@@ -1,0 +1,34 @@
+These set of scripts deal as an interface between the calculated PROCAR as obtained from VASP, which are the onsite
+projections over different characters of the wave function
+
+
+The format is assumed as follows:
+
+Line 1 PROCAR lm decomposed
+Line 2 # of k-points:    4         # of bands: 224         # of ions:  4
+Line 3 
+Line 4  k-point    1 :    0.12500000 0.12500000 0.12500000     weight = 0.12500000
+Line 5 
+Line 6 band   1 # energy  -52.65660295 # occ.  1.00000000
+Line 7 
+Line 8 ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot
+Line 9   1  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+Line 10  2  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+Line 11  3  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+Line 12  4  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+Line 13  4  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+Line 14 tot 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+
+
+Line 1 is a comment
+Line 2 gives the number of K points calculated (kpoint), number of bands (nband) and number of ions (nion)
+Line 5 gives the energy for kpoints
+Line 8 Labels of calculated projections, column 11 is the total projection
+Line 9 Calculated projections for atom 1
+Line 10 Calculated projections for atom 2 and so on
+Line 14 after projections over all atoms, the total over every atomic projection is reported
+   This block is repeated if calculations was polarized
+   If no polarized but non collinear, you have 3 more blocks that correspond to Sx, Sy and Sz
+
+
+
