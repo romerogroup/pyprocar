@@ -31,7 +31,7 @@ Changes
 -------
 v0.1.0, June 10, 2013 -- Initial release.
 
-v2.0 Mar21,2018 -- Created PyProcar package version with added support to Abinit. 
+v2.0 Mar21, 2018 -- Created PyProcar package version with added support for Abinit. 
 
 
 Installation
