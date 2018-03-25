@@ -5,7 +5,7 @@ setup(
     version='2.0',
     author='Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He',
     author_email='fvmunoz@gmail.com,alromero@mail.wvu.edu,smsingh@mix.wvu.edu,ukh0001@mix.wvu.edu,petavazohi@mix.wvu.edu,eric.bousquet@uliege.be,mailhexu@gmail.com',
-    url='http://pyprocar.sourceforge.net/',
+    url='http://pyprocar.sourceforge.net/,https://github.com/uthpalah/PyProcar',
     packages=['pyprocar', 
               'pyprocar.utilsprocar',
               'pyprocar.fermisurface',

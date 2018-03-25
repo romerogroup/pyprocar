@@ -1,7 +1,7 @@
-PyPROCAR
+PyProcar
 ===========
 
-Prprocar provides a set of scripts that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR
+PyProcar provides a set of scripts that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR
 file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every K
 point in the considered mesh, every energy band and every atom. Here you will find scripts that help
 you in digging the information from it and plot it in a nice and friendly process.
@@ -19,12 +19,12 @@ Refer to the documentation for further details.
 
 Contributors
 ------------
-Francisco Munoz
-Aldo Romero
-Sobhit Singh
-Uthpala Herath
-Pedram Tavadze
-Eric Bousquet 
+Francisco Munoz <br />
+Aldo Romero <br />
+Sobhit Singh <br />
+Uthpala Herath <br />
+Pedram Tavadze <br />
+Eric Bousquet <br />
 Xu He
 
 Changes
@@ -38,7 +38,7 @@ Installation
 ------------
 
 From SOURCEFORGE (We will be shifting to github soon.)
-	-Download the pyprocar package and cd into the root directory.Then,
+-Download the pyprocar package and cd into the root directory.Then,
 
 	>sudo python setup.py install
 
