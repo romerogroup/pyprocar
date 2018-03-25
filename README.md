@@ -38,7 +38,7 @@ Installation
 ------------
 
 From SOURCEFORGE (We will be shifting to github soon.)
--Download the pyprocar package and cd into the root directory.Then,
+Download the pyprocar package and cd into the root directory.Then,
 
 	>sudo python setup.py install
 
