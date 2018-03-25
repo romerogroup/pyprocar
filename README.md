@@ -37,7 +37,8 @@ v2.0 Mar21, 2018 -- Created PyProcar package version with added support for Abin
 Installation
 ------------
 
-From SOURCEFORGE (We will be shifting to github soon.)
+From SOURCEFORGE (We will be shifting to github soon.)<br />
+https://sourceforge.net/projects/pyprocar/ <br/>
 Download the pyprocar package and cd into the root directory.Then,
 
 	>sudo python setup.py install
