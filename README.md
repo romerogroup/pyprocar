@@ -39,4 +39,4 @@ v2.1 Apr 03,2018 -- Fixed issue with input arguments when using OUTCAR as an inp
 Installation
 ------------
 
-	>pip install pyprocar	
+	pip install pyprocar	
