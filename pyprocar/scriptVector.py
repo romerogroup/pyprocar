@@ -28,8 +28,8 @@ def Vector(infile,bands=None,energy=None,fermi=None,atoms=None,orbitals=None,out
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
-      if quiet is False:
-        print "Fermi energy found in outcar file = " + str(fermi)
+      #if quiet is False:
+      print "Fermi energy found in outcar file = " + str(fermi)
     recLat = outcarparser.RecLatOutcar(outcar)
 
   if atoms is None:

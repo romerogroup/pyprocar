@@ -32,7 +32,7 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
   print "atoms list.   : ", atoms
   print "orbs. list.   : ", orbitals
 
-  if fermi is None and outcar is None:
+  if fermi is None and outcar is None and abinit_output is None:
     print "WARNING: Fermi Energy not set! "
     print "You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n"
     print "The zero of energy is arbitrary\n"
@@ -101,8 +101,8 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
-      if quiet is False:
-        print "INFO: Fermi energy found in outcar file = " + str(fermi)
+      #if quiet is False:
+      print "INFO: Fermi energy found in outcar file = " + str(fermi)
     recLat = outcarparser.RecLatOutcar(outcar)
 
   # parsing the PROCAR file

@@ -31,19 +31,12 @@ Changes
 -------
 v0.1.0, June 10, 2013 -- Initial release.
 
-v2.0 Mar21, 2018 -- Created PyProcar package version with added support for Abinit. 
+v2.0 Mar 21,2018 -- Created PyProcar package version with added support to Abinit. 
+
+v2.1 Apr 03,2018 -- Fixed issue with input arguments when using OUTCAR as an input 
 
 
 Installation
 ------------
-
-From SOURCEFORGE (We will be shifting to github soon.)<br />
-https://sourceforge.net/projects/pyprocar/ <br/>
-Download the pyprocar package and cd into the root directory.Then,
-
-	>sudo python setup.py install
-
-
-From PyPI
 
 	>pip install pyprocar	
