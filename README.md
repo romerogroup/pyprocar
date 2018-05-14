@@ -35,6 +35,8 @@ v2.0 Mar 21,2018 -- Created PyProcar package version with added support to Abini
 
 v2.1 Apr 03,2018 -- Fixed issue with input arguments when using OUTCAR as an input 
 
+v2.2 May 14,2018 -- Updated documentation.
+
 
 Installation
 ------------
