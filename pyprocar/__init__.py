@@ -21,6 +21,7 @@ import numpy as np
 import re
 import logging
 import matplotlib.pyplot as plt
+import seekpath
 
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarparser import ProcarParser
@@ -38,3 +39,4 @@ from scriptRepair import repair
 from scriptVector import Vector
 from scriptKmesh2D import generate2dkmesh
 from scriptAbinitMerge import mergeabinit
+from scriptKpath import kpath
