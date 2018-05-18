@@ -43,6 +43,8 @@ v2.4 May 18,2018 -- Fixed minor issues with fermi2D and procarsymmetry
 
 v2.5 May 18.2018 -- Fixed issue with Vector
 
+v2.6 May 18,2018 -- Fixed more issues with fermi2D
+
 
 Installation
 ------------

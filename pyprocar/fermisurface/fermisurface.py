@@ -61,7 +61,7 @@ class FermiSurface:
   def Plot(self, interpolation=200, mask=None):
     """Only 2D layer geometry along z"""
     self.log.debug("Plot: ...")
-    from scipy.interpolate import griddata, interp2d
+    from scipy.interpolate import griddata
     
     if self.useful is None:
       raise RuntimeError("self.FindEnergy() must be called before Plotting")
@@ -93,7 +93,7 @@ class FermiSurface:
     self.log.debug("Plot: ...Done")
     return plots
 
-  def st(self, sx, sy, sz, spin=None, noarrow=False, interpolation=250):
+  def st(self, sx, sy, sz, spin=None, noarrow=False, interpolation=300):
     """Only 2D layer geometry along z. It is like a enhanced version
     of 'plot' method.
 
@@ -103,7 +103,7 @@ class FermiSurface:
 
     """
     self.log.debug("st: ...")
-    from scipy.interpolate import griddata, interp2d, BivariateSpline
+    from scipy.interpolate import griddata
     
     if self.useful is None:
       raise RuntimeError("self.FindEnergy() must be called before Plotting")
@@ -120,13 +120,8 @@ class FermiSurface:
     #and new, interpolated component
     xmax,xmin = x.max(), x.min()
     ymax,ymin = y.max(), y.min()
-
-    if (noarrow):
-       interpolation=interpolation*50
-    self.log.debug(      "xlim = " + str([xmin, xmax]) 
-                    +  "  ylim = " + str([ymin, ymax]))
-    xnew, ynew = np.mgrid[xmin:xmax:interpolation*1j, 
-                          ymin:ymax:interpolation*1j]
+    self.log.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
+    xnew, ynew = np.mgrid[xmin:xmax:interpolation * 1j, ymin:ymax:interpolation * 1j]
 
     #interpolation
     bnew = []
@@ -136,6 +131,7 @@ class FermiSurface:
     
     linewidths=0.7
     if noarrow:
+      #print "second no arrow\n"
       linewidths=0.2
     cont = [plt.contour(xnew, ynew, z, [self.energy],
                         linewidths=linewidths, colors='k',
@@ -159,16 +155,15 @@ class FermiSurface:
       import matplotlib.colors as colors
       
       if noarrow is False:
-        norm = np.sqrt(newSx[::6]*newSx[::6]+newSy[::6]*newSy[::6])
-        plt.quiver(points[::6,0], points[::6,1], newSx[::6]/norm,
-                   newSy[::6]/norm, norm, scale_units='xy',
-                   angles='xy', norm=colors.Normalize(-0.5,0.5), cmap='seismic_r', headaxislength=3)
+        plt.quiver(points[::6,0], points[::6,1], newSx[::6],
+                   newSy[::6],newSz[::6], scale_units='xy',
+                   angles='xy', norm=colors.Normalize(-0.5,0.5))
       else:
         #a dictionary to select the right spin component
         spinDict = { 1 : newSx[::6], 2 : newSy[::6], 3 : newSz[::6] }
         plt.scatter(points[::6,0], points[::6,1], c=spinDict[spin],
                     s=50, edgecolor='none', alpha=1.0, marker=".",
-                    cmap='seismic', norm=colors.normalize(-0.5,0.5)) 
+                    cmap='seismic', norm=colors.Normalize(-0.5,0.5)) 
     plt.colorbar()
     plt.axis("equal")
     font = { 'size' : 16}
