@@ -41,6 +41,8 @@ v2.3 May 17,2018 -- Added k path generator.
 
 v2.4 May 18,2018 -- Fixed minor issues with fermi2D and procarsymmetry
 
+v2.5 May 18.2018 -- Fixed issue with Vector
+
 
 Installation
 ------------
