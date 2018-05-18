@@ -37,6 +37,8 @@ v2.1 Apr 03,2018 -- Fixed issue with input arguments when using OUTCAR as an inp
 
 v2.2 May 14,2018 -- Updated documentation.
 
+v2.3 May 17,2018 -- Added k path generator.
+
 
 Installation
 ------------
