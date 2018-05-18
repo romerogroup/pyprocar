@@ -45,6 +45,8 @@ v2.5 May 18.2018 -- Fixed issue with Vector
 
 v2.6 May 18,2018 -- Fixed more issues with fermi2D
 
+v2.7 May 18,2018 -- Fixed out-of-bounds error in k path generator.
+
 
 Installation
 ------------

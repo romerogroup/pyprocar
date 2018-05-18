@@ -19,7 +19,7 @@ def kpath(infile,grid_size,with_time_reversal,recipe,threshhold,symprec,angle_to
 
 	#positions
 	atoms = np.array(POSCAR[5].split()).astype(np.int)
-	positions_matrix = POSCAR[7:]	
+	positions_matrix = POSCAR[7:7+sum(atoms)]	
 	positions = np.zeros(shape=(np.sum(atoms),3))
 
 	for j in range(len(positions_matrix)):

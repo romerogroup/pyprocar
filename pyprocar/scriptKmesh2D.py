@@ -1,6 +1,4 @@
 import os
-
-
 	
 def generate2dkmesh(x1,y1,x2,y2,grid_size):	
 	n=grid_size;  #Defines density of kgrid
