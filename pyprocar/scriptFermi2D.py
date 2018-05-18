@@ -3,6 +3,7 @@ from procarparser import ProcarParser
 from procarselect import ProcarSelect
 from procarplot import ProcarPlot
 from procarsymmetry import ProcarSymmetry
+from fermisurface import FermiSurface
 import matplotlib.pyplot as plt
 
 
@@ -52,7 +53,7 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
     rec_basis = outcarparser.RecLatOutcar(outcar)
   #Reciprocal lattices are needed!
   elif rec_basis is None and outcar is None:
-    print "ERORR: Reciprocal Lattice is needed, use --rec_basis or --outcar"
+    print "ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar"
     raise RuntimeError("Reciprocal Lattice not found")
     
   #parsing the file
@@ -85,8 +86,7 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
   character = data.spd
   if st is True:
     sx, sy, sz = stData[0], stData[1], stData[2]
-    symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz,
-                          loglevel=loglevel, character=character)
+    symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz,character=character)
   else:
     symm = ProcarSymmetry(kpoints, bands, character=character)
 

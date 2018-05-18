@@ -9,6 +9,7 @@ pyprocar/scriptCat.py
 pyprocar/scriptFermi2D.py
 pyprocar/scriptFilter.py
 pyprocar/scriptKmesh2D.py
+pyprocar/scriptKpath.py
 pyprocar/scriptRepair.py
 pyprocar/scriptVector.py
 pyprocar/fermisurface/__init__.py

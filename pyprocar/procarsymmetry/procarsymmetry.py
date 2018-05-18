@@ -23,16 +23,16 @@ class ProcarSymmetry:
     #optional arguments when not given will False, but they can still
     #be treated like arrays
     self.character = np.array([])
-    if character != None:
+    if character is not None:
       self.character = character
     self.sx = np.array([])
-    if sx != None:  
+    if sx is not None:  
       self.sx = sx
     self.sy = np.array([])
-    if sy != None: 
+    if sy is not None: 
       self.sy = sy
     self.sz = np.array([])
-    if sz != None:
+    if sz is not None:
       self.sz = sz
 
     self.log.info("Kpoints : " + str(self.kpoints.shape))
