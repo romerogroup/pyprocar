@@ -4,7 +4,7 @@ from utilsprocar import UtilsProcar
 
 def cat(inFiles,outFile,gz=False):
     print   "Concatenating:"
-    print   "Input         : ", inFiles    # ', '.join(inFiles)
+    print   "Input         : ", ', '.join(inFiles)
     print   "Output        : ", outFile
     if gz==True:
         print "out compressed: True"
