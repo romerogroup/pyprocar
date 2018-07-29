@@ -25,7 +25,11 @@ Sobhit Singh <br />
 Uthpala Herath <br />
 Pedram Tavadze <br />
 Eric Bousquet <br />
-Xu He
+Xu He <br />
+
+Mailing list
+--------------
+https://groups.google.com/d/forum/pyprocar
 
 Changes
 -------
@@ -48,6 +52,8 @@ v2.6 May 18,2018 -- Fixed more issues with fermi2D
 v2.7 May 18,2018 -- Fixed out-of-bounds error in k path generator.
 
 v2.8 May 23,2018 -- Fixed procar.cat()
+
+v2.9 Jul 29,2018 -- Created PyProcar Mailing list.
 
 
 Installation
