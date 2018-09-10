@@ -173,7 +173,7 @@ class UtilsProcar:
     bands   = set([x[1] for x in parsedMeta])
     ions    = set([x[2] for x in parsedMeta])
     
-    #checking that bands and ions macht (mind: bands & ions are 'sets'):    
+    #checking that bands and ions match (mind: bands & ions are 'sets'):    
     if len(bands) != 1 or len(ions) != 1:
       self.log.error("Number of bands/ions  do not match")
       raise RuntimeError("Files are incompatible")
