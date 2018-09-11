@@ -8,7 +8,7 @@ import re
 
 
 
-def bandscompare(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=10,cmap='hot_r',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None):
+def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,cmap='hot_r',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -24,7 +24,7 @@ def bandscompare(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbi
 
   print "Script initiated"
   print "input file 1   : ", file
-  print "input file 2   : ", 
+  print "input file 2   : ", file2 #2nd file
   print "Mode          : ", mode
   
   print "spin comp.    : ", spin
@@ -36,6 +36,12 @@ def bandscompare(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbi
     print "You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n"
     print "The zero of energy is arbitrary\n"
     fermi = 0
+    
+  if fermi2 is None and outcar2 is None:
+    print "WARNING: Fermi Energy #2 not set! "
+    print "You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n"
+    print "The zero of energy is arbitrary\n"
+    fermi2 = 0
 
 
 ###################reading abinit output (added by uthpala) ##########################
@@ -55,10 +61,11 @@ def bandscompare(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbi
 
  
   print "Fermi Ener.   : ", fermi
+  print "Fermi Ener. #2  ", fermi2
   print "Energy range  : ", elimit
 
   if mask is not None:
-    print "masking thres.: ", mask
+    print "masking thres.: ", mask 
     
   print "Colormap      : ", cmap
   print "MarkerSize    : ", markersize
@@ -77,6 +84,7 @@ def bandscompare(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbi
   print "title         : ", title
 
   print "outcar        : ", outcar
+  print "outcar #2     : ", outcar2
 
   #If ticks and names are given we should use them#
   if kticks is not None and knames is not None:
