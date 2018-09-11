@@ -185,3 +185,6 @@ def bandscompare(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbi
     plt.show()
 
   return
+
+if __name__ == "__main__":
+    bandscompare('PROCAR_repaired',outcar='OUTCAR',mode='parametric',elimit=[-5,5])
