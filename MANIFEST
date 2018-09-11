@@ -2,7 +2,6 @@
 setup.cfg
 setup.py
 pyprocar/__init__.py
-pyprocar/info.py
 pyprocar/scriptAbinitMerge.py
 pyprocar/scriptBandsplot.py
 pyprocar/scriptCat.py
