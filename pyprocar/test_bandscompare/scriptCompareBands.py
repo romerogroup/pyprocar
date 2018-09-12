@@ -8,7 +8,7 @@ import re
 
 
 
-def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,cmap='hot_r',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None):
+def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,cmap='hot_r',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -20,6 +20,8 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
       human = False
   if orbitals is None:
     orbitals = [-1]
+  if orbitals2 is None:
+    orbitals2 = [-1]  
     
 
   print "Script initiated"
@@ -30,6 +32,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   print "spin comp.    : ", spin
   print "atoms list.   : ", atoms
   print "orbs. list.   : ", orbitals
+  print "orbs. list #2 : ", orbitals2
 
   if fermi is None and outcar is None and abinit_output is None:
     print "WARNING: Fermi Energy not set! "
@@ -108,16 +111,23 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
+      fermi2 = outcarparser.FermiOutcar(outcar2)
       #if quiet is False:
       print "INFO: Fermi energy found in outcar file = " + str(fermi)
+      print "INFO: Fermi energy #2 found in outcar file = " + str(fermi2)
     recLat = outcarparser.RecLatOutcar(outcar)
 
   # parsing the PROCAR file
   procarFile = ProcarParser()
   procarFile.readFile(file, permissive, recLat)
+  
+  # parsing the PROCAR file #2
+  procarFile2 = ProcarParser()
+  procarFile2.readFile(file2, permissive, recLat)
 
   # processing the data, getting an instance of the class that reduces the data
   data = ProcarSelect(procarFile, deepCopy=True)
+  data2 = ProcarSelect(procarFile2,deepCopy=True)
   
   #handling the spin, `spin='st'` is not straightforward, needs
   #to calculate the k vector and its normal. Other `spin` values
@@ -145,40 +155,50 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
     data.selectIspin([spin])
     data.selectAtoms(atoms, fortran=human)
     data.selectOrbital(orbitals)
-
+    
+    data2.selectIspin([spin])
+    data2.selectAtoms(atoms, fortran=human)
+    data2.selectOrbital(orbitals2)
+  
+  fermi2=5
   # Plotting the data
-  data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
-  plot = ProcarPlot(data.bands, data.spd, data.kpoints)
+  data.bands = (data.bands.transpose() - np.array(fermi)).transpose()  
+  # Plotting the data for data #2
+  data2.bands = (data2.bands.transpose() - np.array(fermi2)).transpose()
+  plot = ProcarPlot(data.bands,data2.bands, data.spd,data2.spd, data.kpoints,data2.kpoints)
+  
+  
+  
 
   ###### start of mode dependent options #########
 
-  if mode == "scatter":
-    plot.scatterPlot(mask=mask, size=markersize,
-                     cmap=cmap, vmin=vmin,
-                     vmax=vmax, marker=marker, ticks=ticks)
-
-    plt.ylabel(r"Energy [eV]")
-    if elimit is not None:
-      plt.ylim(elimit)
-
-  elif mode == "plain":
+#  if mode == "scatter":
+#    plot.scatterPlot(mask=mask, size=markersize,
+#                     cmap=cmap, vmin=vmin,
+#                     vmax=vmax, marker=marker, ticks=ticks)
+#
+#    plt.ylabel(r"Energy [eV]")
+#    if elimit is not None:
+#      plt.ylim(elimit)
+#
+  if mode == "plain":
     plot.plotBands(markersize, marker=marker, ticks=ticks)
     plt.ylabel(r"Energy [eV]")
     if elimit:
       plt.ylim(elimit)
       
-  elif mode == "parametric":
+  if mode == "parametric":
     plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,
                         ticks=ticks)
     plt.ylabel(r"Energy [eV]")
     if elimit is not None:
       plt.ylim(elimit)
 
-  elif mode == "atomic":
-    plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax)
-    plt.ylabel(r"Energy [eV]")
-    if elimit is not None:
-      plt.ylim(elimit)
+#  elif mode == "atomic":
+#    plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax)
+#    plt.ylabel(r"Energy [eV]")
+#    if elimit is not None:
+#      plt.ylim(elimit)
   ###### end of mode dependent options ###########
 
   if grid:
@@ -195,4 +215,4 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   return
 
 if __name__ == "__main__":
-    bandscompare('PROCAR_repaired',outcar='OUTCAR',mode='parametric',elimit=[-5,5])
+    bandscompare('PROCAR_repaired1','PROCAR_repaired2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='parametric',elimit=[-5,5],orbitals=[4,5,6,7,8],orbitals2=[1,2,3,4,5,6,7,8])
