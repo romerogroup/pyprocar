@@ -8,7 +8,8 @@ import re
 
 
 
-def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,cmap='hot_r',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None):
+
+def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=None,spin='0',spin2='0',atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,markersize2=10,cmap='hot_r',vmax=None,vmin=None,vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,legend='PROCAR1',legend2='PROCAR2'):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -18,8 +19,15 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
       print "WARNING: `--human` option given without atoms list!"
       print "--human will be set to False (ignored)\n "
       human = False
+  
+  #repeat for 2nd data set
+  if atoms2 is None:
+    atoms2 = [-1]
+         
+      
   if orbitals is None:
     orbitals = [-1]
+  #repeat for 2nd data set  
   if orbitals2 is None:
     orbitals2 = [-1]  
     
@@ -29,9 +37,11 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   print "input file 2   : ", file2 #2nd file
   print "Mode          : ", mode
   
-  print "spin comp.    : ", spin
-  print "atoms list.   : ", atoms
-  print "orbs. list.   : ", orbitals
+  print "spin comp. #1   : ", spin
+  print "spin comp. #2 : ", spin2
+  print "atoms list. #1  : ", atoms
+  print "atoms list. #2 : ", atoms2
+  print "orbs. list. #1  : ", orbitals
   print "orbs. list #2 : ", orbitals2
 
   if fermi is None and outcar is None and abinit_output is None:
@@ -58,12 +68,23 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   	rf.close()
 
   	fermi = float(re.findall('Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)',data)[0])
+   
+   
+  if abinit_output2:
+  	print "Abinit output #2 used"
+
+  #reading abinit output file
+  	rf2 = open(abinit_output2,'r')
+  	data2 = rf2.read()
+  	rf2.close()
+
+  	fermi2 = float(re.findall('Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)',data2)[0])
 
 
 ####################################################################  
 
  
-  print "Fermi Ener.   : ", fermi
+  print "Fermi Ener. #1  : ", fermi
   print "Fermi Ener. #2  ", fermi2
   print "Energy range  : ", elimit
 
@@ -71,13 +92,16 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
     print "masking thres.: ", mask 
     
   print "Colormap      : ", cmap
-  print "MarkerSize    : ", markersize
+  print "MarkerSize #1   : ", markersize
+  print "MarkerSize #2 : ", markersize2
     
   print "Permissive    : ", permissive
   if permissive:
     print "INFO: Permissive flag is on! Be careful"
   print "vmax          : ", vmax
   print "vmin          : ", vmin
+  print "vmax #2       : ", vmax2
+  print "vmin #2       : ", vmin2
   print "grid enabled  : ", grid 
   if human is not None:
     print "human         : ", human
@@ -86,8 +110,11 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   print "knames        : ", knames
   print "title         : ", title
 
-  print "outcar        : ", outcar
+  print "outcar #1       : ", outcar
   print "outcar #2     : ", outcar2
+  
+  print "legend #1        : ",legend
+  print "legend #2     : ", legend2
 
   #If ticks and names are given we should use them#
   if kticks is not None and knames is not None:
@@ -100,6 +127,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   #The spin argument should be a number (index of an array), or
   #'st'. In the last case it will be handled separately (later)
   spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin]
+  spin2 = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin2]
 
 
   #The second part of this function is parse/select/use the data in
@@ -107,6 +135,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
 
   #first parse the outcar if given, to get Efermi and Reciprocal lattice
   recLat = None 
+  recLat = None
   if outcar:
     outcarparser = UtilsProcar()
     if fermi is None:
@@ -199,7 +228,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
 #    plt.ylabel(r"Energy [eV]")
 #    if elimit is not None:
 #      plt.ylim(elimit)
-  ###### end of mode dependent options ###########
+  ##### end of mode dependent options ###########
 
   if grid:
     plt.grid()
@@ -215,4 +244,4 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,spin='0',atoms=Non
   return
 
 if __name__ == "__main__":
-    bandscompare('PROCAR_repaired1','PROCAR_repaired2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='parametric',elimit=[-5,5],orbitals=[4,5,6,7,8],orbitals2=[1,2,3,4,5,6,7,8])
+    bandscompare('PROCAR_repaired1','PROCAR_repaired2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='plain',marker=',',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'])

@@ -50,7 +50,7 @@ class ProcarPlot:
     print "xaxis.shape #2: ", xaxis2.shape
     print "bands.shape #2 : ", self.bands2.shape
     
-    plot = plt.plot(xaxis,self.bands.transpose(), 'g-',xaxis2,self.bands2.transpose(), 'r-') #, marker=marker,markersize=size)
+    plot = plt.plot(xaxis,self.bands.transpose(), 'g',xaxis2,self.bands2.transpose(), 'r', marker=marker,markersize=size)
     plt.xlim(xaxis.min(), xaxis.max())
 
     #handling ticks
@@ -188,34 +188,34 @@ class ProcarPlot:
 
     return fig
 
-#  def atomicPlot(self, cmap='hot_r', vmin=None, vmax=None):
-#    """
-#    Just a handler to parametricPlot. Useful to plot energy levels. 
-#
-#    It adds a fake k-point. Shouldn't be invoked with more than one
-#    k-point
-#    """
-#
-#    print "Atomic plot: bands.shape  :", self.bands.shape
-#    print "Atomic plot: spd.shape    :", self.spd.shape
-#    print "Atomic plot: kpoints.shape:", self.kpoints.shape
-#
-#    self.bands = np.hstack((self.bands, self.bands))
-#    self.spd = np.hstack((self.spd, self.spd))
-#    self.kpoints = np.vstack((self.kpoints, self.kpoints))
-#    self.kpoints[0][-1] += 1
-#    print "Atomic plot: bands.shape  :", self.bands.shape
-#    print "Atomic plot: spd.shape    :", self.spd.shape
-#    print "Atomic plot: kpoints.shape:", self.kpoints.shape
-#
-#    print self.kpoints
-#    
-#    fig = self.parametricPlot(cmap, vmin, vmax)
-#    plt.gca().xaxis.set_major_locator(plt.NullLocator())
-#
-#    # labels on each band
-#    for i in range(len(self.bands[:,0])):
-#      # print i, self.bands[i]
-#      plt.text(0, self.bands[i,0], str(i+1), fontsize=15)
-#    
-#    return fig
+  def atomicPlot(self, cmap='hot_r', vmin=None, vmax=None):
+    """
+    Just a handler to parametricPlot. Useful to plot energy levels. 
+
+    It adds a fake k-point. Shouldn't be invoked with more than one
+    k-point
+    """
+
+    print "Atomic plot: bands.shape  :", self.bands.shape
+    print "Atomic plot: spd.shape    :", self.spd.shape
+    print "Atomic plot: kpoints.shape:", self.kpoints.shape
+
+    self.bands = np.hstack((self.bands, self.bands))
+    self.spd = np.hstack((self.spd, self.spd))
+    self.kpoints = np.vstack((self.kpoints, self.kpoints))
+    self.kpoints[0][-1] += 1
+    print "Atomic plot: bands.shape  :", self.bands.shape
+    print "Atomic plot: spd.shape    :", self.spd.shape
+    print "Atomic plot: kpoints.shape:", self.kpoints.shape
+
+    print self.kpoints
+    
+    fig = self.parametricPlot(cmap, vmin, vmax)
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+
+    # labels on each band
+    for i in range(len(self.bands[:,0])):
+      # print i, self.bands[i]
+      plt.text(0, self.bands[i,0], str(i+1), fontsize=15)
+    
+    return fig
