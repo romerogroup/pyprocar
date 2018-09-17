@@ -28,7 +28,9 @@ Eric Bousquet <br />
 Xu He <br />
 
 Mailing list
---------------
+-------------
+Please post your questions on our forum.
+
 https://groups.google.com/d/forum/pyprocar
 
 Changes

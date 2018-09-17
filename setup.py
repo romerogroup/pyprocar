@@ -15,6 +15,7 @@ setup(
               'pyprocar.procarfilefilter',
               'pyprocar.procarplot',
               'pyprocar.procarsymmetry',
+              'pyprocar.procarplotcompare',
               'pyprocar.procarselect'],
     license='LICENSE.txt',
     description='A python package for analyzing PROCAR files obtained from VASP and Abinit.',
