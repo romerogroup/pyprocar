@@ -57,7 +57,7 @@ v2.8 May 23,2018 -- Fixed procar.cat()
 
 v2.9 Jul 29,2018 -- Created PyProcar Mailing list.
 
-v3.0 Sep 17, 2018 -- Added method to compare two PROCARs.
+v3.0 Sep 17, 2018 -- Added method to compare two PROCARs.  <br />
 		  -- Moved to Python3. 
 
 
