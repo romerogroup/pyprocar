@@ -34,14 +34,14 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   print "Script initiated"
   print "input file 1   : ", file
   print "input file 2   : ", file2 #2nd file
-  print "Mode          : ", mode
+  print "Mode           : ", mode
   
-  print "spin comp. #1   : ", spin
-  print "spin comp. #2 : ", spin2
-  print "atoms list. #1  : ", atoms
+  print "spin comp.  #1 : ", spin
+  print "spin comp.  #2 : ", spin2
+  print "atoms list. #1 : ", atoms
   print "atoms list. #2 : ", atoms2
-  print "orbs. list. #1  : ", orbitals
-  print "orbs. list #2 : ", orbitals2
+  print "orbs. list. #1 : ", orbitals
+  print "orbs. list  #2 : ", orbitals2
 
   if fermi is None and outcar is None and abinit_output is None:
     print "WARNING: Fermi Energy not set! "
@@ -84,36 +84,36 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
 
  
   print "Fermi Ener. #1  : ", fermi
-  print "Fermi Ener. #2  ", fermi2
-  print "Energy range  : ", elimit
+  print "Fermi Ener. #2  : ", fermi2
+  print "Energy range    : ", elimit
 
   if mask is not None:
     print "masking thres.: ", mask 
     
-  print "Colormap      : ", cmap
+  print "Colormap        : ", cmap
   print "MarkerSize #1   : ", markersize
-  print "MarkerSize #2 : ", markersize2
+  print "MarkerSize #2   : ", markersize2
     
-  print "Permissive    : ", permissive
+  print "Permissive      : ", permissive
   if permissive:
     print "INFO: Permissive flag is on! Be careful"
-  print "vmax          : ", vmax
-  print "vmin          : ", vmin
-  print "vmax #2       : ", vmax2
-  print "vmin #2       : ", vmin2
-  print "grid enabled  : ", grid 
+  print "vmax            : ", vmax
+  print "vmin            : ", vmin
+  print "vmax #2         : ", vmax2
+  print "vmin #2         : ", vmin2
+  print "grid enabled    : ", grid 
   if human is not None:
-    print "human         : ", human
-  print "Savefig       : ", savefig
-  print "kticks        : ", kticks
-  print "knames        : ", knames
-  print "title         : ", title
+    print "human          : ", human
+  print "Savefig         : ", savefig
+  print "kticks          : ", kticks
+  print "knames          : ", knames
+  print "title           : ", title
 
   print "outcar #1       : ", outcar
-  print "outcar #2     : ", outcar2
+  print "outcar #2       : ", outcar2
   
-  print "legend #1        : ",legend
-  print "legend #2     : ", legend2
+  print "legend #1       : ",legend
+  print "legend #2       : ",legend2
 
   #If ticks and names are given we should use them#
   if kticks is not None and knames is not None:
@@ -140,10 +140,12 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
-      fermi2 = outcarparser.FermiOutcar(outcar2)
-      #if quiet is False:
       print "INFO: Fermi energy found in outcar file = " + str(fermi)
+    if fermi2 is None:  
+      fermi2 = outcarparser.FermiOutcar(outcar2)
       print "INFO: Fermi energy #2 found in outcar file = " + str(fermi2)
+      
+      
     recLat = outcarparser.RecLatOutcar(outcar)
     recLat2 = outcarparser.RecLatOutcar(outcar2)
 
@@ -217,7 +219,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   data.bands = (data.bands.transpose() - np.array(fermi)).transpose()    
   # Plotting the data for data #2
   data2.bands = (data2.bands.transpose() - np.array(fermi2)).transpose()
-  plot = ProcarPlot(data.bands, data2.bands, data.spd, data2.spd, data.kpoints, data2.kpoints)
+  plot = ProcarPlotCompare(data.bands, data2.bands, data.spd, data2.spd, data.kpoints, data2.kpoints)
   
   
   ###### start of mode dependent options #########
@@ -235,7 +237,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.ylim(elimit)
       
   if mode == "parametric":
-    plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='--', marker2='-.', legend1=legend,legend2=legend2,ticks=ticks)
+    plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='solid', marker2='dashed', legend1=legend,legend2=legend2,ticks=ticks)
     plt.ylabel(r"Energy [eV]")
     if elimit is not None:
       plt.ylim(elimit)
@@ -260,8 +262,4 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     plt.show()
 
   return
-
-if __name__ == "__main__":
-    bandscompare('./procars/PROCAR_4_repaired','./procars/PROCAR_8_repaired',outcar='./procars/OUTCAR_4',outcar2='./procars/OUTCAR_8',cmap='seismic',mode='parametric',marker='--',marker2='-.',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],legend='PRO1',legend2='PRO2')
-    #bandscompare('PROCAR1','PROCAR2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='scatter',marker='^',marker2='o',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],legend='PRO1',legend2='PRO2')
-    #bandscompare('PROCAR1','PROCAR2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='atomic',marker='*',marker2='--')
+    

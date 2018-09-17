@@ -33,7 +33,7 @@ import seekpath
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarparser import ProcarParser
 from pyprocar.procarplot import ProcarPlot
-from pyprocar.procarplotcompare	ProcarPlotCompare
+from pyprocar.procarplotcompare import	ProcarPlotCompare
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.fermisurface import FermiSurface
