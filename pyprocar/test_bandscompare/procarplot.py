@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import sys
 
 class ProcarPlot:
-  def __init__(self, bands,bands2, spd,spd2, kpoints=None,kpoints2=None):
+  def __init__(self, bands, bands2, spd, spd2, kpoints=None, kpoints2=None):
     self.bands = bands.transpose()
     self.spd = spd.transpose()
     self.kpoints = kpoints
@@ -15,13 +15,15 @@ class ProcarPlot:
     self.kpoints2 = kpoints2
     return
 
-  def plotBands(self, size=None, marker='o', ticks=None):
+  def plotBands(self, size=10, size2=10, marker=',', marker2=',',color='r',color2='g', legend1='PROCAR1',legend2='PROCAR2', ticks=None):
     if size is not None:
       size = size/2
+    if size2 is not None:
+      size2 = size2/2
+      
       
     if self.kpoints is not None:
       xaxis = [0]
-      print "kpoints=",self.kpoints.shape
       for i in range(1,len(self.kpoints)):
         d = self.kpoints[i-1]-self.kpoints[i]
         d = np.sqrt(np.dot(d,d))
@@ -50,13 +52,21 @@ class ProcarPlot:
     print "xaxis.shape #2: ", xaxis2.shape
     print "bands.shape #2 : ", self.bands2.shape
     
-    plot = plt.plot(xaxis,self.bands.transpose(), 'g',xaxis2,self.bands2.transpose(), 'r', marker=marker,markersize=size)
-    plt.xlim(xaxis.min(), xaxis.max())
-
+   
+    plot = plt.plot(xaxis,self.bands.transpose() ,marker=marker,markersize=size,color=color,label=legend1)     
+    plot = plt.plot(xaxis2,self.bands2.transpose() ,marker=marker2,markersize=size2,color=color2,label=legend2)
+    
+    
+    
+    plt.xlim(min(xaxis.min(),xaxis2.min()), max(xaxis.max(),xaxis2.max()) )
+    
     #handling ticks
     if ticks:
       ticks, ticksNames = zip(*ticks)
-      ticks = [xaxis[x] for x in ticks]
+      if len(xaxis) > len(xaxis2):          
+          ticks = [xaxis[x] for x in ticks]
+      else:
+          ticks = [xaxis2[x] for x in ticks]
       plt.xticks(ticks, ticksNames)
     
     return plot
@@ -97,8 +107,7 @@ class ProcarPlot:
 #
 #    return plot
     
-  def parametricPlot(self, cmap='hot_r', vmin=None, vmax=None, mask=None, 
-                     ticks=None):
+  def parametricPlot(self, cmap='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None ,mask=None, marker='--', marker2='-.', legend1='PROCAR1',legend2='PROCAR2',ticks=None):
     from matplotlib.collections import LineCollection
     import matplotlib
     fig = plt.figure()
@@ -127,8 +136,12 @@ class ProcarPlot:
       vmin = self.spd.min()
     if vmax is None:
       vmax = self.spd.max()
-    print "normalizing to: ", (vmin,vmax)
-    norm = matplotlib.colors.Normalize(vmin, vmax)
+    if vmin2 is None:
+      vmin2 = self.spd2.min()
+    if vmax2 is None:
+      vmax2 = self.spd2.max()  
+    print "normalizing to: ", (min(vmin,vmin2),max(vmax,vmax2))
+    norm = matplotlib.colors.Normalize(min(vmin,vmin2), max(vmax,vmax2))
     
     #generating x axis data
     if self.kpoints is not None:
@@ -157,8 +170,7 @@ class ProcarPlot:
       #print xaxis.shape, y.shape, z.shape
       points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
       segments = np.concatenate([points[:-1], points[1:]], axis=1)
-      lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm, 
-                          alpha=0.8)
+      lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm, alpha=0.8,linestyles=marker)
       lc.set_array(z)
       lc.set_linewidth(2)
       gca.add_collection(lc)
@@ -172,50 +184,53 @@ class ProcarPlot:
       #print xaxis.shape, y.shape, z.shape
       points2 = np.array([xaxis2, y2]).T.reshape(-1, 1, 2)
       segments2 = np.concatenate([points2[:-1], points2[1:]], axis=1)
-      lc2 = LineCollection(segments2, cmap=plt.get_cmap(cmap), norm=norm,alpha=0.8,linestyles='dotted')
+      lc2 = LineCollection(segments2, cmap=plt.get_cmap(cmap), norm=norm,alpha=0.8,linestyles=marker2)
       lc2.set_array(z2)
       lc2.set_linewidth(2)
       gca.add_collection(lc2)
       
-      plt.legend((lc,lc2),('PROCAR1','PROCAR2'))
+      plt.legend((lc,lc2),(legend1,legend2))
     
 
     #handling ticks
     if ticks:
       ticks, ticksNames = zip(*ticks)
-      ticks = [xaxis[x] for x in ticks]
+      if len(xaxis) > len(xaxis2):          
+          ticks = [xaxis[x] for x in ticks]
+      else:
+          ticks = [xaxis2[x] for x in ticks]
       plt.xticks(ticks, ticksNames)
 
     return fig
 
-  def atomicPlot(self, cmap='hot_r', vmin=None, vmax=None):
-    """
-    Just a handler to parametricPlot. Useful to plot energy levels. 
-
-    It adds a fake k-point. Shouldn't be invoked with more than one
-    k-point
-    """
-
-    print "Atomic plot: bands.shape  :", self.bands.shape
-    print "Atomic plot: spd.shape    :", self.spd.shape
-    print "Atomic plot: kpoints.shape:", self.kpoints.shape
-
-    self.bands = np.hstack((self.bands, self.bands))
-    self.spd = np.hstack((self.spd, self.spd))
-    self.kpoints = np.vstack((self.kpoints, self.kpoints))
-    self.kpoints[0][-1] += 1
-    print "Atomic plot: bands.shape  :", self.bands.shape
-    print "Atomic plot: spd.shape    :", self.spd.shape
-    print "Atomic plot: kpoints.shape:", self.kpoints.shape
-
-    print self.kpoints
-    
-    fig = self.parametricPlot(cmap, vmin, vmax)
-    plt.gca().xaxis.set_major_locator(plt.NullLocator())
-
-    # labels on each band
-    for i in range(len(self.bands[:,0])):
-      # print i, self.bands[i]
-      plt.text(0, self.bands[i,0], str(i+1), fontsize=15)
-    
-    return fig
+#  def atomicPlot(self, cmap='hot_r', vmin=None, vmax=None):
+#    """
+#    Just a handler to parametricPlot. Useful to plot energy levels. 
+#
+#    It adds a fake k-point. Shouldn't be invoked with more than one
+#    k-point
+#    """
+#
+#    print "Atomic plot: bands.shape  :", self.bands.shape
+#    print "Atomic plot: spd.shape    :", self.spd.shape
+#    print "Atomic plot: kpoints.shape:", self.kpoints.shape
+#
+#    self.bands = np.hstack((self.bands, self.bands))
+#    self.spd = np.hstack((self.spd, self.spd))
+#    self.kpoints = np.vstack((self.kpoints, self.kpoints))
+#    self.kpoints[0][-1] += 1
+#    print "Atomic plot: bands.shape  :", self.bands.shape
+#    print "Atomic plot: spd.shape    :", self.spd.shape
+#    print "Atomic plot: kpoints.shape:", self.kpoints.shape
+#
+#    print self.kpoints
+#    
+#    fig = self.parametricPlot(cmap, vmin, vmax)
+#    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+#
+#    # labels on each band
+#    for i in range(len(self.bands[:,0])):
+#      # print i, self.bands[i]
+#      plt.text(0, self.bands[i,0], str(i+1), fontsize=15)
+#    
+#    return fig

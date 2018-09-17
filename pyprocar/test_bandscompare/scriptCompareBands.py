@@ -9,7 +9,7 @@ import re
 
 
 
-def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=None,spin='0',spin2='0',atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,markersize2=10,cmap='hot_r',vmax=None,vmin=None,vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,legend='PROCAR1',legend2='PROCAR2'):
+def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=10,markersize2=10,cmap='hot_r',vmax=None,vmin=None,vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',color2='g',legend1='PROCAR1',legend2='PROCAR2'):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -113,7 +113,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
   print "outcar #1       : ", outcar
   print "outcar #2     : ", outcar2
   
-  print "legend #1        : ",legend
+  print "legend #1        : ",legend1
   print "legend #2     : ", legend2
 
   #If ticks and names are given we should use them#
@@ -135,8 +135,9 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
 
   #first parse the outcar if given, to get Efermi and Reciprocal lattice
   recLat = None 
-  recLat = None
-  if outcar:
+  recLat2 = None
+  
+  if outcar and outcar2:
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
@@ -145,6 +146,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
       print "INFO: Fermi energy found in outcar file = " + str(fermi)
       print "INFO: Fermi energy #2 found in outcar file = " + str(fermi2)
     recLat = outcarparser.RecLatOutcar(outcar)
+    recLat2 = outcarparser.RecLatOutcar(outcar2)
 
   # parsing the PROCAR file
   procarFile = ProcarParser()
@@ -152,7 +154,7 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
   
   # parsing the PROCAR file #2
   procarFile2 = ProcarParser()
-  procarFile2.readFile(file2, permissive, recLat)
+  procarFile2.readFile(file2, permissive, recLat2)
 
   # processing the data, getting an instance of the class that reduces the data
   data = ProcarSelect(procarFile, deepCopy=True)
@@ -185,16 +187,41 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
     data.selectAtoms(atoms, fortran=human)
     data.selectOrbital(orbitals)
     
-    data2.selectIspin([spin])
-    data2.selectAtoms(atoms, fortran=human)
-    data2.selectOrbital(orbitals2)
+  #repeat for dataset #2
+
+  if spin2 is 'st':
+    #two `ProcarSelect` instances, to store temporal values: spin_x, spin_y
+    dataX2 = ProcarSelect(procarFile2, deepCopy=True)
+    dataX2.selectIspin([1])
+    dataX2.selectAtoms(atoms2, fortran=human)
+    dataX2.selectOrbital(orbitals2)  
+    dataY2 = ProcarSelect(procarFile2, deepCopy=True)
+    dataY2.selectIspin([2])
+    dataY2.selectAtoms(atoms2, fortran=human)
+    dataY2.selectOrbital(orbitals2)
+    #getting the signed angle of each K-vector
+    angle2 = np.arctan2(dataX2.kpoints[:,1], (dataX2.kpoints[:,0]+0.000000001))
+    sin2 = np.sin(angle2)
+    cos2 = np.cos(angle2)
+    sin2.shape = (sin2.shape[0],1)
+    cos2.shape = (cos2.shape[0],1)
+    ##print sin, cos
+    #storing the spin projection into the original array
+    data2.spd = -sin2*dataX2.spd + cos2*dataY2.spd
+  else:
+    data2.selectIspin([spin2])
+    data2.selectAtoms(atoms2, fortran=human)
+    data2.selectOrbital(orbitals2)  
+    
+
   
   fermi2=5
   # Plotting the data
   data.bands = (data.bands.transpose() - np.array(fermi)).transpose()  
+  
   # Plotting the data for data #2
   data2.bands = (data2.bands.transpose() - np.array(fermi2)).transpose()
-  plot = ProcarPlot(data.bands,data2.bands, data.spd,data2.spd, data.kpoints,data2.kpoints)
+  plot = ProcarPlot(data.bands, data2.bands, data.spd, data2.spd, data.kpoints, data2.kpoints)
   
   
   
@@ -211,14 +238,13 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
 #      plt.ylim(elimit)
 #
   if mode == "plain":
-    plot.plotBands(markersize, marker=marker, ticks=ticks)
+    plot.plotBands(size=markersize,size2= markersize2, marker=marker, marker2=marker2,color=color,color2=color2,legend1=legend1,legend2=legend2, ticks=ticks)
     plt.ylabel(r"Energy [eV]")
     if elimit:
       plt.ylim(elimit)
       
   if mode == "parametric":
-    plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,
-                        ticks=ticks)
+    plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='--', marker2='-.', legend1='PROCAR1',legend2='PROCAR2',ticks=ticks)
     plt.ylabel(r"Energy [eV]")
     if elimit is not None:
       plt.ylim(elimit)
@@ -244,4 +270,5 @@ def bandscompare(file,file2,mode='scatter',abinit_output=None,abinit_output2=Non
   return
 
 if __name__ == "__main__":
-    bandscompare('PROCAR_repaired1','PROCAR_repaired2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='plain',marker=',',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'])
+    bandscompare('./procars/PROCAR_4_repaired','./procars/PROCAR_8_repaired',outcar='./procars/OUTCAR_4',outcar2='./procars/OUTCAR_8',cmap='seismic',mode='parametric',marker='--',marker2='-.',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],legend1='PRO1',legend2='PRO2')
+    #bandscompare('PROCAR1','PROCAR2',outcar='OUTCAR1',outcar2='OUTCAR2',mode='parametric',cmap='seismic',marker='--',marker2='-.',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],legend1='PRO1',legend2='PRO2')
