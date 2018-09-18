@@ -12,8 +12,8 @@ Usage
 Typical use is as follows
 
     #!/usr/bin/env python
-    import pyprocar 
-    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='parametric')
+    import pyprocar3 
+    pyprocar3.bandsplot('PROCAR',outcar='OUTCAR',mode='parametric')
 
 Refer to the documentation for further details. 
 
