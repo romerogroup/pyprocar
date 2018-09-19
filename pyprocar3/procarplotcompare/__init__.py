@@ -1,1 +1,0 @@
-from .procarplotcompare import ProcarPlotCompare

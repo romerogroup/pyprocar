@@ -1,4 +1,4 @@
-from utilsprocar import UtilsProcar
+from .utilsprocar import UtilsProcar
 
 
 
@@ -6,8 +6,8 @@ from utilsprocar import UtilsProcar
 #calls ProcarRepair
 def repair(infile,outfile):
  
-	print "Input File    : ", infile
-	print "Output File   : ", outfile
+	print("Input File    : ", infile)
+	print("Output File   : ", outfile)
 
 #parsing the file
 	handler = UtilsProcar()

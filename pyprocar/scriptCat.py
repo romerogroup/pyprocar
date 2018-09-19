@@ -1,17 +1,17 @@
-from utilsprocar import UtilsProcar
+from .utilsprocar import UtilsProcar
 
 
 
 def cat(inFiles,outFile,gz=False):
-    print   "Concatenating:"
-    print   "Input         : ", inFiles    # ', '.join(inFiles)
-    print   "Output        : ", outFile
+    print("Concatenating:")
+    print("Input         : ", inFiles)    # ', '.join(inFiles)
+    print("Output        : ", outFile)
     if gz==True:
-        print "out compressed: True"
+        print("out compressed: True")
     
     if gz=="True" and outFile[-3:] is not '.gz':
       outFile += '.gz'
-      print ".gz extension appended to the outFile"
+      print(".gz extension appended to the outFile")
     
     handler = UtilsProcar()
     handler.MergeFiles(inFiles,outFile, gzipOut=gz)

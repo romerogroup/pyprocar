@@ -116,7 +116,7 @@ class ProcarParser:
       self.kpoints = np.array(self.kpoints, dtype=float)
     except ValueError:
       self.log.error("Ill-formatted data:")
-      print '\n'.join([str(x) for x in self.kpoints])
+      print('\n'.join([str(x) for x in self.kpoints]))
       if permissive is True:
         # Discarding the kpoints list, however I need to set
         # self.ispin beforehand.
@@ -319,7 +319,7 @@ class ProcarParser:
                         str(self.orbitalCount+1) + " = " + 
                         str((self.ionsCount)*(self.orbitalCount+1)) +
                         " Fields. Present block: " + str(len(line.split())))
-        print line
+        print(line)
         raise RuntimeError("Flats happens")
 
     # replacing the "tot" string by a number, to allows a conversion
@@ -337,10 +337,8 @@ class ProcarParser:
       # bands.
       up,down = np.vsplit(self.spd, 2)
       # ispin = 1 for a while, we will made the distinction
-      up.shape = (self.kpointsCount, self.bandsCount/2, 1,
-                  self.ionsCount, self.orbitalCount+1)
-      down.shape = (self.kpointsCount, self.bandsCount/2, 1,
-                    self.ionsCount, self.orbitalCount+1)
+      up.shape = (self.kpointsCount, int(self.bandsCount/2), 1,self.ionsCount, self.orbitalCount+1)
+      down.shape = (self.kpointsCount, int(self.bandsCount/2), 1,self.ionsCount, self.orbitalCount+1)
       # concatenating bandwise. Density and magntization, their
       # meaning is obvious, and do uses 2 times more memory than
       # required, but I *WANT* to keep it as close as possible to the
@@ -396,7 +394,7 @@ class ProcarParser:
     self.log.debug("The metadata line is: "+ metaLine)
     re.findall(r"#[^:]+:([^#]+)", metaLine)
     self.kpointsCount, self.bandsCount, self.ionsCount = \
-        map(int, re.findall(r"#[^:]+:([^#]+)", metaLine))
+        list(map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
     self.log.info("kpointsCount = " + str(self.kpointsCount));
     self.log.info("bandsCount = " + str(self.bandsCount));
     self.log.info("ionsCount = " + str(self.ionsCount));

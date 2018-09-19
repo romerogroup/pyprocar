@@ -168,7 +168,7 @@ class UtilsProcar:
     self.log.debug("All the input metalines are:\n "+ "".join(metas))
     #parsing metalines
 
-    parsedMeta = [map(int, re.findall(r"#[^:]+:([^#]+)",x)) for x in metas]
+    parsedMeta = [list(map(int, re.findall(r"#[^:]+:([^#]+)",x))) for x in metas]
     kpoints = [x[0] for x in parsedMeta]
     bands   = set([x[1] for x in parsedMeta])
     ions    = set([x[2] for x in parsedMeta])

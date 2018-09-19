@@ -1,9 +1,9 @@
 __author__="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2018"
-__version__ = "2.9"
+__version__ = "3.1"
 __email__ = "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 __status__ = "Development"
-__date__ ="July 29,2018"
+__date__ ="September 19th,2018"
 
 # Copyright (C) 2018 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
@@ -39,13 +39,13 @@ from pyprocar.procarselect import ProcarSelect
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarsymmetry import ProcarSymmetry
 
-from scriptBandsplot import bandsplot
-from scriptCat import cat
-from scriptFermi2D import fermi2D
-from scriptFilter import filter
-from scriptRepair import repair
-from scriptVector import Vector
-from scriptKmesh2D import generate2dkmesh
-from scriptAbinitMerge import mergeabinit
-from scriptKpath import kpath
-from scriptCompareBands import bandscompare
+from .scriptBandsplot import bandsplot
+from .scriptCat import cat
+from .scriptFermi2D import fermi2D
+from .scriptFilter import filter
+from .scriptRepair import repair
+from .scriptVector import Vector
+from .scriptKmesh2D import generate2dkmesh
+from .scriptAbinitMerge import mergeabinit
+from .scriptKpath import kpath
+from .scriptCompareBands import bandscompare

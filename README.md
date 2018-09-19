@@ -12,8 +12,8 @@ Usage
 Typical use is as follows
 
     #!/usr/bin/env python
-    import pyprocar3 
-    pyprocar3.bandsplot('PROCAR',outcar='OUTCAR',mode='parametric')
+    import pyprocar 
+    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='parametric')
 
 Refer to the documentation for further details. 
 
@@ -59,8 +59,10 @@ v2.9 Jul 29,2018 -- Created PyProcar Mailing list.
 
 v3.0 Sep 17, 2018 -- Added method to compare two PROCARs. Moved to Python3. 
 
+v3.1 Sep 19, 2018 -- Minor bug fixes. 
+
 
 Installation
 ------------
 
-	pip3 install pyprocar3	
+	pip install pyprocar	

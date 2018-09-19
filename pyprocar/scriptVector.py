@@ -1,25 +1,25 @@
 
-from utilsprocar import UtilsProcar
-from procarparser import ProcarParser
-from procarselect import ProcarSelect
-from procarplot import ProcarPlot
+from .utilsprocar import UtilsProcar
+from .procarparser import ProcarParser
+from .procarselect import ProcarSelect
+from .procarplot import ProcarPlot
 
 
 def Vector(infile,bands=None,energy=None,fermi=None,atoms=None,orbitals=None,outcar=None,scale=0.1):
   
-  print "Input File    : ", infile
-  print "Bands         : ", bands
-  print "Energy        : ", energy
-  print "Fermi         : ", fermi
-  print "outcar        : ", outcar
-  print "atoms         : ", atoms
-  print "orbitals      : ", orbitals
-  print "scale factor  : ", scale
+  print("Input File    : ", infile)
+  print("Bands         : ", bands)
+  print("Energy        : ", energy)
+  print("Fermi         : ", fermi)
+  print("outcar        : ", outcar)
+  print("atoms         : ", atoms)
+  print("orbitals      : ", orbitals)
+  print("scale factor  : ", scale)
 
   if bands is [] and energy is None:
     raise RuntimeError("You must provide the bands or energy.")
   if fermi == None and outcar == None:
-    print "WARNING: Fermi's Energy not set"
+    print("WARNING: Fermi's Energy not set")
 
 
   #first parse the outcar if given
@@ -29,7 +29,7 @@ def Vector(infile,bands=None,energy=None,fermi=None,atoms=None,orbitals=None,out
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
       #if quiet is False:
-      print "Fermi energy found in outcar file = " + str(fermi)
+      print("Fermi energy found in outcar file = " + str(fermi))
     recLat = outcarparser.RecLatOutcar(outcar)
 
   if atoms is None:
@@ -68,7 +68,7 @@ def Vector(infile,bands=None,energy=None,fermi=None,atoms=None,orbitals=None,out
                            sx.spd, recLat)
     FerSurf.FindEnergy(energy)
     bands = list(FerSurf.useful[0])
-    print "Bands indexes crossing Energy  ", energy, ", are: ", bands
+    print("Bands indexes crossing Energy  ", energy, ", are: ", bands)
   
 
   from mayavi import mlab

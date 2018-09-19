@@ -138,7 +138,7 @@ class ProcarSymmetry:
     self.log.debug("RotSymmetryZ:...")
     rotations = [self.GeneralRotation(360*i/order, store=False) for i
                  in range(order)]
-    rotations = zip(*rotations)
+    rotations = list(zip(*rotations))
     self.log.debug("self.kpoints.shape (before concat.): " +
                    str(self.kpoints.shape))
     self.kpoints = np.concatenate(rotations[0], axis=0)
@@ -149,7 +149,7 @@ class ProcarSymmetry:
     self.sz = np.concatenate(rotations[3], axis=0)
     #the bands and proj. character also need to be enlarged
     bandsChar = [(self.bands, self.character) for i in range(order)]
-    bandsChar = zip(*bandsChar)
+    bandsChar = list(zip(*bandsChar))
     self.bands = np.concatenate(bandsChar[0], axis=0)
     self.character = np.concatenate(bandsChar[1], axis=0)
     self.log.debug("RotSymmZ:...Done")
@@ -173,14 +173,14 @@ class ProcarSymmetry:
     self.sx = np.concatenate((self.sx, newSx), axis=0)
     self.sy = np.concatenate((self.sy, newSy), axis=0)
     self.sz = np.concatenate((self.sz, newSz), axis=0)
-    print "self.sx", self.sx.shape
-    print "self.sy", self.sy.shape
-    print "self.sz", self.sz.shape
+    print("self.sx", self.sx.shape)
+    print("self.sy", self.sy.shape)
+    print("self.sz", self.sz.shape)
     #the bands and proj. character also need to be enlarged
     self.bands = np.concatenate((self.bands, self.bands), axis=0)
     self.character = np.concatenate((self.character, self.character), axis=0)
-    print "self.character", self.character.shape
-    print "self.bands", self.bands.shape
+    print("self.character", self.character.shape)
+    print("self.bands", self.bands.shape)
     self.log.debug("Mirror:...Done")
 
     return 

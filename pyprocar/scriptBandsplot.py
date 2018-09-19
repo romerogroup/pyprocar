@@ -1,8 +1,8 @@
   
-from utilsprocar import UtilsProcar
-from procarparser import ProcarParser
-from procarselect import ProcarSelect
-from procarplot import ProcarPlot
+from .utilsprocar import UtilsProcar
+from .procarparser import ProcarParser
+from .procarselect import ProcarSelect
+from .procarplot import ProcarPlot
 import numpy as np
 import matplotlib.pyplot as plt
 import re
@@ -17,32 +17,32 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
   if atoms is None:
     atoms = [-1]
     if human is True:
-      print "WARNING: `--human` option given without atoms list!"
-      print "--human will be set to False (ignored)\n "
+      print("WARNING: `--human` option given without atoms list!")
+      print("--human will be set to False (ignored)\n ")
       human = False
   if orbitals is None:
     orbitals = [-1]
     
 
-  print "Script initiated"
-  print "input file    : ", file
-  print "Mode          : ", mode
+  print("Script initiated")
+  print("input file    : ", file)
+  print("Mode          : ", mode)
   
-  print "spin comp.    : ", spin
-  print "atoms list.   : ", atoms
-  print "orbs. list.   : ", orbitals
+  print("spin comp.    : ", spin)
+  print("atoms list.   : ", atoms)
+  print("orbs. list.   : ", orbitals)
 
   if fermi is None and outcar is None and abinit_output is None:
-    print "WARNING: Fermi Energy not set! "
-    print "You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n"
-    print "The zero of energy is arbitrary\n"
+    print("WARNING: Fermi Energy not set! ")
+    print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
+    print("The zero of energy is arbitrary\n")
     fermi = 0
 
 
 ###################reading abinit output (added by uthpala) ##########################
 
   if abinit_output:
-  	print "Abinit output used"
+  	print("Abinit output used")
 
   #reading abinit output file
   	rf = open(abinit_output,'r')
@@ -55,35 +55,35 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
 ####################################################################  
 
  
-  print "Fermi Ener.   : ", fermi
-  print "Energy range  : ", elimit
+  print("Fermi Ener.   : ", fermi)
+  print("Energy range  : ", elimit)
 
   if mask is not None:
-    print "masking thres.: ", mask
+    print("masking thres.: ", mask)
     
-  print "Colormap      : ", cmap
-  print "MarkerSize    : ", markersize
+  print("Colormap      : ", cmap)
+  print("MarkerSize    : ", markersize)
     
-  print "Permissive    : ", permissive
+  print("Permissive    : ", permissive)
   if permissive:
-    print "INFO: Permissive flag is on! Be careful"
-  print "vmax          : ", vmax
-  print "vmin          : ", vmin
-  print "grid enabled  : ", grid 
+    print("INFO: Permissive flag is on! Be careful")
+  print("vmax          : ", vmax)
+  print("vmin          : ", vmin)
+  print("grid enabled  : ", grid) 
   if human is not None:
-    print "human         : ", human
-  print "Savefig       : ", savefig
-  print "kticks        : ", kticks
-  print "knames        : ", knames
-  print "title         : ", title
+    print("human         : ", human)
+  print("Savefig       : ", savefig)
+  print("kticks        : ", kticks)
+  print("knames        : ", knames)
+  print("title         : ", title)
 
-  print "outcar        : ", outcar
+  print("outcar        : ", outcar)
 
   #If ticks and names are given we should use them#
   if kticks is not None and knames is not None:
-    ticks = zip(kticks,knames)
+    ticks = list(zip(kticks,knames))
   elif kticks is not None:
-    ticks = zip(kticks,kticks)
+    ticks = list(zip(kticks,kticks))
   else:
     ticks = None
   
@@ -102,7 +102,7 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
       #if quiet is False:
-      print "INFO: Fermi energy found in outcar file = " + str(fermi)
+      print("INFO: Fermi energy found in outcar file = " + str(fermi))
     recLat = outcarparser.RecLatOutcar(outcar)
 
   # parsing the PROCAR file

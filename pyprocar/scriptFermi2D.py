@@ -1,9 +1,9 @@
-from utilsprocar import UtilsProcar
-from procarparser import ProcarParser
-from procarselect import ProcarSelect
-from procarplot import ProcarPlot
-from procarsymmetry import ProcarSymmetry
-from fermisurface import FermiSurface
+from .utilsprocar import UtilsProcar
+from .procarparser import ProcarParser
+from .procarselect import ProcarSelect
+from .procarplot import ProcarPlot
+from .procarsymmetry import ProcarSymmetry
+from .fermisurface import FermiSurface
 import matplotlib.pyplot as plt
 
 
@@ -12,7 +12,7 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
   if atoms is None:
     atoms = [-1]
     if human is True:
-      print "WARNING: `--human` option given without atoms list!!!!!"
+      print("WARNING: `--human` option given without atoms list!!!!!")
 
   if orbitals is None:
     orbitals = [-1]
@@ -22,25 +22,25 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
     rec_basis.shape = (3,3)
 
   if len(translate) != 3 and len(translate) != 1:
-    print "Error: --translate option is invalid! (", translate,")"
+    print("Error: --translate option is invalid! (", translate,")")
     raise RuntimeError("invalid option --translate")
 
   
-  print "file            : ", file
-  print "atoms           : ", atoms
-  print "orbitals        : ", orbitals
-  print "spin comp.      : ", spin
-  print "energy          : ", energy
-  print "fermi energy    : ", fermi
-  print "Rec. basis      : ", rec_basis
-  print "rot. symmetry   : ", rot_symm
-  print "origin (trasl.) : ", translate
-  print "rotation        : ", rotation
-  print "masking thres.  : ", mask
-  print "save figure     : ", savefig
-  print "outcar          : ", outcar
-  print "st              : ", st
-  print "no_arrows       : ", noarrow
+  print("file            : ", file)
+  print("atoms           : ", atoms)
+  print("orbitals        : ", orbitals)
+  print("spin comp.      : ", spin)
+  print("energy          : ", energy)
+  print("fermi energy    : ", fermi)
+  print("Rec. basis      : ", rec_basis)
+  print("rot. symmetry   : ", rot_symm)
+  print("origin (trasl.) : ", translate)
+  print("rotation        : ", rotation)
+  print("masking thres.  : ", mask)
+  print("save figure     : ", savefig)
+  print("outcar          : ", outcar)
+  print("st              : ", st)
+  print("no_arrows       : ", noarrow)
   
 
 
@@ -49,11 +49,11 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
-      print "Fermi energy found in outcar file = " + str(fermi)
+      print("Fermi energy found in outcar file = " + str(fermi))
     rec_basis = outcarparser.RecLatOutcar(outcar)
   #Reciprocal lattices are needed!
   elif rec_basis is None and outcar is None:
-    print "ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar"
+    print("ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar")
     raise RuntimeError("Reciprocal Lattice not found")
     
   #parsing the file
@@ -97,7 +97,7 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
 
 
   # plotting the data
-  print "Bands will be shifted by the Fermi energy = ", fermi
+  print("Bands will be shifted by the Fermi energy = ", fermi)
   fs = FermiSurface(symm.kpoints, symm.bands-fermi, symm.character)
   fs.FindEnergy(energy)
   

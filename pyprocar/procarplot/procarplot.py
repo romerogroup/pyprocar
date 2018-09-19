@@ -23,16 +23,16 @@ class ProcarPlot:
       xaxis = np.array(xaxis)
     else:
       xaxis = np.arange(len(self.bands))
-    print "self.kpoints: ", self.kpoints.shape
-    print "xaxis.shape : ", xaxis.shape
-    print "bands.shape : ", self.bands.shape
+    print("self.kpoints: ", self.kpoints.shape)
+    print("xaxis.shape : ", xaxis.shape)
+    print("bands.shape : ", self.bands.shape)
     plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker, 
                     markersize=size)
     plt.xlim(xaxis.min(), xaxis.max())
 
     #handling ticks
     if ticks:
-      ticks, ticksNames = zip(*ticks)
+      ticks, ticksNames = list(zip(*ticks))
       ticks = [xaxis[x] for x in ticks]
       plt.xticks(ticks, ticksNames)
     
@@ -41,7 +41,7 @@ class ProcarPlot:
   def scatterPlot(self, size=50, mask=None, cmap='hot_r', vmax=None, vmin=None,
                   marker='o', ticks=None):
     bsize, ksize = self.bands.shape
-    print bsize, ksize
+    print(bsize, ksize)
 
     if self.kpoints is not None:
       xaxis = [0]
@@ -68,7 +68,7 @@ class ProcarPlot:
     
     #handling ticks
     if ticks:
-      ticks, ticksNames = zip(*ticks)
+      ticks, ticksNames = list(zip(*ticks))
       ticks = [xaxis[0,x] for x in ticks]
       plt.xticks(ticks, ticksNames)
 
@@ -94,7 +94,7 @@ class ProcarPlot:
       vmin = self.spd.min()
     if vmax is None:
       vmax = self.spd.max()
-    print "normalizing to: ", (vmin,vmax)
+    print("normalizing to: ", (vmin,vmax))
     norm = matplotlib.colors.Normalize(vmin, vmax)
 
     if self.kpoints is not None:
@@ -122,7 +122,7 @@ class ProcarPlot:
 
     #handling ticks
     if ticks:
-      ticks, ticksNames = zip(*ticks)
+      ticks, ticksNames = list(zip(*ticks))
       ticks = [xaxis[x] for x in ticks]
       plt.xticks(ticks, ticksNames)
 
@@ -136,19 +136,19 @@ class ProcarPlot:
     k-point
     """
 
-    print "Atomic plot: bands.shape  :", self.bands.shape
-    print "Atomic plot: spd.shape    :", self.spd.shape
-    print "Atomic plot: kpoints.shape:", self.kpoints.shape
+    print("Atomic plot: bands.shape  :", self.bands.shape)
+    print("Atomic plot: spd.shape    :", self.spd.shape)
+    print("Atomic plot: kpoints.shape:", self.kpoints.shape)
 
     self.bands = np.hstack((self.bands, self.bands))
     self.spd = np.hstack((self.spd, self.spd))
     self.kpoints = np.vstack((self.kpoints, self.kpoints))
     self.kpoints[0][-1] += 1
-    print "Atomic plot: bands.shape  :", self.bands.shape
-    print "Atomic plot: spd.shape    :", self.spd.shape
-    print "Atomic plot: kpoints.shape:", self.kpoints.shape
+    print("Atomic plot: bands.shape  :", self.bands.shape)
+    print("Atomic plot: spd.shape    :", self.spd.shape)
+    print("Atomic plot: kpoints.shape:", self.kpoints.shape)
 
-    print self.kpoints
+    print(self.kpoints)
     
     fig = self.parametricPlot(cmap, vmin, vmax)
     plt.gca().xaxis.set_major_locator(plt.NullLocator())

@@ -1,7 +1,7 @@
-from utilsprocar import UtilsProcar
-from procarparser import ProcarParser
-from procarselect import ProcarSelect
-from procarplotcompare import ProcarPlotCompare
+from .utilsprocar import UtilsProcar
+from .procarparser import ProcarParser
+from .procarselect import ProcarSelect
+from .procarplotcompare import ProcarPlotCompare
 import numpy as np
 import matplotlib.pyplot as plt
 import re
@@ -16,8 +16,8 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   if atoms is None:
     atoms = [-1]
     if human is True:
-      print "WARNING: `--human` option given without atoms list!"
-      print "--human will be set to False (ignored)\n "
+      print("WARNING: `--human` option given without atoms list!")
+      print("--human will be set to False (ignored)\n ")
       human = False
   
   #repeat for 2nd data set
@@ -31,35 +31,35 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     orbitals2 = [-1]  
     
 
-  print "Script initiated"
-  print "input file 1   : ", file
-  print "input file 2   : ", file2 #2nd file
-  print "Mode           : ", mode
+  print("Script initiated")
+  print("input file 1   : ", file)
+  print("input file 2   : ", file2) #2nd file
+  print("Mode           : ", mode)
   
-  print "spin comp.  #1 : ", spin
-  print "spin comp.  #2 : ", spin2
-  print "atoms list. #1 : ", atoms
-  print "atoms list. #2 : ", atoms2
-  print "orbs. list. #1 : ", orbitals
-  print "orbs. list  #2 : ", orbitals2
+  print("spin comp.  #1 : ", spin)
+  print("spin comp.  #2 : ", spin2)
+  print("atoms list. #1 : ", atoms)
+  print("atoms list. #2 : ", atoms2)
+  print("orbs. list. #1 : ", orbitals)
+  print("orbs. list  #2 : ", orbitals2)
 
   if fermi is None and outcar is None and abinit_output is None:
-    print "WARNING: Fermi Energy not set! "
-    print "You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n"
-    print "The zero of energy is arbitrary\n"
+    print("WARNING: Fermi Energy not set! ")
+    print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
+    print("The zero of energy is arbitrary\n")
     fermi = 0
     
   if fermi2 is None and outcar2 is None and abinit_output2 is None:
-    print "WARNING: Fermi Energy #2 not set! "
-    print "You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n"
-    print "The zero of energy is arbitrary\n"
+    print("WARNING: Fermi Energy #2 not set! ")
+    print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
+    print("The zero of energy is arbitrary\n")
     fermi2 = 0
 
 
 ###################reading abinit output (added by uthpala) ##########################
 
   if abinit_output:
-  	print "Abinit output used"
+  	print("Abinit output used")
 
   #reading abinit output file
   	rf = open(abinit_output,'r')
@@ -70,7 +70,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
    
    
   if abinit_output2:
-  	print "Abinit output #2 used"
+  	print("Abinit output #2 used")
 
   #reading abinit output file
   	rf2 = open(abinit_output2,'r')
@@ -83,43 +83,43 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
 ####################################################################  
 
  
-  print "Fermi Ener. #1  : ", fermi
-  print "Fermi Ener. #2  : ", fermi2
-  print "Energy range    : ", elimit
+  print("Fermi Ener. #1  : ", fermi)
+  print("Fermi Ener. #2  : ", fermi2)
+  print("Energy range    : ", elimit)
 
   if mask is not None:
-    print "masking thres.: ", mask 
+    print("masking thres.: ", mask) 
     
-  print "Colormap        : ", cmap
-  print "MarkerSize #1   : ", markersize
-  print "MarkerSize #2   : ", markersize2
+  print("Colormap        : ", cmap)
+  print("MarkerSize #1   : ", markersize)
+  print("MarkerSize #2   : ", markersize2)
     
-  print "Permissive      : ", permissive
+  print("Permissive      : ", permissive)
   if permissive:
-    print "INFO: Permissive flag is on! Be careful"
-  print "vmax            : ", vmax
-  print "vmin            : ", vmin
-  print "vmax #2         : ", vmax2
-  print "vmin #2         : ", vmin2
-  print "grid enabled    : ", grid 
+    print("INFO: Permissive flag is on! Be careful")
+  print("vmax            : ", vmax)
+  print("vmin            : ", vmin)
+  print("vmax #2         : ", vmax2)
+  print("vmin #2         : ", vmin2)
+  print("grid enabled    : ", grid) 
   if human is not None:
-    print "human          : ", human
-  print "Savefig         : ", savefig
-  print "kticks          : ", kticks
-  print "knames          : ", knames
-  print "title           : ", title
+    print("human          : ", human)
+  print("Savefig         : ", savefig)
+  print("kticks          : ", kticks)
+  print("knames          : ", knames)
+  print("title           : ", title)
 
-  print "outcar #1       : ", outcar
-  print "outcar #2       : ", outcar2
+  print("outcar #1       : ", outcar)
+  print("outcar #2       : ", outcar2)
   
-  print "legend #1       : ",legend
-  print "legend #2       : ",legend2
+  print("legend #1       : ",legend)
+  print("legend #2       : ",legend2)
 
   #If ticks and names are given we should use them#
   if kticks is not None and knames is not None:
-    ticks = zip(kticks,knames)
+    ticks = list(zip(kticks,knames))
   elif kticks is not None:
-    ticks = zip(kticks,kticks)
+    ticks = list(zip(kticks,kticks))
   else:
     ticks = None
   
@@ -140,10 +140,10 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     outcarparser = UtilsProcar()
     if fermi is None:
       fermi = outcarparser.FermiOutcar(outcar)
-      print "INFO: Fermi energy found in outcar file = " + str(fermi)
+      print("INFO: Fermi energy found in outcar file = " + str(fermi))
     if fermi2 is None:  
       fermi2 = outcarparser.FermiOutcar(outcar2)
-      print "INFO: Fermi energy #2 found in outcar file = " + str(fermi2)
+      print("INFO: Fermi energy #2 found in outcar file = " + str(fermi2))
       
       
     recLat = outcarparser.RecLatOutcar(outcar)
