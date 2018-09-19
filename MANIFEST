@@ -5,6 +5,7 @@ pyprocar/__init__.py
 pyprocar/scriptAbinitMerge.py
 pyprocar/scriptBandsplot.py
 pyprocar/scriptCat.py
+pyprocar/scriptCompareBands.py
 pyprocar/scriptFermi2D.py
 pyprocar/scriptFilter.py
 pyprocar/scriptKmesh2D.py
@@ -19,6 +20,8 @@ pyprocar/procarparser/__init__.py
 pyprocar/procarparser/procarparser.py
 pyprocar/procarplot/__init__.py
 pyprocar/procarplot/procarplot.py
+pyprocar/procarplotcompare/__init__.py
+pyprocar/procarplotcompare/procarplotcompare.py
 pyprocar/procarselect/__init__.py
 pyprocar/procarselect/procarselect.py
 pyprocar/procarsymmetry/__init__.py
