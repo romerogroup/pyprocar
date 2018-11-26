@@ -61,6 +61,8 @@ v3.0 Sep 17, 2018 -- Added method to compare two PROCARs. Moved to Python3.
 
 v3.1 Sep 19, 2018 -- Minor bug fixes. 
 
+v3.2 Nov 26, 2018 -- Moved project to romerogroup.
+
 Dependencies
 ------------
 matplotlib <br />
