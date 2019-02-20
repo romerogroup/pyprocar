@@ -3,7 +3,7 @@ import os
 import seekpath
 import numpy as np
 
-def kpath(infile,grid_size,with_time_reversal,recipe,threshhold,symprec,angle_tolerence):
+def kpath(infile,grid_size,with_time_reversal,recipe,threshhold,symprec,angle_tolerence, supercell_matrix=np.eye(3)):
 	file = open(infile,'r')
 	POSCAR = file.readlines()
 
@@ -57,7 +57,7 @@ def kpath(infile,grid_size,with_time_reversal,recipe,threshhold,symprec,angle_to
 	coord_matrix=np.zeros(shape=(2*len(kpath_dictionary['path']),3))
 	path_array_counter = 0
 	for mm in range(len(coord_matrix)):
-		coord_matrix[mm,:] = kpath_dictionary['point_coords'][path_array[path_array_counter]]
+		coord_matrix[mm,:] = np.dot(kpath_dictionary['point_coords'][path_array[path_array_counter]], supercell_matrix)
 		path_array_counter=path_array_counter+1
 
 	k_file = open('KPOINTS','w+')

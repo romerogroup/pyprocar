@@ -1,7 +1,7 @@
 import numpy as np
 import re
 from ase.io import read
-from unfolder import Unfolder
+from .unfolder import Unfolder
 import matplotlib.pyplot as plt
 from plot import plot_band_weight
 from pyprocar import ProcarParser
@@ -85,39 +85,3 @@ class ProcarUnfolder(object):
                 axes.plot(self.procar.bands[:,i], color='gray', linewidth=1, alpha=0.3)
         return axes
 
-
-def run_unfolding(
-        fname='PROCAR',
-        poscar='POSCAR',
-        supercell_matrix=np.diag([2, 2, 2]),
-        efermi=4.298,
-        ylim=(-5, 15),
-        ktick=[0, 36, 54, 86, 110, 147, 165, 199],
-        knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
-        print_kpts=False,
-        show_band=True,
-        figname='unfolded_band.png'):
-    uf = ProcarUnfolder(
-        procar=fname,
-        poscar=poscar,
-        supercell_matrix=supercell_matrix,
-    )
-    if print_kpts:
-        for ik, k in enumerate(uf.procar.kpoints):
-            print(ik, k)
-    axes = uf.plot(efermi=efermi, ylim=ylim, ktick=ktick, kname=knames, show_band=show_band)
-    plt.savefig(figname)
-    plt.show()
-
-
-def test():
-    import os
-    path = '/media/hexu/Data/Projects/pyprocar_unfolding/MgB2/MgB2_sc222_Aldoping'
-    print(os.path.exists(os.path.join(path, 'PROCAR')))
-    run_unfolding(
-        fname=os.path.join(path, 'PROCAR'),
-        poscar=os.path.join(path, 'POSCAR'))
-
-
-if __name__ == '__main__':
-    test()
