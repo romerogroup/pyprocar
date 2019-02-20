@@ -68,6 +68,7 @@ class ProcarParser:
 
     self.fileStr = None      #the actual file, stored in memory
     self.spd = None          #the atom/orbital projected data
+    self.cspd = None #spd data with the phase
     self.orbitalName = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz",
                         "dx2", "tot"]
     self.orbitalCount = None #number of orbitals
@@ -357,7 +358,7 @@ class ProcarParser:
     self.log.info("spd array ready. Its shape is:" + str(self.spd.shape))
     return
   
-  def readFile(self, procar=None, permissive=False, recLattice=None):
+  def readFile(self, procar=None,phase=False, permissive=False, recLattice=None):
     """Reads and parses the whole PROCAR file. This method is a sort
     of metamethod: it opens the file, reads the meta data and call the
     respective functions for parsing kpoints, bands, and projected
@@ -381,33 +382,107 @@ class ProcarParser:
      ones. Default=None
 
     """
-    self.log.debug("readFile...")
 
-    self.recLattice = recLattice
+    if phase==False:
+        self.log.debug("readFile...")
 
-    self.log.debug("Opening file: '"+str(procar)+"'")
-    f = self.utils.OpenFile(procar)
-    # Line 1: PROCAR lm decomposed
-    f.readline()  # throwaway
-    # Line 2: # of k-points:  816   # of bands:  52   # of ions:   8
-    metaLine = f.readline() # metadata
-    self.log.debug("The metadata line is: "+ metaLine)
-    re.findall(r"#[^:]+:([^#]+)", metaLine)
-    self.kpointsCount, self.bandsCount, self.ionsCount = \
-        list(map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
-    self.log.info("kpointsCount = " + str(self.kpointsCount));
-    self.log.info("bandsCount = " + str(self.bandsCount));
-    self.log.info("ionsCount = " + str(self.ionsCount));
-    if self.ionsCount is 1:
-      self.log.warning("Special case: only one atom found. The program may not work as expected")
-    else:
-      self.log.debug("An extra ion representing the  total value will be added")
-      self.ionsCount = self.ionsCount + 1
+        self.recLattice = recLattice
 
-    #reading all the rest of the file to be parsed below
-    self.fileStr = f.read()
-    self._readKpoints(permissive)
-    self._readBands()
-    self._readOrbital()
-    self.log.debug("readfile...done")
+        self.log.debug("Opening file: '"+str(procar)+"'")
+        f = self.utils.OpenFile(procar)
+        # Line 1: PROCAR lm decomposed
+        f.readline()  # throwaway
+        # Line 2: # of k-points:  816   # of bands:  52   # of ions:   8
+        metaLine = f.readline() # metadata
+        self.log.debug("The metadata line is: "+ metaLine)
+        re.findall(r"#[^:]+:([^#]+)", metaLine)
+        self.kpointsCount, self.bandsCount, self.ionsCount = \
+            list(map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
+        self.log.info("kpointsCount = " + str(self.kpointsCount));
+        self.log.info("bandsCount = " + str(self.bandsCount));
+        self.log.info("ionsCount = " + str(self.ionsCount));
+        if self.ionsCount is 1:
+          self.log.warning("Special case: only one atom found. The program may not work as expected")
+        else:
+          self.log.debug("An extra ion representing the  total value will be added")
+          self.ionsCount = self.ionsCount + 1
+
+        #reading all the rest of the file to be parsed below
+        self.fileStr = f.read()
+        self._readKpoints(permissive)
+        self._readBands()
+        self._readOrbital()
+        self.log.debug("readfile...done")
+
+    elif phase==True: #for LORBIT=12
+        self.recLattice = recLattice
+        f = self.utils.OpenFile(procar)
+        f.readline() #throw away first line
+        metaLine = f.readline() # header
+           
+        #parsing header information   
+        self.kpointsCount, self.bandsCount, self.ionsCount = list(map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
+
+        if self.ionsCount is 1:
+          self.log.warning("Special case: only one atom found. The program may not work as expected")
+        else:
+          self.log.debug("An extra ion representing the  total value will be added")
+          self.ionsCount = self.ionsCount + 1
+
+        #reading all the rest of the file to be parsed below saved as spd
+        self.fileStr = f.read()
+        self._readKpoints(permissive)
+        self._readBands()
+        self._readOrbital()
+        self.log.debug("readfile...done")  
+
+        #reading the complex phase data. will be saved as cspd
+        f2 = self.utils.OpenFile(procar)
+        f2.readline() #throw away first line
+        f2.readline() #throw away header line
+        data2=f2.read()
+        
+
+        #parsing 
+        spd0 = re.findall(r"ion(.+)", data2) #headers of the blocks
+        FoundOrbs = spd0[1].split()
+        size = len(FoundOrbs)
+        corbitalCount = size
+        spd_phase = re.findall(r"(?<=dx2-y2)([charge0-9.\s-]*)(?=band|k-point|\Z)", data2) #for LORBIT=12
+
+        spd_new=[]
+        for i in range(len(spd_phase)):
+          #get last list of original block and replace spd last line and append all to get new spd. 
+          # for charge line use spd instead of spd_real
+          spd_last= spd_phase[i].split()[-(corbitalCount+2):]
+          result=[]
+          for counter,value in enumerate(spd_last):    
+            result.append(value)
+            result.append('0')
+          del result[1]  
+          del result[-1]
+
+          #replace last line of each spd block 
+          spd_block = spd_phase[i].split()
+          spd_block[-(corbitalCount+2):]=result
+          spd_block=[x.replace('charge','0') for x in spd_block]
+          spd_new.append(spd_block)
+
+        # conversion to numpy
+        spd_phase = np.array(spd_new, dtype=float)  
+        
+        #reshaping
+        spd_phase.shape=(self.kpointsCount, self.bandsCount,1,self.ionsCount, 2*corbitalCount+2)
+
+        #matrix to hold complex values
+        self.cspd=np.zeros([self.kpointsCount,self.bandsCount,1,self.ionsCount,corbitalCount+2],dtype='complex')
+
+        for ikpointsCount in range(self.kpointsCount):
+          for ibandsCount in range(self.bandsCount):
+            for iionsCount in range(self.ionsCount):
+              orbs_real = spd_phase[ikpointsCount][ibandsCount][0][iionsCount][1:-1:2]
+              orbs_imag = spd_phase[ikpointsCount][ibandsCount][0][iionsCount][2::2]
+              orbs_all = orbs_real + (1j*orbs_imag)
+              self.cspd[ikpointsCount,ibandsCount,0,iionsCount,:] = np.concatenate([[spd_phase[ikpointsCount][ibandsCount][0][iionsCount][0]],orbs_all,[spd_phase[ikpointsCount][ibandsCount][0][iionsCount][-1]]])
+
     return
