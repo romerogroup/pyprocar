@@ -14,7 +14,7 @@ def unfold(
         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
         print_kpts=False,
         show_band=True,
-        figname='unfolded_band.png'):
+        savefig='unfolded_band.png'):
     """
     Params:
     ==============================================
@@ -59,15 +59,20 @@ def unfold(
 
 
 if __name__ == '__main__':
-    unfold(
+    """
+    An example of how to use
+    """
+    import pyprocar
+    import numpy as np
+    pyprocar.unfold(
         fname='PROCAR',
         poscar='POSCAR',
         outcar='OUTCAR',
         supercell_matrix=np.diag([2, 2, 2]),
         efermi=None,
-        ylim=(-5, 15),
-        ktick=[0, 36, 54, 86, 110, 147, 165, 199],
+        elimit=(-5, 15),
+        kticks=[0, 36, 54, 86, 110, 147, 165, 199],
         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
         print_kpts=False,
         show_band=True,
-        figname='unfolded_band.png')
+        savefig='unfolded_band.png')
