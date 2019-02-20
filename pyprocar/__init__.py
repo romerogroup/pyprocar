@@ -38,6 +38,7 @@ from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarsymmetry import ProcarSymmetry
+from pyprocar.unfold import ProcarUnfolder
 
 from .scriptBandsplot import bandsplot
 from .scriptCat import cat
