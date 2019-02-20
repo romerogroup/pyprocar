@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 from .unfold import ProcarUnfolder
 from .utilsprocar import UtilsProcar
 
-def run_unfolding(
+def unfold(
         fname='PROCAR',
         poscar='POSCAR',
         outcar='OUTCAR',
         supercell_matrix=np.diag([2, 2, 2]),
         efermi=None,
-        ylim=(-5, 15),
-        ktick=[0, 36, 54, 86, 110, 147, 165, 199],
+        elimit=(-5, 15),
+        kticks=[0, 36, 54, 86, 110, 147, 165, 199],
         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
         print_kpts=False,
         show_band=True,
@@ -23,12 +23,12 @@ def run_unfolding(
     outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
     supercell_matrix: supercell matrix from primitive cell to supercell
     efermi: Fermi energy
-    ylim: range of energy to be plotted.
-    ktick: the indices of K points which has labels given in knames.
-    knames: see ktick
-    print_kpts: print all the kpoints to screen. This is to help find the ktick and knames.
+    elimit: range of energy to be plotted.
+    kticks: the indices of K points which has labels given in knames.
+    knames: see kticks
+    print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.
     show_band: whether to plot the bands before unfolding.
-    figname: the file name of which the figure will be saved.
+    savefig: the file name of which the figure will be saved.
     """
 
     if efermi is not None:
@@ -50,16 +50,16 @@ def run_unfolding(
             print(ik, k)
     axes = uf.plot(
         efermi=fermi,
-        ylim=ylim,
-        ktick=ktick,
+        ylim=elimit,
+        ktick=kticks,
         kname=knames,
         show_band=show_band)
-    plt.savefig(figname)
+    plt.savefig(savefig)
     plt.show()
 
 
 if __name__ == '__main__':
-    run_unfolding(
+    unfold(
         fname='PROCAR',
         poscar='POSCAR',
         outcar='OUTCAR',

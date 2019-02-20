@@ -50,3 +50,4 @@ from .scriptKmesh2D import generate2dkmesh
 from .scriptAbinitMerge import mergeabinit
 from .scriptKpath import kpath
 from .scriptCompareBands import bandscompare
+from .scriptUnfold import unfold

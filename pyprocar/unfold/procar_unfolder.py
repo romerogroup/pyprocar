@@ -3,7 +3,7 @@ import re
 from ase.io import read
 from .unfolder import Unfolder
 import matplotlib.pyplot as plt
-from plot import plot_band_weight
+from .plot import plot_band_weight
 from pyprocar import ProcarParser
 
 
@@ -18,9 +18,7 @@ class ProcarUnfolder(object):
 
     def _parse_procar(self):
         self.procar = ProcarParser()
-        print("read File")
         self.procar.readFile2(self.fname, phase=True)
-        print("File read")
 
     def _prepare_unfold_basis(self, ispin):
         # basis, which are the name of the bands e.g. 'Ti|dxy|0'
