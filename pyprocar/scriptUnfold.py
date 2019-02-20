@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from .unfold import ProcarUnfolder
+from .procarunfold import ProcarUnfolder
 from .utilsprocar import UtilsProcar
 
 def unfold(
