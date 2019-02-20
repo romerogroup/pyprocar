@@ -7,9 +7,20 @@ from ase.build import make_supercell
 from ase.atoms import Atoms
 import numpy as np
 
+
 class Unfolder():
     """ phonon unfolding class"""
-    def __init__(self, cell, basis, positions , supercell_matrix, eigenvectors, qpoints, tol_r=0.1, compare=None, phase=True):
+
+    def __init__(self,
+                 cell,
+                 basis,
+                 positions,
+                 supercell_matrix,
+                 eigenvectors,
+                 qpoints,
+                 tol_r=0.1,
+                 compare=None,
+                 phase=True):
         """
         Params:
         ===================
@@ -31,7 +42,7 @@ class Unfolder():
         self._trans_rs = None
         self._trans_indices = None
         self._make_translate_maps()
-        self._phase=phase
+        self._phase = phase
         return
 
     def _translate(self, evec, r):
@@ -72,7 +83,8 @@ class Unfolder():
             for i_basis, pos in enumerate(positions):
                 for j_basis, Tpos in enumerate(Tpositions):
                     dpos = Tpos - pos
-                    if close_to_int(dpos) and (self._basis[i_basis]==self._basis[j_basis]):
+                    if close_to_int(dpos) and (
+                            self._basis[i_basis] == self._basis[j_basis]):
                         #indices[i, j_atom * self._ndim:j_atom * self._ndim + self._ndim] = np.arange(i_atom * self._ndim, i_atom * self._ndim + self._ndim)
                         indices[i, j_basis] = i_basis
 
@@ -86,16 +98,17 @@ class Unfolder():
         W= sum_1^N < evec| T(r_i)exp(-I (K+G) * r_i| evec>, here G=0. T(r_i)exp(-I K r_i)| evec> = evec[indices[i]]
         """
         if G is None:
-            G=np.zeros_like(qpt)
+            G = np.zeros_like(qpt)
         weight = 0j
         N = len(self._trans_rs)
         for r_i, ind in zip(self._trans_rs, self._trans_indices):
             if self._phase:
-                weight += np.vdot(evec, evec[ind])*np.exp(1j *2 * np.pi * np.dot(qpt+G,r_i))  /N
+                weight += np.vdot(evec, evec[ind]) * np.exp(
+                    1j * 2 * np.pi * np.dot(qpt + G, r_i)) / N
             else:
-                weight += np.vdot(evec, evec[ind]) / N*np.exp(-1j *2 * np.pi * np.dot(G,r_i))  
+                weight += np.vdot(evec, evec[ind]) / N * np.exp(
+                    -1j * 2 * np.pi * np.dot(G, r_i))
         return weight.real
-
 
     def get_weights(self):
         """
@@ -105,7 +118,8 @@ class Unfolder():
         weights = np.zeros([nqpts, nfreqs])
         for iqpt in range(nqpts):
             for ifreq in range(nfreqs):
-                weights[iqpt, ifreq] = self.get_weight(self._evecs[iqpt,  ifreq, :], self._qpts[iqpt])
+                weights[iqpt, ifreq] = self.get_weight(
+                    self._evecs[iqpt, ifreq, :], self._qpts[iqpt])
 
         self._weights = weights
         return self._weights

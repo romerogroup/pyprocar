@@ -9,94 +9,6 @@ import sys
 import argparse
 import os.path
 
-
-def get_fermi(fname):
-    with open(fname) as myfile:
-        for line in myfile:
-            m = re.search('E-fermi\s*\:\s*(.*)\XC', line)
-            if m is not None:
-                return float(m.group(1))
-
-
-def read_band(fname='wannier90.up_band.dat', fermi_shift=None):
-    """
-    plot the wannier band.
-
-    :param fname: the filename of the _band.dat
-    :param fermi_shift: (None | float) if None, no shift, else,  all the energies are shifted down by fermi_shift.
-    """
-    kslist = []
-    ks = []
-    ekslist = []
-    eks = []
-    wkslist = []
-    wks = []
-    have_weight = False
-    with open(fname) as myfile:
-        for line in myfile:
-            if len(line) > 5:
-                vals = map(float, line.strip().split())
-                ks.append(vals[0])
-                if fermi_shift is None:
-                    eks.append(vals[1])
-                else:
-                    eks.append(vals[1] - fermi_shift)
-                if len(vals) == 3:
-                    have_weight = True
-                    wks.append(vals[2])
-
-            else:
-                kslist.append(ks)
-                ekslist.append(eks)
-                wkslist.append(wks)
-                ks = []
-                eks = []
-                wks = []
-    if have_weight:
-        return kslist, ekslist, wkslist
-    else:
-        return kslist, ekslist
-
-
-def plot_band_from_data(es, kpts=None, efermi=None, labels=None):
-    """
-    plot the band.
-    :param es: energies, nkpts*nbands array.
-    """
-    plt.cla()
-    nbands, nkpts = np.asarray(es).shape
-    if kpts is None:
-        kpts = np.arrzy(range(nkpts))
-    if len(np.asarray(kpts).shape) == 2:
-        kpts = kpts[0]
-    xmax = max(kpts)
-    plt.xlim([0, xmax])
-    if efermi is not None:
-        plt.axhline(y=0.0, linestyle='--', color='blue')
-        es = np.asarray(es) - efermi
-    for e in es:
-        plt.plot(kpts, e)
-
-    if labels is not None:
-        plt.xticks(labels[0], labels[1])
-        for x in labels[0]:
-            plt.axvline(x=x, color='gray')
-    plt.show()
-
-
-def plot_band(fname='wannier90.up_band.dat', efermi=None):
-    """
-    plot the band with data read from wannier90 output data.
-    """
-    plt.clf()
-    kslist, ekslist = read_band(fname, fermi_shift=efermi)[:-1]
-    xmax = max(kslist[0])
-    plt.xlim([0, xmax])
-    for ks, eks in zip(kslist, ekslist):
-        plt.plot(ks, eks)
-    plt.show()
-
-
 def plot_band_weight(kslist,
                      ekslist,
                      wkslist=None,
@@ -175,58 +87,6 @@ def plot_band_weight(kslist,
     return a
 
 
-def plot_band_weight_file(fname='wannier90.up_band.dat',
-                          efermi=None,
-                          weight=True,
-                          yrange=None,
-                          output=None,
-                          style='alpha',
-                          color='blue',
-                          axis=None,
-                          width=10):
-    """
-    plot the band with projection
-    """
-    #plt.cla()
-    if weight:
-        kslist, ekslist, wkslist = read_band(fname, fermi_shift=efermi)
-    else:
-        kslist, ekslist = read_band(fname, fermi_shift=efermi)[:2]
-        wkslist = None
-    if fname[:-3].endswith('band.'):
-        xticks = read_xtics(fname[:-3] + 'gnu')
-    else:
-        xticks = read_xtics(fname[:fname.rfind('_')] + '.gnu')
-
-    return plot_band_weight(
-        kslist,
-        ekslist,
-        wkslist=wkslist,
-        efermi=efermi,
-        yrange=yrange,
-        output=output,
-        style=style,
-        color=color,
-        axis=axis,
-        width=width,
-        xticks=xticks)
-
-
-def read_xtics(fname='wannier90.up_band.gnu'):
-    text = open(fname).read()
-    m = re.search('xtics\s*\((.*)\)\n', text)
-    ts = m.group(1).split(',')
-    names = []
-    xs = []
-    for t in ts:
-        r = re.search(r'"\s*(.*)\s*"', t).group(1)
-        x = float(t.strip().split()[-1])
-        #print r,x
-        names.append(r)
-        xs.append(x)
-    return names, xs
-
-
 def main():
     parser = argparse.ArgumentParser(description='plot wannier bands.')
     parser.add_argument('fname', type=str, help='dat filename')
@@ -271,6 +131,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    #plot_band()
-    #plot_band_weight(efermi=9.05)
-    #print read_xtics()
