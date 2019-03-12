@@ -38,6 +38,7 @@ from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarsymmetry import ProcarSymmetry
+from pyprocar.procarunfold import ProcarUnfolder
 
 from .scriptBandsplot import bandsplot
 from .scriptCat import cat
@@ -49,3 +50,4 @@ from .scriptKmesh2D import generate2dkmesh
 from .scriptAbinitMerge import mergeabinit
 from .scriptKpath import kpath
 from .scriptCompareBands import bandscompare
+from .scriptUnfold import unfold
