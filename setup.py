@@ -16,7 +16,7 @@ setup(
               'pyprocar.procarplot',
               'pyprocar.procarsymmetry',
               'pyprocar.procarplotcompare',
-              'pyprocar.unfold',
+              'pyprocar.procarunfold',
               'pyprocar.procarselect'],
     license='LICENSE.txt',
     description='A python package for analyzing PROCAR files obtained from VASP and Abinit.',
