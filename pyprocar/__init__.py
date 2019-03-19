@@ -1,11 +1,11 @@
 __author__="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
-__copyright__ = "Copyright 2018"
-__version__ = "3.2"
+__copyright__ = "Copyright 2019"
+__version__ = "3.3"
 __email__ = "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 __status__ = "Development"
-__date__ ="November 26,2018"
+__date__ ="Mar 19, 2019"
 
-# Copyright (C) 2018 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
+# Copyright (C) 2019 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
 # This file is part of pyprocar.
 #
@@ -29,6 +29,7 @@ import re
 import logging
 import matplotlib.pyplot as plt
 import seekpath
+import ase
 
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarparser import ProcarParser

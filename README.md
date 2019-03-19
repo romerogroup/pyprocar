@@ -63,13 +63,15 @@ v3.1 Sep 19, 2018 -- Minor bug fixes.
 
 v3.2 Nov 26, 2018 -- Moved project to romerogroup.
 
+v3.3 Mar 19, 2019 -- Added band unfolder. 
+
 Dependencies
 ------------
 matplotlib <br />
 numpy <br />
 scipy <br />
 seekpath <br />
-
+ase <br />
 
 
 Installation

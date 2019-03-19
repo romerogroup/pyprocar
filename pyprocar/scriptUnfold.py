@@ -58,21 +58,21 @@ def unfold(
     plt.show()
 
 
-if __name__ == '__main__':
-    """
-    An example of how to use
-    """
-    import pyprocar
-    import numpy as np
-    pyprocar.unfold(
-        fname='PROCAR',
-        poscar='POSCAR',
-        outcar='OUTCAR',
-        supercell_matrix=np.diag([2, 2, 2]),
-        efermi=None,
-        elimit=(-5, 15),
-        kticks=[0, 36, 54, 86, 110, 147, 165, 199],
-        knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
-        print_kpts=False,
-        show_band=True,
-        savefig='unfolded_band.png')
+# if __name__ == '__main__':
+#     """
+#     An example of how to use
+#     """
+#     import pyprocar
+#     import numpy as np
+#     pyprocar.unfold(
+#         fname='PROCAR',
+#         poscar='POSCAR',
+#         outcar='OUTCAR',
+#         supercell_matrix=np.diag([2, 2, 2]),
+#         efermi=None,
+#         elimit=(-5, 15),
+#         kticks=[0, 36, 54, 86, 110, 147, 165, 199],
+#         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
+#         print_kpts=False,
+#         show_band=True,
+#         savefig='unfolded_band.png')
