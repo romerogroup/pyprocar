@@ -32,6 +32,7 @@ class ProcarSelect:
     self.spd = None
     self.bands = None
     self.kpoints = None
+    self.cspd=None
 
     # We want a logging to tell us what is happening
     self.log = logging.getLogger("ProcarSelect")
@@ -65,10 +66,12 @@ class ProcarSelect:
       self.spd     = ProcarData.spd.copy()
       self.bands   = ProcarData.bands.copy()
       self.kpoints = ProcarData.kpoints.copy()
+      self.cspd = ProcarData.cspd.copy()
     else:
       self.spd = ProcarData.spd
       self.bands = ProcarData.bands
       self.kpoints = ProcarData.kpoints
+      self.cspd = ProcarData.cspd
     self.log.debug("setData: ... Done")
     return
   
@@ -135,6 +138,8 @@ class ProcarSelect:
       raise RuntimeError('Wrong dimensionality of the array')
     self.spd = self.spd[:,:,value]
     self.spd = self.spd.sum(axis=2)
+    self.cspd = self.cspd[:,:,value]
+    self.cspd = self.cspd.sum(axis=2)
     self.log.info( "new shape =" + str(self.spd.shape))
     self.log.debug("selectAtoms: ...Done")
     return
@@ -171,6 +176,7 @@ class ProcarSelect:
 
     #all kpoint, all bands, VALUE orbitals, nothing else?
     self.spd = self.spd[:,:,value]
+    self.cspd = self.cspd[:,:,value]
     self.log.debug( "old shape =" + str(self.spd.shape))
 
     #testing if the dimensionaluty is rigth:
@@ -183,6 +189,7 @@ class ProcarSelect:
       raise RuntimeError('Wrong dimensionality of the array')
 
     self.spd = self.spd.sum(axis=2)
+    self.cspd=self.cspd.sum(axis=2)
     self.log.info( "new shape =" + str(self.spd.shape))
     self.log.debug("selectOrbital: ...Done")
     return
