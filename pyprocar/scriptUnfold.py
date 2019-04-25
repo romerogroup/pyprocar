@@ -9,6 +9,7 @@ def unfold(
         outcar='OUTCAR',
         supercell_matrix=np.diag([2, 2, 2]),
         efermi=None,
+        shift_efermi=True,
         elimit=(-5, 15),
         kticks=[0, 36, 54, 86, 110, 147, 165, 199],
         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
@@ -50,6 +51,7 @@ def unfold(
             print(ik, k)
     axes = uf.plot(
         efermi=fermi,
+        shift_efermi=shift_efermi,
         ylim=elimit,
         ktick=kticks,
         kname=knames,
@@ -70,6 +72,7 @@ def unfold(
 #         outcar='OUTCAR',
 #         supercell_matrix=np.diag([2, 2, 2]),
 #         efermi=None,
+#         shift_efermi=True,
 #         elimit=(-5, 15),
 #         kticks=[0, 36, 54, 86, 110, 147, 165, 199],
 #         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],

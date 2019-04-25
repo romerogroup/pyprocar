@@ -65,6 +65,7 @@ class ProcarUnfolder(object):
              ktick=[0, 41, 83, 125, 200],
              kname=['$\Gamma$', 'X', 'M', 'R', '$\Gamma$'],
              show_band=True,
+             shift_efermi=True,
              axis=None, 
              ):
         xlist = [list(range(self.procar.kpointsCount))]
@@ -75,6 +76,7 @@ class ProcarUnfolder(object):
             np.abs(uf.T),
             xticks=[kname, ktick],
             efermi=efermi,
+            shift_efermi=shift_efermi,
             axis=axis)
         axes.set_ylim(ylim)
         axes.set_xlim(0, self.procar.kpointsCount - 1)
