@@ -249,7 +249,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.ylim(elimit)
 
   ##### end of mode dependent options ###########
-
+  plt.tight_layout()
   if grid:
     plt.grid()
   
@@ -257,7 +257,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     plt.title(title,fontsize=22)
 
   if savefig:
-    plt.savefig(savefig,  bbox_inches=0)
+    plt.savefig(savefig)
   else:
     plt.show()
 

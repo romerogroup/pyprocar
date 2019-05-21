@@ -173,7 +173,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms
     if elimit is not None:
       plt.ylim(elimit)
   ###### end of mode dependent options ###########
-
+  plt.tight_layout()
   if grid:
     plt.grid()
   
@@ -181,7 +181,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms
     plt.title(title,fontsize=22)
 
   if savefig:
-    plt.savefig(savefig,  bbox_inches=0)
+    plt.savefig(savefig)
   else:
     plt.show()
 
