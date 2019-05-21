@@ -122,7 +122,8 @@ class ProcarPlot:
       lc.set_array(z)
       lc.set_linewidth(2)
       gca.add_collection(lc)
-    plt.colorbar(lc)
+    cb = plt.colorbar(lc)
+    cb.ax.tick_params(labelsize=20)
     plt.xlim(xaxis.min(), xaxis.max())
     plt.ylim(mbands.min(), mbands.max())
 

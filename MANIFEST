@@ -11,6 +11,7 @@ pyprocar/scriptFilter.py
 pyprocar/scriptKmesh2D.py
 pyprocar/scriptKpath.py
 pyprocar/scriptRepair.py
+pyprocar/scriptUnfold.py
 pyprocar/scriptVector.py
 pyprocar/fermisurface/__init__.py
 pyprocar/fermisurface/fermisurface.py
@@ -26,5 +27,10 @@ pyprocar/procarselect/__init__.py
 pyprocar/procarselect/procarselect.py
 pyprocar/procarsymmetry/__init__.py
 pyprocar/procarsymmetry/procarsymmetry.py
+pyprocar/procarunfold/__init__.py
+pyprocar/procarunfold/_bak.procarparser.py
+pyprocar/procarunfold/fatband.py
+pyprocar/procarunfold/procar_unfolder.py
+pyprocar/procarunfold/unfolder.py
 pyprocar/utilsprocar/__init__.py
 pyprocar/utilsprocar/utilsprocar.py
