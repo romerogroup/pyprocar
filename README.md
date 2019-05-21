@@ -65,6 +65,8 @@ v3.2 Nov 26, 2018 -- Moved project to romerogroup.
 
 v3.3 Mar 19, 2019 -- Added band unfolder. 
 
+v3.4 May 21, 2019 -- Bug fixes for plotting and added capability to plot meta-GGA 
+
 Dependencies
 ------------
 matplotlib <br />
