@@ -73,6 +73,7 @@ class ProcarPlotCompare:
       else:
           ticks = [xaxis2[x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
+      plt.yticks(fontsize=22)
     
     return plot
 
@@ -136,6 +137,7 @@ class ProcarPlotCompare:
       else:
           ticks = [xaxis2[0,x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
+      plt.yticks(fontsize=22)
 
     return plot
     
@@ -235,6 +237,7 @@ class ProcarPlotCompare:
       else:
           ticks = [xaxis2[x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
+      plt.yticks(fontsize=22)
 
     return fig
 
@@ -279,10 +282,10 @@ class ProcarPlotCompare:
     # labels on each band
     for i in range(len(self.bands[:,0])):
       # print i, self.bands[i]
-      plt.text(0, self.bands[i,0], str(i+1),color='r')
+      plt.text(0, self.bands[i,0], str(i+1),color='r',fontsize=22)
       
     for i2 in range(len(self.bands2[:,0])):
       # print i, self.bands[i]
-      plt.text(0, self.bands2[i2,0], str(i2+1),color='g')  
+      plt.text(0, self.bands2[i2,0], str(i2+1),color='g',fontsize=22)  
     
     return fig

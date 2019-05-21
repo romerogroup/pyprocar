@@ -38,6 +38,7 @@ class ProcarPlot:
       	plt.xlim(left=xaxis[ticks[0]])
       ticks = [xaxis[x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
+      plt.yticks(fontsize=22)
     
     return plot
 
@@ -77,6 +78,7 @@ class ProcarPlot:
       	plt.xlim(left=xaxis[0,ticks[0]])
       ticks = [xaxis[0,x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
+      plt.yticks(fontsize=22)
 
     return plot
     
@@ -135,6 +137,7 @@ class ProcarPlot:
       	plt.xlim(left=xaxis[ticks[0]])
       ticks = [xaxis[x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
+      plt.yticks(fontsize=22)
 
     return fig
 
@@ -166,6 +169,6 @@ class ProcarPlot:
     # labels on each band
     for i in range(len(self.bands[:,0])):
       # print i, self.bands[i]
-      plt.text(0, self.bands[i,0], str(i+1), fontsize=15)
+      plt.text(0, self.bands[i,0], str(i+1), fontsize=22)
     
     return fig
