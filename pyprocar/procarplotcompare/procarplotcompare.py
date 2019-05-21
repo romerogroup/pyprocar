@@ -15,7 +15,7 @@ class ProcarPlotCompare:
     self.kpoints2 = kpoints2
     return
 
-  def plotBands(self, size=10, size2=10, marker=',', marker2=',',color='r',color2='g', legend1='PROCAR1',legend2='PROCAR2', ticks=None):
+  def plotBands(self, size=0.02, size2=0.02, marker=',', marker2=',',color='r',color2='g', legend1='PROCAR1',legend2='PROCAR2', ticks=None):
     if size is not None:
       size = size/2
     if size2 is not None:
@@ -65,11 +65,14 @@ class ProcarPlotCompare:
     #handling ticks
     if ticks:
       ticks, ticksNames = list(zip(*ticks))
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+        plt.xlim(left=xaxis[ticks[0]])
       if len(xaxis) > len(xaxis2):          
           ticks = [xaxis[x] for x in ticks]
       else:
           ticks = [xaxis2[x] for x in ticks]
-      plt.xticks(ticks, ticksNames)
+      plt.xticks(ticks, ticksNames,fontsize=22)
     
     return plot
 
@@ -125,11 +128,14 @@ class ProcarPlotCompare:
     #handling ticks
     if ticks:
       ticks, ticksNames = list(zip(*ticks))
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+        plt.xlim(left=xaxis[0,ticks[0]])
       if len(xaxis) > len(xaxis2): 
           ticks = [xaxis[0,x] for x in ticks]
       else:
           ticks = [xaxis2[0,x] for x in ticks]
-      plt.xticks(ticks, ticksNames)
+      plt.xticks(ticks, ticksNames,fontsize=22)
 
     return plot
     
@@ -221,11 +227,14 @@ class ProcarPlotCompare:
     #handling ticks
     if ticks:
       ticks, ticksNames = list(zip(*ticks))
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+        plt.xlim(left=xaxis[ticks[0]])
       if len(xaxis) > len(xaxis2):          
           ticks = [xaxis[x] for x in ticks]
       else:
           ticks = [xaxis2[x] for x in ticks]
-      plt.xticks(ticks, ticksNames)
+      plt.xticks(ticks, ticksNames,fontsize=22)
 
     return fig
 

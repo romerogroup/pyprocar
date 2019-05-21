@@ -11,7 +11,7 @@ class ProcarPlot:
     self.kpoints = kpoints
     return
 
-  def plotBands(self, size=None, marker='o', ticks=None):
+  def plotBands(self, size=0.02, marker='o', ticks=None,color='blue'):
     if size is not None:
       size = size/2
     if self.kpoints is not None:
@@ -27,14 +27,17 @@ class ProcarPlot:
     print("xaxis.shape : ", xaxis.shape)
     print("bands.shape : ", self.bands.shape)
     plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker, 
-                    markersize=size)
+                    markersize=size,color=color)
     plt.xlim(xaxis.min(), xaxis.max())
 
     #handling ticks
     if ticks:
       ticks, ticksNames = list(zip(*ticks))
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+      	plt.xlim(left=xaxis[ticks[0]])
       ticks = [xaxis[x] for x in ticks]
-      plt.xticks(ticks, ticksNames)
+      plt.xticks(ticks, ticksNames,fontsize=22)
     
     return plot
 
@@ -69,12 +72,15 @@ class ProcarPlot:
     #handling ticks
     if ticks:
       ticks, ticksNames = list(zip(*ticks))
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+      	plt.xlim(left=xaxis[0,ticks[0]])
       ticks = [xaxis[0,x] for x in ticks]
-      plt.xticks(ticks, ticksNames)
+      plt.xticks(ticks, ticksNames,fontsize=22)
 
     return plot
     
-  def parametricPlot(self, cmap='hot_r', vmin=None, vmax=None, mask=None, 
+  def parametricPlot(self, cmap='jet', vmin=None, vmax=None, mask=None, 
                      ticks=None):
     from matplotlib.collections import LineCollection
     import matplotlib
@@ -123,8 +129,11 @@ class ProcarPlot:
     #handling ticks
     if ticks:
       ticks, ticksNames = list(zip(*ticks))
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+      	plt.xlim(left=xaxis[ticks[0]])
       ticks = [xaxis[x] for x in ticks]
-      plt.xticks(ticks, ticksNames)
+      plt.xticks(ticks, ticksNames,fontsize=22)
 
     return fig
 

@@ -10,7 +10,7 @@ import re
 
 
   
-def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=10,cmap='hot_r',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None):
+def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -150,26 +150,26 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
                      cmap=cmap, vmin=vmin,
                      vmax=vmax, marker=marker, ticks=ticks)
 
-    plt.ylabel(r"Energy [eV]")
+    plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit is not None:
       plt.ylim(elimit)
 
   elif mode == "plain":
-    plot.plotBands(markersize, marker=marker, ticks=ticks)
-    plt.ylabel(r"Energy [eV]")
+    plot.plotBands(markersize, marker=marker, ticks=ticks,color=color)
+    plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit:
       plt.ylim(elimit)
       
   elif mode == "parametric":
     plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,
                         ticks=ticks)
-    plt.ylabel(r"Energy [eV]")
+    plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit is not None:
       plt.ylim(elimit)
 
   elif mode == "atomic":
     plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax)
-    plt.ylabel(r"Energy [eV]")
+    plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit is not None:
       plt.ylim(elimit)
   ###### end of mode dependent options ###########
@@ -178,7 +178,7 @@ def bandsplot(file,mode='scatter',abinit_output=None,spin='0',atoms=None,orbital
     plt.grid()
   
   if title:
-    plt.title(title)
+    plt.title(title,fontsize=22)
 
   if savefig:
     plt.savefig(savefig,  bbox_inches=0)
