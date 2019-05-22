@@ -67,6 +67,8 @@ v3.3 Mar 19, 2019 -- Added band unfolder.
 
 v3.4 May 21, 2019 -- Bug fixes for plotting and added capability to plot meta-GGA 
 
+v3.5 May 22, 2019 -- added automatic high symmetry point labeling from KPOINTS file
+
 Dependencies
 ------------
 matplotlib <br />

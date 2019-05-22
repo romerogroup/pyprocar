@@ -10,7 +10,7 @@ import re
 
 
   
-def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None):
+def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,kpointsfile=None):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -37,6 +37,9 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms
     print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
     print("The zero of energy is arbitrary\n")
     fermi = 0
+
+  if kpointsfile is None:
+    print("No KPOINTS file present. Please set knames and kticks manually.")  
 
 
 ###################reading abinit output (added by uthpala) ##########################
@@ -73,19 +76,56 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms
   if human is not None:
     print("human         : ", human)
   print("Savefig       : ", savefig)
-  print("kticks        : ", kticks)
-  print("knames        : ", knames)
+  if kpointsfile is None:
+    print("kticks        : ", kticks)
+    print("knames        : ", knames)
   print("title         : ", title)
 
   print("outcar        : ", outcar)
 
-  #If ticks and names are given we should use them#
+
+  #If KPOINTS file is given:
+  if kpointsfile is not None:
+    #Getting the high symmetry point names from KPOINTS file
+    f = open(kpointsfile)
+    KPread = f.read()
+    f.close()
+
+    KPmatrix = re.findall('reciprocal[\s\S]*',KPread)
+    tick_labels = np.array(re.findall('!\s(.*)',KPmatrix[0]))
+    knames=[]
+    knames=[tick_labels[0]]
+
+    for i in range(len(tick_labels)-1):
+      if tick_labels[i] !=tick_labels[i+1]:
+        knames.append(tick_labels[i+1])
+
+    knames = [str("$"+latx+"$") for latx in knames] 
+
+    #getting the number of grid points from the KPOINTS file
+    f2 = open(kpointsfile)
+    KPreadlines = f2.readlines()
+    f2.close()
+    numgridpoints = int(KPreadlines[1].split()[0])
+
+    kticks=[0]
+    gridpoint=0
+    for kt in range(len(knames)-1):
+      gridpoint=gridpoint+numgridpoints
+      kticks.append(gridpoint-1)
+    print("knames        : ", knames)
+    print("kticks        : ", kticks)  
+
+
+  #If ticks and names are given by user manually:
   if kticks is not None and knames is not None:
     ticks = list(zip(kticks,knames))
   elif kticks is not None:
     ticks = list(zip(kticks,kticks))
   else:
     ticks = None
+
+
   
   #The spin argument should be a number (index of an array), or
   #'st'. In the last case it will be handled separately (later)
