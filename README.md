@@ -76,6 +76,8 @@ v3.5 May 22, 2019 -- added automatic high symmetry point labeling from KPOINTS f
 
 v3.6 Jun 04, 2019 -- Added 3D Fermi surface utility.
 
+v3.7 Jun 04, 2019 -- Bug fixes for Fermi surface.
+
 Dependencies
 ------------
 matplotlib <br />

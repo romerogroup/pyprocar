@@ -4,10 +4,10 @@ import pyprocar
 setup(
     name='pyprocar',
     version = pyprocar.__version__,
-    author='Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He',
+    author='Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet, Xu He, Jordan Bieder ',
     author_email='fvmunoz@gmail.com,alromero@mail.wvu.edu,smsingh@mix.wvu.edu,ukh0001@mix.wvu.edu,petavazohi@mix.wvu.edu,eric.bousquet@uliege.be,mailhexu@gmail.com',
     url='https://github.com/romerogroup/pyprocar',
-    download_url='https://github.com/romerogroup/pyprocar/archive/3.6.tar.gz',
+    download_url='https://github.com/romerogroup/pyprocar/archive/3.7.tar.gz',
     packages=['pyprocar', 
               'pyprocar.utilsprocar',
               'pyprocar.procarparser',
