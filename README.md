@@ -11,9 +11,8 @@ Usage
 -----
 Typical use is as follows
 
-    #!/usr/bin/env python
     import pyprocar 
-    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='parametric')
+    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain')
 
 Refer to the documentation for further details. 
 
@@ -31,6 +30,7 @@ Uthpala Herath <br />
 Pedram Tavadze <br />
 Eric Bousquet <br />
 Xu He <br />
+Jordan Bieder <br />
 
 Mailing list
 -------------
@@ -70,9 +70,11 @@ v3.2 Nov 26, 2018 -- Moved project to romerogroup.
 
 v3.3 Mar 19, 2019 -- Added band unfolder. 
 
-v3.4 May 21, 2019 -- Bug fixes for plotting and added capability to plot meta-GGA 
+v3.4 May 21, 2019 -- Bug fixes for plotting and added capability to plot meta-GGA. 
 
-v3.5 May 22, 2019 -- added automatic high symmetry point labeling from KPOINTS file
+v3.5 May 22, 2019 -- added automatic high symmetry point labeling from KPOINTS file.
+
+v3.6 Jun 04, 2019 -- Added 3D Fermi surface utility.
 
 Dependencies
 ------------

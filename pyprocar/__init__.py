@@ -1,9 +1,9 @@
 __author__="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2019"
-__version__ = "3.5"
+__version__ = "3.6"
 __email__ = "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 __status__ = "Development"
-__date__ ="May 22, 2019"
+__date__ ="Jun 04, 2019"
 
 # Copyright (C) 2019 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
@@ -37,14 +37,14 @@ from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarplotcompare import	ProcarPlotCompare
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarselect import ProcarSelect
-from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.procarunfold import ProcarUnfolder
+from pyprocar.fermisurface import FermiSurface
 
 from .scriptBandsplot import bandsplot
 from .scriptCat import cat
 from .scriptFermi2D import fermi2D
-from .fermi3D import fermi3D
+from .scriptFermi3D import fermi3D
 from .scriptFilter import filter
 from .scriptRepair import repair
 from .scriptVector import Vector

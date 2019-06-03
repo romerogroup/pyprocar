@@ -462,7 +462,7 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
         # after the FFT we loose the center of the BZ, using numpy roll we bring back the center of the BZ 
         surf_equation = np.roll(surf_equation,(scale)//2,axis=[0,1,2])
         
-        
+
         try : 
             # creating the isosurface if possible
             verts, faces ,normals,values = measure.marching_cubes_lewiner(surf_equation, e_fermi)
@@ -492,7 +492,7 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
            results = np.array(p.map(is_outside,args))
            p.close()
            out_verts = np.arange(0,len(results))[results]
-           return out_verts,faces
+           
            new_faces = []
            outs_bool_mat = np.zeros(shape=faces.shape,dtype=np.bool)
            
@@ -501,7 +501,6 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
                for ivert in iface :
                    if ivert in out_verts:
                        remove = True
-
                        continue
                    
                if not remove :
@@ -589,7 +588,8 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
                 if mode == 'plain':
                     if not(transparent):
                         s = mlab.pipeline.surface(polydata,representation='surface',color=(0,0.5,1),
-                                          opacity=1,name='band-'+str(iband))
+                                          name='band-'+str(iband))
+                        #mlab.show()
 
                 elif mode == 'parametric' or mode == 'external':
                 
@@ -670,5 +670,4 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
     elif plotting_package == 'ipyvolume' :
         ipv.show()
     
-    return data
-
+    return 
