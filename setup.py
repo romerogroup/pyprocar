@@ -10,7 +10,6 @@ setup(
     download_url='https://github.com/romerogroup/pyprocar/archive/3.5.tar.gz',
     packages=['pyprocar', 
               'pyprocar.utilsprocar',
-              'pyprocar.fermisurface',
               'pyprocar.procarparser',
               'pyprocar.procarfilefilter',
               'pyprocar.procarplot',

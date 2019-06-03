@@ -44,6 +44,7 @@ from pyprocar.procarunfold import ProcarUnfolder
 from .scriptBandsplot import bandsplot
 from .scriptCat import cat
 from .scriptFermi2D import fermi2D
+from .fermi3D import fermi3D
 from .scriptFilter import filter
 from .scriptRepair import repair
 from .scriptVector import Vector
