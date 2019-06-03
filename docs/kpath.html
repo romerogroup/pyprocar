@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Generating a k-path &mdash; PyProcar 3.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'3.5',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Repair" href="repair.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generating a k-path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html">Bulk band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Generating a k-path</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/kpath.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="generating-a-k-path">
+<h1>Generating a k-path<a class="headerlink" href="#generating-a-k-path" title="Permalink to this headline">¶</a></h1>
+<p>In order to plot a band structure, one must define a set of <span class="math notranslate nohighlight">\(k\)</span>-points following a desired <span class="math notranslate nohighlight">\(k\)</span>-path in momentum space. PyProcar’s <span class="math notranslate nohighlight">\(k\)</span>-path generation utility enables a the user to automatically generate a suitable and sufficient <span class="math notranslate nohighlight">\(k\)</span>-path given the crystal structure, typically read from the POSCAR file which is displayed below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sb</span> <span class="n">Bi</span>
+   <span class="mf">4.51004000000000</span>
+   <span class="mf">0.8660254037844390</span>   <span class="o">-</span><span class="mf">0.5000000000000000</span>    <span class="mf">0.0000000000000000</span>
+   <span class="mf">0.0000000000000000</span>    <span class="mf">1.0000000000000000</span>    <span class="mf">0.0000000000000000</span>
+   <span class="mf">0.0000000000000000</span>    <span class="mf">0.0000000000000000</span>    <span class="mf">2.6420852143218241</span>
+   <span class="mi">3</span>     <span class="mi">3</span>
+<span class="n">Direct</span>
+  <span class="mf">0.0000000000000000</span>  <span class="mf">0.0000000000000000</span>  <span class="mf">0.6470799999999988</span>
+  <span class="mf">0.6666666666666643</span>  <span class="mf">0.3333333333333357</span>  <span class="mf">0.9804133333333345</span>
+  <span class="mf">0.3333333333333357</span>  <span class="mf">0.6666666666666643</span>  <span class="mf">0.3137466666666702</span>
+  <span class="mf">0.0000000000000000</span>  <span class="mf">0.0000000000000000</span>  <span class="mf">0.1818699999999997</span>
+  <span class="mf">0.6666666666666643</span>  <span class="mf">0.3333333333333357</span>  <span class="mf">0.5152033333333354</span>
+  <span class="mf">0.3333333333333357</span>  <span class="mf">0.6666666666666643</span>  <span class="mf">0.8485366666666640</span>
+</pre></div>
+</div>
+<p>General format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">kpath</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">grid</span><span class="o">-</span><span class="n">size</span><span class="p">,</span> <span class="k">with</span><span class="o">-</span><span class="n">time</span><span class="o">-</span><span class="n">reversal</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">symprec</span><span class="p">,</span> <span class="n">angle</span><span class="o">-</span><span class="n">tolerance</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.kpath(`POSCAR&#39;,40,True,`hpkot&#39;,1e-07,1e-05,-1.0)
+</pre></div>
+</div>
+<p>More details regarding these parameters can be found in the <a class="reference external" href="https://seekpath.readthedocs.io/en/latest/module_guide/index.html">SeeK-path manual</a>.
+The <span class="math notranslate nohighlight">\(k\)</span>-path generation utility within PyProcar is based on the Python library <strong>seekpath</strong> developed by Hinuma et al:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Y. Hinuma, G. Pizzi, Y. Kumagai, F. Oba, I. Tanaka, Band structure diagram paths based on crystallography, Computational Materials Science 128 (2017) 140–184.doi:10.1016/j.commatsci.2016.10.015.
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="repair.html" class="btn btn-neutral float-right" title="Repair" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Uthpala Herath
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
