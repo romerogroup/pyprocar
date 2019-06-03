@@ -17,6 +17,11 @@ Typical use is as follows
 
 Refer to the documentation for further details. 
 
+Documentation
+-------------
+
+https://romerogroup.github.io/pyprocar/
+
 Contributors
 ------------
 Francisco Munoz <br />
