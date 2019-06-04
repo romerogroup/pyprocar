@@ -8,6 +8,7 @@ Please install the following dependencies prior to installing PyProcar.
 	* scipy 
 	* seekpath 
 	* ase 
+	* scikit-image
 
 To install using pip use the following command::
 	

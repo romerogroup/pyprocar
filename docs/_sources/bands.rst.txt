@@ -1,4 +1,4 @@
-Bulk band structure
+Band structure
 ===================
 
 PyProcar goes beyond the conventional plain band structure to plot the projected bands that carry even more information. The projected bands are color coded in an informative manner to portray fine details. 

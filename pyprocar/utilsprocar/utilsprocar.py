@@ -113,7 +113,7 @@ class UtilsProcar:
             #Checking if compressed
             if FileName[-2:] == "gz":
                 self.log.info("A gzipped file found")
-                inFile = gzip.open(FileName, "r")
+                inFile = gzip.open(FileName,mode='rt')
             else:
                 self.log.debug("A normal file found")
                 inFile = open(FileName, "r")
@@ -124,7 +124,7 @@ class UtilsProcar:
             self.log.info(
                 "File not found, however a .gz version does exist and will"
                 " be used")
-            inFile = gzip.open(FileName + ".gz")
+            inFile = gzip.open(FileName + ".gz",mode='rt')
 
         else:
             self.log.debug("File not exist, neither a gzipped version")
@@ -183,7 +183,7 @@ class UtilsProcar:
 
         if gzipOut:
             self.log.debug("gzipped output")
-            outFile = gzip.open(outFile, 'w')
+            outFile = gzip.open(outFile, ,mode='wt')
         else:
             self.log.debug("normal output")
             outFile = open(outFile, 'w')

@@ -1,10 +1,7 @@
 PyProcar
 ===========
 
-PyProcar provides a set of scripts that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR
-file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every K
-point in the considered mesh, every energy band and every atom. Here you will find scripts that help
-you in digging the information from it and plot it in a nice and friendly process.
+PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every k-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a k-path for a given crystal structure. Currently supports VASP and Abinit. 
 
 
 Usage
@@ -94,4 +91,5 @@ v3.7 Jun 04, 2019 -- Bug fixes for Fermi surface.
 
 v3.71 Jun 05, 2019 -- More bug fixes. 
 
+v3.8 Jun 05, 2019 -- Updated reading from gzip for binary data. Increased parsing speed when phase factors are present. 
 

@@ -306,7 +306,10 @@ class ProcarParser:
         if self.ionsCount is 1:
             self.spd = re.findall(r"^(\s*1\s+.+)$", self.fileStr, re.MULTILINE)
         else:
-            self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.fileStr)
+        	#Added by Francisco to speed up filtering on June 4th, 2019
+        	self.spd = re.findall(r"ion.+tot\n([-.\d\seto]+)", self.fileStr)
+        	self.spd = ''.join(self.spd)
+        	self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.fileStr)
         # free the memory (could be a lot)
         self.fileStr = None
         self.log.debug("the first entry is \n" + self.spd[0])

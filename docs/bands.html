@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Bulk band structure &mdash; PyProcar 3.5 documentation</title>
+  <title>Band structure &mdash; PyProcar 3.6 documentation</title>
   
 
   
@@ -20,11 +20,21 @@
   <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'3.6',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -88,7 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Bulk band structure</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Band structure</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#plain-band-structure">1. Plain band structure</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spin-projection">2. Spin projection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#atom-projection">3. Atom projection</a></li>
@@ -150,7 +160,7 @@
         
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
         
-      <li>Bulk band structure</li>
+      <li>Band structure</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,8 +179,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="bulk-band-structure">
-<h1>Bulk band structure<a class="headerlink" href="#bulk-band-structure" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="band-structure">
+<h1>Band structure<a class="headerlink" href="#band-structure" title="Permalink to this headline">¶</a></h1>
 <p>PyProcar goes beyond the conventional plain band structure to plot the projected bands that carry even more information. The projected bands are color coded in an informative manner to portray fine details.</p>
 <div class="section" id="plain-band-structure">
 <h2>1. Plain band structure<a class="headerlink" href="#plain-band-structure" title="Permalink to this headline">¶</a></h2>
