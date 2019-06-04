@@ -91,5 +91,5 @@ v3.7 Jun 04, 2019 -- Bug fixes for Fermi surface.
 
 v3.71 Jun 05, 2019 -- More bug fixes. 
 
-v3.8 Jun 05, 2019 -- Updated reading from gzip for binary data. Increased parsing speed when phase factors are present. 
+v3.8.1 Jun 05, 2019 -- Updated reading from gzip for binary data. Increased parsing speed when phase factors are present. 
 
