@@ -7,14 +7,13 @@ pyprocar/scriptBandsplot.py
 pyprocar/scriptCat.py
 pyprocar/scriptCompareBands.py
 pyprocar/scriptFermi2D.py
+pyprocar/scriptFermi3D.py
 pyprocar/scriptFilter.py
 pyprocar/scriptKmesh2D.py
 pyprocar/scriptKpath.py
 pyprocar/scriptRepair.py
 pyprocar/scriptUnfold.py
 pyprocar/scriptVector.py
-pyprocar/fermisurface/__init__.py
-pyprocar/fermisurface/fermisurface.py
 pyprocar/procarfilefilter/__init__.py
 pyprocar/procarfilefilter/procarfilefilter.py
 pyprocar/procarparser/__init__.py
