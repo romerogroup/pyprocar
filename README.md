@@ -38,8 +38,22 @@ Please post your questions on our forum.
 
 https://groups.google.com/d/forum/pyprocar
 
-Changes
--------
+Dependencies
+------------
+matplotlib <br />
+numpy <br />
+scipy <br />
+seekpath <br />
+ase <br />
+scikit-image <br />
+
+Installation
+------------
+
+	pip install pyprocar	
+
+Changelog
+--------------
 v0.1.0, June 10, 2013 -- Initial release.
 
 v2.0 Mar 21,2018 -- Created PyProcar package version with added support to Abinit. 
@@ -78,16 +92,6 @@ v3.6 Jun 04, 2019 -- Added 3D Fermi surface utility.
 
 v3.7 Jun 04, 2019 -- Bug fixes for Fermi surface.
 
-Dependencies
-------------
-matplotlib <br />
-numpy <br />
-scipy <br />
-seekpath <br />
-ase <br />
+v3.71 Jun 05, 2019 -- More bug fixes. 
 
 
-Installation
-------------
-
-	pip install pyprocar	

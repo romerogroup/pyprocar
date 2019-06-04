@@ -119,3 +119,6 @@ ENV/
 
 #sphinx
 _build/
+
+#mac
+.DS_Store
