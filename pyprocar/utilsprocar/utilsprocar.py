@@ -183,7 +183,7 @@ class UtilsProcar:
 
         if gzipOut:
             self.log.debug("gzipped output")
-            outFile = gzip.open(outFile, ,mode='wt')
+            outFile = gzip.open(outFile,mode='wt')
         else:
             self.log.debug("normal output")
             outFile = open(outFile, 'w')
