@@ -307,9 +307,10 @@ class ProcarParser:
             self.spd = re.findall(r"^(\s*1\s+.+)$", self.fileStr, re.MULTILINE)
         else:
         	#Added by Francisco to speed up filtering on June 4th, 2019
+        	#get rid of phase factors
         	self.spd = re.findall(r"ion.+tot\n([-.\d\seto]+)", self.fileStr)
         	self.spd = ''.join(self.spd)
-        	self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.fileStr)
+        	self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.spd)
         # free the memory (could be a lot)
         self.fileStr = None
         self.log.debug("the first entry is \n" + self.spd[0])

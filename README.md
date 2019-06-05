@@ -93,3 +93,5 @@ v3.71 Jun 05, 2019 -- More bug fixes.
 v3.8.1 Jun 05, 2019 -- Updated reading from gzip for binary data. Increased parsing speed when phase factors are present. 
 
 v3.8.2 Jun 05, 2019 -- Updated docs. 
+
+v3.8.3 Jun 05, 2019 -- Updated parsing for PROCAR with phase. 
