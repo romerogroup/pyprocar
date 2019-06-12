@@ -95,3 +95,5 @@ v3.8.1 Jun 05, 2019 -- Updated reading from gzip for binary data. Increased pars
 v3.8.2 Jun 05, 2019 -- Updated docs. 
 
 v3.8.3 Jun 05, 2019 -- Updated parsing for PROCAR with phase. 
+
+v3.8.4 Jun 11, 2019 -- Fixed parsing old PROCAR format. 
