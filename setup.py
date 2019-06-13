@@ -20,5 +20,5 @@ setup(
               'pyprocar.procarselect'],
     license='LICENSE.txt',
     description='A python package for analyzing PROCAR files obtained from VASP and Abinit.',
-    install_requires=['seekpath>=1.0'],
+    install_requires=['seekpath>=1.0', 'numpy', 'scipy', 'matplotlib', 'ase', 'scikit-image'],
 )
