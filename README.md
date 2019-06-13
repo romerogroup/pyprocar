@@ -97,3 +97,5 @@ v3.8.2 Jun 05, 2019 -- Updated docs.
 v3.8.3 Jun 05, 2019 -- Updated parsing for PROCAR with phase. 
 
 v3.8.4 Jun 11, 2019 -- Fixed parsing old PROCAR format. 
+
+v3.8.5 Jun 13, 2019 -- Bug fixes in Fermi surface plotting. 

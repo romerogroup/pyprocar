@@ -1,9 +1,9 @@
 __author__="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2019"
-__version__ = "3.8.4"
+__version__ = "3.8.5"
 __email__ = "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 __status__ = "Development"
-__date__ ="Jun 11, 2019"
+__date__ ="Jun 13, 2019"
 
 # Copyright (C) 2019 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
