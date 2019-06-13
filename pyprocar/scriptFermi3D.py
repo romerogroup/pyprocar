@@ -1,15 +1,13 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
 """
 Created on Fri May 10 16:23:30 2019
 
-@author: Pedram Tavadze19
+@author: Pedram Tavadze
 
 """
 
-from utilsprocar import UtilsProcar
-from procarparser import ProcarParser
-from procarselect import ProcarSelect
+from .utilsprocar import UtilsProcar
+from .procarparser import ProcarParser
+from .procarselect import ProcarSelect
 import numpy as np
 from scipy.spatial import ConvexHull
 from scipy.spatial import Voronoi
@@ -602,15 +600,6 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
                     if not(transparent):
                         s = mlab.pipeline.surface(polydata,representation='surface',color=(0,0.5,1),
                                           opacity=1,name='band-'+str(iband))
-
-#                        cut_plane = mlab.pipeline.scalar_cut_plane(s)
-#                        cut_plane.implicit_plane.normal = (0.5,0.5,0.5)
-#                        cut_plane.implicit_plane.origin = (0,0,0)
-#                        cut_plane.implicit_plane.widget.enabled = True
-#                        thr = mlab.pipeline.threshold(cut_plane)
-                        
-                        #cp = mlab.pipeline.cut_plane(s,normal=(0.5,0.5,0),origin=(0,0,0))
-                        
                         
                 elif mode == 'parametric' or mode == 'external':
                 
@@ -691,21 +680,4 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
     elif plotting_package == 'ipyvolume' :
         ipv.show()
     
-    return data
-
-if __name__ == '__main__':
-#     data = fermi3D('PROCAR-SrVO3','OUTCAR-SrVO3',
-#                     bands=[32], scale=6,plotting_package='mayavi',mode='plain',
-#                     st=True,nprocess=8,cmap='jet',face_colors=[(0.75,0.75,0.75)])
-#    data = fermi3D('PROCAR-MgB2-nonPol','OUTCAR-MgB2-nonPol',
-#                     bands=[5,6,7],scale=2,orbitals=[2,3],atoms=[1,2],plotting_package='mayavi',mode='plain'
-#                     ,color_file='MgB2_fermi_velocity.txt',st=False,nprocess=8,cmap='jet')
-     data = fermi3D('PROCAR-MgB2-Monhkorst','OUTCAR-MgB2-Monhkorst',
-                     bands=[10,12,14],scale=2,plotting_package='mayavi',mode='external'
-                     ,color_file='MgB2_fermi_velocity.txt',st=False,nprocess=8,cmap='jet')
-#    data = fermi3D('Fermi-surface_Pedram/BiSb/Fermi_surface/PROCAR-repaired','Fermi-surface_Pedram/BiSb/Fermi_surface/OUTCAR',
-#                             bands=[20],plotting_package='mayavi', mask_points=4,mode='plain',st=True,arrow_projection=2,scale=1,colormap='jet',energy=0.6,transparent=True)  
-
-#     data = Fermi3DPlane('PROCAR-SrFeO3','OUTCAR-SrFeO3',
-#                             bands=-1, plotting_package='mayavi', scale=5,
-#                             face_colors=[(0.5,0,1),(0,0.5,1),(1,0.5,0),(1,0,0),(0,1,0),(0.5,0.5,0.5)],nprocess=8)
+    return 
