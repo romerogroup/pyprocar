@@ -3,18 +3,17 @@
 """
 Created on Fri May 10 16:23:30 2019
 
-@author: Pedram Tavadze
+@author: Pedram Tavadze19
 
 """
 
-from .utilsprocar import UtilsProcar
-from .procarparser import ProcarParser
-from .procarselect import ProcarSelect
-from scipy.spatial import ConvexHull
+from utilsprocar import UtilsProcar
+from procarparser import ProcarParser
+from procarselect import ProcarSelect
 import numpy as np
+from scipy.spatial import ConvexHull
 from scipy.spatial import Voronoi
 from skimage import measure   
-import matplotlib as mpl
 from multiprocessing import Pool
 import scipy.interpolate as interpolate
 
@@ -360,7 +359,6 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
     kvector_cart,kvector_red,has_points_out = bring_pnts_to_BZ(recLat,kvector_cart,kvector_red,br_points)   
 #    has_points_out = False
 
-
     # getting the mesh grid in each dirrection
     kx_red = np.unique(kvector_red[:,0]) 
     ky_red = np.unique(kvector_red[:,1])
@@ -428,9 +426,22 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
             print("mode selected was external, but no color_file name was provided")
             return
     if st:
+        
         dataX = ProcarSelect(procarFile,deepCopy=True)
         dataY = ProcarSelect(procarFile,deepCopy=True)
         dataZ = ProcarSelect(procarFile,deepCopy=True)
+        
+        dataX.kpoints = data.kpoints
+        dataY.kpoints = data.kpoints
+        dataZ.kpoints = data.kpoints
+        
+        dataX.spd = data.spd
+        dataY.spd = data.spd
+        dataZ.spd = data.spd
+        
+        dataX.bands = data.bands
+        dataY.bands = data.bands
+        dataZ.bands = data.bands
         
         dataX.selectIspin([1])
         dataY.selectIspin([2])
@@ -462,7 +473,7 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
         # after the FFT we loose the center of the BZ, using numpy roll we bring back the center of the BZ 
         surf_equation = np.roll(surf_equation,(scale)//2,axis=[0,1,2])
         
-
+        
         try : 
             # creating the isosurface if possible
             verts, faces ,normals,values = measure.marching_cubes_lewiner(surf_equation, e_fermi)
@@ -484,30 +495,32 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
         
         # identifying the points in 2nd BZ and removing them
         if has_points_out :
-           args = []       
-           for ivert in range(len(verts)):
-               args.append([br_points,verts[ivert]])
-               
-           p = Pool(nprocess)
-           results = np.array(p.map(is_outside,args))
-           p.close()
-           out_verts = np.arange(0,len(results))[results]
-           
-           new_faces = []
-           outs_bool_mat = np.zeros(shape=faces.shape,dtype=np.bool)
-           
-           for iface in faces:
-               remove = False
-               for ivert in iface :
-                   if ivert in out_verts:
-                       remove = True
-                       continue
-                   
-               if not remove :
-                   new_faces.append(iface)
-           faces = np.array(new_faces)
+            args = []       
+            for ivert in range(len(verts)):
+                args.append([br_points,verts[ivert]])
+                
+            p = Pool(nprocess)
+            results = np.array(p.map(is_outside,args))
+            p.close()
+            out_verts = np.arange(0,len(results))[results]
+            new_faces = []
+#            outs_bool_mat = np.zeros(shape=faces.shape,dtype=np.bool)
+            
+            for iface in faces:
+                remove = False
+                for ivert in iface :
+                    if ivert in out_verts:
+                        remove = True
+
+                        continue
+                    
+                if not remove :
+                    new_faces.append(iface)
+            faces = np.array(new_faces)
 
 
+
+        print("done removing")
         # At this point we have the plain Fermi surface, we can color the surface depending on the projection         
         # We create the center of faces by averaging coordinates of corners
 
@@ -528,7 +541,7 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
                 centers[iface,0:3] = np.average(verts[faces[iface]],axis=0)
 
             colors = interpolate.griddata(color_kvector_cart,character,centers,method="nearest")
-            
+
             
             
         if st :
@@ -588,9 +601,17 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
                 if mode == 'plain':
                     if not(transparent):
                         s = mlab.pipeline.surface(polydata,representation='surface',color=(0,0.5,1),
-                                          name='band-'+str(iband))
-                        #mlab.show()
+                                          opacity=1,name='band-'+str(iband))
 
+#                        cut_plane = mlab.pipeline.scalar_cut_plane(s)
+#                        cut_plane.implicit_plane.normal = (0.5,0.5,0.5)
+#                        cut_plane.implicit_plane.origin = (0,0,0)
+#                        cut_plane.implicit_plane.widget.enabled = True
+#                        thr = mlab.pipeline.threshold(cut_plane)
+                        
+                        #cp = mlab.pipeline.cut_plane(s,normal=(0.5,0.5,0),origin=(0,0,0))
+                        
+                        
                 elif mode == 'parametric' or mode == 'external':
                 
                     polydata.cell_data.scalars = colors
@@ -655,7 +676,7 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
                 face_colors = cmap(colors)
                 colormap = ['rgb(%i,%i,%i)' % (x[0],x[1],x[2]) for x in (face_colors*255).round()]
                 ipv.figure()
-                ipv.plot_trisurf(verts[:,0],verts[:,1],verts[:,2], triangles=faces,color=color_map)
+                ipv.plot_trisurf(verts[:,0],verts[:,1],verts[:,2], triangles=faces,color=cmap)
                 
     if plotting_package == 'mayavi':
         mlab.colorbar(orientation='vertical')#,label_fmt='%.1f')
@@ -670,4 +691,21 @@ def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
     elif plotting_package == 'ipyvolume' :
         ipv.show()
     
-    return 
+    return data
+
+if __name__ == '__main__':
+#     data = fermi3D('PROCAR-SrVO3','OUTCAR-SrVO3',
+#                     bands=[32], scale=6,plotting_package='mayavi',mode='plain',
+#                     st=True,nprocess=8,cmap='jet',face_colors=[(0.75,0.75,0.75)])
+#    data = fermi3D('PROCAR-MgB2-nonPol','OUTCAR-MgB2-nonPol',
+#                     bands=[5,6,7],scale=2,orbitals=[2,3],atoms=[1,2],plotting_package='mayavi',mode='plain'
+#                     ,color_file='MgB2_fermi_velocity.txt',st=False,nprocess=8,cmap='jet')
+     data = fermi3D('PROCAR-MgB2-Monhkorst','OUTCAR-MgB2-Monhkorst',
+                     bands=[10,12,14],scale=2,plotting_package='mayavi',mode='external'
+                     ,color_file='MgB2_fermi_velocity.txt',st=False,nprocess=8,cmap='jet')
+#    data = fermi3D('Fermi-surface_Pedram/BiSb/Fermi_surface/PROCAR-repaired','Fermi-surface_Pedram/BiSb/Fermi_surface/OUTCAR',
+#                             bands=[20],plotting_package='mayavi', mask_points=4,mode='plain',st=True,arrow_projection=2,scale=1,colormap='jet',energy=0.6,transparent=True)  
+
+#     data = Fermi3DPlane('PROCAR-SrFeO3','OUTCAR-SrFeO3',
+#                             bands=-1, plotting_package='mayavi', scale=5,
+#                             face_colors=[(0.5,0,1),(0,0.5,1),(1,0.5,0),(1,0,0),(0,1,0),(0.5,0.5,0.5)],nprocess=8)

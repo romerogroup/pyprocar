@@ -119,10 +119,9 @@ class ProcarPlot:
       #print xaxis.shape, y.shape, z.shape
       points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
       segments = np.concatenate([points[:-1], points[1:]], axis=1)
-      lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm, 
-                          alpha=0.8)
+      lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
       lc.set_array(z)
-      lc.set_linewidth(2)
+      lc.set_linewidth(1)
       gca.add_collection(lc)
     cb = plt.colorbar(lc)
     cb.ax.tick_params(labelsize=20)
