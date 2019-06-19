@@ -15,6 +15,9 @@ def unfold(
         knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
         print_kpts=False,
         show_band=True,
+        width=4,
+        color='blue',
+        savetab='unfold_result.csv',
         savefig='unfolded_band.png'):
     """
     Params:
@@ -29,6 +32,9 @@ def unfold(
     knames: see kticks
     print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.
     show_band: whether to plot the bands before unfolding.
+    width: the width of the unfolded band. 
+    color: color of the unfoled band.
+    savetab: the csv file name of which  the table of unfolding result will be written into.
     savefig: the file name of which the figure will be saved.
     """
 
@@ -55,6 +61,9 @@ def unfold(
         ylim=elimit,
         ktick=kticks,
         kname=knames,
+        color=color,
+        width=width,
+        savetab=savetab,
         show_band=show_band)
     plt.savefig(savefig)
     plt.show()

@@ -20,6 +20,7 @@ def plot_band_weight(kslist,
                      color='blue',
                      axis=None,
                      width=10,
+                     fatness=4,
                      xticks=None,
                      cmap=mpl.cm.bwr,
                      weight_min=-0.1,
@@ -51,7 +52,7 @@ def plot_band_weight(kslist,
                 lwidths = np.array(wkslist[i]) * width
                 lc = LineCollection(
                     segments,
-                    linewidths=[4] * len(x),
+                    linewidths=[fatness] * len(x),
                     colors=[
                         colorConverter.to_rgba(
                             color, alpha=lwidth / (width + 0.001))
