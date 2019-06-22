@@ -66,10 +66,19 @@ class ProcarUnfolder(object):
              kname=['$\Gamma$', 'X', 'M', 'R', '$\Gamma$'],
              show_band=True,
              shift_efermi=True,
+             width=4.0,
+             color='blue',
              axis=None, 
+             savetab=None,
              ):
         xlist = [list(range(self.procar.kpointsCount))]
         uf = self.unfold()
+        if savetab is not None:
+            nk, nb=uf.shape
+            tab=np.zeros((nb, nk*2), dtype=float)
+            tab[:, ::2]=self.procar.bands.T
+            tab[:, 1::2]=uf.T
+            np.savetxt(savetab, tab, delimiter=',', fmt="%10.4f", header='# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)...'%(nk, nb))
         axes = plot_band_weight(
             xlist * self.procar.bandsCount,
             self.procar.bands.T,
@@ -77,11 +86,17 @@ class ProcarUnfolder(object):
             xticks=[kname, ktick],
             efermi=efermi,
             shift_efermi=shift_efermi,
+            fatness=width,
+            color=color,
             axis=axis)
         axes.set_ylim(ylim)
         axes.set_xlim(0, self.procar.kpointsCount - 1)
+        if shift_efermi:
+            shift=-efermi
+        else:
+            shift=0.0
         if show_band:
             for i in range(self.procar.bandsCount):
-                axes.plot(self.procar.bands[:,i], color='gray', linewidth=1, alpha=0.3)
+                axes.plot(self.procar.bands[:,i]+shift, color='gray', linewidth=1, alpha=0.3)
         return axes
 
