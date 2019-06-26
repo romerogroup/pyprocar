@@ -189,27 +189,38 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin='0',atoms
     plot.scatterPlot(mask=mask, size=markersize,
                      cmap=cmap, vmin=vmin,
                      vmax=vmax, marker=marker, ticks=ticks)
-
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)	
     if elimit is not None:
       plt.ylim(elimit)
 
   elif mode == "plain":
     plot.plotBands(markersize, marker=marker, ticks=ticks,color=color)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)	
     if elimit:
       plt.ylim(elimit)
       
   elif mode == "parametric":
     plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,
                         ticks=ticks)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)	
     if elimit is not None:
       plt.ylim(elimit)
 
   elif mode == "atomic":
     plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)	
     if elimit is not None:
       plt.ylim(elimit)
   ###### end of mode dependent options ###########

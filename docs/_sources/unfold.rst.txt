@@ -25,4 +25,7 @@ Then the unfold module can be used to plot the unfolded band as follows::
 	        knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
 	        print_kpts=False,
 	        show_band=True,
+                width=4,
+                color='blue',
+                savetab='unfolding.csv',
 	        savefig='unfolded_band.png')

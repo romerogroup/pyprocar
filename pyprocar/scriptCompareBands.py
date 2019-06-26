@@ -263,25 +263,37 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
 
   if mode == "scatter":
     plot.scatterPlot(mask=mask,size=markersize,size2= markersize2, cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker=marker, marker2=marker2,legend1=legend,legend2=legend2, ticks=ticks)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit is not None:
       plt.ylim(elimit)
 #
   if mode == "plain":
     plot.plotBands(size=markersize,size2= markersize2, marker=marker, marker2=marker2,color=color,color2=color2,legend1=legend,legend2=legend2, ticks=ticks)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit:
       plt.ylim(elimit)
       
   if mode == "parametric":
     plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='solid', marker2='dashed', legend1=legend,legend2=legend2,ticks=ticks)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit is not None:
       plt.ylim(elimit)
 
   elif mode == "atomic":
     plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2)
-    plt.ylabel(r"Energy [eV]",fontsize=22)
+    if fermi is not None:
+    	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
+    else:
+    	plt.ylabel(r"Energy [eV]",fontsize=22)
     if elimit is not None:
       plt.ylim(elimit)
 

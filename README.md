@@ -99,3 +99,5 @@ v3.8.3 Jun 05, 2019 -- Updated parsing for PROCAR with phase.
 v3.8.4 Jun 11, 2019 -- Fixed parsing old PROCAR format. 
 
 v3.8.5 Jun 13, 2019 -- Bug fixes in Fermi surface plotting. 
+
+v3.8.6 Jun 26, 2019 -- Bug fixes in band unfolding Fermi shift energy and band structure labels for Fermi shifts.  
