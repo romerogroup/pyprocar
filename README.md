@@ -28,6 +28,14 @@ Pedram Tavadze <br />
 Eric Bousquet <br />
 Xu He <br />
 
+How to cite
+-----------
+If you have used PyProcar in your work, please cite: 
+
+arXiv:1906.11387 [cond-mat.mtrl-sci]
+
+Thank you.
+
 Mailing list
 -------------
 Please post your questions on our forum.
