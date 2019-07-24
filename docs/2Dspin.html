@@ -169,8 +169,8 @@
   <div class="section" id="d-spin-texture">
 <h1>2D spin-texture<a class="headerlink" href="#d-spin-texture" title="Permalink to this headline">¶</a></h1>
 <p>This module can be utilized to visualize the constant energy surface spin textures in a given system. This feature is particularly useful in identifying Rashba and Dresselhaus type spin-splitting effects, analyzing the topology of Fermi-surface, and examining Lifshitz transitions. To plot 2D spin texture, we require a 2D <span class="math notranslate nohighlight">\(k\)</span>-grid centered a certain special <span class="math notranslate nohighlight">\(k\)</span>-point in Brillouin zone near which we want to examine the spin-texture in <span class="math notranslate nohighlight">\(k\)</span>-space (see section <a class="reference internal" href="kmesh.html#labelkmesh"><span class="std std-ref">k-mesh generator</span></a> regarding generation of 2D <span class="math notranslate nohighlight">\(k\)</span>-mesh).</p>
-<p>Usage: To plot <span class="math notranslate nohighlight">\(S_x\)</span> spin component at a constant energy surface <span class="math notranslate nohighlight">\(E = E_{F} + 0.60\,eV\)</span> (spin=‘1’, ‘2’, ‘3’ for <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span>, <span class="math notranslate nohighlight">\(S_z\)</span>, respectively):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">st</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span> <span class="n">noarrow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+<p>Usage: To plot <span class="math notranslate nohighlight">\(S_x\)</span> spin component at a constant energy surface <span class="math notranslate nohighlight">\(E = E_{F} + 0.60\,eV\)</span> (spin=1, 2, 3 for <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span>, <span class="math notranslate nohighlight">\(S_z\)</span>, respectively):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">st</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span> <span class="n">noarrow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>One could also plot spin texture using arrows instead of a heat map. This can be done by setting the tag: <code class="docutils literal notranslate"><span class="pre">noarrow=False</span></code>. To set maximum and minimum energy values for color map, one could use <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code> tags.</p>
@@ -178,15 +178,15 @@
 <h2>Translate and Rotate the 2D KPOINT mesh<a class="headerlink" href="#translate-and-rotate-the-2d-kpoint-mesh" title="Permalink to this headline">¶</a></h2>
 <p>For any spin-texture in a 2D K-plane, PyProcar usually treats Z-direction as the normal, and makes plot in the X-Y plane. It works fine when we have a 2D k-mesh in (<span class="math notranslate nohighlight">\(k_x\)</span>, <span class="math notranslate nohighlight">\(k_y\)</span>, 0) plane, but for other 2D k-meshes (e.g. Y-Z or X-Z), it gives us <code class="docutils literal notranslate"><span class="pre">Value</span> <span class="pre">Error</span></code> or <code class="docutils literal notranslate"><span class="pre">Segmentation</span> <span class="pre">Fault</span></code>.</p>
 <p>The solution is to rotate the PROCAR by 90 degrees and make the Z-axis perpendicular to the 2D plane. But we should first translate our mesh to a particular K-point (which is mostly the center of the k-mesh) to define the rotation point, and then decide the rotation axis and rotation angle.</p>
-<dl class="docutils">
-<dt>To translate the k-mesh::</dt>
-<dd>translate=[2,2,0]</dd>
-</dl>
+<p>To translate the k-mesh:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">translate</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>220 is the index of the <span class="math notranslate nohighlight">\(k\)</span>-point in the 2D <span class="math notranslate nohighlight">\(k\)</span>-mesh to define the rotation point (counting starts from 0).</p>
-<dl class="docutils">
-<dt>To define the rotation angle and rotation axis::</dt>
-<dd>rotation=[90,0,1,0]</dd>
-</dl>
+<p>To define the rotation angle and rotation axis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rotation</span><span class="o">=</span><span class="p">[</span><span class="mi">90</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>This defines the rotation angle = 90, and Y-axis as the rotation axis. PyProcar always performs the translation operation first and then does the rotation.</p>
 <p><strong>Be careful</strong>: Now <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span> and <span class="math notranslate nohighlight">\(S_z\)</span> all will be rotated according to the user’s choice. <span class="math notranslate nohighlight">\(S_y\)</span> will be same as before but <span class="math notranslate nohighlight">\(S_x\)</span> would now be <span class="math notranslate nohighlight">\(S_z\)</span> and <span class="math notranslate nohighlight">\(S_z\)</span> would be <span class="math notranslate nohighlight">\(-S_x\)</span>.</p>
 </div>

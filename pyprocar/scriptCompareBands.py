@@ -9,7 +9,7 @@ import re
 
 
 
-def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',vmax=None,vmin=None,vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None):
+def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin=0,spin2=0,atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',vmax=None,vmin=None,vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None):
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -162,8 +162,10 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   
   #The spin argument should be a number (index of an array), or
   #'st'. In the last case it will be handled separately (later)
-  spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin]
-  spin2 = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin2]
+
+  #Commented out by Uthpala to preserve the spin=1 tagging convention
+  #spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin]
+  #spin2 = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin2]
 
 
   #The second part of this function is parse/select/use the data in

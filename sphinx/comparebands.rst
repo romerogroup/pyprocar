@@ -5,6 +5,6 @@ This module is useful to compare different bands from different materials on the
 
 Usage::
 
-	pyprocar.bandscompare('PROCAR1','PROCAR2',outcar='OUTCAR1',outcar2='OUTCAR2',cmap='jet',mode='parametric',marker='*',marker2='-.',elimit=[-5,5],kpointsfile='KPOINTS',legend='PRO1',legend2='PRO2')
+	pyprocar.bandscompare('PROCAR1','PROCAR2',outcar='OUTCAR1',outcar2='OUTCAR2',cmap='jet',mode='parametric',marker='*',marker2='-.',elimit=[-5,5],kpointsfile='KPOINTS',legend='PRO1',legend2='PRO2',spin=1,spin2=2)
 
 A similar approch could be used for other modes of band plots. 	

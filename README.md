@@ -111,3 +111,5 @@ v3.8.5 Jun 13, 2019 -- Bug fixes in Fermi surface plotting.
 v3.8.6 Jun 26, 2019 -- Bug fixes in band unfolding Fermi shift energy and band structure labels for Fermi shifts.  
 
 v3.8.7 Jul 21, 2019 -- Fixed bug in K-mesh generator. 
+
+v3.8.8 Jul 24, 2019 -- Fixed ambiguity in spin flag. 
