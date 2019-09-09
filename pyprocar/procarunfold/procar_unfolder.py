@@ -70,9 +70,10 @@ class ProcarUnfolder(object):
              color='blue',
              axis=None, 
              savetab=None,
+             ispin=0,
              ):
         xlist = [list(range(self.procar.kpointsCount))]
-        uf = self.unfold()
+        uf = self.unfold(ispin=ispin)
         if savetab is not None:
             nk, nb=uf.shape
             tab=np.zeros((nb, nk*2), dtype=float)
