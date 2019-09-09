@@ -18,7 +18,8 @@ def unfold(
         width=4,
         color='blue',
         savetab='unfold_result.csv',
-        savefig='unfolded_band.png'):
+        savefig='unfolded_band.png'
+        ispin=0):
     """
     Params:
     ==============================================
@@ -36,6 +37,7 @@ def unfold(
     color: color of the unfoled band.
     savetab: the csv file name of which  the table of unfolding result will be written into.
     savefig: the file name of which the figure will be saved.
+    ispin: 0: no spin/spin up; 1: spin down
     """
 
     if efermi is not None:
@@ -64,7 +66,8 @@ def unfold(
         color=color,
         width=width,
         savetab=savetab,
-        show_band=show_band)
+        show_band=show_band
+        ispin=ispin)
     plt.savefig(savefig)
     plt.show()
 
