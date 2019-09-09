@@ -308,7 +308,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     plt.title(title,fontsize=22)
 
   if savefig:
-    plt.savefig(savefig)
+    plt.savefig(savefig,bbox_inches='tight')
   else:
     plt.show()
 

@@ -233,7 +233,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     plt.title(title,fontsize=22)
 
   if savefig:
-    plt.savefig(savefig)
+    plt.savefig(savefig,bbox_inches='tight')
   else:
     plt.show()
 

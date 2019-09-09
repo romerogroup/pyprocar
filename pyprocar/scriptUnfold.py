@@ -65,7 +65,7 @@ def unfold(
         width=width,
         savetab=savetab,
         show_band=show_band)
-    plt.savefig(savefig)
+    plt.savefig(savefig,bbox_inches='tight')
     plt.show()
 
 

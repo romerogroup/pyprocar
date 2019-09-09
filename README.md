@@ -113,3 +113,5 @@ v3.8.6 Jun 26, 2019 -- Bug fixes in band unfolding Fermi shift energy and band s
 v3.8.7 Jul 21, 2019 -- Fixed bug in K-mesh generator. 
 
 v3.8.8 Jul 24, 2019 -- Fixed ambiguity in spin flag. 
+
+v3.8.9 Sep 9th, 2-19 -- Added bbox_inches='tight' for savefig
