@@ -66,7 +66,7 @@ def unfold(
         color=color,
         width=width,
         savetab=savetab,
-        show_band=show_band
+        show_band=show_band,
         ispin=ispin)
     plt.savefig(savefig)
     plt.show()
