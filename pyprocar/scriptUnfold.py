@@ -8,7 +8,7 @@ def unfold(
         poscar='POSCAR',
         outcar='OUTCAR',
         supercell_matrix=np.diag([2, 2, 2]),
-        ispin=0,
+        ispin=None,
         efermi=None,
         shift_efermi=True,
         elimit=(-5, 15),
@@ -27,8 +27,8 @@ def unfold(
     poscar: POSCAR filename
     outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
     supercell_matrix: supercell matrix from primitive cell to supercell
-    ispin: For non-spin polarized system, ispin=0. 
-           For spin polarized system: ispin=0 is spin up, ispin=1 is spin down.
+    ispin: For non-spin polarized system, ispin=None. 
+           For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.
     efermi: Fermi energy
     elimit: range of energy to be plotted.
     kticks: the indices of K points which has labels given in knames.
@@ -58,6 +58,10 @@ def unfold(
     if print_kpts:
         for ik, k in enumerate(uf.procar.kpoints):
             print(ik, k)
+    if ispin is None: # None-polarized
+        ispin=0
+    elif ispin==1 or ispin==2: # polaried
+        ispin -= 1   # 0 based counting in python
     axes = uf.plot(
         efermi=fermi,
         ispin=ispin,
