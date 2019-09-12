@@ -54,14 +54,11 @@ def unfold(
         procar=fname,
         poscar=poscar,
         supercell_matrix=supercell_matrix,
+        ispin=ispin
     )
     if print_kpts:
         for ik, k in enumerate(uf.procar.kpoints):
             print(ik, k)
-    if ispin is None: # None-polarized
-        ispin=0
-    elif ispin==1 or ispin==2: # polaried
-        ispin -= 1   # 0 based counting in python
     axes = uf.plot(
         efermi=fermi,
         ispin=ispin,

@@ -565,7 +565,10 @@ class ProcarParser:
                 permissive=permissive,
                 recLattice=recLattice)
         else:
-            self.ispin=ispin
+            if ispin is None:
+                nspin=1
+            else:
+                nspin=2
             self.projections = None
             ikpt = 0
             iband = 0
@@ -590,7 +593,7 @@ class ProcarParser:
                     w = float(ss[-1])
                     self.kpoints[ikpt, :] = [k0, k1, k2]
                     self.kweights[ikpt] = w
-                    nk_read+=1
+                    nkread+=1
                     if nkread <= self.kpointsCount:
                         iispin = 0
                     else:
@@ -611,7 +614,7 @@ class ProcarParser:
                             self.orbitalCount
                         ])
                         self.carray = np.zeros([
-                            self.kpointsCount, self.bandsCount, self.nspin,
+                            self.kpointsCount, self.bandsCount, nspin,
                             self.ionsCount, self.orbitalCount
                         ],
                                                dtype='complex')
