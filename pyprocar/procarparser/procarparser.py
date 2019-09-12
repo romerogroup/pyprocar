@@ -633,14 +633,12 @@ class ProcarParser:
 
                         #Added by Francisco to parse older version of PROCAR format on Jun 11, 2019
                         elif len(t) == self.orbitalCount * 1 + 1:
-                            if iispin == ispin:
-                                self.carray[ikpt, iband, iispin, i, :] += np.array(
+                            self.carray[ikpt, iband, iispin, i, :] += np.array(
                                     [float(x) for x in t[1:]])
-                                line = next(lines)
-                                t = line.strip().split()
-                                self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
+                            line = next(lines)
+                            t = line.strip().split()
+                            self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
                                     [float(x) for x in t[1:]])						
-
                         else:
                             raise Exception(
                                 "Cannot parse line to projection: %s" % line)
