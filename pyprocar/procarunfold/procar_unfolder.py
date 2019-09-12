@@ -8,24 +8,28 @@ from ..procarparser import ProcarParser
 
 
 class ProcarUnfolder(object):
-    def __init__(self, procar, poscar, supercell_matrix):
+    def __init__(self, procar, poscar, supercell_matrix, ispin=None):
         self.fname = procar
         self.supercell_matrix = supercell_matrix
-        self._parse_procar()
+        self._parse_procar(ispin=ispin)
         self.atoms = read(poscar)
         self.basis = []
         self.positions = []
 
-    def _parse_procar(self):
+    def _parse_procar(self, ispin=None):
         self.procar = ProcarParser()
-        self.procar.readFile2(self.fname, phase=True)
+        self.procar.readFile2(self.fname, phase=True, ispin=ispin)
 
-    def _prepare_unfold_basis(self, ispin):
+    def _prepare_unfold_basis(self, ispin=None):
         # basis, which are the name of the bands e.g. 'Ti|dxy|0'
         # self.eigenvectors = np.zeros(
         #    (self.procar.kpointsCount, self.procar.bandsCount,
         #     (self.procar.orbitalCount - 1) * (self.procar.ionsCount - 1) *
         #     self.procar.ispin), dtype='complex')
+        if ispin is None:
+            iispin=0
+        else:
+            ispin -=1
         self.eigenvectors = np.reshape(
             self.procar.carray[:, :, ispin, :, :],
             (self.procar.kpointsCount, self.procar.bandsCount,
@@ -41,7 +45,7 @@ class ProcarUnfolder(object):
                     self.positions.append(
                         self.atoms.get_scaled_positions()[iatom])
 
-    def unfold(self, ispin=0):
+    def unfold(self, ispin=None):
         # spd: spd[kpoint][band][ispin][atom][orbital]
         # bands[kpt][iband]
         # to unfold,
@@ -61,6 +65,7 @@ class ProcarUnfolder(object):
 
     def plot(self,
              efermi=5.46,
+             ispin=None,
              ylim=(-5, 10),
              ktick=[0, 41, 83, 125, 200],
              kname=['$\Gamma$', 'X', 'M', 'R', '$\Gamma$'],
@@ -72,7 +77,7 @@ class ProcarUnfolder(object):
              savetab=None,
              ):
         xlist = [list(range(self.procar.kpointsCount))]
-        uf = self.unfold()
+        uf = self.unfold(ispin=ispin)
         if savetab is not None:
             nk, nb=uf.shape
             tab=np.zeros((nb, nk*2), dtype=float)
