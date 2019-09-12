@@ -61,6 +61,7 @@ class ProcarUnfolder(object):
 
     def plot(self,
              efermi=5.46,
+             ispin=0,
              ylim=(-5, 10),
              ktick=[0, 41, 83, 125, 200],
              kname=['$\Gamma$', 'X', 'M', 'R', '$\Gamma$'],
@@ -72,7 +73,7 @@ class ProcarUnfolder(object):
              savetab=None,
              ):
         xlist = [list(range(self.procar.kpointsCount))]
-        uf = self.unfold()
+        uf = self.unfold(ispin=ispin)
         if savetab is not None:
             nk, nb=uf.shape
             tab=np.zeros((nb, nk*2), dtype=float)

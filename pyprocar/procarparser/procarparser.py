@@ -551,6 +551,11 @@ class ProcarParser:
                   phase=False,
                   permissive=False,
                   recLattice=None):
+        """
+        Read file in a line by line manner.
+        Only used when the phase factor is in procar. (for vasp, lorbit=12)
+        """
+        # Fall back to readFile function if no phase
         if not phase:
             self.readFile(
                 procar=procar,
@@ -561,6 +566,7 @@ class ProcarParser:
             self.projections = None
             ikpt = 0
             iband = 0
+            nkread = 0
             #with open(self.fname) as myfile:
             f = self.utils.OpenFile(procar)
             lines = iter(f.readlines())
@@ -581,6 +587,11 @@ class ProcarParser:
                     w = float(ss[-1])
                     self.kpoints[ikpt, :] = [k0, k1, k2]
                     self.kweights[ikpt] = w
+                    nk_read+=1
+                    if nkread <= self.kpointsCount:
+                        ispin = 0
+                    else:
+                        ispin = 1
                 if line.strip().startswith('band'):
                     ss = line.strip().split()
                     iband = int(ss[1]) - 1
@@ -597,7 +608,7 @@ class ProcarParser:
                             self.orbitalCount
                         ])
                         self.carray = np.zeros([
-                            self.kpointsCount, self.bandsCount, 1,
+                            self.kpointsCount, self.bandsCount, ispin,
                             self.ionsCount, self.orbitalCount
                         ],
                                                dtype='complex')
@@ -609,18 +620,18 @@ class ProcarParser:
                                 float(x) for x in t[1:-1]
                             ]
                         elif len(t) == self.orbitalCount * 2 + 2:
-                            self.carray[ikpt, iband, 0, i, :] += np.array(
+                            self.carray[ikpt, iband, ispin, i, :] += np.array(
                                 [float(x) for x in t[1:-1:2]])
-                            self.carray[ikpt, iband, 0, i, :] += 1j * np.array(
+                            self.carray[ikpt, iband, ispin, i, :] += 1j * np.array(
                                 [float(x) for x in t[2::2]])
 
                         #Added by Francisco to parse older version of PROCAR format on Jun 11, 2019
                         elif len(t) == self.orbitalCount * 1 + 1:
-                            self.carray[ikpt, iband, 0, i, :] += np.array(
+                            self.carray[ikpt, iband, ispin, i, :] += np.array(
                                 [float(x) for x in t[1:]])
                             line = next(lines)
                             t = line.strip().split()
-                            self.carray[ikpt, iband, 0, i, :] += 1j * np.array(
+                            self.carray[ikpt, iband, ispin, i, :] += 1j * np.array(
                                 [float(x) for x in t[1:]])						
 
                         else:
