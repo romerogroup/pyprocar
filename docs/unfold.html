@@ -176,6 +176,7 @@ First, calculate the band structure in the primitive cell BZ. The PROCAR should 
         <span class="n">poscar</span><span class="o">=</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">,</span>
         <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span>
         <span class="n">supercell_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+  <span class="n">ispin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down</span>
         <span class="n">efermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">shift_efermi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">elimit</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>

@@ -18,6 +18,7 @@ Then the unfold module can be used to plot the unfolded band as follows::
 	        poscar='POSCAR',
 	        outcar='OUTCAR',
 	        supercell_matrix=np.diag([2, 2, 2]),
+          ispin=None, # None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down
 	        efermi=None,
 	        shift_efermi=True,
 	        elimit=(-5, 15),
