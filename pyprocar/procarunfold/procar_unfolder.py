@@ -76,17 +76,20 @@ class ProcarUnfolder(object):
              axis=None, 
              savetab=None,
              ):
+        iispin=0
+        if ispin is not None:
+            iispin=ispin-1
         xlist = [list(range(self.procar.kpointsCount))]
         uf = self.unfold(ispin=ispin)
         if savetab is not None:
             nk, nb=uf.shape
             tab=np.zeros((nb, nk*2), dtype=float)
-            tab[:, ::2]=self.procar.bands.T
+            tab[:, ::2]=self.procar.bands[iispin].T
             tab[:, 1::2]=uf.T
             np.savetxt(savetab, tab, delimiter=',', fmt="%10.4f", header='# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)...'%(nk, nb))
         axes = plot_band_weight(
             xlist * self.procar.bandsCount,
-            self.procar.bands.T,
+            self.procar.bands[iispin].T,
             np.abs(uf.T),
             xticks=[kname, ktick],
             efermi=efermi,
@@ -102,6 +105,6 @@ class ProcarUnfolder(object):
             shift=0.0
         if show_band:
             for i in range(self.procar.bandsCount):
-                axes.plot(self.procar.bands[:,i]+shift, color='gray', linewidth=1, alpha=0.3)
+                axes.plot(self.procar.bands[iispin, :,i]+shift, color='gray', linewidth=1, alpha=0.3)
         return axes
 

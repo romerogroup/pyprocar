@@ -348,7 +348,6 @@ class ProcarParser:
                     str(self.orbitalCount + 1) + " = " +
                     str((self.ionsCount) * (self.orbitalCount + 1)) +
                     " Fields. Present block: " + str(len(line.split())))
-                print(line)
                 raise RuntimeError("Flats happens")
 
         # replacing the "tot" string by a number, to allows a conversion
@@ -558,6 +557,7 @@ class ProcarParser:
         Only used when the phase factor is in procar. (for vasp, lorbit=12)
         """
         # Fall back to readFile function if no phase
+        self.bands = None
         if not phase:
             self.readFile(
                 procar=procar,
@@ -569,6 +569,7 @@ class ProcarParser:
                 nspin=1
             else:
                 nspin=2
+            iispin=0
             self.projections = None
             ikpt = 0
             iband = 0
@@ -583,7 +584,8 @@ class ProcarParser:
                         int, a)
                     self.kpoints = np.zeros([self.kpointsCount, 3])
                     self.kweights = np.zeros(self.kpointsCount)
-                    self.bands = np.zeros([self.kpointsCount, self.bandsCount])
+                    if self.bands is None:
+                        self.bands = np.zeros([nspin, self.kpointsCount, self.bandsCount])
                 if line.strip().startswith('k-point'):
                     ss = line.strip().split()
                     ikpt = int(ss[1]) - 1
@@ -603,7 +605,7 @@ class ProcarParser:
                     iband = int(ss[1]) - 1
                     e = float(ss[4])
                     occ = float(ss[-1])
-                    self.bands[ikpt, iband] = e
+                    self.bands[iispin, ikpt, iband] = e
                 if line.strip().startswith('ion'):
                     if line.strip().endswith('tot'):
                         self.orbitalName = line.strip().split()[1:-1]
@@ -622,7 +624,7 @@ class ProcarParser:
                         line = next(lines)
                         t = line.strip().split()
                         if len(t) == self.orbitalCount + 2:
-                            self.projections[ikpt, iband, i, :] = [
+                            self.projections[ikpt, iband, iispin, :] = [
                                 float(x) for x in t[1:-1]
                             ]
                         elif len(t) == self.orbitalCount * 2 + 2:
