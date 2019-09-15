@@ -114,6 +114,8 @@ v3.8.7 Jul 21, 2019 -- Fixed bug in K-mesh generator.
 
 v3.8.8 Jul 24, 2019 -- Fixed ambiguity in spin flag. 
 
-v3.8.9 Sep 9th, 2019 -- Added bbox_inches='tight' for savefig.
+v3.8.9 Sep 9, 2019 -- Added bbox_inches='tight' for savefig.
 
-v3.9.0 Sep 12th, 2019 -- Fixed spin polarized band unfolding.  
+v3.9.0 Sep 12, 2019 -- Fixed spin polarized band unfolding.  
+
+v3.9.0 Sep 15, 2019 -- Fixed unfold spin polarized eigenvalue bug and spin up/down band energy error in unfolding. 
