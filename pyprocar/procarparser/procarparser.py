@@ -583,7 +583,7 @@ class ProcarParser:
                         int, a)
                     self.kpoints = np.zeros([self.kpointsCount, 3])
                     self.kweights = np.zeros(self.kpointsCount)
-                    self.bands = np.zeros([self.kpointsCount, self.bandsCount])
+                    self.bands = np.zeros([nspin, self.kpointsCount, self.bandsCount])
                 if line.strip().startswith('k-point'):
                     ss = line.strip().split()
                     ikpt = int(ss[1]) - 1
@@ -603,7 +603,7 @@ class ProcarParser:
                     iband = int(ss[1]) - 1
                     e = float(ss[4])
                     occ = float(ss[-1])
-                    self.bands[ikpt, iband] = e
+                    self.bands[iispin, ikpt, iband] = e
                 if line.strip().startswith('ion'):
                     if line.strip().endswith('tot'):
                         self.orbitalName = line.strip().split()[1:-1]
