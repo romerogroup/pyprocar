@@ -118,4 +118,4 @@ v3.8.9 Sep 9, 2019 -- Added bbox_inches='tight' for savefig.
 
 v3.9.0 Sep 12, 2019 -- Fixed spin polarized band unfolding.  
 
-v3.9.0 Sep 15, 2019 -- Fixed unfold spin polarized eigenvalue bug and spin up/down band energy error in unfolding. 
+v3.9.1 Sep 15, 2019 -- Fixed unfold spin polarized eigenvalue bug and spin up/down band energy error in unfolding. 
