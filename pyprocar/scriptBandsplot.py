@@ -244,5 +244,10 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     plt.savefig(savefig,bbox_inches='tight')
   else:
     plt.show()
+    
+  # Added by Nicholas Pike to close memory issue of looping and creating
+  # many figures
+  plt.close()
+
 
   return
