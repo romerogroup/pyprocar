@@ -36,3 +36,5 @@ Similar to the previous section, this function is able to read an external file,
     
 The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on. 
 
+.. automodule:: pyprocar.scriptFermi3D
+	:members:

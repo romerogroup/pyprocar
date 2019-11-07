@@ -3,7 +3,10 @@ import os
 import seekpath
 import numpy as np
 
-def kpath(infile,grid_size,with_time_reversal,recipe,threshhold,symprec,angle_tolerence, supercell_matrix=np.eye(3)):
+def kpath(infile,grid_size,with_time_reversal,recipe,threshold,symprec,angle_tolerence, supercell_matrix=np.eye(3)):
+	"""
+	This module creates a KPOINTS file for band structure plotting.
+	"""
 	file = open(infile,'r')
 	POSCAR = file.readlines()
 
@@ -43,7 +46,7 @@ def kpath(infile,grid_size,with_time_reversal,recipe,threshhold,symprec,angle_to
 
 	#seekpath
 	structure = (cell,positions,numbers)	
-	kpath_dictionary = seekpath.get_path(structure,with_time_reversal,recipe,threshhold,symprec,angle_tolerence)
+	kpath_dictionary = seekpath.get_path(structure,with_time_reversal,recipe,threshold,symprec,angle_tolerence)
 	
 	path_array = ['']*2*len(kpath_dictionary['path'])
 	count=0

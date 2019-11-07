@@ -24,7 +24,8 @@
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -196,6 +197,25 @@
 </pre></div>
 </div>
 <p>The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on.</p>
+<span class="target" id="module-pyprocar.scriptFermi3D"></span><p>Created on Fri May 10 16:23:30 2019</p>
+<p>&#64;author: Pedram Tavadze</p>
+<dl class="function">
+<dt id="pyprocar.scriptFermi3D.fermi3D">
+<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param">procar</em>, <em class="sig-param">outcar</em>, <em class="sig-param">bands=-1</em>, <em class="sig-param">scale=1</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">st=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots 3d fermi surface
+list of acceptable kwargs :</p>
+<blockquote>
+<div><p>plotting_package
+nprocess
+face_colors
+arrow_colors
+arrow_spin
+atom
+orbital
+spin</p>
+</div></blockquote>
+</dd></dl>
+
 </div>
 </div>
 

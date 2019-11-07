@@ -3,6 +3,9 @@ from .utilsprocar import UtilsProcar
 
 
 def cat(inFiles,outFile,gz=False):
+    """
+    This module concatenates multiple PROCARs.
+    """
     print("Concatenating:")
     print("Input         : ", inFiles)    # ', '.join(inFiles)
     print("Output        : ", outFile)

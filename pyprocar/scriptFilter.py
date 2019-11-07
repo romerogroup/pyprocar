@@ -3,6 +3,9 @@ from .procarfilefilter import ProcarFileFilter
 
   
 def filter(inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None,spin=None,human_atoms=False):
+    """
+    This module filters the PROCAR file and re-write a new one.
+    """
     print("Input file  :", inFile)
     print("Output file :", outFile)
 

@@ -5,7 +5,9 @@ import glob
 
 
 def mergeabinit(outfile):
-	#merge PROCAR files
+	""" This module merges PROCAR files generated from multiple 
+	Abinit calculations.
+	"""
 	filenames = sorted(glob.glob("PROCAR_*"))
 
 	with open(outfile, 'w') as outfile:

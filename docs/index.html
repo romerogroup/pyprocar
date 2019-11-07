@@ -24,7 +24,8 @@
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -150,7 +151,7 @@
             
   <div class="section" id="pyprocar-documentation">
 <h1>PyProcar documentation<a class="headerlink" href="#pyprocar-documentation" title="Permalink to this headline">¶</a></h1>
-<p>PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every <span class="math notranslate nohighlight">\(k\)</span>-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a <span class="math notranslate nohighlight">\(k\)</span>-path for a given crystal structure.</p>
+<p>PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every <span class="math notranslate nohighlight">\(k\)</span>-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a <span class="math notranslate nohighlight">\(k\)</span>-path for a given crystal structure. In the VASP code, this information is written into the PROCAR file when <code class="docutils literal notranslate"><span class="pre">LORBIT=11</span></code> or <code class="docutils literal notranslate"><span class="pre">LORBIT=12</span></code> (to include phase projections of the wave functions) in the INCAR file.</p>
 <p>The format of the PROCAR is as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span>   <span class="n">PROCAR</span> <span class="n">lm</span> <span class="n">decomposed</span>
 <span class="mf">2.</span>    <span class="n">of</span> <span class="n">k</span><span class="o">-</span><span class="n">points</span><span class="p">:</span>    <span class="mi">4</span>         <span class="c1"># of bands: 224         # of ions:  4</span>
@@ -169,14 +170,14 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li>Line 1 is a comment</li>
-<li>Line 2 gives the number of K points calculated (kpoint), number of bands (nband) and number of ions (nion)</li>
-<li>Line 4 gives the k-point and the weight</li>
-<li>Line 6 gives the energy for kpoints</li>
-<li>Line 8 Labels of calculated projections, column 11 is the total projection</li>
-<li>Line 9 Calculated projections for atom 1</li>
-<li>Line 10 Calculated projections for atom 2 and so on</li>
-<li>Line 14 after projections over all atoms, the total over every atomic projection is reported</li>
+<li><p>Line 1 is a comment</p></li>
+<li><p>Line 2 gives the number of K points calculated (kpoint), number of bands (nband) and number of ions (nion)</p></li>
+<li><p>Line 4 gives the k-point and the weight</p></li>
+<li><p>Line 6 gives the energy for kpoints</p></li>
+<li><p>Line 8 Labels of calculated projections, column 11 is the total projection</p></li>
+<li><p>Line 9 Calculated projections for atom 1</p></li>
+<li><p>Line 10 Calculated projections for atom 2 and so on</p></li>
+<li><p>Line 14 after projections over all atoms, the total over every atomic projection is reported</p></li>
 </ul>
 <p>This block is repeated for the other spin channel if the calculation was polarized.
 For spin polarized or non-collinear spin calculations there are additional blocks for each spin component.</p>
@@ -220,9 +221,9 @@ For spin polarized or non-collinear spin calculations there are additional block
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 

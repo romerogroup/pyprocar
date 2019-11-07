@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 
 
 def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,rec_basis=None,rot_symm=1,translate=[0,0,0],rotation=[0,0,0,1],human=False,mask=None,savefig=None,st=False,noarrow=False):
+  """
+  This module plots 2D Fermi surface.
+  """
   if atoms is None:
     atoms = [-1]
     if human is True:

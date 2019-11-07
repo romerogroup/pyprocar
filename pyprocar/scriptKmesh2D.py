@@ -1,6 +1,9 @@
 import numpy as np 
 	
 def generate2dkmesh(x1,y1,x2,y2,z,nkx,nky):	  
+	"""
+	This module generates a KPOINTS mesh file for 2D plotting.
+	"""
 	kx = np.linspace(x1,x2,nkx)
 	ky = np.linspace(y1,y2,nky)
 	wf = open('Kgrid.dat',"w")

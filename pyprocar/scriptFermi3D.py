@@ -175,7 +175,7 @@ def to_remove(args):
     return np.any(faces == vert,axis=1)
 
 
-def fermi3D(procar,outcar,bands,scale=1,mode='plain',st=False,**kwargs):
+def fermi3D(procar,outcar,bands=-1,scale=1,mode='plain',st=False,**kwargs):
     """
     This function plots 3d fermi surface
     list of acceptable kwargs :

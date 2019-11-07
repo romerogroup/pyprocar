@@ -11,6 +11,8 @@ import re
 
   
 def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,kpointsfile=None):
+  """This function plots band structures
+  """
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -130,7 +132,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   #The spin argument should be a number (index of an array), or
   #'st'. In the last case it will be handled separately (later)
 
-  #spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[spin]   #commented out by Uthpala to keep spin = 1 instead of spin = '1'
+  spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[str(spin)]  
 
 
   #The second part of this function is parse/select/use the data in

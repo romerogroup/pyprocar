@@ -24,7 +24,8 @@
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -182,18 +183,25 @@
 </pre></div>
 </div>
 <p>General format:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">kpath</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">grid</span><span class="o">-</span><span class="n">size</span><span class="p">,</span> <span class="k">with</span><span class="o">-</span><span class="n">time</span><span class="o">-</span><span class="n">reversal</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">symprec</span><span class="p">,</span> <span class="n">angle</span><span class="o">-</span><span class="n">tolerance</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">kpath</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">grid</span><span class="o">-</span><span class="n">size</span><span class="p">,</span> <span class="k">with</span><span class="o">-</span><span class="n">time</span><span class="o">-</span><span class="n">reversal</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">symprec</span><span class="p">,</span> <span class="n">angle</span><span class="o">-</span><span class="n">tolerance</span><span class="p">,</span><span class="n">supercell_matrix</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.kpath(`POSCAR&#39;,40,True,`hpkot&#39;,1e-07,1e-05,-1.0)
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.kpath(`POSCAR&#39;,40,True,`hpkot&#39;,1e-07,1e-05,-1.0,np.eye(3))
 </pre></div>
 </div>
+<p>This information is automatically written to a KPOINTS file.</p>
 <p>More details regarding these parameters can be found in the <a class="reference external" href="https://seekpath.readthedocs.io/en/latest/module_guide/index.html">SeeK-path manual</a>.
 The <span class="math notranslate nohighlight">\(k\)</span>-path generation utility within PyProcar is based on the Python library <strong>seekpath</strong> developed by Hinuma et al:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Y. Hinuma, G. Pizzi, Y. Kumagai, F. Oba, I. Tanaka, Band structure diagram paths based on crystallography, Computational Materials Science 128 (2017) 140–184.doi:10.1016/j.commatsci.2016.10.015.
 </pre></div>
 </div>
+<span class="target" id="module-pyprocar.scriptKpath"></span><dl class="function">
+<dt id="pyprocar.scriptKpath.kpath">
+<code class="sig-prename descclassname">pyprocar.scriptKpath.</code><code class="sig-name descname">kpath</code><span class="sig-paren">(</span><em class="sig-param">infile, grid_size, with_time_reversal, recipe, threshold, symprec, angle_tolerence, supercell_matrix=array([[1., 0., 0.],        [0., 1., 0.],        [0., 0., 1.]])</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptKpath.kpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module creates a KPOINTS file for band structure plotting.</p>
+</dd></dl>
+
 </div>
 
 

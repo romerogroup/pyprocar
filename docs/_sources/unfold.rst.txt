@@ -30,3 +30,9 @@ Then the unfold module can be used to plot the unfolded band as follows::
                 color='blue',
                 savetab='unfolding.csv',
 	        savefig='unfolded_band.png')
+
+.. automodule:: pyprocar.scriptUnfold
+	:members:
+	:undoc-members:
+	:inherited-members:
+	:show-inheritance:

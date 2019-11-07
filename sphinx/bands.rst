@@ -29,13 +29,21 @@ This is valid for the rest of the band plotting projections and also for the ``b
 2. Spin projection
 ==================
 
-For collinear spin polarized and non-collinear spin calculations of DFT codes, PyProcar is able to plot the bands of each spin channel or direction separately. For the former case setting ``spin=0`` plots the total density from both spin channels and ``spin=1`` plots the spin channels separately. 
+For collinear spin polarized and non-collinear spin calculations of DFT codes, PyProcar is able to plot the bands of each spin channel or direction separately. For the former case setting ``spin=0`` plots the unpolarized bands  and ``spin=1`` plots the spin channels separately. 
 
-For non-collinear spin calculations, spin=1,2,3 corresponds to spins oriented in :math:`S_x`, :math:`S_y` and :math:`S_z` directions respectively. For parametric plots such as spin, atom and orbitals, the user should set ``mode=`parametric'``. ``cmap`` refers to the matplotlib color map used for the parametric plotting and can be modified by using the same color maps used in matplotlib.
+For non-collinear spin calculations, spin=1,2,3 corresponds to spins oriented in :math:`S_x`, :math:`S_y` and :math:`S_z` directions respectively. Setting ``spin='st'`` plots the spin texture perpendicular in the plane (:math:`k_x`,:math:`k_y`) to each (:math:`k_x`,:math:`k_y`) vector. This is useful for Rashba-like states in surfaces. For parametric plots such as spin, atom and orbitals, the user should set ``mode=`parametric'``. ``cmap`` refers to the matplotlib color map used for the parametric plotting and can be modified by using the same color maps used in matplotlib.
 
 Usage::
 
 	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet',mode='parametric',spin=1)
+
+If spin-up and spin-down bands are to be plot separately, one may use the ``filter()`` function to create two PROCARs for each case and plot them individually. An example is given below::
+
+	pyprocar.filter('PROCAR','PROCAR-up',spin=0)
+	pyprocar.filter('PROCAR','PROCAR-down',spin=1)
+	pyprocar.bandsplot('PROCAR-up',...)
+	pyprocar.bandsplot('PROCAR-down',...)
+
 
 ==================
 3. Atom projection
@@ -64,4 +72,6 @@ One or many of the above can be combined together to allow the user to probe int
 Different modes of band structures are useful for obtaining information for different cases. The four modes available within PyProcar are ``plain, scatter, parametric`` and ``atomic``. The ``plain`` bands contain no projection information. The ``scatter`` mode creates a scatter plot of points. The ``parametric`` mode interpolates between points to create bands which are also projectable. Finally, the ``atomic`` mode is useful to plot energy levels for atoms. To  set  maximum  and  minimum  projections  for  color  map,  one  could  use ``vmin`` and ``vmax`` tags.
 
 
+.. automodule:: pyprocar.scriptBandsplot
+	:members:
 

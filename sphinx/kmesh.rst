@@ -12,3 +12,8 @@ General format::
 Usage::
 
 	pyprocar.generate2dkmesh(-0.5,-0.5,0.5,0.5,0,5,7)
+
+This information is automatically written to a KPOINTS file.
+
+.. automodule:: pyprocar.scriptKmesh2D
+	:members:

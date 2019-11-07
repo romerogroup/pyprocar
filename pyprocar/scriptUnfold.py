@@ -20,9 +20,11 @@ def unfold(
         color='blue',
         savetab='unfold_result.csv',
         savefig='unfolded_band.png'):
+
     """
-    Params:
-    ==============================================
+
+    Parameters
+    ---------- 
     fname: PROCAR filename.
     poscar: POSCAR filename
     outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
@@ -39,6 +41,7 @@ def unfold(
     color: color of the unfoled band.
     savetab: the csv file name of which  the table of unfolding result will be written into.
     savefig: the file name of which the figure will be saved.
+
     """
 
     if efermi is not None:

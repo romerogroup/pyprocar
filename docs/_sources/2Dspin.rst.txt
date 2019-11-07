@@ -31,3 +31,6 @@ To define the rotation angle and rotation axis::
 This defines the rotation angle = 90, and Y-axis as the rotation axis. PyProcar always performs the translation operation first and then does the rotation.
 
 **Be careful**: Now :math:`S_x`, :math:`S_y` and :math:`S_z` all will be rotated according to the user’s choice. :math:`S_y` will be same as before but :math:`S_x` would now be :math:`S_z` and :math:`S_z` would be :math:`-S_x`.
+
+.. automodule:: pyprocar.scriptFermi2D
+	:members:

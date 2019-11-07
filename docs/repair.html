@@ -24,7 +24,8 @@
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -165,11 +166,17 @@
             
   <div class="section" id="repair">
 <h1>Repair<a class="headerlink" href="#repair" title="Permalink to this headline">¶</a></h1>
-<p>This utility is used to repair the ill-formatting of the PROCAR file due to the erroneous file handling in Fortran, particularly in a VASP calculation. This prevents issues arising from the lack of white space between a number and a negative sign, for instance <code class="docutils literal notranslate"><span class="pre">0.000000-0.5000000</span></code>. Typically, <code class="docutils literal notranslate"><span class="pre">pyprocar.repair()</span></code> is recommended to be applied before using any other utility.</p>
+<p>This utility is used to repair the ill-formatting of the PROCAR file due to the erroneous file handling in Fortran, particularly in a VASP calculation. This prevents issues arising from the lack of white space between a number and a negative sign, for instance <code class="docutils literal notranslate"><span class="pre">0.000000-0.5000000</span></code>. Typically, <code class="docutils literal notranslate"><span class="pre">pyprocar.repair()</span></code> is recommended to be applied before using any other utility. Setting <code class="docutils literal notranslate"><span class="pre">permissive=True</span></code> during plotting will achieve this too.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.repair(`PROCAR&#39;,`PROCAR-repaired&#39;)
 </pre></div>
 </div>
+<span class="target" id="module-pyprocar.scriptRepair"></span><dl class="function">
+<dt id="pyprocar.scriptRepair.repair">
+<code class="sig-prename descclassname">pyprocar.scriptRepair.</code><code class="sig-name descname">repair</code><span class="sig-paren">(</span><em class="sig-param">infile</em>, <em class="sig-param">outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptRepair.repair" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module calls ProcarRepair to repair the PROCAR file.</p>
+</dd></dl>
+
 </div>
 
 

@@ -1,11 +1,6 @@
-.. PyProcar documentation master file, created by
-   sphinx-quickstart on Sat Jun  1 22:03:37 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 PyProcar documentation
 ======================
-PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every :math:`k`-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a :math:`k`-path for a given crystal structure.
+PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every :math:`k`-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a :math:`k`-path for a given crystal structure. In the VASP code, this information is written into the PROCAR file when ``LORBIT=11`` or ``LORBIT=12`` (to include phase projections of the wave functions) in the INCAR file.
 
 The format of the PROCAR is as follows::
 
@@ -63,12 +58,6 @@ where :math:`\sigma^i` are the Pauli matrices with :math:`i = x, y , z` and the 
 	\end{bmatrix}
 
 An OUTCAR file or an equivalent Abinit output file is required to extract the Fermi-energy and reciprocal lattice vectors. 
-
-
-
-
-
-
 
 
 .. toctree::

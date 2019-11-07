@@ -121,3 +121,5 @@ v3.9.0 Sep 12, 2019 -- Fixed spin polarized band unfolding.
 v3.9.1 Sep 15, 2019 -- Fixed unfold spin polarized eigenvalue bug and spin up/down band energy error in unfolding. 
 
 v3.9.2 Oct 4, 2019 -- Fixed bug in 2D Kmesh generator. 
+
+v4.0.0 Nov 6th, 2019 -- Various bug fixes. Release of standalone version. Updated documentation. 
