@@ -2,7 +2,7 @@ from .procarfilefilter import ProcarFileFilter
 
 
   
-def filter(inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None,spin=None,human_atoms=False):
+def filter(inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None,spin=None,kpoints=None,human_atoms=False):
     """
     This module filters the PROCAR file and re-write a new one.
     """
@@ -17,6 +17,7 @@ def filter(inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None
         print("orb. names  :", orbital_names)
     print("bands       :", bands)
     print("spins       :", spin)
+    print("k-points    :", kpoints)
 
     #Access init class of ProcarFileFilter and pass two arguments
     FileFilter = ProcarFileFilter(inFile,outFile)
@@ -56,6 +57,19 @@ def filter(inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None
         print("New bands limits: ", bmin, " to ", bmax)
 
       FileFilter.FilterBands(bmin,bmax)
+
+    #for k-points
+    elif kpoints:
+      print("Manipulating the k-points")
+
+      kmin = kpoints[0]
+      kmax = kpoints[1]
+      if kmax < kmin:
+        kmax, kmin = kmin, kmax
+        print("New k-points limits: ", kmin, " to ", kmax)
+
+      FileFilter.FilterKpoints(kmin,kmax)
+
       
     #for spin
     elif spin:

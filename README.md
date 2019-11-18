@@ -122,4 +122,6 @@ v3.9.1 Sep 15, 2019 -- Fixed unfold spin polarized eigenvalue bug and spin up/do
 
 v3.9.2 Oct 4, 2019 -- Fixed bug in 2D Kmesh generator. 
 
-v4.0.0 Nov 6th, 2019 -- Various bug fixes. Release of standalone version. Updated documentation. 
+v4.0.0 Nov 6th, 2019 -- Various bug fixes. Release of standalone version. Updated documentation.
+
+v4.0.1 Nov 17th, 2019 -- Added feature to filter k-points.  

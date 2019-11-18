@@ -19,6 +19,18 @@ If you want to select only :math:`p_x` orbitals, just use ``orbitals=[[3]]``.
 
 In the same way to plot the projection of total :math:`p`-orbitals use ``orbitals=[[1,2,3]]``  (i.e. :math:`px+py+pz`). Same goes for other orbitals. 
 
+===================================
+To filter selected :math:`k`-points
+===================================
+
+This is helpful especially for hybrid calculations where the weighted :math:`k`-points should be filtered to perform band structure plotting.
+To filter :math:`k`-points within a minimum and maximum range::
+
+	pyprocar.filter('PROCAR’,'PROCAR-filtered_kpoints’, kpoints=[10,13])
+
+This created a new PROCAR file containing only the selected :math:`k`-points.
+
+
 ========================
 To filter selected atoms 
 ========================

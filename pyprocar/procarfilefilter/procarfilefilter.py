@@ -373,3 +373,50 @@ class ProcarFileFilter:
         else:
           fout.write(line)
     return
+
+  def FilterKpoints(self, Min, Max):
+    """
+    Reads the file already set by SetInFile() and writes a new
+    file already set by SetOutFile(). The new file the
+    selected bands.
+
+    Args: 
+
+    -Min, Max:
+      the minimum/maximum band  kpoint to be considered, the indexes 
+      are the same used by vasp (i.e. written in the file). Not starting from zero
+    """
+    # setting iostuff, this method -and class- should not made any
+    # checking about IO, that is the job of the caller
+    self.log.info("In File: " + self.infile)
+    self.log.info("Out File: " + self.outfile)
+    # open the files
+    fout = open(self.outfile, 'w')
+    fopener = UtilsProcar()
+    fin = fopener.OpenFile(self.infile)
+
+    # I need to change the numbers of kpoints, it will needs the second
+    # line. The first one is not needed
+    fout.write(fin.readline())
+    line = fin.readline()
+    # the third value needs to be changed, however better print it
+    self.log.debug("The line contaning kpoints number is " + line)
+    line = line.split()
+    self.log.debug("The number of kpoints is: " + line[3])
+    line[3] = str(Max-Min+1)
+    line = ' '.join(line)
+    fout.write(line + '\n')
+    
+    # now parsing the rest of the file
+    write = True
+    for line in fin:
+      if re.match(r"\s*k-point\s*", line):
+        self.log.debug("bands line found: " + line)
+        kpoint = int(re.match(r"\s*k-point\s*(\d+)", line).group(1)) 
+        if kpoint < Min or kpoint > Max:
+          write = False
+        else:
+          write = True
+      if write:
+        fout.write(line)
+    return

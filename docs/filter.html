@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Filtering data</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-orbitals">To filter selected orbitals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-k-points">To filter selected <span class="math notranslate nohighlight">\(k\)</span>-points</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-atoms">To filter selected atoms</a></li>
 </ul>
 </li>
@@ -184,6 +185,15 @@
 <p>If you want to select only <span class="math notranslate nohighlight">\(p_x\)</span> orbitals, just use <code class="docutils literal notranslate"><span class="pre">orbitals=[[3]]</span></code>.</p>
 <p>In the same way to plot the projection of total <span class="math notranslate nohighlight">\(p\)</span>-orbitals use <code class="docutils literal notranslate"><span class="pre">orbitals=[[1,2,3]]</span></code>  (i.e. <span class="math notranslate nohighlight">\(px+py+pz\)</span>). Same goes for other orbitals.</p>
 </div>
+<div class="section" id="to-filter-selected-k-points">
+<h2>To filter selected <span class="math notranslate nohighlight">\(k\)</span>-points<a class="headerlink" href="#to-filter-selected-k-points" title="Permalink to this headline">¶</a></h2>
+<p>This is helpful especially for hybrid calculations where the weighted <span class="math notranslate nohighlight">\(k\)</span>-points should be filtered to perform band structure plotting.
+To filter <span class="math notranslate nohighlight">\(k\)</span>-points within a minimum and maximum range:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.filter(&#39;PROCAR’,&#39;PROCAR-filtered_kpoints’, kpoints=[10,13])
+</pre></div>
+</div>
+<p>This created a new PROCAR file containing only the selected <span class="math notranslate nohighlight">\(k\)</span>-points.</p>
+</div>
 <div class="section" id="to-filter-selected-atoms">
 <h2>To filter selected atoms<a class="headerlink" href="#to-filter-selected-atoms" title="Permalink to this headline">¶</a></h2>
 <p>Usage:</p>
@@ -193,7 +203,7 @@
 <p>PyProcar counts each row of ions in PROCAR file starting from 0. Keep in mind: <code class="docutils literal notranslate"><span class="pre">atoms=0</span></code> does not define the atom_type, rather it defines only the first ion in the POSCAR. So if you have more than one ion of the same element, use <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[[0,1,2,3,...]]</span></code>.</p>
 <span class="target" id="module-pyprocar.scriptFilter"></span><dl class="function">
 <dt id="pyprocar.scriptFilter.filter">
-<code class="sig-prename descclassname">pyprocar.scriptFilter.</code><code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param">inFile</em>, <em class="sig-param">outFile</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbital_names=None</em>, <em class="sig-param">bands=None</em>, <em class="sig-param">spin=None</em>, <em class="sig-param">human_atoms=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFilter.filter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptFilter.</code><code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param">inFile</em>, <em class="sig-param">outFile</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbital_names=None</em>, <em class="sig-param">bands=None</em>, <em class="sig-param">spin=None</em>, <em class="sig-param">kpoints=None</em>, <em class="sig-param">human_atoms=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFilter.filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module filters the PROCAR file and re-write a new one.</p>
 </dd></dl>
 
