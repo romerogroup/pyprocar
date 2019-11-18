@@ -39,7 +39,7 @@ For example, to filter the spin in the :math:`S_x` direction::
 
 	pyprocar.filter('PROCAR’,'PROCAR-filtered_spin’, spin=[1])
 
-This creates a new PROCAR file containing only the selected :math:`k`-points.
+This creates a new PROCAR file containing only the selected spin component(s).
 
 
 ========================
