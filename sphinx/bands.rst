@@ -39,8 +39,8 @@ Usage::
 
 If spin-up and spin-down bands are to be plot separately, one may use the ``filter()`` function to create two PROCARs for each case and plot them individually. An example is given below::
 
-	pyprocar.filter('PROCAR','PROCAR-up',spin=0)
-	pyprocar.filter('PROCAR','PROCAR-down',spin=1)
+	pyprocar.filter('PROCAR','PROCAR-up',spin=[0])
+	pyprocar.filter('PROCAR','PROCAR-down',spin=[1])
 	pyprocar.bandsplot('PROCAR-up',...)
 	pyprocar.bandsplot('PROCAR-down',...)
 

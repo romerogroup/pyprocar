@@ -95,6 +95,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Filtering data</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-orbitals">To filter selected orbitals</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-k-points">To filter selected <span class="math notranslate nohighlight">\(k\)</span>-points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-spins">To filter selected spins</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#to-filter-selected-atoms">To filter selected atoms</a></li>
 </ul>
 </li>
@@ -192,7 +193,16 @@ To filter <span class="math notranslate nohighlight">\(k\)</span>-points within 
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.filter(&#39;PROCAR’,&#39;PROCAR-filtered_kpoints’, kpoints=[10,13])
 </pre></div>
 </div>
-<p>This created a new PROCAR file containing only the selected <span class="math notranslate nohighlight">\(k\)</span>-points.</p>
+<p>This creates a new PROCAR file containing only the selected <span class="math notranslate nohighlight">\(k\)</span>-points.</p>
+</div>
+<div class="section" id="to-filter-selected-spins">
+<h2>To filter selected spins<a class="headerlink" href="#to-filter-selected-spins" title="Permalink to this headline">¶</a></h2>
+<p>This can be used to generate a PROCAR that contains a selected spin component.
+For example, to filter the spin in the <span class="math notranslate nohighlight">\(S_x\)</span> direction:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.filter(&#39;PROCAR’,&#39;PROCAR-filtered_spin’, spin=[1])
+</pre></div>
+</div>
+<p>This creates a new PROCAR file containing only the selected <span class="math notranslate nohighlight">\(k\)</span>-points.</p>
 </div>
 <div class="section" id="to-filter-selected-atoms">
 <h2>To filter selected atoms<a class="headerlink" href="#to-filter-selected-atoms" title="Permalink to this headline">¶</a></h2>
