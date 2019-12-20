@@ -3,7 +3,7 @@ How to cite
 
 If you have used PyProcar in your work, please cite:
 
-`arXiv:1906.11387 [cond-mat.mtrl-sci] <https://arxiv.org/abs/1906.11387>`_
+`DOI: 10.1016/j.cpc.2019.107080 <https://www.sciencedirect.com/science/article/pii/S0010465519303935>`_
 
 Thank you. 
 
