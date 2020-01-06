@@ -106,7 +106,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     # latex rendering.
     for i in range(len(knames)):
         if knames[i] =='GAMMA':
-            knames[i] = 'Gamma'
+            knames[i] = '\\Gamma'
         else:
             pass
             
