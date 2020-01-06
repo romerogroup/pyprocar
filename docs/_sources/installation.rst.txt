@@ -16,4 +16,8 @@ To install using pip use the following command::
 
 Once you are done with the installation you can import PyProcar within Python with the command::
 
-	import pyprocar	
+	import pyprocar
+
+The command-line version of PyProcar can be invoked in a terminal with::
+    
+    procar	

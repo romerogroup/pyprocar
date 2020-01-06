@@ -5,7 +5,7 @@ This utility is used to repair the ill-formatting of the PROCAR file due to the 
 
 Usage::
 
-	pyprocar.repair(`PROCAR',`PROCAR-repaired')
+	pyprocar.repair('PROCAR','PROCAR-repaired')
 
 .. automodule:: pyprocar.scriptRepair
 	:members:

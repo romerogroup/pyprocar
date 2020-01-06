@@ -168,7 +168,7 @@
 <h1>Repair<a class="headerlink" href="#repair" title="Permalink to this headline">¶</a></h1>
 <p>This utility is used to repair the ill-formatting of the PROCAR file due to the erroneous file handling in Fortran, particularly in a VASP calculation. This prevents issues arising from the lack of white space between a number and a negative sign, for instance <code class="docutils literal notranslate"><span class="pre">0.000000-0.5000000</span></code>. Typically, <code class="docutils literal notranslate"><span class="pre">pyprocar.repair()</span></code> is recommended to be applied before using any other utility. Setting <code class="docutils literal notranslate"><span class="pre">permissive=True</span></code> during plotting will achieve this too.</p>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pyprocar.repair(`PROCAR&#39;,`PROCAR-repaired&#39;)
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">repair</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR-repaired&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <span class="target" id="module-pyprocar.scriptRepair"></span><dl class="function">

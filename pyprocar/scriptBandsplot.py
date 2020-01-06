@@ -249,7 +249,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     
   # Added by Nicholas Pike to close memory issue of looping and creating
   # many figures
-  plt.close()
+  #plt.close()
 
 
   return
