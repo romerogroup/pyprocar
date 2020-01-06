@@ -102,6 +102,14 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
       if tick_labels[i] !=tick_labels[i+1]:
         knames.append(tick_labels[i+1])
 
+    # Added by Nicholas Pike to modify the output of seekpath to allow for 
+    # latex rendering.
+    for i in range(len(knames)):
+        if knames[i] =='GAMMA':
+            knames[i] = 'Gamma'
+        else:
+            pass
+            
     knames = [str("$"+latx+"$") for latx in knames] 
 
     #getting the number of grid points from the KPOINTS file
@@ -238,5 +246,10 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     plt.savefig(savefig,bbox_inches='tight')
   else:
     plt.show()
+    
+  # Added by Nicholas Pike to close memory issue of looping and creating
+  # many figures
+  plt.close()
+
 
   return

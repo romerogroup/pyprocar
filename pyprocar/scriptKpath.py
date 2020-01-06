@@ -21,8 +21,11 @@ def kpath(infile,grid_size,with_time_reversal,recipe,threshold,symprec,angle_tol
 
 
 	#positions
-	atoms = np.array(POSCAR[5].split()).astype(np.int)
-	positions_matrix = POSCAR[7:7+sum(atoms)]	
+    # POSCAR index changed by Nicholas Pike from 5 -> 6 and from 7 -> 8 
+    # Previously, POSCAR[5] referenced the atom names i.e. Na Cl and not the 
+    # atom numbers
+	atoms = np.array(POSCAR[6].split()).astype(np.int)
+	positions_matrix = POSCAR[8:8+sum(atoms)]	
 	positions = np.zeros(shape=(np.sum(atoms),3))
 
 	for j in range(len(positions_matrix)):
