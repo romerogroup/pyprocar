@@ -32,5 +32,21 @@ This defines the rotation angle = 90, and Y-axis as the rotation axis. PyProcar 
 
 **Be careful**: Now :math:`S_x`, :math:`S_y` and :math:`S_z` all will be rotated according to the user’s choice. :math:`S_y` will be same as before but :math:`S_x` would now be :math:`S_z` and :math:`S_z` would be :math:`-S_x`.
 
+=========================================
+Export plot as a matplotlib.pyplot object
+=========================================
+
+PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting ``exportplt = True``.
+Usage::
+
+    import matplotlib.pyplot as plt
+    import pyprocar
+
+    plt = pyprocar.fermi2D('PROCAR', outcar='OUTCAR', exportplt=True)  
+    plt.title('Using matplotlib options')
+    plt.show()
+
+
 .. automodule:: pyprocar.scriptFermi2D
 	:members:

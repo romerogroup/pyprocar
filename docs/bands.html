@@ -94,6 +94,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#spin-projection">2. Spin projection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#atom-projection">3. Atom projection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#orbital-projection">4. Orbital projection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
@@ -225,9 +226,23 @@
 </div>
 <p>One or many of the above can be combined together to allow the user to probe into more specific queries such as a collinear spin projection of a certain orbital of a certain atom.</p>
 <p>Different modes of band structures are useful for obtaining information for different cases. The four modes available within PyProcar are <code class="docutils literal notranslate"><span class="pre">plain,</span> <span class="pre">scatter,</span> <span class="pre">parametric</span></code> and <code class="docutils literal notranslate"><span class="pre">atomic</span></code>. The <code class="docutils literal notranslate"><span class="pre">plain</span></code> bands contain no projection information. The <code class="docutils literal notranslate"><span class="pre">scatter</span></code> mode creates a scatter plot of points. The <code class="docutils literal notranslate"><span class="pre">parametric</span></code> mode interpolates between points to create bands which are also projectable. Finally, the <code class="docutils literal notranslate"><span class="pre">atomic</span></code> mode is useful to plot energy levels for atoms. To  set  maximum  and  minimum  projections  for  color  map,  one  could  use <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code> tags.</p>
+</div>
+<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">plt</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
 <span class="target" id="module-pyprocar.scriptBandsplot"></span><dl class="function">
 <dt id="pyprocar.scriptBandsplot.bandsplot">
-<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">mode='scatter'</em>, <em class="sig-param">color='blue'</em>, <em class="sig-param">abinit_output=None</em>, <em class="sig-param">spin=0</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">markersize=0.02</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">marker='o'</em>, <em class="sig-param">permissive=False</em>, <em class="sig-param">human=False</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">kticks=None</em>, <em class="sig-param">knames=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">kpointsfile=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">mode='scatter'</em>, <em class="sig-param">color='blue'</em>, <em class="sig-param">abinit_output=None</em>, <em class="sig-param">spin=0</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">markersize=0.02</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">marker='o'</em>, <em class="sig-param">permissive=False</em>, <em class="sig-param">human=False</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">kticks=None</em>, <em class="sig-param">knames=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">kpointsfile=None</em>, <em class="sig-param">exportplt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots band structures</p>
 </dd></dl>
 

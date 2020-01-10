@@ -9,5 +9,20 @@ Usage::
 
 A similar approch could be used for other modes of band plots. 	
 
+=========================================
+Export plot as a matplotlib.pyplot object
+=========================================
+
+PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting ``exportplt = True``.
+Usage::
+
+    import matplotlib.pyplot as plt
+    import pyprocar
+
+    plt = pyprocar.bandscompare('PROCAR1', 'PROCAR2', outcar='OUTCAR1', outcar2='OUTCAR2', mode='plain', exportplt=True)  
+    plt.title('Using matplotlib options')
+    plt.show()
+
 .. automodule:: pyprocar.scriptCompareBands
 	:members:

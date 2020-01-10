@@ -93,7 +93,10 @@
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Compare bands</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Compare bands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
 </ul>
@@ -172,12 +175,26 @@
 </pre></div>
 </div>
 <p>A similar approch could be used for other modes of band plots.</p>
+<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">plt</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandscompare</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span> <span class="s1">&#39;PROCAR2&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span> <span class="n">outcar2</span><span class="o">=</span><span class="s1">&#39;OUTCAR2&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
 <span class="target" id="module-pyprocar.scriptCompareBands"></span><dl class="function">
 <dt id="pyprocar.scriptCompareBands.bandscompare">
-<code class="sig-prename descclassname">pyprocar.scriptCompareBands.</code><code class="sig-name descname">bandscompare</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">file2</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">abinit_output=None</em>, <em class="sig-param">abinit_output2=None</em>, <em class="sig-param">spin='0'</em>, <em class="sig-param">spin2='0'</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">atoms2=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbitals2=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">fermi2=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">markersize=0.02</em>, <em class="sig-param">markersize2=0.02</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax2=None</em>, <em class="sig-param">vmin2=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">marker='</em>, <em class="sig-param">'</em>, <em class="sig-param">marker2='</em>, <em class="sig-param">'</em>, <em class="sig-param">permissive=False</em>, <em class="sig-param">human=False</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">kticks=None</em>, <em class="sig-param">knames=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">outcar2=None</em>, <em class="sig-param">color='r'</em>, <em class="sig-param">color2='g'</em>, <em class="sig-param">legend='PROCAR1'</em>, <em class="sig-param">legend2='PROCAR2'</em>, <em class="sig-param">kpointsfile=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptCompareBands.bandscompare" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptCompareBands.</code><code class="sig-name descname">bandscompare</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">file2</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">abinit_output=None</em>, <em class="sig-param">abinit_output2=None</em>, <em class="sig-param">spin='0'</em>, <em class="sig-param">spin2='0'</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">atoms2=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbitals2=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">fermi2=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">markersize=0.02</em>, <em class="sig-param">markersize2=0.02</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax2=None</em>, <em class="sig-param">vmin2=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">marker='</em>, <em class="sig-param">'</em>, <em class="sig-param">marker2='</em>, <em class="sig-param">'</em>, <em class="sig-param">permissive=False</em>, <em class="sig-param">human=False</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">kticks=None</em>, <em class="sig-param">knames=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">outcar2=None</em>, <em class="sig-param">color='r'</em>, <em class="sig-param">color2='g'</em>, <em class="sig-param">legend='PROCAR1'</em>, <em class="sig-param">legend2='PROCAR2'</em>, <em class="sig-param">kpointsfile=None</em>, <em class="sig-param">exportplt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptCompareBands.bandscompare" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module compares two band structures.</p>
 </dd></dl>
 
+</div>
 </div>
 
 

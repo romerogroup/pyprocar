@@ -94,7 +94,10 @@
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Band unfolding</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Band unfolding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -177,7 +180,7 @@ First, calculate the band structure in the primitive cell BZ. The PROCAR should 
         <span class="n">poscar</span><span class="o">=</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">,</span>
         <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span>
         <span class="n">supercell_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
-  <span class="n">ispin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down</span>
+        <span class="n">ispin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down</span>
         <span class="n">efermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">shift_efermi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">elimit</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
@@ -188,12 +191,26 @@ First, calculate the band structure in the primitive cell BZ. The PROCAR should 
         <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
         <span class="n">savetab</span><span class="o">=</span><span class="s1">&#39;unfolding.csv&#39;</span><span class="p">,</span>
-        <span class="n">savefig</span><span class="o">=</span><span class="s1">&#39;unfolded_band.png&#39;</span><span class="p">)</span>
+        <span class="n">savefig</span><span class="o">=</span><span class="s1">&#39;unfolded_band.png&#39;</span><span class="p">,</span>
+        <span class="n">exportplt</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">plt</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">unfold</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <span class="target" id="module-pyprocar.scriptUnfold"></span><dl class="function">
 <dt id="pyprocar.scriptUnfold.unfold">
-<code class="sig-prename descclassname">pyprocar.scriptUnfold.</code><code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param">fname='PROCAR', poscar='POSCAR', outcar='OUTCAR', supercell_matrix=array([[2, 0, 0],        [0, 2, 0],        [0, 0, 2]]), ispin=None, efermi=None, shift_efermi=True, elimit=(-5, 15), kticks=[0, 36, 54, 86, 110, 147, 165, 199], knames=['$\\Gamma$', 'K', 'M', '$\\Gamma$', 'A', 'H', 'L', 'A'], print_kpts=False, show_band=True, width=4, color='blue', savetab='unfold_result.csv', savefig='unfolded_band.png'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptUnfold.</code><code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param">fname='PROCAR', poscar='POSCAR', outcar='OUTCAR', supercell_matrix=array([[2, 0, 0],        [0, 2, 0],        [0, 0, 2]]), ispin=None, efermi=None, shift_efermi=True, elimit=(-5, 15), kticks=[0, 36, 54, 86, 110, 147, 165, 199], knames=['$\\Gamma$', 'K', 'M', '$\\Gamma$', 'A', 'H', 'L', 'A'], print_kpts=False, show_band=True, width=4, color='blue', savetab='unfold_result.csv', savefig='unfolded_band.png', exportplt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -212,11 +229,13 @@ First, calculate the band structure in the primitive cell BZ. The PROCAR should 
 <li><p><strong>color</strong> (<em>color of the unfoled band.</em>) – </p></li>
 <li><p><strong>savetab</strong> (<em>the csv file name of which  the table of unfolding result will be written into.</em>) – </p></li>
 <li><p><strong>savefig</strong> (<em>the file name of which the figure will be saved.</em>) – </p></li>
+<li><p><strong>exportplt</strong> (<em>flag to export plot as matplotlib.pyplot object.</em>) – </p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
+</div>
 </div>
 
 

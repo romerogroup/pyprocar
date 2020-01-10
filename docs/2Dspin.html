@@ -92,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">2D spin-texture</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#translate-and-rotate-the-2d-kpoint-mesh">Translate and Rotate the 2D KPOINT mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
@@ -190,9 +191,23 @@
 </div>
 <p>This defines the rotation angle = 90, and Y-axis as the rotation axis. PyProcar always performs the translation operation first and then does the rotation.</p>
 <p><strong>Be careful</strong>: Now <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span> and <span class="math notranslate nohighlight">\(S_z\)</span> all will be rotated according to the user’s choice. <span class="math notranslate nohighlight">\(S_y\)</span> will be same as before but <span class="math notranslate nohighlight">\(S_x\)</span> would now be <span class="math notranslate nohighlight">\(S_z\)</span> and <span class="math notranslate nohighlight">\(S_z\)</span> would be <span class="math notranslate nohighlight">\(-S_x\)</span>.</p>
+</div>
+<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">plt</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
 <span class="target" id="module-pyprocar.scriptFermi2D"></span><dl class="function">
 <dt id="pyprocar.scriptFermi2D.fermi2D">
-<code class="sig-prename descclassname">pyprocar.scriptFermi2D.</code><code class="sig-name descname">fermi2D</code><span class="sig-paren">(</span><em class="sig-param">file, outcar, spin=0, atoms=None, orbitals=None, energy=None, fermi=None, rec_basis=None, rot_symm=1, translate=[0, 0, 0], rotation=[0, 0, 0, 1], human=False, mask=None, savefig=None, st=False, noarrow=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFermi2D.fermi2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptFermi2D.</code><code class="sig-name descname">fermi2D</code><span class="sig-paren">(</span><em class="sig-param">file, outcar, spin=0, atoms=None, orbitals=None, energy=None, fermi=None, rec_basis=None, rot_symm=1, translate=[0, 0, 0], rotation=[0, 0, 0, 1], human=False, mask=None, savefig=None, st=False, noarrow=False, exportplt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFermi2D.fermi2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module plots 2D Fermi surface.</p>
 </dd></dl>
 
