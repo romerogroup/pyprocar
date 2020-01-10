@@ -126,4 +126,6 @@ v4.0.0 Nov 6th, 2019 -- Various bug fixes. Release of standalone version. Update
 
 v4.0.1 Nov 17th, 2019 -- Added feature to filter k-points.  
 
-v4.0.4 Dec 6th, 2020 -- Added command-line compatibility to standalone version and better Latex rendering.
+v4.0.4 Dec 6th, 2019 -- Added command-line compatibility to standalone version and better Latex rendering.
+
+v4.1.0 Jan 10th, 2020 -- Added feature to export plots as matplotlib.pyplot objects for further processing through matplotlib options. 

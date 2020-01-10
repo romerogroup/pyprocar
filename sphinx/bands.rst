@@ -71,6 +71,21 @@ One or many of the above can be combined together to allow the user to probe int
 
 Different modes of band structures are useful for obtaining information for different cases. The four modes available within PyProcar are ``plain, scatter, parametric`` and ``atomic``. The ``plain`` bands contain no projection information. The ``scatter`` mode creates a scatter plot of points. The ``parametric`` mode interpolates between points to create bands which are also projectable. Finally, the ``atomic`` mode is useful to plot energy levels for atoms. To  set  maximum  and  minimum  projections  for  color  map,  one  could  use ``vmin`` and ``vmax`` tags.
 
+=========================================
+Export plot as a matplotlib.pyplot object
+=========================================
+
+PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting ``exportplt = True``.
+Usage::
+
+	import matplotlib.pyplot as plt
+	import pyprocar
+
+	plt = pyprocar.bandsplot('PROCAR', outcar='OUTCAR', mode='plain', exportplt=True)  
+	plt.title('Using matplotlib options')
+	plt.show()
+
 
 .. automodule:: pyprocar.scriptBandsplot
 	:members:

@@ -9,10 +9,19 @@ import re
 
 
 
-def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',vmax=None,vmin=None,vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None):
+def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',
+                 atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,
+                 elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',vmax=None,vmin=None,
+                 vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,
+                 savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',
+                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False):
   """
   This module compares two band structures.
   """
+
+  # Turn interactive plotting off
+  plt.ioff()
+
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -309,10 +318,14 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   if title:
     plt.title(title,fontsize=22)
 
-  if savefig:
-    plt.savefig(savefig,bbox_inches='tight')
-  else:
-    plt.show()
+  if exportplt:
+    return plt 
 
-  return
+  else:
+    if savefig:
+      plt.savefig(savefig,bbox_inches='tight')
+      plt.close() #Added by Nicholas Pike to close memory issue of looping and creating many figures 
+    else:
+      plt.show()
+    return  
     

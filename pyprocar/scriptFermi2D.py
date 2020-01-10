@@ -8,10 +8,15 @@ import matplotlib.pyplot as plt
 
 
 
-def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,rec_basis=None,rot_symm=1,translate=[0,0,0],rotation=[0,0,0,1],human=False,mask=None,savefig=None,st=False,noarrow=False):
+def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,rec_basis=None,
+            rot_symm=1,translate=[0,0,0],rotation=[0,0,0,1],human=False,mask=None,savefig=None,
+            st=False,noarrow=False,exportplt=False):
   """
   This module plots 2D Fermi surface.
   """
+  # Turn interactive plotting off
+  plt.ioff()
+
   if atoms is None:
     atoms = [-1]
     if human is True:
@@ -109,9 +114,13 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
   else:
     fs.st(sx=symm.sx, sy=symm.sy, sz=symm.sz, noarrow=noarrow, spin=spin)
   
-  if savefig:
-    plt.savefig(savefig)
+  if exportplt:
+    return plt 
+
   else:
-    plt.show()
-    
-  return
+    if savefig:
+      plt.savefig(savefig,bbox_inches='tight')
+      plt.close() #Added by Nicholas Pike to close memory issue of looping and creating many figures
+    else:
+      plt.show()
+    return  

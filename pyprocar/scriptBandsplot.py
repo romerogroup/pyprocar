@@ -10,9 +10,16 @@ import re
 
 
   
-def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,knames=None,title=None,outcar=None,kpointsfile=None):
+def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,
+            markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,
+            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False):
+
   """This function plots band structures
   """
+
+  # Turn interactive plotting off
+  plt.ioff()
+
   #First handling the options, to get feedback to the user and check
   #that the input makes sense.
   #It is quite long
@@ -242,14 +249,15 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   if title:
     plt.title(title,fontsize=22)
 
-  if savefig:
-    plt.savefig(savefig,bbox_inches='tight')
+  if exportplt:
+    return plt 
+
   else:
-    plt.show()
-    
-  # Added by Nicholas Pike to close memory issue of looping and creating
-  # many figures
-  #plt.close()
+    if savefig:
+      plt.savefig(savefig,bbox_inches='tight')
+      plt.close() #Added by Nicholas Pike to close memory issue of looping and creating many figures
+    else:
+      plt.show()
+    return  
 
-
-  return
+ 

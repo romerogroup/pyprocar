@@ -19,7 +19,8 @@ def unfold(
         width=4,
         color='blue',
         savetab='unfold_result.csv',
-        savefig='unfolded_band.png'):
+        savefig='unfolded_band.png',
+        exportplt = False):
 
     """
 
@@ -41,8 +42,12 @@ def unfold(
     color: color of the unfoled band.
     savetab: the csv file name of which  the table of unfolding result will be written into.
     savefig: the file name of which the figure will be saved.
+    exportplt: flag to export plot as matplotlib.pyplot object.
 
     """
+
+    # Turn interactive plotting off
+    plt.ioff()
 
     if efermi is not None:
         fermi = efermi
@@ -73,8 +78,18 @@ def unfold(
         width=width,
         savetab=savetab,
         show_band=show_band)
-    plt.savefig(savefig,bbox_inches='tight')
-    plt.show()
+
+
+    if exportplt:
+        return plt 
+
+    else:
+        if savefig:
+            plt.savefig(savefig,bbox_inches='tight')
+            plt.close() #Added by Nicholas Pike to close memory issue of looping and creating many figures
+        else:
+            plt.show()
+        return
 
 
 # if __name__ == '__main__':

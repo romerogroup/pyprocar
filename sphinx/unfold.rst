@@ -14,22 +14,38 @@ Then the unfold module can be used to plot the unfolded band as follows::
 
 	import numpy as np
 	pyprocar.unfold(
-	        fname='PROCAR',
-	        poscar='POSCAR',
-	        outcar='OUTCAR',
-	        supercell_matrix=np.diag([2, 2, 2]),
-          ispin=None, # None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down
-	        efermi=None,
-	        shift_efermi=True,
-	        elimit=(-5, 15),
-	        kticks=[0, 36, 54, 86, 110, 147, 165, 199],
-	        knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
-	        print_kpts=False,
-	        show_band=True,
+                fname='PROCAR',
+                poscar='POSCAR',
+                outcar='OUTCAR',
+                supercell_matrix=np.diag([2, 2, 2]),
+                ispin=None, # None for non-spin polarized calculation. For spin polarized case, ispin=1: up, ispin=2: down
+                efermi=None,
+                shift_efermi=True,
+                elimit=(-5, 15),
+                kticks=[0, 36, 54, 86, 110, 147, 165, 199],
+                knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
+                print_kpts=False,
+                show_band=True,
                 width=4,
                 color='blue',
                 savetab='unfolding.csv',
-	        savefig='unfolded_band.png')
+                savefig='unfolded_band.png',
+                exportplt=False)
+
+=========================================
+Export plot as a matplotlib.pyplot object
+=========================================
+
+PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting ``exportplt = True``.
+Usage::
+
+	import matplotlib.pyplot as plt
+	import pyprocar
+
+	plt = pyprocar.unfold('PROCAR', outcar='OUTCAR', exportplt=True)  
+	plt.title('Using matplotlib options')
+	plt.show()	        
 
 .. automodule:: pyprocar.scriptUnfold
 	:members:
