@@ -129,3 +129,5 @@ v4.0.1 Nov 17th, 2019 -- Added feature to filter k-points.
 v4.0.4 Dec 6th, 2019 -- Added command-line compatibility to standalone version and better Latex rendering.
 
 v4.1.0 Jan 10th, 2020 -- Added feature to export plots as matplotlib.pyplot objects for further processing through matplotlib options. 
+
+v4.1.1 Feb 12th, 2020 -- Added feature to compare two parametric plots with colormaps in bandscompare.

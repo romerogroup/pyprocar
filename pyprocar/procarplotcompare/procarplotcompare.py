@@ -77,7 +77,7 @@ class ProcarPlotCompare:
     
     return plot
 
-  def scatterPlot(self, size=50,size2=50, mask=None, cmap='hot_r', vmax=None, vmin=None,vmax2=None, vmin2=None,marker='o',marker2='o',legend1='PRO1',legend2='PRO2', ticks=None):
+  def scatterPlot(self, size=50,size2=50, mask=None, cmap='jet' ,cmap2='hot_r', vmax=None, vmin=None,vmax2=None, vmin2=None,marker='o',marker2='o',legend1='PRO1',legend2='PRO2', ticks=None):
     bsize, ksize = self.bands.shape
     bsize2,ksize2 = self.bands2.shape
     print(bsize, ksize, bsize2, ksize2)
@@ -117,7 +117,7 @@ class ProcarPlotCompare:
       mbands2 = self.bands2  
     
     plot = plt.scatter(xaxis, mbands, c=self.spd, s=size, linewidths=0,cmap=cmap, vmax=vmax, vmin=vmin, marker=marker,edgecolors='none')
-    plot = plt.scatter(xaxis2, mbands2, c=self.spd2, s=size2, linewidths=0,cmap=cmap, vmax=vmax2, vmin=vmin2, marker=marker2,edgecolors='none')
+    plot = plt.scatter(xaxis2, mbands2, c=self.spd2, s=size2, linewidths=0,cmap=cmap2, vmax=vmax2, vmin=vmin2, marker=marker2,edgecolors='none')
     plt.colorbar()
     plt.xlim(min(xaxis.min(),xaxis2.min()), max(xaxis.max(),xaxis2.max())) 
     
@@ -141,7 +141,7 @@ class ProcarPlotCompare:
 
     return plot
     
-  def parametricPlot(self, cmap='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None ,mask=None, marker='--', marker2='-.', legend1='PROCAR1',legend2='PROCAR2',ticks=None):
+  def parametricPlot(self, cmap='jet' ,cmap2='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None ,mask=None, marker='--', marker2='-.', legend1='PROCAR1',legend2='PROCAR2',ticks=None):
     from matplotlib.collections import LineCollection
     import matplotlib
     fig = plt.figure()
@@ -218,13 +218,12 @@ class ProcarPlotCompare:
       #print xaxis.shape, y.shape, z.shape
       points2 = np.array([xaxis2, y2]).T.reshape(-1, 1, 2)
       segments2 = np.concatenate([points2[:-1], points2[1:]], axis=1)
-      lc2 = LineCollection(segments2, cmap=plt.get_cmap(cmap), norm=norm,alpha=0.8,linestyles=marker2)
+      lc2 = LineCollection(segments2, cmap=plt.get_cmap(cmap2), norm=norm,alpha=0.8,linestyles=marker2)
       lc2.set_array(z2)
       lc2.set_linewidth(2)
       gca.add_collection(lc2)
-      
-      plt.legend((lc,lc2),(legend1,legend2))
-    
+    plt.colorbar(lc2)
+    plt.legend((lc,lc2),(legend1,legend2))
 
     #handling ticks
     if ticks:
@@ -241,7 +240,7 @@ class ProcarPlotCompare:
 
     return fig
 
-  def atomicPlot(self, cmap='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None):
+  def atomicPlot(self, cmap='jet', cmap2='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None):
     """
     Just a handler to parametricPlot. Useful to plot energy levels. 
 

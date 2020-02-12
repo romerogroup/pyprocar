@@ -11,7 +11,7 @@ import re
 
 def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',
                  atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,
-                 elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',vmax=None,vmin=None,
+                 elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',cmap2='hot_r',vmax=None,vmin=None,
                  vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,
                  savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',
                  color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False):
@@ -105,7 +105,8 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   if mask is not None:
     print("masking thres.: ", mask) 
     
-  print("Colormap        : ", cmap)
+  print("Colormap #1        : ", cmap)
+  print("Colormap #2        : ", cmap2)
   print("MarkerSize #1   : ", markersize)
   print("MarkerSize #2   : ", markersize2)
     
@@ -275,7 +276,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   ###### start of mode dependent options #########
 
   if mode == "scatter":
-    plot.scatterPlot(mask=mask,size=markersize,size2= markersize2, cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker=marker, marker2=marker2,legend1=legend,legend2=legend2, ticks=ticks)
+    plot.scatterPlot(mask=mask,size=markersize,size2= markersize2, cmap=cmap, cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker=marker, marker2=marker2,legend1=legend,legend2=legend2, ticks=ticks)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -293,7 +294,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.ylim(elimit)
       
   if mode == "parametric":
-    plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='solid', marker2='dashed', legend1=legend,legend2=legend2,ticks=ticks)
+    plot.parametricPlot(cmap=cmap,cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='solid', marker2='solid', legend1=legend,legend2=legend2,ticks=ticks)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -302,7 +303,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.ylim(elimit)
 
   elif mode == "atomic":
-    plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2)
+    plot.atomicPlot(cmap=cmap,cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
