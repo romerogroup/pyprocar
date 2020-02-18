@@ -44,9 +44,7 @@ where,
 
 .. math::
 
-	\frac{1}{2} \sum_{\alpha,\beta = 1}^2 \sigma_{\alpha,\beta}^i
-	<{\psi_{n,k}^\alpha | Y_{lm}^{\alpha}}> 
-	<{Y_{lm}^{\beta} | \psi_{n,k}^\beta}>
+	\frac{1}{2} \sum_{\mu, \nu=1}^{2} \sigma_{\mu, \nu}^{i}<\psi_{n, k}^{\mu}\left|Y_{l m}^{\alpha}><Y_{l m}^{\alpha}\right| \psi_{n, k}^{\nu}>
 
 where :math:`\sigma^i` are the Pauli matrices with :math:`i = x, y , z` and the spinor wavefunction :math:`\phi_{nk}` is now defined as 	 
 
