@@ -55,7 +55,7 @@ def plot_band_weight(kslist,
                     linewidths=[fatness] * len(x),
                     colors=[
                         colorConverter.to_rgba(
-                            color, alpha=lwidth / (width + 0.001))
+                            color, alpha=lwidth / (width + 0.05))
                         for lwidth in lwidths
                     ])
             elif style == 'color' or style == 'colormap':
