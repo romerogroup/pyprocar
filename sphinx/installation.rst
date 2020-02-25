@@ -1,6 +1,6 @@
 Installation
 ============
-PyProcar is supported by both Python 2.x and Python 3.x. 
+PyProcar is supported by Python 3.x. 
 
 Please install the following dependencies prior to installing PyProcar. 
 	* matplotlib 
