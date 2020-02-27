@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/pyprocar.svg)](https://badge.fury.io/py/pyprocar)
+
 PyProcar
 ===========
 
@@ -50,6 +52,7 @@ scipy <br />
 seekpath <br />
 ase <br />
 scikit-image <br />
+mayavi <br />
 
 Installation
 ------------
