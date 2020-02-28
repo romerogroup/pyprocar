@@ -14,7 +14,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
                  elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',cmap2='hot_r',vmax=None,vmin=None,
                  vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,
                  savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',
-                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,direct=True,direct2=True):
+                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,kdirect=True,kdirect2=True):
   """
   This module compares two band structures.
   """
@@ -132,12 +132,12 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   print("legend #1       : ",legend)
   print("legend #2       : ",legend2)
 
-  if direct:
+  if kdirect:
     print("k-points #1 are in reduced coordinates")
   else:
     print("k-points #1 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")
 
-  if direct2:
+  if kdirect2:
     print("k-points #2 are in reduced coordinates")
   else:
     print("k-points #2 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")  
@@ -206,23 +206,27 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       fermi2 = outcarparser.FermiOutcar(outcar2)
       print("INFO: Fermi energy #2 found in outcar file = " + str(fermi2))
       
-      
     recLat = outcarparser.RecLatOutcar(outcar)
     recLat2 = outcarparser.RecLatOutcar(outcar2)
 
+  # parsing the PROCAR file #1
+  procarFile = ProcarParser()
+  
+  # parsing the PROCAR file #2
+  procarFile2 = ProcarParser()
 
   # parsing the PROCAR file #1
-  # if direct = False, then the k-points will be in cartesian coordinates. 
+  # if kdirect = False, then the k-points will be in cartesian coordinates. 
   # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
-  if direct:
+  if kdirect:
     procarFile.readFile(file, permissive)
   else:
     procarFile.readFile(file, permissive, recLattice=recLat)
 
   # parsing the PROCAR file #2
-  # if direct = False, then the k-points will be in cartesian coordinates. 
+  # if kdirect2 = False, then the k-points will be in cartesian coordinates. 
   # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
-  if direct2:
+  if kdirect2:
     procarFile2.readFile(file, permissive)
   else:
     procarFile2.readFile(file, permissive, recLattice=recLat2)
