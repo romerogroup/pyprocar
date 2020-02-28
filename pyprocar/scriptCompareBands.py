@@ -14,7 +14,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
                  elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',cmap2='hot_r',vmax=None,vmin=None,
                  vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,
                  savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',
-                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False):
+                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,direct=True,direct2=True):
   """
   This module compares two band structures.
   """
@@ -132,6 +132,16 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   print("legend #1       : ",legend)
   print("legend #2       : ",legend2)
 
+  if direct:
+    print("k-points #1 are in reduced coordinates")
+  else:
+    print("k-points #1 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")
+
+  if direct2:
+    print("k-points #2 are in reduced coordinates")
+  else:
+    print("k-points #2 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")  
+
 #If KPOINTS file is given:
   if kpointsfile is not None:
     #Getting the high symmetry point names from KPOINTS file
@@ -200,13 +210,24 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     recLat = outcarparser.RecLatOutcar(outcar)
     recLat2 = outcarparser.RecLatOutcar(outcar2)
 
-  # parsing the PROCAR file
-  procarFile = ProcarParser()
-  procarFile.readFile(file, permissive, recLat)
-  
+
+  # parsing the PROCAR file #1
+  # if direct = False, then the k-points will be in cartesian coordinates. 
+  # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
+  if direct:
+    procarFile.readFile(file, permissive)
+  else:
+    procarFile.readFile(file, permissive, recLattice=recLat)
+
   # parsing the PROCAR file #2
-  procarFile2 = ProcarParser()
-  procarFile2.readFile(file2, permissive, recLat2)
+  # if direct = False, then the k-points will be in cartesian coordinates. 
+  # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
+  if direct2:
+    procarFile2.readFile(file, permissive)
+  else:
+    procarFile2.readFile(file, permissive, recLattice=recLat2)
+
+
 
   # processing the data, getting an instance of the class that reduces the data
   data = ProcarSelect(procarFile, deepCopy=True)

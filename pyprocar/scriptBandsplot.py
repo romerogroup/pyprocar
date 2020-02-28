@@ -12,7 +12,7 @@ import re
   
 def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,
             markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,
-            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False):
+            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False, direct=True):
 
   """This function plots band structures
   """
@@ -92,6 +92,11 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
 
   print("outcar        : ", outcar)
 
+  if direct:
+    print("k-points are in reduced coordinates")
+  else:
+    print("k-points are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")
+
 
   #If KPOINTS file is given:
   if kpointsfile is not None:
@@ -165,7 +170,13 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
 
   # parsing the PROCAR file
   procarFile = ProcarParser()
-  procarFile.readFile(file, permissive, recLat)
+
+  # if direct = False, then the k-points will be in cartesian coordinates. 
+  # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
+  if direct:
+    procarFile.readFile(file, permissive)
+  else:
+    procarFile.readFile(file, permissive, recLattice=recLat)
 
   # processing the data, getting an instance of the class that reduces the data
   data = ProcarSelect(procarFile, deepCopy=True)

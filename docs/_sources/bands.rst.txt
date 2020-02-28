@@ -86,6 +86,12 @@ Usage::
 	plt.title('Using matplotlib options')
 	plt.show()
 
+=================================================================
+Converting :math:`k`-points from reduced to cartesian coordinates
+=================================================================
+
+PyProcar defaults to plotting using the reduced coordinates of the :math:`k`-points. If one wishes to plot using cartesian coordinates, set ``direct=False``. However, an ``OUTCAR`` must be supplied for this case to retrieve the reciprocal lattice vectors to transform the coordinates from reduced to cartesian. 
+
 
 .. automodule:: pyprocar.scriptBandsplot
 	:members:
