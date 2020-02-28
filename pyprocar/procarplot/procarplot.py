@@ -23,9 +23,6 @@ class ProcarPlot:
       xaxis = np.array(xaxis)
     else:
       xaxis = np.arange(len(self.bands))
-    print("self.kpoints: ", self.kpoints.shape)
-    print("xaxis.shape : ", xaxis.shape)
-    print("bands.shape : ", self.bands.shape)
     plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker, 
                     markersize=size,color=color)
     plt.xlim(xaxis.min(), xaxis.max())

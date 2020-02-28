@@ -72,7 +72,7 @@ class ProcarParser:
         self.spd = None  #the atom/orbital projected data
         self.cspd = None  #spd data with the phase
         self.orbitalName = [
-            "s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2", "tot"
+            "s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2", "tot"
         ]
         self.orbitalCount = None  #number of orbitals
 

@@ -42,16 +42,6 @@ class ProcarPlotCompare:
       xaxis2 = np.array(xaxis2)
     else:
       xaxis2 = np.arange(len(self.bands2))
-    
-    
-    print("self.kpoints: ", self.kpoints.shape)
-    print("xaxis.shape : ", xaxis.shape)
-    print("bands.shape : ", self.bands.shape)
-    
-    print("self.kpoints #2: ", self.kpoints2.shape)
-    print("xaxis.shape #2: ", xaxis2.shape)
-    print("bands.shape #2 : ", self.bands2.shape)
-    
    
     plot = plt.plot(xaxis,self.bands.transpose() ,marker=marker,markersize=size,color=color)     
     plot = plt.plot(xaxis2,self.bands2.transpose() ,marker=marker2,markersize=size2,color=color2)
