@@ -6,7 +6,7 @@ from .procarplot import ProcarPlot
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-
+import pyfiglet
 
 
   
@@ -16,6 +16,15 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
 
   """This function plots band structures
   """
+
+  ################ Welcome Text #######################
+  print(pyfiglet.figlet_format("PyProcar"))
+  print('A Python library for electronic structure pre/post-processing.\n')
+  print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
+  A., PyProcar: A Python library for electronic structure pre/post-processing.,\
+  Computer Physics Communications 107080 (2019).\n')
+
+  #####################################################
 
   # Turn interactive plotting off
   plt.ioff()
@@ -33,7 +42,6 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     orbitals = [-1]
     
 
-  print("Script initiated")
   print("input file    : ", file)
   print("Mode          : ", mode)
   

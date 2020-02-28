@@ -74,6 +74,7 @@ class ProcarParser:
         self.orbitalName = [
             "s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2", "tot"
         ]
+        self.orbitalName_short = ["s","p","d","tot"]
         self.orbitalCount = None  #number of orbitals
 
         # number of spin components (blocks of data), 1: non-magnetic non
@@ -290,7 +291,8 @@ class ProcarParser:
         size = len(FoundOrbs)
         # only the first 'size' orbital
         StdOrbs = self.orbitalName[:size - 1] + self.orbitalName[-1:]
-        if FoundOrbs != (StdOrbs):
+        StdOrbs_short = self.orbitalName_short[:size - 1] + self.orbitalName_short[-1:]
+        if FoundOrbs != (StdOrbs) and FoundOrbs != (StdOrbs_short) :
             self.log.warning(
                 str(size) + " orbitals. (Some of) They are unknow (if "
                 "you did 'filter' them it is OK).")

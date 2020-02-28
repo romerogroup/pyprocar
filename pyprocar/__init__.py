@@ -1,6 +1,6 @@
 __author__="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "4.1.5"
+__version__ = "4.1.6"
 __email__ = "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 __status__ = "Development"
 __date__ ="Feb 28th, 2020"
@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 import seekpath
 import ase
 import skimage
+import pyfiglet
 
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarparser import ProcarParser

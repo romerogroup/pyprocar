@@ -5,6 +5,7 @@ from .procarplotcompare import ProcarPlotCompare
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import pyfiglet
 
 
 
@@ -18,6 +19,14 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   """
   This module compares two band structures.
   """
+  ################ Welcome Text #######################
+  print(pyfiglet.figlet_format("PyProcar"))
+  print('A Python library for electronic structure pre/post-processing.\n')
+  print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
+  A., PyProcar: A Python library for electronic structure pre/post-processing.,\
+  Computer Physics Communications 107080 (2019).\n')
+
+  #####################################################
 
   # Turn interactive plotting off
   plt.ioff()

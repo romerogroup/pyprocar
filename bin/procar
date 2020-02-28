@@ -43,7 +43,9 @@ def call_bandsplot(args):
 		knames=args.knames,
 		title=args.title,
 		outcar=args.outcar,
-		kpointsfile=args.kpointsfile)
+		kpointsfile=args.kpointsfile,
+		kdirect=args.kdirect,
+		)
 
 
 def call_kpath(args):	
@@ -104,7 +106,8 @@ def call_fermi2D(args):
 		mask = args.mask,
 		savefig = args.savefig,
 		st = args.st,
-		noarrow = args.noarrow)
+		noarrow = args.noarrow,
+		)
 
 def call_fermi3D(args):
 	"""
@@ -177,7 +180,10 @@ def call_bandscompare(args):
 		color2 = args.color2,
 		legend = args.legend,
 		legend2 = args.legend2,
-		kpointsfile = args.kpointsfile)
+		kpointsfile = args.kpointsfile,
+		kdirect = args.kdirect,
+		kdirect2 = args.kdirect2,
+		)
 
 def call_cat(args):
 	"""
@@ -216,7 +222,8 @@ def call_unfold(args):
 		width = args.width,
 		color = args.color,
 		savetab = args.savetab,
-		savefig = args.savefig)
+		savefig = args.savefig,
+		)
 
 
 if __name__ == "__main__":
@@ -629,6 +636,9 @@ if __name__ == "__main__":
     	phelp = ("KPOINTS file for bandstructure plotting.\n")
     	parserBandsplot.add_argument('--kpointsfile', help=phelp,default=None)
 
+    	phelp = ("Convert k-points from reduced to cartesian for plot #1?")
+    	parserBandscompare.add_argument("-kdirect", help=phelp,action="store_false")
+
     	parserBandsplot.set_defaults(func=call_bandsplot)
 
     ################### bandscompare ######################################################
@@ -807,6 +817,12 @@ if __name__ == "__main__":
 
     	parserBandscompare.add_argument('-legend', help='Legend name for first plot.',default='PROCAR1')
     	parserBandscompare.add_argument('-legend2', help='Legend name for second plot',default='PROCAR2')
+
+    	phelp = ("Convert k-points from reduced to cartesian for plot #1?")
+    	parserBandscompare.add_argument("-kdirect", help=phelp,action="store_false")
+
+    	phelp = ("Convert k-points from reduced to cartesian for plot #2?")
+    	parserBandscompare.add_argument("-kdirect2", help=phelp,action="store_false")
 
     	parserBandscompare.set_defaults(func=call_bandscompare)
 

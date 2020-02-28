@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 
 setup(
     name='pyprocar',
-    version = "4.1.5",
+    version = "4.1.6",
     author='Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet, Xu He',
     author_email='fvmunoz@gmail.com,alromero@mail.wvu.edu,smsingh@mix.wvu.edu,ukh0001@mix.wvu.edu,petavazohi@mix.wvu.edu,eric.bousquet@uliege.be,mailhexu@gmail.com',
     url='https://github.com/romerogroup/pyprocar',
@@ -19,6 +19,6 @@ setup(
               'pyprocar.procarselect'],
     license='LICENSE.txt',
     description='A python package for analyzing PROCAR files obtained from VASP and Abinit.',
-    install_requires=['seekpath>=1.0', 'numpy', 'scipy', 'matplotlib', 'ase', 'scikit-image'],
+    install_requires=['seekpath>=1.0', 'numpy', 'scipy', 'matplotlib', 'ase', 'scikit-image','mayavi==4.6.2','pyfiglet'],
     scripts=['bin/procar']
 )

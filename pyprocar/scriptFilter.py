@@ -1,4 +1,5 @@
 from .procarfilefilter import ProcarFileFilter
+import pyfiglet
 
 
   
@@ -6,6 +7,15 @@ def filter(inFile,outFile,atoms=None,orbitals=None,orbital_names=None,bands=None
     """
     This module filters the PROCAR file and re-write a new one.
     """
+    ################ Welcome Text #######################
+    print(pyfiglet.figlet_format("PyProcar"))
+    print('A Python library for electronic structure pre/post-processing.\n')
+    print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
+    A., PyProcar: A Python library for electronic structure pre/post-processing.,\
+    Computer Physics Communications 107080 (2019).\n')
+
+    #####################################################
+
     print("Input file  :", inFile)
     print("Output file :", outFile)
 

@@ -3,10 +3,19 @@ from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .procarplot import ProcarPlot
+import pyfiglet
 
 
 def Vector(infile,bands=None,energy=None,fermi=None,atoms=None,orbitals=None,outcar=None,scale=0.1):
-  
+ 
+  ################ Welcome Text #######################
+  print(pyfiglet.figlet_format("PyProcar"))
+  print('A Python library for electronic structure pre/post-processing.\n')
+  print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
+  A., PyProcar: A Python library for electronic structure pre/post-processing.,\
+  Computer Physics Communications 107080 (2019).\n')
+  #####################################################
+
   print("Input File    : ", infile)
   print("Bands         : ", bands)
   print("Energy        : ", energy)
