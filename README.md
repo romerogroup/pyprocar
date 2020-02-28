@@ -138,3 +138,5 @@ v4.1.0 Jan 10th, 2020 -- Added feature to export plots as matplotlib.pyplot obje
 v4.1.1 Feb 12th, 2020 -- Added feature to compare two parametric plots with colormaps in bandscompare.
 
 v4.1.2 Feb 24th, 2020 -- Bug fixes in band unfolder. 
+
+v4.1.3 Feb 27th, 2020 -- Renormalize alpha values in band unfolder for values > 1. 
