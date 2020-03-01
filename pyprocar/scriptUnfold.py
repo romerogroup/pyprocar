@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .procarunfold import ProcarUnfolder
 from .utilsprocar import UtilsProcar
-import pyfiglet
+from .splash import welcome
 
 def unfold(
         fname='PROCAR',
@@ -46,15 +46,7 @@ def unfold(
     exportplt: flag to export plot as matplotlib.pyplot object.
 
     """
-
-    ################ Welcome Text #######################
-    print(pyfiglet.figlet_format("PyProcar"))
-    print('A Python library for electronic structure pre/post-processing.\n')
-    print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
-    A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-    Computer Physics Communications 107080 (2019).\n')
-
-    #####################################################
+    welcome()
 
     # Turn interactive plotting off
     plt.ioff()

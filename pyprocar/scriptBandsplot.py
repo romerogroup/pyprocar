@@ -6,25 +6,15 @@ from .procarplot import ProcarPlot
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-import pyfiglet
-
-
+from .splash import welcome
   
 def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,
             markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,
-            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False, kdirect=True):
+            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False, kdirect=True, discontinuities = None):
 
   """This function plots band structures
   """
-
-  ################ Welcome Text #######################
-  print(pyfiglet.figlet_format("PyProcar"))
-  print('A Python library for electronic structure pre/post-processing.\n')
-  print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
-  A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-  Computer Physics Communications 107080 (2019).\n')
-
-  #####################################################
+  welcome()
 
   # Turn interactive plotting off
   plt.ioff()
@@ -74,7 +64,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
 
 ####################################################################  
 
- 
+  print("Script initiated") 
   print("Fermi Ener.   : ", fermi)
   print("Energy range  : ", elimit)
 
@@ -116,17 +106,29 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     KPmatrix = re.findall('reciprocal[\s\S]*',KPread)
     tick_labels = np.array(re.findall('!\s(.*)',KPmatrix[0]))
     knames=[]
-    knames=[tick_labels[0]]
-
-    for i in range(len(tick_labels)-1):
-      if tick_labels[i] !=tick_labels[i+1]:
-        knames.append(tick_labels[i+1])
-
+    knames=[tick_labels[0]]    
+   
+    ################## Checking for discontinuities ########################
+    discont_indx=[]
+    icounter = 1
+    while icounter<len(tick_labels)-1:
+        if tick_labels[icounter] == tick_labels[icounter+1]:
+            knames.append(tick_labels[icounter])
+            icounter = icounter + 2
+        else:
+            discont_indx.append(icounter)
+            knames.append(tick_labels[icounter]+'/'+tick_labels[icounter+1])
+            icounter = icounter + 2
+    knames.append(tick_labels[-1])                    
+    discont_indx = list(dict.fromkeys(discont_indx))
+    
+    ################# End of discontinuity check ##########################
+                  
     # Added by Nicholas Pike to modify the output of seekpath to allow for 
     # latex rendering.
     for i in range(len(knames)):
         if knames[i] =='GAMMA':
-            knames[i] = '\\Gamma'
+            knames[i] = '\Gamma'
         else:
             pass
             
@@ -145,6 +147,14 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
       kticks.append(gridpoint-1)
     print("knames        : ", knames)
     print("kticks        : ", kticks)  
+    
+    # creating an array for discontunuity k-points. These are the indexes 
+    # of the discontinuity k-points.
+    discontinuities = []  
+    for k in discont_indx:
+        discontinuities.append( kticks[int(k/2)+1]  )  
+    if discontinuities:
+        print("discontinuities :",discontinuities)
 
 
   #If ticks and names are given by user manually:
@@ -225,7 +235,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   if mode == "scatter":
     plot.scatterPlot(mask=mask, size=markersize,
                      cmap=cmap, vmin=vmin,
-                     vmax=vmax, marker=marker, ticks=ticks)
+                     vmax=vmax, marker=marker, ticks=ticks, discontinuities = discontinuities)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -234,7 +244,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
       plt.ylim(elimit)
 
   elif mode == "plain":
-    plot.plotBands(markersize, marker=marker, ticks=ticks,color=color)
+    plot.plotBands(markersize, marker=marker, ticks=ticks,color=color, discontinuities = discontinuities)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -244,7 +254,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
       
   elif mode == "parametric":
     plot.parametricPlot(cmap=cmap, vmin=vmin, vmax=vmax,
-                        ticks=ticks)
+                        ticks=ticks,discontinuities = discontinuities)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -279,4 +289,8 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
       plt.show()
     return  
 
- 
+#if __name__ == "__main__":
+    #bandsplot('PROCAR1',outcar='OUTCAR1',mode='parametric',kpointsfile='KPOINTS1',atoms=[1],elimit=[-6,6],vmin=0,vmax=1)
+  # knames=['$\\Gamma$', '$X$', '$M$', '$\\Gamma$', '$R$', '$X/M$','$R$'],
+  # kticks=[0,39,79,119,159,199,238])
+    

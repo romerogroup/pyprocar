@@ -1,0 +1,242 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Concatenating multiple calculations &mdash; PyProcar 3.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Band unfolding" href="unfold.html" />
+    <link rel="prev" title="Compare bands" href="comparebands.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Concatenating multiple calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Concatenating multiple calculations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/cat.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="concatenating-multiple-calculations">
+<h1>Concatenating multiple calculations<a class="headerlink" href="#concatenating-multiple-calculations" title="Permalink to this headline">¶</a></h1>
+<p>Multiple PROCAR files from multiple DFT calculations can be combined with this utility. This utility is particularly useful in cases of large systems, where one can split the bandstructure calculations along different high-symmetry directions in BZ, and then concatenate the PROCAR files for each separate <span class="math notranslate nohighlight">\(k\)</span>-paths, and finally plot the full bandstructure in a single plot. The following command concatenates the PROCAR files obtained from three separate bandstructure calculations done along <span class="math notranslate nohighlight">\(\Gamma-K\)</span>, <span class="math notranslate nohighlight">\(K-M\)</span>, and <span class="math notranslate nohighlight">\(M-\Gamma\)</span> <span class="math notranslate nohighlight">\(k\)</span>-path in hexagonal Brillouin zone.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="s1">&#39;PROCAR_G-K&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR_K-M&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR_M-G&#39;</span><span class="p">],</span><span class="s1">&#39;PROCAR_merged&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<span class="target" id="module-pyprocar.scriptCat"></span><dl class="function">
+<dt id="pyprocar.scriptCat.cat">
+<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param">inFiles</em>, <em class="sig-param">outFile</em>, <em class="sig-param">gz=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module concatenates multiple PROCARs.</p>
+</dd></dl>
+
+<p>To concatenate PROCAR’s generated from Abinit assuming the files are all in the same directory, use the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">mergeabinit</span><span class="p">(</span><span class="s1">&#39;PROCAR_merged&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<span class="target" id="module-pyprocar.scriptAbinitMerge"></span><dl class="function">
+<dt id="pyprocar.scriptAbinitMerge.mergeabinit">
+<code class="sig-prename descclassname">pyprocar.scriptAbinitMerge.</code><code class="sig-name descname">mergeabinit</code><span class="sig-paren">(</span><em class="sig-param">outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptAbinitMerge.mergeabinit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module merges PROCAR files generated from multiple
+Abinit calculations.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="unfold.html" class="btn btn-neutral float-right" title="Band unfolding" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="comparebands.html" class="btn btn-neutral float-left" title="Compare bands" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Uthpala Herath
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

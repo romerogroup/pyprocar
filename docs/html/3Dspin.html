@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3D Fermi surface &mdash; PyProcar 3.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Filtering data" href="filter.html" />
+    <link rel="prev" title="2D spin-texture" href="2Dspin.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3D Fermi surface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plain-fermi-surface">1. Plain Fermi surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#surface-coloring-based-on-properties-from-procar">2. Surface coloring based on properties from PROCAR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#surface-coloring-based-on-properties-obtained-from-an-external-file">3. Surface coloring based on properties obtained from an external file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>3D Fermi surface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/3Dspin.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="d-fermi-surface">
+<h1>3D Fermi surface<a class="headerlink" href="#d-fermi-surface" title="Permalink to this headline">¶</a></h1>
+<p>PyProcar’s 3D Fermi surface utility is able to generate Fermi surface plots projected over spin, atoms and orbitals or a combination of one or many of each. This utility is also capable of projecting external properties that are provided on a mesh grid in momentum space. This feature is useful when one wants to project properties that are not provided in PROCAR file such as Fermi velocity, electron-phonon coupling and electron effective mass. We divide this section into three sub sections, plain Fermi surface, projection of properties from PROCAR and projection of properties from external file.</p>
+<div class="section" id="plain-fermi-surface">
+<h2>1. Plain Fermi surface<a class="headerlink" href="#plain-fermi-surface" title="Permalink to this headline">¶</a></h2>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi3D</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span><span class="n">outcar</span><span class="p">,</span><span class="n">bands</span><span class="p">,</span><span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">st</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The main arguments in this function are <code class="docutils literal notranslate"><span class="pre">procar</span></code>, <code class="docutils literal notranslate"><span class="pre">outcar</span></code>, <code class="docutils literal notranslate"><span class="pre">bands</span></code>, <code class="docutils literal notranslate"><span class="pre">scale</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">st</span></code>, where <code class="docutils literal notranslate"><span class="pre">procar</span></code> and <code class="docutils literal notranslate"><span class="pre">outcar</span></code> are the names of the input PROCAR and OUTCAR files respectively, <code class="docutils literal notranslate"><span class="pre">bands</span></code> is an array of the bands that are desired to be plotted. Note if <code class="docutils literal notranslate"><span class="pre">bands</span> <span class="pre">=</span> <span class="pre">-1</span></code>, the function will try to plot all the bands provided in the PROCAR file. The kmesh will be interpolated by a factor of scale in each direction. The <code class="docutils literal notranslate"><span class="pre">st</span></code> tag controls the spin-texture plotting, and <code class="docutils literal notranslate"><span class="pre">mode</span></code> determines the type of projection of colors. There are additional keyword arguments that can be accessed in the help section of this function, such as <code class="docutils literal notranslate"><span class="pre">face_color,</span> <span class="pre">cmap,</span> <span class="pre">atoms,</span> <span class="pre">orbitals,</span> <span class="pre">energy,</span> <span class="pre">transparent,</span> <span class="pre">nprocess</span></code> etc.</p>
+</div>
+<div class="section" id="surface-coloring-based-on-properties-from-procar">
+<h2>2. Surface coloring based on properties from PROCAR<a class="headerlink" href="#surface-coloring-based-on-properties-from-procar" title="Permalink to this headline">¶</a></h2>
+<p>Similar to the <code class="docutils literal notranslate"><span class="pre">bandsplot()</span></code> section one can choose to project the contribution of different properties provided in the PROCAR file, such as atom, orbital and spin contributions. The projection can be represented by different color mapping schemes chosen by the user. The projection is not restricted to only one property at a time, so it can be chosen from all the provided properties. For example, one might want to see the contribution of the orbitals <span class="math notranslate nohighlight">\(p_x\)</span>, <span class="math notranslate nohighlight">\(p_y\)</span>, <span class="math notranslate nohighlight">\(p_z\)</span> from specific atoms, this function will parse the desired contributions and projects the sum of contributions on each face. To use this functionality one has to change the mode from <code class="docutils literal notranslate"><span class="pre">plain</span></code> to <code class="docutils literal notranslate"><span class="pre">parametric</span></code> and choose the atoms, orbitals, spin that are desired to be projected.</p>
+<p>For noncolinear calculations, this function is able to plot arrows in the direction of the spinors provided in the PROCAR file. To turn this functionality on the one can set <code class="docutils literal notranslate"><span class="pre">st=True</span></code> to turn the spin-texture ON. The user can choose between coloring all the arrows originated from one band with a specific color, or project the contribution of that arrow in a specific Cartesian direction. To better represent the spin-texture we use the key argument <code class="docutils literal notranslate"><span class="pre">transparent=True</span></code> which changes the opacity of the Fermi-surface to zero.</p>
+</div>
+<div class="section" id="surface-coloring-based-on-properties-obtained-from-an-external-file">
+<h2>3. Surface coloring based on properties obtained from an external file<a class="headerlink" href="#surface-coloring-based-on-properties-obtained-from-an-external-file" title="Permalink to this headline">¶</a></h2>
+<p>Similar to the previous section, this function is able to read an external file, containing information about a scalar or a vector field in BZ and project the field on the Fermi surface. This file does not need to have the same mesh grid as the PROCAR file as long as the mesh sampling is fine enough. This function performs an interpolation on the provided data and evaluates functions at the center of each face on the Fermi surface. The external file should have the following format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">band</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">band</span> <span class="n">number</span><span class="o">&gt;</span>
+   <span class="o">&lt;</span><span class="n">kx1</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">ky1</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">kz1</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">color1</span><span class="o">&gt;</span>
+   <span class="o">&lt;</span><span class="n">kx2</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">ky2</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">kz2</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">color2</span><span class="o">&gt;</span>
+   <span class="o">&lt;</span><span class="n">kx3</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">ky3</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">kz3</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">color3</span><span class="o">&gt;</span>
+   <span class="o">...</span>
+<span class="n">band</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">band</span> <span class="n">number</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on.</p>
+<span class="target" id="module-pyprocar.scriptFermi3D"></span><p>Created on Fri May 10 16:23:30 2019</p>
+<p>&#64;author: Pedram Tavadze</p>
+<dl class="function">
+<dt id="pyprocar.scriptFermi3D.fermi3D">
+<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param">procar</em>, <em class="sig-param">outcar</em>, <em class="sig-param">bands=-1</em>, <em class="sig-param">scale=1</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">st=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots 3d fermi surface
+list of acceptable kwargs :</p>
+<blockquote>
+<div><p>plotting_package
+nprocess
+face_colors
+arrow_colors
+arrow_spin
+atom
+orbital
+spin</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="filter.html" class="btn btn-neutral float-right" title="Filtering data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="2Dspin.html" class="btn btn-neutral float-left" title="2D spin-texture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Uthpala Herath
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

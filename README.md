@@ -142,3 +142,5 @@ v4.1.2 Feb 24th, 2020 -- Bug fixes in band unfolder.
 v4.1.3 Feb 27th, 2020 -- Renormalize alpha values in band unfolder for values > 1. 
 
 v4.1.4 Feb 28th, 2020 -- Added option to convert k-points between reduced and cartesian when OUTCAR is supplied. 
+
+v5.0.0 Mar 1st, 2020 -- Added discontinuous band-plotting feature and other improvements. 

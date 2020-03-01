@@ -14,7 +14,7 @@ from scipy.spatial import Voronoi
 from skimage import measure   
 from multiprocessing import Pool
 import scipy.interpolate as interpolate
-import pyfiglet
+from .splash import welcome
 
 
 def get_wigner_seitz(recLat):
@@ -190,15 +190,7 @@ def fermi3D(procar,outcar,bands=-1,scale=1,mode='plain',st=False,**kwargs):
         spin
         
     """
-
-    ################ Welcome Text #######################
-    print(pyfiglet.figlet_format("PyProcar"))
-    print('A Python library for electronic structure pre/post-processing.\n')
-    print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
-    A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-    Computer Physics Communications 107080 (2019).\n')
-
-    #####################################################
+    welcome()
     
     # Initilizing the arguments :
 

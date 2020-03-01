@@ -1,19 +1,11 @@
 import numpy as np 
-import pyfiglet
+from .splash import welcome
 	
 def generate2dkmesh(x1,y1,x2,y2,z,nkx,nky):	  
 	"""
 	This module generates a KPOINTS mesh file for 2D plotting.
 	"""
-
-	################ Welcome Text #######################
-	print(pyfiglet.figlet_format("PyProcar"))
-	print('A Python library for electronic structure pre/post-processing.\n')
-	print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
-	A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-	Computer Physics Communications 107080 (2019).\n')
-
-	#####################################################
+	welcome()
 
 	kx = np.linspace(x1,x2,nkx)
 	ky = np.linspace(y1,y2,nky)

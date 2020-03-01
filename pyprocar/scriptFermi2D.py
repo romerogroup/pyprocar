@@ -5,7 +5,7 @@ from .procarplot import ProcarPlot
 from .procarsymmetry import ProcarSymmetry
 from .fermisurface import FermiSurface
 import matplotlib.pyplot as plt
-import pyfiglet
+from .splash import welcome
 
 
 
@@ -16,14 +16,7 @@ def fermi2D(file,outcar,spin=0,atoms=None,orbitals=None,energy=None,fermi=None,r
   This module plots 2D Fermi surface.
   """
 
-  ################ Welcome Text #######################
-  print(pyfiglet.figlet_format("PyProcar"))
-  print('A Python library for electronic structure pre/post-processing.\n')
-  print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
-  A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-  Computer Physics Communications 107080 (2019).\n')
-
-  #####################################################
+  welcome() 
 
   # Turn interactive plotting off
   plt.ioff()

@@ -11,76 +11,76 @@ class ProcarPlot:
     self.kpoints = kpoints
     return
 
-  def plotBands(self, size=0.02, marker='o', ticks=None,color='blue'):
+  def plotBands(self, size=0.02, marker='o', ticks=None,color='blue',discontinuities=None):
     if size is not None:
-      size = size/2
+        size = size/2
+        
     if self.kpoints is not None:
-      xaxis = [0]
-      for i in range(1,len(self.kpoints)):
-        d = self.kpoints[i-1]-self.kpoints[i]
-        d = np.sqrt(np.dot(d,d))
-        xaxis.append(d+xaxis[-1])
-      xaxis = np.array(xaxis)
+        xaxis = [0]
+    
+    #### MODIFIED FOR DISCONTINOUS BANDS ####
+        if ticks:
+          ticks, ticksNames = list(zip(*ticks))  
+          
+          #counters for number of discontinuities 
+          icounter = 1
+          ii = 0
+                               
+          for i in range(1,len(self.kpoints)-len(discontinuities)):
+            d = self.kpoints[icounter] - self.kpoints[icounter-1]
+            d = np.sqrt(np.dot(d,d))
+            xaxis.append(d + xaxis[-1])
+            icounter+=1
+            ii+=1
+            if ii in discontinuities:
+               icounter +=1
+               ii+=1
+               xaxis.append(xaxis[-1])
+          xaxis = np.array(xaxis)  
+           
+          # plotting
+          for i_tick in range(len(ticks)-1):
+            x = xaxis[ticks[i_tick]:ticks[i_tick+1]+1]
+            y = self.bands.transpose()[ticks[i_tick]:ticks[i_tick+1]+1,:] 
+            plot = plt.plot(x,y,'r-', marker=marker,markersize=size,color=color)
+                                  
+    #### END  OF MODIFIED DISCONTINUOUS BANDS #### 
+        
+        #if ticks are not given
+        else:
+          for i in range(1,len(self.kpoints)):
+            d = self.kpoints[i-1]-self.kpoints[i]
+            d = np.sqrt(np.dot(d,d))
+            xaxis.append(d+xaxis[-1])
+          xaxis = np.array(xaxis) 
+          plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker,markersize=size,color=color)
+            
+    # if self.kpoints is None
     else:
-      xaxis = np.arange(len(self.bands))
-    plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker, 
-                    markersize=size,color=color)
+        xaxis = np.arange(len(self.bands))
+        plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker, markersize=size,color=color) 
+                    
     plt.xlim(xaxis.min(), xaxis.max())
-
-    #handling ticks
+    print("kpoints.shape:[%d,%d] " %self.kpoints.shape)
+    print("xaxis.shape :[%d,]" %xaxis.shape)
+    print("bands.shape :[%d,%d]" %self.bands.shape)
+ 
+    # Handling ticks
     if ticks:
-      ticks, ticksNames = list(zip(*ticks))
-      #added for meta-GGA calculations
-      if ticks[0] > 0:
-      	plt.xlim(left=xaxis[ticks[0]])
-      ticks = [xaxis[x] for x in ticks]
-      plt.xticks(ticks, ticksNames,fontsize=22)
-      plt.yticks(fontsize=22)
+        #added for meta-GGA calculations
+        if ticks[0] > 0:
+          plt.xlim(left=xaxis[ticks[0]])
+        ticks = [xaxis[x] for x in ticks]
+        plt.xticks(ticks, ticksNames,fontsize=22)
+        for xc in ticks:
+           plt.axvline(x=xc,color='k')
+    plt.yticks(fontsize=22)
+    plt.axhline(color='r',linestyle='--')
     
     return plot
 
-  def scatterPlot(self, size=50, mask=None, cmap='hot_r', vmax=None, vmin=None,
-                  marker='o', ticks=None):
-    bsize, ksize = self.bands.shape
-    print(bsize, ksize)
-
-    if self.kpoints is not None:
-      xaxis = [0]
-      for i in range(1,len(self.kpoints)):
-        d = self.kpoints[i-1]-self.kpoints[i]
-        d = np.sqrt(np.dot(d,d))
-        xaxis.append(d+xaxis[-1])
-      xaxis = np.array(xaxis)
-    else:
-      xaxis = np.arange(ksize)
-
-    xaxis.shape=(1,ksize)
-    xaxis = xaxis.repeat(bsize, axis=0)
-    if mask is not None:
-      mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
-    else:
-      mbands = self.bands
-    
-    plot = plt.scatter(xaxis, mbands, c=self.spd, s=size, linewidths=0,
-                       cmap=cmap, vmax=vmax, vmin=vmin, marker=marker,
-                       edgecolors='none')
-    plt.colorbar()
-    plt.xlim(xaxis.min(), xaxis.max())
-    
-    #handling ticks
-    if ticks:
-      ticks, ticksNames = list(zip(*ticks))
-      #added for meta-GGA calculations
-      if ticks[0] > 0:
-      	plt.xlim(left=xaxis[0,ticks[0]])
-      ticks = [xaxis[0,x] for x in ticks]
-      plt.xticks(ticks, ticksNames,fontsize=22)
-      plt.yticks(fontsize=22)
-
-    return plot
-    
   def parametricPlot(self, cmap='jet', vmin=None, vmax=None, mask=None, 
-                     ticks=None):
+                     ticks=None,discontinuities=None):
     from matplotlib.collections import LineCollection
     import matplotlib
     fig = plt.figure()
@@ -93,8 +93,7 @@ class ProcarPlot:
     else:
       #Faking a mask, all elemtnet are included
       mbands = np.ma.masked_array(self.bands, False)
-    #print mbands
-    
+       
     if vmin is None:
       vmin = self.spd.min()
     if vmax is None:
@@ -104,38 +103,189 @@ class ProcarPlot:
 
     if self.kpoints is not None:
       xaxis = [0]
-      for i in range(1,len(self.kpoints)):
-        d = self.kpoints[i-1]-self.kpoints[i]
-        d = np.sqrt(np.dot(d,d))
-        xaxis.append(d+xaxis[-1])
-      xaxis = np.array(xaxis)
+      
+    #### MODIFIED FOR DISCONTINOUS BANDS ####  
+      if ticks:
+          ticks, ticksNames = list(zip(*ticks))  
+      
+          #counters for number of discontinuities 
+          icounter = 1
+          ii = 0
+                               
+          for i in range(1,len(self.kpoints)-len(discontinuities)):
+            d = self.kpoints[icounter] - self.kpoints[icounter-1]
+            d = np.sqrt(np.dot(d,d))
+            xaxis.append(d + xaxis[-1])
+            icounter+=1
+            ii+=1
+            if ii in discontinuities:
+               icounter +=1
+               ii+=1
+               xaxis.append(xaxis[-1])
+          xaxis = np.array(xaxis)  
+          
+          #plotting
+          for y,z in zip(mbands,self.spd):
+            points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+            lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
+            lc.set_array(z)
+            lc.set_linewidth(1)
+            gca.add_collection(lc)
+          cb = plt.colorbar(lc)
+          cb.ax.tick_params(labelsize=20)
+          plt.xlim(xaxis.min(), xaxis.max())
+          plt.ylim(mbands.min(), mbands.max())
+      
+      #### END  OF MODIFIED DISCONTINUOUS BANDS ####   
+      
+      # if ticks are not given
+      else:
+          for i in range(1,len(self.kpoints)):
+            d = self.kpoints[i-1]-self.kpoints[i]
+            d = np.sqrt(np.dot(d,d))
+            xaxis.append(d+xaxis[-1])
+          xaxis = np.array(xaxis) 
+          
+          #plotting
+          for y,z in zip(mbands,self.spd):
+            points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+            lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
+            lc.set_array(z)
+            lc.set_linewidth(1)
+            gca.add_collection(lc)
+          cb = plt.colorbar(lc)
+          cb.ax.tick_params(labelsize=20)
+          plt.xlim(xaxis.min(), xaxis.max())
+          plt.ylim(mbands.min(), mbands.max())
+              
+    # if self.kpoints is None
     else:
-      xaxis = np.arange(ksize)
-
-    for y,z in zip(mbands,self.spd):
-      #print xaxis.shape, y.shape, z.shape
-      points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
-      segments = np.concatenate([points[:-1], points[1:]], axis=1)
-      lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
-      lc.set_array(z)
-      lc.set_linewidth(1)
-      gca.add_collection(lc)
-    cb = plt.colorbar(lc)
-    cb.ax.tick_params(labelsize=20)
-    plt.xlim(xaxis.min(), xaxis.max())
-    plt.ylim(mbands.min(), mbands.max())
-
+        xaxis = np.arange(ksize)        
+        for y,z in zip(mbands,self.spd):
+           points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
+           segments = np.concatenate([points[:-1], points[1:]], axis=1)
+           lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
+           lc.set_array(z)
+           lc.set_linewidth(1)
+           gca.add_collection(lc)
+        cb = plt.colorbar(lc)
+        cb.ax.tick_params(labelsize=20)
+        plt.xlim(xaxis.min(), xaxis.max())
+        plt.ylim(mbands.min(), mbands.max())
+  
     #handling ticks
     if ticks:
-      ticks, ticksNames = list(zip(*ticks))
       #added for meta-GGA calculations
       if ticks[0] > 0:
-      	plt.xlim(left=xaxis[ticks[0]])
+        plt.xlim(left=xaxis[ticks[0]])
       ticks = [xaxis[x] for x in ticks]
       plt.xticks(ticks, ticksNames,fontsize=22)
-      plt.yticks(fontsize=22)
+      for xc in ticks:
+           plt.axvline(x=xc,color='lightgrey')
+    plt.yticks(fontsize=22)
+    plt.axhline(color='r',linestyle='--')
 
     return fig
+
+  def scatterPlot(self, size=50, mask=None, cmap='hot_r', vmax=None, vmin=None,
+                  marker='o', ticks=None, discontinuities = None):
+    bsize, ksize = self.bands.shape
+    print(bsize, ksize)
+
+    if self.kpoints is not None:
+      xaxis = [0]
+
+      #### MODIFIED FOR DISCONTINOUS BANDS ####  
+      if ticks:
+          ticks, ticksNames = list(zip(*ticks))  
+      
+          #counters for number of discontinuities 
+          icounter = 1
+          ii = 0
+                               
+          for i in range(1,len(self.kpoints)-len(discontinuities)):
+            d = self.kpoints[icounter] - self.kpoints[icounter-1]
+            d = np.sqrt(np.dot(d,d))
+            xaxis.append(d + xaxis[-1])
+            icounter+=1
+            ii+=1
+            if ii in discontinuities:
+               icounter +=1
+               ii+=1
+               xaxis.append(xaxis[-1])
+          xaxis = np.array(xaxis)  
+          
+          #plotting
+          xaxis.shape=(1,ksize)
+          xaxis = xaxis.repeat(bsize, axis=0)
+          if mask is not None:
+            mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+          else:
+            mbands = self.bands
+    
+          plot = plt.scatter(xaxis, mbands, c=self.spd, s=size, linewidths=0,
+                       cmap=cmap, vmax=vmax, vmin=vmin, marker=marker,
+                       edgecolors='none')
+          plt.colorbar()
+          plt.xlim(xaxis.min(), xaxis.max())
+        
+      #### END  OF MODIFIED DISCONTINUOUS BANDS ####    
+
+      # if ticks are not given
+      else:
+        for i in range(1,len(self.kpoints)):
+          d = self.kpoints[i-1]-self.kpoints[i]
+          d = np.sqrt(np.dot(d,d))
+          xaxis.append(d+xaxis[-1])
+        xaxis = np.array(xaxis)    
+
+        xaxis.shape=(1,ksize)
+        xaxis = xaxis.repeat(bsize, axis=0)
+        if mask is not None:
+          mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+        else:
+          mbands = self.bands
+    
+        plot = plt.scatter(xaxis, mbands, c=self.spd, s=size, linewidths=0,
+                       cmap=cmap, vmax=vmax, vmin=vmin, marker=marker,
+                       edgecolors='none')
+    
+        plt.colorbar()
+        plt.xlim(xaxis.min(), xaxis.max())     
+
+
+    # if kpoints is None  
+    else:
+      xaxis = np.arange(ksize)
+      xaxis.shape=(1,ksize)
+      xaxis = xaxis.repeat(bsize, axis=0)
+      if mask is not None:
+        mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+      else:
+        mbands = self.bands
+    
+      plot = plt.scatter(xaxis, mbands, c=self.spd, s=size, linewidths=0,
+                       cmap=cmap, vmax=vmax, vmin=vmin, marker=marker,
+                       edgecolors='none')
+    
+      plt.colorbar()
+      plt.xlim(xaxis.min(), xaxis.max()) 
+    
+    #handling ticks
+    if ticks:
+      #added for meta-GGA calculations
+      if ticks[0] > 0:
+      	plt.xlim(left=xaxis[0,ticks[0]])
+      ticks = [xaxis[0,x] for x in ticks]
+      plt.xticks(ticks, ticksNames,fontsize=22)
+    plt.yticks(fontsize=22)
+    plt.axhline(color='r',linestyle='--')
+
+    return plot
+    
+  
 
   def atomicPlot(self, cmap='hot_r', vmin=None, vmax=None):
     """

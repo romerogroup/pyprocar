@@ -5,7 +5,7 @@ from .procarplotcompare import ProcarPlotCompare
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-import pyfiglet
+from .splash import welcome
 
 
 
@@ -15,18 +15,11 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
                  elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',cmap2='hot_r',vmax=None,vmin=None,
                  vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,
                  savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',
-                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,kdirect=True,kdirect2=True):
+                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,kdirect=True,kdirect2=True, discontinuities = None):
   """
   This module compares two band structures.
   """
-  ################ Welcome Text #######################
-  print(pyfiglet.figlet_format("PyProcar"))
-  print('A Python library for electronic structure pre/post-processing.\n')
-  print('Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
-  A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-  Computer Physics Communications 107080 (2019).\n')
-
-  #####################################################
+  welcome()
 
   # Turn interactive plotting off
   plt.ioff()
@@ -151,7 +144,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   else:
     print("k-points #2 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")  
 
-#If KPOINTS file is given:
+  #If KPOINTS file is given:
   if kpointsfile is not None:
     #Getting the high symmetry point names from KPOINTS file
     f = open(kpointsfile)
@@ -161,12 +154,32 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     KPmatrix = re.findall('reciprocal[\s\S]*',KPread)
     tick_labels = np.array(re.findall('!\s(.*)',KPmatrix[0]))
     knames=[]
-    knames=[tick_labels[0]]
-
-    for i in range(len(tick_labels)-1):
-      if tick_labels[i] !=tick_labels[i+1]:
-        knames.append(tick_labels[i+1])
-
+    knames=[tick_labels[0]]    
+   
+    ################## Checking for discontinuities ########################
+    discont_indx=[]
+    icounter = 1
+    while icounter<len(tick_labels)-1:
+        if tick_labels[icounter] == tick_labels[icounter+1]:
+            knames.append(tick_labels[icounter])
+            icounter = icounter + 2
+        else:
+            discont_indx.append(icounter)
+            knames.append(tick_labels[icounter]+'/'+tick_labels[icounter+1])
+            icounter = icounter + 2
+    knames.append(tick_labels[-1])                    
+    discont_indx = list(dict.fromkeys(discont_indx))
+    
+    ################# End of discontinuity check ##########################
+                  
+    # Added by Nicholas Pike to modify the output of seekpath to allow for 
+    # latex rendering.
+    for i in range(len(knames)):
+        if knames[i] =='GAMMA':
+            knames[i] = '\Gamma'
+        else:
+            pass
+            
     knames = [str("$"+latx+"$") for latx in knames] 
 
     #getting the number of grid points from the KPOINTS file
@@ -182,6 +195,14 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       kticks.append(gridpoint-1)
     print("knames        : ", knames)
     print("kticks        : ", kticks)  
+    
+    # creating an array for discontunuity k-points. These are the indexes 
+    # of the discontinuity k-points.
+    discontinuities = []  
+    for k in discont_indx:
+        discontinuities.append( kticks[int(k/2)+1]  )  
+    if discontinuities:
+        print("discontinuities :",discontinuities)  
 
 
   #If ticks and names are given by user manually:
@@ -310,7 +331,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   ###### start of mode dependent options #########
 
   if mode == "scatter":
-    plot.scatterPlot(mask=mask,size=markersize,size2= markersize2, cmap=cmap, cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker=marker, marker2=marker2,legend1=legend,legend2=legend2, ticks=ticks)
+    plot.scatterPlot(mask=mask,size=markersize,size2= markersize2, cmap=cmap, cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker=marker, marker2=marker2,legend1=legend,legend2=legend2, ticks=ticks, discontinuities = discontinuities)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -319,7 +340,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.ylim(elimit)
 #
   if mode == "plain":
-    plot.plotBands(size=markersize,size2= markersize2, marker=marker, marker2=marker2,color=color,color2=color2,legend1=legend,legend2=legend2, ticks=ticks)
+    plot.plotBands(size=markersize,size2= markersize2, marker=marker, marker2=marker2,color=color,color2=color2,legend1=legend,legend2=legend2, ticks=ticks, discontinuities = discontinuities)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -328,7 +349,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.ylim(elimit)
       
   if mode == "parametric":
-    plot.parametricPlot(cmap=cmap,cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='solid', marker2='solid', legend1=legend,legend2=legend2,ticks=ticks)
+    plot.parametricPlot(cmap=cmap,cmap2 = cmap2, vmin=vmin, vmax=vmax,vmin2=vmin2, vmax2=vmax2, marker='solid', marker2='solid', legend1=legend,legend2=legend2,ticks=ticks, discontinuities = discontinuities)
     if fermi is not None:
     	plt.ylabel(r"$E-E_f$ [eV]",fontsize=22)
     else:
@@ -362,5 +383,7 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       plt.close() #Added by Nicholas Pike to close memory issue of looping and creating many figures 
     else:
       plt.show()
-    return  
-    
+    return 
+
+#if __name__ == "__main__": 
+    #bandscompare('./compare/PROCAR','./compare/PROCAR',outcar='./compare/OUTCAR',outcar2='./compare/OUTCAR2',kpointsfile='./compare/KPOINTS',mode='plain',elimit=[-6,6])

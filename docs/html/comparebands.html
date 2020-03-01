@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Compare bands &mdash; PyProcar 3.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Concatenating multiple calculations" href="cat.html" />
+    <link rel="prev" title="Filtering data" href="filter.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Compare bands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Compare bands</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/comparebands.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="compare-bands">
+<h1>Compare bands<a class="headerlink" href="#compare-bands" title="Permalink to this headline">¶</a></h1>
+<p>This module is useful to compare different bands from different materials on the same band plot. The bands are plotted for the same <span class="math notranslate nohighlight">\(k\)</span>-path in order to have a meaningful comparison but they do not need to have the same number of <span class="math notranslate nohighlight">\(k\)</span>-points in each interval. The <code class="docutils literal notranslate"><span class="pre">bandscompare()</span></code> function contains all the parameters that are used in the <code class="docutils literal notranslate"><span class="pre">bandsplot()</span></code> along with an added feature of displaying a <code class="docutils literal notranslate"><span class="pre">legend</span></code> to help differentiate between the two different band structures. Different <code class="docutils literal notranslate"><span class="pre">marker</span></code> styles can be used as well.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandscompare</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR2&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span><span class="n">outcar2</span><span class="o">=</span><span class="s1">&#39;OUTCAR2&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="n">marker2</span><span class="o">=</span><span class="s1">&#39;-.&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">kpointsfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span><span class="n">legend</span><span class="o">=</span><span class="s1">&#39;PRO1&#39;</span><span class="p">,</span><span class="n">legend2</span><span class="o">=</span><span class="s1">&#39;PRO2&#39;</span><span class="p">,</span><span class="n">spin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">spin2</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kdirect2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">discontinuities</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A similar approch could be used for other modes of band plots.</p>
+<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">plt</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandscompare</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span> <span class="s1">&#39;PROCAR2&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span> <span class="n">outcar2</span><span class="o">=</span><span class="s1">&#39;OUTCAR2&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<span class="target" id="module-pyprocar.scriptCompareBands"></span><dl class="function">
+<dt id="pyprocar.scriptCompareBands.bandscompare">
+<code class="sig-prename descclassname">pyprocar.scriptCompareBands.</code><code class="sig-name descname">bandscompare</code><span class="sig-paren">(</span><em class="sig-param">file</em>, <em class="sig-param">file2</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">abinit_output=None</em>, <em class="sig-param">abinit_output2=None</em>, <em class="sig-param">spin='0'</em>, <em class="sig-param">spin2='0'</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">atoms2=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbitals2=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">fermi2=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">markersize=0.02</em>, <em class="sig-param">markersize2=0.02</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">cmap2='hot_r'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax2=None</em>, <em class="sig-param">vmin2=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">marker='</em>, <em class="sig-param">'</em>, <em class="sig-param">marker2='</em>, <em class="sig-param">'</em>, <em class="sig-param">permissive=False</em>, <em class="sig-param">human=False</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">kticks=None</em>, <em class="sig-param">knames=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">outcar2=None</em>, <em class="sig-param">color='r'</em>, <em class="sig-param">color2='g'</em>, <em class="sig-param">legend='PROCAR1'</em>, <em class="sig-param">legend2='PROCAR2'</em>, <em class="sig-param">kpointsfile=None</em>, <em class="sig-param">exportplt=False</em>, <em class="sig-param">kdirect=True</em>, <em class="sig-param">kdirect2=True</em>, <em class="sig-param">discontinuities=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptCompareBands.bandscompare" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module compares two band structures.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cat.html" class="btn btn-neutral float-right" title="Concatenating multiple calculations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filter.html" class="btn btn-neutral float-left" title="Filtering data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Uthpala Herath
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
