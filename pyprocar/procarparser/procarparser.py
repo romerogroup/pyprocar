@@ -74,6 +74,7 @@ class ProcarParser:
         self.orbitalName = [
             "s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2", "tot"
         ]
+        self.orbitalName_old = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2", "tot"]
         self.orbitalName_short = ["s","p","d","tot"]
         self.orbitalCount = None  #number of orbitals
 
@@ -292,7 +293,8 @@ class ProcarParser:
         # only the first 'size' orbital
         StdOrbs = self.orbitalName[:size - 1] + self.orbitalName[-1:]
         StdOrbs_short = self.orbitalName_short[:size - 1] + self.orbitalName_short[-1:]
-        if FoundOrbs != (StdOrbs) and FoundOrbs != (StdOrbs_short) :
+        StdOrbs_old = self.orbitalName_old[:size - 1] + self.orbitalName_old[-1:]
+        if FoundOrbs != (StdOrbs) and FoundOrbs != (StdOrbs_short) and FoundOrbs != (StdOrbs_old):
             self.log.warning(
                 str(size) + " orbitals. (Some of) They are unknow (if "
                 "you did 'filter' them it is OK).")

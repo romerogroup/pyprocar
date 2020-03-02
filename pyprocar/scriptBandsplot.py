@@ -31,7 +31,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   if orbitals is None:
     orbitals = [-1]
     
-
+  print("Script initiated")  
   print("input file    : ", file)
   print("Mode          : ", mode)
   
@@ -64,7 +64,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
 
 ####################################################################  
 
-  print("Script initiated") 
+ 
   print("Fermi Ener.   : ", fermi)
   print("Energy range  : ", elimit)
 
@@ -86,6 +86,8 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   if kpointsfile is None:
     print("kticks        : ", kticks)
     print("knames        : ", knames)
+    if discontinuities:
+        print("discontinuities :",discontinuities)
   print("title         : ", title)
 
   print("outcar        : ", outcar)
@@ -146,7 +148,8 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
       gridpoint=gridpoint+numgridpoints
       kticks.append(gridpoint-1)
     print("knames        : ", knames)
-    print("kticks        : ", kticks)  
+    print("kticks        : ", kticks)
+  
     
     # creating an array for discontunuity k-points. These are the indexes 
     # of the discontinuity k-points.
@@ -154,7 +157,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     for k in discont_indx:
         discontinuities.append( kticks[int(k/2)+1]  )  
     if discontinuities:
-        print("discontinuities :",discontinuities)
+        print("discontinuities :",discontinuities)  
 
 
   #If ticks and names are given by user manually:

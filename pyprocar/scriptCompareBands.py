@@ -125,8 +125,11 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   print("Savefig         : ", savefig)
   print("kticks          : ", kticks)
   if kpointsfile is None:
-    print("knames          : ", knames)
-    print("title           : ", title)
+    print("kticks        : ", kticks)
+    print("knames        : ", knames)
+    if discontinuities:
+        print("discontinuities :",discontinuities)
+  print("title         : ", title)
 
   print("outcar #1       : ", outcar)
   print("outcar #2       : ", outcar2)
@@ -194,7 +197,8 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
       gridpoint=gridpoint+numgridpoints
       kticks.append(gridpoint-1)
     print("knames        : ", knames)
-    print("kticks        : ", kticks)  
+    print("kticks        : ", kticks) 
+ 
     
     # creating an array for discontunuity k-points. These are the indexes 
     # of the discontinuity k-points.

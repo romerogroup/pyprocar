@@ -144,3 +144,5 @@ v4.1.3 Feb 27th, 2020 -- Renormalize alpha values in band unfolder for values > 
 v4.1.4 Feb 28th, 2020 -- Added option to convert k-points between reduced and cartesian when OUTCAR is supplied. 
 
 v5.0.0 Mar 1st, 2020 -- Added discontinuous band-plotting feature and other improvements. 
+
+v5.0.1 Mar 2nd, 2020 -- Added orbital header array for newer version of VASP.
