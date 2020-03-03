@@ -41,6 +41,10 @@ from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarsymmetry import ProcarSymmetry
+# ELK
+from pyprocar.elkparser import ElkParser
+
+
 
 from .scriptBandsplot import bandsplot
 from .scriptCat import cat
