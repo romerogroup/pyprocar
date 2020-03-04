@@ -3,14 +3,16 @@ from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .procarplot import ProcarPlot
+from .elkparser import ElkParser 
+from .splash import welcome
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-from .splash import welcome
+
   
-def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,
+def bandsplot(file=None,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=None,orbitals=None,fermi=None,elimit=None,mask=None,
             markersize=0.02,cmap='jet',vmax=None,vmin=None,grid=True,marker='o',permissive=False,human=False,savefig=None,kticks=None,
-            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False, kdirect=True, discontinuities = None):
+            knames=None,title=None,outcar=None,kpointsfile=None,exportplt=False, kdirect=True, discontinuities = [], code='vasp'):
 
   """This function plots band structures
   """
@@ -31,49 +33,29 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   if orbitals is None:
     orbitals = [-1]
     
-  print("Script initiated")  
+  print("Script initiated")
+  print("code          : ", code)  
   print("input file    : ", file)
-  print("Mode          : ", mode)
-  
+  print("Mode          : ", mode)  
   print("spin comp.    : ", spin)
-  print("atoms list.   : ", atoms)
-  print("orbs. list.   : ", orbitals)
+  print("atoms list   : ", atoms)
+  print("orbs. list   : ", orbitals)
 
-  if fermi is None and outcar is None and abinit_output is None:
-    print("WARNING: Fermi Energy not set! ")
-    print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
-    print("The zero of energy is arbitrary\n")
+  if fermi is None and outcar is None and abinit_output is None and code!='elk':
+    print("WARNING: Fermi Energy not set! Please set manually or provide output file.")
     fermi = 0
+  
+  if fermi is None and code=='elk':
+      fermi = None
 
-  if kpointsfile is None:
-    print("No KPOINTS file present. Please set knames and kticks manually.")  
-
-
-###################reading abinit output (added by uthpala) ##########################
-
-  if abinit_output:
-  	print("Abinit output used")
-
-  #reading abinit output file
-  	rf = open(abinit_output,'r')
-  	data = rf.read()
-  	rf.close()
-
-  	fermi = float(re.findall('Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)',data)[0])
-
-
-####################################################################  
-
- 
-  print("Fermi Ener.   : ", fermi)
+  print("Fermi Energy   : ", fermi)
   print("Energy range  : ", elimit)
 
   if mask is not None:
     print("masking thres.: ", mask)
     
   print("Colormap      : ", cmap)
-  print("MarkerSize    : ", markersize)
-    
+  print("MarkerSize    : ", markersize)    
   print("Permissive    : ", permissive)
   if permissive:
     print("INFO: Permissive flag is on! Be careful")
@@ -89,14 +71,14 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     if discontinuities:
         print("discontinuities :",discontinuities)
   print("title         : ", title)
-
   print("outcar        : ", outcar)
 
   if kdirect:
     print("k-points are in reduced coordinates")
   else:
-    print("k-points are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")
+    print("k-points are in cartesian coordinates. Remember to supply an output file for this case to work.")
 
+  #### READING KPOINTS FILE IF PRESENT ####
 
   #If KPOINTS file is given:
   if kpointsfile is not None:
@@ -147,9 +129,9 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     for kt in range(len(knames)-1):
       gridpoint=gridpoint+numgridpoints
       kticks.append(gridpoint-1)
+      
     print("knames        : ", knames)
-    print("kticks        : ", kticks)
-  
+    print("kticks        : ", kticks)     
     
     # creating an array for discontunuity k-points. These are the indexes 
     # of the discontinuity k-points.
@@ -158,46 +140,72 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
         discontinuities.append( kticks[int(k/2)+1]  )  
     if discontinuities:
         print("discontinuities :",discontinuities)  
+        
+  #### END OF KPOINTS FILE DEPENDENT SECTION ####      
 
+   
+  #The spin argument should be a number (index of an array), or
+  #'st'. In the last case it will be handled separately (later)
 
-  #If ticks and names are given by user manually:
+  spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[str(spin)]  
+  
+  # parsing the PROCAR file
+  if code == 'vasp' or code=='abinit':
+      procarFile = ProcarParser()
+  elif code == 'elk':
+      procarFile = ElkParser(kdirect=kdirect)
+      
+      # Retrieving knames and kticks from Elk
+      if kticks is None and knames is None:
+          if procarFile.kticks and procarFile.knames:
+              kticks = procarFile.kticks
+              knames = procarFile.knames
+      
+  #If ticks and names are given by the user manually:
   if kticks is not None and knames is not None:
     ticks = list(zip(kticks,knames))
   elif kticks is not None:
     ticks = list(zip(kticks,kticks))
   else:
-    ticks = None
-
-
+    ticks = None 
   
-  #The spin argument should be a number (index of an array), or
-  #'st'. In the last case it will be handled separately (later)
-
-  spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[str(spin)]  
-
 
   #The second part of this function is parse/select/use the data in
   #OUTCAR (if given) and PROCAR
 
   #first parse the outcar if given, to get Efermi and Reciprocal lattice
-  recLat = None 
-  if outcar:
-    outcarparser = UtilsProcar()
+  recLat = None     
+  if code == 'vasp':    
+      if outcar:
+        outcarparser = UtilsProcar()
+        if fermi is None:
+          fermi = outcarparser.FermiOutcar(outcar)            
+          print("Fermi energy found in outcar file = " + str(fermi))
+        recLat = outcarparser.RecLatOutcar(outcar)
+  
+  elif code =='elk':
+      if fermi is None:
+        fermi = procarFile.fermi
+        print("Fermi energy found in Elk output file = " + str(fermi))
+  
+  elif code=='abinit':  	
     if fermi is None:
-      fermi = outcarparser.FermiOutcar(outcar)
-      #if quiet is False:
-      print("INFO: Fermi energy found in outcar file = " + str(fermi))
-    recLat = outcarparser.RecLatOutcar(outcar)
-
-  # parsing the PROCAR file
-  procarFile = ProcarParser()
+      rf = open(abinit_output,'r')
+      data = rf.read()
+      rf.close()
+      fermi = float(re.findall('Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)',data)[0])  
+      print("Fermi energy found in Abinit output file = " + str(fermi))
+          
 
   # if kdirect = False, then the k-points will be in cartesian coordinates. 
-  # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
-  if kdirect:
-    procarFile.readFile(file, permissive)
-  else:
-    procarFile.readFile(file, permissive, recLattice=recLat)
+  # The output should be read to find the reciprocal lattice vectors to transform from direct to cartecian
+  
+  if code=='vasp' or code=='abinit':
+      if kdirect:        
+        procarFile.readFile(file, permissive)        
+      else:    
+        procarFile.readFile(file, permissive, recLattice=recLat)
+    
 
   # processing the data, getting an instance of the class that reduces the data
   data = ProcarSelect(procarFile, deepCopy=True)
@@ -233,6 +241,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
   data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
   plot = ProcarPlot(data.bands, data.spd, data.kpoints)
 
+  
   ###### start of mode dependent options #########
 
   if mode == "scatter":
@@ -293,7 +302,7 @@ def bandsplot(file,mode='scatter',color='blue',abinit_output=None,spin=0,atoms=N
     return  
 
 #if __name__ == "__main__":
-    #bandsplot('PROCAR1',outcar='OUTCAR1',mode='parametric',kpointsfile='KPOINTS1',atoms=[1],elimit=[-6,6],vmin=0,vmax=1)
-  # knames=['$\\Gamma$', '$X$', '$M$', '$\\Gamma$', '$R$', '$X/M$','$R$'],
-  # kticks=[0,39,79,119,159,199,238])
+   # bandsplot(mode='parametric',elimit=[-6,6],orbitals=[4,5,6,7,8],vmin=0,vmax=1, code='elk')
+   #knames=['$\Gamma$', '$X$', '$M$', '$\Gamma$', '$R$','$X$'],
+   #kticks=[0, 8, 16, 24, 38, 49])
     

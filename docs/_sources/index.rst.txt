@@ -1,6 +1,8 @@
 PyProcar documentation
 ======================
-PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every :math:`k`-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a :math:`k`-path for a given crystal structure. In the VASP code, this information is written into the PROCAR file when ``LORBIT=11`` or ``LORBIT=12`` (to include phase projections of the wave functions) in the INCAR file.
+PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage the PROCAR file obtained from Vasp and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every :math:`k`-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a :math:`k`-path for a given crystal structure. 
+
+In the VASP code, this information is written into the PROCAR file when ``LORBIT=11`` or ``LORBIT=12`` (to include phase projections of the wave functions) in the INCAR file. Partial support for Elk (tasks 21, 22, non spin calculations) and Abinit (`prtprocar`) is also available. To switch between codes, set the ``code`` variable to the desired code. E.g. ``code='vasp'``. Full support for Elk and Abinit along with other DFT codes will be implemented in the future. 
 
 The format of the PROCAR is as follows::
 
@@ -12,12 +14,12 @@ The format of the PROCAR is as follows::
 	6.   band   1 # energy  -52.65660295 # occ.  1.00000000 
 	7.   
 	8.   ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot 
-	9.     1  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+	9.     1  0.052  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.052
 	10.    2  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
 	11.    3  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
 	12.    4  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
 	13.    4  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
-	14.   tot 0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000 
+	14.   tot 0.052  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.052 
 
 
 - Line 1 is a comment 

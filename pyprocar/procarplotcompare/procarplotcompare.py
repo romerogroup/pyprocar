@@ -15,7 +15,7 @@ class ProcarPlotCompare:
     self.kpoints2 = kpoints2
     return
 
-  def plotBands(self, size=0.02, size2=0.02, marker=',', marker2=',',color='r',color2='g', legend1='PROCAR1',legend2='PROCAR2', ticks=None,discontinuities=None):
+  def plotBands(self, size=0.02, size2=0.02, marker=',', marker2=',',color='r',color2='g', legend1='PROCAR1',legend2='PROCAR2', ticks=None,discontinuities=[]):
     if size is not None:
       size = size/2
     if size2 is not None:
@@ -140,7 +140,7 @@ class ProcarPlotCompare:
     
     return plot
 
-  def scatterPlot(self, size=50,size2=50, mask=None, cmap='jet' ,cmap2='hot_r', vmax=None, vmin=None,vmax2=None, vmin2=None,marker='o',marker2='o',legend1='PRO1',legend2='PRO2', ticks=None, discontinuities = None):
+  def scatterPlot(self, size=50,size2=50, mask=None, cmap='jet' ,cmap2='hot_r', vmax=None, vmin=None,vmax2=None, vmin2=None,marker='o',marker2='o',legend1='PRO1',legend2='PRO2', ticks=None, discontinuities = []):
     bsize, ksize = self.bands.shape
     bsize2,ksize2 = self.bands2.shape
     print(bsize, ksize, bsize2, ksize2)
@@ -315,7 +315,7 @@ class ProcarPlotCompare:
 
     return plot
     
-  def parametricPlot(self, cmap='jet' ,cmap2='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None ,mask=None, marker='--', marker2='-.', legend1='PROCAR1',legend2='PROCAR2',ticks=None, discontinuities = None):
+  def parametricPlot(self, cmap='jet' ,cmap2='hot_r', vmin=None, vmax=None,vmin2=None, vmax2=None ,mask=None, marker='--', marker2='-.', legend1='PROCAR1',legend2='PROCAR2',ticks=None, discontinuities = []):
     from matplotlib.collections import LineCollection
     import matplotlib
     fig = plt.figure()

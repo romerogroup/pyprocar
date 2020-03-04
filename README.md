@@ -146,3 +146,5 @@ v4.1.4 Feb 28th, 2020 -- Added option to convert k-points between reduced and ca
 v5.0.0 Mar 1st, 2020 -- Added discontinuous band-plotting feature and other improvements. 
 
 v5.0.1 Mar 2nd, 2020 -- Added orbital header array for newer version of VASP.
+
+v5.1.0 Mar 4th, 2020 — Elk implementation.

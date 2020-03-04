@@ -11,7 +11,7 @@ class ProcarPlot:
     self.kpoints = kpoints
     return
 
-  def plotBands(self, size=0.02, marker='o', ticks=None,color='blue',discontinuities=None):
+  def plotBands(self, size=0.02, marker='o', ticks=None,color='blue',discontinuities=[]):
     if size is not None:
         size = size/2
         
@@ -80,7 +80,7 @@ class ProcarPlot:
     return plot
 
   def parametricPlot(self, cmap='jet', vmin=None, vmax=None, mask=None, 
-                     ticks=None,discontinuities=None):
+                     ticks=None,discontinuities=[]):
     from matplotlib.collections import LineCollection
     import matplotlib
     fig = plt.figure()
@@ -190,7 +190,7 @@ class ProcarPlot:
     return fig
 
   def scatterPlot(self, size=50, mask=None, cmap='hot_r', vmax=None, vmin=None,
-                  marker='o', ticks=None, discontinuities = None):
+                  marker='o', ticks=None, discontinuities = []):
     bsize, ksize = self.bands.shape
     print(bsize, ksize)
 

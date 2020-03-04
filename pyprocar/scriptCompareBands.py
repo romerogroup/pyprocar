@@ -2,20 +2,22 @@ from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .procarplotcompare import ProcarPlotCompare
+from .elkparser import ElkParser 
+from .splash import welcome
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-from .splash import welcome
 
 
 
 
-def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',
+
+def bandscompare(file=None,file2=None,mode='plain',abinit_output=None,abinit_output2=None,spin='0',spin2='0',
                  atoms=None,atoms2=None,orbitals=None,orbitals2=None,fermi=None,fermi2=None,
                  elimit=None,mask=None,markersize=0.02,markersize2=0.02,cmap='jet',cmap2='hot_r',vmax=None,vmin=None,
                  vmax2=None,vmin2=None,grid=True,marker=',',marker2=',',permissive=False,human=False,
                  savefig=None,kticks=None,knames=None,title=None,outcar=None,outcar2=None,color='r',
-                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,kdirect=True,kdirect2=True, discontinuities = None):
+                 color2='g',legend='PROCAR1',legend2='PROCAR2',kpointsfile=None,exportplt=False,kdirect=True, discontinuities = None, code='vasp'):
   """
   This module compares two band structures.
   """
@@ -58,19 +60,12 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   print("orbs. list  #2 : ", orbitals2)
 
   if fermi is None and outcar is None and abinit_output is None:
-    print("WARNING: Fermi Energy not set! ")
-    print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
-    print("The zero of energy is arbitrary\n")
+    print("WARNING: Fermi Energy not set! Please set manually or provide output file.")
     fermi = 0
     
   if fermi2 is None and outcar2 is None and abinit_output2 is None:
-    print("WARNING: Fermi Energy #2 not set! ")
-    print("You should use '-f' or '--outcar'\n Are you using Abinit Procar?\n")
-    print("The zero of energy is arbitrary\n")
+    print("WARNING: Fermi Energy #2 not set! Please set manually or provide output file.")
     fermi2 = 0
-
-  if kpointsfile is None:
-    print("No KPOINTS file present. Please set knames and kticks manually.")    
 
 
 ###################reading abinit output (added by uthpala) ##########################
@@ -100,8 +95,8 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
 ####################################################################  
 
  
-  print("Fermi Ener. #1  : ", fermi)
-  print("Fermi Ener. #2  : ", fermi2)
+  print("Fermi Energy #1  : ", fermi)
+  print("Fermi Energy #2  : ", fermi2)
   print("Energy range    : ", elimit)
 
   if mask is not None:
@@ -138,14 +133,11 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   print("legend #2       : ",legend2)
 
   if kdirect:
-    print("k-points #1 are in reduced coordinates")
+    print("k-points  are in reduced coordinates")
   else:
-    print("k-points #1 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")
+    print("k-points  are in cartesian coordinates. Remember to supply an output file for this case to work.")
 
-  if kdirect2:
-    print("k-points #2 are in reduced coordinates")
-  else:
-    print("k-points #2 are in cartesian coordinates. Remember to supply an OUTCAR for this case to work.")  
+  #### READING KPOINTS FILE IF PRESENT ####
 
   #If KPOINTS file is given:
   if kpointsfile is not None:
@@ -196,9 +188,9 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
     for kt in range(len(knames)-1):
       gridpoint=gridpoint+numgridpoints
       kticks.append(gridpoint-1)
+      
     print("knames        : ", knames)
-    print("kticks        : ", kticks) 
- 
+    print("kticks        : ", kticks)     
     
     # creating an array for discontunuity k-points. These are the indexes 
     # of the discontinuity k-points.
@@ -207,21 +199,36 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
         discontinuities.append( kticks[int(k/2)+1]  )  
     if discontinuities:
         print("discontinuities :",discontinuities)  
+        
+  #### END OF KPOINTS FILE DEPENDENT SECTION ####  
 
-
-  #If ticks and names are given by user manually:
-  if kticks is not None and knames is not None:
-    ticks = list(zip(kticks,knames))
-  elif kticks is not None:
-    ticks = list(zip(kticks,kticks))
-  else:
-    ticks = None
-  
+ 
   #The spin argument should be a number (index of an array), or
   #'st'. In the last case it will be handled separately (later)
 
   spin = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[str(spin)]
   spin2 = {'0':0, '1':1, '2':2, '3':3, 'st':'st'}[str(spin2)]
+
+  # parsing the PROCAR file
+  if code == 'vasp' or code=='abinit':
+      procarFile = ProcarParser()
+      procarFile2 = ProcarParser()
+  elif code == 'elk':
+      procarFile = ElkParser(kdirect=kdirect)
+      
+      # Retrieving knames and kticks from Elk
+      if kticks is None and knames is None:
+          if procarFile.kticks and procarFile.knames:
+              kticks = procarFile.kticks
+              knames = procarFile.knames
+      
+  #If ticks and names are given by the user manually:
+  if kticks is not None and knames is not None:
+    ticks = list(zip(kticks,knames))
+  elif kticks is not None:
+    ticks = list(zip(kticks,kticks))
+  else:
+    ticks = None 
 
 
   #The second part of this function is parse/select/use the data in
@@ -230,42 +237,44 @@ def bandscompare(file,file2,mode='plain',abinit_output=None,abinit_output2=None,
   #first parse the outcar if given, to get Efermi and Reciprocal lattice
   recLat = None 
   recLat2 = None
-  
-  if outcar and outcar2:
-    outcarparser = UtilsProcar()
-    if fermi is None:
-      fermi = outcarparser.FermiOutcar(outcar)
-      print("INFO: Fermi energy found in outcar file = " + str(fermi))
-    if fermi2 is None:  
-      fermi2 = outcarparser.FermiOutcar(outcar2)
-      print("INFO: Fermi energy #2 found in outcar file = " + str(fermi2))
+ 
+  if code == 'vasp':
+    if outcar and outcar2:
+      outcarparser = UtilsProcar()
+      if fermi is None:
+        fermi = outcarparser.FermiOutcar(outcar)
+        print("Fermi energy found in outcar file = " + str(fermi))
+      if fermi2 is None:  
+        fermi2 = outcarparser.FermiOutcar(outcar2)
+        print("Fermi energy #2 found in outcar file = " + str(fermi2))
       
-    recLat = outcarparser.RecLatOutcar(outcar)
-    recLat2 = outcarparser.RecLatOutcar(outcar2)
+      recLat = outcarparser.RecLatOutcar(outcar)
+      recLat2 = outcarparser.RecLatOutcar(outcar2)
 
-  # parsing the PROCAR file #1
-  procarFile = ProcarParser()
-  
-  # parsing the PROCAR file #2
-  procarFile2 = ProcarParser()
+  elif code =='elk':
+    if fermi is None:
+      fermi = procarFile.fermi
+      print("Fermi energy found in Elk output file = " + str(fermi))
 
-  # parsing the PROCAR file #1
+  elif code=='abinit':    
+    if fermi is None:
+      rf = open(abinit_output,'r')
+      data = rf.read()
+      rf.close()
+      fermi = float(re.findall('Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)',data)[0])  
+      print("Fermi energy found in Abinit output file = " + str(fermi))
+             
+
   # if kdirect = False, then the k-points will be in cartesian coordinates. 
   # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
-  if kdirect:
-    procarFile.readFile(file, permissive)
-  else:
-    procarFile.readFile(file, permissive, recLattice=recLat)
+  if code=='vasp' or code=='abinit':
+      if kdirect:        
+        procarFile.readFile(file, permissive)
+        procarFile2.readFile(file2, permissive)
 
-  # parsing the PROCAR file #2
-  # if kdirect2 = False, then the k-points will be in cartesian coordinates. 
-  # The outcar should be read to find the reciprocal lattice vectors to transform from direct to cartecian
-  if kdirect2:
-    procarFile2.readFile(file, permissive)
-  else:
-    procarFile2.readFile(file, permissive, recLattice=recLat2)
-
-
+      else:    
+        procarFile.readFile(file, permissive, recLattice=recLat)
+        procarFile2.readFile(file2, permissive,recLattice=recLat2)
 
   # processing the data, getting an instance of the class that reduces the data
   data = ProcarSelect(procarFile, deepCopy=True)

@@ -1,3 +1,5 @@
+.. _labelbands:
+
 Band structure
 ===================
 
@@ -7,11 +9,11 @@ PyProcar goes beyond the conventional plain band structure to plot the projected
 1. Plain band structure
 =======================
 
-This is the most basic type of band structure. No projection information is contained here. In order to use the plain mode one sets ``mode=`plain'``. ``elimit`` sets the energy window limits. ``outcar`` specifies the **OUTCAR** file. For Abinit calculations, ``abinit_output`` is used instead. ``color`` lets the user use any color available in the matplotlib package. If an output file is not present one can set ``fermi`` manually. One may save the plot using the ``savefig`` tag, for example, ``savefig='figure.png'`` with a desired image file format. This applies to all other band structure plotting functions in PyProcar as well. 
+This is the most basic type of band structure. No projection information is contained here. In order to use the plain mode one sets ``mode=`plain'``. ``elimit`` sets the energy window limits. ``outcar`` specifies the **OUTCAR** file. For Abinit calculations, ``abinit_output`` is used instead. ``color`` lets the user use any color available in the matplotlib package. If an output file is not present one can set ``fermi`` manually. One may save the plot using the ``savefig`` tag, for example, ``savefig='figure.png'`` with a desired image file format. This applies to all other band structure plotting functions in PyProcar as well. For Elk, setting file='PROCAR' and outcar='OUTCAR' is not necessary since the ElkParser() will take care of all that. 
 
 Usage::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue') 
+	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',code='vasp') 
 
 PyProcar is capable of labeling the :math:`k`-path names automatically, however, the user can manually input them as desired. 
 
@@ -19,11 +21,44 @@ If a **KPOINTS** file is present automatic labeling can be enabled as follows::
 
 	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kpointsfile='KPOINTS')
 
+For VASP, the KPOINTS file should be similar to the following::
+	
+   UCB (simple cubic) G-X-M-G-R-X M-R
+   40   ! 40 grids 
+   Line-mode
+   reciprocal
+   0.0000   0.0000   0.0000   ! \Gamma
+   0.0000   0.5000   0.0000   ! X
+ 
+   0.0000   0.5000   0.0000   ! X
+   0.5000   0.5000   0.0000   ! M
+ 
+   0.5000   0.5000   0.0000   ! M
+   0.0000   0.0000   0.0000   ! \Gamma
+ 
+   0.0000   0.0000   0.0000   ! \Gamma
+   0.5000   0.5000   0.5000   ! R
+ 
+   0.5000   0.5000   0.5000   ! R
+   0.0000   0.5000   0.0000   ! X	
+
+For Elk, to retrieve the KPOINTS automatically, one should define the :math:`k`-path block in the ``elk.in`` file such as::
+
+	! These are the vertices to be joined for the band structure plot
+	plot1d
+  	6 50
+  	0.0      0.0      0.0 : \Gamma
+  	0.5      0.0      0.0 : X
+  	0.5      0.5      0.0 : M
+  	0.0      0.0      0.0 : \Gamma
+  	0.5      0.5      0.5 : R
+  	0.5      0.0      0.0 : X   
+
 One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` corresponds to the labels and the number of grid points between the high symmetry points in the :math:`k`-path used for the band structure calculation. Usage::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'])
+	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],code='vasp')
 
-This is valid for the rest of the band plotting projections and also for the ``bandscompare()`` function.
+This is valid for the rest of the band plotting projections and also for the :ref:`labelbandscompare` function.
 
 ==================
 2. Spin projection
@@ -90,7 +125,7 @@ Usage::
 Converting :math:`k`-points from reduced to cartesian coordinates
 =================================================================
 
-PyProcar defaults to plotting using the reduced coordinates of the :math:`k`-points. If one wishes to plot using cartesian coordinates, set ``kdirect=False``. However, an ``OUTCAR`` must be supplied for this case to retrieve the reciprocal lattice vectors to transform the coordinates from reduced to cartesian. 
+PyProcar defaults to plotting using the reduced coordinates of the :math:`k`-points. If one wishes to plot using cartesian coordinates, set ``kdirect=False``. However, an ``OUTCAR`` must be supplied for this case to retrieve the reciprocal lattice vectors to transform the coordinates from reduced to cartesian. Note that for the case of Elk, the output is automatically retrieved so it is not necessary to provide it for the conversion. 
 
 ============================================================
 Plotting band structures with a discontinuous :math:`k`-path

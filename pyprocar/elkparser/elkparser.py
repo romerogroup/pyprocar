@@ -5,11 +5,12 @@ Created on Fri March 2 2020
 """
 
 from re import findall
-from numpy import array, linspace, where,zeros
+from numpy import array, linspace, where, zeros, dot
+
 
 
 class ElkParser():
-    def __init__(self, elkin='elk.in'):
+    def __init__(self, elkin = 'elk.in', kdirect = True):
 
     
         # elk specific inp
@@ -21,6 +22,9 @@ class ElkParser():
         self.nbands = None
         self.composition = {}
         self.tasks = None
+        self.kticks = None
+        self.knames = None
+        self.kdirect = kdirect
 
 
         self.kpoints = None
@@ -32,6 +36,9 @@ class ElkParser():
         
         self.spd = None
         self.cspd = None
+        
+        self.fermi = None
+        self.reclat = None #reciprocal lattice vectors
         
         self.orbitalName = [
             "Y00", "Y1-1", "Y10", "Y11", "Y2-2", "Y2-1", "Y20", "Y21", "Y22", "Y3-3"
@@ -45,21 +52,18 @@ class ElkParser():
         # NOTE: before calling to `self._readOrbital` the case '4'
         # is marked as '1'
         self.ispin = None
-        self.recLattice = None  #reciprocal lattice vectors
-
-
-
-
+        
         rf = open(self.fin,'r')
         self.elkIn = rf.read()
         rf.close()
 
         self._readElkin()
         self._readFiles()
+        
+        self._readFermi()
+        self._readRecLattice()
 
         return
-
-
 
     @property
     def nspin(self):
@@ -88,11 +92,11 @@ class ElkParser():
         for ispc in findall('\'([A-Za-z]*).in\'.*\n\s*([0-9]*)',self.elkIn):
             self.composition[ispc[0]] =  int(ispc[1])
             self.ionsCount+=int(ispc[1])
-        raw_ticks = findall('plot1d\n\s*[0-9]*\s*[0-9]*.*\n'+self.nhigh_sym*'.*:(.*)\n',self.elkIn)
+        raw_ticks = findall('plot1d\n\s*[0-9]*\s*[0-9]*.*\n'+self.nhigh_sym*'.*:(.*)\n',self.elkIn)[0]
         if len(raw_ticks) != self.nhigh_sym:
-            self.ticks = [str(x) for x in range(self.nhigh_sym)]
+            self.knames = [str(x) for x in range(self.nhigh_sym)]
         else :
-            self.ticks = ["$%s$" % (x.replace(',','').replace('vlvp1d','').replace(' ','')) for x in re.findall('plot1d\n\s*[0-9]*\s*[0-9]*.*\n'+self.nvortex*'.*:(.*)\n',self.elkIn)[0]]
+            self.knames = ["$%s$" % (x.replace(',','').replace('vlvp1d','').replace(' ','')) for x in findall('plot1d\n\s*[0-9]*\s*[0-9]*.*\n'+self.nhigh_sym*'.*:(.*)\n',self.elkIn)[0]]
         self.tasks = [int(x) for x in findall('tasks\n\s*([0-9\s\n]*)',self.elkIn)[0].split()]
 
         if 20 in self.tasks :
@@ -113,9 +117,7 @@ class ElkParser():
         rf = open('BANDLINES.OUT','r')
         bandLines = rf.readlines()
         rf.close()
-        itick = 0
         tick_pos = []
-        itick = 0
         # using strings for a better comparision and avoiding rounding by python
         for iline in range(0,len(bandLines),3):
             tick_pos.append(bandLines[iline].split()[0])
@@ -128,7 +130,7 @@ class ElkParser():
         tick_pos = array(tick_pos)
         
 
-
+        self.kticks = []
         for ihs in range(1,self.nhigh_sym):
             # if ihs == 1:
             #     start = 0
@@ -137,9 +139,9 @@ class ElkParser():
             start = where(x_points == tick_pos[ihs-1])[0][0]
             end = where(x_points == tick_pos[ihs])[0][0]+1
             self.kpoints[start:end][:] = linspace(self.high_symmetry_points[ihs-1],self.high_symmetry_points[ihs],end-start)
-
-
-
+            self.kticks.append(start)
+        self.kticks.append(self.kpointsCount-1) 
+        
         rf = open(self.file_names[0],'r')
         lines = rf.readlines()
         rf.close()
@@ -181,4 +183,19 @@ class ElkParser():
         self.spd[:,:,:,:,-1] = self.spd.sum(axis=4)
         self.spd[:,:,:,-1,:] = self.spd.sum(axis=3)
         self.spd[:,:,0,-1,0] = 0
-            
+    
+    def _readFermi(self):
+        rf = open('EFERMI.OUT','r')
+        self.fermi = float(rf.readline().split()[0])
+        rf.close()
+        
+    def _readRecLattice(self):
+        rf = open('LATTICE.OUT','r')
+        data = rf.read()
+        rf.close()
+        lattice_block = findall(r'matrix\s*:([\s0-9.]*)Inverse',data)
+        lattice_array = array(lattice_block[1].split(),dtype=float)        
+        self.reclat = lattice_array.reshape((3,3))
+        
+        if self.kdirect is False:
+            self.kpoints = dot(self.kpoints, self.reclat)
