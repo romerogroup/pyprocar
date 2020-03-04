@@ -61,9 +61,7 @@ class ProcarPlot:
         plot = plt.plot(xaxis,self.bands.transpose(), 'r-', marker=marker, markersize=size,color=color) 
                     
     plt.xlim(xaxis.min(), xaxis.max())
-    print("kpoints.shape:[%d,%d] " %self.kpoints.shape)
-    print("xaxis.shape :[%d,]" %xaxis.shape)
-    print("bands.shape :[%d,%d]" %self.bands.shape)
+  
  
     # Handling ticks
     if ticks:
@@ -83,8 +81,8 @@ class ProcarPlot:
                      ticks=None,discontinuities=[]):
     from matplotlib.collections import LineCollection
     import matplotlib
-    fig = plt.figure()
-    gca = fig.gca()
+    #fig = plt.figure() # use plt.gca() since it won't create a new figure for band comparison
+    gca = plt.gca()
     bsize, ksize = self.bands.shape
 
     #print self.bands
@@ -187,7 +185,7 @@ class ProcarPlot:
     plt.yticks(fontsize=22)
     plt.axhline(color='r',linestyle='--')
 
-    return fig
+    return plt
 
   def scatterPlot(self, size=50, mask=None, cmap='hot_r', vmax=None, vmin=None,
                   marker='o', ticks=None, discontinuities = []):

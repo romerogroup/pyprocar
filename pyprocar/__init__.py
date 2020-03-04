@@ -1,9 +1,9 @@
 __author__="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.1.0"
+__version__ = "5.1.1"
 __email__ = "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 __status__ = "Development"
-__date__ ="Mar 4th, 2020"
+__date__ ="Mar 5th, 2020"
 
 # Copyright (C) 2019 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
@@ -36,7 +36,6 @@ import pyfiglet
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarparser import ProcarParser
 from pyprocar.procarplot import ProcarPlot
-from pyprocar.procarplotcompare import	ProcarPlotCompare
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.fermisurface import FermiSurface
@@ -56,6 +55,5 @@ from .scriptVector import Vector
 from .scriptKmesh2D import generate2dkmesh
 from .scriptAbinitMerge import mergeabinit
 from .scriptKpath import kpath
-from .scriptCompareBands import bandscompare
 from .scriptUnfold import unfold
 from .splash import welcome

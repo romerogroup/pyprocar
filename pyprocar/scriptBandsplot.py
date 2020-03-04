@@ -65,18 +65,13 @@ def bandsplot(file=None,mode='scatter',color='blue',abinit_output=None,spin=0,at
   if human is not None:
     print("human         : ", human)
   print("Savefig       : ", savefig)
-  if kpointsfile is None:
-    print("kticks        : ", kticks)
-    print("knames        : ", knames)
-    if discontinuities:
-        print("discontinuities :",discontinuities)
   print("title         : ", title)
   print("outcar        : ", outcar)
 
   if kdirect:
-    print("k-points are in reduced coordinates")
+    print("k-point coordinates        : reduced")
   else:
-    print("k-points are in cartesian coordinates. Remember to supply an output file for this case to work.")
+    print("k-point coordinates        : cartesian (Remember to supply an output file for this case to work.)")
 
   #### READING KPOINTS FILE IF PRESENT ####
 
@@ -168,6 +163,12 @@ def bandsplot(file=None,mode='scatter',color='blue',abinit_output=None,spin=0,at
     ticks = list(zip(kticks,kticks))
   else:
     ticks = None 
+
+  if kpointsfile is None and kticks and knames:
+    print("kticks        : ", kticks)
+    print("knames        : ", knames)
+    if discontinuities:
+        print("discontinuities :",discontinuities)  
   
 
   #The second part of this function is parse/select/use the data in
@@ -180,7 +181,7 @@ def bandsplot(file=None,mode='scatter',color='blue',abinit_output=None,spin=0,at
         outcarparser = UtilsProcar()
         if fermi is None:
           fermi = outcarparser.FermiOutcar(outcar)            
-          print("Fermi energy found in outcar file = " + str(fermi))
+          print("Fermi energy found in OUTCAR file = " + str(fermi))
         recLat = outcarparser.RecLatOutcar(outcar)
   
   elif code =='elk':
@@ -198,7 +199,7 @@ def bandsplot(file=None,mode='scatter',color='blue',abinit_output=None,spin=0,at
           
 
   # if kdirect = False, then the k-points will be in cartesian coordinates. 
-  # The output should be read to find the reciprocal lattice vectors to transform from direct to cartecian
+  # The output should be read to find the reciprocal lattice vectors to transform from direct to cartesian
   
   if code=='vasp' or code=='abinit':
       if kdirect:        
