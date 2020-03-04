@@ -3,30 +3,20 @@
 Compare bands
 =============
 
-This module is useful to compare different bands from different materials on the same band plot. The bands are plotted for the same :math:`k`-path in order to have a meaningful comparison but they do not need to have the same number of :math:`k`-points in each interval. The ``bandscompare()`` function contains all the parameters that are used in the ``bandsplot()`` along with an added feature of displaying a ``legend`` to help differentiate between the two different band structures. Different ``marker`` styles can be used as well. 
+This module is useful to compare bands from different materials on the same band structure plot. The bands are plotted for the same :math:`k`-path in order to have a meaningful comparison but they do not need to have the same number of :math:`k`-points in each interval.
+This makes use of the PyProcar ``exportplt`` feature. Any number of different modes of plots can be plot on the same figure with this function.  
 
 Usage::
 
-	pyprocar.bandscompare('PROCAR1','PROCAR2',outcar='OUTCAR1',outcar2='OUTCAR2',cmap='jet',mode='parametric',marker='*',marker2='-.',elimit=[-5,5],kpointsfile='KPOINTS',legend='PRO1',legend2='PRO2',spin=1,spin2=2, 
-	kdirect=True, discontinuities=None, code='vasp')
-
-A similar approch could be used for other modes of band plots as described in :ref:`labelbands`. 
-
-
-=========================================
-Export plot as a matplotlib.pyplot object
-=========================================
-
-PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
-This can be enabled by setting ``exportplt = True``.
-Usage::
-
-    import matplotlib.pyplot as plt
     import pyprocar
+    import matplotlib.pyplot as plot
 
-    plt = pyprocar.bandscompare('PROCAR1', 'PROCAR2', outcar='OUTCAR1', outcar2='OUTCAR2', mode='plain', exportplt=True)  
-    plt.title('Using matplotlib options')
-    plt.show()
+    plot.figure(figsize=(13,9)) #This is just to get better resolution. Not needed.
 
-.. automodule:: pyprocar.scriptCompareBands
-	:members:
+    plot = pyprocar.bandsplot(mode='parametric',elimit=[-5,5],code='elk',exportplt=True,orbitals=[4,5,6,7,8],vmin=0,vmax=1)
+    plot = pyprocar.bandsplot('PROCAR1',kpointsfile='KPOINTS1',outcar='OUTCAR1',mode='plain',elimit=[-5,5],code='vasp',exportplt=True,color='k')
+    plot.show()
+
+The above command plots the figure displayed below. The black bands are plain bands of :math:`SrVO_3` calculated from VASP and the jet colormap is d orbital projected bands of the same material calculated from Elk.
+
+.. image:: ElkvsVASP.png    

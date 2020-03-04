@@ -65,6 +65,7 @@ Installation
 Changelog
 --------------
 
+v5.1.1 Mar 5th, 2020 -- Removed bandscompare() due to redundancy with exportplt.<br />
 v5.1.0 Mar 4th, 2020 -- Elk implementation.<br />
 v5.0.1 Mar 2nd, 2020 -- Added orbital header array for newer version of VASP.<br />
 v5.0.0 Mar 1st, 2020 -- Added discontinuous band-plotting feature and other improvements. <br />

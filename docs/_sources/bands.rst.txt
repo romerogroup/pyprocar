@@ -58,7 +58,7 @@ One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` cor
 
 	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],code='vasp')
 
-This is valid for the rest of the band plotting projections and also for the :ref:`labelbandscompare` function.
+This is valid for the rest of the band plotting projections.
 
 ==================
 2. Spin projection

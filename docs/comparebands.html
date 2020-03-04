@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -93,10 +93,7 @@
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Compare bands</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Compare bands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
 </ul>
@@ -169,33 +166,21 @@
             
   <div class="section" id="compare-bands">
 <span id="labelbandscompare"></span><h1>Compare bands<a class="headerlink" href="#compare-bands" title="Permalink to this headline">¶</a></h1>
-<p>This module is useful to compare different bands from different materials on the same band plot. The bands are plotted for the same <span class="math notranslate nohighlight">\(k\)</span>-path in order to have a meaningful comparison but they do not need to have the same number of <span class="math notranslate nohighlight">\(k\)</span>-points in each interval. The <code class="docutils literal notranslate"><span class="pre">bandscompare()</span></code> function contains all the parameters that are used in the <code class="docutils literal notranslate"><span class="pre">bandsplot()</span></code> along with an added feature of displaying a <code class="docutils literal notranslate"><span class="pre">legend</span></code> to help differentiate between the two different band structures. Different <code class="docutils literal notranslate"><span class="pre">marker</span></code> styles can be used as well.</p>
+<p>This module is useful to compare bands from different materials on the same band structure plot. The bands are plotted for the same <span class="math notranslate nohighlight">\(k\)</span>-path in order to have a meaningful comparison but they do not need to have the same number of <span class="math notranslate nohighlight">\(k\)</span>-points in each interval.
+This makes use of the PyProcar <code class="docutils literal notranslate"><span class="pre">exportplt</span></code> feature. Any number of different modes of plots can be plot on the same figure with this function.</p>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandscompare</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR2&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span><span class="n">outcar2</span><span class="o">=</span><span class="s1">&#39;OUTCAR2&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="n">marker2</span><span class="o">=</span><span class="s1">&#39;-.&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">kpointsfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span><span class="n">legend</span><span class="o">=</span><span class="s1">&#39;PRO1&#39;</span><span class="p">,</span><span class="n">legend2</span><span class="o">=</span><span class="s1">&#39;PRO2&#39;</span><span class="p">,</span><span class="n">spin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">spin2</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">discontinuities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyprocar</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plot</span>
+
+<span class="n">plot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span> <span class="c1">#This is just to get better resolution. Not needed.</span>
+
+<span class="n">plot</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;elk&#39;</span><span class="p">,</span><span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plot</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span><span class="n">kpointsfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS1&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>A similar approch could be used for other modes of band plots as described in <a class="reference internal" href="bands.html#labelbands"><span class="std std-ref">Band structure</span></a>.</p>
-<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
-<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
-<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
-This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
-Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">pyprocar</span>
-
-<span class="n">plt</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandscompare</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span> <span class="s1">&#39;PROCAR2&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span> <span class="n">outcar2</span><span class="o">=</span><span class="s1">&#39;OUTCAR2&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="n">exportplt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<span class="target" id="module-pyprocar.scriptCompareBands"></span><dl class="function">
-<dt id="pyprocar.scriptCompareBands.bandscompare">
-<code class="sig-prename descclassname">pyprocar.scriptCompareBands.</code><code class="sig-name descname">bandscompare</code><span class="sig-paren">(</span><em class="sig-param">file=None</em>, <em class="sig-param">file2=None</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">abinit_output=None</em>, <em class="sig-param">abinit_output2=None</em>, <em class="sig-param">spin='0'</em>, <em class="sig-param">spin2='0'</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">atoms2=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbitals2=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">fermi2=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">markersize=0.02</em>, <em class="sig-param">markersize2=0.02</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">cmap2='hot_r'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax2=None</em>, <em class="sig-param">vmin2=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">marker='</em>, <em class="sig-param">'</em>, <em class="sig-param">marker2='</em>, <em class="sig-param">'</em>, <em class="sig-param">permissive=False</em>, <em class="sig-param">human=False</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">kticks=None</em>, <em class="sig-param">knames=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">outcar2=None</em>, <em class="sig-param">color='r'</em>, <em class="sig-param">color2='g'</em>, <em class="sig-param">legend='PROCAR1'</em>, <em class="sig-param">legend2='PROCAR2'</em>, <em class="sig-param">kpointsfile=None</em>, <em class="sig-param">exportplt=False</em>, <em class="sig-param">kdirect=True</em>, <em class="sig-param">discontinuities=None</em>, <em class="sig-param">code='vasp'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptCompareBands.bandscompare" title="Permalink to this definition">¶</a></dt>
-<dd><p>This module compares two band structures.</p>
-</dd></dl>
-
-</div>
+<p>The above command plots the figure displayed below. The black bands are plain bands of <span class="math notranslate nohighlight">\(SrVO_3\)</span> calculated from VASP and the jet colormap is d orbital projected bands of the same material calculated from Elk.</p>
+<img alt="_images/ElkvsVASP.png" src="_images/ElkvsVASP.png" />
 </div>
 
 
