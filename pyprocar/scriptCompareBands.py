@@ -48,6 +48,7 @@ def bandscompare(file=None,file2=None,mode='plain',abinit_output=None,abinit_out
     
 
   print("Script initiated")
+  print("code          : ", code)
   print("input file 1   : ", file)
   print("input file 2   : ", file2) #2nd file
   print("Mode           : ", mode)

@@ -16,6 +16,8 @@ pyprocar/scriptRepair.py
 pyprocar/scriptUnfold.py
 pyprocar/scriptVector.py
 pyprocar/splash.py
+pyprocar/elkparser/__init__.py
+pyprocar/elkparser/elkparser.py
 pyprocar/fermisurface/__init__.py
 pyprocar/fermisurface/fermisurface.py
 pyprocar/procarfilefilter/__init__.py
