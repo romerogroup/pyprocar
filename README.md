@@ -1,5 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/pyprocar.svg)](https://badge.fury.io/py/pyprocar)
 [![Build Status](https://travis-ci.org/romerogroup/pyprocar.svg?branch=master)](https://travis-ci.org/romerogroup/pyprocar)
+[![Coverage Status](https://coveralls.io/repos/github/romerogroup/pyprocar/badge.svg?branch=master)](https://coveralls.io/github/romerogroup/pyprocar?branch=master)
 [![HitCount](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar.svg)](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/pyprocar)
 

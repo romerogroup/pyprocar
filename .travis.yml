@@ -4,5 +4,11 @@ python:
 cache: pip
 install:
   - pip install -r requirements.txt
+  - pip install pytest
+  - pip install pytest-cov
+  - pip install coveralls
 script:
   - python tests.py
+  - pytest --cov=pyprocar/
+after_success:
+  - coveralls
