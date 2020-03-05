@@ -6,4 +6,3 @@ ase
 mayavi==4.6.2
 scikit-image
 pyfiglet
-black

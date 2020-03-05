@@ -3,7 +3,6 @@ setup.cfg
 setup.py
 bin/procar
 pyprocar/__init__.py
-pyprocar/scriptAbinitMerge.py
 pyprocar/scriptBandsplot.py
 pyprocar/scriptCat.py
 pyprocar/scriptFermi2D.py

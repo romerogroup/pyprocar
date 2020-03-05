@@ -6,7 +6,6 @@ install:
   - pip install -r requirements.txt
   - pip install -e .
 script:
-  - black --check pyprocar
   - cd tests/
   - chmod +x test_scriptBandsplot.py
   - python test_scriptBandsplot.py
