@@ -4,10 +4,10 @@ python:
 cache: pip
 install:
   - pip install -r requirements.txt
-  - pip install pytest
-  - pip install pytest-cov
   - pip install coveralls
 script:
-  - python tests.py
+  - chmod +x ./tests/test_scriptBandsplot.py
+  - python ./tests/test_scriptBandsplot.py
+  - rm ./tests/test.pdf
 after_success:
   - coveralls
