@@ -1,4 +1,4 @@
-import pyprocar
+import .pyprocar
 
 pyprocar.bandsplot(
     file = './examples/SrVO3/nospin/PROCAR3',
