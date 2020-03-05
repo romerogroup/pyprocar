@@ -5,6 +5,7 @@ cache: pip
 install:
   - pip install -r requirements.txt
   - pip install coveralls
+  - pip install -e .
 script:
   - chmod +x ./tests/test_scriptBandsplot.py
   - python ./tests/test_scriptBandsplot.py
