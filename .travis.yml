@@ -4,7 +4,6 @@ python:
 cache: pip
 install:
   - pip install -r requirements.txt
-  - pip install coveralls
   - pip install -e .
 script:
   - black --check pyprocar
@@ -12,5 +11,3 @@ script:
   - chmod +x test_scriptBandsplot.py
   - python test_scriptBandsplot.py
   - rm test.pdf
-after_success:
-  - coveralls
