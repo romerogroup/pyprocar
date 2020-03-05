@@ -7,8 +7,10 @@ install:
   - pip install coveralls
   - pip install -e .
 script:
-  - chmod +x ./tests/test_scriptBandsplot.py
-  - python ./tests/test_scriptBandsplot.py
-  - rm ./tests/test.pdf
+  - black --check pyprocar
+  - cd tests/
+  - chmod +x test_scriptBandsplot.py
+  - python test_scriptBandsplot.py
+  - rm test.pdf
 after_success:
   - coveralls
