@@ -67,6 +67,7 @@ Installation
 Changelog
 --------------
 
+v5.1.2 Mar 5th, 2020 -- Fixed Abinit PROCAR formatting issues in PyProcar cat function.<br />
 v5.1.1 Mar 5th, 2020 -- Removed bandscompare() due to redundancy with exportplt.<br />
 v5.1.0 Mar 4th, 2020 -- Elk implementation.<br />
 v5.0.1 Mar 2nd, 2020 -- Added orbital header array for newer version of VASP.<br />

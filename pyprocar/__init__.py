@@ -1,6 +1,6 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.1.1"
+__version__ = "5.1.2"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
@@ -55,7 +55,6 @@ from .scriptFilter import filter
 from .scriptRepair import repair
 from .scriptVector import Vector
 from .scriptKmesh2D import generate2dkmesh
-from .scriptAbinitMerge import mergeabinit
 from .scriptKpath import kpath
 from .scriptUnfold import unfold
 from .splash import welcome
