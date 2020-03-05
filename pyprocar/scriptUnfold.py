@@ -4,24 +4,26 @@ from .procarunfold import ProcarUnfolder
 from .utilsprocar import UtilsProcar
 from .splash import welcome
 
+
 def unfold(
-        fname='PROCAR',
-        poscar='POSCAR',
-        outcar='OUTCAR',
-        supercell_matrix=np.diag([2, 2, 2]),
-        ispin=None,
-        efermi=None,
-        shift_efermi=True,
-        elimit=(-5, 15),
-        kticks=[0, 36, 54, 86, 110, 147, 165, 199],
-        knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'],
-        print_kpts=False,
-        show_band=True,
-        width=4,
-        color='blue',
-        savetab='unfold_result.csv',
-        savefig='unfolded_band.png',
-        exportplt = False):
+    fname="PROCAR",
+    poscar="POSCAR",
+    outcar="OUTCAR",
+    supercell_matrix=np.diag([2, 2, 2]),
+    ispin=None,
+    efermi=None,
+    shift_efermi=True,
+    elimit=(-5, 15),
+    kticks=[0, 36, 54, 86, 110, 147, 165, 199],
+    knames=["$\Gamma$", "K", "M", "$\Gamma$", "A", "H", "L", "A"],
+    print_kpts=False,
+    show_band=True,
+    width=4,
+    color="blue",
+    savetab="unfold_result.csv",
+    savefig="unfolded_band.png",
+    exportplt=False,
+):
 
     """
 
@@ -57,14 +59,10 @@ def unfold(
         outcarparser = UtilsProcar()
         fermi = outcarparser.FermiOutcar(outcar)
     else:
-        raise Warning(
-            "Fermi energy is not given, neither an OUTCAR contains it.")
+        raise Warning("Fermi energy is not given, neither an OUTCAR contains it.")
 
     uf = ProcarUnfolder(
-        procar=fname,
-        poscar=poscar,
-        supercell_matrix=supercell_matrix,
-        ispin=ispin
+        procar=fname, poscar=poscar, supercell_matrix=supercell_matrix, ispin=ispin
     )
     if print_kpts:
         for ik, k in enumerate(uf.procar.kpoints):
@@ -79,16 +77,16 @@ def unfold(
         color=color,
         width=width,
         savetab=savetab,
-        show_band=show_band)
-
+        show_band=show_band,
+    )
 
     if exportplt:
-        return plt 
+        return plt
 
     else:
         if savefig:
-            plt.savefig(savefig,bbox_inches='tight')
-            plt.close() #Added by Nicholas Pike to close memory issue of looping and creating many figures
+            plt.savefig(savefig, bbox_inches="tight")
+            plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
         else:
             plt.show()
         return

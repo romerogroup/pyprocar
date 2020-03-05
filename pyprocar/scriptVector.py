@@ -1,95 +1,110 @@
-
 from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .procarplot import ProcarPlot
 from .splash import welcome
 
-def Vector(infile,bands=None,energy=None,fermi=None,atoms=None,orbitals=None,outcar=None,scale=0.1):
- 
-  welcome()
 
-  print("Input File    : ", infile)
-  print("Bands         : ", bands)
-  print("Energy        : ", energy)
-  print("Fermi         : ", fermi)
-  print("outcar        : ", outcar)
-  print("atoms         : ", atoms)
-  print("orbitals      : ", orbitals)
-  print("scale factor  : ", scale)
+def Vector(
+    infile,
+    bands=None,
+    energy=None,
+    fermi=None,
+    atoms=None,
+    orbitals=None,
+    outcar=None,
+    scale=0.1,
+):
 
-  if bands is [] and energy is None:
-    raise RuntimeError("You must provide the bands or energy.")
-  if fermi == None and outcar == None:
-    print("WARNING: Fermi's Energy not set")
+    welcome()
 
+    print("Input File    : ", infile)
+    print("Bands         : ", bands)
+    print("Energy        : ", energy)
+    print("Fermi         : ", fermi)
+    print("outcar        : ", outcar)
+    print("atoms         : ", atoms)
+    print("orbitals      : ", orbitals)
+    print("scale factor  : ", scale)
 
-  #first parse the outcar if given
-  recLat = None #Will contain reciprocal vectors, if necessary
-  if outcar:
-    outcarparser = UtilsProcar()
-    if fermi is None:
-      fermi = outcarparser.FermiOutcar(outcar)
-      #if quiet is False:
-      print("Fermi energy found in outcar file = " + str(fermi))
-    recLat = outcarparser.RecLatOutcar(outcar)
+    if bands is [] and energy is None:
+        raise RuntimeError("You must provide the bands or energy.")
+    if fermi == None and outcar == None:
+        print("WARNING: Fermi's Energy not set")
 
-  if atoms is None:
-    atoms = [-1]
-  if orbitals is None:
-    orbitals = [-1]
-  
+    # first parse the outcar if given
+    recLat = None  # Will contain reciprocal vectors, if necessary
+    if outcar:
+        outcarparser = UtilsProcar()
+        if fermi is None:
+            fermi = outcarparser.FermiOutcar(outcar)
+            # if quiet is False:
+            print("Fermi energy found in outcar file = " + str(fermi))
+        recLat = outcarparser.RecLatOutcar(outcar)
 
-  #parsing the file
-  procarFile = ProcarParser()
-  procarFile.readFile(infile, recLattice=recLat)
+    if atoms is None:
+        atoms = [-1]
+    if orbitals is None:
+        orbitals = [-1]
 
-  #processing the data
-  sx = ProcarSelect(procarFile, deepCopy=True)
-  sx.selectIspin([1])
-  sx.selectAtoms(atoms)
-  sx.selectOrbital(orbitals)
+    # parsing the file
+    procarFile = ProcarParser()
+    procarFile.readFile(infile, recLattice=recLat)
 
-  sy = ProcarSelect(procarFile, deepCopy=True)
-  sy.selectIspin([2])
-  sy.selectAtoms(atoms)
-  sy.selectOrbital(orbitals)
+    # processing the data
+    sx = ProcarSelect(procarFile, deepCopy=True)
+    sx.selectIspin([1])
+    sx.selectAtoms(atoms)
+    sx.selectOrbital(orbitals)
 
-  sz = ProcarSelect(procarFile, deepCopy=True)
-  sz.selectIspin([3])
-  sz.selectAtoms(atoms)
-  sz.selectOrbital(orbitals)
+    sy = ProcarSelect(procarFile, deepCopy=True)
+    sy.selectIspin([2])
+    sy.selectAtoms(atoms)
+    sy.selectOrbital(orbitals)
 
-  x = sx.kpoints[:,0]
-  y = sx.kpoints[:,1]
-  z = sx.kpoints[:,2]
+    sz = ProcarSelect(procarFile, deepCopy=True)
+    sz.selectIspin([3])
+    sz.selectAtoms(atoms)
+    sz.selectOrbital(orbitals)
 
-  #if energy was given I need to find the bands indexes crossing it
-  if energy != None:
-    FerSurf = FermiSurface(sx.kpoints, sx.bands-fermi,
-                           sx.spd, recLat)
-    FerSurf.FindEnergy(energy)
-    bands = list(FerSurf.useful[0])
-    print("Bands indexes crossing Energy  ", energy, ", are: ", bands)
-  
+    x = sx.kpoints[:, 0]
+    y = sx.kpoints[:, 1]
+    z = sx.kpoints[:, 2]
 
-  from mayavi import mlab
+    # if energy was given I need to find the bands indexes crossing it
+    if energy != None:
+        FerSurf = FermiSurface(sx.kpoints, sx.bands - fermi, sx.spd, recLat)
+        FerSurf.FindEnergy(energy)
+        bands = list(FerSurf.useful[0])
+        print("Bands indexes crossing Energy  ", energy, ", are: ", bands)
 
-  fig = mlab.figure(bgcolor=(1,1,1))
+    from mayavi import mlab
 
-  for band in bands:
-    #z = sx.bands[:,band]-fermi
-    u = sx.spd[:, band]
-    v = sy.spd[:, band]
-    w = sz.spd[:, band]
-    scalar = w
+    fig = mlab.figure(bgcolor=(1, 1, 1))
 
-    vect = mlab.quiver3d(x, y, z, u, v, w, scale_factor=scale,
-                  scale_mode='vector', scalars=scalar, mode='arrow',
-                  colormap='jet')
-    vect.glyph.color_mode = 'color_by_scalar'
-    vect.scene.parallel_projection = True
-    vect.scene.z_plus_view()
+    for band in bands:
+        # z = sx.bands[:,band]-fermi
+        u = sx.spd[:, band]
+        v = sy.spd[:, band]
+        w = sz.spd[:, band]
+        scalar = w
 
-    #tube= mlab.plot3d(x,y,z, tube_radius=0.0050, color=(0.5,0.5,0.5))
-  mlab.show()
+        vect = mlab.quiver3d(
+            x,
+            y,
+            z,
+            u,
+            v,
+            w,
+            scale_factor=scale,
+            scale_mode="vector",
+            scalars=scalar,
+            mode="arrow",
+            colormap="jet",
+        )
+        vect.glyph.color_mode = "color_by_scalar"
+        vect.scene.parallel_projection = True
+        vect.scene.z_plus_view()
+
+        # tube= mlab.plot3d(x,y,z, tube_radius=0.0050, color=(0.5,0.5,0.5))
+    mlab.show()

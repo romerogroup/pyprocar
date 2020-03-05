@@ -29,45 +29,44 @@ class UtilsProcar:
         self.log.setLevel(loglevel)
         self.ch = logging.StreamHandler()
         self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s:"
-                              " %(message)s"))
+            logging.Formatter("%(name)s::%(levelname)s:" " %(message)s")
+        )
         self.ch.setLevel(logging.DEBUG)
         self.log.addHandler(self.ch)
         self.log.debug("UtilsProcar()")
         self.log.debug("UtilsProcar()...done")
         return
 
-###############################SCRIPTS####################################################################
+    ###############################SCRIPTS####################################################################
 
-# #calls ProcarRepair
-# def scriptRepair(self,infile,outfile):
+    # #calls ProcarRepair
+    # def scriptRepair(self,infile,outfile):
 
-#   print "Input File    : ", infile
-#   print "Output File   : ", outfile
+    #   print "Input File    : ", infile
+    #   print "Output File   : ", outfile
 
-#   #parsing the file
-#   handler = UtilsProcar()
-#   handler.ProcarRepair(infile,outfile)
+    #   #parsing the file
+    #   handler = UtilsProcar()
+    #   handler.ProcarRepair(infile,outfile)
 
-#calls MergeFiles
-#inFiles should be a list of the PROCAR files that require concatenation
-# def scriptCat(self,inFiles,outFile,gz=False):
-#   print   "Concatenating:"
-#   print   "Input         : ", ', '.join(inFiles)
-#   print   "Output        : ", outFile
-#   if gz==True:
-#       print "out compressed: True"
+    # calls MergeFiles
+    # inFiles should be a list of the PROCAR files that require concatenation
+    # def scriptCat(self,inFiles,outFile,gz=False):
+    #   print   "Concatenating:"
+    #   print   "Input         : ", ', '.join(inFiles)
+    #   print   "Output        : ", outFile
+    #   if gz==True:
+    #       print "out compressed: True"
 
-#   if gz=="True" and outFile[-3:] is not '.gz':
-#     outFile += '.gz'
-#     print ".gz extension appended to the outFile"
+    #   if gz=="True" and outFile[-3:] is not '.gz':
+    #     outFile += '.gz'
+    #     print ".gz extension appended to the outFile"
 
-#   handler = UtilsProcar()
-#   handler.MergeFiles(inFiles,outFile, gzipOut=gz)
-#   return
+    #   handler = UtilsProcar()
+    #   handler.MergeFiles(inFiles,outFile, gzipOut=gz)
+    #   return
 
-
-####################################################################################################################################################
+    ####################################################################################################################################################
 
     def OpenFile(self, FileName=None):
         """
@@ -98,8 +97,8 @@ class UtilsProcar:
             FileName = "PROCAR"
             self.log.debug("Input was None, now is: " + FileName)
 
-        #checking if fileName is just a path and needs a "PROCAR to " be
-        #appended
+        # checking if fileName is just a path and needs a "PROCAR to " be
+        # appended
         elif os.path.isdir(FileName):
             self.log.info("The filename is a directory")
             if FileName[-1] != r"/":
@@ -107,24 +106,24 @@ class UtilsProcar:
             FileName += "PROCAR"
             self.log.debug("I will try  to open :" + FileName)
 
-        #checking that the file exist
+        # checking that the file exist
         if os.path.isfile(FileName):
             self.log.debug("The File does exist")
-            #Checking if compressed
+            # Checking if compressed
             if FileName[-2:] == "gz":
                 self.log.info("A gzipped file found")
-                inFile = gzip.open(FileName,mode='rt')
+                inFile = gzip.open(FileName, mode="rt")
             else:
                 self.log.debug("A normal file found")
                 inFile = open(FileName, "r")
             return inFile
 
-        #otherwise a gzipped version may exist
+        # otherwise a gzipped version may exist
         elif os.path.isfile(FileName + ".gz"):
             self.log.info(
-                "File not found, however a .gz version does exist and will"
-                " be used")
-            inFile = gzip.open(FileName + ".gz",mode='rt')
+                "File not found, however a .gz version does exist and will" " be used"
+            )
+            inFile = gzip.open(FileName + ".gz", mode="rt")
 
         else:
             self.log.debug("File not exist, neither a gzipped version")
@@ -162,16 +161,14 @@ class UtilsProcar:
         self.log.debug("All the input headers are: \n" + "".join(header))
         metas = [x.readline() for x in inFiles]
         self.log.debug("All the input metalines are:\n " + "".join(metas))
-        #parsing metalines
+        # parsing metalines
 
-        parsedMeta = [
-            list(map(int, re.findall(r"#[^:]+:([^#]+)", x))) for x in metas
-        ]
+        parsedMeta = [list(map(int, re.findall(r"#[^:]+:([^#]+)", x))) for x in metas]
         kpoints = [x[0] for x in parsedMeta]
         bands = set([x[1] for x in parsedMeta])
         ions = set([x[2] for x in parsedMeta])
 
-        #checking that bands and ions match (mind: bands & ions are 'sets'):
+        # checking that bands and ions match (mind: bands & ions are 'sets'):
         if len(bands) != 1 or len(ions) != 1:
             self.log.error("Number of bands/ions  do not match")
             raise RuntimeError("Files are incompatible")
@@ -183,43 +180,45 @@ class UtilsProcar:
 
         if gzipOut:
             self.log.debug("gzipped output")
-            outFile = gzip.open(outFile,mode='wt')
+            outFile = gzip.open(outFile, mode="wt")
         else:
             self.log.debug("normal output")
-            outFile = open(outFile, 'w')
+            outFile = open(outFile, "w")
         outFile.write(header[0])
         outFile.write(newMeta)
 
-        #embedded function to change old k-point indexes by the correct
-        #ones. The `kreplace.k` syntax is for making the variable 'static'
+        # embedded function to change old k-point indexes by the correct
+        # ones. The `kreplace.k` syntax is for making the variable 'static'
         def kreplace(matchobj):
-            #self.log.debug(print matchobj.group(0))
+            # self.log.debug(print matchobj.group(0))
             kreplace.k += 1
             kreplace.localCounter += 1
             return matchobj.group(0).replace(
-                str(kreplace.localCounter), str(kreplace.k))
+                str(kreplace.localCounter), str(kreplace.k)
+            )
 
         kreplace.k = 0
-        down = []  #to handle spin-down (if found)
+        down = []  # to handle spin-down (if found)
         self.log.debug("Going to replace K-points indexes")
         for inFile in inFiles:
             lines = inFile.read()
-            #looking for an extra metada line, if found the file is
-            #spin-polarized
-            p = re.compile(\
-              r'#[\s\w]+k-points:[\s\d]+#[\s\w]+bands:[\s\d]+#[\w\s]+ions:\s*\d+\s*')
+            # looking for an extra metada line, if found the file is
+            # spin-polarized
+            p = re.compile(
+                r"#[\s\w]+k-points:[\s\d]+#[\s\w]+bands:[\s\d]+#[\w\s]+ions:\s*\d+\s*"
+            )
             lines = p.split(lines)
             up = lines[0]
             if len(lines) == 2:
                 down.append(lines[1])
                 self.log.info("Spin-polarized PROCAR!")
-            #closing inFile
+            # closing inFile
             inFile.close()
             kreplace.localCounter = 0
-            up = re.sub('(\s+k-point\s*\d+\s*:)', kreplace, up)
+            up = re.sub("(\s+k-point\s*\d+\s*:)", kreplace, up)
             outFile.write(up)
 
-        #handling the spin-down channel, if present
+        # handling the spin-down channel, if present
         if down:
             self.log.debug("writing spin down metadata")
             outFile.write("\n")
@@ -227,7 +226,7 @@ class UtilsProcar:
         kreplace.k = 0
         for group in down:
             kreplace.localCounter = 0
-            group = re.sub('(\s+k-point\s*\d+\s*:)', kreplace, group)
+            group = re.sub("(\s+k-point\s*\d+\s*:)", kreplace, group)
             outFile.write(group)
 
         self.log.debug("Closing output file")
@@ -264,13 +263,12 @@ class UtilsProcar:
         self.log.debug("Input filename : " + filename)
 
         outcar = open(filename, "r").read()
-        #just keeping the last component
-        recLat = re.findall(r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)",
-                            outcar)[-1]
+        # just keeping the last component
+        recLat = re.findall(r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", outcar)[-1]
         self.log.debug("the match is : " + recLat)
         recLat = recLat.split()
         recLat = np.array(recLat, dtype=float)
-        #up to now I have, both direct and rec. lattices (3+3=6 columns)
+        # up to now I have, both direct and rec. lattices (3+3=6 columns)
         recLat.shape = (3, 6)
         recLat = recLat[:, 3:]
         self.log.info("Reciprocal Lattice found :\n" + str(recLat))
@@ -295,15 +293,15 @@ class UtilsProcar:
 
         # Fixing bands issues (when there are more than 999 bands)
         # band *** # energy    6.49554019 # occ.  0.00000000
-        fileStr = re.sub(r'(band\s)(\*\*\*)', r'\1 1000', fileStr)
+        fileStr = re.sub(r"(band\s)(\*\*\*)", r"\1 1000", fileStr)
 
         # Fixing k-point issues
-        fileStr = re.sub(r'(\.\d{8})(\d{2}\.)', r'\1 \2', fileStr)
-        fileStr = re.sub(r'(\d)-(\d)', r'\1 -\2', fileStr)
+        fileStr = re.sub(r"(\.\d{8})(\d{2}\.)", r"\1 \2", fileStr)
+        fileStr = re.sub(r"(\d)-(\d)", r"\1 -\2", fileStr)
 
-        fileStr = re.sub(r'\*+', r' -10.0000 ', fileStr)
+        fileStr = re.sub(r"\*+", r" -10.0000 ", fileStr)
 
-        outfile = open(outfilename, 'w')
+        outfile = open(outfilename, "w")
         outfile.write(fileStr)
         outfile.close()
 

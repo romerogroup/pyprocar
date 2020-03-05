@@ -2,16 +2,16 @@ from .utilsprocar import UtilsProcar
 from .splash import welcome
 
 
-#calls ProcarRepair
-def repair(infile,outfile):
-	"""
+# calls ProcarRepair
+def repair(infile, outfile):
+    """
 	This module calls ProcarRepair to repair the PROCAR file.
 	"""
-	welcome()
+    welcome()
 
-	print("Input File    : ", infile)
-	print("Output File   : ", outfile)
+    print("Input File    : ", infile)
+    print("Output File   : ", outfile)
 
-#parsing the file
-	handler = UtilsProcar()
-	handler.ProcarRepair(infile,outfile)
+    # parsing the file
+    handler = UtilsProcar()
+    handler.ProcarRepair(infile, outfile)

@@ -65,18 +65,38 @@ class ProcarParser:
         # distinction between spin up and down
         self.bandsCount = None
 
-        #Number of ions+1 the +1 is the 'tot' field, ie: the sum over all atoms
+        # Number of ions+1 the +1 is the 'tot' field, ie: the sum over all atoms
         self.ionsCount = None
 
-        self.fileStr = None  #the actual file, stored in memory
-        self.spd = None  #the atom/orbital projected data
-        self.cspd = None  #spd data with the phase
+        self.fileStr = None  # the actual file, stored in memory
+        self.spd = None  # the atom/orbital projected data
+        self.cspd = None  # spd data with the phase
         self.orbitalName = [
-            "s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "x2-y2", "tot"
+            "s",
+            "py",
+            "pz",
+            "px",
+            "dxy",
+            "dyz",
+            "dz2",
+            "dxz",
+            "x2-y2",
+            "tot",
         ]
-        self.orbitalName_old = ["s", "py", "pz", "px", "dxy", "dyz", "dz2", "dxz", "dx2", "tot"]
-        self.orbitalName_short = ["s","p","d","tot"]
-        self.orbitalCount = None  #number of orbitals
+        self.orbitalName_old = [
+            "s",
+            "py",
+            "pz",
+            "px",
+            "dxy",
+            "dyz",
+            "dz2",
+            "dxz",
+            "dx2",
+            "tot",
+        ]
+        self.orbitalName_short = ["s", "p", "d", "tot"]
+        self.orbitalCount = None  # number of orbitals
 
         # number of spin components (blocks of data), 1: non-magnetic non
         # polarized, 2: spin polarized collinear, 4: non-collinear
@@ -84,18 +104,18 @@ class ProcarParser:
         # NOTE: before calling to `self._readOrbital` the case '4'
         # is marked as '1'
         self.ispin = None
-        self.recLattice = None  #reciprocal lattice vectors
+        self.recLattice = None  # reciprocal lattice vectors
         self.utils = UtilsProcar()
 
         self.log = logging.getLogger("ProcarParser")
         self.log.setLevel(loglevel)
         self.ch = logging.StreamHandler()
         self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s:"
-                              " %(message)s"))
+            logging.Formatter("%(name)s::%(levelname)s:" " %(message)s")
+        )
         self.ch.setLevel(logging.DEBUG)
         self.log.addHandler(self.ch)
-        #At last, one message to the logger.
+        # At last, one message to the logger.
         self.log.debug("Procar instanciated")
         return
 
@@ -121,13 +141,11 @@ class ProcarParser:
         """
         self.log.debug("readKpoints")
         if not self.fileStr:
-            log.warning(
-                "You should invoke `procar.readFile()` instead. Returning")
+            log.warning("You should invoke `procar.readFile()` instead. Returning")
             return
 
         # finding all the K-points headers
-        self.kpoints = re.findall(r"k-point\s+\d+\s*:\s+([-.\d\s]+)",
-                                  self.fileStr)
+        self.kpoints = re.findall(r"k-point\s+\d+\s*:\s+([-.\d\s]+)", self.fileStr)
         self.log.debug(str(len(self.kpoints)) + " K-point headers found")
         self.log.debug("The first match found is: " + str(self.kpoints[0]))
 
@@ -137,7 +155,7 @@ class ProcarParser:
             self.kpoints = np.array(self.kpoints, dtype=float)
         except ValueError:
             self.log.error("Ill-formatted data:")
-            print('\n'.join([str(x) for x in self.kpoints]))
+            print("\n".join([str(x) for x in self.kpoints]))
             if permissive is True:
                 # Discarding the kpoints list, however I need to set
                 # self.ispin beforehand.
@@ -148,22 +166,21 @@ class ProcarParser:
                 else:
                     raise ValueError("Kpoints do not match with ispin=1 or 2.")
                 self.kpoints = None
-                self.log.warning(
-                    "K-points list is useless, setting it to `None`")
+                self.log.warning("K-points list is useless, setting it to `None`")
                 return
             else:
-                raise ValueError(
-                    "Badly formated Kpoints headers, try `--permissive`")
+                raise ValueError("Badly formated Kpoints headers, try `--permissive`")
         # if successful, go on
 
         # trying to identify an non-polarized or non-collinear case, a
         # polarized case or a defective file
 
         if len(self.kpoints) != self.kpointsCount:
-            #if they do not match, may means two things a spin polarized
-            #case or a bad file, lets check
-            self.log.debug("Number of kpoints do not match, looking for a "
-                           "spin-polarized case")
+            # if they do not match, may means two things a spin polarized
+            # case or a bad file, lets check
+            self.log.debug(
+                "Number of kpoints do not match, looking for a " "spin-polarized case"
+            )
             # lets start testing if it is spin polarized, if so, there
             # should be 2 identical blocks of kpoints.
             up, down = np.vsplit(self.kpoints, 2)
@@ -181,10 +198,11 @@ class ProcarParser:
         else:
             self.ispin = 1
 
-        #checking again, for compatibility,
+        # checking again, for compatibility,
         if len(self.kpoints) != self.kpointsCount:
             raise RuntimeError(
-                "Kpoints number do not match with metadata (header of PROCAR)")
+                "Kpoints number do not match with metadata (header of PROCAR)"
+            )
 
         self.log.debug(str(self.kpoints))
         self.log.info("The kpoints shape is " + str(self.kpoints.shape))
@@ -208,11 +226,14 @@ class ProcarParser:
             return
 
         # finding all bands
-        self.bands = re.findall(r"band\s*(\d+)\s*#\s*energy\s*([-.\d\s]+)",
-                                self.fileStr)
+        self.bands = re.findall(
+            r"band\s*(\d+)\s*#\s*energy\s*([-.\d\s]+)", self.fileStr
+        )
         self.log.debug(
-            str(len(self.bands)) + " bands headers found, bands*Kpoints = " +
-            str(self.bandsCount * self.kpointsCount))
+            str(len(self.bands))
+            + " bands headers found, bands*Kpoints = "
+            + str(self.bandsCount * self.kpointsCount)
+        )
         self.log.debug("The first match found is: " + str(self.bands[0]))
 
         # checking if the number of bands match
@@ -244,15 +265,17 @@ class ProcarParser:
             # and joining along the second axis (axis=1), ie: bands-like
             self.bands = np.concatenate((up, down), axis=1)
 
-        #otherwise just reshaping is needed
+        # otherwise just reshaping is needed
         else:
             self.bands.shape = (self.kpointsCount, self.bandsCount, 2)
 
         # Making a test if the broadcast is rigth, otherwise just print
         test = [x.max() - x.min() for x in self.bands[:, :, 0].transpose()]
         if np.array(test).any():
-            self.log.warning("The indexes of bands do not match. CHECK IT. "
-                             "Likely the data was wrongly broadcasted")
+            self.log.warning(
+                "The indexes of bands do not match. CHECK IT. "
+                "Likely the data was wrongly broadcasted"
+            )
             self.log.warning(str(self.bands[:, :, 0]))
         # Now safely removing the band index
         self.bands = self.bands[:, :, 1]
@@ -277,31 +300,36 @@ class ProcarParser:
     """
         self.log.debug("readOrbital")
         if not self.fileStr:
-            log.warning(
-                "You should invoke `procar.readFile()` instead. Returning")
+            log.warning("You should invoke `procar.readFile()` instead. Returning")
             return
 
-        #finding all orbital headers
+        # finding all orbital headers
         self.spd = re.findall(r"ion(.+)", self.fileStr)
         self.log.info("the first orbital match reads: " + self.spd[0])
-        self.log.debug("And I found " + str(len(self.spd)) +
-                       " orbitals headers")
+        self.log.debug("And I found " + str(len(self.spd)) + " orbitals headers")
 
         # testing if the orbital names are known (the standard ones)
         FoundOrbs = self.spd[0].split()
         size = len(FoundOrbs)
         # only the first 'size' orbital
-        StdOrbs = self.orbitalName[:size - 1] + self.orbitalName[-1:]
-        StdOrbs_short = self.orbitalName_short[:size - 1] + self.orbitalName_short[-1:]
-        StdOrbs_old = self.orbitalName_old[:size - 1] + self.orbitalName_old[-1:]
-        if FoundOrbs != (StdOrbs) and FoundOrbs != (StdOrbs_short) and FoundOrbs != (StdOrbs_old):
+        StdOrbs = self.orbitalName[: size - 1] + self.orbitalName[-1:]
+        StdOrbs_short = self.orbitalName_short[: size - 1] + self.orbitalName_short[-1:]
+        StdOrbs_old = self.orbitalName_old[: size - 1] + self.orbitalName_old[-1:]
+        if (
+            FoundOrbs != (StdOrbs)
+            and FoundOrbs != (StdOrbs_short)
+            and FoundOrbs != (StdOrbs_old)
+        ):
             self.log.warning(
                 str(size) + " orbitals. (Some of) They are unknow (if "
-                "you did 'filter' them it is OK).")
+                "you did 'filter' them it is OK)."
+            )
         self.orbitalCount = size
         self.orbitalNames = self.spd[0].split()
-        self.log.debug("Anyway, I will use the following set of orbitals: " +
-                       str(self.orbitalNames))
+        self.log.debug(
+            "Anyway, I will use the following set of orbitals: "
+            + str(self.orbitalNames)
+        )
 
         # Now reading the bulk of data
         self.log.debug("Now searching the values")
@@ -310,11 +338,11 @@ class ProcarParser:
         if self.ionsCount is 1:
             self.spd = re.findall(r"^(\s*1\s+.+)$", self.fileStr, re.MULTILINE)
         else:
-        	#Added by Francisco to speed up filtering on June 4th, 2019
-        	#get rid of phase factors
-        	self.spd = re.findall(r"ion.+tot\n([-.\d\seto]+)", self.fileStr)
-        	self.spd = ''.join(self.spd)
-        	self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.spd)
+            # Added by Francisco to speed up filtering on June 4th, 2019
+            # get rid of phase factors
+            self.spd = re.findall(r"ion.+tot\n([-.\d\seto]+)", self.fileStr)
+            self.spd = "".join(self.spd)
+            self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.spd)
         # free the memory (could be a lot)
         self.fileStr = None
         self.log.debug("the first entry is \n" + self.spd[0])
@@ -326,8 +354,9 @@ class ProcarParser:
 
         self.log.debug("Number of entries found: " + str(len(self.spd)))
         expected = self.bandsCount * self.kpointsCount
-        self.log.debug("The number of entries for a non magnetic calc. is: " +
-                       str(expected))
+        self.log.debug(
+            "The number of entries for a non magnetic calc. is: " + str(expected)
+        )
         if expected == len(self.spd):
             self.log.info("Both numbers match, ok, going ahead")
         # catching a non-collinear calc.
@@ -335,8 +364,9 @@ class ProcarParser:
             self.log.info("non-collinear calculation found")
             # testing if previous ispin value is ok
             if self.ispin != 1:
-                self.log.warning("Incompatible data: self.ispin= " +
-                                 str(self.ispin) + ". Now is 4")
+                self.log.warning(
+                    "Incompatible data: self.ispin= " + str(self.ispin) + ". Now is 4"
+                )
             self.ispin = 4
         else:
             self.log.error("The parser or data is wrong!!!")
@@ -348,15 +378,20 @@ class ProcarParser:
         for line in self.spd:
             if len(line.split()) != (self.ionsCount) * (self.orbitalCount + 1):
                 self.log.error(
-                    "Expected: " + str(self.ionsCount) + "*" +
-                    str(self.orbitalCount + 1) + " = " +
-                    str((self.ionsCount) * (self.orbitalCount + 1)) +
-                    " Fields. Present block: " + str(len(line.split())))
+                    "Expected: "
+                    + str(self.ionsCount)
+                    + "*"
+                    + str(self.orbitalCount + 1)
+                    + " = "
+                    + str((self.ionsCount) * (self.orbitalCount + 1))
+                    + " Fields. Present block: "
+                    + str(len(line.split()))
+                )
                 raise RuntimeError("Flats happens")
 
         # replacing the "tot" string by a number, to allows a conversion
         # to numpy
-        self.spd = [x.replace('tot', '0') for x in self.spd]
+        self.spd = [x.replace("tot", "0") for x in self.spd]
         self.spd = [x.split() for x in self.spd]
         self.spd = np.array(self.spd, dtype=float)
         self.log.debug("The spd (old) array shape is:" + str(self.spd.shape))
@@ -369,34 +404,44 @@ class ProcarParser:
             # bands.
             up, down = np.vsplit(self.spd, 2)
             # ispin = 1 for a while, we will made the distinction
-            up.shape = (self.kpointsCount, int(self.bandsCount / 2), 1,
-                        self.ionsCount, self.orbitalCount + 1)
-            down.shape = (self.kpointsCount, int(self.bandsCount / 2), 1,
-                          self.ionsCount, self.orbitalCount + 1)
+            up.shape = (
+                self.kpointsCount,
+                int(self.bandsCount / 2),
+                1,
+                self.ionsCount,
+                self.orbitalCount + 1,
+            )
+            down.shape = (
+                self.kpointsCount,
+                int(self.bandsCount / 2),
+                1,
+                self.ionsCount,
+                self.orbitalCount + 1,
+            )
             # concatenating bandwise. Density and magntization, their
             # meaning is obvious, and do uses 2 times more memory than
             # required, but I *WANT* to keep it as close as possible to the
             # non-collinear or non-polarized case
             density = np.concatenate((up, down), axis=1)
             magnet = np.concatenate((up, -down), axis=1)
-            #concatenated along 'ispin axis'
+            # concatenated along 'ispin axis'
             self.spd = np.concatenate((density, magnet), axis=2)
-            self.log.debug("polarized collinear spd.shape= " +
-                           str(self.spd.shape))
+            self.log.debug("polarized collinear spd.shape= " + str(self.spd.shape))
 
-        #otherwise, just a reshaping suffices
+        # otherwise, just a reshaping suffices
         else:
-            self.spd.shape = (self.kpointsCount, self.bandsCount, self.ispin,
-                              self.ionsCount, self.orbitalCount + 1)
+            self.spd.shape = (
+                self.kpointsCount,
+                self.bandsCount,
+                self.ispin,
+                self.ionsCount,
+                self.orbitalCount + 1,
+            )
 
         self.log.info("spd array ready. Its shape is:" + str(self.spd.shape))
         return
 
-    def readFile(self,
-                 procar=None,
-                 phase=False,
-                 permissive=False,
-                 recLattice=None):
+    def readFile(self, procar=None, phase=False, permissive=False, recLattice=None):
         """Reads and parses the whole PROCAR file. This method is a sort
     of metamethod: it opens the file, reads the meta data and call the
     respective functions for parsing kpoints, bands, and projected
@@ -424,172 +469,173 @@ class ProcarParser:
 
         self.recLattice = recLattice
 
-        self.log.debug("Opening file: '"+str(procar)+"'")
+        self.log.debug("Opening file: '" + str(procar) + "'")
         f = self.utils.OpenFile(procar)
         # Line 1: PROCAR lm decomposed
         f.readline()  # throwaway
         # Line 2: # of k-points:  816   # of bands:  52   # of ions:   8
-        metaLine = f.readline() # metadata
-        self.log.debug("The metadata line is: "+ metaLine)
+        metaLine = f.readline()  # metadata
+        self.log.debug("The metadata line is: " + metaLine)
         re.findall(r"#[^:]+:([^#]+)", metaLine)
-        self.kpointsCount, self.bandsCount, self.ionsCount = \
-            map(int, re.findall(r"#[^:]+:([^#]+)", metaLine))
-        self.log.info("kpointsCount = " + str(self.kpointsCount));
-        self.log.info("bandsCount = " + str(self.bandsCount));
-        self.log.info("ionsCount = " + str(self.ionsCount));
+        self.kpointsCount, self.bandsCount, self.ionsCount = map(
+            int, re.findall(r"#[^:]+:([^#]+)", metaLine)
+        )
+        self.log.info("kpointsCount = " + str(self.kpointsCount))
+        self.log.info("bandsCount = " + str(self.bandsCount))
+        self.log.info("ionsCount = " + str(self.ionsCount))
         if self.ionsCount is 1:
-          self.log.warning("Special case: only one atom found. The program may not work as expected")
+            self.log.warning(
+                "Special case: only one atom found. The program may not work as expected"
+            )
         else:
-          self.log.debug("An extra ion representing the  total value will be added")
-          self.ionsCount = self.ionsCount + 1
+            self.log.debug("An extra ion representing the  total value will be added")
+            self.ionsCount = self.ionsCount + 1
 
-        #reading all the rest of the file to be parsed below
+        # reading all the rest of the file to be parsed below
         self.fileStr = f.read()
         self._readKpoints(permissive)
         self._readBands()
         self._readOrbital()
         self.log.debug("readfile...done")
         return
-   
 
+    # Slower way to parse the phase included PROCAR. He Xu implemented a faster way. See readFile2()
+    # if phase == False:
+    #     self.log.debug("readFile...")
 
+    #     self.recLattice = recLattice
 
-    #Slower way to parse the phase included PROCAR. He Xu implemented a faster way. See readFile2() 
-        # if phase == False:
-        #     self.log.debug("readFile...")
+    #     self.log.debug("Opening file: '" + str(procar) + "'")
+    #     f = self.utils.OpenFile(procar)
+    #     # Line 1: PROCAR lm decomposed
+    #     f.readline()  # throwaway
+    #     # Line 2: # of k-points:  816   # of bands:  52   # of ions:   8
+    #     metaLine = f.readline()  # metadata
+    #     self.log.debug("The metadata line is: " + metaLine)
+    #     re.findall(r"#[^:]+:([^#]+)", metaLine)
+    #     self.kpointsCount, self.bandsCount, self.ionsCount = \
+    #         list(map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
+    #     self.log.info("kpointsCount = " + str(self.kpointsCount))
+    #     self.log.info("bandsCount = " + str(self.bandsCount))
+    #     self.log.info("ionsCount = " + str(self.ionsCount))
+    #     if self.ionsCount is 1:
+    #         self.log.warning(
+    #             "Special case: only one atom found. The program may not work as expected"
+    #         )
+    #     else:
+    #         self.log.debug(
+    #             "An extra ion representing the  total value will be added")
+    #         self.ionsCount = self.ionsCount + 1
 
-        #     self.recLattice = recLattice
+    #     #reading all the rest of the file to be parsed below
+    #     self.fileStr = f.read()
+    #     self._readKpoints(permissive)
+    #     self._readBands()
+    #     self._readOrbital()
+    #     self.log.debug("readfile...done")
 
-        #     self.log.debug("Opening file: '" + str(procar) + "'")
-        #     f = self.utils.OpenFile(procar)
-        #     # Line 1: PROCAR lm decomposed
-        #     f.readline()  # throwaway
-        #     # Line 2: # of k-points:  816   # of bands:  52   # of ions:   8
-        #     metaLine = f.readline()  # metadata
-        #     self.log.debug("The metadata line is: " + metaLine)
-        #     re.findall(r"#[^:]+:([^#]+)", metaLine)
-        #     self.kpointsCount, self.bandsCount, self.ionsCount = \
-        #         list(map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
-        #     self.log.info("kpointsCount = " + str(self.kpointsCount))
-        #     self.log.info("bandsCount = " + str(self.bandsCount))
-        #     self.log.info("ionsCount = " + str(self.ionsCount))
-        #     if self.ionsCount is 1:
-        #         self.log.warning(
-        #             "Special case: only one atom found. The program may not work as expected"
-        #         )
-        #     else:
-        #         self.log.debug(
-        #             "An extra ion representing the  total value will be added")
-        #         self.ionsCount = self.ionsCount + 1
+    # elif phase == True:  #for LORBIT=12
+    #     self.recLattice = recLattice
+    #     f = self.utils.OpenFile(procar)
+    #     f.readline()  #throw away first line
+    #     metaLine = f.readline()  # header
 
-        #     #reading all the rest of the file to be parsed below
-        #     self.fileStr = f.read()
-        #     self._readKpoints(permissive)
-        #     self._readBands()
-        #     self._readOrbital()
-        #     self.log.debug("readfile...done")
+    #     #parsing header information
+    #     self.kpointsCount, self.bandsCount, self.ionsCount = list(
+    #         map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
 
-        # elif phase == True:  #for LORBIT=12
-        #     self.recLattice = recLattice
-        #     f = self.utils.OpenFile(procar)
-        #     f.readline()  #throw away first line
-        #     metaLine = f.readline()  # header
+    #     if self.ionsCount is 1:
+    #         self.log.warning(
+    #             "Special case: only one atom found. The program may not work as expected"
+    #         )
+    #     else:
+    #         self.log.debug(
+    #             "An extra ion representing the  total value will be added")
+    #         self.ionsCount = self.ionsCount + 1
 
-        #     #parsing header information
-        #     self.kpointsCount, self.bandsCount, self.ionsCount = list(
-        #         map(int, re.findall(r"#[^:]+:([^#]+)", metaLine)))
+    #     #reading all the rest of the file to be parsed below saved as spd
+    #     self.fileStr = f.read()
+    #     self._readKpoints(permissive)
+    #     self._readBands()
+    #     self._readOrbital()
+    #     self.log.debug("readfile...done")
 
-        #     if self.ionsCount is 1:
-        #         self.log.warning(
-        #             "Special case: only one atom found. The program may not work as expected"
-        #         )
-        #     else:
-        #         self.log.debug(
-        #             "An extra ion representing the  total value will be added")
-        #         self.ionsCount = self.ionsCount + 1
+    #     #reading the complex phase data. will be saved as cspd
+    #     f2 = self.utils.OpenFile(procar)
+    #     f2.readline()  #throw away first line
+    #     f2.readline()  #throw away header line
+    #     data2 = f2.read()
 
-        #     #reading all the rest of the file to be parsed below saved as spd
-        #     self.fileStr = f.read()
-        #     self._readKpoints(permissive)
-        #     self._readBands()
-        #     self._readOrbital()
-        #     self.log.debug("readfile...done")
+    #     #parsing
+    #     spd0 = re.findall(r"ion(.+)", data2)  #headers of the blocks
+    #     FoundOrbs = spd0[1].split()
+    #     size = len(FoundOrbs)
+    #     corbitalCount = size
+    #     spd_phase = re.findall(
+    #         r"(?<=dx2-y2)([charge0-9.\s-]*)(?=band|k-point|\Z)",
+    #         data2)  #for LORBIT=12
 
-        #     #reading the complex phase data. will be saved as cspd
-        #     f2 = self.utils.OpenFile(procar)
-        #     f2.readline()  #throw away first line
-        #     f2.readline()  #throw away header line
-        #     data2 = f2.read()
+    #     spd_new = []
+    #     for i in range(len(spd_phase)):
+    #         #get last list of original block and replace spd last line and append all to get new spd.
+    #         # for charge line use spd instead of spd_real
+    #         spd_last = spd_phase[i].split()[-(corbitalCount + 2):]
+    #         result = []
+    #         for counter, value in enumerate(spd_last):
+    #             result.append(value)
+    #             result.append('0')
+    #         del result[1]
+    #         del result[-1]
 
-        #     #parsing
-        #     spd0 = re.findall(r"ion(.+)", data2)  #headers of the blocks
-        #     FoundOrbs = spd0[1].split()
-        #     size = len(FoundOrbs)
-        #     corbitalCount = size
-        #     spd_phase = re.findall(
-        #         r"(?<=dx2-y2)([charge0-9.\s-]*)(?=band|k-point|\Z)",
-        #         data2)  #for LORBIT=12
+    #         #replace last line of each spd block
+    #         spd_block = spd_phase[i].split()
+    #         spd_block[-(corbitalCount + 2):] = result
+    #         spd_block = [x.replace('charge', '0') for x in spd_block]
+    #         spd_new.append(spd_block)
 
-        #     spd_new = []
-        #     for i in range(len(spd_phase)):
-        #         #get last list of original block and replace spd last line and append all to get new spd.
-        #         # for charge line use spd instead of spd_real
-        #         spd_last = spd_phase[i].split()[-(corbitalCount + 2):]
-        #         result = []
-        #         for counter, value in enumerate(spd_last):
-        #             result.append(value)
-        #             result.append('0')
-        #         del result[1]
-        #         del result[-1]
+    #     # conversion to numpy
+    #     spd_phase = np.array(spd_new, dtype=float)
 
-        #         #replace last line of each spd block
-        #         spd_block = spd_phase[i].split()
-        #         spd_block[-(corbitalCount + 2):] = result
-        #         spd_block = [x.replace('charge', '0') for x in spd_block]
-        #         spd_new.append(spd_block)
+    #     #reshaping
+    #     spd_phase.shape = (self.kpointsCount, self.bandsCount, 1,
+    #                        self.ionsCount, 2 * corbitalCount + 2)
 
-        #     # conversion to numpy
-        #     spd_phase = np.array(spd_new, dtype=float)
+    #     #matrix to hold complex values
+    #     self.cspd = np.zeros([
+    #         self.kpointsCount, self.bandsCount, 1, self.ionsCount,
+    #         corbitalCount + 2
+    #     ],
+    #                          dtype='complex')
 
-        #     #reshaping
-        #     spd_phase.shape = (self.kpointsCount, self.bandsCount, 1,
-        #                        self.ionsCount, 2 * corbitalCount + 2)
+    #     for ikpointsCount in range(self.kpointsCount):
+    #         for ibandsCount in range(self.bandsCount):
+    #             for iionsCount in range(self.ionsCount):
+    #                 orbs_real = spd_phase[ikpointsCount][ibandsCount][0][
+    #                     iionsCount][1:-1:2]
+    #                 orbs_imag = spd_phase[ikpointsCount][ibandsCount][0][
+    #                     iionsCount][2::2]
+    #                 orbs_all = orbs_real + (1j * orbs_imag)
+    #                 self.cspd[ikpointsCount, ibandsCount, 0,
+    #                           iionsCount, :] = np.concatenate(
+    #                               [[
+    #                                   spd_phase[ikpointsCount][ibandsCount]
+    #                                   [0][iionsCount][0]
+    #                               ], orbs_all,
+    #                                [
+    #                                    spd_phase[ikpointsCount]
+    #                                    [ibandsCount][0][iionsCount][-1]
+    #                                ]])
 
-        #     #matrix to hold complex values
-        #     self.cspd = np.zeros([
-        #         self.kpointsCount, self.bandsCount, 1, self.ionsCount,
-        #         corbitalCount + 2
-        #     ],
-        #                          dtype='complex')
+    # return
 
-        #     for ikpointsCount in range(self.kpointsCount):
-        #         for ibandsCount in range(self.bandsCount):
-        #             for iionsCount in range(self.ionsCount):
-        #                 orbs_real = spd_phase[ikpointsCount][ibandsCount][0][
-        #                     iionsCount][1:-1:2]
-        #                 orbs_imag = spd_phase[ikpointsCount][ibandsCount][0][
-        #                     iionsCount][2::2]
-        #                 orbs_all = orbs_real + (1j * orbs_imag)
-        #                 self.cspd[ikpointsCount, ibandsCount, 0,
-        #                           iionsCount, :] = np.concatenate(
-        #                               [[
-        #                                   spd_phase[ikpointsCount][ibandsCount]
-        #                                   [0][iionsCount][0]
-        #                               ], orbs_all,
-        #                                [
-        #                                    spd_phase[ikpointsCount]
-        #                                    [ibandsCount][0][iionsCount][-1]
-        #                                ]])
-
-        # return
-
-    def readFile2(self,
-                  procar=None,
-                  phase=False,
-                  permissive=False,
-                  recLattice=None,
-                  ispin=None   # the only spin channle to read
-                  ):
+    def readFile2(
+        self,
+        procar=None,
+        phase=False,
+        permissive=False,
+        recLattice=None,
+        ispin=None,  # the only spin channle to read
+    ):
         """
         Read file in a line by line manner.
         Only used when the phase factor is in procar. (for vasp, lorbit=12)
@@ -598,33 +644,32 @@ class ProcarParser:
         self.bands = None
         if not phase:
             self.readFile(
-                procar=procar,
-                phase=False,
-                permissive=permissive,
-                recLattice=recLattice)
+                procar=procar, phase=False, permissive=permissive, recLattice=recLattice
+            )
         else:
             if ispin is None:
-                nspin=1
+                nspin = 1
             else:
-                nspin=2
-            iispin=0
+                nspin = 2
+            iispin = 0
             self.projections = None
             ikpt = 0
             iband = 0
             nkread = 0
-            #with open(self.fname) as myfile:
+            # with open(self.fname) as myfile:
             f = self.utils.OpenFile(procar)
             lines = iter(f.readlines())
             for line in lines:
                 if line.startswith("# of k-points"):
                     a = re.findall(":\s*([0-9]*)", line)
-                    self.kpointsCount, self.bandsCount, self.ionsCount = map(
-                        int, a)
+                    self.kpointsCount, self.bandsCount, self.ionsCount = map(int, a)
                     self.kpoints = np.zeros([self.kpointsCount, 3])
                     self.kweights = np.zeros(self.kpointsCount)
                     if self.bands is None:
-                        self.bands = np.zeros([nspin, self.kpointsCount, self.bandsCount])
-                if line.strip().startswith('k-point'):
+                        self.bands = np.zeros(
+                            [nspin, self.kpointsCount, self.bandsCount]
+                        )
+                if line.strip().startswith("k-point"):
                     ss = line.strip().split()
                     ikpt = int(ss[1]) - 1
                     k0 = float(ss[3])
@@ -633,31 +678,40 @@ class ProcarParser:
                     w = float(ss[-1])
                     self.kpoints[ikpt, :] = [k0, k1, k2]
                     self.kweights[ikpt] = w
-                    nkread+=1
+                    nkread += 1
                     if nkread <= self.kpointsCount:
                         iispin = 0
                     else:
                         iispin = 1
-                if line.strip().startswith('band'):
+                if line.strip().startswith("band"):
                     ss = line.strip().split()
                     iband = int(ss[1]) - 1
                     e = float(ss[4])
                     occ = float(ss[-1])
                     self.bands[iispin, ikpt, iband] = e
-                if line.strip().startswith('ion'):
-                    if line.strip().endswith('tot'):
+                if line.strip().startswith("ion"):
+                    if line.strip().endswith("tot"):
                         self.orbitalName = line.strip().split()[1:-1]
                         self.orbitalCount = len(self.orbitalName)
                     if self.projections is None:
-                        self.projections = np.zeros([
-                            self.kpointsCount, self.bandsCount, self.ionsCount,
-                            self.orbitalCount
-                        ])
-                        self.carray = np.zeros([
-                            self.kpointsCount, self.bandsCount, nspin,
-                            self.ionsCount, self.orbitalCount
-                        ],
-                                               dtype='complex')
+                        self.projections = np.zeros(
+                            [
+                                self.kpointsCount,
+                                self.bandsCount,
+                                self.ionsCount,
+                                self.orbitalCount,
+                            ]
+                        )
+                        self.carray = np.zeros(
+                            [
+                                self.kpointsCount,
+                                self.bandsCount,
+                                nspin,
+                                self.ionsCount,
+                                self.orbitalCount,
+                            ],
+                            dtype="complex",
+                        )
                     for i in range(self.ionsCount):
                         line = next(lines)
                         t = line.strip().split()
@@ -667,18 +721,23 @@ class ProcarParser:
                             ]
                         elif len(t) == self.orbitalCount * 2 + 2:
                             self.carray[ikpt, iband, iispin, i, :] += np.array(
-                                    [float(x) for x in t[1:-1:2]])
+                                [float(x) for x in t[1:-1:2]]
+                            )
                             self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
-                                    [float(x) for x in t[2::2]])
+                                [float(x) for x in t[2::2]]
+                            )
 
-                        #Added by Francisco to parse older version of PROCAR format on Jun 11, 2019
+                        # Added by Francisco to parse older version of PROCAR format on Jun 11, 2019
                         elif len(t) == self.orbitalCount * 1 + 1:
                             self.carray[ikpt, iband, iispin, i, :] += np.array(
-                                    [float(x) for x in t[1:]])
+                                [float(x) for x in t[1:]]
+                            )
                             line = next(lines)
                             t = line.strip().split()
                             self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
-                                    [float(x) for x in t[1:]])						
+                                [float(x) for x in t[1:]]
+                            )
                         else:
                             raise Exception(
-                                "Cannot parse line to projection: %s" % line)
+                                "Cannot parse line to projection: %s" % line
+                            )

@@ -27,13 +27,17 @@ class ProcarUnfolder(object):
         #     (self.procar.orbitalCount - 1) * (self.procar.ionsCount - 1) *
         #     self.procar.ispin), dtype='complex')
         if ispin is None:
-            iispin=0
+            iispin = 0
         else:
-            ispin -=1
+            ispin -= 1
         self.eigenvectors = np.reshape(
             self.procar.carray[:, :, ispin, :, :],
-            (self.procar.kpointsCount, self.procar.bandsCount,
-             self.procar.ionsCount * self.procar.orbitalCount))
+            (
+                self.procar.kpointsCount,
+                self.procar.bandsCount,
+                self.procar.ionsCount * self.procar.orbitalCount,
+            ),
+        )
         norm = np.linalg.norm(self.eigenvectors, ord=2, axis=2)
         self.eigenvectors /= norm[:, :, None]
 
@@ -42,15 +46,14 @@ class ProcarUnfolder(object):
                 for spin in range(self.procar.nspin):
                     # todo: what about spin?
                     self.basis.append("%s|%s|%s" % (None, orb, spin))
-                    self.positions.append(
-                        self.atoms.get_scaled_positions()[iatom])
+                    self.positions.append(self.atoms.get_scaled_positions()[iatom])
 
     def unfold(self, ispin=None):
         # spd: spd[kpoint][band][ispin][atom][orbital]
         # bands[kpt][iband]
         # to unfold,
         # unfolder:
-        #def __init__(self, cell, basis, positions , supercell_matrix, eigenvectors, qpoints, tol_r=0.1, compare=None):
+        # def __init__(self, cell, basis, positions , supercell_matrix, eigenvectors, qpoints, tol_r=0.1, compare=None):
         self._prepare_unfold_basis(ispin=ispin)
         self.unfolder = Unfolder(
             self.atoms.cell,
@@ -59,34 +62,43 @@ class ProcarUnfolder(object):
             self.supercell_matrix,
             self.eigenvectors,
             self.procar.kpoints,
-            phase=False)
+            phase=False,
+        )
         w = self.unfolder.get_weights()
         return w
 
-    def plot(self,
-             efermi=5.46,
-             ispin=None,
-             ylim=(-5, 10),
-             ktick=[0, 41, 83, 125, 200],
-             kname=['$\Gamma$', 'X', 'M', 'R', '$\Gamma$'],
-             show_band=True,
-             shift_efermi=True,
-             width=4.0,
-             color='blue',
-             axis=None, 
-             savetab=None,
-             ):
-        iispin=0
+    def plot(
+        self,
+        efermi=5.46,
+        ispin=None,
+        ylim=(-5, 10),
+        ktick=[0, 41, 83, 125, 200],
+        kname=["$\Gamma$", "X", "M", "R", "$\Gamma$"],
+        show_band=True,
+        shift_efermi=True,
+        width=4.0,
+        color="blue",
+        axis=None,
+        savetab=None,
+    ):
+        iispin = 0
         if ispin is not None:
-            iispin=ispin-1
+            iispin = ispin - 1
         xlist = [list(range(self.procar.kpointsCount))]
         uf = self.unfold(ispin=ispin)
         if savetab is not None:
-            nk, nb=uf.shape
-            tab=np.zeros((nb, nk*2), dtype=float)
-            tab[:, ::2]=self.procar.bands[iispin].T
-            tab[:, 1::2]=uf.T
-            np.savetxt(savetab, tab, delimiter=',', fmt="%10.4f", header='# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)...'%(nk, nb))
+            nk, nb = uf.shape
+            tab = np.zeros((nb, nk * 2), dtype=float)
+            tab[:, ::2] = self.procar.bands[iispin].T
+            tab[:, 1::2] = uf.T
+            np.savetxt(
+                savetab,
+                tab,
+                delimiter=",",
+                fmt="%10.4f",
+                header="# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)..."
+                % (nk, nb),
+            )
         axes = plot_band_weight(
             xlist * self.procar.bandsCount,
             self.procar.bands[iispin].T,
@@ -96,15 +108,20 @@ class ProcarUnfolder(object):
             shift_efermi=shift_efermi,
             fatness=width,
             color=color,
-            axis=axis)
+            axis=axis,
+        )
         axes.set_ylim(ylim)
         axes.set_xlim(0, self.procar.kpointsCount - 1)
         if shift_efermi:
-            shift=-efermi
+            shift = -efermi
         else:
-            shift=0.0
+            shift = 0.0
         if show_band:
             for i in range(self.procar.bandsCount):
-                axes.plot(self.procar.bands[iispin, :,i]+shift, color='gray', linewidth=1, alpha=0.3)
+                axes.plot(
+                    self.procar.bands[iispin, :, i] + shift,
+                    color="gray",
+                    linewidth=1,
+                    alpha=0.3,
+                )
         return axes
-

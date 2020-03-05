@@ -8,19 +8,21 @@ from ase.atoms import Atoms
 import numpy as np
 
 
-class Unfolder():
+class Unfolder:
     """ phonon unfolding class"""
 
-    def __init__(self,
-                 cell,
-                 basis,
-                 positions,
-                 supercell_matrix,
-                 eigenvectors,
-                 qpoints,
-                 tol_r=0.1,
-                 compare=None,
-                 phase=True):
+    def __init__(
+        self,
+        cell,
+        basis,
+        positions,
+        supercell_matrix,
+        eigenvectors,
+        qpoints,
+        tol_r=0.1,
+        compare=None,
+        phase=True,
+    ):
         """
         Params:
         ===================
@@ -70,12 +72,12 @@ class Unfolder():
         
         TODO: vacancies/add_atoms not supported. How to do it? For vacancies, a ghost atom can be added. For add_atom, maybe we can just ignore them? Will it change the energy spectrum?
         """
-        a1 = Atoms(symbols='H', positions=[(0, 0, 0)], cell=[1, 1, 1])
+        a1 = Atoms(symbols="H", positions=[(0, 0, 0)], cell=[1, 1, 1])
         sc = make_supercell(a1, self._scmat)
         rs = sc.get_scaled_positions()
 
         positions = self._positions
-        indices = np.zeros([len(rs), len(positions)], dtype='int32')
+        indices = np.zeros([len(rs), len(positions)], dtype="int32")
         for i, ri in enumerate(rs):
             inds = []
             Tpositions = positions + np.array(ri)
@@ -84,13 +86,14 @@ class Unfolder():
                 for j_basis, Tpos in enumerate(Tpositions):
                     dpos = Tpos - pos
                     if close_to_int(dpos) and (
-                            self._basis[i_basis] == self._basis[j_basis]):
-                        #indices[i, j_atom * self._ndim:j_atom * self._ndim + self._ndim] = np.arange(i_atom * self._ndim, i_atom * self._ndim + self._ndim)
+                        self._basis[i_basis] == self._basis[j_basis]
+                    ):
+                        # indices[i, j_atom * self._ndim:j_atom * self._ndim + self._ndim] = np.arange(i_atom * self._ndim, i_atom * self._ndim + self._ndim)
                         indices[i, j_basis] = i_basis
 
         self._trans_rs = rs
         self._trans_indices = indices
-        #print(indices)
+        # print(indices)
 
     def get_weight(self, evec, qpt, G=None):
         """
@@ -103,11 +106,17 @@ class Unfolder():
         N = len(self._trans_rs)
         for r_i, ind in zip(self._trans_rs, self._trans_indices):
             if self._phase:
-                weight += np.vdot(evec, evec[ind]) * np.exp(
-                    1j * 2 * np.pi * np.dot(qpt + G, r_i)) / N
+                weight += (
+                    np.vdot(evec, evec[ind])
+                    * np.exp(1j * 2 * np.pi * np.dot(qpt + G, r_i))
+                    / N
+                )
             else:
-                weight += np.vdot(evec, evec[ind]) / N * np.exp(
-                    -1j * 2 * np.pi * np.dot(G, r_i))
+                weight += (
+                    np.vdot(evec, evec[ind])
+                    / N
+                    * np.exp(-1j * 2 * np.pi * np.dot(G, r_i))
+                )
         return weight.real
 
     def get_weights(self):
@@ -119,7 +128,8 @@ class Unfolder():
         for iqpt in range(nqpts):
             for ifreq in range(nfreqs):
                 weights[iqpt, ifreq] = self.get_weight(
-                    self._evecs[iqpt, ifreq, :], self._qpts[iqpt])
+                    self._evecs[iqpt, ifreq, :], self._qpts[iqpt]
+                )
 
         self._weights = weights
         return self._weights
