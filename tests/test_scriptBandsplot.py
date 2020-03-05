@@ -1,9 +1,4 @@
-"""
-Testing bandplotting
-"""
-
 import pyprocar
-
 
 pyprocar.bandsplot(
     file = './examples/SrVO3/nospin/PROCAR3',
