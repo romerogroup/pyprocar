@@ -9,7 +9,7 @@ PyProcar goes beyond the conventional plain band structure to plot the projected
 1. Plain band structure
 =======================
 
-This is the most basic type of band structure. No projection information is contained here. In order to use the plain mode one sets ``mode=`plain'``. ``elimit`` sets the energy window limits. ``outcar`` specifies the **OUTCAR** file. For Abinit calculations, ``abinit_output`` is used instead. ``color`` lets the user use any color available in the matplotlib package. If an output file is not present one can set ``fermi`` manually. One may save the plot using the ``savefig`` tag, for example, ``savefig='figure.png'`` with a desired image file format. This applies to all other band structure plotting functions in PyProcar as well. For Elk, setting file='PROCAR' and outcar='OUTCAR' is not necessary since the ElkParser() will take care of all that. 
+This is the most basic type of band structure. No projection information is contained here. In order to use the plain mode one sets ``mode=`plain'``. ``elimit`` sets the energy window limits. ``outcar`` specifies the **OUTCAR** file. For Abinit calculations, ``abinit_output`` is used instead. ``color`` lets the user use any color available in the matplotlib package. If an output file is not present one can set ``fermi`` manually. One may save the plot using the ``savefig`` tag, for example, ``savefig='figure.png'`` with a desired image file format. This applies to all other band structure plotting functions in PyProcar as well. For Elk, setting file='PROCAR' and outcar='OUTCAR' is not necessary since the ElkParser() parses the equivalent Elk output files as long as PyProcar is run in the directory the Elk calculation was performed in. 
 
 Usage::
 
@@ -58,7 +58,7 @@ One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` cor
 
 	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],code='vasp')
 
-This is valid for the rest of the band plotting projections.
+This is valid for the rest of the band plotting modes as well.
 
 ==================
 2. Spin projection
@@ -136,6 +136,8 @@ PyProcar allows the plotting of band structures with a discontinuous :math:`k`-p
 	knames = ['$\\Gamma$', '$X$', '$M$', '$\\Gamma$', '$R$', '$X/M$', '$R/X$', '$M$', '$\\Gamma$']
 	kticks = [0, 39, 79, 119, 159, 199, 239, 279, 319]
 	discontinuities = [199, 239]
+
+.. image:: continuousbands.png    
 
 
 .. automodule:: pyprocar.scriptBandsplot
