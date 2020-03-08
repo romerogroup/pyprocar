@@ -4,13 +4,16 @@ from .procarselect import ProcarSelect
 from .procarplot import ProcarPlot
 from .procarsymmetry import ProcarSymmetry
 from .fermisurface import FermiSurface
+from .elkparser import ElkParser
+from .abinitparser import AbinitParser
 import matplotlib.pyplot as plt
 from .splash import welcome
 
 
 def fermi2D(
     file,
-    outcar,
+    outcar=None,
+    abinit_output=None,
     spin=0,
     atoms=None,
     orbitals=None,
@@ -26,6 +29,7 @@ def fermi2D(
     st=False,
     noarrow=False,
     exportplt=False,
+    code='vasp',
 ):
     """
   This module plots 2D Fermi surface.
@@ -53,6 +57,8 @@ def fermi2D(
         raise RuntimeError("invalid option --translate")
 
     print("file            : ", file)
+    print("outcar          : ", outcar)
+    print("Abinit output   : ", abinit_output)
     print("atoms           : ", atoms)
     print("orbitals        : ", orbitals)
     print("spin comp.      : ", spin)
@@ -64,26 +70,57 @@ def fermi2D(
     print("rotation        : ", rotation)
     print("masking thres.  : ", mask)
     print("save figure     : ", savefig)
-    print("outcar          : ", outcar)
     print("st              : ", st)
     print("no_arrows       : ", noarrow)
 
-    # first parse the outcar, if given
-    if rec_basis is None and outcar:
-        outcarparser = UtilsProcar()
-        if fermi is None:
-            fermi = outcarparser.FermiOutcar(outcar)
-            print("Fermi energy found in outcar file = " + str(fermi))
-        rec_basis = outcarparser.RecLatOutcar(outcar)
-    # Reciprocal lattices are needed!
-    elif rec_basis is None and outcar is None:
-        print("ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar")
-        raise RuntimeError("Reciprocal Lattice not found")
+    # first parse the outputs if given
+    if code == 'vasp':
+        if rec_basis is None and outcar:
+            outcarparser = UtilsProcar()
+            if fermi is None:
+                fermi = outcarparser.FermiOutcar(outcar)
+                print("Fermi energy found in outcar file = " + str(fermi))
+            rec_basis = outcarparser.RecLatOutcar(outcar)
+        # Reciprocal lattices are needed!
+        elif rec_basis is None and outcar is None:
+            print("ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar")
+            raise RuntimeError("Reciprocal Lattice not found")
 
-    # parsing the file
-    procarFile = ProcarParser()
-    # permissive incompatible with Fermi surfaces
-    procarFile.readFile(file, permissive=False, recLattice=rec_basis)
+        # parsing the file
+        procarFile = ProcarParser()
+        # permissive incompatible with Fermi surfaces
+        procarFile.readFile(file, permissive=False, recLattice=rec_basis)
+
+    elif code == 'elk':
+        procarFile = ElkParser()
+        if rec_basis is None:
+            if fermi is None:
+                fermi = procarFile.fermi
+                print("Fermi energy found in Elk output file = " + str(fermi))
+            rec_basis = procarFile.reclat
+        # Reciprocal lattices are needed!
+        if rec_basis is None:
+            print("ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar")
+            raise RuntimeError("Reciprocal Lattice not found")
+        procarFile = Elkparser(kdirect=False)
+
+    elif code == 'abinit':
+        if rec_basis is None and abinit_output:
+            abinitparser = AbinitParser(abinit_output=abinit_output)
+            if fermi is None:
+                fermi = abinitparser.fermi
+                print("Fermi energy found in Abinit ouput file = " + str(fermi))
+            rec_basis = abinitparser.reclat
+        # Reciprocal lattices are needed!
+        elif rec_basis is None and abinit_output is None:
+            print("ERROR: Reciprocal Lattice is needed, use --rec_basis or --outcar")
+            raise RuntimeError("Reciprocal Lattice not found")
+        # parsing the file
+        procarFile = ProcarParser()
+        # permissive incompatible with Fermi surfaces
+        procarFile.readFile(file, permissive=False, recLattice=rec_basis)
+
+    ### End of parsing ###
 
     if st is not True:
         # processing the data

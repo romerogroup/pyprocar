@@ -5,7 +5,7 @@ This module can be utilized to visualize the constant energy surface spin textur
 
 Usage: To plot :math:`S_x` spin component at a constant energy surface :math:`E = E_{F} + 0.60\,eV` (spin=1, 2, 3 for :math:`S_x`, :math:`S_y`, :math:`S_z`, respectively)::
 
-	pyprocar.fermi2D('PROCAR', outcar='OUTCAR', st=True, energy=0.60, noarrow=True, spin=1)
+	pyprocar.fermi2D('PROCAR', outcar='OUTCAR', st=True, energy=0.60, noarrow=True, spin=1, code='vasp')
 	 
 
 One could also plot spin texture using arrows instead of a heat map. This can be done by setting the tag: ``noarrow=False``. To set maximum and minimum energy values for color map, one could use ``vmin`` and ``vmax`` tags.

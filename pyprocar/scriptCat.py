@@ -30,31 +30,28 @@ def cat(inFiles, outFile, gz=False, mergeparallel=False, fixformat=False):
         handler.mergefiles(inFiles, outFile, gzipout=gz)
         return
 
-    elif mergeparallel == True and fixformat == False:    
-        _mergeparallel(inFiles,outFile)
+    elif mergeparallel == True and fixformat == False:
+        _mergeparallel(inFiles, outFile)
 
     elif mergeparallel == True and fixformat == True:
-        outFile_temp = 'outFile.tmp'        
+        outFile_temp = 'outFile.tmp'
         _mergeparallel(inFiles, outFile_temp)
         _fixformat(outFile_temp, outFile)
         if os.path.exists(outFile_temp):
             os.remove(outFile_temp)
-   
 
-    elif mergeparallel == False and fixformat ==True:
+    elif mergeparallel == False and fixformat == True:
         print('Using fixformat = True without mergeparallel. Input a single PROCAR.')
-        _fixformat(inFiles, outFile)    
+        _fixformat(inFiles, outFile)
 
-def _mergeparallel(
-    inputfiles = None,
-    outputfile = None
-    ):
+
+def _mergeparallel(inputfiles=None, outputfile=None):
     """ This merges Procar files seperated between k-point ranges.
     Happens with parallel Abinit runs. 
-    """   
+    """
     print("Merging parallel files...")
     filenames = sorted(inputfiles)
-    
+
     with open(outputfile, "w") as outfile:
         for fname in filenames:
             with open(fname) as infile:
@@ -62,10 +59,7 @@ def _mergeparallel(
                     outfile.write(line)
 
 
-def _fixformat(
-    inputfile = None,
-    outputfile = None
-    ):
+def _fixformat(inputfile=None, outputfile=None):
 
     """Fixes the formatting of Abinit's Procar
     when the tot projection is not summed and spin directions
@@ -75,7 +69,7 @@ def _fixformat(
     # removing existing temporary fixed file
     if os.path.exists(outputfile):
         os.remove(outputfile)
-   
+
     ####### Fixing the parallel PROCARs from Abinit ##########
 
     rf = open(inputfile, "r")
@@ -204,9 +198,6 @@ def _fixformat(
                 for ions_count in range(nion):
                     fp.write(single_band_lines[band_iterator] + "\n")
                     band_iterator += 1
-                fp.write(
-                    "tot  " + " ".join(map(str, tot[total_count, :])) + "\n\n"
-                )
+                fp.write("tot  " + " ".join(map(str, tot[total_count, :])) + "\n\n")
                 total_count += 1
     fp.close()
-    

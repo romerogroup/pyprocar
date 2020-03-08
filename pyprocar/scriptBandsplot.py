@@ -3,6 +3,7 @@ from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .procarplot import ProcarPlot
 from .elkparser import ElkParser
+from .abinitparser import AbinitParser
 from .splash import welcome
 import numpy as np
 import matplotlib.pyplot as plt
@@ -173,10 +174,17 @@ def bandsplot(
 
     spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
 
-    # parsing the PROCAR file
-    if code == "vasp" or code == "abinit":
+    #### parsing the PROCAR file or equivalent to retrieve spd data ####
+
+    if code == "vasp":
         procarFile = ProcarParser()
+
+    elif code == "abinit":
+        procarFile = ProcarParser()
+        abinitFile = AbinitParser(abinit_output=abinit_output)
+
     elif code == "elk":
+        # reciprocal lattice already taken care of
         procarFile = ElkParser(kdirect=kdirect)
 
         # Retrieving knames and kticks from Elk
@@ -219,20 +227,21 @@ def bandsplot(
 
     elif code == "abinit":
         if fermi is None:
-            rf = open(abinit_output, "r")
-            data = rf.read()
-            rf.close()
-            fermi = float(
-                re.findall(
-                    "Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)", data
-                )[0]
-            )
+            fermi = abinitFile.fermi
             print("Fermi energy found in Abinit output file = " + str(fermi))
+        recLat = abinitFile.reclat
 
     # if kdirect = False, then the k-points will be in cartesian coordinates.
-    # The output should be read to find the reciprocal lattice vectors to transform from direct to cartesian
+    # The output should be read to find the reciprocal lattice vectors to transform
+    # from direct to cartesian
 
-    if code == "vasp" or code == "abinit":
+    if code == "vasp":
+        if kdirect:
+            procarFile.readFile(file, permissive)
+        else:
+            procarFile.readFile(file, permissive, recLattice=recLat)
+
+    elif code == 'abinit':
         if kdirect:
             procarFile.readFile(file, permissive)
         else:
