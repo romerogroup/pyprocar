@@ -67,6 +67,7 @@ Installation
 Changelog
 --------------
 
+v5.1.5 Mar 8th, 2020 -- Fixed summation issues in ElkParser. <br />
 v5.1.4 Mar 7th, 2020 -- Added new class for parsing Abinit data.<br />
 v5.1.3 Mar 5th, 2020 -- Fixed Abinit PROCAR formatting issues in PyProcar cat function.<br />
 v5.1.1 Mar 5th, 2020 -- Removed bandscompare() due to redundancy with exportplt.<br />

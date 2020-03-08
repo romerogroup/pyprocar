@@ -5,7 +5,7 @@ Created on Fri March 2 2020
 """
 
 from re import findall
-from numpy import array, linspace, where, zeros, dot
+from numpy import array, linspace, where, zeros, dot, sum
 
 
 class ElkParser:
@@ -218,7 +218,7 @@ class ElkParser:
                 if ikpoint == self.kpointsCount - 1:
                     iline += 1
         # self.spd[:,:,:,-1,:] = self.spd.sum(axis=3)
-        self.spd[:, :, :, :, -1] = self.spd.sum(axis=4)
+        self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1],axis=4)
         self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
         self.spd[:, :, 0, -1, 0] = 0
 
