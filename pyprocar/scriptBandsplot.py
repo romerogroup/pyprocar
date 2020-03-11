@@ -12,7 +12,7 @@ import re
 
 def bandsplot(
     file=None,
-    mode="scatter",
+    mode="plain",
     color="blue",
     abinit_output=None,
     spin=0,

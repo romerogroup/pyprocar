@@ -2,6 +2,7 @@ import re
 import os
 import seekpath
 import numpy as np
+from .splash import welcome
 
 
 def kpath(

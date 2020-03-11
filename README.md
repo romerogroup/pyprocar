@@ -16,7 +16,7 @@ Usage
 Typical use is as follows
 
     import pyprocar 
-    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain')
+    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain',code='vasp')
 
 Refer to the documentation for further details. 
 
