@@ -6,11 +6,15 @@ In order to plot a band structure, one must define a set of :math:`k`-points fol
 
 General format::
 
-	pyprocar.kpath(infile, grid-size, with-time-reversal, recipe, threshold, symprec, angle-tolerance,supercell_matrix)
+	pyprocar.kpath(infile, outfile, grid-size, with-time-reversal, recipe, threshold, symprec, angle-tolerance,supercell_matrix)
 
 Usage::
 	
-	pyprocar.kpath('POSCAR',40,True,'hpkot',1e-07,1e-05,-1.0,np.eye(3))	
+	pyprocar.kpath('POSCAR','KPOINTS',40,True,'hpkot',1e-07,1e-05,-1.0,np.eye(3))	
+
+or using the default options, a POSCAR would suffice::
+    
+    pyprocar.kpath('POSCAR')
 
 This information is automatically written to a KPOINTS file.
 
