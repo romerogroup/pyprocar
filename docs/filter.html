@@ -21,11 +21,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -211,12 +211,6 @@ For example, to filter the spin in the <span class="math notranslate nohighlight
 </pre></div>
 </div>
 <p>PyProcar counts each row of ions in PROCAR file starting from 0. Keep in mind: <code class="docutils literal notranslate"><span class="pre">atoms=0</span></code> does not define the atom_type, rather it defines only the first ion in the POSCAR. So if you have more than one ion of the same element, use <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[[0,1,2,3,...]]</span></code>.</p>
-<span class="target" id="module-pyprocar.scriptFilter"></span><dl class="function">
-<dt id="pyprocar.scriptFilter.filter">
-<code class="sig-prename descclassname">pyprocar.scriptFilter.</code><code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param">inFile</em>, <em class="sig-param">outFile</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbital_names=None</em>, <em class="sig-param">bands=None</em>, <em class="sig-param">spin=None</em>, <em class="sig-param">kpoints=None</em>, <em class="sig-param">human_atoms=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFilter.filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>This module filters the PROCAR file and re-write a new one.</p>
-</dd></dl>
-
 </div>
 </div>
 
