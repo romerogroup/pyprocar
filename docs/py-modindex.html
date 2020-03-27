@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Repair &mdash; PyProcar 3.6 documentation</title>
+  <title>Python Module Index &mdash; PyProcar 3.6 documentation</title>
   
 
   
@@ -36,8 +36,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="k-mesh generator" href="kmesh.html" />
-    <link rel="prev" title="Generating a k-path" href="kpath.html" /> 
+ 
+
+
 </head>
 
 <body class="wy-body-for-nav">
@@ -81,23 +82,11 @@
               
             
             
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Repair</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 
             
@@ -143,16 +132,10 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
-        
-      <li>Repair</li>
+      <li>Python Module Index</li>
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
-            <a href="_sources/repair.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -164,35 +147,75 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="repair">
-<h1>Repair<a class="headerlink" href="#repair" title="Permalink to this headline">¶</a></h1>
-<p>This utility is used to repair the ill-formatting of the PROCAR file due to the erroneous file handling in Fortran, particularly in a VASP calculation. This prevents issues arising from the lack of white space between a number and a negative sign, for instance <code class="docutils literal notranslate"><span class="pre">0.000000-0.5000000</span></code>. Typically, <code class="docutils literal notranslate"><span class="pre">pyprocar.repair()</span></code> is recommended to be applied before using any other utility. Setting <code class="docutils literal notranslate"><span class="pre">permissive=True</span></code> during plotting will achieve this too.</p>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">repair</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR-repaired&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<span class="target" id="module-pyprocar.scriptRepair"></span><dl class="function">
-<dt id="pyprocar.scriptRepair.repair">
-<code class="sig-prename descclassname">pyprocar.scriptRepair.</code><code class="sig-name descname">repair</code><span class="sig-paren">(</span><em class="sig-param">infile</em>, <em class="sig-param">outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptRepair.repair" title="Permalink to this definition">¶</a></dt>
-<dd><p>This module calls ProcarRepair to repair the PROCAR file.</p>
-</dd></dl>
 
-</div>
+   <h1>Python Module Index</h1>
+
+   <div class="modindex-jumpbox">
+   <a href="#cap-p"><strong>p</strong></a>
+   </div>
+
+   <table class="indextable modindextable">
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-p"><td></td><td>
+       <strong>p</strong></td><td></td></tr>
+     <tr>
+       <td><img src="_static/minus.png" class="toggler"
+              id="toggle-1" style="display: none" alt="-" /></td>
+       <td>
+       <code class="xref">pyprocar</code></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="bands.html#module-pyprocar.scriptBandsplot"><code class="xref">pyprocar.scriptBandsplot</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="cat.html#module-pyprocar.scriptCat"><code class="xref">pyprocar.scriptCat</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="2Dspin.html#module-pyprocar.scriptFermi2D"><code class="xref">pyprocar.scriptFermi2D</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="3Dspin.html#module-pyprocar.scriptFermi3D"><code class="xref">pyprocar.scriptFermi3D</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="filter.html#module-pyprocar.scriptFilter"><code class="xref">pyprocar.scriptFilter</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="kmesh.html#module-pyprocar.scriptKmesh2D"><code class="xref">pyprocar.scriptKmesh2D</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="kpath.html#module-pyprocar.scriptKpath"><code class="xref">pyprocar.scriptKpath</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="repair.html#module-pyprocar.scriptRepair"><code class="xref">pyprocar.scriptRepair</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="unfold.html#module-pyprocar.scriptUnfold"><code class="xref">pyprocar.scriptUnfold</code></a></td><td>
+       <em></em></td></tr>
+   </table>
 
 
            </div>
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="kmesh.html" class="btn btn-neutral float-right" title="k-mesh generator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="kpath.html" class="btn btn-neutral float-left" title="Generating a k-path" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>
