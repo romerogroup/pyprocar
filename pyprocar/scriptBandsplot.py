@@ -1,13 +1,15 @@
-from .utilsprocar import UtilsProcar
-from .procarparser import ProcarParser
-from .procarselect import ProcarSelect
-from .procarplot import ProcarPlot
-from .elkparser import ElkParser
-from .abinitparser import AbinitParser
-from .splash import welcome
-import numpy as np
-import matplotlib.pyplot as plt
 import re
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from .abinitparser import AbinitParser
+from .elkparser import ElkParser
+from .procarparser import ProcarParser
+from .procarplot import ProcarPlot
+from .procarselect import ProcarSelect
+from .splash import welcome
+from .utilsprocar import UtilsProcar
 
 
 def bandsplot(
@@ -241,7 +243,7 @@ def bandsplot(
         else:
             procarFile.readFile(file, permissive, recLattice=recLat)
 
-    elif code == 'abinit':
+    elif code == "abinit":
         if kdirect:
             procarFile.readFile(file, permissive)
         else:

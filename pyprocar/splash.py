@@ -9,7 +9,7 @@ def welcome():
     print(
         "Please cite: Herath, U., Tavadze, P., He, X., Bousquet, E., Singh, S., Muñoz, F. & Romero,\
     A., PyProcar: A Python library for electronic structure pre/post-processing.,\
-    Computer Physics Communications 107080 (2019).\n"
+    Computer Physics Communications 251 (2020):107080.\n"
     )
 
     return
