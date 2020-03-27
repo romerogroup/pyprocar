@@ -659,6 +659,7 @@ class ProcarParser:
             # with open(self.fname) as myfile:
             f = self.utils.OpenFile(procar)
             lines = iter(f.readlines())
+            last_iband = -1
             for line in lines:
                 if line.startswith("# of k-points"):
                     a = re.findall(":\s*([0-9]*)", line)
@@ -685,7 +686,11 @@ class ProcarParser:
                         iispin = 1
                 if line.strip().startswith("band"):
                     ss = line.strip().split()
-                    iband = int(ss[1]) - 1
+                    try:
+                        iband = int(ss[1]) - 1
+                    except ValueError:
+                        iband = last_iband + 1
+                    last_iband=iband
                     e = float(ss[4])
                     occ = float(ss[-1])
                     self.bands[iispin, ikpt, iband] = e
