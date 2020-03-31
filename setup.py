@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from distutils.core import Extension, setup
 
 setup(
     name="pyprocar",
