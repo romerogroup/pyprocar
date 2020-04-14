@@ -82,6 +82,7 @@ Installation
 Changelog
 --------------
 
+v5.1.9 Apr 14th, 2020 -- Added feature to filter colinear spins in pyprocar.filter(). <br />
 v5.1.8 Mar 27th, 2020 -- Fix iband reading error due to vasp incorrectly writting iband>999. <br />
 v5.1.5 Mar 8th, 2020 -- Fixed summation issues in ElkParser. <br />
 v5.1.4 Mar 7th, 2020 -- Added new class for parsing Abinit data.<br />

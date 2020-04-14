@@ -1,8 +1,10 @@
-import numpy as np
-import re
 import logging
-import matplotlib.pyplot as plt
+import re
 import sys
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 from ..utilsprocar import UtilsProcar
 
 
@@ -14,7 +16,7 @@ class ProcarFileFilter:
   A PROCAR File is basically an multi-dimmensional arrays of data, the
   largest being:
   spd_data[#kpoints][#band][#ispin][#atom][#orbital]
-  
+
   while the number of Kpoints d'ont seems a target for reduction
   (omission or averaging), the other fields can be reduced, for
   instance: grouping the atoms by species or as "surtrate" and
@@ -25,12 +27,12 @@ class ProcarFileFilter:
 
   -To group the "s", "p" y "d" orbitals from the file PROCAR and write
    them in PROCAR-spd:
-   
+
    >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
    >>> a.FilterOrbitals([[0],[1,2,3],[4,5,6,7,8]], ['s','p', 'd'])
-   
+
        The PROCAR-new will have just 3+1 columns (orbitals are colum-wise
-       , take a look to the file). If you omit the ['s', 'p', 'd'] list, 
+       , take a look to the file). If you omit the ['s', 'p', 'd'] list,
        the new orbitals will have a generic meaningless name (o1, o2, o3)
 
   -To group the atoms 1,2,5,6 and 3,4,7,8 from PROCAR and write them
@@ -39,7 +41,7 @@ class ProcarFileFilter:
    >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
    >>> a.FilterAtoms([[0,1,4,5],[2,3,6,7]])
 
-   -To select just the total density (ie: ignoring the spin-resolved stuff, 
+   -To select just the total density (ie: ignoring the spin-resolved stuff,
     if any)from PROCAR and write it in PROCAR-new:
 
    >>> a = procar.ProcarFileFilter("PROCAR", "PROCAR-new")
@@ -152,7 +154,7 @@ class ProcarFileFilter:
     file already set by SetOutFile(). The new file only has the
     selected/grouped orbitals.
 
-    Args: 
+    Args:
 
     -orbitals: nested iterable with the orbitals indexes to be
       considered. For example: [[0],[2]] means select the first
@@ -161,10 +163,10 @@ class ProcarFileFilter:
 
     -orbitalsNames: The name to be put in each new orbital field (of a
       orbital line). For example ["s","p","d"] is a good
-      `orbitalsName` for the `orbitals`=[[0],[1,2,3],[4,5,6,7,8]]. 
+      `orbitalsName` for the `orbitals`=[[0],[1,2,3],[4,5,6,7,8]].
       However, ["foo", "bar", "baz"] is equally valid.
 
-    Note: 
+    Note:
       -The atom index is not counted as the first field.
       -The last column ('tot') is so important that it is always
        included. Do not needs to be called
@@ -206,17 +208,17 @@ class ProcarFileFilter:
     file already set by SetOutFile(). The new file only has the
     selected/grouped atoms.
 
-    Args: 
+    Args:
 
     -atomsGroups: nested iterable with the atoms indexes (0-based) to
       be considered. For example: [[0],[2]] means select the first and
       the second atoms. While [[1,2,3],[4,5,6,7,8]] means select the
       contribution of atoms 1+2+3 and 4+5+6+7+8
 
-    Note: 
+    Note:
       -The atom index is c-based (or python) beginning with 0
       -The output has a dummy atom index, without any intrisic meaning
-    
+
     """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
@@ -278,16 +280,16 @@ class ProcarFileFilter:
     file already set by SetOutFile(). The new file only has the
     selected bands.
 
-    Args: 
+    Args:
 
     -Min, Max:
-      the minimum/maximum band  index to be considered, the indexes 
+      the minimum/maximum band  index to be considered, the indexes
       are the same used by vasp (ie written in the file).
 
 
     Note: -Since bands are somewhat disordered in vasp you may like to
       consider a large region and made some trial and error
-    
+
     """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
@@ -331,41 +333,98 @@ class ProcarFileFilter:
     file already set by SetOutFile(). The new file only has the
     selected part of the density (sigma_i).
 
-    Args: 
+    Args:
 
-    -components: The spin component block, for instante [0] menas just
-      the density, while [1,2] would be the the sigma_x and sigma_y
-      for a non-collinear calculation.
+    -components: For non colinear spin calculations
+      the spin component block, for instante [0] menas just
+      the density, while [1,2] would be the the sigma_x and sigma_y.
+      For colinear spin polarized calculations [0] means spin up
+      component and [1] spin down component.
 
-    TODO: spin-polarized collinear case is not included at all, not
-    even a warning message!
 
+    UPDATE: Colinear spin calculation implemented. It uses regex to
+            check for the type of calculation. Hopefully, this won't
+            be an issue with memory nowadays.
     """
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
         self.log.info("Out File: " + self.outfile)
-        # open the files
-        fout = open(self.outfile, "w")
+
+        # First let's see if this is a spin colinear calculation.
         fopener = UtilsProcar()
-        with fopener.OpenFile(self.infile) as fin:
-            counter = 0
-            for line in fin:
-                # if any data found
-                if re.match(r"\s*\d", line):
-                    # check if should be written
-                    if counter in components:
+        fin_test = fopener.OpenFile(self.infile)
+        data = fin_test.read()
+        colinear_counter = re.findall(r"#\sof\sk-points:", data)
+
+        if len(colinear_counter) == 1:
+            # This is a non colinear spin calculation.
+            # (Or no spin. But why would anyone want to filter spins in that?)
+
+            print("Non colinear spin calculation detected.")
+
+            # open the files
+            fout = open(self.outfile, "w")
+            fopener = UtilsProcar()
+            with fopener.OpenFile(self.infile) as fin:
+                counter = 0
+                for line in fin:
+                    # if any data found
+                    if re.match(r"\s*\d", line):
+                        # check if should be written
+                        if counter in components:
+                            fout.write(line)
+                    elif re.match(r"\s*tot", line):
+                        if counter in components:
+                            fout.write(line)
+                        # the next block will belong to other component
+                        counter += 1
+                    elif re.match(r"\s*ion", line):
                         fout.write(line)
-                elif re.match(r"\s*tot", line):
-                    if counter in components:
+                        counter = 0
+                    else:
                         fout.write(line)
-                    # the next block will belong to other component
-                    counter += 1
-                elif re.match(r"\s*ion", line):
-                    fout.write(line)
-                    counter = 0
-                else:
-                    fout.write(line)
+
+        elif len(colinear_counter) == 2:
+            # This is a colinear spin calculation.
+            # The idea is to seperate spin up [0] and down [1] components
+            # and store them in two different PROCARS.
+            # They can then be used to plot spin up and spin down
+            # bands seperately without plotting spin density or
+            # spin magnetization.
+
+            print("Colinear spin calculation detected.")
+
+            # open the files
+            fout = open(self.outfile, "w")
+            fopener = UtilsProcar()
+            spindown_buffer = []
+            component_counter = 0
+
+            with fopener.OpenFile(self.infile) as fin:
+                for line in fin:
+                    if re.match(r"PROCAR\s*", line):
+                        # First line of the file.
+                        spindown_buffer.append(line)
+
+                    if re.match(r"#\sof\sk-points:", line):
+                        component_counter += 1
+
+                    if component_counter < 2:
+                        if components[0] == 0:
+                            # Write to file for spin up component.
+                            fout.write(line)
+                            # Keep on writing line by line until the start of
+                            # the next component, i.e. "# of k-points:".
+                    else:
+                        # Save spin down component to buffer.
+                        # Save later if asked.
+                        spindown_buffer.append(line)
+
+            if components[0] == 1:
+                for i in spindown_buffer:
+                    fout.write(i)
+
         return
 
     def FilterKpoints(self, Min, Max):
@@ -374,10 +433,10 @@ class ProcarFileFilter:
     file already set by SetOutFile(). The new file the
     selected bands.
 
-    Args: 
+    Args:
 
     -Min, Max:
-      the minimum/maximum band  kpoint to be considered, the indexes 
+      the minimum/maximum band  kpoint to be considered, the indexes
       are the same used by vasp (i.e. written in the file). Not starting from zero
     """
         # setting iostuff, this method -and class- should not made any

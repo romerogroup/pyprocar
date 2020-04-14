@@ -8,7 +8,7 @@ The following example extracts information of bands ranging from index 50 to 70 
 	pyprocar.filter('PROCAR','PROCAR-band50-70',bands=[50,70])
 
 ===========================
-To filter selected orbitals 
+To filter selected orbitals
 ===========================
 
 To make a new PROCAR file containing only three columns, one for :math:`s` orbitals, one for :math:`p`, and one for total (real total, not total of :math:`s+p`)::
@@ -17,7 +17,7 @@ To make a new PROCAR file containing only three columns, one for :math:`s` orbit
 
 If you want to select only :math:`p_x` orbitals, just use ``orbitals=[[3]]``.
 
-In the same way to plot the projection of total :math:`p`-orbitals use ``orbitals=[[1,2,3]]``  (i.e. :math:`px+py+pz`). Same goes for other orbitals. 
+In the same way to plot the projection of total :math:`p`-orbitals use ``orbitals=[[1,2,3]]``  (i.e. :math:`px+py+pz`). Same goes for other orbitals.
 
 ===================================
 To filter selected :math:`k`-points
@@ -34,16 +34,18 @@ This creates a new PROCAR file containing only the selected :math:`k`-points.
 To filter selected spins
 ========================
 
-This can be used to generate a PROCAR that contains a selected spin component. 
+This can be used to generate a PROCAR that contains a selected spin component.
+For non colinear spin calculations 0 is the total spin density and 1,2,3 correspond to spins in the x,y and z directions.
 For example, to filter the spin in the :math:`S_x` direction::
 
 	pyprocar.filter('PROCAR’,'PROCAR-filtered_spin’, spin=[1])
 
 This creates a new PROCAR file containing only the selected spin component(s).
+For colinear spin calculations spin=[0] and spin=[1] selects spin up and spin down components, respectively.
 
 
 ========================
-To filter selected atoms 
+To filter selected atoms
 ========================
 
 Usage::
