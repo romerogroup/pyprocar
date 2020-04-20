@@ -9,7 +9,7 @@ Please install the following dependencies prior to installing PyProcar.
 	* seekpath 
 	* ase 
 	* scikit-image
-	* mayavi 4.6.2
+	* mayavi 4.6.0
 
 To install using pip use the following command::
 	

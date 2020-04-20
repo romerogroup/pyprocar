@@ -3,6 +3,6 @@ scipy
 matplotlib
 seekpath
 ase
-mayavi==4.6.2
+mayavi==4.6.0
 scikit-image
 pyfiglet

@@ -29,7 +29,7 @@ setup(
         "matplotlib",
         "ase",
         "scikit-image",
-        "mayavi==4.6.2",
+        "mayavi==4.6.0",
         "pyfiglet",
     ],
     scripts=["bin/procar"],
