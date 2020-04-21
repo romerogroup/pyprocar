@@ -5,7 +5,8 @@ Created on Fri March 2 2020
 """
 
 from re import findall
-from numpy import array, linspace, where, zeros, dot, sum
+
+from numpy import array, dot, linspace, sum, where, zeros
 
 
 class ElkParser:
@@ -35,6 +36,10 @@ class ElkParser:
 
         self.fermi = None
         self.reclat = None  # reciprocal lattice vectors
+
+        # spin polarized parameters
+        self.spinpol = None
+        self.ispin = 0
 
         self.orbitalName = [
             "Y00",
@@ -136,6 +141,21 @@ class ElkParser:
                     )
                 ispc += 1
 
+        # Checking if spinpol = .true. in elk.in
+        self.spinpol = findall(r"spinpol\s*([.a-zA-Z]*)", self.elkIn)[0]
+        if self.spinpol:
+            if self.spinpol == ".true.":
+                print("\nElk colinear spin calculation detected.\n")
+                self.ispin = 2
+            else:
+                print("\nElk non spin calculation detected.\n")
+                self.ispin = 1
+        else:
+            print(
+                "\nNo spinpol keyword found in elk.in. Assuming non spin calculation.\n"
+            )
+            self.ispin = 1
+
     def _readFiles(self):
         rf = open(self.file_names[0], "r")
         lines = rf.readlines()
@@ -218,9 +238,39 @@ class ElkParser:
                 if ikpoint == self.kpointsCount - 1:
                     iline += 1
         # self.spd[:,:,:,-1,:] = self.spd.sum(axis=3)
-        self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1],axis=4)
+        self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1], axis=4)
         self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
         self.spd[:, :, 0, -1, 0] = 0
+
+        if self.ispin == 2:
+            # manipulating spd array for spin polarized calculations.
+            # The shape is (nkpoints,2*nbands,2,natoms,norbitals)
+            # The third dimension is for spin.
+            # When this is zero, the bands*2 (all spin up and down bands) have positive projections.
+            # When this is one, the the first half of bands (spin up) will have positive projections
+            # and the second half (spin down) will have negative projections. This is to adhere to
+            # the convention used in PyProcar to obtain spin density and spin magnetization.
+
+            # Create temporary array to store the data
+            spd2 = zeros(
+                shape=(self.kpointsCount, self.bandsCount, 2, self.ionsCount + 1, 18)
+            )
+
+            # spin up and spin down block for spin = 0
+            spd2[:, :, 0, :, :] = self.spd[:, :, 0, :, :]
+
+            # spin up block for spin = 1
+            spd2[:, : int(self.bandsCount / 2), 1, :, :] = self.spd[
+                :, : int(self.bandsCount / 2), 0, :, :
+            ]
+
+            # spin down block for spin = 1
+            spd2[:, int(self.bandsCount / 2) :, 1, :, :] = (
+                -1 * self.spd[:, int(self.bandsCount / 2) :, 0, :, :]
+            )
+
+            # setting this to original spd array
+            self.spd = spd2
 
     def _readFermi(self):
         rf = open("EFERMI.OUT", "r")

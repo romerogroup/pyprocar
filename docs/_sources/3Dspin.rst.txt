@@ -3,6 +3,10 @@
 
 PyProcar's 3D Fermi surface utility is able to generate Fermi surface plots projected over spin, atoms and orbitals or a combination of one or many of each. This utility is also capable of projecting external properties that are provided on a mesh grid in momentum space. This feature is useful when one wants to project properties that are not provided in PROCAR file such as Fermi velocity, electron-phonon coupling and electron effective mass. We divide this section into three sub sections, plain Fermi surface, projection of properties from PROCAR and projection of properties from external file. 
 
+NOTE:
+
+When plotting 3D Fermi surfaces, it is important to use a Monkhorst-Pack k-grid while setting ``ISYM=-1`` in the INCAR file (turn off symmetry). 
+
 ======================
 1. Plain Fermi surface
 ======================

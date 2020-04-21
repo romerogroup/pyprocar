@@ -1,8 +1,10 @@
-import numpy as np
-import re
 import logging
-import matplotlib.pyplot as plt
+import re
 import sys
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 from ..utilsprocar import UtilsProcar
 
 
@@ -11,13 +13,13 @@ class ProcarSelect:
   Reduces the dimensionality of the data making it uselful to
   plot bands.
 
-  The main data to manipulate is the projected electronic structure. 
+  The main data to manipulate is the projected electronic structure.
   Its shape original is:
 
   spd[kpoint][band][ispin][atom][orbital].
 
   The selection of components should be done in order, says, first
-  "ispin", then "atom", and at last "orbital". 
+  "ispin", then "atom", and at last "orbital".
 
   Note: once any selection has been performed, the data itself
   changes. Say, if you want compare atom [0] and [1,2], you need two
@@ -29,12 +31,15 @@ class ProcarSelect:
 
   """
 
-    def __init__(self, ProcarData=None, deepCopy=True, loglevel=logging.WARNING):
+    def __init__(
+        self, ProcarData=None, deepCopy=True, loglevel=logging.WARNING, mode=None
+    ):
 
         self.spd = None
         self.bands = None
         self.kpoints = None
         # self.cspd=None
+        self.mode = mode
 
         # We want a logging to tell us what is happening
         self.log = logging.getLogger("ProcarSelect")
@@ -55,7 +60,7 @@ class ProcarSelect:
     def setData(self, ProcarData, deepCopy=True):
         """
     The data from ProcarData is deepCopy-ed by default (ie: their
-    elements are not modified by this class.   
+    elements are not modified by this class.
 
     Args:
 
@@ -78,9 +83,14 @@ class ProcarSelect:
         self.log.debug("setData: ... Done")
         return
 
-    def selectIspin(self, value):
+    def selectIspin(self, value=None, separate=False):
         """
     value is a list with the values of Ispin to select.
+
+    UPDATE:
+        if separate == true, then spin = 0 corresponds to spin up
+        and spin = 1 corresponds to spin down. If not, they give
+        spin density and spin magnetization, respectively.
 
     Example:
     >>> foo = ProcarParser()
@@ -104,13 +114,34 @@ class ProcarSelect:
             )
             raise RuntimeError("Wrong dimensionality of the array")
         self.log.debug("ispin value = " + str(value))
-        self.spd = self.spd[:, :, value]
-        self.spd = self.spd.sum(axis=2)
-        self.log.info("new spd shape =" + str(self.spd.shape))
-        self.log.debug("selectIspin: ...Done")
+
+        numofbands = int(self.spd.shape[1] / 2)
+
+        if separate == False:
+            # spin density or magnetization
+            self.spd = self.spd[:, :, value]
+            self.spd = self.spd.sum(axis=2)
+            self.log.info("new spd shape =" + str(self.spd.shape))
+            self.log.debug("selectIspin: ...Done")
+            if self.mode == "parametric":
+                if value == [0]:
+                    print("Plotting spin density...")
+                elif value == [1]:
+                    print("Plotting spin magnetization...")
+
+        else:
+            # spin up (spin = 0) and spin down (spin = 1) separately.
+            if value == [0]:
+                # select spin up block
+                self.spd = self.spd[:, :numofbands, 0]
+
+            elif value == [1]:
+                # select spin down block
+                self.spd = self.spd[:, numofbands:, 0]
+
         return
 
-    def selectAtoms(self, value, fortran=False):
+    def selectAtoms(self, value=None, fortran=False):
         """
     value is a list with the values of Atoms to select. The optional
     `fortran` argument indicates whether a c-like 0-based indexing
@@ -123,7 +154,7 @@ class ProcarSelect:
     >>> bar = ProcarSelect(foo)
     >>> bar.selectIspin([...])
     >>> bar.selectAtoms([0,1,2]) #atom0+atom1+atom2
-    
+
     Note: this method should be called after select.Ispin
     """
         self.log.debug("selectAtoms: ...")
@@ -166,7 +197,7 @@ class ProcarSelect:
     >>> bar.selectIspin([...])
     >>> bar.selectAtoms([...])
     >>> bar.selectOrbital([-1]) #the last (`tot`) field
-    
+
     to select "p" orbitals just change the argument in the last line
     to [2,3,4] or as needed
 

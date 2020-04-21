@@ -41,6 +41,7 @@ def bandsplot(
     kdirect=True,
     discontinuities=[],
     code="vasp",
+    separate=False,
 ):
 
     """This function plots band structures
@@ -250,7 +251,8 @@ def bandsplot(
             procarFile.readFile(file, permissive, recLattice=recLat)
 
     # processing the data, getting an instance of the class that reduces the data
-    data = ProcarSelect(procarFile, deepCopy=True)
+    data = ProcarSelect(procarFile, deepCopy=True, mode=mode)
+    numofbands = int(data.spd.shape[1] / 2)
 
     # handling the spin, `spin='st'` is not straightforward, needs
     # to calculate the k vector and its normal. Other `spin` values
@@ -275,13 +277,32 @@ def bandsplot(
         # storing the spin projection into the original array
         data.spd = -sin * dataX.spd + cos * dataY.spd
     else:
-        data.selectIspin([spin])
+        data.selectIspin([spin], separate=separate)
         data.selectAtoms(atoms, fortran=human)
         data.selectOrbital(orbitals)
 
     # Plotting the data
-    data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
-    plot = ProcarPlot(data.bands, data.spd, data.kpoints)
+    if separate == True:
+        if spin == 0:
+            # plotting spin up bands separately
+            data.bands = (
+                data.bands[:, :numofbands].transpose() - np.array(fermi)
+            ).transpose()
+            print("Plotting spin up bands...")
+
+        elif spin == 1:
+            # plotting spin down bands separately
+            data.bands = (
+                data.bands[:, numofbands:].transpose() - np.array(fermi)
+            ).transpose()
+            print("Plotting spin down bands...")
+
+        plot = ProcarPlot(data.bands, data.spd, data.kpoints)
+
+    else:
+        # Regular plotting method. For spin it plots density or magnetization.
+        data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
+        plot = ProcarPlot(data.bands, data.spd, data.kpoints)
 
     ###### start of mode dependent options #########
 
