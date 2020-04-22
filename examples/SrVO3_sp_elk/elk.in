@@ -1,0 +1,52 @@
+! plotting the wannier functions in SrVO3
+
+tasks
+  0
+  22
+
+ngridk
+  8 8 8	
+
+scale
+  7.2589
+
+avec
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+
+highq
+.true.
+
+spinpol
+.true.
+
+wrtvars
+.true.
+
+sppath
+  '/home/uthpala/elk/elk-6.3.2/species/'
+
+atoms
+  3                                    : nspecies
+  'Sr.in'                              : spfname
+  1                                    : natoms; atpos, bfcmt below
+  .00000000000  .00000000000  .00000000000  0. 0. 0. 
+  'V.in'
+  1
+   0.5 0.5 0.5 0.0 0.0 1.0
+  'O.in'                               : spfname
+  3                                    : natoms; atpos, bfcmt below
+  0.5 0.5 0.0 0. 0. 0.
+  0.5 0.0 0.5 0. 0. 0.
+  0.0 0.5 0.5 0. 0. 0.
+
+! These are the vertices to be joined for the band structure plot
+plot1d
+  6 40 
+   0.0      0.0      0.0 : \Gamma
+   0.5      0.0      0.0 : X
+   0.5      0.5      0.0 : M
+   0.0      0.0      0.0 : \Gamma
+   0.5      0.5      0.5 : R
+   0.5      0.0      0.0 : X

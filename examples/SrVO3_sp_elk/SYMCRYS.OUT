@@ -1,0 +1,580 @@
+ 
+(translation vectors and rotation matrices are in lattice coordinates)
+ 
+  48 : nsymcrys
+ 
+Crystal symmetry :    1
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    2
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0  -1   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    3
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0   0  -1
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    4
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0   0  -1
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    5
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0   0   1
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    6
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0   0   1
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    7
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0   1   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    8
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0   1   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :    9
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+  -1   0   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   10
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+  -1   0   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   11
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+   0   0  -1
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   12
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+   0   0  -1
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   13
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+   0   0   1
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   14
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+   0   0   1
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   15
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+   1   0   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   16
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0  -1   0
+   1   0   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   17
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+  -1   0   0
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   18
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+  -1   0   0
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   19
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+   0  -1   0
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   20
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+   0  -1   0
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   21
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+   0   1   0
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   22
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+   0   1   0
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   23
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+   1   0   0
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   24
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0  -1
+   1   0   0
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   25
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+  -1   0   0
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   26
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+  -1   0   0
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   27
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+   0  -1   0
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   28
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+   0  -1   0
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   29
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+   0   1   0
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   30
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+   0   1   0
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   31
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+   1   0   0
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   32
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   0   1
+   1   0   0
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   33
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+  -1   0   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   34
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+  -1   0   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   35
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+   0   0  -1
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   36
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+   0   0  -1
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   37
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+   0   0   1
+  -1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   38
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+   0   0   1
+   1   0   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   39
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+   1   0   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   40
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   0   1   0
+   1   0   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   41
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0  -1   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   42
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0  -1   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   43
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0   0  -1
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   44
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0   0  -1
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   45
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0   0   1
+   0  -1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   46
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0   0   1
+   0   1   0
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   47
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+   1   0   0
+   0   1   0
+   0   0  -1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
+ 
+Crystal symmetry :   48
+ spatial translation :
+   0.000000000       0.000000000       0.000000000    
+ spatial rotation :
+  -1   0   0
+   0  -1   0
+   0   0   1
+ global spin rotation :
+   1   0   0
+   0   1   0
+   0   0   1
