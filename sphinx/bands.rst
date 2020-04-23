@@ -92,8 +92,8 @@ These methods can be used for both plain and parametric modes. If a comparison o
 
 E.g.::
 
-    plot = pyprocar.bandsplot('PROCAR-up',exportplt=true,color='red',mode=plain)
-    plot = pyprocar.bandsplot('PROCAR-down',exportplt=true,color='blue',mode=plain)
+    plot = pyprocar.bandsplot('PROCAR-up',exportplt=True,color='red',mode='plain')
+    plot = pyprocar.bandsplot('PROCAR-down',exportplt=True,color='blue',mode='plain')
     plot.show()
 
 Note:
