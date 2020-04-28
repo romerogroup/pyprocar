@@ -303,6 +303,22 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                 "You have selected ipyvolume as plotting package. please install ipyvolume or choose a different package"
             )
             return
+    if mode == 'colorful' :
+        face_colors = [(1,0,0),
+                       (0,1,0)
+                       ,(0,0,1)
+                       ,(1,1,0)
+                       ,(0,1,1)
+                       ,(1,0,1)
+                       ,(192/255,192/255,192/255)
+                       ,(128/255,128/255,128/255)
+                       ,(128/255,0,0)
+                       ,(128/255,128/255,0)
+                       ,(0,128/255,0)
+                       ,(128/255,0,128/255)
+                       ,(0,128/255,128/255)
+                       ,(0,0,128/255)]
+
     permissive = False
 
     # get fermi from outcar
@@ -331,6 +347,7 @@ def fermi3D(procar, outcar, bands=-1, scale=1, mode="plain", st=False, **kwargs)
                 point_count += 1
             brillouin_faces.append(single_face)
         polydata_br = tvtk.PolyData(points=brillouin_point, polys=brillouin_faces)
+        mlab.figure(figure=None, bgcolor=(1,1,1), fgcolor=None, engine=None, size=(400, 350))
         mlab.pipeline.surface(
             polydata_br,
             representation="wireframe",
