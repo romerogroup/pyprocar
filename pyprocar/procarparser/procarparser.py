@@ -335,7 +335,7 @@ class ProcarParser:
         self.log.debug("Now searching the values")
         # The case of just one atom is handled differently since the VASP
         # output is a little different
-        if self.ionsCount is 1:
+        if self.ionsCount == 1:
             self.spd = re.findall(r"^(\s*1\s+.+)$", self.fileStr, re.MULTILINE)
         else:
             # Added by Francisco to speed up filtering on June 4th, 2019
@@ -483,7 +483,7 @@ class ProcarParser:
         self.log.info("kpointsCount = " + str(self.kpointsCount))
         self.log.info("bandsCount = " + str(self.bandsCount))
         self.log.info("ionsCount = " + str(self.ionsCount))
-        if self.ionsCount is 1:
+        if self.ionsCount == 1:
             self.log.warning(
                 "Special case: only one atom found. The program may not work as expected"
             )

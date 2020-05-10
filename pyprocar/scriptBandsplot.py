@@ -178,7 +178,7 @@ def bandsplot(
     spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
 
     #### parsing the PROCAR file or equivalent to retrieve spd data ####
-
+    code = code.lower()
     if code == "vasp":
         procarFile = ProcarParser()
 
@@ -257,7 +257,7 @@ def bandsplot(
     # handling the spin, `spin='st'` is not straightforward, needs
     # to calculate the k vector and its normal. Other `spin` values
     # are trivial.
-    if spin is "st":
+    if spin == "st":
         # two `ProcarSelect` instances, to store temporal values: spin_x, spin_y
         dataX = ProcarSelect(procarFile, deepCopy=True)
         dataX.selectIspin([1])

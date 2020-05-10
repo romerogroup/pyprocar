@@ -22,7 +22,7 @@ def cat(inFiles, outFile, gz=False, mergeparallel=False, fixformat=False):
         if gz == true:
             print("out compressed: true")
 
-        if gz == "true" and outFile[-3:] is not ".gz":
+        if gz == "true" and outFile[-3:] !=  ".gz":
             outFile += ".gz"
             print(".gz extension appended to the outfile")
 
