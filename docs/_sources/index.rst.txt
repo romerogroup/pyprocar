@@ -64,7 +64,7 @@ An OUTCAR file or an equivalent Abinit output file is required to extract the Fe
    :maxdepth: 2
       
    installation
-   contributors
+   developers
    cite
    tutorials
 
