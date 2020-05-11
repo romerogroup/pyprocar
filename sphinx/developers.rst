@@ -1,5 +1,5 @@
-Contributors
-============
+Developers
+===========
 
 1. Francisco Munoz [a]
 2. Aldo Romero [b]
