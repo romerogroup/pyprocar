@@ -23,7 +23,7 @@ class ElkParser:
 
         self.kpoints = None
         self.bands = None
-        self.bandsCount = None
+        
 
 
         self.spd = None
@@ -32,7 +32,7 @@ class ElkParser:
 
         # spin polarized parameters
         self.spinpol = None
-        self.ispin = 0
+        
 
         self.orbitalName = [
             "Y00",
@@ -60,7 +60,7 @@ class ElkParser:
         # spin.
         # NOTE: before calling to `self._readOrbital` the case '4'
         # is marked as '1'
-        self.ispin = None
+        
 
 
         self._read_elkin()
@@ -84,18 +84,30 @@ class ElkParser:
 
     @property 
     def nhigh_sym(self):
+        """
+        Returns nu,ber of high symmetry points
+        """
         return int(findall("plot1d\n\s*([0-9]*)\s*[0-9]*", self.elkin)[0])
     
     @property 
     def nkpoints(self):
+        """
+        Returns total number of kpoints
+        """
         return int(findall("plot1d\n\s*[0-9]*\s*([0-9]*)", self.elkin)[0])
     
     @property 
     def tasks(self):
+        """
+        Returns the tasks calculated by elk
+        """
         return [int(x) for x in findall("tasks\n\s*([0-9\s\n]*)", self.elkin)[0].split()]
     
     @property
     def high_symmetry_points(self):
+        """
+        Returns the corrdinates of high symmtery points provided in elk.in
+        """
         if 20 in self.tasks or 21 in self.tasks or 22 in self.tasks :
             raw_hsp = findall(
                     "plot1d\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * "([0-9\s\.-]*).*\n",
@@ -107,10 +119,17 @@ class ElkParser:
     
     @property 
     def nspecies(self):
+        """
+        Returns number of species
+        """
+        
         return int(findall("atoms\n\s*([0-9]*)", self.elkin)[0])
     
     @property 
     def natom(self):
+        """
+        Returns number of atoms in the structure  
+        """
         natom = 0
         for ispc in findall("'([A-Za-z]*).in'.*\n\s*([0-9]*)", self.elkin):
             natom += int(ispc[1])
@@ -118,6 +137,9 @@ class ElkParser:
     
     @property 
     def composition(self):
+        """
+        Returns the composition of the structure
+        """
         composition = {}
         for ispc in findall("'([A-Za-z]*).in'.*\n\s*([0-9]*)", self.elkin):
             composition[ispc[0]] = int(ispc[1])
@@ -125,6 +147,10 @@ class ElkParser:
     
     @property 
     def knames(self):
+        """
+        Returns the names of the high symmetry points(x ticks) provided in elk.in
+        
+        """
         raw_ticks = findall("plot1d\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*:(.*)\n", self.elkin)[0]
         if len(raw_ticks) != self.nhigh_sym:
             knames = [str(x) for x in range(self.nhigh_sym)]
@@ -138,7 +164,9 @@ class ElkParser:
 
 
     def _read_elkin(self):    
-
+        """
+        Reads and parses elk.in
+        """
         rf = open(self.fin, "r")
         self.elkin = rf.read()
         rf.close()
@@ -167,6 +195,10 @@ class ElkParser:
             self.nspin = 1
             
     def _read_bands(self):
+        """
+        if the task is any of 20,21,22 it parses the BANDS*.OUT files 
+        and prepares the spd, bands and kpoints for bandsplot
+        """
         if np.any([x in self.tasks for x in [20,21,22]]):
             
             
@@ -246,11 +278,11 @@ class ElkParser:
             self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
             self.spd[:, :, 0, -1, 0] = 0
     
-            if self.ispin == 2:
+            if self.nspin == 2:
                 # spin up block for spin = 1
                 self.spd[:, :self.nbands//2, 1, :, :] = self.spd[:, :self.nbands//2, 0, :, :]
                 # spin down block for spin = 1
-                self.spd[:, self.nbands//2:, 1, :, :] = -1*self.spd[:, self.bandsCount//2:, 0, :, :]
+                self.spd[:, self.nbands//2:, 1, :, :] = -1*self.spd[:, self.nbands//2:, 0, :, :]
                 
                 # manipulating spd array for spin polarized calculations.
                 # The shape is (nkpoints,2*nbands,2,natoms,norbitals)
@@ -267,6 +299,9 @@ class ElkParser:
 
     @property 
     def fermi(self):
+        """
+        Returns the fermi energy read from FERMI.OUT
+        """
         rf = open("EFERMI.OUT", "r")
         fermi = float(rf.readline().split()[0])
         rf.close()
@@ -274,6 +309,9 @@ class ElkParser:
 
     @property 
     def reclat(self):
+        """
+        Returns the reciprocal lattice read from LATTICE.OUT
+        """
         rf = open("LATTICE.OUT", "r")
         data = rf.read()
         rf.close()
