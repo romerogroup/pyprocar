@@ -8,6 +8,7 @@ Developers
 5. Sobhit Singh [c]
 6. Eric Bousquet [d]
 7. Xu He [d]
+8. Reese Boucher [b]
 
 [a] Departamento de F\'isica, Facultad de Ciencias, Universidad de Chile, Santiago, Chile; Center for the Development of Nanoscience and Nanotechnology (CEDENNA), Santiago, Chile
 

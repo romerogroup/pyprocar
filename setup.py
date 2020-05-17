@@ -30,7 +30,6 @@ setup(
         "ase",
         "scikit-image",
         "mayavi",
-        "pyfiglet",
     ],
     scripts=["bin/procar"],
 )
