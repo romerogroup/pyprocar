@@ -25,7 +25,7 @@ Documentation
 
 https://romerogroup.github.io/pyprocar/
 
-Contributors
+Developers
 ------------
 Francisco Muñoz <br />
 Aldo Romero <br />
@@ -34,6 +34,8 @@ Uthpala Herath <br />
 Pedram Tavadze <br />
 Eric Bousquet <br />
 Xu He <br />
+Reese Boucher <br />
+
 
 How to cite
 -----------
@@ -82,6 +84,7 @@ Installation
 Changelog
 --------------
 
+v5.2.1 May 11th, 2020 -- Bugfixes in pyprocar.cat and improving comparison method. <br />
 v5.2.0 Apr 21st, 2020 -- Added spin colinear plotting feature for Elk calculations and a method to plot spin up and spin down plots separately without the need to filter the PROCAR file. <br />
 v5.1.9 Apr 14th, 2020 -- Added feature to filter colinear spins in pyprocar.filter(). <br />
 v5.1.8 Mar 27th, 2020 -- Fix iband reading error due to vasp incorrectly writting iband>999. <br />
