@@ -1,11 +1,11 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.2.0"
+__version__ = "5.2.1"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
 __status__ = "Development"
-__date__ = "Apr 21st, 2020"
+__date__ = "May 11th, 2020"
 
 # Copyright (C) 2019 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
@@ -39,6 +39,10 @@ import skimage
 from pyprocar.abinitparser import AbinitParser
 # ELK
 from pyprocar.elkparser import ElkParser
+from pyprocar.doscarplot import DosPlot
+
+
+
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
@@ -47,7 +51,11 @@ from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
 
+
+
 from .scriptBandsplot import bandsplot
+from .scriptDosplot import dosplot
+from .scriptBandsDosplot import bandsdosplot
 from .scriptCat import cat
 from .scriptFermi2D import fermi2D
 from .scriptFermi3D import fermi3D

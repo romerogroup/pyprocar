@@ -1,19 +1,20 @@
-import numpy as np
-import re
 import logging
-import matplotlib.pyplot as plt
+import re
 import sys
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class UtilsProcar:
     """
   This class store handy methods that do not fit any other place
-  
+
   members:
 
   -Openfile: Tries to open a File, it has suitable values for PROCARs
    and can handle gzipped files
-   
+
   -MergeFiles: concatenate two or more PROCAR files taking care of
    metadata and kpoint indexes. Useful for splitted bandstructures
    calculation.
@@ -73,7 +74,7 @@ class UtilsProcar:
     Tries to open a File, it has suitable values for PROCAR and can
     handle gzipped files
 
-    Example: 
+    Example:
 
     >>> foo =  UtilsProcar.Openfile()
     Tries to open "PROCAR", then "PROCAR.gz"
@@ -140,7 +141,7 @@ class UtilsProcar:
 
     Useful when large number of K points have been calculated in
     different PROCARs.
-    
+
     Args:
     -inFiles: an iterable with files to be concatenated
 
@@ -255,9 +256,9 @@ class UtilsProcar:
         """Finds and return the reciprocal lattice vectors, if more than
     one set present, it return just the last one.
 
-    Args: 
+    Args:
     -filename: the name of the outcar file  to be read
-    
+
     """
         self.log.debug("RecLatOutcar(): ...")
         self.log.debug("Input filename : " + filename)

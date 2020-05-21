@@ -11,6 +11,19 @@ from .procarselect import ProcarSelect
 from .splash import welcome
 from .utilsprocar import UtilsProcar
 
+#import matplotlib 
+plt.rcParams['mathtext.default'] = 'regular' #Roman ['rm', 'cal', 'it', 'tt', 'sf', 
+#                                                   'bf', 'default', 'bb', 'frak',
+#                                                   'circled', 'scr', 'regular']
+plt.rcParams["font.family"] = "Georgia"
+plt.rc('font', size=22)          # controls default text sizes
+plt.rc('axes', titlesize=22)     # fontsize of the axes title
+plt.rc('axes', labelsize=22)    # fontsize of the x and y labels
+plt.rc('xtick',labelsize=22)    # fontsize of the tick labels
+plt.rc('ytick',labelsize=22)    # fontsize of the tick labels
+#plt.rc('legend', fontsize=22)    # legend fontsize
+#plt.rc('figure', titlesize=22)  # fontsize of the figure title
+
 
 def bandsplot(
     file=None,
@@ -21,7 +34,7 @@ def bandsplot(
     atoms=None,
     orbitals=None,
     fermi=None,
-    elimit=None,
+    elimit=[-2,2],
     mask=None,
     markersize=0.02,
     cmap="jet",
@@ -37,11 +50,10 @@ def bandsplot(
     title=None,
     outcar=None,
     kpointsfile=None,
-    exportplt=False,
     kdirect=True,
-    discontinuities=[],
     code="vasp",
     separate=False,
+    ax=None,
 ):
 
     """This function plots band structures
@@ -106,7 +118,7 @@ def bandsplot(
         print(
             "k-point coordinates        : cartesian (Remember to supply an output file for this case to work.)"
         )
-
+    discontinuities = []
     #### READING KPOINTS FILE IF PRESENT ####
 
     # If KPOINTS file is given:
@@ -130,7 +142,7 @@ def bandsplot(
                 icounter = icounter + 2
             else:
                 discont_indx.append(icounter)
-                knames.append(tick_labels[icounter] + "/" + tick_labels[icounter + 1])
+                knames.append(tick_labels[icounter] + "|" + tick_labels[icounter + 1])
                 icounter = icounter + 2
         knames.append(tick_labels[-1])
         discont_indx = list(dict.fromkeys(discont_indx))
@@ -178,7 +190,7 @@ def bandsplot(
     spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
 
     #### parsing the PROCAR file or equivalent to retrieve spd data ####
-
+    code = code.lower()
     if code == "vasp":
         procarFile = ProcarParser()
 
@@ -257,7 +269,7 @@ def bandsplot(
     # handling the spin, `spin='st'` is not straightforward, needs
     # to calculate the k vector and its normal. Other `spin` values
     # are trivial.
-    if spin is "st":
+    if spin == "st":
         # two `ProcarSelect` instances, to store temporal values: spin_x, spin_y
         dataX = ProcarSelect(procarFile, deepCopy=True)
         dataX.selectIspin([1])
@@ -307,79 +319,81 @@ def bandsplot(
     ###### start of mode dependent options #########
 
     if mode == "scatter":
-        plot.scatterPlot(
-            mask=mask,
-            size=markersize,
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
-            marker=marker,
-            ticks=ticks,
-            discontinuities=discontinuities,
-        )
+        fig,ax1 = plot.scatterPlot(
+                    mask=mask,
+                    size=markersize,
+                    cmap=cmap,
+                    vmin=vmin,
+                    vmax=vmax,
+                    marker=marker,
+                    ticks=ticks,
+                    discontinuities=discontinuities,
+                    ax=ax,
+                    )
         if fermi is not None:
-            plt.ylabel(r"$E-E_f$ [eV]", fontsize=22)
+            ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
-            plt.ylabel(r"Energy [eV]", fontsize=22)
+            ax1.set_ylabel(r"Energy [eV]")
         if elimit is not None:
-            plt.ylim(elimit)
+            ax1.set_ylim(elimit)
 
     elif mode == "plain":
-        plot.plotBands(
-            markersize,
-            marker=marker,
-            ticks=ticks,
-            color=color,
-            discontinuities=discontinuities,
-        )
+        fig,ax1 = plot.plotBands(
+                    markersize,
+                    marker=marker,
+                    ticks=ticks,
+                    color=color,
+                    discontinuities=discontinuities,
+                    ax=ax,
+                    )   
         if fermi is not None:
-            plt.ylabel(r"$E-E_f$ [eV]", fontsize=22)
+            ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
-            plt.ylabel(r"Energy [eV]", fontsize=22)
+            ax1.set_ylabel(r"Energy [eV]")
         if elimit:
-            plt.ylim(elimit)
+            ax1.set_ylim(elimit)
 
     elif mode == "parametric":
-        plot.parametricPlot(
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
-            ticks=ticks,
-            discontinuities=discontinuities,
-        )
+        fig,ax1 = plot.parametricPlot(
+                    cmap=cmap,
+                    vmin=vmin,
+                    vmax=vmax,
+                    ticks=ticks,
+                    discontinuities=discontinuities,
+                    ax=ax,
+                    )
         if fermi is not None:
-            plt.ylabel(r"$E-E_f$ [eV]", fontsize=22)
+            ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
-            plt.ylabel(r"Energy [eV]", fontsize=22)
+            ax1.set_ylabel(r"Energy [eV]")
         if elimit is not None:
-            plt.ylim(elimit)
+            ax1.set_ylim(elimit)
 
     elif mode == "atomic":
-        plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax)
+        fig,ax1 = plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax,ax=ax)
         if fermi is not None:
-            plt.ylabel(r"$E-E_f$ [eV]", fontsize=22)
+            ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
-            plt.ylabel(r"Energy [eV]", fontsize=22)
+            ax1.set_ylabel(r"Energy [eV]")
         if elimit is not None:
-            plt.ylim(elimit)
+            ax1.set_ylim(elimit)
     ###### end of mode dependent options ###########
-    plt.tight_layout()
+    fig.tight_layout()
     if grid:
-        plt.grid()
+        ax1.grid()
 
     if title:
-        plt.title(title, fontsize=22)
+        ax1.set_title(title)
 
-    if exportplt:
-        return plt
 
     else:
         if savefig:
-            plt.savefig(savefig, bbox_inches="tight")
+            fig.savefig(savefig, bbox_inches="tight")
             plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+            return None,None
         else:
             plt.show()
-        return
+        return fig,ax1
 
 
 # if __name__ == "__main__":

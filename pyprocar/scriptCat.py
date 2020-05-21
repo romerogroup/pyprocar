@@ -1,15 +1,17 @@
-from .utilsprocar import UtilsProcar
-from .splash import welcome
-import re
 import os
+import re
+
 import numpy as np
+
+from .splash import welcome
+from .utilsprocar import UtilsProcar
 
 
 def cat(inFiles, outFile, gz=False, mergeparallel=False, fixformat=False):
     """
     This module concatenates multiple PROCARs.
     set fixparallel = True for merging PROCARs generated from
-    parallel Abinit calculations. 
+    parallel Abinit calculations.
     """
     welcome()
 
@@ -19,35 +21,35 @@ def cat(inFiles, outFile, gz=False, mergeparallel=False, fixformat=False):
 
     if mergeparallel == False and fixformat == False:
 
-        if gz == true:
+        if gz == True:
             print("out compressed: true")
 
-        if gz == "true" and outFile[-3:] is not ".gz":
+        if gz == True and outFile[-3:] != ".gz":
             outFile += ".gz"
             print(".gz extension appended to the outfile")
 
-        handler = utilsprocar()
-        handler.mergefiles(inFiles, outFile, gzipout=gz)
+        handler = UtilsProcar()
+        handler.MergeFiles(inFiles, outFile, gzipOut=gz)
         return
 
     elif mergeparallel == True and fixformat == False:
         _mergeparallel(inFiles, outFile)
 
     elif mergeparallel == True and fixformat == True:
-        outFile_temp = 'outFile.tmp'
+        outFile_temp = "outFile.tmp"
         _mergeparallel(inFiles, outFile_temp)
         _fixformat(outFile_temp, outFile)
         if os.path.exists(outFile_temp):
             os.remove(outFile_temp)
 
     elif mergeparallel == False and fixformat == True:
-        print('Using fixformat = True without mergeparallel. Input a single PROCAR.')
+        print("Using fixformat = True without mergeparallel. Input a single PROCAR.")
         _fixformat(inFiles, outFile)
 
 
 def _mergeparallel(inputfiles=None, outputfile=None):
     """ This merges Procar files seperated between k-point ranges.
-    Happens with parallel Abinit runs. 
+    Happens with parallel Abinit runs.
     """
     print("Merging parallel files...")
     filenames = sorted(inputfiles)

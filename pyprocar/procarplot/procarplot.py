@@ -9,12 +9,24 @@ class ProcarPlot:
     def __init__(self, bands, spd, kpoints=None):
         self.bands = bands.transpose()
         self.spd = spd.transpose()
-        self.kpoints = kpoints
+        self.kpoints = kpoints        
         return
 
-    def plotBands(
-        self, size=0.02, marker="o", ticks=None, color="blue", discontinuities=[]
+    def plotBands(self, 
+                  size=0.02, 
+                  marker="o", 
+                  ticks=None, 
+                  color="blue", 
+                  discontinuities=[], 
+                  figsize=(13,9),
+                  ax=None
     ):
+        
+        if not ax :
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(111)
+        else :
+            fig = plt.gca()
         if size is not None:
             size = size / 2
 
@@ -42,11 +54,12 @@ class ProcarPlot:
                 xaxis = np.array(xaxis)
 
                 # plotting
+
                 for i_tick in range(len(ticks) - 1):
                     x = xaxis[ticks[i_tick] : ticks[i_tick + 1] + 1]
                     y = self.bands.transpose()[ticks[i_tick] : ticks[i_tick + 1] + 1, :]
-                    plot = plt.plot(
-                        x, y, "r-", marker=marker, markersize=size, color=color
+                    ax.plot(
+                            x, y, "r-", marker=marker, markersize=size, color=color
                     )
 
             #### END  OF MODIFIED DISCONTINUOUS BANDS ####
@@ -58,7 +71,7 @@ class ProcarPlot:
                     d = np.sqrt(np.dot(d, d))
                     xaxis.append(d + xaxis[-1])
                 xaxis = np.array(xaxis)
-                plot = plt.plot(
+                ax.plot(
                     xaxis,
                     self.bands.transpose(),
                     "r-",
@@ -70,7 +83,7 @@ class ProcarPlot:
         # if self.kpoints is None
         else:
             xaxis = np.arange(len(self.bands))
-            plot = plt.plot(
+            ax.plot(
                 xaxis,
                 self.bands.transpose(),
                 "r-",
@@ -79,21 +92,21 @@ class ProcarPlot:
                 color=color,
             )
 
-        plt.xlim(xaxis.min(), xaxis.max())
+        ax.set_xlim(xaxis.min(), xaxis.max())
 
         # Handling ticks
         if ticks:
             # added for meta-GGA calculations
             if ticks[0] > 0:
-                plt.xlim(left=xaxis[ticks[0]])
+                ax.set_xlim(left=xaxis[ticks[0]])
             ticks = [xaxis[x] for x in ticks]
-            plt.xticks(ticks, ticksNames, fontsize=22)
+            ax.set_xticks(ticks)
+            ax.set_xticklabels(ticksNames)
             for xc in ticks:
-                plt.axvline(x=xc, color="k")
-        plt.yticks(fontsize=22)
-        plt.axhline(color="r", linestyle="--")
+                ax.axvline(x=xc, color="k")
+        ax.axhline(color="black", linestyle="--")
 
-        return plot
+        return fig,ax
 
     def parametricPlot(
         self,
@@ -103,12 +116,19 @@ class ProcarPlot:
         mask=None,
         ticks=None,
         discontinuities=[],
+        ax=None,
+        figsize=(13,9),
+        plot_bar = True,
     ):
         from matplotlib.collections import LineCollection
         import matplotlib
 
         # fig = plt.figure() # use plt.gca() since it won't create a new figure for band comparison
-        gca = plt.gca()
+        if ax is None:
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(111)
+        else :
+            fig = ax.get_figure()
         bsize, ksize = self.bands.shape
 
         # print self.bands
@@ -155,11 +175,12 @@ class ProcarPlot:
                     lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
                     lc.set_array(z)
                     lc.set_linewidth(1)
-                    gca.add_collection(lc)
-                cb = plt.colorbar(lc)
-                cb.ax.tick_params(labelsize=20)
-                plt.xlim(xaxis.min(), xaxis.max())
-                plt.ylim(mbands.min(), mbands.max())
+                    ax.add_collection(lc)
+                if plot_bar:
+                    cb = fig.colorbar(lc,ax=ax)
+                    cb.ax.tick_params(labelsize=20)
+                ax.set_xlim(xaxis.min(), xaxis.max())
+                ax.set_ylim(mbands.min(), mbands.max())
 
             #### END  OF MODIFIED DISCONTINUOUS BANDS ####
 
@@ -178,11 +199,12 @@ class ProcarPlot:
                     lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
                     lc.set_array(z)
                     lc.set_linewidth(1)
-                    gca.add_collection(lc)
-                cb = plt.colorbar(lc)
-                cb.ax.tick_params(labelsize=20)
-                plt.xlim(xaxis.min(), xaxis.max())
-                plt.ylim(mbands.min(), mbands.max())
+                    ax.add_collection(lc)
+                if plot_bar:
+                    cb = fig.colorbar(lc,ax=ax)
+                    cb.ax.tick_params(labelsize=20)
+                ax.set_xlim(xaxis.min(), xaxis.max())
+                ax.set_ylim(mbands.min(), mbands.max())
 
         # if self.kpoints is None
         else:
@@ -193,25 +215,27 @@ class ProcarPlot:
                 lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
                 lc.set_array(z)
                 lc.set_linewidth(1)
-                gca.add_collection(lc)
-            cb = plt.colorbar(lc)
-            cb.ax.tick_params(labelsize=20)
-            plt.xlim(xaxis.min(), xaxis.max())
-            plt.ylim(mbands.min(), mbands.max())
+                ax.add_collection(lc)
+            if plot_bar:
+                cb = fig.colorbar(lc,ax=ax)
+                cb.ax.tick_params(labelsize=20)
+            ax.set_xlim(xaxis.min(), xaxis.max())
+            ax.set_ylim(mbands.min(), mbands.max())
 
         # handling ticks
         if ticks:
             # added for meta-GGA calculations
             if ticks[0] > 0:
-                plt.xlim(left=xaxis[ticks[0]])
+                ax.set_xlim(left=xaxis[ticks[0]])
             ticks = [xaxis[x] for x in ticks]
-            plt.xticks(ticks, ticksNames, fontsize=22)
+            ax.set_xticks(ticks)
+            ax.set_xticklabels(ticksNames)
             for xc in ticks:
-                plt.axvline(x=xc, color="lightgrey")
-        plt.yticks(fontsize=22)
-        plt.axhline(color="r", linestyle="--")
+                ax.axvline(x=xc, color="black")
+        
+        ax.axhline(color="black", linestyle="--")
 
-        return plt
+        return fig,ax
 
     def scatterPlot(
         self,
@@ -223,10 +247,15 @@ class ProcarPlot:
         marker="o",
         ticks=None,
         discontinuities=[],
+        ax=None,
     ):
         bsize, ksize = self.bands.shape
-        print(bsize, ksize)
-
+        # plotting
+        if not ax:
+            fig = plt.figure(figsize=(13, 9))
+            ax = fig.add_subplot(111)
+        else : 
+            fig = ax.get_figure()
         if self.kpoints is not None:
             xaxis = [0]
 
@@ -250,28 +279,29 @@ class ProcarPlot:
                         xaxis.append(xaxis[-1])
                 xaxis = np.array(xaxis)
 
-                # plotting
+
+                
                 xaxis.shape = (1, ksize)
                 xaxis = xaxis.repeat(bsize, axis=0)
                 if mask is not None:
                     mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
                 else:
                     mbands = self.bands
-
-                plot = plt.scatter(
-                    xaxis,
-                    mbands,
-                    c=self.spd,
-                    s=size,
-                    linewidths=0,
-                    cmap=cmap,
-                    vmax=vmax,
-                    vmin=vmin,
-                    marker=marker,
-                    edgecolors="none",
-                )
-                plt.colorbar()
-                plt.xlim(xaxis.min(), xaxis.max())
+                
+                scatter = ax.scatter(
+                        xaxis,
+                        mbands,
+                        c=self.spd,
+                        s=size,
+                        linewidths=0,
+                        cmap=cmap,
+                        vmax=vmax,
+                        vmin=vmin,
+                        marker=marker,
+                        edgecolors="none",
+                        )
+                fig.colorbar(scatter)
+                ax.set_xlim(xaxis.min(), xaxis.max())
 
             #### END  OF MODIFIED DISCONTINUOUS BANDS ####
 
@@ -290,21 +320,21 @@ class ProcarPlot:
                 else:
                     mbands = self.bands
 
-                plot = plt.scatter(
-                    xaxis,
-                    mbands,
-                    c=self.spd,
-                    s=size,
-                    linewidths=0,
-                    cmap=cmap,
-                    vmax=vmax,
-                    vmin=vmin,
-                    marker=marker,
-                    edgecolors="none",
-                )
+                scatter = ax.scatter(
+                        xaxis,
+                        mbands,
+                        c=self.spd,
+                        s=size,
+                        linewidths=0,
+                        cmap=cmap,
+                        vmax=vmax,
+                        vmin=vmin,
+                        marker=marker,
+                        edgecolors="none",
+                        )
 
-                plt.colorbar()
-                plt.xlim(xaxis.min(), xaxis.max())
+                plt.colorbar(scatter)
+                ax.set_xlim(xaxis.min(), xaxis.max())
 
         # if kpoints is None
         else:
@@ -316,7 +346,7 @@ class ProcarPlot:
             else:
                 mbands = self.bands
 
-            plot = plt.scatter(
+            ax.scatter(
                 xaxis,
                 mbands,
                 c=self.spd,
@@ -329,27 +359,29 @@ class ProcarPlot:
                 edgecolors="none",
             )
 
-            plt.colorbar()
-            plt.xlim(xaxis.min(), xaxis.max())
+            plt.colorbar(ax=ax)
+            ax.set_xlim(xaxis.min(), xaxis.max())
 
         # handling ticks
         if ticks:
             # added for meta-GGA calculations
             if ticks[0] > 0:
-                plt.xlim(left=xaxis[0, ticks[0]])
+                ax.set_xlim(left=xaxis[0, ticks[0]])
             ticks = [xaxis[0, x] for x in ticks]
-            plt.xticks(ticks, ticksNames, fontsize=22)
-        plt.yticks(fontsize=22)
-        plt.axhline(color="r", linestyle="--")
+            ax.set_xticks(ticks)
+            ax.set_xticklabels(ticksNames)
+        
+        ax.axhline(color="black", linestyle="--")
 
-        return plot
+        return fig,ax
 
-    def atomicPlot(self, cmap="hot_r", vmin=None, vmax=None):
+    def atomicPlot(self, cmap="hot_r", vmin=None, vmax=None,ax=None):
         """
     Just a handler to parametricPlot. Useful to plot energy levels. 
 
     It adds a fake k-point. Shouldn't be invoked with more than one
     k-point
+    ax not implemented here, not need
     """
 
         print("Atomic plot: bands.shape  :", self.bands.shape)
@@ -364,14 +396,16 @@ class ProcarPlot:
         print("Atomic plot: spd.shape    :", self.spd.shape)
         print("Atomic plot: kpoints.shape:", self.kpoints.shape)
 
-        print(self.kpoints)
+#        print(self.kpoints)
 
-        fig = self.parametricPlot(cmap, vmin, vmax)
-        plt.gca().xaxis.set_major_locator(plt.NullLocator())
 
+        fig,ax1 = self.parametricPlot(cmap, vmin, vmax,ax=ax)
+        
+#        plt.gca().xaxis.set_major_locator(plt.NullLocator())
+        ax1.xaxis.set_major_locator(plt.NullLocator())    
         # labels on each band
         for i in range(len(self.bands[:, 0])):
             # print i, self.bands[i]
-            plt.text(0, self.bands[i, 0], str(i + 1), fontsize=22)
+            ax1.text(0, self.bands[i, 0], str(i + 1))
 
-        return fig
+        return fig,ax1
