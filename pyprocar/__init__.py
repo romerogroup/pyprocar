@@ -1,6 +1,6 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.3.0"
+__version__ = "5.3.1"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
@@ -38,10 +38,10 @@ import pychemia
 
 # Abinit
 from pyprocar.abinitparser import AbinitParser
-from pyprocar.doscarplot import DosPlot
 
 # Elk
 from pyprocar.elkparser import ElkParser
+
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
@@ -49,7 +49,7 @@ from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
-
+from pyprocar.doscarplot import DosPlot
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
