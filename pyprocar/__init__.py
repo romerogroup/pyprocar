@@ -1,6 +1,6 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.3.1"
+__version__ = "5.3.2"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seekpath
 import skimage
-import pychemia
+#import pychemia
 
 # Abinit
 from pyprocar.abinitparser import AbinitParser

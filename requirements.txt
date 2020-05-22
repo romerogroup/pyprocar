@@ -4,5 +4,3 @@ seekpath
 ase
 mayavi
 scikit-image
-cython
-pychemia
