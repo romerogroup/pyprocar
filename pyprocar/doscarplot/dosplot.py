@@ -8,10 +8,9 @@ np.seterr(divide="ignore", invalid="ignore")
 
 
 class DosPlot:
-
-    from pychemia.code.vasp import VaspXML
-
     def __init__(self, vaspxml="vasprun.xml"):
+        from pychemia.code.vasp import VaspXML
+
         self.VaspXML = VaspXML(vaspxml)
         return
 
