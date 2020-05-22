@@ -30,6 +30,7 @@ setup(
         "ase",
         "scikit-image",
         "mayavi",
+        "pychemia",
     ],
     scripts=["bin/procar"],
 )

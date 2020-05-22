@@ -34,13 +34,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seekpath
 import skimage
+import pychemia
 
-#Abinit
+# Abinit
 from pyprocar.abinitparser import AbinitParser
+from pyprocar.doscarplot import DosPlot
 
-#Elk
+# Elk
 from pyprocar.elkparser import ElkParser
-
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
@@ -48,7 +49,7 @@ from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
-from pyprocar.doscarplot import DosPlot
+
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot

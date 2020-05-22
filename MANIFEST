@@ -3,8 +3,10 @@ setup.cfg
 setup.py
 bin/procar
 pyprocar/__init__.py
+pyprocar/scriptBandsDosplot.py
 pyprocar/scriptBandsplot.py
 pyprocar/scriptCat.py
+pyprocar/scriptDosplot.py
 pyprocar/scriptFermi2D.py
 pyprocar/scriptFermi3D.py
 pyprocar/scriptFilter.py
@@ -16,6 +18,8 @@ pyprocar/scriptVector.py
 pyprocar/splash.py
 pyprocar/abinitparser/__init__.py
 pyprocar/abinitparser/abinitparser.py
+pyprocar/doscarplot/__init__.py
+pyprocar/doscarplot/dosplot.py
 pyprocar/elkparser/__init__.py
 pyprocar/elkparser/elkparser.py
 pyprocar/fermisurface/__init__.py
