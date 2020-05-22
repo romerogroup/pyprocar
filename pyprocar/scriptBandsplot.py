@@ -11,18 +11,18 @@ from .procarselect import ProcarSelect
 from .splash import welcome
 from .utilsprocar import UtilsProcar
 
-#import matplotlib 
-plt.rcParams['mathtext.default'] = 'regular' #Roman ['rm', 'cal', 'it', 'tt', 'sf', 
+# import matplotlib
+plt.rcParams["mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
 #                                                   'bf', 'default', 'bb', 'frak',
 #                                                   'circled', 'scr', 'regular']
 plt.rcParams["font.family"] = "Georgia"
-plt.rc('font', size=22)          # controls default text sizes
-plt.rc('axes', titlesize=22)     # fontsize of the axes title
-plt.rc('axes', labelsize=22)    # fontsize of the x and y labels
-plt.rc('xtick',labelsize=22)    # fontsize of the tick labels
-plt.rc('ytick',labelsize=22)    # fontsize of the tick labels
-#plt.rc('legend', fontsize=22)    # legend fontsize
-#plt.rc('figure', titlesize=22)  # fontsize of the figure title
+plt.rc("font", size=22)  # controls default text sizes
+plt.rc("axes", titlesize=22)  # fontsize of the axes title
+plt.rc("axes", labelsize=22)  # fontsize of the x and y labels
+plt.rc("xtick", labelsize=22)  # fontsize of the tick labels
+plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
+# plt.rc('legend', fontsize=22)    # legend fontsize
+# plt.rc('figure', titlesize=22)  # fontsize of the figure title
 
 
 def bandsplot(
@@ -34,7 +34,7 @@ def bandsplot(
     atoms=None,
     orbitals=None,
     fermi=None,
-    elimit=[-2,2],
+    elimit=[-2, 2],
     mask=None,
     markersize=0.02,
     cmap="jet",
@@ -116,7 +116,7 @@ def bandsplot(
         print("k-point coordinates        : reduced")
     else:
         print(
-            "k-point coordinates        : cartesian (Remember to supply an output file for this case to work.)"
+            "k-point coordinates        : cartesian (Remember to provide an output file for this case to work.)"
         )
     discontinuities = []
     #### READING KPOINTS FILE IF PRESENT ####
@@ -319,17 +319,17 @@ def bandsplot(
     ###### start of mode dependent options #########
 
     if mode == "scatter":
-        fig,ax1 = plot.scatterPlot(
-                    mask=mask,
-                    size=markersize,
-                    cmap=cmap,
-                    vmin=vmin,
-                    vmax=vmax,
-                    marker=marker,
-                    ticks=ticks,
-                    discontinuities=discontinuities,
-                    ax=ax,
-                    )
+        fig, ax1 = plot.scatterPlot(
+            mask=mask,
+            size=markersize,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            marker=marker,
+            ticks=ticks,
+            discontinuities=discontinuities,
+            ax=ax,
+        )
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
@@ -338,14 +338,14 @@ def bandsplot(
             ax1.set_ylim(elimit)
 
     elif mode == "plain":
-        fig,ax1 = plot.plotBands(
-                    markersize,
-                    marker=marker,
-                    ticks=ticks,
-                    color=color,
-                    discontinuities=discontinuities,
-                    ax=ax,
-                    )   
+        fig, ax1 = plot.plotBands(
+            markersize,
+            marker=marker,
+            ticks=ticks,
+            color=color,
+            discontinuities=discontinuities,
+            ax=ax,
+        )
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
@@ -354,14 +354,14 @@ def bandsplot(
             ax1.set_ylim(elimit)
 
     elif mode == "parametric":
-        fig,ax1 = plot.parametricPlot(
-                    cmap=cmap,
-                    vmin=vmin,
-                    vmax=vmax,
-                    ticks=ticks,
-                    discontinuities=discontinuities,
-                    ax=ax,
-                    )
+        fig, ax1 = plot.parametricPlot(
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            ticks=ticks,
+            discontinuities=discontinuities,
+            ax=ax,
+        )
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
@@ -370,7 +370,7 @@ def bandsplot(
             ax1.set_ylim(elimit)
 
     elif mode == "atomic":
-        fig,ax1 = plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax,ax=ax)
+        fig, ax1 = plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax, ax=ax)
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
@@ -385,15 +385,14 @@ def bandsplot(
     if title:
         ax1.set_title(title)
 
-
     else:
         if savefig:
             fig.savefig(savefig, bbox_inches="tight")
             plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
-            return None,None
+            return None, None
         else:
             plt.show()
-        return fig,ax1
+        return fig, ax1
 
 
 # if __name__ == "__main__":

@@ -80,7 +80,10 @@ class ProcarSelect:
             self.bands = ProcarData.bands
             self.kpoints = ProcarData.kpoints
             # self.cspd = ProcarData.cspd
+
+        self.numspin = self.spd.shape[2]  # Number of spins
         self.log.debug("setData: ... Done")
+
         return
 
     def selectIspin(self, value=None, separate=False):
@@ -124,10 +127,11 @@ class ProcarSelect:
             self.log.info("new spd shape =" + str(self.spd.shape))
             self.log.debug("selectIspin: ...Done")
             if self.mode == "parametric":
-                if value == [0]:
-                    print("Plotting spin density...")
-                elif value == [1]:
-                    print("Plotting spin magnetization...")
+                if self.numspin > 1:
+                    if value == [0]:
+                        print("Plotting spin density...")
+                    elif value == [1]:
+                        print("Plotting spin magnetization...")
 
         else:
             # spin up (spin = 0) and spin down (spin = 1) separately.
