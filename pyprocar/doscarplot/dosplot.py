@@ -1,29 +1,29 @@
-# -*- coding: utf-8 -*-
-
+"""
+Created on May 17 2020 
+@author: Pedram Tavadze
+"""
 import matplotlib as mpl
 import matplotlib.pylab as plt
 import numpy as np
-from pychemia.code.vasp import VaspXML
 
 np.seterr(divide="ignore", invalid="ignore")
-
+figsize = (12, 6)
 
 class DosPlot:
     def __init__(self, vaspxml="vasprun.xml"):
+        from pychemia.code.vasp import VaspXML
 
         self.VaspXML = VaspXML(vaspxml)
         return
-
+    
     def plot_total(
-        self,
-        spins=None,
-        markersize=0.02,
-        marker="o",
-        spin_colors=None,
-        figsize=(12, 6),
-        ax=None,
-        orientation="horizontal",
-        labels=None,
+            self,
+            spins=None,
+            spin_colors=None,
+            figsize=figsize,
+            ax=None,
+            orientation="horizontal",
+            labels=None,
     ):
 
         # dos is a pychemia density of states object
@@ -31,12 +31,10 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
         dos = self.VaspXML.dos_total
-
+        
         fig, ax = plotter(
             dos,
             spins,
-            markersize,
-            marker,
             spin_colors,
             figsize,
             ax,
@@ -51,8 +49,6 @@ class DosPlot:
         atoms=None,
         spins=None,
         orbitals=None,
-        markersize=0.02,
-        marker="o",
         spin_colors=None,
         figsize=(12, 6),
         ax=None,
@@ -75,8 +71,6 @@ class DosPlot:
         fig, ax = plotter(
             dos,
             spins,
-            markersize,
-            marker,
             spin_colors,
             figsize,
             ax,
@@ -90,8 +84,6 @@ class DosPlot:
         atoms=None,
         spins=None,
         orbitals=None,
-        markersize=0.02,
-        marker="o",
         spin_colors=None,
         cmap="jet",
         vmin=0,
@@ -175,8 +167,6 @@ class DosPlot:
         self,
         spins=None,
         orbitals=None,
-        markersize=0.02,
-        marker="o",
         spin_colors=None,
         colors=None,
         elimit=None,
@@ -187,22 +177,19 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(0, 0, 1), (1, 0, 0)]
         if colors is None:
-            colors = [
-                (1, 0, 0),
-                (0, 0, 1),
-                (0, 1, 0),
-                (1, 1, 0),
-                (0, 1, 1),
-                (1, 0, 1),
-                (192 / 255, 192 / 255, 192 / 255),
-                (128 / 255, 128 / 255, 128 / 255),
-                (128 / 255, 0, 0),
-                (128 / 255, 128 / 255, 0),
-                (0, 128 / 255, 0),
-                (128 / 255, 0, 128 / 255),
-                (0, 128 / 255, 128 / 255),
-                (0, 0, 128 / 255),
-            ]
+            colors=['red',
+                    'green',
+                    'blue',
+                    'cyan',
+                    'magenta',
+                    'yellow',
+                    'orange',
+                    'purple',
+                    'brown',
+                    'navy',
+                    'maroon',
+                    'olive']
+
         #        if ax is None:
         #            if orientation == 'horizontal':
         #                fig = plt.figure(figsize=figsize)
@@ -296,8 +283,6 @@ class DosPlot:
         self,
         spins=None,
         atoms=None,
-        markersize=0.02,
-        marker="o",
         spin_colors=None,
         colors=None,
         elimit=None,
@@ -308,22 +293,19 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(0, 0, 0), (0, 0, 0)]
         if colors is None:
-            colors = [
-                (1, 0, 0),
-                (0, 0, 1),
-                (0, 1, 0),
-                (1, 1, 0),
-                (0, 1, 1),
-                (1, 0, 1),
-                (192 / 255, 192 / 255, 192 / 255),
-                (128 / 255, 128 / 255, 128 / 255),
-                (128 / 255, 0, 0),
-                (128 / 255, 128 / 255, 0),
-                (0, 128 / 255, 0),
-                (128 / 255, 0, 128 / 255),
-                (0, 128 / 255, 128 / 255),
-                (0, 0, 128 / 255),
-            ]
+            colors=['red',
+                    'blue',
+                    'green',
+                    'cyan',
+                    'magenta',
+                    'yellow',
+                    'orange',
+                    'purple',
+                    'brown',
+                    'navy',
+                    'maroon',
+                    'olive']
+
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -403,8 +385,6 @@ class DosPlot:
         self,
         items={},
         spins=None,
-        markersize=0.02,
-        marker="o",
         spin_colors=None,
         colors=None,
         elimit=None,
@@ -424,22 +404,19 @@ class DosPlot:
             spin_colors = [(0, 0, 1), (1, 0, 0)]
         src_colors = colors
         if src_colors is None:
-            src_colors = [
-                (1, 0, 0),
-                (0, 0, 1),
-                (0, 1, 0),
-                (1, 1, 0),
-                (0, 1, 1),
-                (1, 0, 1),
-                (192 / 255, 192 / 255, 192 / 255),
-                (128 / 255, 128 / 255, 128 / 255),
-                (128 / 255, 0, 0),
-                (128 / 255, 128 / 255, 0),
-                (0, 128 / 255, 0),
-                (128 / 255, 0, 128 / 255),
-                (0, 128 / 255, 128 / 255),
-                (0, 0, 128 / 255),
-            ]
+            src_colors=['red',
+                        'blue',
+                        'green',
+                        'cyan',
+                        'magenta',
+                        'yellow',
+                        'orange',
+                        'purple',
+                        'brown',
+                        'navy',
+                        'maroon',
+                        'olive']
+
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -527,8 +504,13 @@ class DosPlot:
         return fig, ax
 
 
-def plotter(
-    dos, spins, markersize, marker, spin_colors, figsize, ax, orientation, labels
+def plotter(dos,
+            spins,
+            spin_colors,
+            figsize,
+            ax,
+            orientation,
+            labels
 ):
 
     if orientation == "horizontal":
@@ -549,8 +531,6 @@ def plotter(
                     x,
                     y,
                     "r-",
-                    marker=marker,
-                    markersize=markersize,
                     color=spin_colors[iy],
                     label=labels[iy],
                 )
@@ -559,8 +539,6 @@ def plotter(
                     x,
                     y,
                     "r-",
-                    marker=marker,
-                    markersize=markersize,
                     color=spin_colors[iy],
                 )
 
@@ -580,8 +558,6 @@ def plotter(
                     x,
                     y,
                     "r-",
-                    marker=marker,
-                    markersize=markersize,
                     color=spin_colors[ix],
                     label=labels[ix],
                 )
@@ -590,8 +566,6 @@ def plotter(
                     x,
                     y,
                     "r-",
-                    marker=marker,
-                    markersize=markersize,
                     color=spin_colors[ix],
                 )
     return fig, ax
