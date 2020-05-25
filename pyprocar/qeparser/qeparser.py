@@ -58,11 +58,10 @@ class QEParser:
               5 dxy    (real combination of m=+/-2 with sine)"""
         # Oribital order. This is the way it goes into the spd Array. index 0 is resered for totals
         self.orbitals = [
-            {"l": None, "m": None},
             {"l": 0, "m": 1},
             {"l": 1, "m": 3},
-            {"l": 1, "m": 2},
             {"l": 1, "m": 1},
+            {"l": 1, "m": 2},
             {"l": 2, "m": 5},
             {"l": 2, "m": 3},
             {"l": 2, "m": 1},
@@ -301,7 +300,7 @@ class QEParser:
                 self.bandsCount,
                 spinCount,
                 self.ionsCount + 1,
-                len(self.orbitals) + 2,
+                len(self.orbitals) + 3,
             )
         )
 
@@ -392,7 +391,7 @@ class QEParser:
                                             iband,
                                             0,
                                             known_states["species_num"] - 1,
-                                            iorbitals,
+                                            iorbitals + 1,
                                         ] += float(proj.split("*")[0])
                                         self.spd[
                                             kp,
