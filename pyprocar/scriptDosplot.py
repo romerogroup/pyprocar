@@ -1,3 +1,7 @@
+"""
+Created on May 17 2020 
+@author: Pedram Tavadze
+"""
 from .elkparser import ElkParser
 from .splash import welcome
 from .doscarplot import DosPlot
@@ -21,7 +25,7 @@ plt.rc('ytick',labelsize=22)    # fontsize of the tick labels
 
 
 def dosplot(
-    file='vasprun.xml',
+    vasprunfile='vasprun.xml',
     mode="plain",
     orientation='horizontal',
     spin_colors=None,
@@ -30,16 +34,13 @@ def dosplot(
     atoms=None,
     orbitals=None,
     elimit=None,
-    mask=None,
-    markersize=0.02,
     cmap="jet",
     vmax=None,
     vmin=None,
     grid=True,
-    marker="o",
     savefig=None,
     title=None,
-    plot_total=None,
+    plot_total=True,
     code="vasp",
     labels = None,
     items = {},
@@ -52,7 +53,7 @@ def dosplot(
     total = plot_total
     code = code.lower()
     if code == "vasp":
-        dos_plot = DosPlot(file)
+        dos_plot = DosPlot(vasprunfile)
         vaspxml = dos_plot.VaspXML
         if atoms is None:
             atoms = list(np.arange(vaspxml.initial_structure.natom,
@@ -67,54 +68,22 @@ def dosplot(
             elimit = [vaspxml.dos_total.energies.min(),
                       vaspxml.dos_total.energies.max()]
 
-#    elif code == "abinit":
-#        procarFile = ProcarParser()
-#        abinitFile = AbinitParser(abinit_output=abinit_output)
-#
-#    elif code == "elk":
-#        # reciprocal lattice already taken care of
-#        procarFile = ElkParser(kdirect=kdirect)
-
-    print("Script initiated")
-    print("code          : ", code)
-    print("input file    : ", file)
-    print("Mode          : ", mode)
-    print("spin comp.    : ", spins)
-    print("atoms list   : ", atoms)
-    print("orbs. list   : ", orbitals)
-
-    print("Fermi Energy   : ", vaspxml.fermi)
-    print("Energy range  : ", elimit)
-
-    print("Colormap      : ", cmap)
-    print("MarkerSize    : ", markersize)
-
-    print("vmax          : ", vmax)
-    print("vmin          : ", vmin)
-    print("grid enabled  : ", grid)
-
-    print("Savefig       : ", savefig)
-    print("title         : ", title)
-
     
     if mode == "plain":
         fig, ax1 = dos_plot.plot_total(spins=spins,
-                                      markersize=markersize,
-                                      marker=marker,
-                                      spin_colors=spin_colors,
-                                      ax=ax,
-                                      orientation=orientation,
-                                      )
+                                       spin_colors=spin_colors,
+                                       ax=ax,
+                                       orientation=orientation,
+                                       labels=labels,
+        )
         dos = dos_plot.VaspXML.dos_total
 
-    elif mode == 'parametric1':
+    elif mode == 'parametric_line':
         if not total:
             fig, ax1 = dos_plot.plot_parametric_line(
                     atoms=atoms,
                     spins=spins,
                     orbitals=orbitals,
-                    markersize=markersize,
-                    marker=marker,
                     spin_colors=spin_colors,
                     ax=ax,
                     orientation=orientation,
@@ -126,8 +95,6 @@ def dosplot(
                                                   )
         else:
             fig, ax1 = dos_plot.plot_total(spins=spins,
-                                          markersize=markersize,
-                                          marker=marker,
                                           spin_colors=[(0,0,0),(0,0,0)],
                                           ax=ax,
                                           orientation=orientation,
@@ -137,21 +104,17 @@ def dosplot(
                     atoms=atoms,
                     spins=spins,
                     orbitals=orbitals,
-                    markersize=markersize,
-                    marker=marker,
                     spin_colors=spin_colors,
                     ax=ax1,
                     orientation=orientation,
                     labels=labels,
                     )
-    elif mode == 'parametric2':
+    elif mode == 'parametric':
         if not total:
             fig, ax1 = dos_plot.plot_parametric(
                     atoms=atoms,
                     spins=spins,
                     orbitals=orbitals,
-                    markersize=markersize,
-                    marker=marker,
                     spin_colors=spin_colors,
                     cmap=cmap,
                     elimit=elimit,
@@ -166,8 +129,6 @@ def dosplot(
                     atoms=atoms,
                     spins=spins,
                     orbitals=orbitals,
-                    markersize=markersize,
-                    marker=marker,
                     spin_colors=spin_colors,
                     cmap=cmap,
                     elimit=elimit,
@@ -177,8 +138,6 @@ def dosplot(
                     )
             dos = dos_plot.VaspXML.dos_total
             _, ax1 = dos_plot.plot_total(spins=spins,
-                                        markersize=markersize,
-                                        marker=marker,
                                         spin_colors=[(0,0,0),(0,0,0)],
                                         ax=ax1,
                                         orientation=orientation,
@@ -188,8 +147,6 @@ def dosplot(
         if not total:
             fig, ax1 = dos_plot.plot_stack_species(spins=spins,
                                                     orbitals=orbitals,
-                                                    markersize=markersize,
-                                                    marker=marker,
                                                     spin_colors=spin_colors,
                                                     colors=colors,
                                                     elimit=elimit,
@@ -201,8 +158,6 @@ def dosplot(
         else:
             fig, ax1 = dos_plot.plot_stack_species(spins=spins,
                                                     orbitals=orbitals,
-                                                    markersize=markersize,
-                                                    marker=marker,
                                                     spin_colors=spin_colors,
                                                     colors=colors,
                                                     elimit=elimit,
@@ -212,8 +167,6 @@ def dosplot(
                                                     )
             dos = dos_plot.VaspXML.dos_total
             _, ax1 = dos_plot.plot_total(spins=spins,
-                                        markersize=markersize,
-                                        marker=marker,
                                         spin_colors=[(0,0,0),(0,0,0)],
                                         ax=ax1,
                                         orientation=orientation,
@@ -223,8 +176,6 @@ def dosplot(
         if not total:
             fig, ax1 = dos_plot.plot_stack_orbitals(spins=spins,
                                                      atoms=atoms,
-                                                     markersize=markersize,
-                                                     marker=marker,
                                                      spin_colors=spin_colors,
                                                      colors=colors,
                                                      elimit=elimit,
@@ -236,8 +187,6 @@ def dosplot(
         else:
             fig, ax1 = dos_plot.plot_stack_orbitals(spins=spins,
                                                      atoms=atoms,
-                                                     markersize=markersize,
-                                                     marker=marker,
                                                      spin_colors=spin_colors,
                                                      colors=colors,
                                                      elimit=elimit,
@@ -247,8 +196,6 @@ def dosplot(
                                                     )
             dos = dos_plot.VaspXML.dos_total
             _, ax1 = dos_plot.plot_total(spins=spins,
-                                        markersize=markersize,
-                                        marker=marker,
                                         spin_colors=[(0, 0, 0), (0, 0, 0)],
                                         ax=ax1,
                                         orientation=orientation,
@@ -259,8 +206,6 @@ def dosplot(
             fig, ax1 = dos_plot.plot_stack(
                     items=items,
                     spins=spins,
-                    markersize=markersize,
-                    marker=marker,
                     spin_colors=spin_colors,
                     colors=colors,
                     elimit=elimit,
@@ -274,8 +219,6 @@ def dosplot(
             fig, ax1 = dos_plot.plot_stack(
                     items=items,
                     spins=spins,
-                    markersize=markersize,
-                    marker=marker,
                     spin_colors=colors,
                     colors=colors,
                     elimit=elimit,
@@ -285,8 +228,6 @@ def dosplot(
                     )
             dos = dos_plot.VaspXML.dos_total
             _, ax1 = dos_plot.plot_total(spins=spins,
-                                        markersize=markersize,
-                                        marker=marker,
                                         spin_colors=[(0, 0, 0), (0, 0, 0)],
                                         ax=ax1,
                                         orientation=orientation,
@@ -320,23 +261,25 @@ def dosplot(
     ax1.axvline(color="black", linestyle="--")   
     
 
-    
+
     fig.tight_layout()
     if grid:
         ax1.grid()
-
-    ax1.legend()
+    if labels or 'stack' in mode:
+        ax1.legend()
     if title:
-        ax1.set_title(title, fontsize=22)
+        ax1.set_title(title,fontsize=17)
 
+    if savefig:
+
+        fig.savefig(savefig, bbox_inches="tight")
+        plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+        return None,None
     else:
-        if savefig:
-            fig.savefig(savefig, bbox_inches="tight")
-            plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
-            return None,None
-        else:
-            plt.show()
-    
+        plt.show()
+
+
+            
     return fig,ax1
 #
 #
