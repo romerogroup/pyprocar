@@ -9,6 +9,7 @@ The following set of tutorials explains the basic usage of PyProcar. Files requi
    repair
    kmesh
    bands
+   dos
    2Dspin
    3Dspin
    filter
