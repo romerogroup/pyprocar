@@ -323,7 +323,7 @@ def bandsplot(
         data.selectOrbital(orbitals)
 
     # Plotting the data
-    if separate == True:
+    if separate:
         if spin == 0:
             # plotting spin up bands separately
             data.bands = (

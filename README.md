@@ -6,7 +6,7 @@
 PyProcar
 ===========
 
-PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data obtained from the PROCAR format. Basically, the PROCAR format is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every k-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a k-path for a given crystal structure. Currently supports VASP, Abinit and Elk. 
+PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data obtained from the PROCAR format. Basically, the PROCAR format is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every k-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a k-path for a given crystal structure. Currently supports VASP, Abinit, Elk and Quantum Espresso. 
 
 ![](welcome.png)
 
@@ -35,6 +35,7 @@ Pedram Tavadze <br />
 Eric Bousquet <br />
 Xu He <br />
 Reese Boucher <br />
+Logan Lang <br />
 
 
 How to cite
