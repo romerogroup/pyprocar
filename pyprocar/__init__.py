@@ -42,6 +42,9 @@ from pyprocar.abinitparser import AbinitParser
 # Elk
 from pyprocar.elkparser import ElkParser
 
+#Quantum Espresso
+from pyprocar.qeparser import QEParser
+
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
@@ -49,7 +52,7 @@ from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
-# from pyprocar.doscarplot import DosPlot
+from pyprocar.doscarplot import DosPlot
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot

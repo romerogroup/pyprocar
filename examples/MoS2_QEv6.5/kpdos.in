@@ -1,0 +1,9 @@
+&projwfc
+   outdir='.',
+   prefix='MoS2',
+   ngauss=0, degauss=0.036748
+   DeltaE=0.01
+   kresolveddos=.true.
+   filpdos='MoS2.k'
+   filproj='MoS2proj.k'
+/

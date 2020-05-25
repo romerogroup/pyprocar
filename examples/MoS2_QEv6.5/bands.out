@@ -1,0 +1,198 @@
+
+     Program PWSCF v.6.5 starts on 18May2020 at  2:18:49 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Serial version
+     Waiting for input...
+     Reading input from standard input
+
+     Current dimensions of program PWSCF are:
+     Max number of different atomic species (ntypx) = 10
+     Max number of k-points (npk) =  40000
+     Max angular momentum in pseudopotentials (lmaxx) =  3
+
+     Atomic positions and unit cell read from directory:
+     ./MoS2.save/                                                                                                                                                                                                                                                    
+
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation= PBE
+                           (   1   4   3   4   0   0   0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+               file Mo.pbe-spn-kjpaw_psl.0.2.UPF: wavefunction(s)  4D renormalized
+               file S.pbe-n-kjpaw_psl.1.0.0.UPF: wavefunction(s)  3S 3P renormalized
+     Message from routine setup:
+     using ibrav=0 with symmetry is DISCOURAGED, use correct ibrav instead
+
+     G-vector sticks info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Sum         595     499    151                47487    34107    5763
+
+
+
+     bravais-lattice index     =            0
+     lattice parameter (alat)  =       5.9526  a.u.
+     unit-cell volume          =     713.2692 (a.u.)^3
+     number of atoms/cell      =            6
+     number of atomic types    =            2
+     number of electrons       =        52.00
+     number of Kohn-Sham states=           30
+     kinetic-energy cutoff     =      50.0000  Ry
+     charge density cutoff     =     250.0000  Ry
+     Exchange-correlation= PBE
+                           (   1   4   3   4   0   0   0)
+
+     celldm(1)=   5.952637  celldm(2)=   0.000000  celldm(3)=   0.000000
+     celldm(4)=   0.000000  celldm(5)=   0.000000  celldm(6)=   0.000000
+
+     crystal axes: (cart. coord. in units of alat)
+               a(1) = (   0.866025  -0.500000   0.000000 )  
+               a(2) = (   0.000000   1.000000   0.000000 )  
+               a(3) = (   0.000000   0.000000   3.904762 )  
+
+     reciprocal axes: (cart. coord. in units 2 pi/alat)
+               b(1) = (  1.154701  0.000000  0.000000 )  
+               b(2) = (  0.577350  1.000000 -0.000000 )  
+               b(3) = ( -0.000000  0.000000  0.256098 )  
+
+
+     PseudoPot. # 1 for Mo read from file:
+     ./Mo.pbe-spn-kjpaw_psl.0.2.UPF
+     MD5 check sum: 99c4efbabb9e14294ed14bd31c5e2f8a
+     Pseudo is Projector augmented-wave + core cor, Zval = 14.0
+     Generated using "atomic" code by A. Dal Corso v.5.0.2 svn rev. 9415
+     Shape of augmentation charge: PSQ
+     Using radial grid of 1229 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   2
+     Q(r) pseudized with 0 coefficients 
+
+
+     PseudoPot. # 2 for S  read from file:
+     ./S.pbe-n-kjpaw_psl.1.0.0.UPF
+     MD5 check sum: fb45dfebcf3e72a4e1bd4a866ec2e262
+     Pseudo is Projector augmented-wave + core cor, Zval =  6.0
+     Generated using "atomic" code by A. Dal Corso v.6.3
+     Shape of augmentation charge: PSQ
+     Using radial grid of 1151 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   2
+     Q(r) pseudized with 0 coefficients 
+
+
+     atomic species   valence    mass     pseudopotential
+        Mo            14.00    95.96000     Mo( 1.00)
+        S              6.00    32.06750     S ( 1.00)
+
+     24 Sym. Ops., with inversion, found (12 have fractional translation)
+
+
+
+   Cartesian axes
+
+     site n.     atom                  positions (alat units)
+         1           Mo  tau(   1) = (   0.2886751   0.5000000   0.9761905  )
+         2           Mo  tau(   2) = (   0.5773503  -0.0000000   2.9285714  )
+         3           S   tau(   3) = (   0.2886751   0.5000000   2.4248571  )
+         4           S   tau(   4) = (   0.2886751   0.5000000   3.4322857  )
+         5           S   tau(   5) = (   0.5773503  -0.0000000   0.4724762  )
+         6           S   tau(   6) = (   0.5773503  -0.0000000   1.4799048  )
+
+     number of k points=   271  Marzari-Vanderbilt smearing, width (Ry)=  0.0050
+
+     Number of k-points >= 100: set verbosity='high' to print them.
+
+     Dense  grid:    47487 G-vectors     FFT dimensions: (  30,  30, 120)
+
+     Smooth grid:    34107 G-vectors     FFT dimensions: (  27,  27, 108)
+
+     Estimated max dynamical RAM per process >     164.41 MB
+
+     Check: negative core charge=   -0.000011
+
+     The potential is recalculated from file :
+     ./MoS2.save/charge-density
+
+     Starting wfcs are   42 randomized atomic wfcs
+
+     Band Structure Calculation
+     Davidson diagonalization with overlap
+     c_bands:  1 eigenvalues not converged
+     c_bands:  1 eigenvalues not converged
+
+     ethr =  1.92E-11,  avg # of iterations = 40.6
+
+     total cpu time spent up to now is     1306.6 secs
+
+     End of band structure calculation
+
+     Number of k-points >= 100: set verbosity='high' to print the bands.
+
+     Writing output data file ./MoS2.save/
+
+     init_run     :      2.97s CPU      3.08s WALL (       1 calls)
+     electrons    :   1297.85s CPU   1302.37s WALL (       1 calls)
+
+     Called by init_run:
+     wfcinit      :      0.00s CPU      0.00s WALL (       1 calls)
+     potinit      :      1.21s CPU      1.24s WALL (       1 calls)
+     hinit0       :      1.37s CPU      1.37s WALL (       1 calls)
+
+     Called by electrons:
+     c_bands      :   1297.85s CPU   1302.36s WALL (       1 calls)
+     v_of_rho     :      0.08s CPU      0.08s WALL (       1 calls)
+     newd         :      0.25s CPU      0.32s WALL (       1 calls)
+     PAW_pot      :      1.12s CPU      1.15s WALL (       1 calls)
+
+     Called by c_bands:
+     init_us_2    :      0.57s CPU      0.83s WALL (     271 calls)
+     cegterg      :   1223.79s CPU   1227.61s WALL (     679 calls)
+
+     Called by sum_band:
+
+     Called by *egterg:
+     h_psi        :    667.22s CPU    669.17s WALL (   11957 calls)
+     s_psi        :    147.30s CPU    148.16s WALL (   11957 calls)
+     g_psi        :      6.06s CPU      6.07s WALL (   11007 calls)
+     cdiaghg      :     40.98s CPU     41.07s WALL (   11278 calls)
+
+     Called by h_psi:
+     h_psi:calbec :    139.18s CPU    139.24s WALL (   11957 calls)
+     vloc_psi     :    377.99s CPU    379.57s WALL (   11957 calls)
+     add_vuspsi   :    147.56s CPU    147.65s WALL (   11957 calls)
+
+     General routines
+     calbec       :    139.13s CPU    139.21s WALL (   11957 calls)
+     fft          :      0.03s CPU      0.03s WALL (      13 calls)
+     ffts         :      0.00s CPU      0.00s WALL (       1 calls)
+     fftw         :    348.49s CPU    349.93s WALL (  338610 calls)
+     interpolate  :      0.00s CPU      0.00s WALL (       1 calls)
+     davcio       :      0.22s CPU      0.33s WALL (     542 calls)
+
+
+     PWSCF        :  21m42.47s CPU  21m49.46s WALL
+
+
+   This run was terminated on:   2:40:39  18May2020            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

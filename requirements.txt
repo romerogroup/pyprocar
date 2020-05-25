@@ -4,3 +4,4 @@ seekpath
 ase
 mayavi
 scikit-image
+pychemia

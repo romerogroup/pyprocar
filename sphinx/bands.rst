@@ -54,6 +54,8 @@ For Elk, to retrieve the KPOINTS automatically, one should define the :math:`k`-
   	0.5      0.5      0.5 : R
   	0.5      0.0      0.0 : X
 
+In Quantum Espresso, it should be define in a similar way. Check the ``examples`` directory for more information. 
+
 One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` corresponds to the labels and the number of grid points between the high symmetry points in the :math:`k`-path used for the band structure calculation. Usage::
 
 	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],code='vasp')
