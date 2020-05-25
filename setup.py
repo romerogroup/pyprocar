@@ -20,6 +20,7 @@ setup(
         "pyprocar.elkparser",
         "pyprocar.abinitparser",
         "pyprocar.doscarplot",
+        "pyprocar.qeparser",
     ],
     license="LICENSE.txt",
     description="A Python library for electronic structure pre/post-processing.",
@@ -30,6 +31,7 @@ setup(
         "ase",
         "scikit-image",
         "mayavi",
+        "pychemia",
     ],
     scripts=["bin/procar"],
 )

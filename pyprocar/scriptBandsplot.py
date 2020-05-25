@@ -5,6 +5,7 @@ import numpy as np
 
 from .abinitparser import AbinitParser
 from .elkparser import ElkParser
+from .qeparser import QEParser
 from .procarparser import ProcarParser
 from .procarplot import ProcarPlot
 from .procarselect import ProcarSelect
@@ -54,6 +55,7 @@ def bandsplot(
     code="vasp",
     separate=False,
     ax=None,
+    discontinuities=[],
 ):
 
     """This function plots band structures
@@ -83,13 +85,21 @@ def bandsplot(
     print("atoms list   : ", atoms)
     print("orbs. list   : ", orbitals)
 
-    if fermi is None and outcar is None and abinit_output is None and code != "elk":
+    if (
+        fermi is None
+        and outcar is None
+        and abinit_output is None
+        and (code != "elk" and code != "qe")
+    ):
         print(
-            "WARNING: Fermi Energy not set! Please set manually or provide output file."
+            "WARNING: Fermi Energy not set! Please set manually or provide output file and set code type."
         )
         fermi = 0
 
-    if fermi is None and code == "elk":
+    elif fermi is None and code == "elk":
+        fermi = None
+
+    elif fermi is None and code == "qe":
         fermi = None
 
     print("Fermi Energy   : ", fermi)
@@ -118,7 +128,7 @@ def bandsplot(
         print(
             "k-point coordinates        : cartesian (Remember to provide an output file for this case to work.)"
         )
-    discontinuities = []
+
     #### READING KPOINTS FILE IF PRESENT ####
 
     # If KPOINTS file is given:
@@ -208,6 +218,20 @@ def bandsplot(
                 kticks = procarFile.kticks
                 knames = procarFile.knames
 
+    elif code == "qe":
+        # reciprocal lattice already taken care of
+        procarFile = QEParser(kdirect=kdirect)
+
+        # Retrieving knames and kticks from QE
+        if kticks is None and knames is None:
+            if procarFile.kticks and procarFile.knames:
+                kticks = procarFile.kticks
+                knames = procarFile.knames
+
+            # Retrieving discontinuities if present
+            if procarFile.discontinuities:
+                discontinuities = procarFile.discontinuities
+
     # If ticks and names are given by the user manually:
     if kticks is not None and knames is not None:
         ticks = list(zip(kticks, knames))
@@ -239,6 +263,11 @@ def bandsplot(
         if fermi is None:
             fermi = procarFile.fermi
             print("Fermi energy found in Elk output file = " + str(fermi))
+
+    elif code == "qe":
+        if fermi is None:
+            fermi = procarFile.fermi
+            print("Fermi energy found in Quantum Espresso output file = " + str(fermi))
 
     elif code == "abinit":
         if fermi is None:

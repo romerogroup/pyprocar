@@ -3,13 +3,13 @@
 import matplotlib as mpl
 import matplotlib.pylab as plt
 import numpy as np
+from pychemia.code.vasp import VaspXML
 
 np.seterr(divide="ignore", invalid="ignore")
 
 
 class DosPlot:
     def __init__(self, vaspxml="vasprun.xml"):
-        from pychemia.code.vasp import VaspXML
 
         self.VaspXML = VaspXML(vaspxml)
         return
