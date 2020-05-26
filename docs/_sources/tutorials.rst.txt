@@ -10,6 +10,7 @@ The following set of tutorials explains the basic usage of PyProcar. Files requi
    kmesh
    bands
    dos
+   bandsdos
    2Dspin
    3Dspin
    filter

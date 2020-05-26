@@ -1,8 +1,8 @@
 PyProcar documentation
 ======================
-PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data from the PROCAR format obtained from Vasp, Elk and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every :math:`k`-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a :math:`k`-path for a given crystal structure. 
+PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data from the PROCAR format obtained from Vasp, Elk, Quantum Espresso and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every :math:`k`-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a :math:`k`-path for a given crystal structure. 
 
-In the VASP code, this information is written into the PROCAR file when ``LORBIT=11`` or ``LORBIT=12`` (to include phase projections of the wave functions) in the INCAR file. Partial support for Elk (tasks 21, 22 for non spin calculations) and Abinit (set `prtprocar`) is also available. While VASP and Abinit outputs a PROCAR file, parsers exist in PyProcar that allow the parsing of data from other formats (e.g. Elk) and store them within PyProcar for further processing.  To switch between codes, set the ``code`` variable to the desired code. E.g. ``code='vasp'``, ``code='elk'`` etc. Full support for Elk and Abinit along with other DFT codes will be implemented in the future. 
+In the VASP code, this information is written into the PROCAR file when ``LORBIT=11`` or ``LORBIT=12`` (to include phase projections of the wave functions) in the INCAR file. Partial support for Elk (tasks 21, 22 for non spin calculations) and Abinit (set `prtprocar`) is also available. While VASP and Abinit outputs a PROCAR file, parsers exist in PyProcar that allow the parsing of data from other formats (e.g. Elk) and store them within PyProcar for further processing.  To switch between codes, set the ``code`` variable to the desired code. E.g. ``code='vasp'``, ``code='elk'``, ``code='qe'`` etc. Full support for Elk, Quantum Espresso and Abinit along with other DFT codes will be implemented in the future. 
 
 The format of the PROCAR is as follows::
 
@@ -57,7 +57,7 @@ where :math:`\sigma^i` are the Pauli matrices with :math:`i = x, y , z` and the 
 	\psi_{nk}^{\downarrow}
 	\end{bmatrix}
 
-An OUTCAR file or an equivalent Abinit output file is required to extract the Fermi-energy and reciprocal lattice vectors. 
+An OUTCAR file or an equivalent output from other DFT calculations is required to extract the Fermi-energy and reciprocal lattice vectors. 
 
 
 .. toctree::

@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2D spin-texture" href="2Dspin.html" />
+    <link rel="next" title="Bands Structure with Density of States" href="bandsdos.html" />
     <link rel="prev" title="Band structure" href="bands.html" /> 
 </head>
 
@@ -103,6 +103,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
@@ -241,7 +242,7 @@
 <p>default: The default is set to select all the atoms.</p>
 </dd>
 <dt class="field-odd">param orbitals</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">orbitals</span></code> define the projection of atoms in the density of States. In other words it selects only the contribution of the orbitals provided. Orbitals has to be a python list(or numpy array) containing the Orbital indices. Orbitals indices has to be order of the input files of DFT package. The following table represents the indecies for different orbitals in <strong>VASP</strong>.</p>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">orbitals</span></code> define the projection of orbitals in the density of States. In other words it selects only the contribution of the orbitals provided. Orbitals has to be a python list(or numpy array) containing the Orbital indices. Orbitals indices has to be order of the input files of DFT package. The following table represents the indecies for different orbitals in <strong>VASP</strong>.</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 11%" />
@@ -375,7 +376,7 @@ savefig=None. If not provided the plot will be shown in the interactive matplotl
 </pre></div>
 </div>
 <img alt="_images/dos_plain_hor.png" src="_images/dos_plain_hor.png" />
-<p>Note that <code class="docutils literal notranslate"><span class="pre">vasprunfile</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">orientationl</span></code> did not need to be specifies as we are using the defalut values.
+<p>Note that <code class="docutils literal notranslate"><span class="pre">vasprunfile</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">orientation</span></code> did not need to be specifies as we are using the defalut values.
 The following will be the change in usage of <code class="docutils literal notranslate"><span class="pre">orientation</span></code>, and the choice of the spin asked to be plotted. After this example we will switch back to horizontal plot for the examples. and plotting both of the spins in plots.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">vasprunfile</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
@@ -409,18 +410,19 @@ The following will be the change in usage of <code class="docutils literal notra
 </div>
 <div class="section" id="mode-parametric-line">
 <h3>3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code><a class="headerlink" href="#mode-parametric-line" title="Permalink to this headline">¶</a></h3>
-<p>This mode is the most might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>) of O(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>) in SrVO<sub>3</sub></p>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">vasprunfile</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
-                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
-                 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>
-                 <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>
-                 <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>
-                 <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;O-up&#39;</span><span class="p">,</span><span class="s1">&#39;O-down&#39;</span><span class="p">],</span>
-                 <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
-                 <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>) of O(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>) in SrVO<sub>3</sub></p>
+<dl class="simple">
+<dt>Usage::</dt><dd><dl class="simple">
+<dt>pyprocar.bandsdosplot(vasprunfile=’vasprun.xml’,</dt><dd><p>mode=’parametric_line’,
+orbitals=[1,2,3],
+atoms=[2,3,4],
+elimit=[-4,4],
+labels=[‘O-up’,’O-down’],
+plot_total=True)</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <img alt="_images/dos_parameteric_line.png" src="_images/dos_parameteric_line.png" />
 </div>
 <div class="section" id="mode-satck">
@@ -484,7 +486,7 @@ The following will be the change in usage of <code class="docutils literal notra
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="2Dspin.html" class="btn btn-neutral float-right" title="2D spin-texture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bandsdos.html" class="btn btn-neutral float-right" title="Bands Structure with Density of States" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bands.html" class="btn btn-neutral float-left" title="Band structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
