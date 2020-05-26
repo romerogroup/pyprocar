@@ -270,6 +270,7 @@ This choice plots a plain bands structure with not projections. Density of State
 This mode plots the contribution of the species and their specified orbitals as stacked curves with filled areas under the curves for DOS. The following example represents the stacked projected DOS of d orbitals of Sr(Sr=[4,5,6,7,8]), p orbitals of O(O=[1,2,3]) and the s and p orbitals of V(V=[0,1,2,3]). The bands plot will be a simple plain bands plot.
 
 Usage::
+
   pyprocar.bandsdosplot(bands_file=procar_bands,
                         outcar=outcar_bands,
                         dos_file=vasprun,
