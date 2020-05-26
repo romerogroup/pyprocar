@@ -1,5 +1,7 @@
-# -*- coding: utf-8 -*-
-
+"""
+Created on May 17 2020 
+@author: Pedram Tavadze
+"""
 import re
 
 import matplotlib as mpl
@@ -24,7 +26,7 @@ plt.rc("axes", titlesize=22)  # fontsize of the axes title
 plt.rc("axes", labelsize=22)  # fontsize of the x and y labels
 plt.rc("xtick", labelsize=22)  # fontsize of the tick labels
 plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
-# plt.rc('legend', fontsize=22)    # legend fontsize
+plt.rc('legend', fontsize=18)    # legend fontsize
 # plt.rc('figure', titlesize=22)  # fontsize of the figure title
 
 
@@ -69,10 +71,7 @@ def bandsdosplot(
     gs = fig.add_gridspec(1, 2, width_ratios=widths, height_ratios=heights)
 
     ax1 = fig.add_subplot(gs[0, 0])
-    #    ax1.set_title('Band Structure')
     ax2 = fig.add_subplot(gs[0, 1])
-    #    ax2.set_title('Density of States')
-    #    ax3 = fig.add_subplot(gs[0,2])
 
     total = plot_total
 
@@ -87,6 +86,11 @@ def bandsdosplot(
             orbitals.copy()
         )  # these copying is because orbitals select changes shifts orbitals by one
 
+    if dos_spins == None:
+        dos_spins = [0,1]
+
+
+        
     if kpointsfile is not None:
         # Getting the high symmetry point names from KPOINTS file
         f = open(kpointsfile)
@@ -281,7 +285,7 @@ def bandsdosplot(
             ax1.set_ylim(elimit)
 
     elif bands_mode == "parametric":
-        if dos_mode == "parametric2":
+        if dos_mode == "parametric":
             plot_bar = False
         else:
             plot_bar = True
@@ -303,17 +307,15 @@ def bandsdosplot(
             ax1.set_ylim(elimit)
 
     if dos_mode == "plain":
-        _, ax2 = dos_plot.plot_total(spins=dos_spins, ax=ax2, orientation="vertical",)
+        _, ax2 = dos_plot.plot_total(spins=dos_spins, ax=ax2, orientation="vertical",labels=dos_labels)
         dos = dos_plot.VaspXML.dos_total
 
-    elif dos_mode == "parametric1":
+    elif dos_mode == "parametric_line":
         if not total:
             _, ax2 = dos_plot.plot_parametric_line(
                 atoms=atoms,
                 spins=dos_spins,
                 orbitals=orbitals,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 ax=ax2,
                 orientation="vertical",
@@ -325,8 +327,6 @@ def bandsdosplot(
         else:
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax2,
                 orientation="vertical",
@@ -336,21 +336,17 @@ def bandsdosplot(
                 atoms=atoms,
                 spins=dos_spins,
                 orbitals=orbitals,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 ax=ax2,
                 orientation="vertical",
                 labels=dos_labels,
             )
-    elif dos_mode == "parametric2":
+    elif dos_mode == "parametric":
         if not total:
             _, ax2 = dos_plot.plot_parametric(
                 atoms=atoms,
                 spins=dos_spins,
                 orbitals=orbitals,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 cmap=cmap,
                 elimit=elimit,
@@ -367,8 +363,6 @@ def bandsdosplot(
                 atoms=atoms,
                 spins=dos_spins,
                 orbitals=orbitals,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 cmap=cmap,
                 elimit=elimit,
@@ -381,8 +375,6 @@ def bandsdosplot(
             dos = dos_plot.VaspXML.dos_total
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax2,
                 orientation="vertical",
@@ -392,8 +384,6 @@ def bandsdosplot(
         if not total:
             _, ax2 = dos_plot.plot_stack_species(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 colors=dos_colors,
                 elimit=elimit,
@@ -417,8 +407,6 @@ def bandsdosplot(
             dos = dos_plot.VaspXML.dos_total
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax2,
                 orientation="vertical",
@@ -427,8 +415,6 @@ def bandsdosplot(
         if not total:
             _, ax2 = dos_plot.plot_stack_orbitals(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 colors=dos_colors,
                 elimit=elimit,
@@ -440,8 +426,6 @@ def bandsdosplot(
         else:
             _, ax2 = dos_plot.plot_stack_orbitals(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 colors=dos_colors,
                 elimit=elimit,
@@ -452,8 +436,6 @@ def bandsdosplot(
             dos = dos_plot.VaspXML.dos_total
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax2,
                 orientation="vertical",
@@ -463,8 +445,6 @@ def bandsdosplot(
             _, ax2 = dos_plot.plot_stack(
                 items=dos_items,
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 colors=dos_colors,
                 elimit=elimit,
@@ -478,8 +458,6 @@ def bandsdosplot(
             _, ax2 = dos_plot.plot_stack(
                 items=dos_items,
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 colors=dos_colors,
                 elimit=elimit,
@@ -490,8 +468,6 @@ def bandsdosplot(
             dos = dos_plot.VaspXML.dos_total
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax2,
                 orientation="vertical",
@@ -505,8 +481,8 @@ def bandsdosplot(
         ax2.grid()
     #    ax2.yaxis.set_ticklabels([])
 
-    #    if dos_labels :
-    ax2.legend(frameon=False)
+    if dos_labels or 'stack' in dos_mode:
+        ax2.legend()
     ax2.yaxis.set_visible(False)
     if (
         dos_mode == "stack_species"
@@ -522,8 +498,8 @@ def bandsdosplot(
 
     if savefig:
         fig.savefig(savefig, bbox_inches="tight")
-        plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
-        return None, None
+        plt.close()  
+        return None,None
     else:
         plt.show()
     return fig, ax1, ax2

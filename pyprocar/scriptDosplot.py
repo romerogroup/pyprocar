@@ -48,7 +48,9 @@ def dosplot(
 ):
 
     """This function plots density of states
-  """
+
+    """
+    
     welcome()
     total = plot_total
     code = code.lower()

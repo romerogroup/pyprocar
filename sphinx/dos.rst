@@ -71,7 +71,7 @@ Parameters
 
 	      default: The default is set to select all the atoms.
 
-:param orbitals: ``orbitals`` define the projection of atoms in the density of States. In other words it selects only the contribution of the orbitals provided. Orbitals has to be a python list(or numpy array) containing the Orbital indices. Orbitals indices has to be order of the input files of DFT package. The following table represents the indecies for different orbitals in **VASP**. 
+:param orbitals: ``orbitals`` define the projection of orbitals in the density of States. In other words it selects only the contribution of the orbitals provided. Orbitals has to be a python list(or numpy array) containing the Orbital indices. Orbitals indices has to be order of the input files of DFT package. The following table represents the indecies for different orbitals in **VASP**. 
 
 		 +-----+-----+----+----+-----+-----+-----+-----+-------+
 		 |  s  | py  | pz | px | dxy | dyz | dz2 | dxz | x2-y2 |
@@ -200,11 +200,13 @@ Usage::
                    orientation='horizontal',
                    labels=[r'$\uparrow$',r'$\downarrow$'],
                    title=r'Total Density of States SrVO$_3$')
+  
+
 
 .. image:: dos_plain_hor.png
 
 
-Note that ``vasprunfile``, ``mode`` and ``orientationl`` did not need to be specifies as we are using the defalut values.
+Note that ``vasprunfile``, ``mode`` and ``orientation`` did not need to be specifies as we are using the defalut values.
 The following will be the change in usage of ``orientation``, and the choice of the spin asked to be plotted. After this example we will switch back to horizontal plot for the examples. and plotting both of the spins in plots.
 
 Usage::
@@ -246,18 +248,16 @@ Usage::
 3. ``mode='parametric_line'``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This mode is the most might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(``orbitals=[1,2,3]``) of O(``atoms=[2,3,4]``) in SrVO\ :sub:`3`\
+This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(``orbitals=[1,2,3]``) of O(``atoms=[2,3,4]``) in SrVO\ :sub:`3`\
 
 Usage::
-
-  pyprocar.dosplot(vasprunfile='vasprun.xml',
-                   mode='parametric_line',
-                   orbitals=[1,2,3],
-                   atoms=[2,3,4],
-                   elimit=[-4,4],
-                   labels=['O-up','O-down'],
-                   orientation='horizontal',
-                   plot_total=True)
+  pyprocar.bandsdosplot(vasprunfile='vasprun.xml',
+                        mode='parametric_line',
+                        orbitals=[1,2,3],
+                        atoms=[2,3,4],
+                        elimit=[-4,4],
+                        labels=['O-up','O-down'],
+                        plot_total=True)
 
 
 .. image:: dos_parameteric_line.png
