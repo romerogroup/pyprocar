@@ -27,7 +27,7 @@ plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
 
 
 def bandsplot(
-    file=None,
+    procarfile=None,
     mode="plain",
     color="blue",
     abinit_output=None,
@@ -55,7 +55,7 @@ def bandsplot(
     code="vasp",
     separate=False,
     ax=None,
-    discontinuities=[],
+    discontinuities=None,
 ):
 
     """This function plots band structures
@@ -64,6 +64,8 @@ def bandsplot(
 
     # Turn interactive plotting off
     plt.ioff()
+
+    # Verbose section
 
     # First handling the options, to get feedback to the user and check
     # that the input makes sense.
@@ -79,11 +81,11 @@ def bandsplot(
 
     print("Script initiated")
     print("code          : ", code)
-    print("input file    : ", file)
+    print("input file    : ", procarfile)
     print("Mode          : ", mode)
     print("spin comp.    : ", spin)
-    print("atoms list   : ", atoms)
-    print("orbs. list   : ", orbitals)
+    print("atoms list    : ", atoms)
+    print("orbs. list    : ", orbitals)
 
     if (
         fermi is None
@@ -102,15 +104,15 @@ def bandsplot(
     elif fermi is None and code == "qe":
         fermi = None
 
-    print("Fermi Energy   : ", fermi)
-    print("Energy range  : ", elimit)
+    print("fermi energy  : ", fermi)
+    print("energy range  : ", elimit)
 
     if mask is not None:
         print("masking thres.: ", mask)
 
-    print("Colormap      : ", cmap)
-    print("MarkerSize    : ", markersize)
-    print("Permissive    : ", permissive)
+    print("colormap      : ", cmap)
+    print("markersize    : ", markersize)
+    print("permissive    : ", permissive)
     if permissive:
         print("INFO: Permissive flag is on! Be careful")
     print("vmax          : ", vmax)
@@ -118,16 +120,19 @@ def bandsplot(
     print("grid enabled  : ", grid)
     if human is not None:
         print("human         : ", human)
-    print("Savefig       : ", savefig)
+    print("savefig       : ", savefig)
     print("title         : ", title)
     print("outcar        : ", outcar)
 
     if kdirect:
-        print("k-point coordinates        : reduced")
+        print("k-grid        :  reduced")
     else:
         print(
-            "k-point coordinates        : cartesian (Remember to provide an output file for this case to work.)"
+            "k-grid          :  cartesian (Remember to provide an output file for this case to work.)"
         )
+
+    if discontinuities is None:
+        discontinuities = []
 
     #### READING KPOINTS FILE IF PRESENT ####
 
@@ -186,16 +191,15 @@ def bandsplot(
 
         # creating an array for discontunuity k-points. These are the indexes
         # of the discontinuity k-points.
-        discontinuities = []
         for k in discont_indx:
             discontinuities.append(kticks[int(k / 2) + 1])
         if discontinuities:
-            print("discontinuities :", discontinuities)
+            print("discont. list : ", discontinuities)
 
     #### END OF KPOINTS FILE DEPENDENT SECTION ####
 
     # The spin argument should be a number (index of an array), or
-    #'st'. In the last case it will be handled separately (later)
+    # 'st'. In the last case it will be handled separately (later)
 
     spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
 
@@ -244,7 +248,7 @@ def bandsplot(
         print("kticks        : ", kticks)
         print("knames        : ", knames)
         if discontinuities:
-            print("discontinuities :", discontinuities)
+            print("discont. list : ", discontinuities)
 
     # The second part of this function is parse/select/use the data in
     # OUTCAR (if given) and PROCAR
@@ -256,23 +260,23 @@ def bandsplot(
             outcarparser = UtilsProcar()
             if fermi is None:
                 fermi = outcarparser.FermiOutcar(outcar)
-                print("Fermi energy found in OUTCAR file = " + str(fermi))
+                print("Fermi energy  :  %s eV (from OUTCAR)" % str(fermi))
             recLat = outcarparser.RecLatOutcar(outcar)
 
     elif code == "elk":
         if fermi is None:
             fermi = procarFile.fermi
-            print("Fermi energy found in Elk output file = " + str(fermi))
+            print("Fermi energy   :  %s eV (from Elk output)" % str(fermi))
 
     elif code == "qe":
         if fermi is None:
             fermi = procarFile.fermi
-            print("Fermi energy found in Quantum Espresso output file = " + str(fermi))
+            print("Fermi energy  :  %s eV (from Quantum Espresso output)" % str(fermi))
 
     elif code == "abinit":
         if fermi is None:
             fermi = abinitFile.fermi
-            print("Fermi energy found in Abinit output file = " + str(fermi))
+            print("Fermi energy  :  %s eV (from Abinit output)" % str(fermi))
         recLat = abinitFile.reclat
 
     # if kdirect = False, then the k-points will be in cartesian coordinates.
@@ -281,15 +285,15 @@ def bandsplot(
 
     if code == "vasp":
         if kdirect:
-            procarFile.readFile(file, permissive)
+            procarFile.readFile(procarfile, permissive)
         else:
-            procarFile.readFile(file, permissive, recLattice=recLat)
+            procarFile.readFile(procarfile, permissive, recLattice=recLat)
 
     elif code == "abinit":
         if kdirect:
-            procarFile.readFile(file, permissive)
+            procarFile.readFile(procarfile, permissive)
         else:
-            procarFile.readFile(file, permissive, recLattice=recLat)
+            procarFile.readFile(procarfile, permissive, recLattice=recLat)
 
     # processing the data, getting an instance of the class that reduces the data
     data = ProcarSelect(procarFile, deepCopy=True, mode=mode)
@@ -314,7 +318,7 @@ def bandsplot(
         cos = np.cos(angle)
         sin.shape = (sin.shape[0], 1)
         cos.shape = (cos.shape[0], 1)
-        ##print sin, cos
+        # print sin, cos
         # storing the spin projection into the original array
         data.spd = -sin * dataX.spd + cos * dataY.spd
     else:
@@ -387,6 +391,7 @@ def bandsplot(
             cmap=cmap,
             vmin=vmin,
             vmax=vmax,
+            mask=mask,
             ticks=ticks,
             discontinuities=discontinuities,
             ax=ax,

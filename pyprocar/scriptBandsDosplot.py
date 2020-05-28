@@ -1,5 +1,5 @@
 """
-Created on May 17 2020 
+Created on May 17 2020
 @author: Pedram Tavadze
 """
 import re
@@ -26,7 +26,7 @@ plt.rc("axes", titlesize=22)  # fontsize of the axes title
 plt.rc("axes", labelsize=22)  # fontsize of the x and y labels
 plt.rc("xtick", labelsize=22)  # fontsize of the tick labels
 plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
-plt.rc('legend', fontsize=18)    # legend fontsize
+plt.rc("legend", fontsize=18)  # legend fontsize
 # plt.rc('figure', titlesize=22)  # fontsize of the figure title
 
 
@@ -61,10 +61,12 @@ def bandsdosplot(
     savefig=None,
     title=None,
     kdirect=True,
+    discontinuities=None,
 ):
+    """This function creates plots containing both DOS and bands."""
 
     welcome()
-    # If KPOINTS file is given:
+
     fig = plt.figure(figsize=(13, 7), constrained_layout=False)
     widths = [13, 5]
     heights = [9]
@@ -86,11 +88,56 @@ def bandsdosplot(
             orbitals.copy()
         )  # these copying is because orbitals select changes shifts orbitals by one
 
-    if dos_spins == None:
-        dos_spins = [0,1]
+    if dos_spins is None:
+        dos_spins = [0, 1]
 
+    # Verbose section
 
-        
+    print("Script initiated")
+    print("code          : ", code)
+    print("bands file    : ", bands_file)
+    print("bands mode    : ", bands_mode)
+    print("bands spin    : ", bands_spin)
+    print("dos file      : ", dos_file)
+    print("dos mode      : ", dos_mode)
+    print("dos spin      : ", dos_spins)
+    print("atoms list    : ", atoms)
+    print("orbs. list    : ", orbitals)
+
+    if fermi is None and outcar is None and abinit_output is None:
+        print(
+            "WARNING: Fermi Energy not set! Please set manually or provide output file and set code type."
+        )
+        fermi = 0
+
+    print("fermi energy  : ", fermi)
+    print("energy range  : ", elimit)
+
+    if mask is not None:
+        print("masking thres.: ", mask)
+
+    print("colormap      : ", cmap)
+    print("markersize    : ", markersize)
+    print("vmax          : ", vmax)
+    print("vmin          : ", vmin)
+    print("grid enabled  : ", grid)
+    print("savefig       : ", savefig)
+    print("title         : ", title)
+    print("outcar        : ", outcar)
+
+    if kdirect:
+        print("k-grid        : reduced")
+    else:
+        print(
+            "k-grid          : cartesian (Remember to provide an output file for this case to work.)"
+        )
+
+    if discontinuities is None:
+        discontinuities = []
+
+    #### READING KPOINTS FILE IF PRESENT ####
+
+    # If KPOINTS file is given:
     if kpointsfile is not None:
         # Getting the high symmetry point names from KPOINTS file
         f = open(kpointsfile)
@@ -145,21 +192,21 @@ def bandsdosplot(
 
         # creating an array for discontunuity k-points. These are the indexes
         # of the discontinuity k-points.
-        discontinuities = []
         for k in discont_indx:
             discontinuities.append(kticks[int(k / 2) + 1])
         if discontinuities:
-            print("discontinuities :", discontinuities)
+            print("discont. list : ", discontinuities)
 
     #### END OF KPOINTS FILE DEPENDENT SECTION ####
-    #        spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
+
+    # spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
 
     #### parsing the PROCAR file or equivalent to retrieve spd data ####
     code = code.lower()
     if code == "vasp":
         procarFile = ProcarParser()
         dos_plot = DosPlot(dos_file)
-        if dos_spins == None:
+        if dos_spins is None:
             dos_spins = np.arange(dos_plot.VaspXML.dos_total.ncols)
 
     # If ticks and names are given by the user manually:
@@ -174,7 +221,7 @@ def bandsdosplot(
         print("kticks        : ", kticks)
         print("knames        : ", knames)
         if discontinuities:
-            print("discontinuities :", discontinuities)
+            print("discont. list : ", discontinuities)
 
     # The second part of this function is parse/select/use the data in
     # OUTCAR (if given) and PROCAR
@@ -186,8 +233,9 @@ def bandsdosplot(
             outcarparser = UtilsProcar()
             if fermi is None:
                 fermi = outcarparser.FermiOutcar(outcar)
-                print("Fermi energy found in OUTCAR file = " + str(fermi))
+                print("Fermi energy  :  %s eV (from OUTCAR)" % str(fermi))
             recLat = outcarparser.RecLatOutcar(outcar)
+
     # if kdirect = False, then the k-points will be in cartesian coordinates.
     # The output should be read to find the reciprocal lattice vectors to transform
     # from direct to cartesian
@@ -223,7 +271,7 @@ def bandsdosplot(
         cos = np.cos(angle)
         sin.shape = (sin.shape[0], 1)
         cos.shape = (cos.shape[0], 1)
-        ##print sin, cos
+        # print sin, cos
         # storing the spin projection into the original array
         data.spd = -sin * dataX.spd + cos * dataY.spd
     else:
@@ -232,7 +280,7 @@ def bandsdosplot(
         data.selectOrbital(bands_orbitals)
 
     # Plotting the data
-    if bands_separate == True:
+    if bands_separate:
         if bands_spin == 0:
             # plotting spin up bands separately
             data.bands = (
@@ -258,6 +306,7 @@ def bandsdosplot(
         vmin = plot.spd.min()
     if vmax is None:
         vmax = plot.spd.max()
+
     ###### start of mode dependent options #########
     if bands_mode == "scatter":
         _, ax1 = plot.scatterPlot(
@@ -267,6 +316,7 @@ def bandsdosplot(
             ticks=ticks,
             discontinuities=discontinuities,
             ax=ax1,
+            mask=mask,
         )
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
@@ -297,6 +347,7 @@ def bandsdosplot(
             discontinuities=discontinuities,
             ax=ax1,
             plot_bar=plot_bar,
+            mask=mask,
         )
 
         if fermi is not None:
@@ -307,7 +358,9 @@ def bandsdosplot(
             ax1.set_ylim(elimit)
 
     if dos_mode == "plain":
-        _, ax2 = dos_plot.plot_total(spins=dos_spins, ax=ax2, orientation="vertical",labels=dos_labels)
+        _, ax2 = dos_plot.plot_total(
+            spins=dos_spins, ax=ax2, orientation="vertical", labels=dos_labels
+        )
         dos = dos_plot.VaspXML.dos_total
 
     elif dos_mode == "parametric_line":
@@ -481,7 +534,7 @@ def bandsdosplot(
         ax2.grid()
     #    ax2.yaxis.set_ticklabels([])
 
-    if dos_labels or 'stack' in dos_mode:
+    if dos_labels or "stack" in dos_mode:
         ax2.legend()
     ax2.yaxis.set_visible(False)
     if (
@@ -498,8 +551,8 @@ def bandsdosplot(
 
     if savefig:
         fig.savefig(savefig, bbox_inches="tight")
-        plt.close()  
-        return None,None
+        plt.close()
+        return None, None
     else:
         plt.show()
     return fig, ax1, ax2
