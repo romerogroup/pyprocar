@@ -80,12 +80,12 @@ def bandsplot(
         orbitals = [-1]
 
     print("Script initiated")
-    print("code          : ", code)
-    print("input file    : ", procarfile)
-    print("Mode          : ", mode)
-    print("spin comp.    : ", spin)
-    print("atoms list    : ", atoms)
-    print("orbs. list    : ", orbitals)
+    print("code           : ", code)
+    print("input file     : ", procarfile)
+    print("mode           : ", mode)
+    print("spin comp.     : ", spin)
+    print("atoms list     : ", atoms)
+    print("orbs. list     : ", orbitals)
 
     if (
         fermi is None
@@ -94,7 +94,7 @@ def bandsplot(
         and (code != "elk" and code != "qe")
     ):
         print(
-            "WARNING: Fermi Energy not set! Please set manually or provide output file and set code type."
+            "WARNING : Fermi Energy not set! Please set manually or provide output file and set code type."
         )
         fermi = 0
 
@@ -104,31 +104,31 @@ def bandsplot(
     elif fermi is None and code == "qe":
         fermi = None
 
-    print("fermi energy  : ", fermi)
-    print("energy range  : ", elimit)
+    print("fermi energy   : ", fermi)
+    print("energy range   : ", elimit)
 
     if mask is not None:
-        print("masking thres.: ", mask)
+        print("masking thres. : ", mask)
 
-    print("colormap      : ", cmap)
-    print("markersize    : ", markersize)
-    print("permissive    : ", permissive)
+    print("colormap       : ", cmap)
+    print("markersize     : ", markersize)
+    print("permissive     : ", permissive)
     if permissive:
-        print("INFO: Permissive flag is on! Be careful")
-    print("vmax          : ", vmax)
-    print("vmin          : ", vmin)
-    print("grid enabled  : ", grid)
+        print("INFO : Permissive flag is on! Be careful")
+    print("vmax           : ", vmax)
+    print("vmin           : ", vmin)
+    print("grid enabled   : ", grid)
     if human is not None:
-        print("human         : ", human)
-    print("savefig       : ", savefig)
-    print("title         : ", title)
-    print("outcar        : ", outcar)
+        print("human          : ", human)
+    print("savefig        : ", savefig)
+    print("title          : ", title)
+    print("outcar         : ", outcar)
 
     if kdirect:
-        print("k-grid        :  reduced")
+        print("k-grid         :  reduced")
     else:
         print(
-            "k-grid          :  cartesian (Remember to provide an output file for this case to work.)"
+            "k-grid         :  cartesian (Remember to provide an output file for this case to work.)"
         )
 
     if discontinuities is None:
@@ -186,15 +186,15 @@ def bandsplot(
             gridpoint = gridpoint + numgridpoints
             kticks.append(gridpoint - 1)
 
-        print("knames        : ", knames)
-        print("kticks        : ", kticks)
+        print("knames         : ", knames)
+        print("kticks         : ", kticks)
 
         # creating an array for discontunuity k-points. These are the indexes
         # of the discontinuity k-points.
         for k in discont_indx:
             discontinuities.append(kticks[int(k / 2) + 1])
         if discontinuities:
-            print("discont. list : ", discontinuities)
+            print("discont. list  : ", discontinuities)
 
     #### END OF KPOINTS FILE DEPENDENT SECTION ####
 
@@ -245,10 +245,10 @@ def bandsplot(
         ticks = None
 
     if kpointsfile is None and kticks and knames:
-        print("kticks        : ", kticks)
-        print("knames        : ", knames)
+        print("knames         : ", knames)
+        print("kticks         : ", kticks)
         if discontinuities:
-            print("discont. list : ", discontinuities)
+            print("discont. list  : ", discontinuities)
 
     # The second part of this function is parse/select/use the data in
     # OUTCAR (if given) and PROCAR
@@ -260,23 +260,23 @@ def bandsplot(
             outcarparser = UtilsProcar()
             if fermi is None:
                 fermi = outcarparser.FermiOutcar(outcar)
-                print("Fermi energy  :  %s eV (from OUTCAR)" % str(fermi))
+                print("Fermi energy   :  %s eV (from OUTCAR)" % str(fermi))
             recLat = outcarparser.RecLatOutcar(outcar)
 
     elif code == "elk":
         if fermi is None:
             fermi = procarFile.fermi
-            print("Fermi energy   :  %s eV (from Elk output)" % str(fermi))
+            print("Fermi energy    :  %s eV (from Elk output)" % str(fermi))
 
     elif code == "qe":
         if fermi is None:
             fermi = procarFile.fermi
-            print("Fermi energy  :  %s eV (from Quantum Espresso output)" % str(fermi))
+            print("Fermi energy   :  %s eV (from Quantum Espresso output)" % str(fermi))
 
     elif code == "abinit":
         if fermi is None:
             fermi = abinitFile.fermi
-            print("Fermi energy  :  %s eV (from Abinit output)" % str(fermi))
+            print("Fermi energy   :  %s eV (from Abinit output)" % str(fermi))
         recLat = abinitFile.reclat
 
     # if kdirect = False, then the k-points will be in cartesian coordinates.

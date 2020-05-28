@@ -293,14 +293,14 @@ class QEParser:
 
         spinCount = 1
         k_info = None
-        self.orbitalCount = 10
+        self.orbitalCount = len(self.orbitals)
         self.spd = zeros(
             shape=(
                 self.kpointsCount,
                 self.bandsCount,
                 spinCount,
                 self.ionsCount + 1,
-                len(self.orbitals) + 3,
+                len(self.orbitals) + 2,
             )
         )
 

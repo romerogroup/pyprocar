@@ -141,7 +141,7 @@ class ProcarPlot:
             vmin = self.spd.min()
         if vmax is None:
             vmax = self.spd.max()
-        print("normalizing to: ", (vmin, vmax))
+        print("normalizing to : ", (vmin, vmax))
         norm = matplotlib.colors.Normalize(vmin, vmax)
 
         if self.kpoints is not None:

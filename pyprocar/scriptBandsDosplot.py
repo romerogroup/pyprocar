@@ -94,42 +94,42 @@ def bandsdosplot(
     # Verbose section
 
     print("Script initiated")
-    print("code          : ", code)
-    print("bands file    : ", bands_file)
-    print("bands mode    : ", bands_mode)
-    print("bands spin    : ", bands_spin)
-    print("dos file      : ", dos_file)
-    print("dos mode      : ", dos_mode)
-    print("dos spin      : ", dos_spins)
-    print("atoms list    : ", atoms)
-    print("orbs. list    : ", orbitals)
+    print("code           : ", code)
+    print("bands file     : ", bands_file)
+    print("bands mode     : ", bands_mode)
+    print("bands spin     : ", bands_spin)
+    print("dos file       : ", dos_file)
+    print("dos mode       : ", dos_mode)
+    print("dos spin       : ", dos_spins)
+    print("atoms list     : ", atoms)
+    print("orbs. list     : ", orbitals)
 
     if fermi is None and outcar is None and abinit_output is None:
         print(
-            "WARNING: Fermi Energy not set! Please set manually or provide output file and set code type."
+            "WARNING : Fermi Energy not set! Please set manually or provide output file and set code type."
         )
         fermi = 0
 
-    print("fermi energy  : ", fermi)
-    print("energy range  : ", elimit)
+    print("fermi energy   : ", fermi)
+    print("energy range   : ", elimit)
 
     if mask is not None:
-        print("masking thres.: ", mask)
+        print("masking thres. : ", mask)
 
-    print("colormap      : ", cmap)
-    print("markersize    : ", markersize)
-    print("vmax          : ", vmax)
-    print("vmin          : ", vmin)
-    print("grid enabled  : ", grid)
-    print("savefig       : ", savefig)
-    print("title         : ", title)
-    print("outcar        : ", outcar)
+    print("colormap       : ", cmap)
+    print("markersize     : ", markersize)
+    print("vmax           : ", vmax)
+    print("vmin           : ", vmin)
+    print("grid enabled   : ", grid)
+    print("savefig        : ", savefig)
+    print("title          : ", title)
+    print("outcar         : ", outcar)
 
     if kdirect:
-        print("k-grid        : reduced")
+        print("k-grid         : reduced")
     else:
         print(
-            "k-grid          : cartesian (Remember to provide an output file for this case to work.)"
+            "k-grid         : cartesian (Remember to provide an output file for this case to work.)"
         )
 
     if discontinuities is None:
@@ -187,15 +187,15 @@ def bandsdosplot(
             gridpoint = gridpoint + numgridpoints
             kticks.append(gridpoint - 1)
 
-        print("knames        : ", knames)
-        print("kticks        : ", kticks)
+        print("knames         : ", knames)
+        print("kticks         : ", kticks)
 
         # creating an array for discontunuity k-points. These are the indexes
         # of the discontinuity k-points.
         for k in discont_indx:
             discontinuities.append(kticks[int(k / 2) + 1])
         if discontinuities:
-            print("discont. list : ", discontinuities)
+            print("discont. list  : ", discontinuities)
 
     #### END OF KPOINTS FILE DEPENDENT SECTION ####
 
@@ -218,10 +218,10 @@ def bandsdosplot(
         ticks = None
 
     if kpointsfile is None and kticks and knames:
-        print("kticks        : ", kticks)
-        print("knames        : ", knames)
+        print("knames         : ", knames)
+        print("kticks         : ", kticks)
         if discontinuities:
-            print("discont. list : ", discontinuities)
+            print("discont. list  : ", discontinuities)
 
     # The second part of this function is parse/select/use the data in
     # OUTCAR (if given) and PROCAR
@@ -233,7 +233,7 @@ def bandsdosplot(
             outcarparser = UtilsProcar()
             if fermi is None:
                 fermi = outcarparser.FermiOutcar(outcar)
-                print("Fermi energy  :  %s eV (from OUTCAR)" % str(fermi))
+                print("Fermi energy   :  %s eV (from OUTCAR)" % str(fermi))
             recLat = outcarparser.RecLatOutcar(outcar)
 
     # if kdirect = False, then the k-points will be in cartesian coordinates.
