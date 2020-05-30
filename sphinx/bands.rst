@@ -118,7 +118,7 @@ Usage::
 
 The projection of atomic orbitals onto bands is also useful to identify the contribution of orbitals to bands. For instance, to identify correlated :math:`d` or :math:`f` orbitals in a strongly correlated material near the Fermi level. It is possible to include more than one type of orbital projection. The mapping of the index of orbitals to be used in ``orbitals`` is as follows (this is the same order from the PROCAR file).
 
-.. image:: orbitals.png
+.. image:: images/orbitals.png
 
 Usage: To project all five :math:`d`-orbitals::
 
@@ -159,7 +159,7 @@ PyProcar allows the plotting of band structures with a discontinuous :math:`k`-p
 	kticks = [0, 39, 79, 119, 159, 199, 239, 279, 319]
 	discontinuities = [199, 239]
 
-.. image:: continuousbands.png
+.. image:: images/continuousbands.png
 
 
 .. automodule:: pyprocar.scriptBandsplot

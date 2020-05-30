@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>PyProcar documentation &mdash; PyProcar 3.6 documentation</title>
+  <title>PyProcar documentation &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -84,6 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 </ul>
 
@@ -151,8 +152,15 @@
             
   <div class="section" id="pyprocar-documentation">
 <h1>PyProcar documentation<a class="headerlink" href="#pyprocar-documentation" title="Permalink to this headline">¶</a></h1>
-<p>PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data from the PROCAR format obtained from Vasp, Elk, Quantum Espresso and Abinit. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every <span class="math notranslate nohighlight">\(k\)</span>-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations and generating a <span class="math notranslate nohighlight">\(k\)</span>-path for a given crystal structure.</p>
-<p>In the VASP code, this information is written into the PROCAR file when <code class="docutils literal notranslate"><span class="pre">LORBIT=11</span></code> or <code class="docutils literal notranslate"><span class="pre">LORBIT=12</span></code> (to include phase projections of the wave functions) in the INCAR file. Partial support for Elk (tasks 21, 22 for non spin calculations) and Abinit (set <cite>prtprocar</cite>) is also available. While VASP and Abinit outputs a PROCAR file, parsers exist in PyProcar that allow the parsing of data from other formats (e.g. Elk) and store them within PyProcar for further processing.  To switch between codes, set the <code class="docutils literal notranslate"><span class="pre">code</span></code> variable to the desired code. E.g. <code class="docutils literal notranslate"><span class="pre">code='vasp'</span></code>, <code class="docutils literal notranslate"><span class="pre">code='elk'</span></code>, <code class="docutils literal notranslate"><span class="pre">code='qe'</span></code> etc. Full support for Elk, Quantum Espresso and Abinit along with other DFT codes will be implemented in the future.</p>
+<p>PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data from the PROCAR format obtained from various DFT codes. Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every <span class="math notranslate nohighlight">\(k\)</span>-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations, plotting partial density of states and generating a <span class="math notranslate nohighlight">\(k\)</span>-path for a given crystal structure.</p>
+<p>Currently supports:</p>
+<ol class="arabic simple">
+<li><p>VASP</p></li>
+<li><p>Elk</p></li>
+<li><p>Quantum Espresso</p></li>
+<li><p>Abinit</p></li>
+</ol>
+<p>Instructions on performing DFT calculations to obtain the necessary files to run PyProcar are given in the <a class="reference internal" href="dftprep.html#labeldftprep"><span class="std std-ref">DFT Preparation</span></a> section.</p>
 <p>The format of the PROCAR is as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span>   <span class="n">PROCAR</span> <span class="n">lm</span> <span class="n">decomposed</span>
 <span class="mf">2.</span>    <span class="n">of</span> <span class="n">k</span><span class="o">-</span><span class="n">points</span><span class="p">:</span>    <span class="mi">4</span>         <span class="c1"># of bands: 224         # of ions:  4</span>
@@ -182,7 +190,7 @@
 </ul>
 <p>This block is repeated for the other spin channel if the calculation was polarized.
 For spin polarized or non-collinear spin calculations there are additional blocks for each spin component.</p>
-<p>The site projected wave function in the PROCAR file is calculated by projecting  the  Kohn-Sham  wave  functions  onto  spherical  harmonics  that  are non-zero  within  spheres  of  a  Wigner-Seitz  radius  around  each  ion  by:</p>
+<p>The site projected wave function in the PROCAR is calculated by projecting  the  Kohn-Sham  wave  functions  onto  spherical  harmonics  that  are non-zero  within  spheres  of  a  Wigner-Seitz  radius  around  each  ion  by:</p>
 <div class="math notranslate nohighlight">
 \[|&lt;Y^{\alpha}_{lm}|\phi_{nk}&gt;|^2\]</div>
 <p>where,
@@ -195,12 +203,18 @@ For spin polarized or non-collinear spin calculations there are additional block
 \psi_{nk}^{\uparrow} \\
 \psi_{nk}^{\downarrow}
 \end{bmatrix}\end{split}\]</div>
-<p>An OUTCAR file or an equivalent output from other DFT calculations is required to extract the Fermi-energy and reciprocal lattice vectors.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dftprep.html#vasp">1. VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dftprep.html#elk">2. Elk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dftprep.html#quantum-espresso">3. Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dftprep.html#abinit">4. Abinit</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>

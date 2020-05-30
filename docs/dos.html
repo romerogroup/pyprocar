@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Density of States &mdash; PyProcar 3.6 documentation</title>
+  <title>Density of States &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
@@ -96,9 +97,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#mode-plain">1. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mode-parametric">2. <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mode-parametric-line">3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mode-satck">4. <code class="docutils literal notranslate"><span class="pre">mode='satck'</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mode-satck-species">5. <code class="docutils literal notranslate"><span class="pre">mode='satck_species'</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mode-satck-orbitals">6. <code class="docutils literal notranslate"><span class="pre">mode='satck_orbitals'</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mode-stack">4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mode-stack-species">5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mode-stack-orbitals">6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -425,8 +426,8 @@ plot_total=True)</p>
 </dl>
 <img alt="_images/dos_parameteric_line.png" src="_images/dos_parameteric_line.png" />
 </div>
-<div class="section" id="mode-satck">
-<h3>4. <code class="docutils literal notranslate"><span class="pre">mode='satck'</span></code><a class="headerlink" href="#mode-satck" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="mode-stack">
+<h3>4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code><a class="headerlink" href="#mode-stack" title="Permalink to this headline">¶</a></h3>
 <p>This mode plots the contribution of the species and their specified orbitals as stacked curves with filled areas under the curves. The following example represents the stacked projected DOS of d orbitals of Sr(Sr=[4,5,6,7,8]), p orbitals of O(O=[1,2,3]) and the s and p orbitals of V(V=[0,1,2,3]). In this example we have specified colors to have an example for not using the default colors.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">vasprunfile</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
@@ -440,8 +441,8 @@ plot_total=True)</p>
 </div>
 <img alt="_images/dos_stack.png" src="_images/dos_stack.png" />
 </div>
-<div class="section" id="mode-satck-species">
-<h3>5. <code class="docutils literal notranslate"><span class="pre">mode='satck_species'</span></code><a class="headerlink" href="#mode-satck-species" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="mode-stack-species">
+<h3>5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code><a class="headerlink" href="#mode-stack-species" title="Permalink to this headline">¶</a></h3>
 <p>This mode is a more specified version of <code class="docutils literal notranslate"><span class="pre">mode=='stack'</span></code>. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if <code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>, PyProcar will plot all the p orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">vasprunfile</span><span class="o">=</span><span class="n">vasprun</span><span class="p">,</span>
@@ -453,8 +454,8 @@ plot_total=True)</p>
 </div>
 <img alt="_images/dos_stack_species.png" src="_images/dos_stack_species.png" />
 </div>
-<div class="section" id="mode-satck-orbitals">
-<h3>6. <code class="docutils literal notranslate"><span class="pre">mode='satck_orbitals'</span></code><a class="headerlink" href="#mode-satck-orbitals" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="mode-stack-orbitals">
+<h3>6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code><a class="headerlink" href="#mode-stack-orbitals" title="Permalink to this headline">¶</a></h3>
 <p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='stack'</span></code>, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>)</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">vasprunfile</span><span class="o">=</span><span class="n">vasprun</span><span class="p">,</span>
@@ -468,9 +469,9 @@ plot_total=True)</p>
 <img alt="_images/dos_stack_orbitals.png" src="_images/dos_stack_orbitals.png" />
 <span class="target" id="module-pyprocar.scriptDosplot"></span><p>Created on May 17 2020
 &#64;author: Pedram Tavadze</p>
-<dl class="py function">
+<dl class="function">
 <dt id="pyprocar.scriptDosplot.dosplot">
-<code class="sig-prename descclassname">pyprocar.scriptDosplot.</code><code class="sig-name descname">dosplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vasprunfile</span><span class="o">=</span><span class="default_value">'vasprun.xml'</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot_total</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptDosplot.dosplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptDosplot.</code><code class="sig-name descname">dosplot</code><span class="sig-paren">(</span><em class="sig-param">vasprunfile='vasprun.xml'</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">orientation='horizontal'</em>, <em class="sig-param">spin_colors=None</em>, <em class="sig-param">colors=None</em>, <em class="sig-param">spins=None</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">grid=True</em>, <em class="sig-param">savefig=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">plot_total=True</em>, <em class="sig-param">code='vasp'</em>, <em class="sig-param">labels=None</em>, <em class="sig-param">items={}</em>, <em class="sig-param">ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptDosplot.dosplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots density of states</p>
 </dd></dl>
 

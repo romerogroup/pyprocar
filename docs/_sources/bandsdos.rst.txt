@@ -61,11 +61,11 @@ dos_mode
 
 	      default: ``fermi=None``
 
-:param mask:
+:param mask: If provided, it masks bands with projection values lower than ``mask``. Useful to remove unwanted bands from the band structure. For instance, in bands with very low contributions, there can still be visible bands. Using a mask with a low value can get rid of these. 
 
-:param markersize:
+:param markersize: Size of the marker used for plotting.
 
-:param marker:
+:param marker: The shape of the marker used for plotting. E.g.- 'o'=circle, 's'=square, '-'=line. 
 
 :param atoms: ``atoms`` define the projection of the atoms if any plot that is going to plotted in ``parametric`` mode. In other words it selects only the contribution of the atoms provided. This variable is only relavent for ``bands_mode='parametric'``, ``dos_mode='parametric'``, ``dos_mode='parametric_line'`` or ``dos_mode='stack_orbitals'``. Atoms has to be a python list(or numpy array) containing the atom indices. Atom indices has to be order of the input files of DFT package. For more information on the influence of ``atoms`` on the DOS plot please refer to the ``atoms`` section of Density of States plot. For more information on the influence of ``atoms`` on the bands plot please refer to the ``atoms`` section of Bands.
 
@@ -236,7 +236,7 @@ Usage::
                         kpointsfile='SrVO3_BANDS/KPOINTS')
 
 			
-.. image:: bandsdos_plain.png
+.. image:: images/bandsdos_plain.png
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -259,7 +259,7 @@ Usage::
                       kpointsfile='SrVO3_BANDS/KPOINTS',
   )
 
-.. image:: bandsdos_parametric.png
+.. image:: images/bandsdos_parametric.png
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -282,7 +282,7 @@ Usage::
 			grid=True,
 			)
 
-.. image:: bands_plain_dos_stack.png
+.. image:: images/bands_plain_dos_stack.png
 
 .. automodule:: pyprocar.scriptBandsDosplot
 	:members:

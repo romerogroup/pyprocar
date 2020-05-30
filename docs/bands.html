@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Band structure &mdash; PyProcar 3.6 documentation</title>
+  <title>Band structure &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="2D spin-texture" href="2Dspin.html" />
+    <link rel="next" title="Density of States" href="dos.html" />
     <link rel="prev" title="k-mesh generator" href="kmesh.html" /> 
 </head>
 
@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
@@ -99,6 +100,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#plotting-band-structures-with-a-discontinuous-k-path">Plotting band structures with a discontinuous <span class="math notranslate nohighlight">\(k\)</span>-path</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
@@ -308,9 +311,9 @@ Usage:</p>
 </pre></div>
 </div>
 <img alt="_images/continuousbands.png" src="_images/continuousbands.png" />
-<span class="target" id="module-pyprocar.scriptBandsplot"></span><dl class="py function">
+<span class="target" id="module-pyprocar.scriptBandsplot"></span><dl class="function">
 <dt id="pyprocar.scriptBandsplot.bandsplot">
-<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'blue'</span></em>, <em class="sig-param"><span class="n">abinit_output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">[- 2, 2]</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">markersize</span><span class="o">=</span><span class="default_value">0.02</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">marker</span><span class="o">=</span><span class="default_value">'o'</span></em>, <em class="sig-param"><span class="n">permissive</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">human</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kticks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">knames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kpointsfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kdirect</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em>, <em class="sig-param"><span class="n">separate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">discontinuities</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param">procarfile=None, mode='plain', color='blue', abinit_output=None, spin=0, atoms=None, orbitals=None, fermi=None, elimit=[-2, 2], mask=None, markersize=0.02, cmap='jet', vmax=None, vmin=None, grid=True, marker='o', permissive=False, human=False, savefig=None, kticks=None, knames=None, title=None, outcar=None, kpointsfile=None, kdirect=True, code='vasp', separate=False, ax=None, discontinuities=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots band structures</p>
 </dd></dl>
 
@@ -325,7 +328,7 @@ Usage:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="2Dspin.html" class="btn btn-neutral float-right" title="2D spin-texture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dos.html" class="btn btn-neutral float-right" title="Density of States" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="kmesh.html" class="btn btn-neutral float-left" title="k-mesh generator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

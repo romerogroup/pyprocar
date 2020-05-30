@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Band unfolding &mdash; PyProcar 3.6 documentation</title>
+  <title>Band unfolding &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -84,11 +84,14 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
@@ -208,9 +211,9 @@ Usage:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<span class="target" id="module-pyprocar.scriptUnfold"></span><dl class="py function">
+<span class="target" id="module-pyprocar.scriptUnfold"></span><dl class="function">
 <dt id="pyprocar.scriptUnfold.unfold">
-<code class="sig-prename descclassname">pyprocar.scriptUnfold.</code><code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'PROCAR'</span></em>, <em class="sig-param"><span class="n">poscar</span><span class="o">=</span><span class="default_value">'POSCAR'</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">'OUTCAR'</span></em>, <em class="sig-param"><span class="n">supercell_matrix</span><span class="o">=</span><span class="default_value">array([[2, 0, 0], [0, 2, 0], [0, 0, 2]])</span></em>, <em class="sig-param"><span class="n">ispin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">efermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shift_efermi</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">- 5, 15</span></em>, <em class="sig-param"><span class="n">kticks</span><span class="o">=</span><span class="default_value">[0, 36, 54, 86, 110, 147, 165, 199]</span></em>, <em class="sig-param"><span class="n">knames</span><span class="o">=</span><span class="default_value">['$\\Gamma$', 'K', 'M', '$\\Gamma$', 'A', 'H', 'L', 'A']</span></em>, <em class="sig-param"><span class="n">print_kpts</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">show_band</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'blue'</span></em>, <em class="sig-param"><span class="n">savetab</span><span class="o">=</span><span class="default_value">'unfold_result.csv'</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">'unfolded_band.png'</span></em>, <em class="sig-param"><span class="n">exportplt</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptUnfold.</code><code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param">fname='PROCAR', poscar='POSCAR', outcar='OUTCAR', supercell_matrix=array([[2, 0, 0],        [0, 2, 0],        [0, 0, 2]]), ispin=None, efermi=None, shift_efermi=True, elimit=(-5, 15), kticks=[0, 36, 54, 86, 110, 147, 165, 199], knames=['$\\Gamma$', 'K', 'M', '$\\Gamma$', 'A', 'H', 'L', 'A'], print_kpts=False, show_band=True, width=4, color='blue', savetab='unfold_result.csv', savefig='unfolded_band.png', exportplt=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

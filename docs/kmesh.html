@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>k-mesh generator &mdash; PyProcar 3.6 documentation</title>
+  <title>k-mesh generator &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -85,11 +85,14 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">k-mesh generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
@@ -176,9 +179,9 @@
 </pre></div>
 </div>
 <p>This information is automatically written to a KPOINTS file.</p>
-<span class="target" id="module-pyprocar.scriptKmesh2D"></span><dl class="py function">
+<span class="target" id="module-pyprocar.scriptKmesh2D"></span><dl class="function">
 <dt id="pyprocar.scriptKmesh2D.generate2dkmesh">
-<code class="sig-prename descclassname">pyprocar.scriptKmesh2D.</code><code class="sig-name descname">generate2dkmesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">y1</span></em>, <em class="sig-param"><span class="n">x2</span></em>, <em class="sig-param"><span class="n">y2</span></em>, <em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">nkx</span></em>, <em class="sig-param"><span class="n">nky</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptKmesh2D.generate2dkmesh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptKmesh2D.</code><code class="sig-name descname">generate2dkmesh</code><span class="sig-paren">(</span><em class="sig-param">x1</em>, <em class="sig-param">y1</em>, <em class="sig-param">x2</em>, <em class="sig-param">y2</em>, <em class="sig-param">z</em>, <em class="sig-param">nkx</em>, <em class="sig-param">nky</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptKmesh2D.generate2dkmesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module generates a KPOINTS mesh file for 2D plotting.</p>
 </dd></dl>
 

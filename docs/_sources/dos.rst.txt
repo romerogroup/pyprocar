@@ -203,7 +203,7 @@ Usage::
   
 
 
-.. image:: dos_plain_hor.png
+.. image:: images/dos_plain_hor.png
 
 
 Note that ``vasprunfile``, ``mode`` and ``orientation`` did not need to be specifies as we are using the defalut values.
@@ -221,7 +221,7 @@ Usage::
                    savefig='dos_plain_ver.png'
   )
 
-.. image:: dos_plain_ver.png
+.. image:: images/dos_plain_ver.png
    :width: 230pt  
    :align: center
 
@@ -242,7 +242,7 @@ Usage::
                    plot_total=True,
                    title=r'Projected DOS of p orbitals of Oxygen in SrVO$_3$')
 
-.. image:: dos_parametric.png
+.. image:: images/dos_parametric.png
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 3. ``mode='parametric_line'``
@@ -260,10 +260,10 @@ Usage::
                         plot_total=True)
 
 
-.. image:: dos_parameteric_line.png
+.. image:: images/dos_parameteric_line.png
 
 ^^^^^^^^^^^^^^^^^^^
-4. ``mode='satck'``
+4. ``mode='stack'``
 ^^^^^^^^^^^^^^^^^^^
 
 This mode plots the contribution of the species and their specified orbitals as stacked curves with filled areas under the curves. The following example represents the stacked projected DOS of d orbitals of Sr(Sr=[4,5,6,7,8]), p orbitals of O(O=[1,2,3]) and the s and p orbitals of V(V=[0,1,2,3]). In this example we have specified colors to have an example for not using the default colors. 
@@ -278,10 +278,10 @@ Usage::
                    elimit=[-4,4],
                    plot_total=True)
 
-.. image:: dos_stack.png
+.. image:: images/dos_stack.png
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-5. ``mode='satck_species'``
+5. ``mode='stack_species'``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This mode is a more specified version of ``mode=='stack'``. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if ``orbitals=[1,2,3]``, PyProcar will plot all the p orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)
@@ -294,10 +294,10 @@ Usage::
                    elimit=[-4,4],
                    plot_total=True)
 
-.. image:: dos_stack_species.png
+.. image:: images/dos_stack_species.png
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-6. ``mode='satck_orbitals'``
+6. ``mode='stack_orbitals'``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This mode is another variation of ``mode=='stack'``, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(``atoms=[2,3,4]``)
@@ -311,7 +311,7 @@ Usage::
                    elimit=[-4,4],
                    plot_total=True)
 
-.. image:: dos_stack_orbitals.png
+.. image:: images/dos_stack_orbitals.png
 
 .. automodule:: pyprocar.scriptDosplot
 	:members:
