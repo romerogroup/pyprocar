@@ -56,6 +56,7 @@ def bandsplot(
     separate=False,
     ax=None,
     discontinuities=None,
+    show=True,
 ):
 
     """This function plots band structures
@@ -412,7 +413,7 @@ def bandsplot(
         if elimit is not None:
             ax1.set_ylim(elimit)
     ###### end of mode dependent options ###########
-    fig.tight_layout()
+
     if grid:
         ax1.grid()
 
@@ -421,11 +422,14 @@ def bandsplot(
 
     else:
         if savefig:
-            fig.savefig(savefig, bbox_inches="tight")
+            plt.savefig(savefig, bbox_inches="tight")
             plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
             return None, None
         else:
-            plt.show()
+            if show:
+                plt.show()
+            else:
+                pass
         return fig, ax1
 
 

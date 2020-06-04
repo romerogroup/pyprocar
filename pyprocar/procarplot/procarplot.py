@@ -25,9 +25,11 @@ class ProcarPlot:
 
         if not ax:
             fig = plt.figure(figsize=figsize)
+            fig.tight_layout()
             ax = fig.add_subplot(111)
         else:
             fig = plt.gca()
+
         if size is not None:
             size = size / 2
 
@@ -125,6 +127,7 @@ class ProcarPlot:
         # fig = plt.figure() # use plt.gca() since it won't create a new figure for band comparison
         if ax is None:
             fig = plt.figure(figsize=figsize)
+            fig.tight_layout()
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
@@ -252,6 +255,7 @@ class ProcarPlot:
         # plotting
         if not ax:
             fig = plt.figure(figsize=(13, 9))
+            fig.tight_layout()
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
