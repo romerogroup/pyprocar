@@ -90,13 +90,13 @@ E.g.::
 
     pyprocar.bandsplot('PROCAR',mode='parametric',separate=True,spin=0,...)
 
-These methods can be used for both plain and parametric modes. If a comparison of spin up and spin down bands is required on the same plot, the ``exportplt`` feature could be used.
+These methods can be used for both plain and parametric modes. If a comparison of spin up and spin down bands is required on the same plot, the following syntax can be used.
 
 E.g.::
 
-    plot = pyprocar.bandsplot('PROCAR-up',exportplt=True,color='red',mode='plain')
-    plot = pyprocar.bandsplot('PROCAR-down',exportplt=True,color='blue',mode='plain')
-    plot.show()
+    fig, ax = pyprocar.bandsplot('PROCAR-up',show=False,color='red',mode='plain')
+    pyprocar.bandsplot('PROCAR-down',color='blue',mode='plain',ax=ax)
+    
 
 Note:
 
@@ -116,9 +116,11 @@ Usage::
 4. Orbital projection
 =====================
 
-The projection of atomic orbitals onto bands is also useful to identify the contribution of orbitals to bands. For instance, to identify correlated :math:`d` or :math:`f` orbitals in a strongly correlated material near the Fermi level. It is possible to include more than one type of orbital projection. The mapping of the index of orbitals to be used in ``orbitals`` is as follows (this is the same order from the PROCAR file).
+The projection of atomic orbitals onto bands is also useful to identify the contribution of orbitals to bands. For instance, to identify correlated :math:`d` or :math:`f` orbitals in a strongly correlated material near the Fermi level. It is possible to include more than one type of orbital projection. The mapping of the index of orbitals to be used in ``orbitals`` is as follows (this is the same order from the PROCAR file). Quantum Espresso, VASP and Abinit follows this order. 
 
 .. image:: images/orbitals.png
+
+In Elk, the :math:`Y_{lm}` projections of the atomic site resolved DOS are arranged in logical order in the BAND_S*A* files, namely: (l,m) = (0,0), (1,-1), (1,0), (1,1), (2,-2), (2,-1), (2,0), (2,1), (2,2), etc., 
 
 Usage: To project all five :math:`d`-orbitals::
 
@@ -133,15 +135,11 @@ Export plot as a matplotlib.pyplot object
 =========================================
 
 PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
-This can be enabled by setting ``exportplt = True``.
 Usage::
 
-	import matplotlib.pyplot as plt
-	import pyprocar
-
-	plt = pyprocar.bandsplot('PROCAR', outcar='OUTCAR', mode='plain', exportplt=True)
-	plt.title('Using matplotlib options')
-	plt.show()
+	fig, ax = pyprocar.bandsplot('PROCAR', outcar='OUTCAR', mode='plain', show=False)
+	ax.set_title('Using matplotlib options')
+	fig.show()
 
 =================================================================
 Converting :math:`k`-points from reduced to cartesian coordinates
