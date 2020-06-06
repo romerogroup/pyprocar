@@ -8,7 +8,7 @@ This is acheived by setting ``show=False`` in pyprocar.bandsplot for the first p
 
 Usage::
 
-    fig, ax = pyprocar.bandsplot(mode='parametric',elimit=[-5,5],code='elk',exportplt=True,orbitals=[4,5,6,7,8], show=False)
+    fig, ax = pyprocar.bandsplot(mode='parametric',elimit=[-5,5],code='elk',orbitals=[4,5,6,7,8], show=False)
     pyprocar.bandsplot('PROCAR1',kpointsfile='KPOINTS1',outcar='OUTCAR1',mode='plain',elimit=[-5,5],code='vasp',color='k',ax=ax)
 
 The above command plots the figure displayed below. The black bands are plain bands of :math:`SrVO_3` calculated from VASP and the jet colormap is d orbital projected bands of the same material calculated from Elk.
