@@ -83,6 +83,10 @@ class ProcarSelect:
 
         self.numspin = self.spd.shape[2]  # Number of spins
         self.log.debug("setData: ... Done")
+        print(
+            "spd shape      :  %s [kpoints, bands, spins, atoms+1, orbitals+2]"
+            % str(self.spd.shape)
+        )
 
         return
 

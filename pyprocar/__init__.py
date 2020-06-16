@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seekpath
 import skimage
-# import pychemia
+import pychemia
 
 # Abinit
 from pyprocar.abinitparser import AbinitParser

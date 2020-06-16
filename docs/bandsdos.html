@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Bands Structure with Density of States &mdash; PyProcar 3.6 documentation</title>
+  <title>Bands Structure with Density of States &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
@@ -224,11 +225,14 @@
 <p>default: <code class="docutils literal notranslate"><span class="pre">fermi=None</span></code></p>
 </dd>
 <dt class="field-odd">param mask</dt>
-<dd class="field-odd"><p></p></dd>
+<dd class="field-odd"><p>If provided, it masks bands with projection values lower than <code class="docutils literal notranslate"><span class="pre">mask</span></code>. Useful to remove unwanted bands from the band structure. For instance, in bands with very low contributions, there can still be visible bands. Using a mask with a low value can get rid of these.</p>
+</dd>
 <dt class="field-even">param markersize</dt>
-<dd class="field-even"><p></p></dd>
+<dd class="field-even"><p>Size of the marker used for plotting.</p>
+</dd>
 <dt class="field-odd">param marker</dt>
-<dd class="field-odd"><p></p></dd>
+<dd class="field-odd"><p>The shape of the marker used for plotting. E.g.- ‘o’=circle, ‘s’=square, ‘-‘=line.</p>
+</dd>
 <dt class="field-even">param atoms</dt>
 <dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">atoms</span></code> define the projection of the atoms if any plot that is going to plotted in <code class="docutils literal notranslate"><span class="pre">parametric</span></code> mode. In other words it selects only the contribution of the atoms provided. This variable is only relavent for <code class="docutils literal notranslate"><span class="pre">bands_mode='parametric'</span></code>, <code class="docutils literal notranslate"><span class="pre">dos_mode='parametric'</span></code>, <code class="docutils literal notranslate"><span class="pre">dos_mode='parametric_line'</span></code> or <code class="docutils literal notranslate"><span class="pre">dos_mode='stack_orbitals'</span></code>. Atoms has to be a python list(or numpy array) containing the atom indices. Atom indices has to be order of the input files of DFT package. For more information on the influence of <code class="docutils literal notranslate"><span class="pre">atoms</span></code> on the DOS plot please refer to the <code class="docutils literal notranslate"><span class="pre">atoms</span></code> section of Density of States plot. For more information on the influence of <code class="docutils literal notranslate"><span class="pre">atoms</span></code> on the bands plot please refer to the <code class="docutils literal notranslate"><span class="pre">atoms</span></code> section of Bands.</p>
 <p>examples: for SrVO<sub>3</sub> we are choosing only the oxygen atoms. <code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>, keep in mind that python counting starts from zero, for a <strong>POSCAR</strong> similar to following:</p>
@@ -446,6 +450,12 @@ This mode plots the contribution of the species and their specified orbitals as 
 <img alt="_images/bands_plain_dos_stack.png" src="_images/bands_plain_dos_stack.png" />
 <span class="target" id="module-pyprocar.scriptBandsDosplot"></span><p>Created on May 17 2020
 &#64;author: Pedram Tavadze</p>
+<dl class="function">
+<dt id="pyprocar.scriptBandsDosplot.bandsdosplot">
+<code class="sig-prename descclassname">pyprocar.scriptBandsDosplot.</code><code class="sig-name descname">bandsdosplot</code><span class="sig-paren">(</span><em class="sig-param">bands_file='PROCAR', dos_file='vasprun.xml', outcar='OUTCAR', abinit_output=None, bands_mode='plain', dos_mode='plain', plot_total=True, fermi=None, mask=None, markersize=0.02, marker='o', atoms=None, orbitals=None, bands_spin=0, bands_separate=False, dos_spins=None, dos_labels=None, dos_spin_colors=[(1, 0, 0), (0, 0, 1)], dos_colors=None, dos_items=None, elimit=None, vmin=None, vmax=None, cmap='jet', grid=False, kpointsfile=None, code='vasp', savefig=None, title=None, kdirect=True, discontinuities=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptBandsDosplot.bandsdosplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates plots containing both DOS and bands.</p>
+</dd></dl>
+
 </div>
 </div>
 </div>

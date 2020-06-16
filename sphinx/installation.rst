@@ -9,7 +9,8 @@ Please install the following dependencies prior to installing PyProcar.
 	* seekpath 
 	* ase 
 	* scikit-image
-	* mayavi 4.6.0
+	* mayavi 
+	* pychemia
 
 On Ubuntu, Fermi3D requires wxPython. Install it with::
     

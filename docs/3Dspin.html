@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>3D Fermi surface &mdash; PyProcar 3.6 documentation</title>
+  <title>3D Fermi surface &mdash; PyProcar 5.3.3 documentation</title>
   
 
   
@@ -85,11 +85,14 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
 <li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">3D Fermi surface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#plain-fermi-surface">1. Plain Fermi surface</a></li>
@@ -201,9 +204,9 @@
 <p>The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on.</p>
 <span class="target" id="module-pyprocar.scriptFermi3D"></span><p>Created on Fri May 10 16:23:30 2019</p>
 <p>&#64;author: Pedram Tavadze</p>
-<dl class="py function">
+<dl class="function">
 <dt id="pyprocar.scriptFermi3D.fermi3D">
-<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">procar</span></em>, <em class="sig-param"><span class="n">outcar</span></em>, <em class="sig-param"><span class="n">bands</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">st</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param">procar</em>, <em class="sig-param">outcar</em>, <em class="sig-param">bands=-1</em>, <em class="sig-param">scale=1</em>, <em class="sig-param">mode='plain'</em>, <em class="sig-param">st=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots 3d fermi surface
 list of acceptable kwargs :</p>
 <blockquote>
