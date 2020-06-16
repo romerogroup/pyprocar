@@ -118,7 +118,7 @@ def fermi3D(procar='PROCAR',
                 p.add_mesh(surfaces[isurface].pyvista_obj,cmap=cmap)
                 p.remove_scalar_bar()
                 text='Projection'
-            if spin_texture:
+
                 
         p.add_scalar_bar(title=text,
                          n_labels=6,

@@ -61,7 +61,7 @@ from .scriptBandsplot import bandsplot
 from .scriptCat import cat
 from .scriptDosplot import dosplot
 from .scriptFermi2D import fermi2D
-from .scriptFermi3D1 import fermi3D
+from .scriptFermi3D import fermi3D
 from .scriptFilter import filter
 from .scriptKmesh2D import generate2dkmesh
 from .scriptKpath import kpath
