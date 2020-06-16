@@ -46,6 +46,8 @@ from pyprocar.elkparser import ElkParser
 from pyprocar.qeparser import QEParser
 
 from pyprocar.fermisurface import FermiSurface
+from pyprocar.fermisurface3d import FermiSurface3D
+from . import fermisurface3d
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
 from pyprocar.procarplot import ProcarPlot
@@ -59,7 +61,7 @@ from .scriptBandsplot import bandsplot
 from .scriptCat import cat
 from .scriptDosplot import dosplot
 from .scriptFermi2D import fermi2D
-from .scriptFermi3D import fermi3D
+from .scriptFermi3D1 import fermi3D
 from .scriptFilter import filter
 from .scriptKmesh2D import generate2dkmesh
 from .scriptKpath import kpath
