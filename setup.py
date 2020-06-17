@@ -23,6 +23,7 @@ setup(
         "pyprocar.qeparser",
     ],
     license="LICENSE.txt",
+    data_files = [("", ["LICENSE.txt"])],
     description="A Python library for electronic structure pre/post-processing.",
     install_requires=[
         "matplotlib",
