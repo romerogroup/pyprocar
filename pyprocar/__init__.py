@@ -1,11 +1,11 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.3.3"
+__version__ = "5.4.0"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
 __status__ = "Development"
-__date__ = "May 22nd, 2020"
+__date__ = "June 17th, 2020"
 
 # Copyright (C) 2019 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
@@ -35,6 +35,8 @@ import numpy as np
 import seekpath
 import skimage
 import pychemia
+import pyvista
+import trimesh
 
 # Abinit
 from pyprocar.abinitparser import AbinitParser
@@ -42,8 +44,11 @@ from pyprocar.abinitparser import AbinitParser
 # Elk
 from pyprocar.elkparser import ElkParser
 
-#Quantum Espresso
+# Quantum Espresso
 from pyprocar.qeparser import QEParser
+
+# Lobster
+from pyprocar.lobsterparser import LobsterParser
 
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.fermisurface3d import FermiSurface3D
@@ -69,9 +74,3 @@ from .scriptRepair import repair
 from .scriptUnfold import unfold
 from .scriptVector import Vector
 from .splash import welcome
-
-
-
-
-
-

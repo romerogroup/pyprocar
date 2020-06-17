@@ -158,16 +158,20 @@ class QEParser:
                 for x in raw_ticks
             ]
 
+        # note:
+        # discontinuities in QE are already specified in the input file.
+        # The following is not needed.
+
         # Fixing discontunuities points if present.
         # Assume that they are separated by a '|'. E.g.- 'G|K'
 
-        dicontinuity_index = []
-        discontinuity_symbols = [s for s in self.knames if "|" in s]
-        for k in discontinuity_symbols:
-            dicontinuity_index.append(self.knames.index(k))
+        # dicontinuity_index = []
+        # discontinuity_symbols = [s for s in self.knames if "|" in s]
+        # for k in discontinuity_symbols:
+        #     dicontinuity_index.append(self.knames.index(k))
 
-        for i in dicontinuity_index:
-            self.discontinuities.append(self.kticks[i])
+        # for i in dicontinuity_index:
+        #     self.discontinuities.append(self.kticks[i])
 
         #######################################################################
         # Reading the kpdos.out for outputfile labels

@@ -5,3 +5,5 @@ ase
 mayavi
 scikit-image
 pychemia
+pyvista
+trimesh

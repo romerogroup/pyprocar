@@ -17,16 +17,6 @@ Currently supports:
 
 ![](welcome.png)
 
-
-Usage
------
-Typical use is as follows
-
-    import pyprocar 
-    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain',code='vasp')
-
-Refer to the documentation for further details. 
-
 Documentation
 -------------
 
@@ -84,15 +74,32 @@ ase <br />
 scikit-image <br />
 mayavi <br />
 pychemia <br />
+pyvista <br />
 
 Installation
 ------------
 
+with pip:
+
 	pip install pyprocar	
+
+with conda:
+
+    conda install -c conda-forge pyprocar
+
+Usage
+-----
+Typical use is as follows
+
+    import pyprocar 
+    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain',code='vasp')
+
+Refer to the documentation for further details. 
 
 Changelog
 --------------
 
+v5.4.0 Jun 17th, 2020 -- Improved 3D Fermi Surface plotter, added support for Quantum Espresso, conda support.  <br />
 v5.3.3 May 22nd, 2020 -- Added DOS plotting feature. <br />
 v5.2.1 May 11th, 2020 -- Bugfixes in pyprocar.cat and improving comparison method. <br />
 v5.2.0 Apr 21st, 2020 -- Added spin colinear plotting feature for Elk calculations and a method to plot spin up and spin down plots separately without the need to filter the PROCAR file. <br />

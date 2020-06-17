@@ -70,6 +70,7 @@ where :math:`\sigma^i` are the Pauli matrices with :math:`i = x, y , z` and the 
       
    installation
    developers
+   contributors
    cite
    dftprep
    tutorials

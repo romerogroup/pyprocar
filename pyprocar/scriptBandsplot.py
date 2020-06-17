@@ -6,6 +6,7 @@ import numpy as np
 from .abinitparser import AbinitParser
 from .elkparser import ElkParser
 from .qeparser import QEParser
+from .lobsterparser import LobsterParser
 from .procarparser import ProcarParser
 from .procarplot import ProcarPlot
 from .procarselect import ProcarSelect
@@ -57,6 +58,7 @@ def bandsplot(
     ax=None,
     discontinuities=None,
     show=True,
+    lobstercode="qe",
 ):
 
     """This function plots band structures
@@ -92,7 +94,7 @@ def bandsplot(
         fermi is None
         and outcar is None
         and abinit_output is None
-        and (code != "elk" and code != "qe")
+        and (code != "elk" and code != "qe" and code != "lobster")
     ):
         print(
             "WARNING : Fermi Energy not set! Please set manually or provide output file and set code type."
@@ -103,6 +105,9 @@ def bandsplot(
         fermi = None
 
     elif fermi is None and code == "qe":
+        fermi = None
+
+    elif fermi is None and code == "lobster":
         fermi = None
 
     print("fermi energy   : ", fermi)
@@ -237,6 +242,20 @@ def bandsplot(
             if procarFile.discontinuities:
                 discontinuities = procarFile.discontinuities
 
+    elif code == "lobster":
+        # reciprocal lattice already taken care of
+        procarFile = LobsterParser(kdirect=kdirect, lobstercode=lobstercode)
+
+        # Retrieving knames and kticks from Lobster
+        if kticks is None and knames is None:
+            if procarFile.kticks and procarFile.knames:
+                kticks = procarFile.kticks
+                knames = procarFile.knames
+
+            # Retrieving discontinuities if present
+            if procarFile.discontinuities:
+                discontinuities = procarFile.discontinuities
+
     # If ticks and names are given by the user manually:
     if kticks is not None and knames is not None:
         ticks = list(zip(kticks, knames))
@@ -273,6 +292,13 @@ def bandsplot(
         if fermi is None:
             fermi = procarFile.fermi
             print("Fermi energy   :  %s eV (from Quantum Espresso output)" % str(fermi))
+
+    elif code == "lobster":
+        if fermi is None:
+            fermi = procarFile.fermi
+            print("Fermi energy   :  %s eV (from Lobster output)" % str(fermi))
+            # lobster already shifts fermi so we set it to zero here.
+            fermi = 0.0
 
     elif code == "abinit":
         if fermi is None:

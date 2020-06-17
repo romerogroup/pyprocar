@@ -11,6 +11,7 @@ Please install the following dependencies prior to installing PyProcar.
 	* scikit-image
 	* mayavi 
 	* pychemia
+	* pyvista
 
 On Ubuntu, Fermi3D requires wxPython. Install it with::
     
@@ -20,6 +21,10 @@ To install PyProcar with pip use the following command::
 	
 	pip install pyprocar
 
+To install PyProcar with conda use the following command::
+	
+	conda install -c conda-forge pyprocar
+
 Once you are done with the installation you can import PyProcar within Python with the command::
 
 	import pyprocar
@@ -27,3 +32,5 @@ Once you are done with the installation you can import PyProcar within Python wi
 The command-line version of PyProcar can be invoked in a terminal with::
     
     procar	
+
+Please note that the command-line version might not be up-to-date with the library version. 

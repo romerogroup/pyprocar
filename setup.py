@@ -2,11 +2,11 @@ from distutils.core import Extension, setup
 
 setup(
     name="pyprocar",
-    version="5.3.3",
+    version="5.4.0",
     author="Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet, Xu He",
     author_email="fvmunoz@gmail.com,alromero@mail.wvu.edu,smsingh@mix.wvu.edu,ukh0001@mix.wvu.edu,petavazohi@mix.wvu.edu,eric.bousquet@uliege.be,mailhexu@gmail.com",
     url="https://github.com/romerogroup/pyprocar",
-    download_url="https://github.com/romerogroup/pyprocar/archive/5.3.3.tar.gz",
+    download_url="https://github.com/romerogroup/pyprocar/archive/5.4.0.tar.gz",
     packages=[
         "pyprocar",
         "pyprocar.utilsprocar",
@@ -16,14 +16,16 @@ setup(
         "pyprocar.procarsymmetry",
         "pyprocar.procarunfold",
         "pyprocar.fermisurface",
+        "pyprocar.fermisurface3d",
         "pyprocar.procarselect",
         "pyprocar.elkparser",
         "pyprocar.abinitparser",
         "pyprocar.doscarplot",
         "pyprocar.qeparser",
+        "pyprocar.lobsterparser",
     ],
     license="LICENSE.txt",
-    data_files = [("", ["LICENSE.txt"])],
+    data_files=[("", ["LICENSE.txt"])],
     description="A Python library for electronic structure pre/post-processing.",
     install_requires=[
         "matplotlib",
@@ -33,6 +35,8 @@ setup(
         "scikit-image",
         "mayavi",
         "pychemia",
+        "pyvista",
+        "trimesh",
     ],
     scripts=["bin/procar"],
 )
