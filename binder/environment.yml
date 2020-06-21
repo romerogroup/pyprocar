@@ -2,4 +2,4 @@ channels:
 - conda-forge
 dependencies:
 - python
-- pyprocar=5.3.3
+- pyprocar
