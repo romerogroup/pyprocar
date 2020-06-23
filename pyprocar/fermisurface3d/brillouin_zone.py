@@ -48,7 +48,7 @@ class Lines:
         for iline in self.connectivity:
             entries.append(trimesh.path.entries.Line(iline))
 
-        self.trimesh_line = trimesh.path.path.Path(entries=entries,
+            self.trimesh_line = trimesh.path.path.Path(entries=entries,
                                                    vertices=self.verts)
 
 class BrillouinZone(Surface):
@@ -56,7 +56,7 @@ class BrillouinZone(Surface):
     A Surface object with verts, faces and line representation, representing
     the BrillouinZone
     """
-    def __init__(self,reciprocal_lattice):
+    def __init__(self,reciprocal_lattice,supercell):
         """
         Parameters
         ----------
@@ -65,12 +65,21 @@ class BrillouinZone(Surface):
 
         """
 
-        self.reciprocal = reciprocal_lattice
+        self.reciprocal = reciprocal_lattice*max(supercell)
+        # for ix in range(3):
+        # self.reciprocal[:,ix]*=supercell[ix]
         verts,faces = self.wigner_seitz()
         
         Surface.__init__(self,verts=verts,faces=faces)
+
+        
+        self._fix_normals_direction()
+        
+
+        #self.pyvista_obj.face_normals*=-1
         # self.pyvista_obj['scalars'] = [0]*len(faces)
         # self.pyvista_obj.set_active_scalars('scalars')
+        
         self.lines = Lines(verts,faces)
         
 
@@ -102,4 +111,14 @@ class BrillouinZone(Surface):
         return np.array(verts), np.array(faces)
 
 
-                
+    def _fix_normals_direction(self):
+        # directions = np.zeros_like(self.centers)
+        for iface in range(self.nfaces):
+            center = self.centers[iface]
+            n1 = center/np.linalg.norm(center)
+            n2 = self.face_normals[iface]
+
+            correction = np.sign(np.dot(n1,n2))
+            self.face_normals[iface]=self.face_normals[iface]*correction
+            self.pyvista_obj.face_normals[iface]=self.pyvista_obj.face_normals[iface]*correction
+            # self.trimesh_obj.face_normals[iface]*=correction

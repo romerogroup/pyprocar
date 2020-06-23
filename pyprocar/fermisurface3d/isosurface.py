@@ -20,54 +20,36 @@ class Isosurface(Surface):
              padding=None,
              transform_matrix=None,
              boundaries=None,):
-        
-        """
-        Parameters
-        ----------
-        XYZ : TYPE, optional
-            DESCRIPTION. The default is None.
-        V : TYPE, optional
-            DESCRIPTION. The default is None.
-        isovalue : TYPE, optional
-            DESCRIPTION. The default is None.
-        V_matrix : TYPE, optional
-            DESCRIPTION. The default is None.
-        dxyz : TYPE, optional
-            DESCRIPTION. The default is None.
-        algorithm : TYPE, optional
-            DESCRIPTION. The default is 'lewiner'.
-        interpolation_factor : TYPE, optional
-            DESCRIPTION. The default is 1.
-        padding : TYPE, optional
-            DESCRIPTION. The default is [0,0,0].
-
-        Returns
-        -------
-        None.
-
-        """
-        
         """
         This class contains a surface that finds all the poins correcponding 
         to the following equation
         V(X,Y,Z) = f
-        :param XYZ: a list of coordinates [[x1,y1,z1],[x2,y2,z2],...] 
+
+        Parameters
+        ----------
+        XYZ : TYPE, list of lists of floats, (n,3)
+            DESCRIPTION. a list of coordinates [[x1,y1,z1],[x2,y2,z2],...] 
             corresponding V
-        :param V: a list of values [V1,V2,...] corresponding to XYZ
-        XYZ[0] >>> V[0]
-        XYZ[1] >>> V[1]
-        ...
-        :param isovalue: The constant value of the surface (f)
-        :param V_matrix: one can present V_matrix instead of XYZ and V. 
+        V : TYPE, list of floats, (n,)
+            DESCRIPTION. a list of values [V1,V2,...] corresponding to XYZ
+            XYZ[0] >>> V[0]
+            XYZ[1] >>> V[1]
+        isovalue : TYPE, float
+            DESCRIPTION. The constant value of the surface (f)
+        V_matrix : TYPE, float (nx,ny,nz) 
+            DESCRIPTION. one can present V_matrix instead of XYZ and V. 
             V_matrix is a matrix representation of XYZ and V together. This 
             matrix is generated if XYZ and V are provided. 
-        :param algorithm: The algorithm used to find the isosurface, This 
+        algorithm : TYPE, string
+            DESCRIPTION. The default is 'lewiner'. The algorithm used to find the isosurface, This 
             function used scikit-image to find the isosurface. possibilities 
             ['classic','lewiner']
-        :param interpolation_factor: This module uses Fourier Transform 
+        interpolation_factor : TYPE, int
+            DESCRIPTION. The default is 1. This module uses Fourier Transform 
             interpolation. interpolation factor will increase the grid points
             in each direction by a this factor, the dafault is set to 1
-        :param padding: padding is used for periodic datasets such as bands in
+        padding : TYPE, list of float (3,)
+            DESCRIPTION. padding is used for periodic datasets such as bands in
             a solid state calculation. e.g. The 1st BZ is not covered fully so
             one might want to pad the matrix with wrap(look at padding in 
             numpy for wrap), afterwards one has to clip the surface to the 
@@ -78,6 +60,12 @@ class Isosurface(Surface):
                               (padding[2]/2, padding[2])),
                               "wrap")
             In other words it creates a super cell withpadding
+        transform_matrix : TYPE, (3,3) float
+            DESCRIPTION. applies an transformation to the vertices VERTS_prime=T*VERTS
+        boundaries : TYPE, pyprocar surface
+            DESCRIPTION. The default is None. The boundaries in which the isosurface will be clipped with
+            for example the first brillouin zone 
+
         """
     
         self.XYZ = np.array(XYZ)
@@ -98,8 +86,10 @@ class Isosurface(Surface):
         
         if self.padding is None:
             self.padding = [self.nX//2,self.nY//2,self.nZ//2]
+        else:
+            self.padding = [self.nX//2*padding[0],self.nY//2*padding[1],self.nZ//2*padding[2]]
 
-        verts, faces, normals, values = self.get_isosurface(interpolation_factor)
+        verts, faces, normals, values = self._get_isosurface(interpolation_factor)
         if verts is not None and faces is not None:
             if transform_matrix is not None:
                 verts = np.dot(verts,transform_matrix)
@@ -114,10 +104,10 @@ class Isosurface(Surface):
             using the other surface provided.
             """
             if boundaries is not None:
-                suprecell_surface = Surface(verts=verts,faces=faces)
+                suprecell_surface = Surface(verts=verts,faces=faces,face_normals=normals)
                 verts, faces = self.clip(suprecell_surface,boundaries)
 
-        Surface.__init__(self,verts=verts,faces=faces)
+        Surface.__init__(self,verts=verts,faces=faces,face_normals=normals)
 
     
 
@@ -127,9 +117,9 @@ class Isosurface(Surface):
 
         Parameters
         ----------
-        S1 : TYPE
+        S1 : TYPE pyprocar surface
             DESCRIPTION.
-        S2 : TYPE
+        S2 : TYPE pyprocar surface
             DESCRIPTION.
 
         Returns
@@ -159,18 +149,53 @@ class Isosurface(Surface):
 
     @property
     def X(self):
+        """
+        
+
+        Returns
+        -------
+        TYPE numpy array 
+            DESCRIPTION. list of grids in X direction
+
+        """
         return np.unique(self.XYZ[:, 0])
 
     @property
     def Y(self):
+        """
+        
+
+        Returns
+        -------
+        TYPE numpy array 
+            DESCRIPTION. list of grids in Y direction
+        """
         return np.unique(self.XYZ[:, 1])
 
     @property
     def Z(self):
+        """
+        
+
+        Returns
+        -------
+        TYPE numpy array 
+            DESCRIPTION. list of grids in Z direction
+
+        """
         return np.unique(self.XYZ[:, 2])
         
     @property
     def dxyz(self):
+        """
+        
+
+        Returns
+        -------
+        list
+            DESCRIPTION. length between points in each direction
+
+        """
         dx = np.abs(self.X[-1] - self.X[-2])
         dy = np.abs(self.Y[-1] - self.Y[-2])
         dz = np.abs(self.Z[-1] - self.Z[-2])
@@ -178,18 +203,56 @@ class Isosurface(Surface):
 
     @property
     def nX(self):
+        """
+        
+
+        Returns
+        -------
+        TYPE int
+            DESCRIPTION. number of points in the grid in X direction
+
+        """
         return len(self.X)
 
     @property
     def nY(self):
+        """
+        
+
+        Returns
+        -------
+        TYPE int
+            DESCRIPTION. number of points in the grid in Y direction
+
+        """
         return len(self.Y)
 
     @property
     def nZ(self):
+        """
+        
+
+        Returns
+        -------
+        TYPE int
+            DESCRIPTION. number of points in the grid in Z direction
+
+        """
         return len(self.Z)
 
     @property
     def surface_boundaries(self):
+        """
+        This function tries to find the isosurface using no interpolation to find the 
+        correct positions of the surface to be able to shift to the interpolated one
+        to the correct position
+
+        Returns
+        -------
+        list of tuples 
+            DESCRIPTION. [(mins[0],maxs[0]),(mins[1],maxs[1]),(mins[2],maxs[2])]
+
+        """
         
         padding_x = self.padding[0]
         padding_y = self.padding[1]
@@ -215,7 +278,28 @@ class Isosurface(Surface):
                 
         
 
-    def get_isosurface(self, interp_factor=1):
+    def _get_isosurface(self, interp_factor=1):
+        """
+        
+
+        Parameters
+        ----------
+        interp_factor : TYPE, optional
+            DESCRIPTION. The default is 1.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION. verts
+        TYPE
+            DESCRIPTION. faces
+        TYPE
+            DESCRIPTION. normals
+        TYPE
+            DESCRIPTION. vlues
+
+        """
+        
 
         # Amount of kpoints needed to add on to fully sample 1st BZ
         
@@ -265,8 +349,26 @@ class Isosurface(Surface):
         # new_faces[:, 1:] = faces
         # faces = new_faces
         return verts, faces, normals, values    
-        
+
+
+
 def map2matrix(XYZ,V):
+    """
+    mapps an Irregular grid to a regular grid
+
+    Parameters
+    ----------
+    XYZ : TYPE
+        DESCRIPTION.
+    V : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    mapped_func : TYPE
+        DESCRIPTION.
+
+    """
     XYZ = XYZ
     V = V
     X = np.unique(XYZ[:, 0])
@@ -296,6 +398,7 @@ def fft_interpolate(function, interpolation_factor=2):
     This function withh recieve f(x,y,z) with dimensions of (nx,ny,nz)
     and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)
     """
+    
     eigen_fft = np.fft.fftn(function)
     shifted_fft = np.fft.fftshift(eigen_fft)
     nx, ny, nz = np.array(shifted_fft.shape)
