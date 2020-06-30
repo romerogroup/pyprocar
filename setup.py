@@ -33,7 +33,6 @@ setup(
         "scipy",
         "ase",
         "scikit-image",
-        "mayavi",
         "pychemia",
         "pyvista",
         "trimesh",
