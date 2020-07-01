@@ -2,7 +2,6 @@ scipy
 matplotlib
 seekpath
 ase
-mayavi
 scikit-image
 pychemia
 pyvista

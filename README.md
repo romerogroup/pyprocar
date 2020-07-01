@@ -73,7 +73,6 @@ scipy <br />
 seekpath <br />
 ase <br />
 scikit-image <br />
-mayavi <br />
 pychemia <br />
 pyvista <br />
 
