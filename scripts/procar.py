@@ -5,7 +5,7 @@ Stand alone script for PyProcar.
 
 This calls the modules in the /pyprocar directory.
 
-Based on the original script developed by Aldo Romero (alromero@mail.wvu.edu) and 
+Based on the original script developed by Aldo Romero (alromero@mail.wvu.edu) and
 Francisco Munoz (fvmunoz@gmail.com).
 """
 
@@ -150,6 +150,13 @@ def call_mergeabinit(args):
 	This module calls the mergeabinit function.
 	"""
     pyprocar.mergeabinit(args.outfile)
+
+
+def call_bandgap(args):
+    """
+	This module calls the mergeabinit function.
+	"""
+    pyprocar.bandgap(args.procar, args.outcar, args.code, args.fermi)
 
 
 def call_unfold(args):
@@ -493,6 +500,24 @@ if __name__ == "__main__":
         parserrepair.add_argument("infile", help="Input file. Can be compressed.")
         parserrepair.add_argument("outfile", help="Output file.")
         parserrepair.set_defaults(func=call_repair)
+
+        ################# bandgap ##########################################
+        parserbandgap = subparsers.add_parser(
+            "bandgap",
+            help="Calculate bandgap. procar and outcar needed only for Abinit and VASP.",
+        )
+        parserbandgap.add_argument("procar", help="PROCAR file.")
+        parserbandgap.add_argument("outcar", help="OUTCAR file.")
+        parserbandgap.add_argument(
+            "code",
+            help="code",
+            choices=["vasp", "qe", "lobster", "abinit", "elk"],
+            default="vasp",
+        )
+        parserbandgap.add_argument(
+            "fermi", help="Fermi energy. Retrived from output if not provided."
+        )
+        parserbandgap.set_defaults(func=call_bandgap)
 
         ################## k-mesh ########################################
         parsergenerate2dkmesh = subparsers.add_parser(
