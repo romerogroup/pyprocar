@@ -73,4 +73,5 @@ from .scriptKpath import kpath
 from .scriptRepair import repair
 from .scriptUnfold import unfold
 from .scriptVector import Vector
+from .scriptBandGap import bandgap
 from .splash import welcome

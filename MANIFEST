@@ -2,7 +2,6 @@
 LICENSE.txt
 setup.cfg
 setup.py
-bin/procar
 pyprocar/__init__.py
 pyprocar/scriptBandsDosplot.py
 pyprocar/scriptBandsplot.py
@@ -52,3 +51,4 @@ pyprocar/qeparser/qeparser.py
 pyprocar/utilsprocar/__init__.py
 pyprocar/utilsprocar/scriptFermi3D.py
 pyprocar/utilsprocar/utilsprocar.py
+scripts/procar.py

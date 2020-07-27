@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>k-mesh generator &mdash; PyProcar 5.4.0 documentation</title>
+  <title>Band gap calculation &mdash; PyProcar 5.4.0 documentation</title>
   
 
   
@@ -36,8 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Band structure" href="bands.html" />
-    <link rel="prev" title="Repair" href="repair.html" /> 
+    <link rel="prev" title="Band unfolding" href="unfold.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,7 +89,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">k-mesh generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmesh.html">k-mesh generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bands.html">Band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dos.html">Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
@@ -100,7 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bandgap.html">Band gap calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Band gap calculation</a></li>
 </ul>
 </li>
 </ul>
@@ -150,13 +149,13 @@
         
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
         
-      <li>k-mesh generator</li>
+      <li>Band gap calculation</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/kmesh.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bandgap.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -169,25 +168,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="k-mesh-generator">
-<span id="labelkmesh"></span><h1>k-mesh generator<a class="headerlink" href="#k-mesh-generator" title="Permalink to this headline">¶</a></h1>
-<p>This utility can be used to generate a 2D <span class="math notranslate nohighlight">\(k\)</span>-mesh centered at a given <span class="math notranslate nohighlight">\(k\)</span>-point and in a given <span class="math notranslate nohighlight">\(k\)</span>-plane. This is particularly useful in computing 2D spin-textures and plotting 2D Fermi-surfaces. For example, the following command creates a 2D <span class="math notranslate nohighlight">\(k_{x}\)</span>-<span class="math notranslate nohighlight">\(k_{y}\)</span> -mesh centered at the <span class="math notranslate nohighlight">\(\Gamma\)</span> point (<span class="math notranslate nohighlight">\(k_{z}= 0\)</span>) ranging from coordinates (-0.5, -0.5, 0.0) to (0.5, 0.5, 0.0) with 5 grids in the x direction and 7 grids in the y direction:</p>
-<p>General format:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">generate2dkmesh</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y2</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">num_grids_x</span><span class="p">,</span><span class="n">num_grids_y</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">generate2dkmesh</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>This information is automatically written to a KPOINTS file.</p>
-<span class="target" id="module-pyprocar.scriptKmesh2D"></span><dl class="function">
-<dt id="pyprocar.scriptKmesh2D.generate2dkmesh">
-<code class="sig-prename descclassname">pyprocar.scriptKmesh2D.</code><code class="sig-name descname">generate2dkmesh</code><span class="sig-paren">(</span><em class="sig-param">x1</em>, <em class="sig-param">y1</em>, <em class="sig-param">x2</em>, <em class="sig-param">y2</em>, <em class="sig-param">z</em>, <em class="sig-param">nkx</em>, <em class="sig-param">nky</em><span class="sig-paren">)</span><a class="headerlink" href="#pyprocar.scriptKmesh2D.generate2dkmesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>This module generates a KPOINTS mesh file for 2D plotting.</p>
-</dd></dl>
-
-</div>
+  <div class="section" id="band-gap-calculation">
+<h1>Band gap calculation<a class="headerlink" href="#band-gap-calculation" title="Permalink to this headline">¶</a></h1>
+<p>The bandgap of a calculation can be found by:</p>
+<blockquote>
+<div><p>pyprocar.bandgap(procar=”PROCAR”, outcar=”OUTCAR”, code=”vasp”)</p>
+</div></blockquote>
+<p>For <code class="docutils literal notranslate"><span class="pre">Abinit</span></code> calculations set outcar to be the output file. For other DFT codes, setting only <code class="docutils literal notranslate"><span class="pre">code</span></code> is sufficient when run from the calculation directory.</p>
+<span class="target" id="module-pyprocar.scriptBandGap"></span></div>
 
 
            </div>
@@ -197,10 +185,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bands.html" class="btn btn-neutral float-right" title="Band structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="repair.html" class="btn btn-neutral float-left" title="Repair" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="unfold.html" class="btn btn-neutral float-left" title="Band unfolding" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
