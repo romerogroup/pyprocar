@@ -1,7 +1,7 @@
 Band gap calculation
 ===================================
 
-The bandgap of a calculation can be found by:
+The bandgap of a calculation can be found by::
 
 	pyprocar.bandgap(procar="PROCAR", outcar="OUTCAR", code="vasp")
 

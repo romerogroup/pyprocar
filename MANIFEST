@@ -3,6 +3,7 @@ LICENSE.txt
 setup.cfg
 setup.py
 pyprocar/__init__.py
+pyprocar/scriptBandGap.py
 pyprocar/scriptBandsDosplot.py
 pyprocar/scriptBandsplot.py
 pyprocar/scriptCat.py
