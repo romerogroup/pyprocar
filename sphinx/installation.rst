@@ -26,6 +26,6 @@ Once you are done with the installation you can import PyProcar within Python wi
 
 The command-line version of PyProcar can be invoked in a terminal with::
     
-    procar	
+    procar.py	
 
 Please note that the command-line version might not be up-to-date with the library version. 

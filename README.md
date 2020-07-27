@@ -96,9 +96,16 @@ Typical use is as follows
 
 Refer to the documentation for further details. 
 
+Stand-alone mode:
+
+    procar.py -h 
+
+will bring a help menu.
+
 Changelog
 --------------
 
+v5.4.2 Jun 17th, 2020 -- Bug fixes in stand-alone version.  <br />
 v5.4.0 Jun 17th, 2020 -- Improved 3D Fermi Surface plotter, added support for Quantum Espresso, conda support.  <br />
 v5.3.3 May 22nd, 2020 -- Added DOS plotting feature. <br />
 v5.2.1 May 11th, 2020 -- Bugfixes in pyprocar.cat and improving comparison method. <br />
