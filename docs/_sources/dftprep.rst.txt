@@ -84,9 +84,19 @@ Run ``pw.x`` for the self-consistent calculation (output : scf.out) and the band
 
 Afterwards, to obtain the projections run ``projwfc.x`` on the kpdos.in file to retrieve kpdos.out. PyProcar should be run in this calculation directory.
 
+============
+4. Lobster 
+============
+
+- Required files : scf.in, scf.out, lobsterin, lobsterout, FATBAND*.lobter files
+- flag           : code='lobster', lobstercode='qe'
+
+Currently supported for Lobster with Quantum Espresso v6.5+. 
+
+Follow instructions on how to perform a Lobster analysis with Quantum Espresso. Also refer to the files in the relevant ``examples`` directory.
 
 =========
-4. Abinit
+5. Abinit
 =========
 
 - Required files : PROCAR, <abinitoutput>.out

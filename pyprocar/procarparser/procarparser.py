@@ -11,40 +11,40 @@ class ProcarParser:
     PROCAR files, that means no Fermi energy (UtilsProcar.FermiOutcar
     can help), and the reciprocal vectors should be supplied (if used,
     see UtilsProcar class).
-    
+
     Members:
-    
-    __init__(self, loglevel): The setup the variables internally, `loglevel` 
+
+    __init__(self, loglevel): The setup the variables internally, `loglevel`
       sets the verbosity level ie: `loglevel=logging.DEBUG` for debugging. Its
-      default is `logging.WARNING` 
-    
+      default is `logging.WARNING`
+
     readFile(self, procar=None, permissive=False, recLattice=None):
       The only method of the API it load the file completely.
-    
+
       Arguments:
-    `procar=None`: name of the PROCAR file, can be a gzipped file (the 
-                    extension is no required). The default covers a wide range 
-                    of obvious alternatives. 
+    `procar=None`: name of the PROCAR file, can be a gzipped file (the
+                    extension is no required). The default covers a wide range
+                    of obvious alternatives.
       `permissive=False`: Set to `True` if the PROCAR file has problems reading
-                        the Kpoints (stupid Fortran), but in that case the 
-                          Kpoints mesh will be discarded. Future updates could 
-                          allow it to handle other formating/corruption issues. 
+                        the Kpoints (stupid Fortran), but in that case the
+                          Kpoints mesh will be discarded. Future updates could
+                          allow it to handle other formating/corruption issues.
       `recLattice`=None: Reciprical Vectors, you want to provide them since not
                         all the paths on the BZ are the same.
-    
+
     Don't use the other methods beggining with underscores "_"
-    
+
     Example:
     To read a PROCAR or PROCAR.gz file:
     >>> foo = ProcarParser()
     >>> foo.readFile()
-    
+
     To include the reciprocal vectors, and file name MyFirstPROCAR
     >>> outcarparser = UtilsProcar()
     >>> recLat = outcarparser.RecLatOutcar(args.outcar)
     >>> foo = ProcarParser()
     >>> foo.readFile("MyFirstPROCAR", recLat=recLat)
-    
+
     """
 
     def __init__(self, loglevel=logging.WARNING):
@@ -81,6 +81,13 @@ class ProcarParser:
             "dz2",
             "dxz",
             "x2-y2",
+            "fy3x2",
+            "fxyz",
+            "fyz2",
+            "fz3",
+            "fxz2",
+            "fzx2",
+            "fx3",
             "tot",
         ]
         self.orbitalName_old = [
@@ -95,7 +102,7 @@ class ProcarParser:
             "dx2",
             "tot",
         ]
-        self.orbitalName_short = ["s", "p", "d", "tot"]
+        self.orbitalName_short = ["s", "p", "d", "f", "tot"]
         self.orbitalCount = None  # number of orbitals
 
         # number of spin components (blocks of data), 1: non-magnetic non
@@ -216,9 +223,9 @@ class ProcarParser:
     def _readBands(self):
         """Reads the bands header. A typical bands is:
         band   1 # energy   -7.11986315 # occ.  1.00000000
-        
-        fills self.bands[kpointsCount][bandsCount] 
-        
+
+        fills self.bands[kpointsCount][bandsCount]
+
         The occupation numbers are discarded (are they useful?)"""
         self.log.debug("readBands")
         if not self.fileStr:
@@ -291,12 +298,12 @@ class ProcarParser:
       4  0.188  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.188
       5  0.188  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.188
     tot  0.686  0.000  0.002  0.000  0.000  0.000  0.000  0.000  0.000  0.688
-    (x2 for spin-polarized -akwardkly formatted-, x4 non-collinear -nicely 
+    (x2 for spin-polarized -akwardkly formatted-, x4 non-collinear -nicely
     formatted-).
 
     The data is stored in an array self.spd[kpoint][band][ispin][atom][orbital]
 
-    Undefined behavior in case of phase factors (LORBIT = 12). 
+    Undefined behavior in case of phase factors (LORBIT = 12).
     """
         self.log.debug("readOrbital")
         if not self.fileStr:
@@ -451,7 +458,7 @@ class ProcarParser:
 
     -procar: The file name, if `None` or a directory, a suitable set
      of defaults will be used. Default=None
-    
+
     -permissive: turn on (or off) some features to deal with badly
      written PROCAR files (stupid fortran), up to now just ignores the
      kpoints coordinates, which -as side effect- prevent he rigth
@@ -690,7 +697,7 @@ class ProcarParser:
                         iband = int(ss[1]) - 1
                     except ValueError:
                         iband = last_iband + 1
-                    last_iband=iband
+                    last_iband = iband
                     e = float(ss[4])
                     occ = float(ss[-1])
                     self.bands[iispin, ikpt, iband] = e

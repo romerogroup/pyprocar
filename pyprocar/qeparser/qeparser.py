@@ -49,7 +49,6 @@ class QEParser:
               1 pz     (m=0)
               2 px     (real combination of m=+/-1 with cosine)
               3 py     (real combination of m=+/-1 with sine)
-
             for l=2:
               1 dz2    (m=0)
               2 dzx    (real combination of m=+/-1 with cosine)
@@ -81,14 +80,30 @@ class QEParser:
         rf = open(self.kfin, "r")
         self.kpdosIn = rf.read()
         rf.close()
-
+        
+        
+        self.test =None
+        
+        
         # The only method this parser takes. I could make more methods to increase its modularity
         self._readQEin()
 
+
+        
+        
+        
         return
 
     def _readQEin(self):
 
+        ###############################################
+
+        spinCalc = False
+        if len(findall("\s*nspin=(.*)",self.bandsIn)) != 0:
+            spinCalc =  True
+
+        
+        
         #######################################################################
         # Finding high symmetry points
         #######################################################################
@@ -107,10 +122,10 @@ class QEParser:
             self.high_symmetry_points[ihs, :] = [
                 float(x) for x in raw_khigh_sym[ihs].split()[0:3]
             ]
-            # tick_Count += raw_khigh_sym[ihs].split()[4]
+            # kpoint_Count += raw_khigh_sym[ihs].split()[4]
             self.kticks.append(tick_Count - 1)
             tick_Count += int(raw_khigh_sym[ihs].split()[3])
-
+        
         #######################################################################
         # Finding composition and specie data
         #######################################################################
@@ -221,9 +236,7 @@ class QEParser:
         self.states = states_list
 
         """
-
         This section was used to parse those extra files we discussed. It is not needed, I kept it just incase
-
         output_prefix = findall("filpdos\s*=\s*'(.*)'", self.kpdosIn)[0]
          kpdos_files=[]
         atmNum = list(range(1, self.ionsCount+1))
@@ -234,16 +247,13 @@ class QEParser:
         for state1 in raw_states:
             wfc_file_label.append((state1[3],state1[4])) if (state1[3],state1[4]) not in wfc_file_label else None
             atm_file_label.append((state1[1],state1[2])) if (state1[1],state1[2]) not in atm_file_label else None
-
         #Combine raw file labels inside a tuple
         for atm in atm_file_label:
             for wfc in wfc_file_label:
                 file = (int(atm[0]),atm[1],int(wfc[0]),int(wfc[1]))
                 kpdos_files.append(file)
                 file = None
-
         #Convert raw file labels to final file string
-
         for file in kpdos_files:
             if(file[3] == 0 ):
                 self.file_names.append(output_prefix + ".pdos_atm#" + str(file[0]) + "(" + file[1] + ")_wfc#" + str(file[2]) +  "(s)")
@@ -260,14 +270,25 @@ class QEParser:
 
         # Finds the k points and stores them in an array
         raw_kpoints = []
-        for k in findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout):
-            raw_kpoints.append(k[0])
-
-        self.kpointsCount = len(raw_kpoints)
+        if(spinCalc == True):
+   
+            self.kpointsCount = int(len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))/2)
+            for k in range(len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))):
+                if(k<self.kpointsCount):
+                    raw_kpoints.append(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout)[k][0])
+            totK = len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))
+        else:
+            for k in range(len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))):
+                raw_kpoints.append(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout)[k][0])
+            self.kpointsCount = len(raw_kpoints)
+      
+        
+        
         self.kpoints = zeros(shape=(self.kpointsCount, 3))
         for ik in range(len(raw_kpoints)):
             for coord in range(3):
                 self.kpoints[ik][coord] = raw_kpoints[ik].split()[coord]
+
 
         # If kdirect=False, then the kgrid will be in cartesian coordinates.
         # Requires the reciprocal lattice vectors to be parsed from the output.
@@ -279,23 +300,35 @@ class QEParser:
         #######################################################################
 
         band_info = findall(r"====\se\(\s*(\d+)\)\s=\s*([-.\d]+)", kpdosout)
-        self.bandsCount = int(len(band_info) / self.kpointsCount)
+        self.test = band_info
+        if(spinCalc == True):
+            self.bandsCount =  int(len(band_info) / totK)   
+            self.bands = zeros(shape=(self.kpointsCount, self.bandsCount,2))
+            ik = 0
+            for band in range(len(band_info)):
+                if(ik<self.kpointsCount):
+                    self.bands[ik, int(band_info[band][0]) - 1,0] = float(band_info[band][1])
+                else:
+                    self.bands[ik-self.kpointsCount, int(band_info[band][0]) - 1,1] = float(band_info[band][1])
+                if int(band_info[band][0]) == self.bandsCount:
+                    ik += 1
+        else:
+            self.bandsCount = int(len(band_info) / self.kpointsCount)
+            self.bands = zeros(shape=(self.kpointsCount, self.bandsCount))
+            ik = 0
+            for band in range(len(band_info)):
+                self.bands[ik, int(band_info[band][0]) - 1] = float(band_info[band][1])
+                if int(band_info[band][0]) == self.bandsCount:
+                    ik += 1
 
-        # if len(band_info) == self.bandsCount * self.kpointsCount:
-        #     print("Number of bands headers match")
-        self.bands = zeros(shape=(self.kpointsCount, self.bandsCount))
-
-        ik = 0
-        for band in range(len(band_info)):
-            self.bands[ik, int(band_info[band][0]) - 1] = float(band_info[band][1])
-            if int(band_info[band][0]) == self.bandsCount:
-                ik += 1
 
         #######################################################################
         # Filling the spd array
         #######################################################################
-
-        spinCount = 1
+        if spinCalc ==True:
+            spinCount = 2
+        else:
+            spinCount = 1
         k_info = None
         self.orbitalCount = len(self.orbitals)
         self.spd = zeros(
@@ -314,35 +347,29 @@ class QEParser:
 
         """First loop goes through the kpoints and matches band information that follows the specific k point. The if else statment is used to catch unique cases, namely the end of the kpoints
            Also sometimes there is a duplicate final k point so findall is used twice to deal with this case
-
            Second loop goes through band information of a kpoint.The if else statments here again catches unique cases. This is when it hits the last the band or when it is the last band and the last kpoint
-
            The other if else statement here catches the cases when there are no contributions at all and would return nothing
-
            Third loop parses the projections of a band
-
            The fourth loop then goes through the known possible states. The if statment ensures the there is a projection and matchs a projection to a known state.
-
            The fifth loop then goes throguh the known possible orbitals. The if statment then matches the projection with a specific orbital.
-
            Finally the projection is put into the spd array
         """
-
+        
         for kp in range(len(k_string)):
             if kp == len(k_string) - 1:
                 expression = "(?<=" + k_string[kp] + ")[\s\S]*?(?=Lowdin Charges:)"
                 expression_final_k = "(?<=" + k_string[kp - 1] + ")[\s\S]*?(?=$)"
                 k_info1 = findall(expression_final_k, kpdosout)[0]
                 k_info = findall(expression, k_info1)[0]
-
             else:
                 expression = (
                     "(?<=" + k_string[kp] + ")[\s\S]*?(?=" + k_string[kp + 1] + ")"
                 )
                 # print(expression)
                 k_info = findall(expression, kpdosout)[0]
-
+                #print(k_info)
                 # print(k_info)
+                #print(self.bandsCount)
             for iband in range(self.bandsCount):
                 if iband == self.bandsCount - 1 and kp == len(k_string) - 1:
                     # print("hi")
@@ -389,27 +416,102 @@ class QEParser:
                                         and known_states["m"]
                                         == self.orbitals[iorbitals]["m"]
                                     ):
-                                        # print(proj)
-                                        self.spd[
-                                            kp,
-                                            iband,
-                                            0,
-                                            known_states["species_num"] - 1,
-                                            iorbitals + 1,
-                                        ] += float(proj.split("*")[0])
-                                        self.spd[
-                                            kp,
-                                            iband,
-                                            0,
-                                            known_states["species_num"] - 1,
-                                            0,
-                                        ] = known_states["species_num"]
-
-        # The following fills the totals for the spd array
+                                        if(spinCalc == True):
+                                            if(kp<self.kpointsCount):
+                                                #print(known_states["species_num"])
+                                                self.spd[
+                                                        kp,
+                                                        iband,
+                                                        0,
+                                                        known_states["species_num"] - 1,
+                                                        iorbitals + 1,
+                                                        ] += float(proj.split("*")[0])
+                                                self.spd[
+                                                        kp,
+                                                        iband,
+                                                        0,
+                                                        known_states["species_num"] - 1,
+                                                        0,
+                                                        ] = known_states["species_num"]
+                                            else:
+                                                self.spd[
+                                                        kp-self.kpointsCount,
+                                                        iband,
+                                                        1,
+                                                        known_states["species_num"] - 1,
+                                                        iorbitals + 1,
+                                                        ] += float(proj.split("*")[0])
+                                                self.spd[
+                                                        kp-self.kpointsCount,
+                                                        iband,
+                                                        1,
+                                                        known_states["species_num"] - 1,
+                                                        0,
+                                                        ] = known_states["species_num"]
+                                                
+                                        else:
+                                            print("hi")
+                                            self.spd[
+                                                    kp,
+                                                    iband,
+                                                    0,
+                                                    known_states["species_num"] - 1,
+                                                    iorbitals + 1,
+                                                    ] += float(proj.split("*")[0])
+                                            self.spd[
+                                                    kp,
+                                                    iband,
+                                                    0,
+                                                    known_states["species_num"] - 1,
+                                                    0,
+                                                    ] = known_states["species_num"]
+        
+        for ions in range(self.ionsCount):
+            self.spd[:,:,:,ions,0] = ions+1
+        
+        #The following fills the totals for the spd array
 
         self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1], axis=4)
         self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
-        self.spd[:, :, 0, -1, 0] = 0
+        self.spd[:, :, :, -1, 0] = 0
+        
+              
+        # colinear spin polarized case
+        
+        # manipulating spd array for spin polarized calculations.
+        # The shape is (nkpoints,2*nbands,2,natoms,norbitals)
+        # The third dimension is for spin.
+        # When this is zero, the bands*2 (all spin up and down bands) have positive projections.
+        # When this is one, the the first half of bands (spin up) will have positive projections
+        # and the second half (spin down) will have negative projections. This is to adhere to
+        # the convention used in PyProcar to obtain spin density and spin magnetization.
+        
+        if spinCalc:
+            print("\nQuantum Espresso colinear spin calculation detected.\n")
+            self.spd2 = zeros(
+            shape=(
+                self.kpointsCount,
+                self.bandsCount*2,
+                spinCount,
+                self.ionsCount + 1,
+                len(self.orbitals) + 2,
+                )
+            )
+            
+            # spin up block for spin=0
+            self.spd2[:, :self.bandsCount, 0, :, :] = self.spd[:,:,0,:,:]
+            
+            # spin down block for spin=0
+            self.spd2[:, self.bandsCount:, 0, :, :] = self.spd[:,:,1,:,:]
+            
+            # spin up block for spin=1
+            self.spd2[:, :self.bandsCount, 1, :, :] = self.spd[:,:,0,:,:]
+            
+            # spin down block for spin=1
+            self.spd2[:, self.bandsCount:, 1, :, :] = -1*self.spd[:,:,1,:,:]
+            
+            self.spd = self.spd2
+            
 
     @property
     def fermi(self):

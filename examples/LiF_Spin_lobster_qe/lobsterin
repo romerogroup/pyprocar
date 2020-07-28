@@ -1,0 +1,11 @@
+
+createFatband Li 1s 2s 
+createFatband F 2s 2p_x 2p_y 2p_z 
+COHPstartEnergy  -22
+COHPendEnergy     18
+basisSet Bunge
+#includeOrbitals s p
+userecommendedbasisfunctions
+cohpGenerator from 1.4 to 3.0 type Li type F
+gaussianSmearingWidth   0.005
+

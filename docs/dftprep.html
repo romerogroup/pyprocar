@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>DFT Preparation &mdash; PyProcar 5.4.0 documentation</title>
+  <title>DFT Preparation &mdash; PyProcar 5.5.0 documentation</title>
   
 
   
@@ -90,7 +90,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#vasp">1. VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#elk">2. Elk</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#quantum-espresso">3. Quantum Espresso</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#abinit">4. Abinit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lobster">4. Lobster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#abinit">5. Abinit</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -233,8 +234,17 @@ plot1d
 </div>
 <p>Afterwards, to obtain the projections run <code class="docutils literal notranslate"><span class="pre">projwfc.x</span></code> on the kpdos.in file to retrieve kpdos.out. PyProcar should be run in this calculation directory.</p>
 </div>
+<div class="section" id="lobster">
+<h2>4. Lobster<a class="headerlink" href="#lobster" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Required files : scf.in, scf.out, lobsterin, lobsterout, FATBAND*.lobter files</p></li>
+<li><p>flag           : code=’lobster’, lobstercode=’qe’</p></li>
+</ul>
+<p>Currently supported for Lobster with Quantum Espresso v6.5+.</p>
+<p>Follow instructions on how to perform a Lobster analysis with Quantum Espresso. Also refer to the files in the relevant <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory.</p>
+</div>
 <div class="section" id="abinit">
-<h2>4. Abinit<a class="headerlink" href="#abinit" title="Permalink to this headline">¶</a></h2>
+<h2>5. Abinit<a class="headerlink" href="#abinit" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Required files : PROCAR, &lt;abinitoutput&gt;.out</p></li>
 <li><p>flag           : code=’abinit’</p></li>
