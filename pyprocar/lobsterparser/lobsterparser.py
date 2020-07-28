@@ -348,7 +348,7 @@ class LobsterParser:
             self.spd = self.spd2
 
             # Reshaping bands array to inlcude all bands (spin up and down)
-            self.bands = bands = concatenate((self.bands, self.bands), axis=1)
+            self.bands = concatenate((self.bands, self.bands), axis=1)
 
     @property
     def fermi(self):
