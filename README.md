@@ -106,7 +106,7 @@ will bring a help menu.
 Changelog
 --------------
 
-v5.5.0 July 27th, 2020 -- Updated spin colinear calculations for Quantum Espresso and Lobster codes. <br />
+v5.5.2 July 27th, 2020 -- Updated spin colinear calculations for Quantum Espresso and Lobster codes. <br />
 v5.4.3 July 25th, 2020 -- Bug fixes in stand-alone version and updates to bandgap calculation. <br />
 v5.4.0 Jun 17th, 2020 -- Improved 3D Fermi Surface plotter, added support for Quantum Espresso, conda support.  <br />
 v5.3.3 May 22nd, 2020 -- Added DOS plotting feature. <br />

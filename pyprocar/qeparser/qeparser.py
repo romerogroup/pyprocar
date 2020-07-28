@@ -508,6 +508,11 @@ class QEParser:
 
             self.spd = self.spd2
 
+            # Reshaping bands array to inlcude all bands (spin up and down)
+            self.bands = self.bands.reshape(
+                self.kpointsCount, self.bandsCount * 2, order="F"
+            )
+
     @property
     def fermi(self):
         """

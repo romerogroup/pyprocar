@@ -8,7 +8,7 @@ Created on Thu Jun 25 03:12:50 2020
 
 from re import findall, search, match, DOTALL, MULTILINE, finditer, compile, sub
 
-from numpy import array, dot, linspace, sum, where, zeros, pi
+from numpy import array, dot, linspace, sum, where, zeros, pi, concatenate
 import logging
 
 
@@ -52,7 +52,7 @@ class LobsterParser:
         self.ionsList = None
         self.ionsCount = None
         self.spinCount = None
-        
+
         # Used to store atomic states at the top of the kpdos.out file
         self.states = None
 
@@ -231,8 +231,8 @@ class LobsterParser:
             for ikband in kpoint_bands:
                 band_info.append(ikband)
 
-#        if len(band_info) == self.bandsCount * self.kpointsCount:
-#            print("Number of bands headers match")
+        #        if len(band_info) == self.bandsCount * self.kpointsCount:
+        #            print("Number of bands headers match")
         self.bands = zeros(shape=(self.kpointsCount, self.bandsCount))
 
         ik = 0
@@ -248,14 +248,11 @@ class LobsterParser:
         # Forming SPD array
         #########################################################################################
 
-        #Checks for spin polarization
+        # Checks for spin polarization
         if len(findall("spillings for spin channel", self.lobsterout)) == 2:
             self.spinCount = 2
         else:
             self.spinCount = 1
-
-
-        
 
         self.orbitalCount = 10
         self.spd = zeros(
@@ -296,21 +293,26 @@ class LobsterParser:
                 band = findall(expression + bands_wSpin * "(.*)\n", projFile)[0]
                 for iband in range(self.bandsCount):
                     if self.spinCount == 2:
-                        self.spd[ik,iband,0,ionIndex,orbitalIndex] += float(band[iband].split()[2])
-                        self.spd[ik,iband,0,ionIndex,0] = ionIndex + 1 
-                        self.spd[ik,iband,1,ionIndex,orbitalIndex] += float(band[iband+self.bandsCount].split()[2]) 
-                        self.spd[ik,iband,1,ionIndex,0] = ionIndex + 1  
+                        self.spd[ik, iband, 0, ionIndex, orbitalIndex] += float(
+                            band[iband].split()[2]
+                        )
+                        self.spd[ik, iband, 0, ionIndex, 0] = ionIndex + 1
+                        self.spd[ik, iband, 1, ionIndex, orbitalIndex] += float(
+                            band[iband + self.bandsCount].split()[2]
+                        )
+                        self.spd[ik, iband, 1, ionIndex, 0] = ionIndex + 1
                     else:
-                        self.spd[ik,iband,0,ionIndex,orbitalIndex] += float(band[iband].split()[2]) 
-                        self.spd[ik,iband,0,ionIndex,0] = ionIndex + 1  
-                    
+                        self.spd[ik, iband, 0, ionIndex, orbitalIndex] += float(
+                            band[iband].split()[2]
+                        )
+                        self.spd[ik, iband, 0, ionIndex, 0] = ionIndex + 1
 
             self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1], axis=4)
             self.spd[:, :, :, -1, :] = sum(self.spd[:, :, :, 0:-1, :], axis=3)
             self.spd[:, :, :, -1, 0] = 0
-            
+
         # colinear spin polarized case
-        
+
         # manipulating spd array for spin polarized calculations.
         # The shape is (nkpoints,2*nbands,2,natoms,norbitals)
         # The third dimension is for spin.
@@ -318,32 +320,35 @@ class LobsterParser:
         # When this is one, the the first half of bands (spin up) will have positive projections
         # and the second half (spin down) will have negative projections. This is to adhere to
         # the convention used in PyProcar to obtain spin density and spin magnetization.
-    
+
         if self.spinCount == 2:
             print("\nLobster colinear spin calculation detected.\n")
             self.spd2 = zeros(
-            shape=(
-                self.kpointsCount,
-                self.bandsCount*2,
-                self.spinCount,
-                self.ionsCount + 1,
-                len(self.orbitals) + 2,
+                shape=(
+                    self.kpointsCount,
+                    self.bandsCount * 2,
+                    self.spinCount,
+                    self.ionsCount + 1,
+                    len(self.orbitals) + 2,
                 )
             )
-            
+
             # spin up block for spin=0
-            self.spd2[:, :self.bandsCount, 0, :, :] = self.spd[:,:,0,:,:]
-            
+            self.spd2[:, : self.bandsCount, 0, :, :] = self.spd[:, :, 0, :, :]
+
             # spin down block for spin=0
-            self.spd2[:, self.bandsCount:, 0, :, :] = self.spd[:,:,1,:,:]
-            
+            self.spd2[:, self.bandsCount :, 0, :, :] = self.spd[:, :, 1, :, :]
+
             # spin up block for spin=1
-            self.spd2[:, :self.bandsCount, 1, :, :] = self.spd[:,:,0,:,:]
-            
+            self.spd2[:, : self.bandsCount, 1, :, :] = self.spd[:, :, 0, :, :]
+
             # spin down block for spin=1
-            self.spd2[:, self.bandsCount:, 1, :, :] = -1*self.spd[:,:,1,:,:]
-            
+            self.spd2[:, self.bandsCount :, 1, :, :] = -1 * self.spd[:, :, 1, :, :]
+
             self.spd = self.spd2
+
+            # Reshaping bands array to inlcude all bands (spin up and down)
+            self.bands = bands = concatenate((self.bands, self.bands), axis=1)
 
     @property
     def fermi(self):
