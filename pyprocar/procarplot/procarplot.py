@@ -255,6 +255,7 @@ class ProcarPlot:
         # plotting
         if not ax:
             fig = plt.figure(figsize=(13, 9))
+            fig.tight_layout()
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
