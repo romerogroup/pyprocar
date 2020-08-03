@@ -51,6 +51,7 @@ def bandsdosplot(
     dos_spin_colors=[(1, 0, 0), (0, 0, 1)],
     dos_colors=None,
     dos_items=None,
+    dos_limit=None,
     elimit=None,
     vmin=None,
     vmax=None,
@@ -545,7 +546,9 @@ def bandsdosplot(
     else:
         ylim = [0, dos.dos[cond][:, dos_spins[0] + 1].max() * 1.1]
 
-    if (dos_mode == "stack_species"
+    if dos_limit is not None:
+        ax2.set_xlim(dos_limit[0], dos_limit[1])
+    elif (dos_mode == "stack_species"
         or dos_mode == "stack_orbitals"
         or dos_mode == "stack"):
         ax2.set_xlim(ax2.get_xlim()[0], ax2.get_xlim()[1]*1.1)#dos.values.max() * 1.4)
