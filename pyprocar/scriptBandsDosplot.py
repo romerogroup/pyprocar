@@ -541,8 +541,9 @@ def bandsdosplot(
         dos_mode == "stack_species"
         or dos_mode == "stack_orbitals"
         or dos_mode == "stack"
+        or dos_mode == "plain"
     ):
-        ax2.set_xlim(ax2.get_xlim()[0], dos.values.max() * 1.4)
+        ax2.set_xlim(ax2.get_xlim()[0], dos.values.max() * 1.1)
 
     if title:
         ax1.set_title(title)
