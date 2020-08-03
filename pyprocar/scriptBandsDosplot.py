@@ -545,15 +545,13 @@ def bandsdosplot(
     else:
         ylim = [0, dos.dos[cond][:, dos_spins[0] + 1].max() * 1.1]
 
-    if (
-        dos_mode == "stack_species"
+    if (dos_mode == "stack_species"
         or dos_mode == "stack_orbitals"
-        or dos_mode == "stack"
-        or dos_mode == "plain"
-    ):
-        #ax2.set_xlim(ax2.get_xlim()[0], dos.values.max() * 1.1)
+        or dos_mode == "stack"):
+        ax2.set_xlim(ax2.get_xlim()[0], dos.values.max() * 1.1)
+        
+    elif dos_mode == 'plain':
         ax2.set_xlim(ylim[0], ylim[1])
-
     if title:
         ax1.set_title(title)
 
