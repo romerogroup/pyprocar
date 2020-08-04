@@ -51,6 +51,7 @@ def bandsdosplot(
     dos_spin_colors=[(1, 0, 0), (0, 0, 1)],
     dos_colors=None,
     dos_items=None,
+    dos_limit=None,
     elimit=None,
     vmin=None,
     vmax=None,
@@ -537,13 +538,23 @@ def bandsdosplot(
     if dos_labels or "stack" in dos_mode:
         ax2.legend()
     ax2.yaxis.set_visible(False)
-    if (
-        dos_mode == "stack_species"
-        or dos_mode == "stack_orbitals"
-        or dos_mode == "stack"
-    ):
-        ax2.set_xlim(ax2.get_xlim()[0], dos.values.max() * 1.4)
+    cond1 = dos.energies > elimit[0]
+    cond2 = dos.energies < elimit[1]
+    cond = np.all([cond1, cond2], axis=0)
+    if len(dos_spins) > 1:
+        ylim = [dos.values[cond][:, 1].max() * -1.1, dos.values[cond][:, 0].max() * 1.1]
+    else:
+        ylim = [0, dos.dos[cond][:, dos_spins[0] + 1].max() * 1.1]
 
+    if dos_limit is not None:
+        ax2.set_xlim(dos_limit[0], dos_limit[1])
+    elif (dos_mode == "stack_species"
+        or dos_mode == "stack_orbitals"
+        or dos_mode == "stack"):
+        ax2.set_xlim(ax2.get_xlim()[0], ax2.get_xlim()[1]*1.1)#dos.values.max() * 1.4)
+        
+    elif dos_mode == 'plain':
+        ax2.set_xlim(ylim[0], ylim[1])
     if title:
         ax1.set_title(title)
 
