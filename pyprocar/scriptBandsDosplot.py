@@ -57,7 +57,7 @@ def bandsdosplot(
     vmax=None,
     cmap="jet",
     grid=False,
-    kpointsfile=None,
+    kpointsfile='KPOINTS',
     code="vasp",
     savefig=None,
     title=None,
@@ -538,13 +538,17 @@ def bandsdosplot(
     if dos_labels or "stack" in dos_mode:
         ax2.legend()
     ax2.yaxis.set_visible(False)
-    cond1 = dos.energies > elimit[0]
-    cond2 = dos.energies < elimit[1]
+    cond1 = dos.energies >= elimit[0]
+    cond2 = dos.energies <= elimit[1]
     cond = np.all([cond1, cond2], axis=0)
     if len(dos_spins) > 1:
         ylim = [dos.values[cond][:, 1].max() * -1.1, dos.values[cond][:, 0].max() * 1.1]
     else:
+
         ylim = [0, dos.dos[cond][:, dos_spins[0] + 1].max() * 1.1]
+        
+
+
 
     if dos_limit is not None:
         ax2.set_xlim(dos_limit[0], dos_limit[1])

@@ -125,8 +125,8 @@ class DosPlot:
             fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         if not elimit:
             elimit = [dos.energies[0], dos.energies[1]]
-        cond1 = dos.energies > elimit[0]
-        cond2 = dos.energies < elimit[1]
+        cond1 = dos.energies >= elimit[0]
+        cond2 = dos.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
 
         dE = dos.energies[1] - dos.energies[0]
@@ -232,8 +232,8 @@ class DosPlot:
                 label = ""
         dos_total = self.VaspXML.dos_total
 
-        cond1 = self.VaspXML.dos_total.energies > elimit[0]
-        cond2 = self.VaspXML.dos_total.energies < elimit[1]
+        cond1 = self.VaspXML.dos_total.energies >= elimit[0]
+        cond2 = self.VaspXML.dos_total.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
 
         for ispin in spins:
@@ -338,8 +338,8 @@ class DosPlot:
             elimit = [-2, 2]
         dos_projected_total = self.VaspXML.dos_parametric()
 
-        cond1 = self.VaspXML.dos_total.energies > elimit[0]
-        cond2 = self.VaspXML.dos_total.energies < elimit[1]
+        cond1 = self.VaspXML.dos_total.energies >= elimit[0]
+        cond2 = self.VaspXML.dos_total.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
         orb_names = ["s", "p", "d"]
         orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8]]
@@ -437,8 +437,8 @@ class DosPlot:
         else:
             all_orbitals = ""
 
-        cond1 = self.VaspXML.dos_total.energies > elimit[0]
-        cond2 = self.VaspXML.dos_total.energies < elimit[1]
+        cond1 = self.VaspXML.dos_total.energies >= elimit[0]
+        cond2 = self.VaspXML.dos_total.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
         counter = 0
         colors = {}
@@ -451,6 +451,7 @@ class DosPlot:
 
         for ispin in spins:
             bottom = np.zeros_like(self.VaspXML.dos_total.energies[cond])
+            # bottom = np.zeros_like(self.VaspXML.dos_total.energies[:])
             for ispc in items:
                 idx = np.array(self.VaspXML.initial_structure.symbols) == ispc
                 atoms = list(np.where(idx)[0])
@@ -472,10 +473,14 @@ class DosPlot:
                 if label == "-" + all_orbitals:
                     label = ""
                 x = dos.energies[cond]
+                # x = dos.energies[:]
 
-                y = (
-                    dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
+                y = ( dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
                 ) / dos_projected_total.dos[cond, ispin + 1]
+                # y = ( dos.dos[:, ispin + 1] * dos_total.dos[:, ispin + 1]
+                # ) / dos_projected_total.dos[:, ispin + 1]
+                # y =  dos.dos[cond, ispin + 1] 
+                
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
                     if orientation == "horizontal":

@@ -10,8 +10,7 @@ __email__ = "petavazohi@mail.wvu.edu"
 __date__ = "March 31, 2020"
 
 class Lines:
-    import trimesh
-    import pyvista as pv
+
     def __init__(self,verts=None,faces=None):
         
         self.verts = verts

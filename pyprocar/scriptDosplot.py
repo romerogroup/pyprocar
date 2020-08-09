@@ -260,8 +260,8 @@ def dosplot(
                 orientation=orientation,
             )
 
-    cond1 = dos.energies > elimit[0]
-    cond2 = dos.energies < elimit[1]
+    cond1 = dos.energies >= elimit[0]
+    cond2 = dos.energies <= elimit[1]
     cond = np.all([cond1, cond2], axis=0)
 
     if len(spins) > 1:
