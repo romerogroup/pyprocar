@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jun 25 03:12:50 2020
-
 @author: Logan Lang
 """
 
@@ -222,28 +221,52 @@ class LobsterParser:
         raw_kpoints = findall(
             "# K-Point \d+ :\s*([-\.\\d]*\s*[-\.\\d]*\s*[-\.\\d]*)", projFile
         )
-        self.bandsCount = int(findall("NBANDS\s*(\d*)", projFile)[0])
+
+        # Checks for spin polarization
+        if len(findall("spillings for spin channel", self.lobsterout)) == 2:
+            self.spinCount = 2
+            bandsCount = int(findall("NBANDS\s*(\d*)", projFile)[0]) * self.spinCount
+            self.bandsCount = bandsCount // 2
+        else:
+            self.spinCount = 1
+            bandsCount = int(findall("NBANDS\s*(\d*)", projFile)[0])
+            self.bandsCount = bandsCount
 
         band_info = []
         for ik in range(len(raw_kpoints)):
             expression = "# K-Point \d+ :\s*" + raw_kpoints[ik] + ".*\n"
-            kpoint_bands = findall(expression + self.bandsCount * "(.*)\n", projFile)[0]
+            kpoint_bands = findall(expression + bandsCount * "(.*)\n", projFile)[0]
             for ikband in kpoint_bands:
                 band_info.append(ikband)
 
         #        if len(band_info) == self.bandsCount * self.kpointsCount:
         #            print("Number of bands headers match")
-        self.bands = zeros(shape=(self.kpointsCount, self.bandsCount))
-
+        raw_bands = zeros(shape=(self.kpointsCount, bandsCount))
+        print(raw_bands)
         ik = 0
         ib = 0
         for i in range(len(band_info)):
-            self.bands[ik, ib] = float(band_info[i].split()[1])
+            raw_bands[ik, ib] = float(band_info[i].split()[1])
             ib += 1
-            if int(ib == self.bandsCount):
+            if int(ib == bandsCount):
                 ik += 1
                 ib = 0
+        # Checks for spin polarization
+        if self.spinCount == 2:
 
+            self.bands = zeros(
+                shape=(self.kpointsCount, self.bandsCount, self.spinCount)
+            )
+            self.bands[:, 0 : self.bandsCount, 0] = raw_bands[:, 0 : self.bandsCount]
+            self.bands[:, 0 : self.bandsCount, 1] = raw_bands[
+                :, self.bandsCount : self.bandsCount * 2
+            ]
+        else:
+            self.spinCount = 2
+            self.bands = zeros(
+                shape=(self.kpointsCount, self.bandsCount, self.spinCount)
+            )
+            self.bands[:, 0 : self.bandsCount, 0] = raw_bands[:, 0 : self.bandsCount]
         #########################################################################################
         # Forming SPD array
         #########################################################################################
@@ -348,7 +371,12 @@ class LobsterParser:
             self.spd = self.spd2
 
             # Reshaping bands array to inlcude all bands (spin up and down)
-            self.bands = concatenate((self.bands, self.bands), axis=1)
+            # self.bands = concatenate((self.bands, self.bands), axis=1)
+
+            # Reshaping bands array to inlcude all bands (spin up and down)
+            self.bands = self.bands.reshape(
+                self.kpointsCount, self.bandsCount * 2, order="F"
+            )
 
     @property
     def fermi(self):
