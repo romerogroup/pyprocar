@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.procarunfold package &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyprocar.qeparser package" href="pyprocar.qeparser.html" />
+    <link rel="prev" title="pyprocar.procarsymmetry package" href="pyprocar.procarsymmetry.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyprocar API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyprocar.html">pyprocar package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyprocar.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.abinitparser.html">pyprocar.abinitparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.html">pyprocar.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.doscarplot.html">pyprocar.doscarplot package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.elkparser.html">pyprocar.elkparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.fermisurface.html">pyprocar.fermisurface package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.fermisurface3d.html">pyprocar.fermisurface3d package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.lobsterparser.html">pyprocar.lobsterparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarfilefilter.html">pyprocar.procarfilefilter package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarparser.html">pyprocar.procarparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarplot.html">pyprocar.procarplot package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarselect.html">pyprocar.procarselect package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarsymmetry.html">pyprocar.procarsymmetry package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyprocar.procarunfold package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.qeparser.html">pyprocar.qeparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.utilsprocar.html">pyprocar.utilsprocar package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptBandGap">pyprocar.scriptBandGap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptBandsDosplot">pyprocar.scriptBandsDosplot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptBandsplot">pyprocar.scriptBandsplot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptCat">pyprocar.scriptCat module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptDosplot">pyprocar.scriptDosplot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptFermi2D">pyprocar.scriptFermi2D module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptFermi3D">pyprocar.scriptFermi3D module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptFilter">pyprocar.scriptFilter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKmesh2D">pyprocar.scriptKmesh2D module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKpath">pyprocar.scriptKpath module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptRepair">pyprocar.scriptRepair module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptUnfold">pyprocar.scriptUnfold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptVector">pyprocar.scriptVector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.splash">pyprocar.splash module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scriptSpin_asymmetry.html">scriptSpin_asymmetry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html">setup module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">pyprocar API</a> &raquo;</li>
+        
+          <li><a href="pyprocar.html">pyprocar package</a> &raquo;</li>
+        
+      <li>pyprocar.procarunfold package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pyprocar.procarunfold.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyprocar-procarunfold-package">
+<h1>pyprocar.procarunfold package<a class="headerlink" href="#pyprocar-procarunfold-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyprocar.procarunfold.fatband">
+<span id="pyprocar-procarunfold-fatband-module"></span><h2>pyprocar.procarunfold.fatband module<a class="headerlink" href="#module-pyprocar.procarunfold.fatband" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="pyprocar.procarunfold.fatband.main">
+<code class="sig-prename descclassname">pyprocar.procarunfold.fatband.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/fatband.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.fatband.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyprocar.procarunfold.fatband.plot_band_weight">
+<code class="sig-prename descclassname">pyprocar.procarunfold.fatband.</code><code class="sig-name descname">plot_band_weight</code><span class="sig-paren">(</span><em class="sig-param">kslist</em>, <em class="sig-param">ekslist</em>, <em class="sig-param">wkslist=None</em>, <em class="sig-param">efermi=None</em>, <em class="sig-param">shift_efermi=False</em>, <em class="sig-param">yrange=None</em>, <em class="sig-param">output=None</em>, <em class="sig-param">style='alpha'</em>, <em class="sig-param">color='blue'</em>, <em class="sig-param">axis=None</em>, <em class="sig-param">width=10</em>, <em class="sig-param">fatness=4</em>, <em class="sig-param">xticks=None</em>, <em class="sig-param">cmap=&lt;matplotlib.colors.LinearSegmentedColormap object at 0x7f83ef8831d0&gt;</em>, <em class="sig-param">weight_min=-0.1</em>, <em class="sig-param">weight_max=0.6</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/fatband.html#plot_band_weight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.fatband.plot_band_weight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pyprocar.procarunfold.procar_unfolder">
+<span id="pyprocar-procarunfold-procar-unfolder-module"></span><h2>pyprocar.procarunfold.procar_unfolder module<a class="headerlink" href="#module-pyprocar.procarunfold.procar_unfolder" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyprocar.procarunfold.procar_unfolder.ProcarUnfolder">
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarunfold.procar_unfolder.</code><code class="sig-name descname">ProcarUnfolder</code><span class="sig-paren">(</span><em class="sig-param">procar</em>, <em class="sig-param">poscar</em>, <em class="sig-param">supercell_matrix</em>, <em class="sig-param">ispin=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/procar_unfolder.html#ProcarUnfolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.procar_unfolder.ProcarUnfolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>plot</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>unfold</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyprocar.procarunfold.procar_unfolder.ProcarUnfolder.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">self, efermi=5.46, ispin=None, ylim=(-5, 10), ktick=[0, 41, 83, 125, 200], kname=['$\Gamma$', 'X', 'M', 'R', '$\Gamma$'], show_band=True, shift_efermi=True, width=4.0, color='blue', axis=None, savetab=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/procar_unfolder.html#ProcarUnfolder.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.procar_unfolder.ProcarUnfolder.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.procarunfold.procar_unfolder.ProcarUnfolder.unfold">
+<code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">ispin=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/procar_unfolder.html#ProcarUnfolder.unfold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.procar_unfolder.ProcarUnfolder.unfold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyprocar.procarunfold.unfolder">
+<span id="pyprocar-procarunfold-unfolder-module"></span><h2>pyprocar.procarunfold.unfolder module<a class="headerlink" href="#module-pyprocar.procarunfold.unfolder" title="Permalink to this headline">¶</a></h2>
+<p>Phonon unfolding: Reciprocal space method. The method is described in
+P. B. Allen et al. Phys Rev B 87, 085322 (2013).
+This method should be also applicable to other bloch waves on discrete grid, eg. electrons wave function in wannier basis set, magnons, etc. Now only phonon istested.</p>
+<dl class="class">
+<dt id="pyprocar.procarunfold.unfolder.Unfolder">
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarunfold.unfolder.</code><code class="sig-name descname">Unfolder</code><span class="sig-paren">(</span><em class="sig-param">cell</em>, <em class="sig-param">basis</em>, <em class="sig-param">positions</em>, <em class="sig-param">supercell_matrix</em>, <em class="sig-param">eigenvectors</em>, <em class="sig-param">qpoints</em>, <em class="sig-param">tol_r=0.1</em>, <em class="sig-param">compare=None</em>, <em class="sig-param">phase=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/unfolder.html#Unfolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.unfolder.Unfolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>phonon unfolding class</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarunfold.unfolder.Unfolder.get_weight" title="pyprocar.procarunfold.unfolder.Unfolder.get_weight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_weight</span></code></a>(self, evec, qpt[, G])</p></td>
+<td><p>get the weight of a mode which has the wave vector of qpt and eigenvector of evec.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarunfold.unfolder.Unfolder.get_weights" title="pyprocar.procarunfold.unfolder.Unfolder.get_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_weights</span></code></a>(self)</p></td>
+<td><p>Get the weight for all the modes.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyprocar.procarunfold.unfolder.Unfolder.get_weight">
+<code class="sig-name descname">get_weight</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">evec</em>, <em class="sig-param">qpt</em>, <em class="sig-param">G=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/unfolder.html#Unfolder.get_weight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.unfolder.Unfolder.get_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the weight of a mode which has the wave vector of qpt and eigenvector of evec.
+W= sum_1^N &lt; evec| T(r_i)exp(-I (K+G) * r_i| evec&gt;, here G=0. T(r_i)exp(-I K r_i)| evec&gt; = evec[indices[i]]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.procarunfold.unfolder.Unfolder.get_weights">
+<code class="sig-name descname">get_weights</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarunfold/unfolder.html#Unfolder.get_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarunfold.unfolder.Unfolder.get_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the weight for all the modes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyprocar.procarunfold">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyprocar.procarunfold" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyprocar.qeparser.html" class="btn btn-neutral float-right" title="pyprocar.qeparser package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyprocar.procarsymmetry.html" class="btn btn-neutral float-left" title="pyprocar.procarsymmetry package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

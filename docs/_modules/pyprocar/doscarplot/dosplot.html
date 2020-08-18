@@ -1,0 +1,780 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.doscarplot.dosplot &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyprocar.doscarplot.dosplot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyprocar.doscarplot.dosplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on May 17 2020 </span>
+<span class="sd">@author: Pedram Tavadze</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DosPlot"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot">[docs]</a><span class="k">class</span> <span class="nc">DosPlot</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vaspxml</span><span class="o">=</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pychemia.code.vasp</span> <span class="kn">import</span> <span class="n">VaspXML</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span> <span class="o">=</span> <span class="n">VaspXML</span><span class="p">(</span><span class="n">vaspxml</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="DosPlot.plot_total"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_total">[docs]</a>    <span class="k">def</span> <span class="nf">plot_total</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">spin_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+            <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="c1"># dos is a pychemia density of states object</span>
+        <span class="c1"># pychemia.visual.DensityOfStates</span>
+        <span class="k">if</span> <span class="n">spin_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spin_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span>
+        
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotter</span><span class="p">(</span>
+            <span class="n">dos</span><span class="p">,</span>
+            <span class="n">spins</span><span class="p">,</span>
+            <span class="n">spin_colors</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="p">,</span>
+            <span class="n">labels</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="DosPlot.plot_parametric_line"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parametric_line</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">spin_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spin_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotter</span><span class="p">(</span>
+            <span class="n">dos</span><span class="p">,</span>
+            <span class="n">spins</span><span class="p">,</span>
+            <span class="n">spin_colors</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="p">,</span>
+            <span class="n">labels</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="DosPlot.plot_parametric"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parametric</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">spin_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spin_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+        <span class="n">dos_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span>
+        <span class="n">dos_total_projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">()</span>
+        <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">plot_bar</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elimit</span><span class="p">:</span>
+            <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">cond1</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">dE</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">y_total</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">bar_color</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">idos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">])):</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">][</span><span class="n">idos</span><span class="p">])</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">idos</span><span class="p">]</span>
+                <span class="n">y_total</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dos_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">idos</span><span class="p">])</span>
+                <span class="n">y_total_projected</span> <span class="o">=</span> <span class="n">dos_total_projected</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">idos</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">ispin</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">y_total</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">y_total_projected</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">bar_color</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmap</span><span class="p">(</span><span class="n">y</span> <span class="o">/</span> <span class="p">(</span><span class="n">y_total_projected</span> <span class="o">*</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">))))</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="c1">#                ax.bar(x,y_total,dE,color=bar_color)</span>
+                <span class="k">for</span> <span class="n">idos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">idos</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">idos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]],</span>
+                        <span class="p">[</span><span class="n">y_total</span><span class="p">[</span><span class="n">idos</span><span class="p">],</span> <span class="n">y_total</span><span class="p">[</span><span class="n">idos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]],</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">bar_color</span><span class="p">[</span><span class="n">idos</span><span class="p">],</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">idos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">idos</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">idos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]],</span>
+                        <span class="p">[</span><span class="n">y_total</span><span class="p">[</span><span class="n">idos</span><span class="p">],</span> <span class="n">y_total</span><span class="p">[</span><span class="n">idos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]],</span>
+                        <span class="n">color</span><span class="o">=</span><span class="n">bar_color</span><span class="p">[</span><span class="n">idos</span><span class="p">],</span>
+                    <span class="p">)</span>
+        <span class="c1">#                ax.barh(y_total,x,dE,color=bar_color)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="DosPlot.plot_stack_species"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_stack_species">[docs]</a>    <span class="k">def</span> <span class="nf">plot_stack_species</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">spin_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spin_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;cyan&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;magenta&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;yellow&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;purple&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;navy&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;maroon&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;olive&#39;</span><span class="p">]</span>
+
+        <span class="c1">#        if ax is None:</span>
+        <span class="c1">#            if orientation == &#39;horizontal&#39;:</span>
+        <span class="c1">#                fig = plt.figure(figsize=figsize)</span>
+        <span class="c1">#                ax = fig.add_subplot(111)</span>
+        <span class="c1">#            elif orientation == &#39;vertical&#39;:</span>
+        <span class="c1">#                fig = plt.figure(figsize=(figsize[1], figsize[0]))</span>
+        <span class="c1">#                ax = fig.add_subplot(111)</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elimit</span><span class="p">:</span>
+            <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">dos_projected_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_projected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ncols</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;spd&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_projected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ncols</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;spdf&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">orbitals</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The plot only considers orbitals&quot;</span><span class="p">,</span> <span class="n">orbitals</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;s&quot;</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;p&quot;</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;d&quot;</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;f&quot;</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">all_orbitals</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">dos_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span>
+
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+                    <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">ispc</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span>
+                <span class="p">)</span>
+
+                <span class="n">x</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">dos</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="n">dos_projected_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">ispin</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                            <span class="n">x</span><span class="p">,</span>
+                            <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+                            <span class="n">bottom</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">],</span>
+                            <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">ispc</span><span class="p">]</span> <span class="o">+</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span>
+                            <span class="n">x</span><span class="p">,</span>
+                            <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+                            <span class="n">bottom</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">],</span>
+                            <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">ispc</span><span class="p">]</span> <span class="o">+</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="p">)</span>
+                <span class="n">bottom</span> <span class="o">+=</span> <span class="n">y</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="DosPlot.plot_stack_orbitals"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_stack_orbitals">[docs]</a>    <span class="k">def</span> <span class="nf">plot_stack_orbitals</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">spin_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spin_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;cyan&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;magenta&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;yellow&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;purple&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;navy&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;maroon&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;olive&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="n">atom_names</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">atoms</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;The plot only considers atoms&quot;</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">symbols</span><span class="p">)[</span><span class="n">atoms</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">atom_names</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">symbols</span><span class="p">)[</span><span class="n">atoms</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">atom_names</span> <span class="o">+=</span> <span class="n">ispc</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span>
+        <span class="n">all_atoms</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">symbols</span><span class="p">)):</span>
+            <span class="n">all_atoms</span> <span class="o">+=</span> <span class="n">ispc</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span>
+        <span class="k">if</span> <span class="n">atom_names</span> <span class="o">==</span> <span class="n">all_atoms</span><span class="p">:</span>
+            <span class="n">atom_names</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">dos_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span>
+        <span class="n">dos_projected_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elimit</span><span class="p">:</span>
+            <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">dos_projected_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">()</span>
+
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">orb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">]</span>
+        <span class="n">orb_l</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">iorb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orb_l</span><span class="p">[</span><span class="n">iorb</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">dos</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="n">dos_projected_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">ispin</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">iorb</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">iorb</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                            <span class="n">x</span><span class="p">,</span>
+                            <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+                            <span class="n">bottom</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">iorb</span><span class="p">],</span>
+                            <span class="n">label</span><span class="o">=</span><span class="n">atom_names</span> <span class="o">+</span> <span class="n">orb_names</span><span class="p">[</span><span class="n">iorb</span><span class="p">],</span>
+                        <span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span>
+                            <span class="n">x</span><span class="p">,</span>
+                            <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+                            <span class="n">bottom</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">iorb</span><span class="p">],</span>
+                            <span class="n">label</span><span class="o">=</span><span class="n">atom_names</span> <span class="o">+</span> <span class="n">orb_names</span><span class="p">[</span><span class="n">iorb</span><span class="p">],</span>
+                        <span class="p">)</span>
+                <span class="n">bottom</span> <span class="o">+=</span> <span class="n">y</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="DosPlot.plot_stack"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_stack">[docs]</a>    <span class="k">def</span> <span class="nf">plot_stack</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;Please provide the stacking items in which you want to plot,</span>
+<span class="sd">                  example : {&#39;Sr&#39;:[1,2,3],&#39;O&#39;:[4,5,6,7,8]} will plot the stacked</span>
+<span class="sd">                  plots of p orbitals of Sr and d orbitals of Oxygen.&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">spin_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spin_colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="n">src_colors</span> <span class="o">=</span> <span class="n">colors</span>
+        <span class="k">if</span> <span class="n">src_colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">src_colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;cyan&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;magenta&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;yellow&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;purple&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;brown&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;navy&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;maroon&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;olive&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elimit</span><span class="p">:</span>
+            <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">dos_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_projected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ncols</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dos_total</span><span class="o">.</span><span class="n">ncols</span><span class="p">:</span>
+            <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;spd&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_projected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ncols</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">*</span> <span class="n">dos_total</span><span class="o">.</span><span class="n">ncols</span><span class="p">:</span>
+            <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;spdf&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_colors</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">dos_projected_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_total</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">])</span>
+            <span class="c1"># bottom = np.zeros_like(self.VaspXML.dos_total.energies[:])</span>
+            <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span> <span class="o">==</span> <span class="n">ispc</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">orbitals</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ispc</span><span class="p">]</span>
+
+                <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VaspXML</span><span class="o">.</span><span class="n">dos_parametric</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span>
+                <span class="p">)</span>
+
+                <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;s&quot;</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;p&quot;</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;d&quot;</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span> <span class="ow">in</span> <span class="n">orbitals</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">]])</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">+=</span> <span class="s2">&quot;f&quot;</span>
+                <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">all_orbitals</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">cond</span><span class="p">]</span>
+                <span class="c1"># x = dos.energies[:]</span>
+
+                <span class="n">y</span> <span class="o">=</span> <span class="p">(</span> <span class="n">dos</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dos_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="n">dos_projected_total</span><span class="o">.</span><span class="n">dos</span><span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="n">ispin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># y = ( dos.dos[:, ispin + 1] * dos_total.dos[:, ispin + 1]</span>
+                <span class="c1"># ) / dos_projected_total.dos[:, ispin + 1]</span>
+                <span class="c1"># y =  dos.dos[cond, ispin + 1] </span>
+                
+                <span class="k">if</span> <span class="n">ispin</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                            <span class="n">x</span><span class="p">,</span>
+                            <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+                            <span class="n">bottom</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">],</span>
+                            <span class="n">label</span><span class="o">=</span><span class="n">ispc</span> <span class="o">+</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+
+                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span>
+                            <span class="n">x</span><span class="p">,</span>
+                            <span class="n">bottom</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+                            <span class="n">bottom</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">ispc</span><span class="p">],</span>
+                            <span class="n">label</span><span class="o">=</span><span class="n">ispc</span> <span class="o">+</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="p">)</span>
+                <span class="n">bottom</span> <span class="o">+=</span> <span class="n">y</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div></div>
+
+
+<div class="viewcode-block" id="plotter"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.plotter">[docs]</a><span class="k">def</span> <span class="nf">plotter</span><span class="p">(</span><span class="n">dos</span><span class="p">,</span>
+            <span class="n">spins</span><span class="p">,</span>
+            <span class="n">spin_colors</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="p">,</span>
+            <span class="n">labels</span>
+<span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span>
+
+        <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">dos</span><span class="p">[:,</span> <span class="n">iy</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">iy</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;r-&quot;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;r-&quot;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span>
+                <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span>
+        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">dos</span><span class="p">[:,</span> <span class="n">ix</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ix</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;r-&quot;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;r-&quot;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span>
+                <span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

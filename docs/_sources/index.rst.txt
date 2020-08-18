@@ -75,6 +75,8 @@ where :math:`\sigma^i` are the Pauli matrices with :math:`i = x, y , z` and the 
    dftprep
    tutorials
 
+   modules
+
 Indices and tables
 ==================
 

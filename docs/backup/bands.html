@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Band structure &mdash; PyProcar 5.3.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">pyprocar</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Band structure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/backup/bands.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="band-structure">
+<span id="labelbands"></span><h1>Band structure<a class="headerlink" href="#band-structure" title="Permalink to this headline">¶</a></h1>
+<p>PyProcar goes beyond the conventional plain band structure to plot the projected bands that carry even more information. The projected bands are color coded in an informative manner to portray fine details.</p>
+<div class="section" id="plain-band-structure">
+<h2>1. Plain band structure<a class="headerlink" href="#plain-band-structure" title="Permalink to this headline">¶</a></h2>
+<p>This is the most basic type of band structure. No projection information is contained here. In order to use the plain mode one sets <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code>. <code class="docutils literal notranslate"><span class="pre">elimit</span></code> sets the energy window limits. <code class="docutils literal notranslate"><span class="pre">outcar</span></code> specifies the <strong>OUTCAR</strong> file. For Abinit calculations, <code class="docutils literal notranslate"><span class="pre">abinit_output</span></code> is used instead. <code class="docutils literal notranslate"><span class="pre">color</span></code> lets the user use any color available in the matplotlib package. If an output file is not present one can set <code class="docutils literal notranslate"><span class="pre">fermi</span></code> manually. One may save the plot using the <code class="docutils literal notranslate"><span class="pre">savefig</span></code> tag, for example, <code class="docutils literal notranslate"><span class="pre">savefig='figure.png'</span></code> with a desired image file format. This applies to all other band structure plotting functions in PyProcar as well. For Elk, setting file=’PROCAR’ and outcar=’OUTCAR’ is not necessary. As long as the path to <strong>elk.in</strong> is defined or PyProcar is executed in the directory of calculation, PyProcar will work of the files needed for the bandsplot.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>PyProcar is capable of labeling the <span class="math notranslate nohighlight">\(k\)</span>-path names automatically, however, the user can manually input them as desired.</p>
+<p>If a <strong>KPOINTS</strong> file is present automatic labeling can be enabled as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">kpointsfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For VASP, the KPOINTS file should be similar to the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>UCB (simple cubic) G-X-M-G-R-X M-R
+40   ! 40 grids
+Line-mode
+reciprocal
+0.0000   0.0000   0.0000   ! \Gamma
+0.0000   0.5000   0.0000   ! X
+
+0.0000   0.5000   0.0000   ! X
+0.5000   0.5000   0.0000   ! M
+
+0.5000   0.5000   0.0000   ! M
+0.0000   0.0000   0.0000   ! \Gamma
+
+0.0000   0.0000   0.0000   ! \Gamma
+0.5000   0.5000   0.5000   ! R
+
+0.5000   0.5000   0.5000   ! R
+0.0000   0.5000   0.0000   ! X
+</pre></div>
+</div>
+<p>For Elk, to retrieve the KPOINTS automatically, one should define the <span class="math notranslate nohighlight">\(k\)</span>-path block in the <code class="docutils literal notranslate"><span class="pre">elk.in</span></code> file such as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>! These are the vertices to be joined for the band structure plot
+plot1d
+6 50
+0.0      0.0      0.0 : \Gamma
+0.5      0.0      0.0 : X
+0.5      0.5      0.0 : M
+0.0      0.0      0.0 : \Gamma
+0.5      0.5      0.5 : R
+0.5      0.0      0.0 : X
+</pre></div>
+</div>
+<p>In Quantum Espresso, it should be define in a similar way. Check the <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory for more information.</p>
+<p>One may manually label the <span class="math notranslate nohighlight">\(k\)</span>-path as well. <code class="docutils literal notranslate"><span class="pre">knames</span></code> and <code class="docutils literal notranslate"><span class="pre">kticks</span></code> corresponds to the labels and the number of grid points between the high symmetry points in the <span class="math notranslate nohighlight">\(k\)</span>-path used for the band structure calculation. Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">kticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">39</span><span class="p">,</span><span class="mi">79</span><span class="p">,</span><span class="mi">119</span><span class="p">,</span><span class="mi">159</span><span class="p">],</span><span class="n">knames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="s1">&#39;M&#39;</span><span class="p">,</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is valid for the rest of the band plotting modes as well.</p>
+</div>
+<div class="section" id="spin-projection">
+<h2>2. Spin projection<a class="headerlink" href="#spin-projection" title="Permalink to this headline">¶</a></h2>
+<p>For collinear spin polarized and non-collinear spin calculations of DFT codes, PyProcar is able to plot the bands considering spin density (magnitude), spin magnetization and spin channels separately.</p>
+<p>For non-collinear spin calculations, <code class="docutils literal notranslate"><span class="pre">spin=0</span></code> plots the spin density (magnitude) and <code class="docutils literal notranslate"><span class="pre">spin=1,2,3</span></code> corresponds to spins oriented in <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span> and <span class="math notranslate nohighlight">\(S_z\)</span> directions respectively. Setting <code class="docutils literal notranslate"><span class="pre">spin='st'</span></code> plots the spin texture perpendicular in the plane (<span class="math notranslate nohighlight">\(k_x\)</span>, <span class="math notranslate nohighlight">\(k_y\)</span>) to each (<span class="math notranslate nohighlight">\(k_x\)</span>,i <span class="math notranslate nohighlight">\(k_y\)</span>) vector. This is useful for Rashba-like states in surfaces. For parametric plots such as spin, atom and orbitals, the user should set <code class="docutils literal notranslate"><span class="pre">mode=`parametric'</span></code>. <code class="docutils literal notranslate"><span class="pre">cmap</span></code> refers to the matplotlib color map used for the parametric plotting and can be modified by using the same color maps used in matplotlib. <code class="docutils literal notranslate"><span class="pre">cmap='seismic'</span></code> is recommended for parametric spin band structure plots.  For colinear spin calculations setting <code class="docutils literal notranslate"><span class="pre">spin=0</span></code> plots the spin density (magnitude) and <code class="docutils literal notranslate"><span class="pre">spin=1</span></code> plots the spin magnetization. Spin channels can also be plot separately (see below).</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">kticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">39</span><span class="p">,</span><span class="mi">79</span><span class="p">,</span><span class="mi">119</span><span class="p">,</span><span class="mi">159</span><span class="p">],</span><span class="n">knames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="s1">&#39;M&#39;</span><span class="p">,</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">spin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If spin-up and spin-down bands are to be plot separately (for colinear calculations), there are two methods one can follow.</p>
+<ol class="arabic">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">pyprocar.filter()</span></code> function can be used to create two PROCARs for each spin direction and be plot individually. An example is given below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR-up&#39;</span><span class="p">,</span><span class="n">spin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="s1">&#39;PROCAR-down&#39;</span><span class="p">,</span><span class="n">spin</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR-up&#39;</span><span class="p">,</span><span class="o">...</span><span class="p">)</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR-down&#39;</span><span class="p">,</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Setting the <code class="docutils literal notranslate"><span class="pre">separate=True</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">pyprocar.bandsplot()</span></code> plots spin up bands and spin down bands with <code class="docutils literal notranslate"><span class="pre">spin=0</span></code> and <code class="docutils literal notranslate"><span class="pre">spin=1</span></code>, respectively.</p></li>
+</ol>
+<p>E.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">separate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These methods can be used for both plain and parametric modes. If a comparison of spin up and spin down bands is required on the same plot, the following syntax can be used.</p>
+<p>E.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR-up&#39;</span><span class="p">,</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">)</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR-down&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note:</p>
+<p>Currently, Elk only supports spin colinear plotting. Non colinear spin plotting will be implemented in the future.</p>
+</div>
+<div class="section" id="atom-projection">
+<h2>3. Atom projection<a class="headerlink" href="#atom-projection" title="Permalink to this headline">¶</a></h2>
+<p>The projection of atoms onto bands can provide information such as which atoms contribute to the electronic states near the Fermi level. PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO_3, the indexes of <code class="docutils literal notranslate"><span class="pre">atoms</span></code> for Sr, V and the three O atoms would be 1,2 and 3,4,5 respectively. It is also possible to include more than one type of atom by using an array such as <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[1,2,3]</span></code>.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">kticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">39</span><span class="p">,</span><span class="mi">79</span><span class="p">,</span><span class="mi">119</span><span class="p">,</span><span class="mi">159</span><span class="p">],</span><span class="n">knames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="s1">&#39;M&#39;</span><span class="p">,</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="orbital-projection">
+<h2>4. Orbital projection<a class="headerlink" href="#orbital-projection" title="Permalink to this headline">¶</a></h2>
+<p>The projection of atomic orbitals onto bands is also useful to identify the contribution of orbitals to bands. For instance, to identify correlated <span class="math notranslate nohighlight">\(d\)</span> or <span class="math notranslate nohighlight">\(f\)</span> orbitals in a strongly correlated material near the Fermi level. It is possible to include more than one type of orbital projection. The mapping of the index of orbitals to be used in <code class="docutils literal notranslate"><span class="pre">orbitals</span></code> is as follows (this is the same order from the PROCAR file). Quantum Espresso, VASP and Abinit follows this order.</p>
+<img alt="../_images/orbitals.png" src="../_images/orbitals.png" />
+<p>In Elk, the <span class="math notranslate nohighlight">\(Y_{lm}\)</span> projections of the atomic site resolved DOS are arranged in logical order in the BAND_S*A* files, namely: (l,m) = (0,0), (1,-1), (1,0), (1,1), (2,-2), (2,-1), (2,0), (2,1), (2,2), etc.,</p>
+<p>Usage: To project all five <span class="math notranslate nohighlight">\(d\)</span>-orbitals:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">kticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">39</span><span class="p">,</span><span class="mi">79</span><span class="p">,</span><span class="mi">119</span><span class="p">,</span><span class="mi">159</span><span class="p">],</span><span class="n">knames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="s1">&#39;M&#39;</span><span class="p">,</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>One or many of the above can be combined together to allow the user to probe into more specific queries such as a collinear spin projection of a certain orbital of a certain atom.</p>
+<p>Different modes of band structures are useful for obtaining information for different cases. The four modes available within PyProcar are <code class="docutils literal notranslate"><span class="pre">plain,</span> <span class="pre">scatter,</span> <span class="pre">parametric</span></code> and <code class="docutils literal notranslate"><span class="pre">atomic</span></code>. The <code class="docutils literal notranslate"><span class="pre">plain</span></code> bands contain no projection information. The <code class="docutils literal notranslate"><span class="pre">scatter</span></code> mode creates a scatter plot of points. The <code class="docutils literal notranslate"><span class="pre">parametric</span></code> mode interpolates between points to create bands which are also projectable. Finally, the <code class="docutils literal notranslate"><span class="pre">atomic</span></code> mode is useful to plot energy levels for atoms. To  set  maximum  and  minimum  projections  for  color  map,  one  could  use <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code> tags.</p>
+</div>
+<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
+Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Using matplotlib options&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="converting-k-points-from-reduced-to-cartesian-coordinates">
+<h2>Converting <span class="math notranslate nohighlight">\(k\)</span>-points from reduced to cartesian coordinates<a class="headerlink" href="#converting-k-points-from-reduced-to-cartesian-coordinates" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar defaults to plotting using the reduced coordinates of the <span class="math notranslate nohighlight">\(k\)</span>-points. If one wishes to plot using cartesian coordinates, set <code class="docutils literal notranslate"><span class="pre">kdirect=False</span></code>. However, an <code class="docutils literal notranslate"><span class="pre">OUTCAR</span></code> must be supplied for this case to retrieve the reciprocal lattice vectors to transform the coordinates from reduced to cartesian. Note that for the case of Elk, the output is automatically retrieved so it is not necessary to provide it for the conversion.</p>
+</div>
+<div class="section" id="plotting-band-structures-with-a-discontinuous-k-path">
+<h2>Plotting band structures with a discontinuous <span class="math notranslate nohighlight">\(k\)</span>-path<a class="headerlink" href="#plotting-band-structures-with-a-discontinuous-k-path" title="Permalink to this headline">¶</a></h2>
+<p>PyProcar allows the plotting of band structures with a discontinuous <span class="math notranslate nohighlight">\(k\)</span>-path. If a <code class="docutils literal notranslate"><span class="pre">KPOINTS</span></code> file with the <span class="math notranslate nohighlight">\(k\)</span>-path is supplied, PyProcar will automatically find the <span class="math notranslate nohighlight">\(k\)</span>-point indices where the discontinuities occur. If not, one may manually set it with the <code class="docutils literal notranslate"><span class="pre">discontinuities</span></code> variable. For example, the <span class="math notranslate nohighlight">\(k\)</span>-path <code class="docutils literal notranslate"><span class="pre">G-X-M-G-R-X</span> <span class="pre">M-R</span> <span class="pre">X-M-G</span></code> with 40 grid points should be set as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">Gamma$&#39;</span><span class="p">,</span> <span class="s1">&#39;$X$&#39;</span><span class="p">,</span> <span class="s1">&#39;$M$&#39;</span><span class="p">,</span> <span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">Gamma$&#39;</span><span class="p">,</span> <span class="s1">&#39;$R$&#39;</span><span class="p">,</span> <span class="s1">&#39;$X/M$&#39;</span><span class="p">,</span> <span class="s1">&#39;$R/X$&#39;</span><span class="p">,</span> <span class="s1">&#39;$M$&#39;</span><span class="p">,</span> <span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">Gamma$&#39;</span><span class="p">]</span>
+<span class="n">kticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">119</span><span class="p">,</span> <span class="mi">159</span><span class="p">,</span> <span class="mi">199</span><span class="p">,</span> <span class="mi">239</span><span class="p">,</span> <span class="mi">279</span><span class="p">,</span> <span class="mi">319</span><span class="p">]</span>
+<span class="n">discontinuities</span> <span class="o">=</span> <span class="p">[</span><span class="mi">199</span><span class="p">,</span> <span class="mi">239</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="../_images/continuousbands.png" src="../_images/continuousbands.png" />
+<span class="target" id="module-pyprocar.scriptBandsplot"></span><dl class="function">
+<dt id="pyprocar.scriptBandsplot.bandsplot">
+<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param">procarfile=None, mode='plain', color='blue', abinit_output=None, spin=0, atoms=None, orbitals=None, fermi=None, elimit=[-2, 2], mask=None, markersize=0.02, cmap='jet', vmax=None, vmin=None, grid=True, marker='o', permissive=False, human=False, savefig=None, kticks=None, knames=None, title=None, outcar=None, kpointsfile=None, kdirect=True, code='vasp', separate=False, ax=None, discontinuities=None, show=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyprocar/scriptBandsplot.html#bandsplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots band structures</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.elkparser package &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pyprocar.fermisurface package" href="pyprocar.fermisurface.html" />
+    <link rel="prev" title="pyprocar.doscarplot package" href="pyprocar.doscarplot.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyprocar API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyprocar.html">pyprocar package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyprocar.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.abinitparser.html">pyprocar.abinitparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.html">pyprocar.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.doscarplot.html">pyprocar.doscarplot package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pyprocar.elkparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.fermisurface.html">pyprocar.fermisurface package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.fermisurface3d.html">pyprocar.fermisurface3d package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.lobsterparser.html">pyprocar.lobsterparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarfilefilter.html">pyprocar.procarfilefilter package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarparser.html">pyprocar.procarparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarplot.html">pyprocar.procarplot package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarselect.html">pyprocar.procarselect package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarsymmetry.html">pyprocar.procarsymmetry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.procarunfold.html">pyprocar.procarunfold package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.qeparser.html">pyprocar.qeparser package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.utilsprocar.html">pyprocar.utilsprocar package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptBandGap">pyprocar.scriptBandGap module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptBandsDosplot">pyprocar.scriptBandsDosplot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptBandsplot">pyprocar.scriptBandsplot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptCat">pyprocar.scriptCat module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptDosplot">pyprocar.scriptDosplot module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptFermi2D">pyprocar.scriptFermi2D module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptFermi3D">pyprocar.scriptFermi3D module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptFilter">pyprocar.scriptFilter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKmesh2D">pyprocar.scriptKmesh2D module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKpath">pyprocar.scriptKpath module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptRepair">pyprocar.scriptRepair module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptUnfold">pyprocar.scriptUnfold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptVector">pyprocar.scriptVector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.splash">pyprocar.splash module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scriptSpin_asymmetry.html">scriptSpin_asymmetry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html">setup module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">pyprocar API</a> &raquo;</li>
+        
+          <li><a href="pyprocar.html">pyprocar package</a> &raquo;</li>
+        
+      <li>pyprocar.elkparser package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pyprocar.elkparser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pyprocar-elkparser-package">
+<h1>pyprocar.elkparser package<a class="headerlink" href="#pyprocar-elkparser-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pyprocar.elkparser.elkparser">
+<span id="pyprocar-elkparser-elkparser-module"></span><h2>pyprocar.elkparser.elkparser module<a class="headerlink" href="#module-pyprocar.elkparser.elkparser" title="Permalink to this headline">¶</a></h2>
+<p>Created on Fri March 2 2020
+&#64;author: Pedram Tavadze</p>
+<dl class="class">
+<dt id="pyprocar.elkparser.elkparser.ElkParser">
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.elkparser.elkparser.</code><code class="sig-name descname">ElkParser</code><span class="sig-paren">(</span><em class="sig-param">elkin='elk.in'</em>, <em class="sig-param">kdirect=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/elkparser/elkparser.html#ElkParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.composition" title="pyprocar.elkparser.elkparser.ElkParser.composition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">composition</span></code></a></dt><dd><p>Returns the composition of the structure</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.fermi" title="pyprocar.elkparser.elkparser.ElkParser.fermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi</span></code></a></dt><dd><p>Returns the fermi energy read from FERMI.OUT</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points" title="pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">high_symmetry_points</span></code></a></dt><dd><p>Returns the corrdinates of high symmtery points provided in elk.in</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.knames" title="pyprocar.elkparser.elkparser.ElkParser.knames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">knames</span></code></a></dt><dd><p>Returns the names of the high symmetry points(x ticks) provided in elk.in</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.natom" title="pyprocar.elkparser.elkparser.ElkParser.natom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natom</span></code></a></dt><dd><p>Returns number of atoms in the structure</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.nhigh_sym" title="pyprocar.elkparser.elkparser.ElkParser.nhigh_sym"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nhigh_sym</span></code></a></dt><dd><p>Returns nu,ber of high symmetry points</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.nkpoints" title="pyprocar.elkparser.elkparser.ElkParser.nkpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nkpoints</span></code></a></dt><dd><p>Returns total number of kpoints</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.nspecies" title="pyprocar.elkparser.elkparser.ElkParser.nspecies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nspecies</span></code></a></dt><dd><p>Returns number of species</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.reclat" title="pyprocar.elkparser.elkparser.ElkParser.reclat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reclat</span></code></a></dt><dd><p>Returns the reciprocal lattice read from LATTICE.OUT</p>
+</dd>
+<dt><strong>spd_orb</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.tasks" title="pyprocar.elkparser.elkparser.ElkParser.tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tasks</span></code></a></dt><dd><p>Returns the tasks calculated by elk</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.composition">
+<em class="property">property </em><code class="sig-name descname">composition</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.composition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the composition of the structure</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.fermi">
+<em class="property">property </em><code class="sig-name descname">fermi</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.fermi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fermi energy read from FERMI.OUT</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points">
+<em class="property">property </em><code class="sig-name descname">high_symmetry_points</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the corrdinates of high symmtery points provided in elk.in</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.knames">
+<em class="property">property </em><code class="sig-name descname">knames</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.knames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the names of the high symmetry points(x ticks) provided in elk.in</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.natom">
+<em class="property">property </em><code class="sig-name descname">natom</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.natom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of atoms in the structure</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.nhigh_sym">
+<em class="property">property </em><code class="sig-name descname">nhigh_sym</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.nhigh_sym" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns nu,ber of high symmetry points</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.nkpoints">
+<em class="property">property </em><code class="sig-name descname">nkpoints</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.nkpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns total number of kpoints</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.nspecies">
+<em class="property">property </em><code class="sig-name descname">nspecies</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.nspecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of species</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.reclat">
+<em class="property">property </em><code class="sig-name descname">reclat</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.reclat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the reciprocal lattice read from LATTICE.OUT</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.spd_orb">
+<em class="property">property </em><code class="sig-name descname">spd_orb</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.spd_orb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyprocar.elkparser.elkparser.ElkParser.tasks">
+<em class="property">property </em><code class="sig-name descname">tasks</code><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the tasks calculated by elk</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyprocar.elkparser">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyprocar.elkparser" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyprocar.fermisurface.html" class="btn btn-neutral float-right" title="pyprocar.fermisurface package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyprocar.doscarplot.html" class="btn btn-neutral float-left" title="pyprocar.doscarplot package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

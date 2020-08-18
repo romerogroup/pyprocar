@@ -1,0 +1,27 @@
+.. _labelfonts:
+
+********************
+Fonts and font sizes
+********************
+
+This section is dedicated to changing the fonts or font sizes in matplotlib. Th default font for these plots is ``Georgia``. The following should be provided before any plotting. The matplotlib parameters is self explanatory. 
+
+Usage ::
+
+  import matplotlib.pylab as plt
+  
+  plt.rcParams['mathtext.default'] = 'regular' #Roman ['rm', 'cal', 'it', 'tt', 'sf', 
+  #                                                   'bf', 'default', 'bb', 'frak',
+  #                                                   'circled', 'scr', 'regular']
+  plt.rcParams["font.family"] = "Georgia" 
+  plt.rc('font', size=18)          # controls default text sizes
+  plt.rc('axes', titlesize=22)     # fontsize of the axes title
+  plt.rc('axes', labelsize=22)    # fontsize of the x and y labels
+  plt.rc('xtick',labelsize=22)    # fontsize of the tick labels
+  plt.rc('ytick',labelsize=22)    # fontsize of the tick labels
+  #plt.rc('legend', fontsize=22)    # legend fontsize
+  #plt.rc('figure', titlesize=22)  # fontsize of the figure title
+
+
+.. automodule::                                                        
+   :members:      

@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.procarplot.procarplot &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyprocar.procarplot.procarplot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyprocar.procarplot.procarplot</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<div class="viewcode-block" id="ProcarPlot"><a class="viewcode-back" href="../../../pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot">[docs]</a><span class="k">class</span> <span class="nc">ProcarPlot</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">spd</span><span class="p">,</span> <span class="n">kpoints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="n">spd</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="ProcarPlot.plotBands"><a class="viewcode-back" href="../../../pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.plotBands">[docs]</a>    <span class="k">def</span> <span class="nf">plotBands</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">ticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+        <span class="n">discontinuities</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">size</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1">#### MODIFIED FOR DISCONTINOUS BANDS ####</span>
+            <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+                <span class="n">ticks</span><span class="p">,</span> <span class="n">ticksNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ticks</span><span class="p">))</span>
+
+                <span class="c1"># counters for number of discontinuities</span>
+                <span class="n">icounter</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">discontinuities</span><span class="p">)):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">icounter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+                    <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">icounter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">discontinuities</span><span class="p">:</span>
+                        <span class="n">icounter</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xaxis</span><span class="p">)</span>
+
+                <span class="c1"># plotting</span>
+
+                <span class="k">for</span> <span class="n">i_tick</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">xaxis</span><span class="p">[</span><span class="n">ticks</span><span class="p">[</span><span class="n">i_tick</span><span class="p">]</span> <span class="p">:</span> <span class="n">ticks</span><span class="p">[</span><span class="n">i_tick</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">transpose</span><span class="p">()[</span><span class="n">ticks</span><span class="p">[</span><span class="n">i_tick</span><span class="p">]</span> <span class="p">:</span> <span class="n">ticks</span><span class="p">[</span><span class="n">i_tick</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+            <span class="c1">#### END  OF MODIFIED DISCONTINUOUS BANDS ####</span>
+
+            <span class="c1"># if ticks are not given</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+                    <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xaxis</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">xaxis</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>
+                    <span class="s2">&quot;r-&quot;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                    <span class="n">markersize</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="c1"># if self.kpoints is None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">xaxis</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>
+                <span class="s2">&quot;r-&quot;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># Handling ticks</span>
+        <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+            <span class="c1"># added for meta-GGA calculations</span>
+            <span class="k">if</span> <span class="n">ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">xaxis</span><span class="p">[</span><span class="n">ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">xaxis</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">ticksNames</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">xc</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xc</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="ProcarPlot.parametricPlot"><a class="viewcode-back" href="../../../pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.parametricPlot">[docs]</a>    <span class="k">def</span> <span class="nf">parametricPlot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">discontinuities</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+        <span class="n">plot_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">LineCollection</span>
+        <span class="kn">import</span> <span class="nn">matplotlib</span>
+
+        <span class="c1"># fig = plt.figure() # use plt.gca() since it won&#39;t create a new figure for band comparison</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="n">bsize</span><span class="p">,</span> <span class="n">ksize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># print self.bands</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mbands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Faking a mask, all elemtnet are included</span>
+            <span class="n">mbands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;normalizing to : &quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">))</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1">#### MODIFIED FOR DISCONTINOUS BANDS ####</span>
+            <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+                <span class="n">ticks</span><span class="p">,</span> <span class="n">ticksNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ticks</span><span class="p">))</span>
+
+                <span class="c1"># counters for number of discontinuities</span>
+                <span class="n">icounter</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">discontinuities</span><span class="p">)):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">icounter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+                    <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">icounter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">discontinuities</span><span class="p">:</span>
+                        <span class="n">icounter</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xaxis</span><span class="p">)</span>
+
+                <span class="c1"># plotting</span>
+                <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mbands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">):</span>
+                    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">segments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">lc</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">segments</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+                    <span class="n">lc</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                    <span class="n">lc</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">plot_bar</span><span class="p">:</span>
+                    <span class="n">cb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+                    <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">mbands</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">mbands</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+            <span class="c1">#### END  OF MODIFIED DISCONTINUOUS BANDS ####</span>
+
+            <span class="c1"># if ticks are not given</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+                    <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xaxis</span><span class="p">)</span>
+
+                <span class="c1"># plotting</span>
+                <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mbands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">):</span>
+                    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">segments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">lc</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">segments</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+                    <span class="n">lc</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                    <span class="n">lc</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">plot_bar</span><span class="p">:</span>
+                    <span class="n">cb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+                    <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">mbands</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">mbands</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># if self.kpoints is None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ksize</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mbands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">):</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">segments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">lc</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">segments</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+                <span class="n">lc</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                <span class="n">lc</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot_bar</span><span class="p">:</span>
+                <span class="n">cb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">mbands</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">mbands</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># handling ticks</span>
+        <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+            <span class="c1"># added for meta-GGA calculations</span>
+            <span class="k">if</span> <span class="n">ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">xaxis</span><span class="p">[</span><span class="n">ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">xaxis</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">ticksNames</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">xc</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xc</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="ProcarPlot.scatterPlot"><a class="viewcode-back" href="../../../pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.scatterPlot">[docs]</a>    <span class="k">def</span> <span class="nf">scatterPlot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;hot_r&quot;</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">ticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">discontinuities</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">bsize</span><span class="p">,</span> <span class="n">ksize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c1"># plotting</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1">#### MODIFIED FOR DISCONTINOUS BANDS ####</span>
+            <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+                <span class="n">ticks</span><span class="p">,</span> <span class="n">ticksNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ticks</span><span class="p">))</span>
+
+                <span class="c1"># counters for number of discontinuities</span>
+                <span class="n">icounter</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">discontinuities</span><span class="p">)):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">icounter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+                    <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">icounter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">discontinuities</span><span class="p">:</span>
+                        <span class="n">icounter</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xaxis</span><span class="p">)</span>
+
+                <span class="n">xaxis</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksize</span><span class="p">)</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">bsize</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">mbands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mask</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mbands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span>
+
+                <span class="n">scatter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                    <span class="n">xaxis</span><span class="p">,</span>
+                    <span class="n">mbands</span><span class="p">,</span>
+                    <span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                    <span class="n">linewidths</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                    <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+                    <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                    <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scatter</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+            <span class="c1">#### END  OF MODIFIED DISCONTINUOUS BANDS ####</span>
+
+            <span class="c1"># if ticks are not given</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+                    <span class="n">xaxis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">xaxis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xaxis</span><span class="p">)</span>
+
+                <span class="n">xaxis</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksize</span><span class="p">)</span>
+                <span class="n">xaxis</span> <span class="o">=</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">bsize</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">mbands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mask</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mbands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span>
+
+                <span class="n">scatter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                    <span class="n">xaxis</span><span class="p">,</span>
+                    <span class="n">mbands</span><span class="p">,</span>
+                    <span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                    <span class="n">linewidths</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                    <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+                    <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                    <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scatter</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># if kpoints is None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ksize</span><span class="p">)</span>
+            <span class="n">xaxis</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksize</span><span class="p">)</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">bsize</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">mbands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mask</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mbands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">xaxis</span><span class="p">,</span>
+                <span class="n">mbands</span><span class="p">,</span>
+                <span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span>
+                <span class="n">s</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">linewidths</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+                <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span>
+                <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xaxis</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">xaxis</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="c1"># handling ticks</span>
+        <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+            <span class="c1"># added for meta-GGA calculations</span>
+            <span class="k">if</span> <span class="n">ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">xaxis</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">xaxis</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">ticksNames</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="ProcarPlot.atomicPlot"><a class="viewcode-back" href="../../../pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot">[docs]</a>    <span class="k">def</span> <span class="nf">atomicPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;hot_r&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Just a handler to parametricPlot. Useful to plot energy levels.</span>
+
+<span class="sd">    It adds a fake k-point. Shouldn&#39;t be invoked with more than one</span>
+<span class="sd">    k-point</span>
+<span class="sd">    ax not implemented here, not need</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atomic plot: bands.shape  :&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atomic plot: spd.shape    :&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atomic plot: kpoints.shape:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atomic plot: bands.shape  :&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atomic plot: spd.shape    :&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Atomic plot: kpoints.shape:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c1">#        print(self.kpoints)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametricPlot</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="c1">#        plt.gca().xaxis.set_major_locator(plt.NullLocator())</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">NullLocator</span><span class="p">())</span>
+        <span class="c1"># labels on each band</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])):</span>
+            <span class="c1"># print i, self.bands[i]</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
