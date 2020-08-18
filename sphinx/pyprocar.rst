@@ -113,6 +113,14 @@ pyprocar.scriptRepair module
    :undoc-members:
    :show-inheritance:
 
+pyprocar.scriptSpin\_asymmetry module
+-------------------------------------
+
+.. automodule:: pyprocar.scriptSpin_asymmetry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyprocar.scriptUnfold module
 ----------------------------
 

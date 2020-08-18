@@ -5,5 +5,4 @@ pyprocar API
    :maxdepth: 4
 
    pyprocar
-   scriptSpin_asymmetry
    setup
