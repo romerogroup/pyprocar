@@ -11,6 +11,19 @@ figsize = (12, 6)
 
 class DosPlot:
     def __init__(self, vaspxml="vasprun.xml"):
+        """
+        
+
+        Parameters
+        ----------
+        vaspxml : TYPE, optional
+            DESCRIPTION. The default is "vasprun.xml".
+
+        Returns
+        -------
+        None.
+
+        """
         from pychemia.code.vasp import VaspXML
 
         self.VaspXML = VaspXML(vaspxml)
@@ -25,6 +38,34 @@ class DosPlot:
             orientation="horizontal",
             labels=None,
     ):
+        """
+        
+
+        Parameters
+        ----------
+        spins : TYPE, optional
+            DESCRIPTION. The default is None.
+        spin_colors : TYPE, optional
+            DESCRIPTION. The default is None.
+        figsize : TYPE, optional
+            DESCRIPTION. The default is figsize.
+        ax : TYPE, optional
+            DESCRIPTION. The default is None.
+        orientation : TYPE, optional
+            DESCRIPTION. The default is "horizontal".
+        labels : TYPE, optional
+            DESCRIPTION. The default is None.
+         : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        fig : TYPE
+            DESCRIPTION.
+        ax : TYPE
+            DESCRIPTION.
+
+        """
 
         # dos is a pychemia density of states object
         # pychemia.visual.DensityOfStates
