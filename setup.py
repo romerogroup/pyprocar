@@ -9,6 +9,7 @@ setup(
     download_url="https://github.com/romerogroup/pyprocar/archive/5.5.3.tar.gz",
     packages=[
         "pyprocar",
+        "pyprocar.core",
         "pyprocar.utilsprocar",
         "pyprocar.procarparser",
         "pyprocar.procarfilefilter",
