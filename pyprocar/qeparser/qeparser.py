@@ -194,8 +194,7 @@ class QEParser:
 
         natomwfc = len(findall("state[\s#]*(\d*)", raw_natomwfc))
 
-        raw_wfc = findall(
-            "\(read from pseudopotential files\)\:.*\n\n\s*" + natomwfc * "(.*)\n",
+        raw_wfc = findall("\(read from pseudopotential files\)\:.*\n\n\s*" + natomwfc * "(.*)\n",
             kpdosout,
         )[0]
 
@@ -203,16 +202,27 @@ class QEParser:
 
         states_list = []
         state_dict = {}
-
+ 
         # Read in raw states
         for state in raw_wfc:
-            raw_states.append(
-                findall(
-                    "state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)",
-                    state,
-                )[0]
-            )
+                #print(state)
+
+                state_index = int(state.split('#')[1].split(':')[0])
+                atom_index  = int(state.split('atom')[1].split('(')[0])
+                atom_name   = str(state.split('(')[1].split(')')[0])
+                wfc_index   = int(state.split('wfc')[1].split('(')[0])
+                l_index     = int(state.split('wfc')[1].split('l=')[1].split('m=')[0])
+                m_index     = int(state.split('wfc')[1].split('m=')[1].split(')')[0])
+
+                append = [state_index, atom_index, atom_name, wfc_index, l_index, m_index]
+                #append = (findall("state #\s*([0-9]+):\s*atom\s*([0-9]+)\s*\((.*)\s\),\s*wfc\s*([0-9]+)\s\(l=\s*([0-9]+)\s*m=\s*([0-9]+)\)", state)[0])
+                #print(append)
+                raw_states.append(append)
+                #int(state.split('#')[1].split(':')[0])
+                #findall("state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)", state)[0])
+            #)
         # self.test = raw_states
+        #print(raw_states)
         for state in raw_states:
             state_dict = {}
             state_dict = {
@@ -522,7 +532,12 @@ class QEParser:
         fi = open(self.outfile, "r")
         data = fi.read()
         fi.close()
-        fermi = float(findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)[0])
+
+        data = data.split('the Fermi energy is')[1].split('ev')[0]
+        fermi = float(data)
+
+        #print((findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)))
+        #fermi = float(findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)[0])
         return fermi
 
     @property
