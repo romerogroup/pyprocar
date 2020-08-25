@@ -57,7 +57,7 @@ def dosplot(
     print("code          : ", code)
     print("vasprun file  : ", vasprunfile)
     print("mode          : ", mode)
-    print("spin          : ", spins)
+    print("spins         : ", spins)
     print("atoms list    : ", atoms)
     print("orbs. list    : ", orbitals)
     print("energy range  : ", elimit)

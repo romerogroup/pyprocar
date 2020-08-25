@@ -1,7 +1,9 @@
 """
-Created on May 17 2020 
+Created on May 17 2020
 @author: Pedram Tavadze
 """
+from ..vaspxml import VaspXML
+from ..core import DensityOfStates
 import matplotlib as mpl
 import matplotlib.pylab as plt
 import numpy as np
@@ -10,9 +12,11 @@ np.seterr(divide="ignore", invalid="ignore")
 figsize = (12, 6)
 
 class DosPlot:
-    def __init__(self, vaspxml="vasprun.xml"):
+    def __init__(self,
+                 vaspxml="vasprun.xml",
+                 interpolation_factor=None):
         """
-        
+
 
         Parameters
         ----------
@@ -24,78 +28,59 @@ class DosPlot:
         None.
 
         """
-        from pychemia.code.vasp import VaspXML
+        self.vaspxml = VaspXML(vaspxml)
+        energies = self.vaspxml.dos_total['energies']
+        total = []
+        for ispin in self.vaspxml.dos_total:
+            if ispin == 'energies':
+                continue
+            total.append(self.vaspxml.dos_total[ispin])
+        total = np.array(total).T
+        dos_projected = self.vaspxml.dos_projected
+        self.dos = DensityOfStates(energies=np.array(energies),
+                                   total=np.array(total),
+                                   projected=dos_projected,
+                                   interpolation_factor=interpolation_factor)
 
-        self.VaspXML = VaspXML(vaspxml)
         return
-    
-    def plot_total(
-            self,
-            spins=None,
-            spin_colors=None,
-            figsize=figsize,
-            ax=None,
-            orientation="horizontal",
-            labels=None,
-    ):
-        """
-        
 
-        Parameters
-        ----------
-        spins : TYPE, optional
-            DESCRIPTION. The default is None.
-        spin_colors : TYPE, optional
-            DESCRIPTION. The default is None.
-        figsize : TYPE, optional
-            DESCRIPTION. The default is figsize.
-        ax : TYPE, optional
-            DESCRIPTION. The default is None.
-        orientation : TYPE, optional
-            DESCRIPTION. The default is "horizontal".
-        labels : TYPE, optional
-            DESCRIPTION. The default is None.
-         : TYPE
-            DESCRIPTION.
+    def plot_total(self,
+                   spins=None,
+                   spin_colors=None,
+                   figsize=figsize,
+                   ax=None,
+                   orientation="horizontal",
+                   labels=None):
 
-        Returns
-        -------
-        fig : TYPE
-            DESCRIPTION.
-        ax : TYPE
-            DESCRIPTION.
-
-        """
-
-        # dos is a pychemia density of states object
-        # pychemia.visual.DensityOfStates
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
-        dos = self.VaspXML.dos_total
-        
-        fig, ax = plotter(
-            dos,
-            spins,
-            spin_colors,
-            figsize,
-            ax,
-            orientation,
-            labels,
-        )
 
+        energies = self.dos.energies
+        dos = np.array(self.dos.total)
+
+        if spins == None:
+            spins = np.arange(len(self.dos.total))
+
+        fig, ax = plotter(energies,
+                          dos,
+                          spins,
+                          spin_colors,
+                          figsize,
+                          ax,
+                          orientation,
+                          labels)
         return fig, ax
 
-    def plot_parametric_line(
-        self,
-        atoms=None,
-        spins=None,
-        orbitals=None,
-        spin_colors=None,
-        figsize=(12, 6),
-        ax=None,
-        orientation="horizontal",
-        labels=None,
-    ):
+    def plot_parametric_line(self,
+                             atoms=None,
+                             principal_q_numbers=[-1],
+                             orbitals=None,
+                             spins=None,
+                             spin_colors=None,
+                             figsize=(12, 6),
+                             ax=None,
+                             orientation="horizontal",
+                             labels=None):
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -107,35 +92,41 @@ class DosPlot:
             fig = ax.get_figure()
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
-        dos = self.VaspXML.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
 
-        fig, ax = plotter(
-            dos,
-            spins,
-            spin_colors,
-            figsize,
-            ax,
-            orientation,
-            labels,
-        )
+        if spins == None:
+            spins = np.arange(len(self.dos.total))
+
+        dos = self.dos.dos_sum(atoms,
+                               principal_q_numbers,
+                               orbitals,
+                               spins)
+
+
+        fig, ax = plotter(self.dos.energies,
+                          dos,
+                          spins,
+                          spin_colors,
+                          figsize,
+                          ax,
+                          orientation,
+                          labels)
         return fig, ax
 
-    def plot_parametric(
-        self,
-        atoms=None,
-        spins=None,
-        orbitals=None,
-        spin_colors=None,
-        cmap="jet",
-        vmin=0,
-        vmax=1,
-        elimit=None,
-        figsize=(12, 6),
-        ax=None,
-        orientation="horizontal",
-        labels=None,
-        plot_bar=True,
-    ):
+    def plot_parametric(self,
+                        atoms=None,
+                        principal_q_numbers=[-1],
+                        orbitals=None,
+                        spins=None,
+                        spin_colors=None,
+                        cmap="jet",
+                        vmin=0,
+                        vmax=1,
+                        elimit=None,
+                        figsize=(12, 6),
+                        ax=None,
+                        orientation="horizontal",
+                        labels=None,
+                        plot_bar=True):
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -148,9 +139,14 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
         cmap = mpl.cm.get_cmap(cmap)
-        dos_total = self.VaspXML.dos_total
-        dos_total_projected = self.VaspXML.dos_parametric()
-        dos = self.VaspXML.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
+        dos_total = np.array(self.dos.total)
+        dos_total_projected = self.dos.dos_sum()
+        if spins is None:
+            spins = np.arange(len(self.dos.total))
+        dos = self.dos.dos_sum(atoms=atoms,
+                               principal_q_numbers=principal_q_numbers,
+                               orbitals=orbitals,
+                               spins=spins)
 
         if ax is None:
             if orientation == "horizontal":
@@ -165,21 +161,24 @@ class DosPlot:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
             fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         if not elimit:
-            elimit = [dos.energies[0], dos.energies[1]]
-        cond1 = dos.energies >= elimit[0]
-        cond2 = dos.energies <= elimit[1]
+            elimit = [self.dos.energies.min(), self.dos.energies.max()]
+        cond1 = self.dos.energies >= elimit[0]
+        cond2 = self.dos.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
 
-        dE = dos.energies[1] - dos.energies[0]
+        # dE = dos.energies[1] - dos.energies[0]
+        if spins is None:
+            spins = np.arange(len(self.dos.total))
         for ispin in spins:
             x = []
             y_total = []
             bar_color = []
-            for idos in range(len(dos.energies[cond])):
-                x.append(dos.energies[cond][idos])
-                y = dos.dos[cond, ispin + 1][idos]
-                y_total.append(dos_total.dos[cond, ispin + 1][idos])
-                y_total_projected = dos_total_projected.dos[cond, ispin + 1][idos]
+            for idos in range(len(self.dos.energies[cond])):
+                x.append(self.dos.energies[cond][idos])
+                y = dos[ispin, cond][idos]
+
+                y_total.append(dos_total[ispin, cond][idos])
+                y_total_projected = dos_total_projected[ispin, cond][idos]
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
                     y_total[-1] *= -1
@@ -188,18 +187,14 @@ class DosPlot:
             if orientation == "horizontal":
                 #                ax.bar(x,y_total,dE,color=bar_color)
                 for idos in range(len(x) - 1):
-                    ax.fill_between(
-                        [x[idos], x[idos + 1]],
+                    ax.fill_between([x[idos], x[idos + 1]],
                         [y_total[idos], y_total[idos + 1]],
-                        color=bar_color[idos],
-                    )
+                        color=bar_color[idos])
             elif orientation == "vertical":
                 for idos in range(len(x) - 1):
-                    ax.fill_betweenx(
-                        [x[idos], x[idos + 1]],
+                    ax.fill_betweenx([x[idos], x[idos + 1]],
                         [y_total[idos], y_total[idos + 1]],
-                        color=bar_color[idos],
-                    )
+                        color=bar_color[idos])
         #                ax.barh(y_total,x,dE,color=bar_color)
 
         return fig, ax
@@ -520,8 +515,8 @@ class DosPlot:
                 ) / dos_projected_total.dos[cond, ispin + 1]
                 # y = ( dos.dos[:, ispin + 1] * dos_total.dos[:, ispin + 1]
                 # ) / dos_projected_total.dos[:, ispin + 1]
-                # y =  dos.dos[cond, ispin + 1] 
-                
+                # y =  dos.dos[cond, ispin + 1]
+
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
                     if orientation == "horizontal":
@@ -550,14 +545,14 @@ class DosPlot:
         return fig, ax
 
 
-def plotter(dos,
+def plotter(energies,
+            dos,
             spins,
             spin_colors,
             figsize,
             ax,
             orientation,
-            labels
-):
+            labels):
 
     if orientation == "horizontal":
         if ax is None:
@@ -566,27 +561,24 @@ def plotter(dos,
         else:
             fig = ax.get_figure()
 
-        x = dos.energies
+        x = energies
 
         for iy in spins:
-            y = dos.dos[:, iy + 1]
+
+            y = dos[iy, :]
             if iy > 0 and len(spins) > 1:
                 y *= -1
             if not labels is None:
-                ax.plot(
-                    x,
-                    y,
-                    "r-",
-                    color=spin_colors[iy],
-                    label=labels[iy],
-                )
+                ax.plot(x,
+                        y,
+                        "r-",
+                        color=spin_colors[iy],
+                        label=labels[iy])
             else:
-                ax.plot(
-                    x,
-                    y,
-                    "r-",
-                    color=spin_colors[iy],
-                )
+                ax.plot(x,
+                        y,
+                        "r-",
+                        color=spin_colors[iy])
 
     elif orientation == "vertical":
         if ax is None:
@@ -594,24 +586,20 @@ def plotter(dos,
             ax = fig.add_subplot(111)
         else:
             fig = plt.gca()
-        y = dos.energies
+        y = energies
         for ix in spins:
-            x = dos.dos[:, ix + 1]
+            x = dos[:, ix]
             if ix > 0 and len(spins) > 1:
                 x *= -1
             if not labels is None:
-                ax.plot(
-                    x,
-                    y,
-                    "r-",
-                    color=spin_colors[ix],
-                    label=labels[ix],
-                )
+                ax.plot(x,
+                        y,
+                        "r-",
+                        color=spin_colors[ix],
+                        label=labels[ix])
             else:
-                ax.plot(
-                    x,
-                    y,
-                    "r-",
-                    color=spin_colors[ix],
-                )
+                ax.plot(x,
+                        y,
+                        "r-",
+                        color=spin_colors[ix])
     return fig, ax

@@ -60,6 +60,7 @@ from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.doscarplot import DosPlot
+from pyprocar.vaspxml import VaspXML
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
