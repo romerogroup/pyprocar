@@ -12,22 +12,27 @@ np.seterr(divide="ignore", invalid="ignore")
 figsize = (12, 6)
 
 class DosPlot:
+<<<<<<< HEAD
     def __init__(self,
                  vaspxml="vasprun.xml",
                  interpolation_factor=None):
         """
 
 
+=======
+    def __init__(self, filename = "vasprun.xml"):
+        """
+        
+>>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
         Parameters
         ----------
         vaspxml : TYPE, optional
             DESCRIPTION. The default is "vasprun.xml".
-
         Returns
         -------
         None.
-
         """
+<<<<<<< HEAD
         self.vaspxml = VaspXML(vaspxml)
         energies = self.vaspxml.dos_total['energies']
         total = []
@@ -51,9 +56,68 @@ class DosPlot:
                    ax=None,
                    orientation="horizontal",
                    labels=None):
+=======
+        from pychemia.code.vasp import VaspXML
+        from ..lobsterparser import LobsterDOSParser
+        
+        if filename == "vasprun.xml":
+            self.parsedData = VaspXML(filename)
+        if filename == "DOSCAR.lobster":
+            self.parsedData = LobsterDOSParser(filename)
+        return
+    
+    def plot_total(
+            self,
+            spins=None,
+            spin_colors=None,
+            figsize=figsize,
+            ax=None,
+            orientation="horizontal",
+            labels=None,
+    ):
+        """
+        
+        Parameters
+        ----------
+        spins : TYPE, optional
+            DESCRIPTION. The default is None.
+        spin_colors : TYPE, optional
+            DESCRIPTION. The default is None.
+        figsize : TYPE, optional
+            DESCRIPTION. The default is figsize.
+        ax : TYPE, optional
+            DESCRIPTION. The default is None.
+        orientation : TYPE, optional
+            DESCRIPTION. The default is "horizontal".
+        labels : TYPE, optional
+            DESCRIPTION. The default is None.
+         : TYPE
+            DESCRIPTION.
+        Returns
+        -------
+        fig : TYPE
+            DESCRIPTION.
+        ax : TYPE
+            DESCRIPTION.
+        """
+>>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
 
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
+<<<<<<< HEAD
+=======
+        dos = self.parsedData.dos_total
+        
+        fig, ax = plotter(
+            dos,
+            spins,
+            spin_colors,
+            figsize,
+            ax,
+            orientation,
+            labels,
+        )
+>>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
 
         energies = self.dos.energies
         dos = np.array(self.dos.total)
@@ -92,6 +156,10 @@ class DosPlot:
             fig = ax.get_figure()
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
+<<<<<<< HEAD
+=======
+        dos = self.parsedData.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
+>>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
 
         if spins == None:
             spins = np.arange(len(self.dos.total))
@@ -139,6 +207,7 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
         cmap = mpl.cm.get_cmap(cmap)
+<<<<<<< HEAD
         dos_total = np.array(self.dos.total)
         dos_total_projected = self.dos.dos_sum()
         if spins is None:
@@ -147,6 +216,11 @@ class DosPlot:
                                principal_q_numbers=principal_q_numbers,
                                orbitals=orbitals,
                                spins=spins)
+=======
+        dos_total = self.parsedData.dos_total
+        dos_total_projected = self.parsedData.dos_parametric()
+        dos = self.parsedData.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
+>>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
 
         if ax is None:
             if orientation == "horizontal":
@@ -245,10 +319,10 @@ class DosPlot:
 
         if not elimit:
             elimit = [-2, 2]
-        dos_projected_total = self.VaspXML.dos_parametric(spin=spins, orbitals=orbitals)
-        if self.VaspXML.dos_projected[0].ncols == (1 + 3 + 5) * 2:
+        dos_projected_total = self.parsedData.dos_parametric(spin=spins, orbitals=orbitals)
+        if self.parsedData.dos_projected[0].ncols == (1 + 3 + 5) * 2:
             all_orbitals = "spd"
-        elif self.VaspXML.dos_projected[0].ncols == (1 + 3 + 5 + 7) + 1:
+        elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 + 7) + 1:
             all_orbitals = "spdf"
         else:
             all_orbitals = ""
@@ -266,21 +340,21 @@ class DosPlot:
                 label += "f"
             if label == "-" + all_orbitals:
                 label = ""
-        dos_total = self.VaspXML.dos_total
+        dos_total = self.parsedData.dos_total
 
-        cond1 = self.VaspXML.dos_total.energies >= elimit[0]
-        cond2 = self.VaspXML.dos_total.energies <= elimit[1]
+        cond1 = self.parsedData.dos_total.energies >= elimit[0]
+        cond2 = self.parsedData.dos_total.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
 
         for ispin in spins:
-            bottom = np.zeros_like(self.VaspXML.dos_total.energies[cond])
-            for ispc in range(len(self.VaspXML.species)):
+            bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
+            for ispc in range(len(self.parsedData.species)):
                 idx = (
-                    np.array(self.VaspXML.initial_structure.symbols)
-                    == self.VaspXML.species[ispc]
+                    np.array(self.parsedData.symbols)
+                    == self.parsedData.species[ispc]
                 )
                 atoms = list(np.where(idx)[0])
-                dos = self.VaspXML.dos_parametric(
+                dos = self.parsedData.dos_parametric(
                     atoms=atoms, spin=spins, orbitals=orbitals
                 )
 
@@ -302,7 +376,7 @@ class DosPlot:
                             bottom + y,
                             bottom,
                             color=colors[ispc],
-                            label=self.VaspXML.species[ispc] + label,
+                            label=self.parsedData.species[ispc] + label,
                         )
                     elif orientation == "vertical":
                         ax.fill_betweenx(
@@ -310,7 +384,7 @@ class DosPlot:
                             bottom + y,
                             bottom,
                             color=colors[ispc],
-                            label=self.VaspXML.species[ispc] + label,
+                            label=self.parsedData.species[ispc] + label,
                         )
                 bottom += y
         return fig, ax
@@ -355,34 +429,34 @@ class DosPlot:
         if atoms:
             print(
                 "The plot only considers atoms",
-                np.array(self.VaspXML.initial_structure.symbols)[atoms],
+                np.array(self.parsedData.symbols)[atoms],
             )
             atom_names = ""
             for ispc in np.unique(
-                np.array(self.VaspXML.initial_structure.symbols)[atoms]
+                np.array(self.parsedData.symbols)[atoms]
             ):
                 atom_names += ispc + "-"
         all_atoms = ""
-        for ispc in np.unique(np.array(self.VaspXML.initial_structure.symbols)):
+        for ispc in np.unique(np.array(self.parsedData.symbols)):
             all_atoms += ispc + "-"
         if atom_names == all_atoms:
             atom_names = ""
-        dos_total = self.VaspXML.dos_total
-        dos_projected_total = self.VaspXML.dos_parametric()
+        dos_total = self.parsedData.dos_total
+        dos_projected_total = self.parsedData.dos_parametric()
 
         if not elimit:
             elimit = [-2, 2]
-        dos_projected_total = self.VaspXML.dos_parametric()
+        dos_projected_total = self.parsedData.dos_parametric()
 
-        cond1 = self.VaspXML.dos_total.energies >= elimit[0]
-        cond2 = self.VaspXML.dos_total.energies <= elimit[1]
+        cond1 = self.parsedData.dos_total.energies >= elimit[0]
+        cond2 = self.parsedData.dos_total.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
         orb_names = ["s", "p", "d"]
         orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8]]
         for ispin in spins:
-            bottom = np.zeros_like(self.VaspXML.dos_total.energies[cond])
+            bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
             for iorb in range(3):
-                dos = self.VaspXML.dos_parametric(
+                dos = self.parsedData.dos_parametric(
                     atoms=atoms, spin=spins, orbitals=orb_l[iorb]
                 )
                 x = dos.energies[cond]
@@ -464,17 +538,17 @@ class DosPlot:
             fig = ax.get_figure()
         if not elimit:
             elimit = [-2, 2]
-        dos_total = self.VaspXML.dos_total
+        dos_total = self.parsedData.dos_total
 
-        if self.VaspXML.dos_projected[0].ncols == (1 + 3 + 5) * dos_total.ncols:
+        if self.parsedData.dos_projected[0].ncols == (1 + 3 + 5) * dos_total.ncols:
             all_orbitals = "spd"
-        elif self.VaspXML.dos_projected[0].ncols == (1 + 3 + 5 + 7) * dos_total.ncols:
+        elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 + 7) * dos_total.ncols:
             all_orbitals = "spdf"
         else:
             all_orbitals = ""
 
-        cond1 = self.VaspXML.dos_total.energies >= elimit[0]
-        cond2 = self.VaspXML.dos_total.energies <= elimit[1]
+        cond1 = self.parsedData.dos_total.energies >= elimit[0]
+        cond2 = self.parsedData.dos_total.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
         counter = 0
         colors = {}
@@ -483,17 +557,17 @@ class DosPlot:
             colors[ispc] = src_colors[counter]
             counter += 1
 
-        dos_projected_total = self.VaspXML.dos_parametric(spin=spins)
+        dos_projected_total = self.parsedData.dos_parametric(spin=spins)
 
         for ispin in spins:
-            bottom = np.zeros_like(self.VaspXML.dos_total.energies[cond])
+            bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
             # bottom = np.zeros_like(self.VaspXML.dos_total.energies[:])
             for ispc in items:
-                idx = np.array(self.VaspXML.initial_structure.symbols) == ispc
+                idx = np.array(self.parsedData.symbols) == ispc
                 atoms = list(np.where(idx)[0])
                 orbitals = items[ispc]
 
-                dos = self.VaspXML.dos_parametric(
+                dos = self.parsedData.dos_parametric(
                     atoms=atoms, spin=spins, orbitals=orbitals
                 )
 
