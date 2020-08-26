@@ -12,18 +12,11 @@ np.seterr(divide="ignore", invalid="ignore")
 figsize = (12, 6)
 
 class DosPlot:
-<<<<<<< HEAD
     def __init__(self,
                  vaspxml="vasprun.xml",
                  interpolation_factor=None):
         """
 
-
-=======
-    def __init__(self, filename = "vasprun.xml"):
-        """
-        
->>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
         Parameters
         ----------
         vaspxml : TYPE, optional
@@ -32,7 +25,7 @@ class DosPlot:
         -------
         None.
         """
-<<<<<<< HEAD
+
         self.vaspxml = VaspXML(vaspxml)
         energies = self.vaspxml.dos_total['energies']
         total = []
@@ -56,16 +49,16 @@ class DosPlot:
                    ax=None,
                    orientation="horizontal",
                    labels=None):
-=======
+
         from pychemia.code.vasp import VaspXML
         from ..lobsterparser import LobsterDOSParser
-        
+
         if filename == "vasprun.xml":
             self.parsedData = VaspXML(filename)
         if filename == "DOSCAR.lobster":
             self.parsedData = LobsterDOSParser(filename)
         return
-    
+
     def plot_total(
             self,
             spins=None,
@@ -76,7 +69,7 @@ class DosPlot:
             labels=None,
     ):
         """
-        
+
         Parameters
         ----------
         spins : TYPE, optional
@@ -100,14 +93,13 @@ class DosPlot:
         ax : TYPE
             DESCRIPTION.
         """
->>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
+
 
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
-<<<<<<< HEAD
-=======
+
         dos = self.parsedData.dos_total
-        
+
         fig, ax = plotter(
             dos,
             spins,
@@ -117,7 +109,7 @@ class DosPlot:
             orientation,
             labels,
         )
->>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
+
 
         energies = self.dos.energies
         dos = np.array(self.dos.total)
@@ -156,10 +148,9 @@ class DosPlot:
             fig = ax.get_figure()
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
-<<<<<<< HEAD
-=======
+
         dos = self.parsedData.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
->>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
+
 
         if spins == None:
             spins = np.arange(len(self.dos.total))
@@ -207,7 +198,7 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
         cmap = mpl.cm.get_cmap(cmap)
-<<<<<<< HEAD
+
         dos_total = np.array(self.dos.total)
         dos_total_projected = self.dos.dos_sum()
         if spins is None:
@@ -216,11 +207,11 @@ class DosPlot:
                                principal_q_numbers=principal_q_numbers,
                                orbitals=orbitals,
                                spins=spins)
-=======
+
         dos_total = self.parsedData.dos_total
         dos_total_projected = self.parsedData.dos_parametric()
         dos = self.parsedData.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
->>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
+
 
         if ax is None:
             if orientation == "horizontal":
