@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,18 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -35,6 +30,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Band gap calculation" href="bandgap.html" />
@@ -52,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -75,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -114,7 +112,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -153,7 +150,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
         
@@ -218,37 +215,6 @@ Usage:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<span class="target" id="module-pyprocar.scriptUnfold"></span><dl class="function">
-<dt>
-<code class="sig-name descname">unfold(fname='PROCAR', poscar='POSCAR', outcar='OUTCAR', supercell_matrix=array([[2, 0, 0],</code></dt>
-<dt>
-<code class="sig-name descname">[0, 2, 0],</code></dt>
-<dt>
-<code class="sig-name descname">[0, 0, 2]]), ispin=None, efermi=None, shift_efermi=True, elimit=(-5, 15), kticks=[0, 36, 54, 86, 110, 147, 165, 199], knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'], print_kpts=False, show_band=True, width=4, color='blue', savetab='unfold_result.csv', savefig='unfolded_band.png', exportplt=False)</code></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fname</strong> (<em>PROCAR filename.</em>) – </p></li>
-<li><p><strong>poscar</strong> (<em>POSCAR filename</em>) – </p></li>
-<li><p><strong>outcar</strong> (<em>OUTCAR filename</em><em>, </em><em>for reading fermi energy. You can also use efermi and set outcar=None</em>) – </p></li>
-<li><p><strong>supercell_matrix</strong> (<em>supercell matrix from primitive cell to supercell</em>) – </p></li>
-<li><p><strong>ispin</strong> (<em>For non-spin polarized system</em><em>, </em><em>ispin=None.</em>) – For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</p></li>
-<li><p><strong>efermi</strong> (<em>Fermi energy</em>) – </p></li>
-<li><p><strong>elimit</strong> (<em>range of energy to be plotted.</em>) – </p></li>
-<li><p><strong>kticks</strong> (<em>the indices of K points which has labels given in knames.</em>) – </p></li>
-<li><p><strong>knames</strong> (<em>see kticks</em>) – </p></li>
-<li><p><strong>print_kpts</strong> (<em>print all the kpoints to screen. This is to help find the kticks and knames.</em>) – </p></li>
-<li><p><strong>show_band</strong> (<em>whether to plot the bands before unfolding.</em>) – </p></li>
-<li><p><strong>width</strong> (<em>the width of the unfolded band.</em>) – </p></li>
-<li><p><strong>color</strong> (<em>color of the unfoled band.</em>) – </p></li>
-<li><p><strong>savetab</strong> (<em>the csv file name of which  the table of unfolding result will be written into.</em>) – </p></li>
-<li><p><strong>savefig</strong> (<em>the file name of which the figure will be saved.</em>) – </p></li>
-<li><p><strong>exportplt</strong> (<em>flag to export plot as matplotlib.pyplot object.</em>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 </div>
 </div>
 
@@ -272,19 +238,11 @@ Usage:</p>
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -295,6 +253,7 @@ Usage:</p>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
