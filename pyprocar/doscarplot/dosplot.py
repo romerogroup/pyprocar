@@ -11,10 +11,9 @@ import numpy as np
 np.seterr(divide="ignore", invalid="ignore")
 figsize = (12, 6)
 
+
 class DosPlot:
-    def __init__(self,
-                 vaspxml="vasprun.xml",
-                 interpolation_factor=None):
+    def __init__(self, vaspxml="vasprun.xml", interpolation_factor=None):
         """
 
         Parameters
@@ -42,6 +41,23 @@ class DosPlot:
 
         return
 
+    # def plot_total(self,
+    #                spins=None,
+    #                spin_colors=None,
+    #                figsize=figsize,
+    #                ax=None,
+    #                orientation="horizontal",
+    #                labels=None):
+
+    # from pychemia.code.vasp import VaspXML
+    # from ..lobsterparser import LobsterDOSParser
+
+    # if filename == "vasprun.xml":
+    #     self.parsedData = VaspXML(filename)
+    # if filename == "DOSCAR.lobster":
+    #     self.parsedData = LobsterDOSParser(filename)
+    # return
+
     def plot_total(self,
                    spins=None,
                    spin_colors=None,
@@ -49,25 +65,6 @@ class DosPlot:
                    ax=None,
                    orientation="horizontal",
                    labels=None):
-
-        from pychemia.code.vasp import VaspXML
-        from ..lobsterparser import LobsterDOSParser
-
-        if filename == "vasprun.xml":
-            self.parsedData = VaspXML(filename)
-        if filename == "DOSCAR.lobster":
-            self.parsedData = LobsterDOSParser(filename)
-        return
-
-    def plot_total(
-            self,
-            spins=None,
-            spin_colors=None,
-            figsize=figsize,
-            ax=None,
-            orientation="horizontal",
-            labels=None,
-    ):
         """
 
         Parameters
@@ -94,11 +91,13 @@ class DosPlot:
             DESCRIPTION.
         """
 
-
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
 
-        dos = self.parsedData.dos_total
+        # dos = self.parsedData.dos_total
+
+        energies = self.dos.energies
+        dos = np.array(self.dos.total)
 
         fig, ax = plotter(
             dos,
@@ -110,21 +109,11 @@ class DosPlot:
             labels,
         )
 
-
-        energies = self.dos.energies
-        dos = np.array(self.dos.total)
-
-        if spins == None:
+        if spins is None:
             spins = np.arange(len(self.dos.total))
 
-        fig, ax = plotter(energies,
-                          dos,
-                          spins,
-                          spin_colors,
-                          figsize,
-                          ax,
-                          orientation,
-                          labels)
+        fig, ax = plotter(energies, dos, spins, spin_colors, figsize, ax,
+                          orientation, labels)
         return fig, ax
 
     def plot_parametric_line(self,
@@ -149,26 +138,17 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
 
-        dos = self.parsedData.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
+        dos = self.parsedData.dos_parametric(atoms=atoms,
+                                             spin=spins,
+                                             orbitals=orbitals)
 
-
-        if spins == None:
+        if spins is None:
             spins = np.arange(len(self.dos.total))
 
-        dos = self.dos.dos_sum(atoms,
-                               principal_q_numbers,
-                               orbitals,
-                               spins)
+        dos = self.dos.dos_sum(atoms, principal_q_numbers, orbitals, spins)
 
-
-        fig, ax = plotter(self.dos.energies,
-                          dos,
-                          spins,
-                          spin_colors,
-                          figsize,
-                          ax,
-                          orientation,
-                          labels)
+        fig, ax = plotter(self.dos.energies, dos, spins, spin_colors, figsize,
+                          ax, orientation, labels)
         return fig, ax
 
     def plot_parametric(self,
@@ -210,8 +190,9 @@ class DosPlot:
 
         dos_total = self.parsedData.dos_total
         dos_total_projected = self.parsedData.dos_parametric()
-        dos = self.parsedData.dos_parametric(atoms=atoms, spin=spins, orbitals=orbitals)
-
+        dos = self.parsedData.dos_parametric(atoms=atoms,
+                                             spin=spins,
+                                             orbitals=orbitals)
 
         if ax is None:
             if orientation == "horizontal":
@@ -253,43 +234,35 @@ class DosPlot:
                 #                ax.bar(x,y_total,dE,color=bar_color)
                 for idos in range(len(x) - 1):
                     ax.fill_between([x[idos], x[idos + 1]],
-                        [y_total[idos], y_total[idos + 1]],
-                        color=bar_color[idos])
+                                    [y_total[idos], y_total[idos + 1]],
+                                    color=bar_color[idos])
             elif orientation == "vertical":
                 for idos in range(len(x) - 1):
                     ax.fill_betweenx([x[idos], x[idos + 1]],
-                        [y_total[idos], y_total[idos + 1]],
-                        color=bar_color[idos])
+                                     [y_total[idos], y_total[idos + 1]],
+                                     color=bar_color[idos])
         #                ax.barh(y_total,x,dE,color=bar_color)
 
         return fig, ax
 
     def plot_stack_species(
-        self,
-        spins=None,
-        orbitals=None,
-        spin_colors=None,
-        colors=None,
-        elimit=None,
-        figsize=(12, 6),
-        ax=None,
-        orientation="horizontal",
+            self,
+            spins=None,
+            orbitals=None,
+            spin_colors=None,
+            colors=None,
+            elimit=None,
+            figsize=(12, 6),
+            ax=None,
+            orientation="horizontal",
     ):
         if spin_colors is None:
             spin_colors = [(0, 0, 1), (1, 0, 0)]
         if colors is None:
-            colors=['red',
-                    'green',
-                    'blue',
-                    'cyan',
-                    'magenta',
-                    'yellow',
-                    'orange',
-                    'purple',
-                    'brown',
-                    'navy',
-                    'maroon',
-                    'olive']
+            colors = [
+                'red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'orange',
+                'purple', 'brown', 'navy', 'maroon', 'olive'
+            ]
 
         #        if ax is None:
         #            if orientation == 'horizontal':
@@ -310,7 +283,8 @@ class DosPlot:
 
         if not elimit:
             elimit = [-2, 2]
-        dos_projected_total = self.parsedData.dos_parametric(spin=spins, orbitals=orbitals)
+        dos_projected_total = self.parsedData.dos_parametric(spin=spins,
+                                                             orbitals=orbitals)
         if self.parsedData.dos_projected[0].ncols == (1 + 3 + 5) * 2:
             all_orbitals = "spd"
         elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 + 7) + 1:
@@ -340,26 +314,29 @@ class DosPlot:
         for ispin in spins:
             bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
             for ispc in range(len(self.parsedData.species)):
-                idx = (
-                    np.array(self.parsedData.symbols)
-                    == self.parsedData.species[ispc]
-                )
+                idx = (np.array(
+                    self.parsedData.symbols) == self.parsedData.species[ispc])
                 atoms = list(np.where(idx)[0])
-                dos = self.parsedData.dos_parametric(
-                    atoms=atoms, spin=spins, orbitals=orbitals
-                )
+                dos = self.parsedData.dos_parametric(atoms=atoms,
+                                                     spin=spins,
+                                                     orbitals=orbitals)
 
                 x = dos.energies[cond]
-                y = (
-                    dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
-                ) / dos_projected_total.dos[cond, ispin + 1]
+                y = (dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
+                     ) / dos_projected_total.dos[cond, ispin + 1]
 
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
                     if orientation == "horizontal":
-                        ax.fill_between(x, bottom + y, bottom, color=colors[ispc])
+                        ax.fill_between(x,
+                                        bottom + y,
+                                        bottom,
+                                        color=colors[ispc])
                     elif orientation == "vertical":
-                        ax.fill_betweenx(x, bottom + y, bottom, color=colors[ispc])
+                        ax.fill_betweenx(x,
+                                         bottom + y,
+                                         bottom,
+                                         color=colors[ispc])
                 else:
                     if orientation == "horizontal":
                         ax.fill_between(
@@ -381,31 +358,23 @@ class DosPlot:
         return fig, ax
 
     def plot_stack_orbitals(
-        self,
-        spins=None,
-        atoms=None,
-        spin_colors=None,
-        colors=None,
-        elimit=None,
-        figsize=(12, 6),
-        ax=None,
-        orientation="horizontal",
+            self,
+            spins=None,
+            atoms=None,
+            spin_colors=None,
+            colors=None,
+            elimit=None,
+            figsize=(12, 6),
+            ax=None,
+            orientation="horizontal",
     ):
         if spin_colors is None:
             spin_colors = [(0, 0, 0), (0, 0, 0)]
         if colors is None:
-            colors=['red',
-                    'blue',
-                    'green',
-                    'cyan',
-                    'magenta',
-                    'yellow',
-                    'orange',
-                    'purple',
-                    'brown',
-                    'navy',
-                    'maroon',
-                    'olive']
+            colors = [
+                'red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'orange',
+                'purple', 'brown', 'navy', 'maroon', 'olive'
+            ]
 
         if ax is None:
             if orientation == "horizontal":
@@ -423,9 +392,7 @@ class DosPlot:
                 np.array(self.parsedData.symbols)[atoms],
             )
             atom_names = ""
-            for ispc in np.unique(
-                np.array(self.parsedData.symbols)[atoms]
-            ):
+            for ispc in np.unique(np.array(self.parsedData.symbols)[atoms]):
                 atom_names += ispc + "-"
         all_atoms = ""
         for ispc in np.unique(np.array(self.parsedData.symbols)):
@@ -447,21 +414,26 @@ class DosPlot:
         for ispin in spins:
             bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
             for iorb in range(3):
-                dos = self.parsedData.dos_parametric(
-                    atoms=atoms, spin=spins, orbitals=orb_l[iorb]
-                )
+                dos = self.parsedData.dos_parametric(atoms=atoms,
+                                                     spin=spins,
+                                                     orbitals=orb_l[iorb])
                 x = dos.energies[cond]
-                y = (
-                    dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
-                ) / dos_projected_total.dos[cond, ispin + 1]
+                y = (dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
+                     ) / dos_projected_total.dos[cond, ispin + 1]
                 y = np.nan_to_num(y, 0)
 
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
                     if orientation == "horizontal":
-                        ax.fill_between(x, bottom + y, bottom, color=colors[iorb])
+                        ax.fill_between(x,
+                                        bottom + y,
+                                        bottom,
+                                        color=colors[iorb])
                     elif orientation == "vertical":
-                        ax.fill_betweenx(x, bottom + y, bottom, color=colors[iorb])
+                        ax.fill_betweenx(x,
+                                         bottom + y,
+                                         bottom,
+                                         color=colors[iorb])
                 else:
                     if orientation == "horizontal":
                         ax.fill_between(
@@ -483,40 +455,31 @@ class DosPlot:
         return fig, ax
 
     def plot_stack(
-        self,
-        items={},
-        spins=None,
-        spin_colors=None,
-        colors=None,
-        elimit=None,
-        figsize=(12, 6),
-        ax=None,
-        orientation="horizontal",
+            self,
+            items={},
+            spins=None,
+            spin_colors=None,
+            colors=None,
+            elimit=None,
+            figsize=(12, 6),
+            ax=None,
+            orientation="horizontal",
     ):
 
         if len(items) == 0:
             print(
                 """Please provide the stacking items in which you want to plot,
                   example : {'Sr':[1,2,3],'O':[4,5,6,7,8]} will plot the stacked
-                  plots of p orbitals of Sr and d orbitals of Oxygen."""
-            )
+                  plots of p orbitals of Sr and d orbitals of Oxygen.""")
 
         if spin_colors is None:
             spin_colors = [(0, 0, 1), (1, 0, 0)]
         src_colors = colors
         if src_colors is None:
-            src_colors=['red',
-                        'blue',
-                        'green',
-                        'cyan',
-                        'magenta',
-                        'yellow',
-                        'orange',
-                        'purple',
-                        'brown',
-                        'navy',
-                        'maroon',
-                        'olive']
+            src_colors = [
+                'red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'orange',
+                'purple', 'brown', 'navy', 'maroon', 'olive'
+            ]
 
         if ax is None:
             if orientation == "horizontal":
@@ -531,9 +494,11 @@ class DosPlot:
             elimit = [-2, 2]
         dos_total = self.parsedData.dos_total
 
-        if self.parsedData.dos_projected[0].ncols == (1 + 3 + 5) * dos_total.ncols:
+        if self.parsedData.dos_projected[0].ncols == (1 + 3 +
+                                                      5) * dos_total.ncols:
             all_orbitals = "spd"
-        elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 + 7) * dos_total.ncols:
+        elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 +
+                                                        7) * dos_total.ncols:
             all_orbitals = "spdf"
         else:
             all_orbitals = ""
@@ -558,9 +523,9 @@ class DosPlot:
                 atoms = list(np.where(idx)[0])
                 orbitals = items[ispc]
 
-                dos = self.parsedData.dos_parametric(
-                    atoms=atoms, spin=spins, orbitals=orbitals
-                )
+                dos = self.parsedData.dos_parametric(atoms=atoms,
+                                                     spin=spins,
+                                                     orbitals=orbitals)
 
                 label = "-"
                 if sum([x in orbitals for x in [0]]) == 1:
@@ -569,15 +534,16 @@ class DosPlot:
                     label += "p"
                 if sum([x in orbitals for x in [4, 5, 6, 7, 8]]) == 5:
                     label += "d"
-                if sum([x in orbitals for x in [9, 10, 11, 12, 13, 14, 15]]) == 7:
+                if sum([x in orbitals
+                        for x in [9, 10, 11, 12, 13, 14, 15]]) == 7:
                     label += "f"
                 if label == "-" + all_orbitals:
                     label = ""
                 x = dos.energies[cond]
                 # x = dos.energies[:]
 
-                y = ( dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
-                ) / dos_projected_total.dos[cond, ispin + 1]
+                y = (dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
+                     ) / dos_projected_total.dos[cond, ispin + 1]
                 # y = ( dos.dos[:, ispin + 1] * dos_total.dos[:, ispin + 1]
                 # ) / dos_projected_total.dos[:, ispin + 1]
                 # y =  dos.dos[cond, ispin + 1]
@@ -585,9 +551,15 @@ class DosPlot:
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
                     if orientation == "horizontal":
-                        ax.fill_between(x, bottom + y, bottom, color=colors[ispc])
+                        ax.fill_between(x,
+                                        bottom + y,
+                                        bottom,
+                                        color=colors[ispc])
                     elif orientation == "vertical":
-                        ax.fill_betweenx(x, bottom + y, bottom, color=colors[ispc])
+                        ax.fill_betweenx(x,
+                                         bottom + y,
+                                         bottom,
+                                         color=colors[ispc])
                 else:
                     if orientation == "horizontal":
                         ax.fill_between(
@@ -617,7 +589,7 @@ def plotter(energies,
             figsize,
             ax,
             orientation,
-            labels):
+            labels=None):
 
     if orientation == "horizontal":
         if ax is None:
@@ -634,16 +606,9 @@ def plotter(energies,
             if iy > 0 and len(spins) > 1:
                 y *= -1
             if not labels is None:
-                ax.plot(x,
-                        y,
-                        "r-",
-                        color=spin_colors[iy],
-                        label=labels[iy])
+                ax.plot(x, y, "r-", color=spin_colors[iy], label=labels[iy])
             else:
-                ax.plot(x,
-                        y,
-                        "r-",
-                        color=spin_colors[iy])
+                ax.plot(x, y, "r-", color=spin_colors[iy])
 
     elif orientation == "vertical":
         if ax is None:
@@ -657,14 +622,7 @@ def plotter(energies,
             if ix > 0 and len(spins) > 1:
                 x *= -1
             if not labels is None:
-                ax.plot(x,
-                        y,
-                        "r-",
-                        color=spin_colors[ix],
-                        label=labels[ix])
+                ax.plot(x, y, "r-", color=spin_colors[ix], label=labels[ix])
             else:
-                ax.plot(x,
-                        y,
-                        "r-",
-                        color=spin_colors[ix])
+                ax.plot(x, y, "r-", color=spin_colors[ix])
     return fig, ax

@@ -2,17 +2,17 @@
 Created on May 17 2020
 @author: Pedram Tavadze
 """
-from .elkparser import ElkParser
+# from .elkparser import ElkParser
 from .splash import welcome
 from .doscarplot import DosPlot
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 # import matplotlib
-plt.rcParams["mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
-#                                                   'bf', 'default', 'bb', 'frak',
-#                                                   'circled', 'scr', 'regular']
+plt.rcParams["mathtext.default"] = "regular"
+# Roman ['rm', 'cal', 'it', 'tt', 'sf',
+#        'bf', 'default', 'bb', 'frak',
+#        'circled', 'scr', 'regular']
 plt.rcParams["font.family"] = "Georgia"
 plt.rc("font", size=18)  # controls default text sizes
 plt.rc("axes", titlesize=22)  # fontsize of the axes title
@@ -24,28 +24,27 @@ plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
 
 
 def dosplot(
-    vasprunfile="vasprun.xml",
-    mode="plain",
-    orientation="horizontal",
-    spin_colors=None,
-    colors=None,
-    spins=None,
-    atoms=None,
-    orbitals=None,
-    elimit=None,
-    cmap="jet",
-    vmax=None,
-    vmin=None,
-    grid=True,
-    savefig=None,
-    title=None,
-    plot_total=True,
-    code="vasp",
-    labels=None,
-    items={},
-    ax=None,
+        vasprunfile="vasprun.xml",
+        mode="plain",
+        orientation="horizontal",
+        spin_colors=None,
+        colors=None,
+        spins=None,
+        atoms=None,
+        orbitals=None,
+        elimit=None,
+        cmap="jet",
+        vmax=None,
+        vmin=None,
+        grid=True,
+        savefig=None,
+        title=None,
+        plot_total=True,
+        code="vasp",
+        labels=None,
+        items={},
+        ax=None,
 ):
-
     """This function plots density of states
 
     """
@@ -79,8 +78,8 @@ def dosplot(
             spins = list(np.arange(vaspxml.dos_total.ncols))
         if orbitals is None:
             orbitals = list(
-                np.arange((len(vaspxml.dos_projected[0].labels) - 1) // 2, dtype=int)
-            )
+                np.arange((len(vaspxml.dos_projected[0].labels) - 1) // 2,
+                          dtype=int))
         if elimit is None:
             elimit = [
                 vaspxml.dos_total.energies.min(),
@@ -109,7 +108,9 @@ def dosplot(
                 labels=labels,
             )
             dos = dos_plot.VaspXML.dos_parametric(
-                atoms=atoms, spin=spins, orbitals=orbitals,
+                atoms=atoms,
+                spin=spins,
+                orbitals=orbitals,
             )
         else:
             fig, ax1 = dos_plot.plot_total(
@@ -265,7 +266,10 @@ def dosplot(
     cond = np.all([cond1, cond2], axis=0)
 
     if len(spins) > 1:
-        ylim = [dos.values[cond][:, 1].max() * -1.1, dos.values[cond][:, 0].max() * 1.1]
+        ylim = [
+            dos.values[cond][:, 1].max() * -1.1,
+            dos.values[cond][:, 0].max() * 1.1
+        ]
     else:
         ylim = [0, dos.dos[cond][:, spins[0] + 1].max() * 1.1]
 
@@ -295,7 +299,8 @@ def dosplot(
     if savefig:
 
         fig.savefig(savefig, bbox_inches="tight")
-        plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+        plt.close(
+        )  # Added by Nicholas Pike to close memory issue of looping and creating many figures
         return None, None
     else:
         plt.show()

@@ -24,7 +24,6 @@ __date__ = "Aug 3rd, 2020"
 # You should have received a copy of the GNU Lesser General Public License
 # along with pyprocar.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import logging
 import re
 import sys
@@ -50,7 +49,6 @@ from pyprocar.qeparser import QEParser
 # Lobster
 from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser
 
-
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.fermisurface3d import FermiSurface3D
 from . import fermisurface3d
@@ -61,11 +59,8 @@ from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.doscarplot import DosPlot
-<<<<<<< HEAD
 from pyprocar.vaspxml import VaspXML
-=======
-from pyprocar.core import DensityOfStates
->>>>>>> e937792a3f68b211f23cc04a4ff068e4b6ae5535
+from pyprocar import core
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
@@ -82,4 +77,3 @@ from .scriptUnfold import unfold
 from .scriptVector import Vector
 from .scriptBandGap import bandgap
 from .splash import welcome
-
