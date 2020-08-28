@@ -5,7 +5,7 @@ Created on Wed Aug 19 20:49:03 2020
 @author: Pedram Tavadze, Logan Lang
 """
 
-from ..core import Structure
+from ..core import Structure, DensityOfStates
 from numpy import array
 import xml.etree.ElementTree as ET
 import os
@@ -86,6 +86,20 @@ class VaspXML(collections.abc.Mapping):
             return None, None
 
     @property
+    def dos(self, interpolation_factor=None):
+        energies = self.dos_total['energies']
+        total = []
+        for ispin in self.dos_total:
+            if ispin == 'energies':
+                continue
+            total.append(self.dos_total[ispin])
+        total = np.array(total).T
+        return DensityOfStates(energies=energies,
+                               total=total,
+                               projected=self.dos_projected,
+                               interpolation_factor=interpolation_factor)
+
+    @property
     def dos_to_dict(self):
         """
         Returns the complete density (total,projected) of states as a python dictionary
@@ -102,6 +116,7 @@ class VaspXML(collections.abc.Mapping):
         """
         dos_total, labels = self._get_dos_total()
         dos_total['energies'] -= self.fermi
+
         return dos_total
 
     @property
@@ -205,6 +220,13 @@ class VaspXML(collections.abc.Mapping):
                            lattice=ist['cell'])
             structures.append(st)
         return structures
+
+    @property
+    def structure(self):
+        """
+        crystal structure of the last step
+        """
+        return self.structures[-1]
 
     @property
     def forces(self):

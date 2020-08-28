@@ -2,6 +2,7 @@
 Created on May 17 2020
 @author: Pedram Tavadze
 """
+
 from ..vaspxml import VaspXML
 from ..core import DensityOfStates
 import matplotlib as mpl
@@ -13,7 +14,7 @@ figsize = (12, 6)
 
 
 class DosPlot:
-    def __init__(self, vaspxml="vasprun.xml", interpolation_factor=None):
+    def __init__(self, dos=None, structure=None):
         """
 
         Parameters
@@ -25,19 +26,17 @@ class DosPlot:
         None.
         """
 
-        self.vaspxml = VaspXML(vaspxml)
-        energies = self.vaspxml.dos_total['energies']
-        total = []
-        for ispin in self.vaspxml.dos_total:
-            if ispin == 'energies':
-                continue
-            total.append(self.vaspxml.dos_total[ispin])
-        total = np.array(total).T
-        dos_projected = self.vaspxml.dos_projected
-        self.dos = DensityOfStates(energies=np.array(energies),
-                                   total=np.array(total),
-                                   projected=dos_projected,
-                                   interpolation_factor=interpolation_factor)
+        # self.vaspxml = VaspXML(vaspxml)
+        # energies = self.vaspxml.dos_total['energies']
+        # total = []
+        # for ispin in self.vaspxml.dos_total:
+        #     if ispin == 'energies':
+        #         continue
+        #     total.append(self.vaspxml.dos_total[ispin])
+        # total = np.array(total).T
+        # dos_projected = self.vaspxml.dos_projected
+        self.structure = structure
+        self.dos = dos
 
         return
 
@@ -99,15 +98,16 @@ class DosPlot:
         energies = self.dos.energies
         dos = np.array(self.dos.total)
 
-        fig, ax = plotter(
-            dos,
-            spins,
-            spin_colors,
-            figsize,
-            ax,
-            orientation,
-            labels,
-        )
+        # fig, ax = plotter(
+        #     energies=energies,
+        #     dos=dos,
+        #     spins=spins,
+        #     spin_colors=spin_colors,
+        #     figsize=figsize,
+        #     ax=ax,
+        #     orientation=orientation,
+        #     labels=labels,
+        # )
 
         if spins is None:
             spins = np.arange(len(self.dos.total))
@@ -126,6 +126,7 @@ class DosPlot:
                              ax=None,
                              orientation="horizontal",
                              labels=None):
+
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -138,9 +139,9 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
 
-        dos = self.parsedData.dos_parametric(atoms=atoms,
-                                             spin=spins,
-                                             orbitals=orbitals)
+        # dos = self.parsedData.dos_parametric(atoms=atoms,
+        # spin=spins,
+        # orbitals=orbitals)
 
         if spins is None:
             spins = np.arange(len(self.dos.total))
@@ -183,26 +184,18 @@ class DosPlot:
         dos_total_projected = self.dos.dos_sum()
         if spins is None:
             spins = np.arange(len(self.dos.total))
+
         dos = self.dos.dos_sum(atoms=atoms,
                                principal_q_numbers=principal_q_numbers,
                                orbitals=orbitals,
                                spins=spins)
+        # dos_total = dos
+        # dos_total = self.parsedData.dos_total
+        # dos_total_projected = self.parsedData.dos_parametric()
+        # dos = self.parsedData.dos_parametric(atoms=atoms,
+        #                                     spin=spins,
+        #                                      orbitals=orbitals)
 
-        dos_total = self.parsedData.dos_total
-        dos_total_projected = self.parsedData.dos_parametric()
-        dos = self.parsedData.dos_parametric(atoms=atoms,
-                                             spin=spins,
-                                             orbitals=orbitals)
-
-        if ax is None:
-            if orientation == "horizontal":
-                fig = plt.figure(figsize=figsize)
-                ax = fig.add_subplot(111)
-            elif orientation == "vertical":
-                fig = plt.figure(figsize=(figsize[1], figsize[0]))
-                ax = fig.add_subplot(111)
-        else:
-            fig = ax.get_figure()
         if plot_bar:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
             fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
@@ -229,6 +222,7 @@ class DosPlot:
                     y *= -1
                     y_total[-1] *= -1
                     y_total_projected *= -1
+
                 bar_color.append(cmap(y / (y_total_projected * (vmax - vmin))))
             if orientation == "horizontal":
                 #                ax.bar(x,y_total,dE,color=bar_color)
@@ -241,14 +235,14 @@ class DosPlot:
                     ax.fill_betweenx([x[idos], x[idos + 1]],
                                      [y_total[idos], y_total[idos + 1]],
                                      color=bar_color[idos])
-        #                ax.barh(y_total,x,dE,color=bar_color)
 
         return fig, ax
 
     def plot_stack_species(
             self,
-            spins=None,
+            principal_q_numbers=[-1],
             orbitals=None,
+            spins=None,
             spin_colors=None,
             colors=None,
             elimit=None,
@@ -264,13 +258,6 @@ class DosPlot:
                 'purple', 'brown', 'navy', 'maroon', 'olive'
             ]
 
-        #        if ax is None:
-        #            if orientation == 'horizontal':
-        #                fig = plt.figure(figsize=figsize)
-        #                ax = fig.add_subplot(111)
-        #            elif orientation == 'vertical':
-        #                fig = plt.figure(figsize=(figsize[1], figsize[0]))
-        #                ax = fig.add_subplot(111)
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -281,16 +268,21 @@ class DosPlot:
         else:
             fig = ax.get_figure()
 
+        if spins is None:
+            spins = np.arange(len(self.dos.total))
+
         if not elimit:
-            elimit = [-2, 2]
-        dos_projected_total = self.parsedData.dos_parametric(spin=spins,
-                                                             orbitals=orbitals)
-        if self.parsedData.dos_projected[0].ncols == (1 + 3 + 5) * 2:
+            elimit = [self.dos.energies.min(), self.dos.energies.max()]
+        # dos_projected_total = self.parsedData.dos_parametric(spin=spins,
+        # orbitals=orbitals)
+
+        if len(self.dos.projected[0][0]) == 1 + 3 + 5:
             all_orbitals = "spd"
-        elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 + 7) + 1:
+        elif len(self.dos.projected[0][0]) == 1 + 3 + 5 + 7:
             all_orbitals = "spdf"
         else:
             all_orbitals = ""
+
         label = ""
         if orbitals:
             print("The plot only considers orbitals", orbitals)
@@ -305,25 +297,38 @@ class DosPlot:
                 label += "f"
             if label == "-" + all_orbitals:
                 label = ""
-        dos_total = self.parsedData.dos_total
+        # dos_total = self.parsedData.dos_total
 
-        cond1 = self.parsedData.dos_total.energies >= elimit[0]
-        cond2 = self.parsedData.dos_total.energies <= elimit[1]
+        # cond1 = self.parsedData.dos_total.energies >= elimit[0]
+        # cond2 = self.parsedData.dos_total.energies <= elimit[1]
+        # cond = np.all([cond1, cond2], axis=0)
+
+        dos_total = self.dos.total
+        dos_projected_total = self.dos.dos_sum()
+
+        cond1 = self.dos.energies >= elimit[0]
+        cond2 = self.dos.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
 
         for ispin in spins:
-            bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
-            for ispc in range(len(self.parsedData.species)):
+            # bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
+            bottom = np.zeros_like(self.dos.energies[cond])
+            for ispc in range(len(self.structure.species)):
                 idx = (np.array(
-                    self.parsedData.symbols) == self.parsedData.species[ispc])
+                    self.structure.atoms) == self.structure.species[ispc])
                 atoms = list(np.where(idx)[0])
-                dos = self.parsedData.dos_parametric(atoms=atoms,
-                                                     spin=spins,
-                                                     orbitals=orbitals)
+                # dos = self.parsedData.dos_parametric(atoms=atoms,
+                #                                      spin=spins,
+                #                                      orbitals=orbitals)
 
-                x = dos.energies[cond]
-                y = (dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
-                     ) / dos_projected_total.dos[cond, ispin + 1]
+                dos = self.dos.dos_sum(atoms=atoms,
+                                       principal_q_numbers=principal_q_numbers,
+                                       orbitals=orbitals,
+                                       spins=spins)
+
+                x = self.dos.energies[cond]
+                y = (dos[ispin, cond] *
+                     dos_total[ispin, cond]) / dos_projected_total[ispin, cond]
 
                 if ispin > 0 and len(spins) > 1:
                     y *= -1
@@ -344,7 +349,7 @@ class DosPlot:
                             bottom + y,
                             bottom,
                             color=colors[ispc],
-                            label=self.parsedData.species[ispc] + label,
+                            label=self.structure.species[ispc] + label,
                         )
                     elif orientation == "vertical":
                         ax.fill_betweenx(
@@ -352,15 +357,16 @@ class DosPlot:
                             bottom + y,
                             bottom,
                             color=colors[ispc],
-                            label=self.parsedData.species[ispc] + label,
+                            label=self.structure.species[ispc] + label,
                         )
                 bottom += y
         return fig, ax
 
     def plot_stack_orbitals(
             self,
-            spins=None,
             atoms=None,
+            principal_q_numbers=[-1],
+            spins=None,
             spin_colors=None,
             colors=None,
             elimit=None,
@@ -376,6 +382,8 @@ class DosPlot:
                 'purple', 'brown', 'navy', 'maroon', 'olive'
             ]
 
+        if spins is None:
+            spins = np.arange(len(self.dos.total), dtype=np.int)
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -389,37 +397,42 @@ class DosPlot:
         if atoms:
             print(
                 "The plot only considers atoms",
-                np.array(self.parsedData.symbols)[atoms],
+                np.array(self.structure.atoms)[atoms],
             )
             atom_names = ""
-            for ispc in np.unique(np.array(self.parsedData.symbols)[atoms]):
+            for ispc in np.unique(np.array(self.structure.atoms)[atoms]):
                 atom_names += ispc + "-"
         all_atoms = ""
-        for ispc in np.unique(np.array(self.parsedData.symbols)):
+        for ispc in np.unique(np.array(self.structure.atoms)):
             all_atoms += ispc + "-"
         if atom_names == all_atoms:
             atom_names = ""
-        dos_total = self.parsedData.dos_total
-        dos_projected_total = self.parsedData.dos_parametric()
+        dos_total = self.dos.total
+        dos_projected_total = self.dos.dos_sum()
 
         if not elimit:
-            elimit = [-2, 2]
-        dos_projected_total = self.parsedData.dos_parametric()
+            elimit = [self.dos.energies.min(), self.dos.energies.max()]
+        # dos_projected_total = self.parsedData.dos_parametric()
 
-        cond1 = self.parsedData.dos_total.energies >= elimit[0]
-        cond2 = self.parsedData.dos_total.energies <= elimit[1]
+        cond1 = self.dos.energies >= elimit[0]
+        cond2 = self.dos.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
+
         orb_names = ["s", "p", "d"]
         orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8]]
         for ispin in spins:
-            bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
+            bottom = np.zeros_like(self.dos.energies[cond])
             for iorb in range(3):
-                dos = self.parsedData.dos_parametric(atoms=atoms,
-                                                     spin=spins,
-                                                     orbitals=orb_l[iorb])
-                x = dos.energies[cond]
-                y = (dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
-                     ) / dos_projected_total.dos[cond, ispin + 1]
+                # dos = self.parsedData.dos_parametric(atoms=atoms,
+                #                                      spin=spins,
+                #                                      orbitals=orb_l[iorb])
+                dos = self.dos.dos_sum(atoms=atoms,
+                                       principal_q_numbers=principal_q_numbers,
+                                       orbitals=orb_l[iorb],
+                                       spins=spins)
+                x = self.dos.energies[cond]
+                y = (dos[ispin, cond] *
+                     dos_total[ispin, cond]) / dos_projected_total[ispin, cond]
                 y = np.nan_to_num(y, 0)
 
                 if ispin > 0 and len(spins) > 1:
@@ -467,10 +480,10 @@ class DosPlot:
     ):
 
         if len(items) == 0:
-            print(
-                """Please provide the stacking items in which you want to plot,
-                  example : {'Sr':[1,2,3],'O':[4,5,6,7,8]} will plot the stacked
-                  plots of p orbitals of Sr and d orbitals of Oxygen.""")
+            print("""Please provide the stacking items in which you want
+                to plot, example : {'Sr':[1,2,3],'O':[4,5,6,7,8]}
+                will plot the stacked plots of p orbitals of Sr and
+                d orbitals of Oxygen.""")
 
         if spin_colors is None:
             spin_colors = [(0, 0, 1), (1, 0, 0)]
@@ -480,6 +493,8 @@ class DosPlot:
                 'red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'orange',
                 'purple', 'brown', 'navy', 'maroon', 'olive'
             ]
+        if spins is None:
+            spins = np.arange(len(self.dos.total), dtype=np.int)
 
         if ax is None:
             if orientation == "horizontal":
@@ -491,20 +506,28 @@ class DosPlot:
         else:
             fig = ax.get_figure()
         if not elimit:
-            elimit = [-2, 2]
-        dos_total = self.parsedData.dos_total
+            elimit = [self.dos.energies.min(), self.dos.energies.max()]
+        # dos_total = self.parsedData.dos_total
+        dos_total = self.dos.total
 
-        if self.parsedData.dos_projected[0].ncols == (1 + 3 +
-                                                      5) * dos_total.ncols:
+        # if self.dos.dos_projected[0].ncols == (1 + 3 +
+        #                                               5) * dos_total.ncols:
+        #     all_orbitals = "spd"
+        # elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 +
+        #                                                 7) * dos_total.ncols:
+        #     all_orbitals = "spdf"
+        # else:
+        #     all_orbitals = ""
+
+        if len(self.dos.projected[0][0]) == (1 + 3 + 5):
             all_orbitals = "spd"
-        elif self.parsedData.dos_projected[0].ncols == (1 + 3 + 5 +
-                                                        7) * dos_total.ncols:
+        elif len(self.dos.projected[0][0]) == (1 + 3 + 5 + 7):
             all_orbitals = "spdf"
         else:
             all_orbitals = ""
 
-        cond1 = self.parsedData.dos_total.energies >= elimit[0]
-        cond2 = self.parsedData.dos_total.energies <= elimit[1]
+        cond1 = self.dos.energies >= elimit[0]
+        cond2 = self.dos.energies <= elimit[1]
         cond = np.all([cond1, cond2], axis=0)
         counter = 0
         colors = {}
@@ -513,20 +536,24 @@ class DosPlot:
             colors[ispc] = src_colors[counter]
             counter += 1
 
-        dos_projected_total = self.parsedData.dos_parametric(spin=spins)
+        # dos_projected_total = self.parsedData.dos_parametric(spin=spins)
+        dos_projected_total = self.dos.dos_sum(spins=spins)
 
         for ispin in spins:
-            bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
+            bottom = np.zeros_like(self.dos.energies[cond])
+            # bottom = np.zeros_like(self.parsedData.dos_total.energies[cond])
             # bottom = np.zeros_like(self.VaspXML.dos_total.energies[:])
             for ispc in items:
-                idx = np.array(self.parsedData.symbols) == ispc
+                idx = np.array(self.structure.atoms) == ispc
                 atoms = list(np.where(idx)[0])
                 orbitals = items[ispc]
 
-                dos = self.parsedData.dos_parametric(atoms=atoms,
-                                                     spin=spins,
-                                                     orbitals=orbitals)
-
+                # dos = self.parsedData.dos_parametric(atoms=atoms,
+                #                                      spin=spins,
+                #                                      orbitals=orbitals)
+                dos = self.dos.dos_sum(atoms=atoms,
+                                       spins=spins,
+                                       orbitals=orbitals)
                 label = "-"
                 if sum([x in orbitals for x in [0]]) == 1:
                     label += "s"
@@ -539,11 +566,11 @@ class DosPlot:
                     label += "f"
                 if label == "-" + all_orbitals:
                     label = ""
-                x = dos.energies[cond]
+                x = self.dos.energies[cond]
                 # x = dos.energies[:]
 
-                y = (dos.dos[cond, ispin + 1] * dos_total.dos[cond, ispin + 1]
-                     ) / dos_projected_total.dos[cond, ispin + 1]
+                y = (dos[ispin, cond] *
+                     dos_total[ispin, cond]) / dos_projected_total[ispin, cond]
                 # y = ( dos.dos[:, ispin + 1] * dos_total.dos[:, ispin + 1]
                 # ) / dos_projected_total.dos[:, ispin + 1]
                 # y =  dos.dos[cond, ispin + 1]
@@ -591,6 +618,9 @@ def plotter(energies,
             orientation,
             labels=None):
 
+    if spins is None:
+        spins = np.arange(dos.shape[0])
+
     if orientation == "horizontal":
         if ax is None:
             fig = plt.figure(figsize=figsize)
@@ -605,7 +635,7 @@ def plotter(energies,
             y = dos[iy, :]
             if iy > 0 and len(spins) > 1:
                 y *= -1
-            if not labels is None:
+            if labels is not None:
                 ax.plot(x, y, "r-", color=spin_colors[iy], label=labels[iy])
             else:
                 ax.plot(x, y, "r-", color=spin_colors[iy])
@@ -618,10 +648,10 @@ def plotter(energies,
             fig = plt.gca()
         y = energies
         for ix in spins:
-            x = dos[:, ix]
+            x = dos[ix, :]
             if ix > 0 and len(spins) > 1:
                 x *= -1
-            if not labels is None:
+            if labels is not None:
                 ax.plot(x, y, "r-", color=spin_colors[ix], label=labels[ix])
             else:
                 ax.plot(x, y, "r-", color=spin_colors[ix])
