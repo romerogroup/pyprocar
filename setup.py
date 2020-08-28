@@ -12,6 +12,7 @@ setup(
         "pyprocar.core",
         "pyprocar.utilsprocar",
         "pyprocar.procarparser",
+        "pyprocar.vaspxml",
         "pyprocar.procarfilefilter",
         "pyprocar.procarplot",
         "pyprocar.procarsymmetry",
