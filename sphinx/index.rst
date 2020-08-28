@@ -8,6 +8,7 @@ Currently supports:
 2. Elk
 3. Quantum Espresso
 4. Abinit
+5. Lobster
 
 Instructions on performing DFT calculations to obtain the necessary files to run PyProcar are given in the :ref:`labeldftprep` section.
 

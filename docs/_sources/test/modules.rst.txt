@@ -1,8 +1,0 @@
-pyprocar
-========
-
-.. toctree::
-   :maxdepth: 4
-
-   pyprocar
-   setup
