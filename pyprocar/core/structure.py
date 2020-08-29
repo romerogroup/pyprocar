@@ -4,14 +4,11 @@
 import numpy as np
 from . import elements
 
-
 N_avogadro = 6.022140857e23
 
+
 class Structure:
-    def __init__(self,
-                 atoms,
-                 fractional_coordinates,
-                 lattice):
+    def __init__(self, atoms=None, fractional_coordinates=None, lattice=None):
         """
         Class to define a peridic crystal structure.
 
@@ -129,7 +126,6 @@ class Structure:
     # def spglib_cell(self):
     #     return (self.lattice, self.fractional_coordinates, self.atomic_numbers)
 
-
     # Question for uthpala: do you think we should include spglib?
 
     # def get_space_group_number(self, symprec=1e-5):
@@ -140,5 +136,3 @@ class Structure:
 
     # def get_wyckoff_positions(self, symprec=1e-5):
     #     return spglib.get_symmetry_dataset(self.spglib_cell, symprec)["wyckoffs"]
-
-

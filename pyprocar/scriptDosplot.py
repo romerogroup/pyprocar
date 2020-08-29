@@ -5,6 +5,7 @@ Created on May 17 2020
 # from .elkparser import ElkParser
 from .splash import welcome
 from .doscarplot import DosPlot
+from .vaspxml import VaspXML
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -24,8 +25,9 @@ plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
 
 
 def dosplot(
-        vasprunfile="vasprun.xml",
+        filename="vasprun.xml",
         mode="plain",
+        interpolation_factor=None,
         orientation="horizontal",
         spin_colors=None,
         colors=None,
@@ -33,10 +35,11 @@ def dosplot(
         atoms=None,
         orbitals=None,
         elimit=None,
+        dlimit=None,
         cmap="jet",
         vmax=None,
         vmin=None,
-        grid=True,
+        grid=False,
         savefig=None,
         title=None,
         plot_total=True,
@@ -44,23 +47,32 @@ def dosplot(
         labels=None,
         items={},
         ax=None,
+        plt_show=True,
 ):
     """This function plots density of states
 
     """
+
+    if mode not in [
+            'plain', 'parametric_line', 'parametric', 'stack_species',
+            'stack_orbitals', 'stack'
+    ]:
+        raise ValueError(
+            "Mode should be choosed from ['plain', 'parametric_line','parametric','stack_species','stack_orbitals','stack']"
+        )
 
     welcome()
 
     # Verbose section
     print("Script initiated")
     print("code          : ", code)
-    print("vasprun file  : ", vasprunfile)
+    print("File name     : ", filename)
     print("mode          : ", mode)
     print("spins         : ", spins)
     print("atoms list    : ", atoms)
     print("orbs. list    : ", orbitals)
     print("energy range  : ", elimit)
-    print("eolormap      : ", cmap)
+    print("colormap      : ", cmap)
     print("vmax          : ", vmax)
     print("vmin          : ", vmin)
     print("grid enabled  : ", grid)
@@ -70,22 +82,18 @@ def dosplot(
     total = plot_total
     code = code.lower()
     if code == "vasp":
-        dos_plot = DosPlot(vasprunfile)
-        vaspxml = dos_plot.VaspXML
+        vaspxml = VaspXML(filename=filename,
+                          dos_interpolation_factor=interpolation_factor)
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if atoms is None:
-            atoms = list(np.arange(vaspxml.initial_structure.natom, dtype=int))
+            atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
         if spins is None:
-            spins = list(np.arange(vaspxml.dos_total.ncols))
+            spins = list(np.arange(len(vaspxml.dos.total)))
         if orbitals is None:
             orbitals = list(
-                np.arange((len(vaspxml.dos_projected[0].labels) - 1) // 2,
-                          dtype=int))
+                np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
         if elimit is None:
-            elimit = [
-                vaspxml.dos_total.energies.min(),
-                vaspxml.dos_total.energies.max(),
-            ]
-
+            elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
     if mode == "plain":
         fig, ax1 = dos_plot.plot_total(
             spins=spins,
@@ -94,7 +102,6 @@ def dosplot(
             orientation=orientation,
             labels=labels,
         )
-        dos = dos_plot.VaspXML.dos_total
 
     elif mode == "parametric_line":
         if not total:
@@ -107,11 +114,7 @@ def dosplot(
                 orientation=orientation,
                 labels=labels,
             )
-            dos = dos_plot.VaspXML.dos_parametric(
-                atoms=atoms,
-                spin=spins,
-                orbitals=orbitals,
-            )
+
         else:
             fig, ax1 = dos_plot.plot_total(
                 spins=spins,
@@ -119,7 +122,6 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
             )
-            dos = dos_plot.VaspXML.dos_total
             _, ax1 = dos_plot.plot_parametric_line(
                 atoms=atoms,
                 spins=spins,
@@ -137,13 +139,13 @@ def dosplot(
                 orbitals=orbitals,
                 spin_colors=spin_colors,
                 cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
                 elimit=elimit,
                 ax=ax,
                 orientation=orientation,
                 labels=labels,
             )
-            dos = dos_plot.VaspXML.dos_total
-
         else:
             fig, ax1 = dos_plot.plot_parametric(
                 atoms=atoms,
@@ -151,12 +153,14 @@ def dosplot(
                 orbitals=orbitals,
                 spin_colors=spin_colors,
                 cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
                 elimit=elimit,
                 ax=ax,
                 orientation=orientation,
                 labels=labels,
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax1 = dos_plot.plot_total(
                 spins=spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -176,7 +180,6 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
             )
-            dos = dos_plot.VaspXML.dos_total
         else:
             fig, ax1 = dos_plot.plot_stack_species(
                 spins=spins,
@@ -188,7 +191,6 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
             )
-            dos = dos_plot.VaspXML.dos_total
             _, ax1 = dos_plot.plot_total(
                 spins=spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -208,7 +210,7 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
             )
-            dos = dos_plot.VaspXML.dos_total
+
         else:
             fig, ax1 = dos_plot.plot_stack_orbitals(
                 spins=spins,
@@ -220,7 +222,7 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax1 = dos_plot.plot_total(
                 spins=spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -241,7 +243,6 @@ def dosplot(
                 orientation=orientation,
             )
 
-            dos = dos_plot.VaspXML.dos_total
         else:
             fig, ax1 = dos_plot.plot_stack(
                 items=items,
@@ -253,7 +254,7 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax1 = dos_plot.plot_total(
                 spins=spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -261,17 +262,20 @@ def dosplot(
                 orientation=orientation,
             )
 
-    cond1 = dos.energies >= elimit[0]
-    cond2 = dos.energies <= elimit[1]
+    cond1 = vaspxml.dos.energies >= elimit[0]
+    cond2 = vaspxml.dos.energies <= elimit[1]
     cond = np.all([cond1, cond2], axis=0)
 
-    if len(spins) > 1:
-        ylim = [
-            dos.values[cond][:, 1].max() * -1.1,
-            dos.values[cond][:, 0].max() * 1.1
-        ]
+    if dlimit is not None:
+        ylim = dlimit
     else:
-        ylim = [0, dos.dos[cond][:, spins[0] + 1].max() * 1.1]
+        if len(spins) > 1:
+            ylim = [
+                vaspxml.dos.total[1, cond].max() * -1.1,
+                vaspxml.dos.total[0, cond].max() * 1.1
+            ]
+        else:
+            ylim = [0, vaspxml.dos.total[spins[0], cond].max() * 1.1]
 
     if orientation == "horizontal":
         ax1.set_xlabel(r"$E-E_f$ [eV]")
@@ -303,7 +307,7 @@ def dosplot(
         )  # Added by Nicholas Pike to close memory issue of looping and creating many figures
         return None, None
     else:
-        plt.show()
+        plt.show(block=plt_show)
 
     return fig, ax1
 

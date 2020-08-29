@@ -15,8 +15,9 @@ import collections
 
 class VaspXML(collections.abc.Mapping):
     """contains."""
-    def __init__(self, filename='vasprun.xml'):
+    def __init__(self, filename='vasprun.xml', dos_interpolation_factor=None):
         self.variables = {}
+        self.dos_interpolation_factor = dos_interpolation_factor
 
         if not os.path.isfile(filename):
             raise ValueError('File not found ' + filename)
@@ -86,18 +87,19 @@ class VaspXML(collections.abc.Mapping):
             return None, None
 
     @property
-    def dos(self, interpolation_factor=None):
+    def dos(self):
         energies = self.dos_total['energies']
         total = []
         for ispin in self.dos_total:
             if ispin == 'energies':
                 continue
             total.append(self.dos_total[ispin])
-        total = np.array(total).T
-        return DensityOfStates(energies=energies,
-                               total=total,
-                               projected=self.dos_projected,
-                               interpolation_factor=interpolation_factor)
+        # total = np.array(total).T
+        return DensityOfStates(
+            energies=energies,
+            total=total,
+            projected=self.dos_projected,
+            interpolation_factor=self.dos_interpolation_factor)
 
     @property
     def dos_to_dict(self):

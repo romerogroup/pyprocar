@@ -3,8 +3,6 @@ Created on May 17 2020
 @author: Pedram Tavadze
 """
 
-from ..vaspxml import VaspXML
-from ..core import DensityOfStates
 import matplotlib as mpl
 import matplotlib.pylab as plt
 import numpy as np
@@ -25,37 +23,10 @@ class DosPlot:
         -------
         None.
         """
-
-        # self.vaspxml = VaspXML(vaspxml)
-        # energies = self.vaspxml.dos_total['energies']
-        # total = []
-        # for ispin in self.vaspxml.dos_total:
-        #     if ispin == 'energies':
-        #         continue
-        #     total.append(self.vaspxml.dos_total[ispin])
-        # total = np.array(total).T
-        # dos_projected = self.vaspxml.dos_projected
-        self.structure = structure
         self.dos = dos
+        self.structure = structure
 
         return
-
-    # def plot_total(self,
-    #                spins=None,
-    #                spin_colors=None,
-    #                figsize=figsize,
-    #                ax=None,
-    #                orientation="horizontal",
-    #                labels=None):
-
-    # from pychemia.code.vasp import VaspXML
-    # from ..lobsterparser import LobsterDOSParser
-
-    # if filename == "vasprun.xml":
-    #     self.parsedData = VaspXML(filename)
-    # if filename == "DOSCAR.lobster":
-    #     self.parsedData = LobsterDOSParser(filename)
-    # return
 
     def plot_total(self,
                    spins=None,
@@ -93,21 +64,8 @@ class DosPlot:
         if spin_colors is None:
             spin_colors = [(1, 0, 0), (0, 0, 1)]
 
-        # dos = self.parsedData.dos_total
-
         energies = self.dos.energies
         dos = np.array(self.dos.total)
-
-        # fig, ax = plotter(
-        #     energies=energies,
-        #     dos=dos,
-        #     spins=spins,
-        #     spin_colors=spin_colors,
-        #     figsize=figsize,
-        #     ax=ax,
-        #     orientation=orientation,
-        #     labels=labels,
-        # )
 
         if spins is None:
             spins = np.arange(len(self.dos.total))

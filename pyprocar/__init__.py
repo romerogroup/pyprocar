@@ -58,8 +58,8 @@ from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
-from pyprocar.doscarplot import DosPlot
-from pyprocar.vaspxml import VaspXML
+from pyprocar import doscarplot
+from pyprocar import vaspxml
 from pyprocar import core
 
 from .scriptBandsDosplot import bandsdosplot

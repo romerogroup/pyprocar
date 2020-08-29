@@ -48,15 +48,15 @@ class DensityOfStates:
         """
 
         self.energies = energies
-        self.total = np.array(total)
+        self.total = total
         self.projected = projected
 
         if interpolation_factor is not None:
             interpolated = []
-            for ispin in range(self.total.shape[1]):
+            for ispin in range(len(self.total)):
                 new_energy, new_total = interpolate(
                     self.energies,
-                    self.total[:, ispin],
+                    self.total[ispin],
                     factor=interpolation_factor)
                 interpolated.append(new_total)
 
@@ -77,8 +77,9 @@ class DensityOfStates:
                                 ispin] = ys
 
             self.energies = xs
+
         self.ndos = len(self.energies)
-        self.total = np.array(total).T
+        self.total = np.array(self.total)
 
     def dos_sum(self,
                 atoms=None,
