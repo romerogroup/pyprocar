@@ -306,7 +306,7 @@ class QEParser:
         #######################################################################
 
         band_info = findall(r"====\se\(\s*(\d+)\)\s=\s*([-.\d]+)", kpdosout)
-        self.test = band_info
+        
         if spinCalc == True:
             self.bandsCount = int(len(band_info) / totK)
             self.bands = zeros(shape=(self.kpointsCount, self.bandsCount, 2))
@@ -367,8 +367,12 @@ class QEParser:
         for kp in range(len(k_string)):
             if kp == len(k_string) - 1:
                 expression = "(?<=" + k_string[kp] + ")[\s\S]*?(?=Lowdin Charges:)"
+                
                 expression_final_k = "(?<=" + k_string[kp - 1] + ")[\s\S]*?(?=$)"
+                
+                
                 k_info1 = findall(expression_final_k, kpdosout)[0]
+
                 k_info = findall(expression, k_info1)[0]
             else:
                 expression = (

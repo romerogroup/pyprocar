@@ -244,7 +244,7 @@ class LobsterParser:
         #        if len(band_info) == self.bandsCount * self.kpointsCount:
         #            print("Number of bands headers match")
         raw_bands = zeros(shape=(self.kpointsCount, bandsCount))
-        print(raw_bands)
+        
         ik = 0
         ib = 0
         for i in range(len(band_info)):
@@ -264,7 +264,7 @@ class LobsterParser:
                 :, self.bandsCount : self.bandsCount * 2
             ]
         else:
-            self.spinCount = 2
+            
             self.bands = zeros(
                 shape=(self.kpointsCount, self.bandsCount, self.spinCount)
             )
@@ -379,7 +379,10 @@ class LobsterParser:
             self.bands = self.bands.reshape(
                 self.kpointsCount, self.bandsCount * 2, order="F"
             )
-
+        else:
+            self.bands = self.bands.reshape(
+                self.kpointsCount, self.bandsCount, order="F"
+            )
     @property
     def fermi(self):
         """
