@@ -278,7 +278,7 @@ class LobsterParser:
             self.spinCount = 2
         else:
             self.spinCount = 1
-
+        
         self.orbitalCount = 10
         self.spd = zeros(
             shape=(

@@ -164,21 +164,22 @@ class QEParser:
                 "$%s$" % (x.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
                 for x in raw_ticks
             ]
+        
+        # finds discontinuities 
+        for i in range(len(self.kticks)):
+            if(i < len(self.kticks)-1):
+                diff = self.kticks[ i+1 ] - self.kticks[i]
+                if diff == 0 :
+                    
+                    self.discontinuities.append(self.kticks[i])
 
-        # note:
-        # discontinuities in QE are already specified in the input file.
-        # The following is not needed.
+                    
+                    discon_name = "$" + self.knames[i].replace("$","") +"|"+ self.knames[i+1].replace("$","") + "$"
+                    self.knames.pop(i+1)
+                    self.knames[i] = discon_name
+                    self.kticks.pop(i+1)
 
-        # Fixing discontunuities points if present.
-        # Assume that they are separated by a '|'. E.g.- 'G|K'
 
-        # dicontinuity_index = []
-        # discontinuity_symbols = [s for s in self.knames if "|" in s]
-        # for k in discontinuity_symbols:
-        #     dicontinuity_index.append(self.knames.index(k))
-
-        # for i in dicontinuity_index:
-        #     self.discontinuities.append(self.kticks[i])
 
         #######################################################################
         # Reading the kpdos.out for outputfile labels
