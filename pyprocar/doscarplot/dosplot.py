@@ -125,6 +125,7 @@ class DosPlot:
                         orientation="horizontal",
                         labels=None,
                         plot_bar=True):
+
         if ax is None:
             if orientation == "horizontal":
                 fig = plt.figure(figsize=figsize)
@@ -153,7 +154,9 @@ class DosPlot:
         # dos = self.parsedData.dos_parametric(atoms=atoms,
         #                                     spin=spins,
         #                                      orbitals=orbitals)
-
+        if vmin is None or vmax is None:
+            vmin = 0
+            vmax = (dos.max() / dos_total.max())
         if plot_bar:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
             fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)

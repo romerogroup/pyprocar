@@ -8,6 +8,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .doscarplot import DosPlot
+from .vaspxml import VaspXML
+
 from .abinitparser import AbinitParser
 from .doscarplot import DosPlot
 from .elkparser import ElkParser
@@ -17,9 +20,10 @@ from .procarselect import ProcarSelect
 from .splash import welcome
 from .utilsprocar import UtilsProcar
 
-plt.rcParams["mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
-#                                                   'bf', 'default', 'bb', 'frak',
-#                                                   'circled', 'scr', 'regular']
+plt.rcParams["mathtext.default"] = "regular"
+# Roman ['rm', 'cal', 'it', 'tt', 'sf',
+#        'bf', 'default', 'bb', 'frak',
+#        'circled', 'scr', 'regular']
 plt.rcParams["font.family"] = "Georgia"
 plt.rc("font", size=18)  # controls default text sizes
 plt.rc("axes", titlesize=22)  # fontsize of the axes title
@@ -31,38 +35,39 @@ plt.rc("legend", fontsize=18)  # legend fontsize
 
 
 def bandsdosplot(
-    bands_file="PROCAR",
-    dos_file="vasprun.xml",
-    outcar="OUTCAR",
-    abinit_output=None,
-    bands_mode="plain",
-    dos_mode="plain",
-    plot_total=True,
-    fermi=None,
-    mask=None,
-    markersize=0.02,
-    marker="o",
-    atoms=None,
-    orbitals=None,
-    bands_spin=0,
-    bands_separate=False,
-    dos_spins=None,
-    dos_labels=None,
-    dos_spin_colors=[(1, 0, 0), (0, 0, 1)],
-    dos_colors=None,
-    dos_items=None,
-    dos_limit=None,
-    elimit=None,
-    vmin=None,
-    vmax=None,
-    cmap="jet",
-    grid=False,
-    kpointsfile='KPOINTS',
-    code="vasp",
-    savefig=None,
-    title=None,
-    kdirect=True,
-    discontinuities=None,
+        bands_file="PROCAR",
+        dos_file="vasprun.xml",
+        outcar="OUTCAR",
+        abinit_output=None,
+        bands_mode="plain",
+        dos_mode="plain",
+        plot_total=True,
+        fermi=None,
+        mask=None,
+        markersize=0.02,
+        marker="o",
+        atoms=None,
+        orbitals=None,
+        bands_spin=0,
+        bands_separate=False,
+        dos_spins=None,
+        dos_labels=None,
+        dos_spin_colors=[(1, 0, 0), (0, 0, 1)],
+        dos_colors=None,
+        dos_items=None,
+        dos_interpolation_factor=None,
+        dlimit=None,
+        elimit=None,
+        vmin=None,
+        vmax=None,
+        cmap="jet",
+        grid=False,
+        kpointsfile='KPOINTS',
+        code="vasp",
+        savefig=None,
+        title=None,
+        kdirect=True,
+        discontinuities=None,
 ):
     """This function creates plots containing both DOS and bands."""
 
@@ -92,6 +97,14 @@ def bandsdosplot(
     if dos_spins is None:
         dos_spins = [0, 1]
 
+    if dos_mode not in [
+            'plain', 'parametric_line', 'parametric', 'stack_species',
+            'stack_orbitals', 'stack'
+    ]:
+        raise ValueError(
+            "Mode should be choosed from ['plain', 'parametric_line','parametric','stack_species','stack_orbitals','stack']"
+        )
+
     # Verbose section
 
     print("Script initiated")
@@ -101,7 +114,7 @@ def bandsdosplot(
     print("bands spin     : ", bands_spin)
     print("dos file       : ", dos_file)
     print("dos mode       : ", dos_mode)
-    print("dos spin       : ", dos_spins)
+    print("dos spins      : ", dos_spins)
     print("atoms list     : ", atoms)
     print("orbs. list     : ", orbitals)
 
@@ -159,7 +172,8 @@ def bandsdosplot(
                 icounter = icounter + 2
             else:
                 discont_indx.append(icounter)
-                knames.append(tick_labels[icounter] + "|" + tick_labels[icounter + 1])
+                knames.append(tick_labels[icounter] + "|" +
+                              tick_labels[icounter + 1])
                 icounter = icounter + 2
         knames.append(tick_labels[-1])
         discont_indx = list(dict.fromkeys(discont_indx))
@@ -206,9 +220,12 @@ def bandsdosplot(
     code = code.lower()
     if code == "vasp":
         procarFile = ProcarParser()
-        dos_plot = DosPlot(dos_file)
+        vaspxml = VaspXML(filename=dos_file,
+                          dos_interpolation_factor=dos_interpolation_factor)
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+
         if dos_spins is None:
-            dos_spins = np.arange(dos_plot.VaspXML.dos_total.ncols)
+            dos_spins = np.arange(len(vaspxml.dos.total))
 
     # If ticks and names are given by the user manually:
     if kticks is not None and knames is not None:
@@ -245,7 +262,9 @@ def bandsdosplot(
         if kdirect:
             procarFile.readFile(bands_file, permissive=False)
         else:
-            procarFile.readFile(bands_file, permissive=False, recLattice=recLat)
+            procarFile.readFile(bands_file,
+                                permissive=False,
+                                recLattice=recLat)
 
     # processing the data, getting an instance of the class that reduces the data
     data = ProcarSelect(procarFile, deepCopy=True, mode=bands_mode)
@@ -267,7 +286,8 @@ def bandsdosplot(
         dataY.selectAtoms(bands_atoms, fortran=False)
         dataY.selectOrbital(bands_orbitals)
         # getting the signed angle of each K-vector
-        angle = np.arctan2(dataX.kpoints[:, 1], (dataX.kpoints[:, 0] + 0.000000001))
+        angle = np.arctan2(dataX.kpoints[:, 1],
+                           (dataX.kpoints[:, 0] + 0.000000001))
         sin = np.sin(angle)
         cos = np.cos(angle)
         sin.shape = (sin.shape[0], 1)
@@ -284,16 +304,14 @@ def bandsdosplot(
     if bands_separate:
         if bands_spin == 0:
             # plotting spin up bands separately
-            data.bands = (
-                data.bands[:, :numofbands].transpose() - np.array(fermi)
-            ).transpose()
+            data.bands = (data.bands[:, :numofbands].transpose() -
+                          np.array(fermi)).transpose()
             print("Plotting spin up bands...")
 
         elif bands_spin == 1:
             # plotting spin down bands separately
-            data.bands = (
-                data.bands[:, numofbands:].transpose() - np.array(fermi)
-            ).transpose()
+            data.bands = (data.bands[:, numofbands:].transpose() -
+                          np.array(fermi)).transpose()
             print("Plotting spin down bands...")
 
         plot = ProcarPlot(data.bands, data.spd, data.kpoints, ax=ax1)
@@ -327,7 +345,11 @@ def bandsdosplot(
             ax1.set_ylim(elimit)
 
     elif bands_mode == "plain":
-        _, ax1 = plot.plotBands(ticks=ticks, discontinuities=discontinuities, ax=ax1,)
+        _, ax1 = plot.plotBands(
+            ticks=ticks,
+            discontinuities=discontinuities,
+            ax=ax1,
+        )
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
         else:
@@ -359,10 +381,10 @@ def bandsdosplot(
             ax1.set_ylim(elimit)
 
     if dos_mode == "plain":
-        _, ax2 = dos_plot.plot_total(
-            spins=dos_spins, ax=ax2, orientation="vertical", labels=dos_labels
-        )
-        dos = dos_plot.VaspXML.dos_total
+        _, ax2 = dos_plot.plot_total(spins=dos_spins,
+                                     ax=ax2,
+                                     orientation="vertical",
+                                     labels=dos_labels)
 
     elif dos_mode == "parametric_line":
         if not total:
@@ -375,9 +397,7 @@ def bandsdosplot(
                 orientation="vertical",
                 labels=dos_labels,
             )
-            dos = dos_plot.VaspXML.dos_parametric(
-                atoms=atoms, spin=dos_spins, orbitals=orbitals,
-            )
+
         else:
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
@@ -385,7 +405,7 @@ def bandsdosplot(
                 ax=ax2,
                 orientation="vertical",
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax2 = dos_plot.plot_parametric_line(
                 atoms=atoms,
                 spins=dos_spins,
@@ -410,7 +430,6 @@ def bandsdosplot(
                 orientation="vertical",
                 labels=dos_labels,
             )
-            dos = dos_plot.VaspXML.dos_total
 
         else:
             _, ax1 = dos_plot.plot_parametric(
@@ -426,7 +445,7 @@ def bandsdosplot(
                 orientation="vertical",
                 labels=dos_labels,
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -476,7 +495,6 @@ def bandsdosplot(
                 ax=ax2,
                 orientation="vertical",
             )
-            dos = dos_plot.VaspXML.dos_total
         else:
             _, ax2 = dos_plot.plot_stack_orbitals(
                 spins=dos_spins,
@@ -487,7 +505,7 @@ def bandsdosplot(
                 ax=ax2,
                 orientation="vertical",
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -507,7 +525,6 @@ def bandsdosplot(
                 orientation="vertical",
             )
 
-            dos = dos_plot.VaspXML.dos_total
         else:
             _, ax2 = dos_plot.plot_stack(
                 items=dos_items,
@@ -519,7 +536,7 @@ def bandsdosplot(
                 ax=ax2,
                 orientation="vertical",
             )
-            dos = dos_plot.VaspXML.dos_total
+
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
@@ -538,25 +555,24 @@ def bandsdosplot(
     if dos_labels or "stack" in dos_mode:
         ax2.legend()
     ax2.yaxis.set_visible(False)
-    cond1 = dos.energies >= elimit[0]
-    cond2 = dos.energies <= elimit[1]
+    cond1 = vaspxml.dos.energies >= elimit[0]
+    cond2 = vaspxml.dos.energies <= elimit[1]
     cond = np.all([cond1, cond2], axis=0)
     if len(dos_spins) > 1:
-        ylim = [dos.values[cond][:, 1].max() * -1.1, dos.values[cond][:, 0].max() * 1.1]
+        ylim = [
+            vaspxml.dos.total[1, cond].max() * -1.1,
+            vaspxml.dos.total[0, cond].max() * 1.1
+        ]
     else:
 
-        ylim = [0, dos.dos[cond][:, dos_spins[0] + 1].max() * 1.1]
-        
+        ylim = [0, vaspxml.dos.total[dos_spins[0], cond].max() * 1.1]
 
+    if dlimit is not None:
+        ax2.set_xlim(dlimit[0], dlimit[1])
+    elif (dos_mode == "stack_species" or dos_mode == "stack_orbitals"
+          or dos_mode == "stack"):
+        ax2.set_xlim(ax2.get_xlim()[0], ax2.get_xlim()[1] * 1.1)
 
-
-    if dos_limit is not None:
-        ax2.set_xlim(dos_limit[0], dos_limit[1])
-    elif (dos_mode == "stack_species"
-        or dos_mode == "stack_orbitals"
-        or dos_mode == "stack"):
-        ax2.set_xlim(ax2.get_xlim()[0], ax2.get_xlim()[1]*1.1)#dos.values.max() * 1.4)
-        
     elif dos_mode == 'plain':
         ax2.set_xlim(ylim[0], ylim[1])
     if title:
