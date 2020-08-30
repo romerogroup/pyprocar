@@ -1,0 +1,1622 @@
+LOBSTER v3.2.0 (g++ 5.4.0)
+Copyright (C) 2019 by Chair of Solid-State and Quantum Chemistry, RWTH Aachen.
+All rights reserved. Contributions by S. Maintz, V. L. Deringer, M. Esser, R. Nelson, C. Ertural, A. L. Tchougreeff and R. Dronskowski
+starting on host Logan on 2020-08-27 at 14:35:57 EDT using 8 threads
+detecting used PAW program... Quantum Espresso
+initializing PW system...
+initializing Augmentations...
+recommended basis functions:
+Li 1s 2s 
+Nb 4d 4p 4s 5s 
+O 2p 2s 
+initializing LCAO system...
+setting up local basis functions...
+INFO: You are choosing to use recommended basis functions.
+INFO: Therefore, any setup using the keyword basisfunctions will be ignored.
+ O (Bunge) 2s 2p_y 2p_z 2p_x 
+Li (Bunge) 1s 2s 
+Nb (Bunge) 4s 5s 4p_y 4p_z 4p_x 4d_xy 4d_yz 4d_z^2 4d_xz 4d_x^2-y^2 
+setting up CO interactions...
+WARNING: You did not specify any COHP pairs in the lobsterin file. As default
+WARNING: I will try to find any pairs between 1.0 and 3.0 A distance,
+WARNING: but that might be wrong. If you want pCOHPs or pCOOPs, change the lobsterin!
+ found 21 interactions.
+projecting...WARNING: PAW bands of k-point 0 0 0
+WARNING: only fulfill orthonormality with an accuracy of 0.001077
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0        0 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0        0 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0        0 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105185
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0         0 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105185
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0         0 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0         0 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point           0    0.142857 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.142857 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105908
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.142857 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.142857 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104086
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105046
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104784
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point           0    0.285714 9.71445e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.285714 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.285714 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105336
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.285714 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104598
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105129
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103723
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105046
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point           0    0.428571 8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105186
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.428571 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.428571 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0 0.428571 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103732
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105129
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104086
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point            0    -0.428571 -8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105186
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104086
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105129
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103732
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point            0    -0.285714 -9.71445e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105046
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103723
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105129
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104598
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105336
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point            0    -0.142857 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104784
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105046
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104086
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105908
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17           0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17    0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105908
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17    0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105362
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17    0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17   -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17   -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105047
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17   -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104784
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.142857        0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105908
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.142857 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.0010764
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.142857 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105801
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.142857 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104569
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105524
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105177
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857    0.285714 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.285714 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105801
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.285714 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00106545
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.285714 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857    0.428571 1.38778e-16
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.428571 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104569
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.428571 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.142857 0.428571 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010514
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104418
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.142857    -0.428571 -9.71445e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010469
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.142857    -0.285714 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105047
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105524
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104551
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103752
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104713
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.142857    -0.142857 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104784
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105177
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.142857 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105177
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17 5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17    0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17    0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105336
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17    0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17   -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17   -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103723
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 8.32667e-17   -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105046
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714    0.142857 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105362
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.142857 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105801
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.142857 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00106545
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.142857 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714    0.285714 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105336
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.285714 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00106545
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.285714 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00106415
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.285714 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104534
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104243
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105625
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104714
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714    0.428571 1.38778e-16
+WARNING: only fulfill orthonormality with an accuracy of 0.00104598
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.428571 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.428571 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104534
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.285714 0.428571 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105511
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.285714    -0.428571 -8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104242
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105258
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.285714    -0.285714 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00103722
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105625
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105625
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857         0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105047
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104714
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.285714 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105524
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105186
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16    0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16    0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16    0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103733
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16   -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16   -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 1.11022e-16   -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571    0.142857 8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.142857 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104569
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.142857 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.142857 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010514
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571    0.285714 5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.285714 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.285714 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104533
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.285714 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010551
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571    0.428571 8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00103732
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.428571 0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.0010514
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.428571 0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105511
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.428571 0.428571 0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104006
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103872
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105258
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.0010469
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.428571    -0.428571 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103872
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103872
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103814
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.428571    -0.285714 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104319
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105258
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103814
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104242
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571   -0.142857 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104837
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010469
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.428571 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105186
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16     0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16     0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16     0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16    -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103733
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16    -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571 -1.11022e-16    -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571     0.142857 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010469
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104837
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.428571    0.285714 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104242
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103814
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105258
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104319
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.428571    0.428571 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103814
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103872
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103872
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571    -0.428571 -8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00103732
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.0010469
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105258
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103872
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104006
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105511
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.0010514
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571    -0.285714 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010551
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104534
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.428571    -0.142857 -8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010514
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.428571 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104569
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17     0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105046
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17     0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103723
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17     0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17    -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104599
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17    -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105336
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714 -8.32667e-17    -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857         0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105047
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105524
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104714
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.285714    0.285714 5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00103722
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105625
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105625
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.285714    0.428571 8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.0010513
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105258
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104242
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714    -0.428571 -1.38778e-16
+WARNING: only fulfill orthonormality with an accuracy of 0.00104598
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104318
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103815
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00105511
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104534
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714    -0.285714 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105336
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104714
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105625
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104243
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104534
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00106415
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00106545
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.285714    -0.142857 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105362
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00106545
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.285714 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105801
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17            0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17     0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104784
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17     0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105047
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17     0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17    -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17    -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105362
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857 -1.38778e-17    -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105908
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.142857    0.142857 1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104784
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105177
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105177
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.142857    0.285714 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105047
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104713
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103752
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104551
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105524
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   -0.142857    0.428571 9.71445e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104836
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010469
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104419
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857  0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857    -0.428571 -1.38778e-16
+WARNING: only fulfill orthonormality with an accuracy of 0.00104984
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.428571  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.428571  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00103753
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.428571  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104418
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.428571 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.0010514
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.428571 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.428571 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00104569
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    -0.142857    -0.285714 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105363
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.285714  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105034
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.285714  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.285714  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00103197
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.285714 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.285714 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00106545
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.285714 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105801
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857         0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105908
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857  0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.00105177
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857  0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105524
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857  0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857 -0.428571
+WARNING: only fulfill orthonormality with an accuracy of 0.00104569
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857 -0.285714
+WARNING: only fulfill orthonormality with an accuracy of 0.00105801
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point -0.142857 -0.142857 -0.142857
+WARNING: only fulfill orthonormality with an accuracy of 0.0010764
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0 0 0
+WARNING: only fulfill orthonormality with an accuracy of 0.001077
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.02 0.02 0.02
+WARNING: only fulfill orthonormality with an accuracy of 0.00107702
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.04 0.04 0.04
+WARNING: only fulfill orthonormality with an accuracy of 0.00107709
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.06 0.06 0.06
+WARNING: only fulfill orthonormality with an accuracy of 0.00107718
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.08 0.08 0.08
+WARNING: only fulfill orthonormality with an accuracy of 0.00107722
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.1 0.1 0.1
+WARNING: only fulfill orthonormality with an accuracy of 0.00107716
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.12 0.12 0.12
+WARNING: only fulfill orthonormality with an accuracy of 0.00107693
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.14 0.14 0.14
+WARNING: only fulfill orthonormality with an accuracy of 0.00107649
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.16 0.16 0.16
+WARNING: only fulfill orthonormality with an accuracy of 0.00107577
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.18 0.18 0.18
+WARNING: only fulfill orthonormality with an accuracy of 0.00107476
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.2 0.2 0.2
+WARNING: only fulfill orthonormality with an accuracy of 0.00107342
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.22 0.22 0.22
+WARNING: only fulfill orthonormality with an accuracy of 0.00107175
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.24 0.24 0.24
+WARNING: only fulfill orthonormality with an accuracy of 0.00106977
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.26 0.26 0.26
+WARNING: only fulfill orthonormality with an accuracy of 0.00106749
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.28 0.28 0.28
+WARNING: only fulfill orthonormality with an accuracy of 0.00106493
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.3 0.3 0.3
+WARNING: only fulfill orthonormality with an accuracy of 0.00106212
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.32 0.32 0.32
+WARNING: only fulfill orthonormality with an accuracy of 0.0010591
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.34 0.34 0.34
+WARNING: only fulfill orthonormality with an accuracy of 0.00105588
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.36 0.36 0.36
+WARNING: only fulfill orthonormality with an accuracy of 0.00105251
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.38 0.38 0.38
+WARNING: only fulfill orthonormality with an accuracy of 0.001049
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.4 0.4 0.4
+WARNING: only fulfill orthonormality with an accuracy of 0.00104538
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.42 0.42 0.42
+WARNING: only fulfill orthonormality with an accuracy of 0.00104167
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.44 0.44 0.44
+WARNING: only fulfill orthonormality with an accuracy of 0.00103789
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.46 0.46 0.46
+WARNING: only fulfill orthonormality with an accuracy of 0.00103406
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.48 0.48 0.48
+WARNING: only fulfill orthonormality with an accuracy of 0.00103021
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.5 0.5 0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102633
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.511042 0.488958      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.0010284
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.522084 0.477916      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103006
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.533126 0.466874      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103129
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.544168 0.455832      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103209
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.55521 0.44479     0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103252
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.566252 0.433748      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103264
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.577295 0.422705      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103252
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.588337 0.411663      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103225
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.599379 0.400621      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.0010319
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.610421 0.389579      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103151
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.621463 0.378537      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103112
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.632505 0.367495      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103073
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.643547 0.356453      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103032
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.654589 0.345411      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102987
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.665631 0.334369      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102935
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.676673 0.323327      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102873
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.687715 0.312285      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102799
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.698757 0.301243      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102714
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.709799 0.290201      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102619
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.720841 0.279159      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102523
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.731884 0.268116      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102437
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.742926 0.257074      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102377
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.753968 0.246032      0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102362
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.76501 0.23499     0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00102405
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.23499  0.23499
+WARNING: only fulfill orthonormality with an accuracy of 0.00102405
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.5 -0.2238  0.2238
+WARNING: only fulfill orthonormality with an accuracy of 0.00102506
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.21261  0.21261
+WARNING: only fulfill orthonormality with an accuracy of 0.00102654
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.20142  0.20142
+WARNING: only fulfill orthonormality with an accuracy of 0.00102828
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.19023  0.19023
+WARNING: only fulfill orthonormality with an accuracy of 0.00103007
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.17904  0.17904
+WARNING: only fulfill orthonormality with an accuracy of 0.00103176
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.16785  0.16785
+WARNING: only fulfill orthonormality with an accuracy of 0.00103329
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.15666  0.15666
+WARNING: only fulfill orthonormality with an accuracy of 0.00103462
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.14547  0.14547
+WARNING: only fulfill orthonormality with an accuracy of 0.00103579
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.13428  0.13428
+WARNING: only fulfill orthonormality with an accuracy of 0.00103684
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.12309  0.12309
+WARNING: only fulfill orthonormality with an accuracy of 0.00103781
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.5 -0.1119  0.1119
+WARNING: only fulfill orthonormality with an accuracy of 0.00103876
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.10071  0.10071
+WARNING: only fulfill orthonormality with an accuracy of 0.0010397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0.5 -0.0895201  0.0895201
+WARNING: only fulfill orthonormality with an accuracy of 0.00104061
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0.5 -0.0783301  0.0783301
+WARNING: only fulfill orthonormality with an accuracy of 0.00104147
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0.5 -0.0671401  0.0671401
+WARNING: only fulfill orthonormality with an accuracy of 0.00104217
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0.5 -0.0559501  0.0559501
+WARNING: only fulfill orthonormality with an accuracy of 0.00104263
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.04476  0.04476
+WARNING: only fulfill orthonormality with an accuracy of 0.00104271
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.03357  0.03357
+WARNING: only fulfill orthonormality with an accuracy of 0.00104231
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.02238  0.02238
+WARNING: only fulfill orthonormality with an accuracy of 0.00104289
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.5 -0.01119  0.01119
+WARNING: only fulfill orthonormality with an accuracy of 0.00104552
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point          0.5  5.55112e-17 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104662
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.482143 1.11022e-16 5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104604
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.464286 -5.55112e-17            0
+WARNING: only fulfill orthonormality with an accuracy of 0.00104681
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.446429  5.55112e-17 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104962
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.428571 5.55112e-17 5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105186
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.410714 5.55112e-17 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105357
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.392857  5.55112e-17 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105481
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point       0.375 2.77556e-17           0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105559
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.357143           0 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105593
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.339286  5.55112e-17 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105584
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.321429  2.77556e-17 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105535
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.303571 5.55112e-17 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105446
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.285714 2.77556e-17 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105324
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.267857  2.77556e-17 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105176
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point        0.25 8.32667e-17 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105016
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.232143 2.77556e-17 2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104868
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.214286  2.77556e-17 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104763
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.196429  2.77556e-17 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104738
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.178571        0        0
+WARNING: only fulfill orthonormality with an accuracy of 0.00104829
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.160714 6.93889e-17           0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105048
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.142857 1.38778e-17           0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105397
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point       0.125 1.38778e-17           0
+WARNING: only fulfill orthonormality with an accuracy of 0.00105885
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.107143  1.38778e-17 -6.93889e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00106335
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0892857 2.08167e-17 6.93889e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00106734
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0714286 6.93889e-18           0
+WARNING: only fulfill orthonormality with an accuracy of 0.00107072
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0535714            0 -3.46945e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00107342
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0357143 6.93889e-18           0
+WARNING: only fulfill orthonormality with an accuracy of 0.0010754
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0178571  1.73472e-18 -1.73472e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.0010766
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0 0 0
+WARNING: only fulfill orthonormality with an accuracy of 0.001077
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0108087   -0.0108087 -3.46945e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00107654
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0216174   -0.0216174 -1.73472e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00107515
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.032426    -0.032426 -6.93889e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00107287
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0432347   -0.0432347 -3.46945e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00106977
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0540434   -0.0540434 -3.46945e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.00106593
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0648521   -0.0648521 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00106143
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0756608   -0.0756608 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105638
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0864694   -0.0864694 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105087
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.0972781   -0.0972781 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104734
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.108087   -0.108087 6.93889e-18
+WARNING: only fulfill orthonormality with an accuracy of 0.0010455
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.118895    -0.118895 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104523
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.129704    -0.129704 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104608
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.140513 -0.140513         0
+WARNING: only fulfill orthonormality with an accuracy of 0.0010475
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.151322 -0.151322         0
+WARNING: only fulfill orthonormality with an accuracy of 0.00104904
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.16213     -0.16213 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105036
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.172939    -0.172939 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105128
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.183748    -0.183748 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105168
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.194556    -0.194556 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105147
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.205365    -0.205365 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105062
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.216174    -0.216174 -1.38778e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.0010491
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.226982    -0.226982 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104688
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.237791    -0.237791 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104395
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point       0.2486      -0.2486 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104039
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.259408    -0.259408 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00103971
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.270217    -0.270217 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104165
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point  0.281026 -0.281026         0
+WARNING: only fulfill orthonormality with an accuracy of 0.00103993
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.291834    -0.291834 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00103589
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.302643    -0.302643 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104149
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.313452    -0.313452 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.0010455
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point      0.32426     -0.32426 -5.55112e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104818
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.335069    -0.335069 -8.32667e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00104999
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.345878    -0.345878 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105115
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.356686    -0.356686 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105179
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.367495    -0.367495 -2.77556e-17
+WARNING: only fulfill orthonormality with an accuracy of 0.00105195
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.632505        0 0.367495
+WARNING: only fulfill orthonormality with an accuracy of 0.00105195
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.620459 5.55112e-17    0.379541
+WARNING: only fulfill orthonormality with an accuracy of 0.00105164
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.608413 1.11022e-16    0.391587
+WARNING: only fulfill orthonormality with an accuracy of 0.00105085
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.596367 5.55112e-17    0.403633
+WARNING: only fulfill orthonormality with an accuracy of 0.00104962
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.584321 5.55112e-17    0.415679
+WARNING: only fulfill orthonormality with an accuracy of 0.00104802
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.572275 1.11022e-16    0.427725
+WARNING: only fulfill orthonormality with an accuracy of 0.00104613
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.560229 5.55112e-17    0.439771
+WARNING: only fulfill orthonormality with an accuracy of 0.00104406
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.548184 5.55112e-17    0.451816
+WARNING: only fulfill orthonormality with an accuracy of 0.00104195
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.536138        0 0.463862
+WARNING: only fulfill orthonormality with an accuracy of 0.00104
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.524092        0 0.475908
+WARNING: only fulfill orthonormality with an accuracy of 0.00103839
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.512046 1.11022e-16    0.487954
+WARNING: only fulfill orthonormality with an accuracy of 0.00103734
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point         0.5 5.55112e-17         0.5
+WARNING: only fulfill orthonormality with an accuracy of 0.00103697
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.483871 5.55112e-17    0.483871
+WARNING: only fulfill orthonormality with an accuracy of 0.00103698
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.467742        0 0.467742
+WARNING: only fulfill orthonormality with an accuracy of 0.00103701
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.451613 1.11022e-16    0.451613
+WARNING: only fulfill orthonormality with an accuracy of 0.00103708
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.435484 2.77556e-17    0.435484
+WARNING: only fulfill orthonormality with an accuracy of 0.00103723
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.419355 5.55112e-17    0.419355
+WARNING: only fulfill orthonormality with an accuracy of 0.0010375
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.403226 1.11022e-16    0.403226
+WARNING: only fulfill orthonormality with an accuracy of 0.00103798
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.387097        0 0.387097
+WARNING: only fulfill orthonormality with an accuracy of 0.00103875
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.370968 5.55112e-17    0.370968
+WARNING: only fulfill orthonormality with an accuracy of 0.00103994
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.354839 8.32667e-17    0.354839
+WARNING: only fulfill orthonormality with an accuracy of 0.00104165
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.33871 2.77556e-17     0.33871
+WARNING: only fulfill orthonormality with an accuracy of 0.00104392
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.322581 5.55112e-17    0.322581
+WARNING: only fulfill orthonormality with an accuracy of 0.00104665
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.306452        0 0.306452
+WARNING: only fulfill orthonormality with an accuracy of 0.00104964
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.290323 2.77556e-17    0.290323
+WARNING: only fulfill orthonormality with an accuracy of 0.00105257
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.274194 5.55112e-17    0.274194
+WARNING: only fulfill orthonormality with an accuracy of 0.00105517
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.258065 -2.77556e-17     0.258065
+WARNING: only fulfill orthonormality with an accuracy of 0.00105724
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.241935 5.55112e-17    0.241935
+WARNING: only fulfill orthonormality with an accuracy of 0.00105863
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.225806        0 0.225806
+WARNING: only fulfill orthonormality with an accuracy of 0.00105933
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.209677 1.38778e-17    0.209677
+WARNING: only fulfill orthonormality with an accuracy of 0.00105941
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.193548 5.55112e-17    0.193548
+WARNING: only fulfill orthonormality with an accuracy of 0.00105906
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.177419        0 0.177419
+WARNING: only fulfill orthonormality with an accuracy of 0.00105859
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point     0.16129 2.77556e-17     0.16129
+WARNING: only fulfill orthonormality with an accuracy of 0.00105841
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.145161 1.38778e-17    0.145161
+WARNING: only fulfill orthonormality with an accuracy of 0.00105893
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.129032 1.38778e-17    0.129032
+WARNING: only fulfill orthonormality with an accuracy of 0.00106041
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.112903 1.38778e-17    0.112903
+WARNING: only fulfill orthonormality with an accuracy of 0.0010628
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0967742 1.38778e-17   0.0967742
+WARNING: only fulfill orthonormality with an accuracy of 0.00106576
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0806452 6.93889e-18   0.0806452
+WARNING: only fulfill orthonormality with an accuracy of 0.00106885
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0645161 6.93889e-18   0.0645161
+WARNING: only fulfill orthonormality with an accuracy of 0.00107168
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0.0483871         0 0.0483871
+WARNING: only fulfill orthonormality with an accuracy of 0.00107399
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point   0.0322581 1.04083e-17   0.0322581
+WARNING: only fulfill orthonormality with an accuracy of 0.00107565
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point    0.016129 1.73472e-18    0.016129
+WARNING: only fulfill orthonormality with an accuracy of 0.00107666
+WARNING: If this value deviates too much from zero, please contact the author.
+WARNING: PAW bands of k-point 0 0 0
+WARNING: only fulfill orthonormality with an accuracy of 0.001077
+WARNING: If this value deviates too much from zero, please contact the author.
+
+WARNING: Cannot use the tetrahedron method for k-space integration and must fall
+WARNING: back to Gaussian smearing which can take significantly longer. Make
+WARNING: sure to use the tetrahedron method whenever applicable.
+
+calculating overlaps...
+post-processing projection...
+WARNING: 6 of 520 k-points could not be orthonormalized with an accuracy of 1.0E-5.
+WARNING: Generally, this is not a critical error. But to help you analyze it,
+WARNING: I dumped the band overlap matrices to the file bandOverlaps.lobster.
+WARNING: Please check how much they deviate from the identity matrix and decide to
+WARNING: use your results only, if you are sure that this is ok.
+
+abs. total  spilling:   5.28%
+abs. charge spilling:   0.87%
+
+calculating pDOS... using Gaussian smearing integration (sigma=0.005eV)
+writing DOSCAR.lobster...
+calculating FatBand for Element: Nb1 Orbital(s): 5s 
+calculating FatBand for Element: Nb2 Orbital(s): 5s 
+calculating FatBand for Element: O3 Orbital(s): 2p_x 2p_y 2p_z 2s 
+calculating FatBand for Element: O4 Orbital(s): 2p_x 2p_y 2p_z 2s 
+calculating FatBand for Element: O5 Orbital(s): 2p_x 2p_y 2p_z 2s 
+calculating FatBand for Element: O6 Orbital(s): 2p_x 2p_y 2p_z 2s 
+calculating FatBand for Element: O7 Orbital(s): 2p_x 2p_y 2p_z 2s 
+calculating FatBand for Element: O8 Orbital(s): 2p_x 2p_y 2p_z 2s 
+calculating FatBand for Element: Li9 Orbital(s): 2s 
+calculating FatBand for Element: Li10 Orbital(s): 2s 
+writing COOPCAR.lobster and ICOOPLIST.lobster...
+calculating pCOHPs... using Gaussian smearing integration (sigma=0.005eV)
+writing COHPCAR.lobster and ICOHPLIST.lobster...
+writing CHARGE.lobster and GROSSPOP.lobster...
+finished in 0 h  4 min  8 s 633 ms of wall time
+            0 h 24 min  8 s  90 ms of user time
+            0 h  1 min  9 s  90 ms of sys  time
+SPOP.lobster...
+finished in 0 h  4 min  8 s 633 ms of wall time
+            0 h 24 min  8 s  90 ms of user time
+            0 h  1 min  9 s  90 ms of sys  time

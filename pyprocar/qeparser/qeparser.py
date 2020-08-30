@@ -43,7 +43,7 @@ class QEParser:
 
         # Used to store atomic states at the top of the kpdos.out file
         self.states = None
-        self.test = None
+        
         self.spd = None
         """ for l=1:
               1 pz     (m=0)
@@ -81,7 +81,7 @@ class QEParser:
         self.kpdosIn = rf.read()
         rf.close()
 
-        self.test = None
+        
 
         # The only method this parser takes. I could make more methods to increase its modularity
         self._readQEin()
@@ -114,10 +114,10 @@ class QEParser:
             self.high_symmetry_points[ihs, :] = [
                 float(x) for x in raw_khigh_sym[ihs].split()[0:3]
             ]
-            # kpoint_Count += raw_khigh_sym[ihs].split()[4]
+            
             self.kticks.append(tick_Count - 1)
             tick_Count += int(raw_khigh_sym[ihs].split()[3])
-
+        
         #######################################################################
         # Finding composition and specie data
         #######################################################################
@@ -169,7 +169,7 @@ class QEParser:
         for i in range(len(self.kticks)):
             if(i < len(self.kticks)-1):
                 diff = self.kticks[ i+1 ] - self.kticks[i]
-                if diff == 0 :
+                if diff == 1 :
                     
                     self.discontinuities.append(self.kticks[i])
 
@@ -222,7 +222,7 @@ class QEParser:
                 #int(state.split('#')[1].split(':')[0])
                 #findall("state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)", state)[0])
             #)
-        # self.test = raw_states
+     
         #print(raw_states)
         for state in raw_states:
             state_dict = {}

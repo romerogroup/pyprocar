@@ -1,0 +1,9 @@
+&projwfc
+   outdir='.',
+   prefix='LiNbO3',
+   ngauss=0, degauss=0.036748
+   DeltaE=0.01
+   kresolveddos=.true.
+   filpdos='LiNbO2.k'
+   filproj='LiNbO2.k'
+/

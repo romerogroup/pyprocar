@@ -55,8 +55,7 @@ class LobsterParser:
         # Used to store atomic states at the top of the kpdos.out file
         self.states = None
 
-        self.test = None
-        self.test2 = None
+        
 
         self.spd = None
         """ for l=1:
