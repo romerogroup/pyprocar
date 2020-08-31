@@ -81,7 +81,7 @@ class QEParser:
         self.kpdosIn = rf.read()
         rf.close()
 
-        
+        self.test = None
 
         # The only method this parser takes. I could make more methods to increase its modularity
         self._readQEin()
@@ -97,27 +97,80 @@ class QEParser:
             spinCalc = True
 
         #######################################################################
-        # Finding high symmetry points
+        # Dealing with kpoints and labels
         #######################################################################
-
-        self.nhigh_sym = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
-        raw_khigh_sym = findall(
-            "K_POINTS.*\n\s*[0-9]*.*\n" + self.nhigh_sym * "([0-9\s\.-]*).*\n",
-            self.bandsIn,
-        )[0]
-        # self.kpointsCount = 0
-
-        self.kticks = []
-        self.high_symmetry_points = zeros(shape=(self.nhigh_sym, 3))
-        tick_Count = 1
-        for ihs in range(self.nhigh_sym):
-            self.high_symmetry_points[ihs, :] = [
-                float(x) for x in raw_khigh_sym[ihs].split()[0:3]
-            ]
-            
-            self.kticks.append(tick_Count - 1)
-            tick_Count += int(raw_khigh_sym[ihs].split()[3])
+        kmethod = findall("K_POINTS[\s\{]*([a-z_]*)[\s\{]*",self.bandsIn)[0]
         
+        if kmethod == 'crystal':
+            numK = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
+            
+            raw_khigh_sym = findall("K_POINTS.*\n\s*[0-9]*.*\n" + numK * "(.*)\n", self.bandsIn)[0]
+
+            
+            tickCountIndex = 0
+            raw_high_symmetry = []
+            self.knames = []
+            self.kticks = []
+
+            for x in raw_khigh_sym:
+                if len(x.split()) == 5:
+    
+                    raw_high_symmetry.append(
+                        (float(x.split()[0]), float(x.split()[1]), float(x.split()[2]))
+                    )
+                    self.knames.append("$%s$" % x.split()[4].replace("!", ""))
+                    self.kticks.append(tickCountIndex)
+                
+                tickCountIndex += 1
+            self.high_symmetry_points = array(raw_high_symmetry)
+            self.nhigh_sym = len(self.knames)
+
+            
+        elif kmethod == 'crystal_b': 
+            self.nhigh_sym = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
+            raw_khigh_sym = findall(
+                "K_POINTS.*\n\s*[0-9]*.*\n" + self.nhigh_sym * "([0-9\s\.-]*).*\n",
+                self.bandsIn,
+            )[0]
+            # self.kpointsCount = 0
+    
+            self.kticks = []
+            self.high_symmetry_points = zeros(shape=(self.nhigh_sym, 3))
+            tick_Count = 1
+            for ihs in range(self.nhigh_sym):
+                self.high_symmetry_points[ihs, :] = [
+                    float(x) for x in raw_khigh_sym[ihs].split()[0:3]
+                ]
+                
+                self.kticks.append(tick_Count - 1)
+                tick_Count += int(raw_khigh_sym[ihs].split()[3])
+            raw_ticks = findall(
+            "K_POINTS.*\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*!(.*)\n",
+            self.bandsIn,)[0]
+    
+            if len(raw_ticks) != self.nhigh_sym:
+                self.knames = [str(x) for x in range(self.nhigh_sym)]
+            else:
+                self.knames = [
+                    "$%s$" % (x.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
+                    for x in raw_ticks
+                ]
+                
+                
+        # finds discontinuities 
+        
+        for i in range(len(self.kticks)):
+            if(i < len(self.kticks)-1):
+                diff = self.kticks[ i+1 ] - self.kticks[i]
+                if diff == 1 :
+                    
+                    self.discontinuities.append(self.kticks[i])
+
+                    
+                    discon_name = "$" + self.knames[i].replace("$","") +"|"+ self.knames[i+1].replace("$","") + "$"
+                    self.knames.pop(i+1)
+                    self.knames[i] = discon_name
+                    self.kticks.pop(i+1)
         #######################################################################
         # Finding composition and specie data
         #######################################################################
@@ -147,39 +200,7 @@ class QEParser:
                 for species in range(len(species_list)):
                     if raw_ions[ions].split()[0] == species_list[species]:
                         self.composition[raw_ions[ions].split()[0]] += 1
-
-        #######################################################################
-        # Finding k labels
-        #######################################################################
-
-        raw_ticks = findall(
-            "K_POINTS.*\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*!(.*)\n",
-            self.bandsIn,
-        )[0]
-
-        if len(raw_ticks) != self.nhigh_sym:
-            self.knames = [str(x) for x in range(self.nhigh_sym)]
-        else:
-            self.knames = [
-                "$%s$" % (x.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
-                for x in raw_ticks
-            ]
-        
-        # finds discontinuities 
-        for i in range(len(self.kticks)):
-            if(i < len(self.kticks)-1):
-                diff = self.kticks[ i+1 ] - self.kticks[i]
-                if diff == 1 :
                     
-                    self.discontinuities.append(self.kticks[i])
-
-                    
-                    discon_name = "$" + self.knames[i].replace("$","") +"|"+ self.knames[i+1].replace("$","") + "$"
-                    self.knames.pop(i+1)
-                    self.knames[i] = discon_name
-                    self.kticks.pop(i+1)
-
-
 
         #######################################################################
         # Reading the kpdos.out for outputfile labels
@@ -268,10 +289,9 @@ class QEParser:
                 self.file_names.append(output_prefix + ".pdos_atm#" + str(file[0]) + "(" + file[1] + ")_wfc#" + str(file[2]) +  "(f)")"""
 
         #######################################################################
-        # Kpoints and kpoints index
+        # Finds kpoints in kpdosout file. They are the k points in the reciprocal space
         #######################################################################
 
-        # Finds the k points and stores them in an array
         raw_kpoints = []
         if spinCalc == True:
 
@@ -350,18 +370,16 @@ class QEParser:
             )
         )
 
-        # Finds the kpoints
-
         k_string = findall(r"\s?k =[\s-]{3}?.+", kpdosout)
 
         """First loop goes through the kpoints and matches band information that follows the specific k point. The if else statment is used to catch unique cases, namely the end of the kpoints
-           Also sometimes there is a duplicate final k point so findall is used twice to deal with this case
-           Second loop goes through band information of a kpoint.The if else statments here again catches unique cases. This is when it hits the last the band or when it is the last band and the last kpoint
-           The other if else statement here catches the cases when there are no contributions at all and would return nothing
-           Third loop parses the projections of a band
-           The fourth loop then goes through the known possible states. The if statment ensures the there is a projection and matchs a projection to a known state.
-           The fifth loop then goes throguh the known possible orbitals. The if statment then matches the projection with a specific orbital.
-           Finally the projection is put into the spd array
+            Also sometimes there is a duplicate final k point so findall is used twice to deal with this case
+            Second loop goes through band information of a kpoint.The if else statments here again catches unique cases. This is when it hits the last the band or when it is the last band and the last kpoint
+            The other if else statement here catches the cases when there are no contributions at all and would return nothing
+            Third loop parses the projections of a band
+            The fourth loop then goes through the known possible states. The if statment ensures the there is a projection and matchs a projection to a known state.
+            The fifth loop then goes throguh the known possible orbitals. The if statment then matches the projection with a specific orbital.
+            Finally the projection is put into the spd array
         """
 
         for kp in range(len(k_string)):
