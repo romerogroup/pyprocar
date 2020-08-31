@@ -1,0 +1,607 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.core.dos &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyprocar.core.dos</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyprocar.core.dos</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Aug 19 20:49:03 2020</span>
+
+<span class="sd">@author: Pedram Tavadze, Logan Lang</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="DensityOfStates"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.dos.DensityOfStates">[docs]</a><span class="k">class</span> <span class="nc">DensityOfStates</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">energies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">total</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">projected</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">interpolation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A class that contains density of states calcuated by the a density</span>
+<span class="sd">        functional theory calculation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        energies : list float, optional</span>
+<span class="sd">            List of points on energy spectrum . The default is None.</span>
+<span class="sd">        total : list float, optional</span>
+<span class="sd">            List of densities at each point. The default is None.</span>
+<span class="sd">        projected : list float, optional</span>
+<span class="sd">            dictionary by the following order</span>
+<span class="sd">            projected[iatom][iprincipal][iorbital][ispin].</span>
+<span class="sd">            ``iprincipal`` works like the principal quantum number n. The last</span>
+<span class="sd">            index should be the total. (iprincipal = -1)</span>
+<span class="sd">            n = iprincipal =&gt; 0, 1, 2, 3, -1 =&gt; s, p, d, total</span>
+<span class="sd">            ``iorbital`` works similar to angular quantum number l, but not the</span>
+<span class="sd">            same. iorbital follows this order</span>
+<span class="sd">            (0,1,2,3,4,5,6,7,8) =&gt; s,py,pz,px,dxy,dyz,dz2,dxz,dx2-y2.</span>
+<span class="sd">            ``ispin`` works as magnetic quantum number.</span>
+<span class="sd">            m = 0,1, for spin up and down</span>
+<span class="sd">            The default is None.</span>
+
+
+<span class="sd">        interpolation_factor : int, optional</span>
+<span class="sd">            The number of density of states points will increase by this factor</span>
+<span class="sd">            in the interpolation.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">energies</span> <span class="o">=</span> <span class="n">energies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">total</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span>
+
+        <span class="k">if</span> <span class="n">interpolation_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">interpolated</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)):</span>
+                <span class="n">new_energy</span><span class="p">,</span> <span class="n">new_total</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ispin</span><span class="p">],</span>
+                    <span class="n">factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
+                <span class="n">interpolated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_total</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">interpolated</span>
+
+            <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">iprincipal</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">])):</span>
+                    <span class="k">for</span> <span class="n">iorbital</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">])):</span>
+                        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                                <span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">][</span><span class="n">iorbital</span><span class="p">])):</span>
+                            <span class="n">x</span> <span class="o">=</span> <span class="n">energies</span>
+                            <span class="n">y</span> <span class="o">=</span> <span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">][</span><span class="n">iorbital</span><span class="p">][</span><span class="n">ispin</span><span class="p">]</span>
+                            <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
+                                                 <span class="n">y</span><span class="p">,</span>
+                                                 <span class="n">factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
+
+                            <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">][</span><span class="n">iorbital</span><span class="p">][</span>
+                                <span class="n">ispin</span><span class="p">]</span> <span class="o">=</span> <span class="n">ys</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">energies</span> <span class="o">=</span> <span class="n">xs</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DensityOfStates.dos_sum"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.dos.DensityOfStates.dos_sum">[docs]</a>    <span class="k">def</span> <span class="nf">dos_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        +-------+-----+------+------+------+------+------+------+------+------+</span>
+<span class="sd">        |n-lm   |  0  |   1  |  2   |   3  |   4  |   5  |   6  |   7  |   8  |</span>
+<span class="sd">        +=======+=====+======+======+======+======+======+======+======+======+</span>
+<span class="sd">        |-1(tot)|  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |</span>
+<span class="sd">        +=======+=====+======+======+======+======+======+======+======+======+</span>
+<span class="sd">        |   0   |  s  |      |      |      |      |      |      |      |      |</span>
+<span class="sd">        +=======+=====+======+======+======+======+======+======+======+======+</span>
+<span class="sd">        |   1   |  s  |  py  |  pz  |  px  |      |      |      |      |      |</span>
+<span class="sd">        +=======+=====+======+======+======+======+======+======+======+======+</span>
+<span class="sd">        |   2   |  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |</span>
+<span class="sd">        +=======+=====+======+======+======+======+======+======+======+======+</span>
+<span class="sd">        |  ...  | ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |</span>
+<span class="sd">        +=======+=====+======+======+======+======+======+======+======+======+</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : list int, optional</span>
+<span class="sd">             list of atom index needed to be sumed over.</span>
+<span class="sd">             count from zero with the same</span>
+<span class="sd">             order as input. The default is None.</span>
+<span class="sd">        principal_q_numbers : list int, optional</span>
+<span class="sd">            list of . The default is [-1].</span>
+<span class="sd">        orbitals : TYPE, optional</span>
+<span class="sd">            DESCRIPTION. The default is None.</span>
+<span class="sd">        spins : TYPE, optional</span>
+<span class="sd">            DESCRIPTION. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ret : list float</span>
+<span class="sd">            .</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span>
+        <span class="n">principal_q_numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">principal_q_numbers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orbitals</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndos</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">iprinc</span> <span class="ow">in</span> <span class="n">principal_q_numbers</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+                    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprinc</span><span class="p">])</span>
+
+                    <span class="n">ret</span><span class="p">[</span><span class="n">ispin</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">temp</span><span class="p">[</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">ispin</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div></div>
+
+
+<div class="viewcode-block" id="interpolate"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.dos.interpolate">[docs]</a><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interplates the function y=f(x) by increasing the x points by the factor.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : list float</span>
+<span class="sd">        points of x.</span>
+<span class="sd">    y : list float</span>
+<span class="sd">        points of y=f(x).</span>
+<span class="sd">    factor : int, optional</span>
+<span class="sd">        Multiplies the number of x points by this factor. The default is 2.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xs : list float</span>
+<span class="sd">        points in which y was interpolated.</span>
+<span class="sd">    ys : list float</span>
+<span class="sd">        interpolated points.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">CubicSpline</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">factor</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">cs</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span></div>
+
+
+<span class="c1"># =======</span>
+<span class="c1"># Created on Mon Jun 15 21:35:50 2020</span>
+
+<span class="c1"># @author: lllan</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+
+<span class="c1"># import os</span>
+<span class="c1"># import sys</span>
+<span class="c1"># import numpy as np</span>
+<span class="c1"># from pychemia import HAS_MATPLOTLIB</span>
+
+<span class="c1"># class DensityOfStates:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Stores the density of states</span>
+<span class="c1">#     It its basically a numpy array with the first column representing energies</span>
+<span class="c1">#     and all the extra columns representing density of states.</span>
+<span class="c1">#     Those several columns could contain partial contributions due to spin and or</span>
+<span class="c1">#     orbital</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     def __init__(self, table=None, title=None,labels=None):</span>
+<span class="c1">#         self._dos = None</span>
+<span class="c1">#         #self._principle_qnumber = None</span>
+<span class="c1">#         self._min_energy = None</span>
+<span class="c1">#         self._max_energy = None</span>
+<span class="c1">#         self._max_dos = None</span>
+<span class="c1">#         self.title = title</span>
+<span class="c1">#         self.labels = labels</span>
+<span class="c1">#         self.ncols = 1</span>
+
+<span class="c1">#         if table is not None:</span>
+<span class="c1">#             self._dos = np.array(table)</span>
+<span class="c1">#             self.ncols = self._dos.shape[1] - 1</span>
+<span class="c1">#             self._min_energy = min(table[:, 0])</span>
+<span class="c1">#             self._max_energy = max(table[:, 0])</span>
+<span class="c1">#             self._max_dos = max(table[:, 1])</span>
+
+<span class="c1">#         if self.labels == None:</span>
+<span class="c1">#             self.labels = np.arange(self.ncols)</span>
+
+<span class="c1">#     @staticmethod</span>
+<span class="c1">#     def read(filename, title=None):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         Reads a file and returns a DensityOFStates object.</span>
+<span class="c1">#         The file could contain concatenated two columns representing</span>
+<span class="c1">#         the desnity of states. However, the energies should be</span>
+<span class="c1">#         repetitivive and the number of values be the same for all the</span>
+<span class="c1">#         sets</span>
+<span class="c1">#         :param filename: (string) the file that contains the density of states</span>
+<span class="c1">#         :param title: (string) customize title</span>
+<span class="c1">#         :return: (DensityOfStates) object</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         table = np.loadtxt(filename)</span>
+<span class="c1">#         table = np.array(table)</span>
+<span class="c1">#         if title is None:</span>
+<span class="c1">#             root, ext = os.path.splitext(os.path.basename(filename))</span>
+<span class="c1">#             name = root</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             name = title</span>
+
+<span class="c1">#         jump = 0</span>
+<span class="c1">#         jumplist = [0]</span>
+<span class="c1">#         nsets = 1</span>
+<span class="c1">#         for iline in range(len(table) - 1):</span>
+<span class="c1">#             if table[iline, 0] != table[iline - jump, 0]:</span>
+<span class="c1">#                 print(iline, jump, table[iline, 0], table[iline - jump, 0])</span>
+<span class="c1">#                 raise ValueError(&quot;No consistency on energy values&quot;)</span>
+<span class="c1">#             if table[iline + 1, 0] &lt; table[iline, 0]:</span>
+<span class="c1">#                 jump = iline + 1</span>
+<span class="c1">#                 jumplist.append(jump)</span>
+<span class="c1">#                 nsets += 1</span>
+
+<span class="c1">#         if nsets &gt; 1:</span>
+<span class="c1">#             jump1 = jumplist[1] - jumplist[0]</span>
+<span class="c1">#             for i in range(1, nsets - 1):</span>
+<span class="c1">#                 if jumplist[i + 1] - jumplist[i] != jump1:</span>
+<span class="c1">#                     raise ValueError(&quot;No equal jumps&quot;)</span>
+<span class="c1">#             table2 = np.zeros((jump1, nsets + 1))</span>
+<span class="c1">#             table2[:, 0] = table[:jump1, 0]</span>
+<span class="c1">#             for i in range(nsets):</span>
+<span class="c1">#                 table2[:, i + 1] = table[i * jump1:(i + 1) * jump1, 1]</span>
+<span class="c1">#                 assert (np.all(table[i * jump1:(i + 1) * jump1, 0] == table[:jump1, 0]))</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             table2 = table</span>
+
+<span class="c1">#         dos = DensityOfStates(table=table2, title=name)</span>
+<span class="c1">#         return dos</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def dos(self):</span>
+<span class="c1">#         return self._dos</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def energies(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         The energy values</span>
+<span class="c1">#         :return: (numpy.ndarray) One-dimensional array of energies</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self._dos[:, 0]</span>
+
+<span class="c1">#     @property</span>
+<span class="c1">#     def values(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         The density of states values, could be multidimensional</span>
+<span class="c1">#         :return: (numpy.ndarray) Density of states values</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         if self.ncols &gt; 1:</span>
+<span class="c1">#             return self._dos[:, range(1, self.ncols + 1)]</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             return self._dos[:, 1]</span>
+
+<span class="c1">#     def save_txt(self,filename=None):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         writes the density of states in a file using numpy savetxt.</span>
+<span class="c1">#         If filename not defined, the title of object is used as filename</span>
+
+<span class="c1">#         :param filename</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         if filename == None:</span>
+<span class="c1">#             filename = self.title.replace(&#39; &#39;,&#39;&#39;)+&#39;.txt&#39;</span>
+
+<span class="c1">#         header = (&#39;%12s&#39;+&#39;%12s&#39;*self.ncols) % tuple(self.labels)</span>
+<span class="c1">#         fmt = (&#39;%12.3f &#39;+&#39;%12.4f&#39;*self.ncols)</span>
+<span class="c1">#         np.savetxt(fname=filename,fmt=fmt,X=self.dos,header=header)</span>
+
+<span class="c1">#         #-34.460  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00</span>
+
+<span class="c1">#     def to_dict(self):</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         returns the object as a python dictionary</span>
+
+<span class="c1">#         :return {&#39;labels&#39;:labels,&#39;energies&#39;:energies,title:values}</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return {&#39;labels&#39;:self.labels,&#39;energies&#39;:self.energies,self.title:self.values}</span>
+
+<span class="c1"># def plot_one_dos(dosobj, ax=None, horizontal=True, figwidth=16, figheight=12):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Plot a single density of states, if the values contains</span>
+<span class="c1">#     several dimensions all the dimensions are plotted</span>
+<span class="c1">#     If the axes is no given, a new figure is created and the</span>
+<span class="c1">#     axes is returned</span>
+<span class="c1">#     :param figheight:</span>
+<span class="c1">#     :param figwidth:</span>
+<span class="c1">#     :param dosobj: (DensityOfStates) object</span>
+<span class="c1">#     :param ax: (matplotlib.axes.Axes) object</span>
+<span class="c1">#     :param horizontal: (bool) if the plot is horizontal or</span>
+<span class="c1">#     :return: (matplotlib.figure.Figure, matplotlib.axes.Axes) the (fig, ax) tuple</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if HAS_MATPLOTLIB:</span>
+<span class="c1">#         import matplotlib.pyplot as plt</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         raise NotImplementedError</span>
+
+<span class="c1">#     if ax is None:</span>
+<span class="c1">#         fig = plt.figure()</span>
+<span class="c1">#         fig.set_figheight(figheight)</span>
+<span class="c1">#         fig.set_figwidth(figwidth)</span>
+<span class="c1">#         ax = fig.add_subplot(111)</span>
+<span class="c1">#         if horizontal:</span>
+<span class="c1">#             ax.set_xlabel(&#39;Energy&#39;)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             ax.set_ylabel(&#39;Energy&#39;)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         fig = plt.gcf()</span>
+
+<span class="c1">#     xx = dosobj.energies</span>
+
+<span class="c1">#     if dosobj.ncols &gt; 1:</span>
+<span class="c1">#         for i in range(dosobj.ncols):</span>
+<span class="c1">#             yy = dosobj.values[:, i]</span>
+
+<span class="c1">#             if horizontal:</span>
+
+<span class="c1">#                 ax.plot(xx, yy, label=dosobj.labels[i+1])</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 ax.plot(yy, xx, label=dosobj.labels[i+1])</span>
+
+<span class="c1">#     else:</span>
+<span class="c1">#         yy = dosobj.values</span>
+<span class="c1">#         if horizontal:</span>
+<span class="c1">#             ax.plot(xx, yy)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             ax.plot(yy, xx)</span>
+
+<span class="c1">#     # fig.savefig(&#39;test.pdf&#39;)</span>
+<span class="c1">#     return fig, ax</span>
+
+<span class="c1"># def plot_many_dos(doslist, minenergy=None, maxenergy=None, figwidth=16, figheight=12):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Plot multiple densities of states</span>
+<span class="c1">#     :param doslist: (list) list of DensityOfStates objects</span>
+<span class="c1">#     :param minenergy: (float) minimal energy to display</span>
+<span class="c1">#     :param maxenergy: (float) maximal energy to display</span>
+<span class="c1">#     :param figheight: (float) Height of figure</span>
+<span class="c1">#     :param figwidth: (float) Width of figure</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     import matplotlib.pyplot as plt</span>
+<span class="c1">#     ndos = len(doslist)</span>
+<span class="c1">#     if minenergy is None:</span>
+<span class="c1">#         minenergy = min([min(x.energies) for x in doslist])</span>
+<span class="c1">#     if maxenergy is None:</span>
+<span class="c1">#         maxenergy = max([max(x.energies) for x in doslist])</span>
+<span class="c1">#     minval = sys.float_info.max</span>
+<span class="c1">#     maxval = sys.float_info.min</span>
+<span class="c1">#     for idos in doslist:</span>
+<span class="c1">#         for i in idos.dos:</span>
+<span class="c1">#             if minenergy &lt; i[0] &lt; maxenergy:</span>
+<span class="c1">#                 for icol in range(idos.ncols):</span>
+<span class="c1">#                     if i[icol + 1] &gt; maxval:</span>
+<span class="c1">#                         maxval = i[icol + 1]</span>
+<span class="c1">#                     if i[icol + 1] &lt; minval:</span>
+<span class="c1">#                         minval = i[icol + 1]</span>
+
+<span class="c1">#     fig, ax = plt.subplots(nrows=1, ncols=ndos, sharex=False, sharey=True, squeeze=True)</span>
+<span class="c1">#     fig.set_figwidth(figwidth)</span>
+<span class="c1">#     fig.set_figheight(figheight)</span>
+<span class="c1">#     plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0, hspace=0)</span>
+<span class="c1">#     for i in range(ndos):</span>
+<span class="c1">#         plot_one_dos(doslist[i], ax[i], horizontal=False)</span>
+<span class="c1">#         ax[i].set_xlim(1.1 * minval, 1.1 * maxval)</span>
+<span class="c1">#         ax[i].set_ylim(minenergy, maxenergy)</span>
+<span class="c1">#         ax[i].set_xlabel(doslist[i].title)</span>
+<span class="c1">#         ax[i].spines[&#39;bottom&#39;].set_linewidth(10)</span>
+<span class="c1">#         ax[i].spines[&#39;left&#39;].set_linewidth(10)</span>
+<span class="c1">#     ax[0].set_ylabel(&#39;Energy&#39;)</span>
+<span class="c1">#     fig.savefig(&#39;test.pdf&#39;)</span>
+<span class="c1">#     return fig, ax</span>
+<span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;&gt; e937792a3f68b211f23cc04a4ff068e4b6ae5535</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

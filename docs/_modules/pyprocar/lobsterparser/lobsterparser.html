@@ -1,0 +1,627 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.lobsterparser.lobsterparser &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyprocar.lobsterparser.lobsterparser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyprocar.lobsterparser.lobsterparser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu Jun 25 03:12:50 2020</span>
+<span class="sd">@author: Logan Lang</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">findall</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">DOTALL</span><span class="p">,</span> <span class="n">MULTILINE</span><span class="p">,</span> <span class="n">finditer</span><span class="p">,</span> <span class="nb">compile</span><span class="p">,</span> <span class="n">sub</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">concatenate</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<div class="viewcode-block" id="LobsterParser"><a class="viewcode-back" href="../../../pyprocar.lobsterparser.html#pyprocar.lobsterparser.lobsterparser.LobsterParser">[docs]</a><span class="k">class</span> <span class="nc">LobsterParser</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">lobsterin</span><span class="o">=</span><span class="s2">&quot;lobsterin&quot;</span><span class="p">,</span>
+        <span class="n">lobsterout</span><span class="o">=</span><span class="s2">&quot;lobsterout&quot;</span><span class="p">,</span>
+        <span class="n">scfin</span><span class="o">=</span><span class="s2">&quot;scf.in&quot;</span><span class="p">,</span>
+        <span class="n">outfile</span><span class="o">=</span><span class="s2">&quot;scf.out&quot;</span><span class="p">,</span>
+        <span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lobstercode</span><span class="o">=</span><span class="s2">&quot;qe&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lobsterin</span> <span class="o">=</span> <span class="n">lobsterin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scfin</span> <span class="o">=</span> <span class="n">scfin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outfile</span> <span class="o">=</span> <span class="n">outfile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span> <span class="o">=</span> <span class="n">lobsterout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dosin</span> <span class="o">=</span> <span class="s2">&quot;DOSCAR.lobster&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_names</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discontinuities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kdirect</span> <span class="o">=</span> <span class="n">kdirect</span>
+        <span class="c1">############################</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nspecies</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">composition</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">speciesList</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ionsList</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ionsCount</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Used to store atomic states at the top of the kpdos.out file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="kc">None</span>
+
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; for l=1:</span>
+<span class="sd">              1 pz     (m=0)</span>
+<span class="sd">              2 px     (real combination of m=+/-1 with cosine)</span>
+<span class="sd">              3 py     (real combination of m=+/-1 with sine)</span>
+<span class="sd">            for l=2:</span>
+<span class="sd">              1 dz2    (m=0)</span>
+<span class="sd">              2 dzx    (real combination of m=+/-1 with cosine)</span>
+<span class="sd">              3 dzy    (real combination of m=+/-1 with sine)</span>
+<span class="sd">              4 dx2-y2 (real combination of m=+/-2 with cosine)</span>
+<span class="sd">              5 dxy    (real combination of m=+/-2 with sine)&quot;&quot;&quot;</span>
+        <span class="c1"># Oribital order. This is the way it goes into the spd Array. index 0 is resered for totals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbitals</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;s&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p_y&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p_z&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p_x&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;d_xy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;d_yz&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;d_z^2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;d_x^2-y^2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;d_xz&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="c1"># These are not used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbitalName_short</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;tot&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbitalCount</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Opens the needed files</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lobsterin</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lobsterin</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scfin</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scfin</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dos</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readFileNames</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readProjFiles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readHighKpoint</span><span class="p">()</span>
+
+        <span class="k">return</span>
+
+    <span class="c1">##########################################################################################</span>
+    <span class="c1"># Finding high symmetry points</span>
+    <span class="c1">##########################################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_readHighKpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">numK</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scfin</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">numK</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scfin</span><span class="p">,</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">tickCountIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">raw_high_symmetry</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_khigh_sym</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+
+                <span class="n">raw_high_symmetry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tickCountIndex</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tickCountIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">raw_high_symmetry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">)</span>
+
+
+
+        <span class="c1"># finds discontinuities </span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                    
+                    <span class="bp">self</span><span class="o">.</span><span class="n">discontinuities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+                    
+                    <span class="n">discon_name</span> <span class="o">=</span> <span class="s2">&quot;$&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;$&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">discon_name</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+
+    <span class="c1">##########################################################################################</span>
+    <span class="c1"># Finding file names</span>
+    <span class="c1">##########################################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_readFileNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ionsList</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;calculating FatBand for Element: (.*) Orbital.*&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span>
+        <span class="p">)</span>
+        <span class="n">raw_speciesList</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;calculating FatBand for Element: ([a-zA-Z]*)[0-9] Orbital.*&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">speciesList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_speciesList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">speciesList</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">speciesList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="mi">0</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nspecies</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">speciesList</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_speciesList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">speciesList</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ionsCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionsList</span><span class="p">)</span>
+
+        <span class="n">proj_orbitals</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;calculating FatBand for Element: (.*) Orbital\(s\):\s*(.*)&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="n">proj_orbitals</span><span class="p">:</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">proj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orbitals</span><span class="p">:</span>
+                <span class="n">fileName</span> <span class="o">=</span> <span class="s2">&quot;FATBAND_&quot;</span> <span class="o">+</span> <span class="n">proj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">orbital</span> <span class="o">+</span> <span class="s2">&quot;.lobster&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+
+    <span class="c1">##########################################################################################</span>
+    <span class="c1"># Reading projection files</span>
+    <span class="c1">##########################################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_readProjFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">projFile</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1">##########################################################################################</span>
+        <span class="c1"># kpoints</span>
+        <span class="c1">##########################################################################################</span>
+
+        <span class="n">raw_kpoints</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;# K-Point \d+ :\s*([-\.</span><span class="se">\\</span><span class="s2">d]*)\s*([-\.</span><span class="se">\\</span><span class="s2">d]*)\s*([-\.</span><span class="se">\\</span><span class="s2">d]*)&quot;</span><span class="p">,</span> <span class="n">projFile</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_kpoints</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_kpoints</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">ik</span><span class="p">][</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_kpoints</span><span class="p">[</span><span class="n">ik</span><span class="p">][</span><span class="n">coord</span><span class="p">]</span>
+        <span class="c1"># raw_kpoints = findall(&quot;(# K-Point \d+ :\s*[-\.\\d]*\s*[-\.\\d]*\s*[-\.\\d]*)&quot;, projFile)</span>
+
+        <span class="c1"># If kdirect=False, then the kgrid will be in cartesian coordinates.</span>
+        <span class="c1"># Requires the reciprocal lattice vectors to be parsed from the output.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">kdirect</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reclat</span><span class="p">)</span>
+
+        <span class="c1">#########################################################################################</span>
+        <span class="c1"># bands</span>
+        <span class="c1">#########################################################################################</span>
+
+        <span class="n">raw_kpoints</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;# K-Point \d+ :\s*([-\.</span><span class="se">\\</span><span class="s2">d]*\s*[-\.</span><span class="se">\\</span><span class="s2">d]*\s*[-\.</span><span class="se">\\</span><span class="s2">d]*)&quot;</span><span class="p">,</span> <span class="n">projFile</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Checks for spin polarization</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;spillings for spin channel&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">bandsCount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;NBANDS\s*(\d*)&quot;</span><span class="p">,</span> <span class="n">projFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">=</span> <span class="n">bandsCount</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">bandsCount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;NBANDS\s*(\d*)&quot;</span><span class="p">,</span> <span class="n">projFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">=</span> <span class="n">bandsCount</span>
+
+        <span class="n">band_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_kpoints</span><span class="p">)):</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="s2">&quot;# K-Point \d+ :\s*&quot;</span> <span class="o">+</span> <span class="n">raw_kpoints</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.*</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">kpoint_bands</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="n">expression</span> <span class="o">+</span> <span class="n">bandsCount</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">projFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">ikband</span> <span class="ow">in</span> <span class="n">kpoint_bands</span><span class="p">:</span>
+                <span class="n">band_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ikband</span><span class="p">)</span>
+
+        <span class="c1">#        if len(band_info) == self.bandsCount * self.kpointsCount:</span>
+        <span class="c1">#            print(&quot;Number of bands headers match&quot;)</span>
+        <span class="n">raw_bands</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="n">bandsCount</span><span class="p">))</span>
+        
+        <span class="n">ik</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ib</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">band_info</span><span class="p">)):</span>
+            <span class="n">raw_bands</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">band_info</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ib</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ib</span> <span class="o">==</span> <span class="n">bandsCount</span><span class="p">):</span>
+                <span class="n">ik</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">ib</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Checks for spin polarization</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_bands</span><span class="p">[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_bands</span><span class="p">[</span>
+                <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_bands</span><span class="p">[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">]</span>
+        <span class="c1">#########################################################################################</span>
+        <span class="c1"># Forming SPD array</span>
+        <span class="c1">#########################################################################################</span>
+
+        <span class="c1"># Checks for spin polarization</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;spillings for spin channel&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobsterout</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbitalCount</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ionsCount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbitals</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_names</span><span class="p">)):</span>
+            <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_names</span><span class="p">[</span><span class="n">file</span><span class="p">],</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="n">projFile</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="n">raw_kpoints</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+                <span class="s2">&quot;# K-Point \d+ :\s*([-\.</span><span class="se">\\</span><span class="s2">d]*\s*[-\.</span><span class="se">\\</span><span class="s2">d]*\s*[-\.</span><span class="se">\\</span><span class="s2">d]*)&quot;</span><span class="p">,</span> <span class="n">projFile</span>
+            <span class="p">)</span>
+            <span class="n">ionIndex</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">orbitalIndex</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">current_orbital</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;(# FATBAND.*)&quot;</span><span class="p">,</span> <span class="n">projFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionsList</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionsList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_names</span><span class="p">[</span><span class="n">file</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">ionIndex</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="c1"># print(ionIndex)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbitals</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orbitals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">current_orbital</span><span class="p">):</span>
+                    <span class="n">orbitalIndex</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="c1"># print(orbitalIndex)</span>
+                    <span class="c1"># print(self.orbitals[orbitalIndex])</span>
+
+            <span class="n">band_info</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_kpoints</span><span class="p">)):</span>
+                <span class="n">expression</span> <span class="o">=</span> <span class="s2">&quot;# K-Point \d+ :\s*&quot;</span> <span class="o">+</span> <span class="n">raw_kpoints</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.*</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">bands_wSpin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span>
+                <span class="n">band</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="n">expression</span> <span class="o">+</span> <span class="n">bands_wSpin</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">projFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">iband</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ionIndex</span><span class="p">,</span> <span class="n">orbitalIndex</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="n">band</span><span class="p">[</span><span class="n">iband</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">iband</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ionIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ionIndex</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">iband</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ionIndex</span><span class="p">,</span> <span class="n">orbitalIndex</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="n">band</span><span class="p">[</span><span class="n">iband</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">iband</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ionIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ionIndex</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">iband</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ionIndex</span><span class="p">,</span> <span class="n">orbitalIndex</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="n">band</span><span class="p">[</span><span class="n">iband</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">iband</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ionIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ionIndex</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># colinear spin polarized case</span>
+
+        <span class="c1"># manipulating spd array for spin polarized calculations.</span>
+        <span class="c1"># The shape is (nkpoints,2*nbands,2,natoms,norbitals)</span>
+        <span class="c1"># The third dimension is for spin.</span>
+        <span class="c1"># When this is zero, the bands*2 (all spin up and down bands) have positive projections.</span>
+        <span class="c1"># When this is one, the the first half of bands (spin up) will have positive projections</span>
+        <span class="c1"># and the second half (spin down) will have negative projections. This is to adhere to</span>
+        <span class="c1"># the convention used in PyProcar to obtain spin density and spin magnetization.</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Lobster colinear spin calculation detected.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spinCount</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ionsCount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbitals</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># spin up block for spin=0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span><span class="p">[:,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="c1"># spin down block for spin=0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="c1"># spin up block for spin=1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span><span class="p">[:,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="c1"># spin down block for spin=1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span>
+
+            <span class="c1"># Reshaping bands array to inlcude all bands (spin up and down)</span>
+            <span class="c1"># self.bands = concatenate((self.bands, self.bands), axis=1)</span>
+
+            <span class="c1"># Reshaping bands array to inlcude all bands (spin up and down)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span>
+            <span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fermi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the fermi energy read from .out</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fi</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">fermi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">fermi</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reclat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the reciprocal lattice read from .out</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">alat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;alat\)\s*=\s*([\d.e+-]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+            <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;b\(1\)\s*=\s*\(([\d.\s+-e]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span>
+        <span class="p">)</span>
+        <span class="n">b2</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+            <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;b\(2\)\s*=\s*\(([\d.\s+-e]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span>
+        <span class="p">)</span>
+        <span class="n">b3</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+            <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;b\(3\)\s*=\s*\(([\d.\s+-e]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">reclat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">alat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">array</span><span class="p">((</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span><span class="p">)))</span>
+
+        <span class="c1"># Transposing to get the correct format</span>
+        <span class="n">reclat</span> <span class="o">=</span> <span class="n">reclat</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">return</span> <span class="n">reclat</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

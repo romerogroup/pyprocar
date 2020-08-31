@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,18 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -30,10 +35,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Compare bands" href="comparebands.html" />
@@ -51,7 +52,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -74,6 +75,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -115,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
         
@@ -219,6 +222,12 @@ For colinear spin calculations spin=[0] and spin=[1] selects spin up and spin do
 </pre></div>
 </div>
 <p>PyProcar counts each row of ions in PROCAR file starting from 0. Keep in mind: <code class="docutils literal notranslate"><span class="pre">atoms=0</span></code> does not define the atom_type, rather it defines only the first ion in the POSCAR. So if you have more than one ion of the same element, use <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[[0,1,2,3,...]]</span></code>.</p>
+<span class="target" id="module-pyprocar.scriptFilter"></span><dl class="function">
+<dt id="pyprocar.scriptFilter.filter">
+<code class="sig-prename descclassname">pyprocar.scriptFilter.</code><code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param">inFile</em>, <em class="sig-param">outFile</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">orbital_names=None</em>, <em class="sig-param">bands=None</em>, <em class="sig-param">spin=None</em>, <em class="sig-param">kpoints=None</em>, <em class="sig-param">human_atoms=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFilter.html#filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptFilter.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module filters the PROCAR file and re-write a new one.</p>
+</dd></dl>
+
 </div>
 </div>
 
@@ -242,11 +251,19 @@ For colinear spin calculations spin=[0] and spin=[1] selects spin up and spin do
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -257,7 +274,6 @@ For colinear spin calculations spin=[0] and spin=[1] selects spin up and spin do
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

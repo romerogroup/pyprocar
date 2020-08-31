@@ -12,11 +12,11 @@ We first explain the arguments involved in this function, then we explain the di
 Parameters
 ==========
 
-:param vasprunfile:   The most important argument needed dosplot is ``vasprunfile``. ``vasprunfile`` defines the path to **vasprun.xml** from the density of states calculation. If plotting is being carried out in the directory of the calculation, one does not need to specify this argument.
+:param filename: The most important argument needed dosplot is ``filename``. ``filename`` defines the path to **vasprun.xml** from the density of states calculation. If plotting is being carried out in the directory of the calculation, one does not need to specify this argument.
 
-		      example: ``vasprunfile='vasprun.xml'``
+		      example: ``filename='vasprun.xml'``
 		      
-		      default: ``vasprunfile='vasprun.xml'``
+		      default: ``filename='vasprun.xml'``
    
 :param mode: ``mode`` defines the mode of the plot. This parameter will be explained in details with exmaples in the tutorial.
 
@@ -194,11 +194,11 @@ This mode plots the basic Total Density of States of the structure. This mode is
 
 Usage::
 
-  pyprocar.dosplot(vasprunfile='vasprun.xml',
+  pyprocar.dosplot(filename='vasprun.xml',
                    mode='plain',
-                   elimit=[-4,4],
+                   elimit=[-4, 4],
                    orientation='horizontal',
-                   labels=[r'$\uparrow$',r'$\downarrow$'],
+                   labels=[r'$\uparrow$', r'$\downarrow$'],
                    title=r'Total Density of States SrVO$_3$')
   
 
@@ -206,17 +206,17 @@ Usage::
 .. image:: images/dos_plain_hor.png
 
 
-Note that ``vasprunfile``, ``mode`` and ``orientation`` did not need to be specifies as we are using the defalut values.
+Note that ``filename``, ``mode`` and ``orientation`` did not need to be specifies as we are using the defalut values.
 The following will be the change in usage of ``orientation``, and the choice of the spin asked to be plotted. After this example we will switch back to horizontal plot for the examples. and plotting both of the spins in plots.
 
 Usage::
 
-  pyprocar.dosplot(vasprunfile='vasprun.xml',
+  pyprocar.dosplot(filename='vasprun.xml',
                    mode='plain',
-                   elimit=[-4,4],
+                   elimit=[-4, 4],
                    spins=[0],
                    orientation='vertical',
-                   labels=[r'$\uparrow$',r'$\downarrow$'],
+                   labels=[r'$\uparrow$', r'$\downarrow$'],
                    title=r'Total Density of States SrVO$_3$',
                    savefig='dos_plain_ver.png'
   )
@@ -233,11 +233,11 @@ This mode will use color coding to illustrate the projection of atoms and orbita
 
 Usage::
 
-  pyprocar.dosplot(vasprunfile='vasprun.xml',
+  pyprocar.dosplot(filename='vasprun.xml',
                    mode='parametric',
-                   orbitals=[1,2,3],
-                   atoms=[2,3,4],
-                   elimit=[-4,4],
+                   orbitals=[1, 2, 3],
+                   atoms=[2, 3, 4],
+                   elimit=[-4, 4],
                    orientation='horizontal',
                    plot_total=True,
                    title=r'Projected DOS of p orbitals of Oxygen in SrVO$_3$')
@@ -251,12 +251,12 @@ Usage::
 This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(``orbitals=[1,2,3]``) of O(``atoms=[2,3,4]``) in SrVO\ :sub:`3`\
 
 Usage::
-  pyprocar.bandsdosplot(vasprunfile='vasprun.xml',
+  pyprocar.bandsdosplot(filename='vasprun.xml',
                         mode='parametric_line',
-                        orbitals=[1,2,3],
-                        atoms=[2,3,4],
-                        elimit=[-4,4],
-                        labels=['O-up','O-down'],
+                        orbitals=[1, 2, 3],
+                        atoms=[2, 3, 4],
+                        elimit=[-4, 4],
+                        labels=['O-up', 'O-down'],
                         plot_total=True)
 
 
@@ -270,12 +270,12 @@ This mode plots the contribution of the species and their specified orbitals as 
 
 Usage::
 
-  pyprocar.dosplot(vasprunfile='vasprun.xml',
+  pyprocar.dosplot(filename='vasprun.xml',
                    mode='stack',
-                   colors=['lawngreen','orangered','royalblue'],
-                   items=dict(Sr=[4,5,6,7,8],O=[1,2,3],V=[0,1,2,3]),
+                   colors=['lawngreen', 'orangered', 'royalblue'],
+                   items=dict(Sr=[4, 5, 6, 7, 8], O=[1, 2, 3], V=[0, 1, 2, 3]),
                    orientation='horizontal',
-                   elimit=[-4,4],
+                   elimit=[-4, 4],
                    plot_total=True)
 
 .. image:: images/dos_stack.png
@@ -288,10 +288,10 @@ This mode is a more specified version of ``mode=='stack'``. This mode will plot 
 
 Usage::
 
-  pyprocar.dosplot(vasprunfile=vasprun,
+  pyprocar.dosplot(filename=vasprun,
                    mode='stack_species',
                    orientation='horizontal',
-                   elimit=[-4,4],
+                   elimit=[-4, 4],
                    plot_total=True)
 
 .. image:: images/dos_stack_species.png
@@ -300,15 +300,15 @@ Usage::
 6. ``mode='stack_orbitals'``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This mode is another variation of ``mode=='stack'``, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(``atoms=[2,3,4]``)
+This mode is another variation of ``mode=='stack'``, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(``atoms=[2, 3, 4]``)
 
 Usage::
 
-  pyprocar.dosplot(vasprunfile=vasprun,
+  pyprocar.dosplot(filename=vasprun,
                    mode='stack_orbitals',
-                   atoms=[2,3,4],
+                   atoms=[2, 3, 4],
                    orientation='horizontal',
-                   elimit=[-4,4],
+                   elimit=[-4, 4],
                    plot_total=True)
 
 .. image:: images/dos_stack_orbitals.png
