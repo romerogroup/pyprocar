@@ -1,5 +1,4 @@
 import numpy as np
-import re
 from ase.io import read
 from .unfolder import Unfolder
 import matplotlib.pyplot as plt
@@ -46,7 +45,8 @@ class ProcarUnfolder(object):
                 for spin in range(self.procar.nspin):
                     # todo: what about spin?
                     self.basis.append("%s|%s|%s" % (None, orb, spin))
-                    self.positions.append(self.atoms.get_scaled_positions()[iatom])
+                    self.positions.append(
+                        self.atoms.get_scaled_positions()[iatom])
 
     def unfold(self, ispin=None):
         # spd: spd[kpoint][band][ispin][atom][orbital]
@@ -68,18 +68,18 @@ class ProcarUnfolder(object):
         return w
 
     def plot(
-        self,
-        efermi=5.46,
-        ispin=None,
-        ylim=(-5, 10),
-        ktick=[0, 41, 83, 125, 200],
-        kname=["$\Gamma$", "X", "M", "R", "$\Gamma$"],
-        show_band=True,
-        shift_efermi=True,
-        width=4.0,
-        color="blue",
-        axis=None,
-        savetab=None,
+            self,
+            efermi=5.46,
+            ispin=None,
+            ylim=(-5, 10),
+            ktick=[0, 41, 83, 125, 200],
+            kname=["$\Gamma$", "X", "M", "R", "$\Gamma$"],
+            show_band=True,
+            shift_efermi=True,
+            width=4.0,
+            color="blue",
+            axis=None,
+            savetab=None,
     ):
         iispin = 0
         if ispin is not None:
@@ -96,7 +96,8 @@ class ProcarUnfolder(object):
                 tab,
                 delimiter=",",
                 fmt="%10.4f",
-                header="# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)..."
+                header=
+                "# nkpoints: %s   nbands:%s \n#E(k1) w(k1) E(k2) w(k2) E(k3) w(k3)..."
                 % (nk, nb),
             )
         axes = plot_band_weight(

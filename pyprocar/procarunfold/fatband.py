@@ -4,29 +4,27 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib.colors import colorConverter
 import numpy as np
-import re
-import sys
 import argparse
 import os.path
 
 
 def plot_band_weight(
-    kslist,
-    ekslist,
-    wkslist=None,
-    efermi=None,
-    shift_efermi=False,
-    yrange=None,
-    output=None,
-    style="alpha",
-    color="blue",
-    axis=None,
-    width=10,
-    fatness=4,
-    xticks=None,
-    cmap=mpl.cm.bwr,
-    weight_min=-0.1,
-    weight_max=0.6,
+        kslist,
+        ekslist,
+        wkslist=None,
+        efermi=None,
+        shift_efermi=False,
+        yrange=None,
+        output=None,
+        style="alpha",
+        color="blue",
+        axis=None,
+        width=10,
+        fatness=4,
+        xticks=None,
+        cmap=mpl.cm.bwr,
+        weight_min=-0.1,
+        weight_max=0.6,
 ):
     if axis is None:
         fig, a = plt.subplots()
@@ -108,19 +106,31 @@ def plot_band_weight(
 def main():
     parser = argparse.ArgumentParser(description="plot wannier bands.")
     parser.add_argument("fname", type=str, help="dat filename")
-    parser.add_argument("-e", "--efermi", type=float, help="Fermi energy", default=None)
-    parser.add_argument(
-        "-o", "--output", type=str, help="output filename", default=None
-    )
-    parser.add_argument(
-        "-w", "--weight", action="store_true", help="use -w to plot weighted band."
-    )
-    parser.add_argument(
-        "-y", "--yrange", type=float, nargs="+", help="range of yticks", default=None
-    )
-    parser.add_argument(
-        "-s", "--style", type=str, help="style of line, width | alpha", default="width"
-    )
+    parser.add_argument("-e",
+                        "--efermi",
+                        type=float,
+                        help="Fermi energy",
+                        default=None)
+    parser.add_argument("-o",
+                        "--output",
+                        type=str,
+                        help="output filename",
+                        default=None)
+    parser.add_argument("-w",
+                        "--weight",
+                        action="store_true",
+                        help="use -w to plot weighted band.")
+    parser.add_argument("-y",
+                        "--yrange",
+                        type=float,
+                        nargs="+",
+                        help="range of yticks",
+                        default=None)
+    parser.add_argument("-s",
+                        "--style",
+                        type=str,
+                        help="style of line, width | alpha",
+                        default="width")
     args = parser.parse_args()
     if args.output is None:
         output = os.path.splitext(args.fname)[0] + ".png"

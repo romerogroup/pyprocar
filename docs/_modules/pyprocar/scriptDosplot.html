@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
@@ -190,7 +193,7 @@
         <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dlimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dos_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
         <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -204,7 +207,237 @@
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">plt_show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This function plots density of states</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function plots the density of states in different formats</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    filename : str, optional (default ``&#39;vasprun.xml&#39;``)</span>
+<span class="sd">        The most important argument needed dosplot is</span>
+<span class="sd">        **filename**. **filename** defines the path to `vasprun.xml`</span>
+<span class="sd">        from the density of states calculation. If plotting is being</span>
+<span class="sd">        carried out in the directory of the calculation, one does not</span>
+<span class="sd">        need to specify this argument.</span>
+
+<span class="sd">    mode : str, optional (default ``&#39;plain&#39;``)</span>
+<span class="sd">        **mode** defines the mode of the plot. This parameter will be</span>
+<span class="sd">        explained in details with exmaples in the tutorial.</span>
+<span class="sd">        options are ``&#39;plain&#39;``, ``&#39;parametric&#39;``,</span>
+<span class="sd">        ``&#39;parametric_line&#39;``, ``&#39;stack&#39;``,</span>
+<span class="sd">        ``&#39;stack_orbitals&#39;``, ``&#39;stack_species&#39;``.</span>
+
+<span class="sd">    interpolation_factor : int, optional (default ``None``)</span>
+<span class="sd">        Number of points in energy axis is multiplied by this factor</span>
+<span class="sd">        and interpolated using cubic</span>
+<span class="sd">        spline. e.g. ``interpolation_factor=3``</span>
+
+<span class="sd">    orientation : str, optional (default ``horizontal&#39;``)</span>
+<span class="sd">        The orientation of the DOS plot.  options are</span>
+<span class="sd">        ``&#39;horizontal&#39;, &#39;vertical&#39;``</span>
+
+<span class="sd">    spin_colors : list str or tuples, (optional ``spin_colors=[&#39;blue&#39;,</span>
+<span class="sd">        &#39;red&#39;]``)</span>
+<span class="sd">        **spin_colors** represent the colors the different spin</span>
+<span class="sd">        ploarizations are going to be represented in the DOS</span>
+<span class="sd">        plot. These colors can be chosen from any type of color</span>
+<span class="sd">        acceptable by</span>
+<span class="sd">        matplotlib(string,rgb,html). e.g. ``spin_colors=[&#39;blue&#39;,&#39;red&#39;]``,</span>
+<span class="sd">        ``spin_colors=[(0, 0, 1),(1, 0,0 )]``,</span>
+<span class="sd">        ``spin_colors=[&#39;#0000ff&#39;,&#39;#ff0000&#39;]``</span>
+
+<span class="sd">        .. caution:: If the calculation is spin polarized one has to</span>
+<span class="sd">        provide two colors even if one is plotting one spin. I</span>
+<span class="sd">        disregard this cation if using default.</span>
+
+<span class="sd">    colors : list str or tuples, optional (default, optional)</span>
+<span class="sd">        ``colors`` defines the color of plots filling the area under</span>
+<span class="sd">        the curve of Total density of states. This is only important in the</span>
+<span class="sd">        ``mode=stack``, ``mode=stack_species``,</span>
+<span class="sd">        ``mode=stack_orbitals``. To have a better sense of this</span>
+<span class="sd">        parameter refer to the stack plots of  SrVO\ :sub:`3`\. These</span>
+<span class="sd">        colors can be chosen from any type of color acceptable by</span>
+<span class="sd">        matplotlib(string,rgb,html).</span>
+
+<span class="sd">    spins : list int, optional</span>
+<span class="sd">        ``spins`` defines plotting of different spins channels present</span>
+<span class="sd">        in the calculation, If the calculation is spin non-polorized</span>
+<span class="sd">        the spins will be set by default to ``spins=[0]``. if the</span>
+<span class="sd">        calculation is spin polorized this parameter can be set to 0</span>
+<span class="sd">        or 1 or both. e.g. ``spins=[0, 1]``</span>
+
+<span class="sd">    atoms : list int, optional</span>
+<span class="sd">        ``atoms`` define the projection of the atoms in the Density of</span>
+<span class="sd">        States. In other words it selects only the contribution of the</span>
+<span class="sd">        atoms provided. Atoms has to be a python list(or numpy array)</span>
+<span class="sd">        containing the atom indices. Atom indices has to be order of</span>
+<span class="sd">        the input files of DFT package. ``atoms`` is only relevant in</span>
+<span class="sd">        ``mode=&#39;parametric&#39;``, ``mode=&#39;parametric_line&#39;``,</span>
+<span class="sd">        ``mode=&#39;stack_orbitals&#39;``. keep in mind that python counting</span>
+<span class="sd">        starts from zero.</span>
+<span class="sd">        e.g. for SrVO\ :sub:`3`\  we are choosing only the oxygen</span>
+<span class="sd">        atoms. ``atoms=[2,3,4]``, keep in mind that python counting</span>
+<span class="sd">        starts from zero, for a **POSCAR** similar to following::</span>
+
+<span class="sd">            Sr1 V1 O3</span>
+<span class="sd">            1.0</span>
+<span class="sd">            3.900891 0.000000 0.000000</span>
+<span class="sd">            0.000000 3.900891 0.000000</span>
+<span class="sd">            0.000000 0.000000 3.900891</span>
+<span class="sd">            Sr V O</span>
+<span class="sd">            1 1 3</span>
+<span class="sd">            direct</span>
+<span class="sd">            0.500000 0.500000 0.500000 Sr atom 0</span>
+<span class="sd">            0.000000 0.000000 0.000000 V  atom 1</span>
+<span class="sd">            0.000000 0.500000 0.000000 O  atom 2</span>
+<span class="sd">            0.000000 0.000000 0.500000 O  atom 3</span>
+<span class="sd">            0.500000 0.000000 0.000000 O  atom 4</span>
+
+<span class="sd">        if nothing is specified this parameter will consider all the</span>
+<span class="sd">        atoms present.</span>
+
+<span class="sd">    orbitals : list int, optional</span>
+<span class="sd">        ``orbitals`` define the projection of orbitals in the density</span>
+<span class="sd">        of States. In other words it selects only the contribution of</span>
+<span class="sd">        the orbitals provided. Orbitals has to be a python list(or</span>
+<span class="sd">        numpy array) containing the Orbital indices. Orbitals indices</span>
+<span class="sd">        has to be order of the input files of DFT package. The</span>
+<span class="sd">        following table represents the indecies for different orbitals</span>
+<span class="sd">        in **VASP**.</span>
+<span class="sd">            +-----+-----+----+----+-----+-----+-----+-----+-------+</span>
+<span class="sd">            |  s  | py  | pz | px | dxy | dyz | dz2 | dxz | x2-y2 |</span>
+<span class="sd">            +-----+-----+----+----+-----+-----+-----+-----+-------+</span>
+<span class="sd">            |  0  |  1  |  2 |  3 |  4  |  5  |  6  |  7  |   8   |</span>
+<span class="sd">            +-----+-----+----+----+-----+-----+-----+-----+-------+</span>
+<span class="sd">        ``orbitals`` is only relavent in ``mode=&#39;parametric&#39;``,</span>
+<span class="sd">        ``mode=&#39;parametric_line&#39;``, ``mode=&#39;stack_species&#39;``.</span>
+<span class="sd">        </span>
+<span class="sd">        e.g. ``orbitals=[1,2,3]`` will only select the p orbitals</span>
+<span class="sd">        while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.</span>
+<span class="sd">        </span>
+<span class="sd">        If nothing is specified pyprocar will select all the present</span>
+<span class="sd">        orbitals.</span>
+
+<span class="sd">    elimit : list float, optional</span>
+<span class="sd">        Energy window limit asked to plot. ``elimit`` has to be a two</span>
+<span class="sd">        element python list(or numpy array).</span>
+<span class="sd">        e.g. ``elimit=[-2, 2]``</span>
+<span class="sd">        The default is set to the minimum and maximum of the energy</span>
+<span class="sd">        window.</span>
+
+<span class="sd">    dos_limit : list float, optional</span>
+<span class="sd">       ``dos_limit`` defines the density of states axis limits on the</span>
+<span class="sd">       graph. It is automatically set to select 10% higher than the</span>
+<span class="sd">       maximum of density of states in the specified energy window.</span>
+<span class="sd">       e.g. ``dos_limit=[0, 30]``</span>
+
+<span class="sd">    cmap : str , optional (default &#39;jet&#39;)</span>
+<span class="sd">        The color map used for color coding the projections. ``cmap``</span>
+<span class="sd">        is only relevant in ``mode=&#39;parametric&#39;``. a full list of</span>
+<span class="sd">        color maps in matplotlib are provided in this web</span>
+<span class="sd">        page. `https://matplotlib.org/2.0.1/users/colormaps.html</span>
+<span class="sd">        &lt;https://matplotlib.org/2.0.1/users/colormaps.html&gt;`_</span>
+
+<span class="sd">    vmax : float, optional</span>
+<span class="sd">        The maximum value in the color bar. ``cmap`` is only relevant</span>
+<span class="sd">        in ``mode=&#39;parametric&#39;``.</span>
+<span class="sd">        e.g. ``vmax=1.0``</span>
+
+<span class="sd">    vmin : float, optional</span>
+<span class="sd">        The maximum value in the color bar. ``cmap`` is only relevant</span>
+<span class="sd">        in ``mode=&#39;parametric&#39;``.</span>
+<span class="sd">        e.g. ``vmin=-1.0``</span>
+
+<span class="sd">    grid : bool, optional (default Flase)</span>
+<span class="sd">        Defines If a grid is plotted in the plot. The entry should be</span>
+<span class="sd">        python boolian.</span>
+
+<span class="sd">    savefig : str , optional (default None)</span>
+<span class="sd">        ``savefig`` defines the file that the plot is going to be</span>
+<span class="sd">        saved in. ``savefig`` accepts all the formats accepted by</span>
+<span class="sd">        matplotlib such as png, pdf, jpg, ...</span>
+<span class="sd">        If not provided the plot will be shown in the</span>
+<span class="sd">        interactive matplotlib mode.</span>
+<span class="sd">        e.g. ``savefig=&#39;DOS.png&#39;``, ``savefig=&#39;DOS.pdf&#39;``</span>
+
+<span class="sd">    title : str, optional</span>
+<span class="sd">        Defines the plot title asked to be added above the plot. If</span>
+<span class="sd">        ``title`` is not defined, PyProcar will not add any title.</span>
+<span class="sd">        e.g. ``title=&quot;Total Density of States SrVO_$3$&quot;``. One can use</span>
+<span class="sd">        LaTex format as well.</span>
+
+<span class="sd">    plot_total : bool, optional (default ``True``)</span>
+<span class="sd">        If the total density of states is plotted as well as other</span>
+<span class="sd">        options. The entry should be python boolian.</span>
+<span class="sd">        e.g. ``plot_total=True``</span>
+
+<span class="sd">    code : str, optional (default ``&#39;vasp&#39;``)</span>
+<span class="sd">        Defines the Density Functional Theory code used for the</span>
+<span class="sd">        calculation. The default of this argument is vasp, so if the</span>
+<span class="sd">        cal is done in vasp one does not need to define this argumnet.</span>
+<span class="sd">        e.g. ``code=vasp``, ``code=elk``, ``code=abinit``</span>
+
+<span class="sd">    labels : list str, optional</span>
+<span class="sd">        ``labels`` define the legends plotted in defining each spin.</span>
+<span class="sd">        e.g.  ``labels=[&#39;Oxygen-Up&#39;,&#39;Oxygen-Down&#39;]``,</span>
+<span class="sd">        ``labels=[&#39;Oxygen-&#39;+r&#39;$\\uparrow$&#39;,&#39;Oxygen-&#39;+r&#39;$\\downarrow$&#39;]``</span>
+<span class="sd">        Side means the string will be treated as raw string. This has</span>
+<span class="sd">        to be used if LaTex formating is used.</span>
+<span class="sd">        No default is used in the ``mode=plain``, ``mode=parametric``,</span>
+<span class="sd">        ``mode=parametric_line``. In ``mode=stack``, `ack_species``,</span>
+<span class="sd">        ``mode=stack_orbitals`` the labels are generated automatically</span>
+<span class="sd">        based on the other parameters such as atoms and orbitals.</span>
+
+<span class="sd">    items : dict, optional</span>
+<span class="sd">        ``items`` is only relavent for ``mode=&#39;stack&#39;``. stack will</span>
+<span class="sd">        plot the items defined with stacked filled areas under</span>
+<span class="sd">        curve. For clarification visit the examples in the</span>
+<span class="sd">        tutorial. ``items`` need to be provided as a python</span>
+<span class="sd">        dictionary, with keys being specific species and values being</span>
+<span class="sd">        projections of ``orbitals``. The following examples can</span>
+<span class="sd">        clarify the python lingo.</span>
+<span class="sd">        e.g.  ``items={&#39;Sr&#39;:[0],&#39;O&#39;:[1,2,3],&#39;V&#39;:[4,5,6,7,8]}`` or</span>
+<span class="sd">        ``items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])``. The two</span>
+<span class="sd">        examples are equivalent to each other. This will plot the</span>
+<span class="sd">        following curves stacked on top of each other. projection of s</span>
+<span class="sd">        orbital in Sr, projection of p orbitals in O and projection of</span>
+<span class="sd">        d orbitals in V.</span>
+<span class="sd">        The default is set to take every atom and every orbital. Which</span>
+<span class="sd">        will be equivalent to ``mode=&#39;stack_species&#39;``</span>
+
+<span class="sd">    ax : matplotlib ax object, optional</span>
+<span class="sd">        ``ax`` is a matplotlib axes. In case one wants to put plot</span>
+<span class="sd">        generated from this plot in a different figure and treat the</span>
+<span class="sd">        output as a subplot in a larger plot.</span>
+<span class="sd">        e.g. :: </span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; # Creates a figure with 3 rows and 2 colomuns </span>
+<span class="sd">            &gt;&gt;&gt; fig, axs = plt.subplots(3, 2)</span>
+<span class="sd">            &gt;&gt;&gt; x = np.linspace(-np.pi, np.pi, 1000)</span>
+<span class="sd">            &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">            &gt;&gt;&gt; axs[0, 0].plot(x, y)</span>
+<span class="sd">            &gt;&gt;&gt; pyprocar.dosplot(mode=&#39;plain&#39;,ax=axs[2, 2]),elimit=[-2,2])</span>
+<span class="sd">            &gt;&gt;&gt; plt.show()</span>
+
+<span class="sd">    plt_show : bool, optional (default ``True``)</span>
+<span class="sd">        whether to show the generated plot or skip to the saving. </span>
+<span class="sd">        e.g. ``plt_show=True``</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fig : matplotlib figure</span>
+<span class="sd">        The generated figure</span>
+
+<span class="sd">    ax : matplotlib ax object</span>
+<span class="sd">        The generated ax for this density of states.</span>
+<span class="sd">        If one chooses ``plt_show=False``, one can modify the plot</span>
+<span class="sd">        using this returned object. </span>
+<span class="sd">        e.g. ::</span>
+<span class="sd">    </span>
+<span class="sd">            &gt;&gt;&gt; fig, ax = pyprocar.dosplot(mode=&#39;plain&#39;, plt_show=False)</span>
+<span class="sd">            &gt;&gt;&gt; ax.set_ylim(-2,2)</span>
+<span class="sd">            &gt;&gt;&gt; fig.show()</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -421,8 +654,8 @@
     <span class="n">cond2</span> <span class="o">=</span> <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dlimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ylim</span> <span class="o">=</span> <span class="n">dlimit</span>
+    <span class="k">if</span> <span class="n">dos_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="n">dos_limit</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span>

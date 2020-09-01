@@ -122,3 +122,6 @@ _build/
 
 #mac
 .DS_Store
+
+# emacs
+'#*

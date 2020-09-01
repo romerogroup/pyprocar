@@ -17,7 +17,6 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 
-
 # -- Project information -----------------------------------------------------
 
 project = "PyProcar"
@@ -29,7 +28,6 @@ version = ""
 # The full version, including alpha/beta/rc tags
 release = "5.5.0"
 
-
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -40,11 +38,8 @@ release = "5.5.0"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.githubpages",
-    "sphinx.ext.napoleon",
-    'sphinx.ext.viewcode',
+    "sphinx.ext.autodoc", "sphinx.ext.mathjax", "sphinx.ext.githubpages",
+    "sphinx.ext.napoleon", 'sphinx.ext.viewcode', 'sphinx_copybutton',
     'numpydoc'
 ]
 
@@ -75,7 +70,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -105,14 +99,15 @@ html_static_path = ["_static"]
 #
 # html_sidebars = {}
 
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "PyProcardoc"
 
-
 # -- Options for LaTeX output ------------------------------------------------
+
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
@@ -133,16 +128,15 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "PyProcar.tex", "PyProcar Documentation", "Uthpala Herath", "manual"),
+    (master_doc, "PyProcar.tex", "PyProcar Documentation", "Uthpala Herath",
+     "manual"),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [(master_doc, "pyprocar", "PyProcar Documentation", [author], 1)]
-
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -160,6 +154,5 @@ texinfo_documents = [
         "Miscellaneous",
     ),
 ]
-
 
 # -- Extension configuration -------------------------------------------------

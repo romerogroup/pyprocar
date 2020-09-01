@@ -1,24 +1,48 @@
-import re
-import os
+"""
+@author : Uthpala Herath
+"""
 import seekpath
 import numpy as np
 from .splash import welcome
 
 
 def kpath(
-    infile=None,
-    outfile='KPOINTS',
-    grid_size=40,
-    with_time_reversal=True,
-    recipe='hpkot',
-    threshold=1e-07,
-    symprec=1e-05,
-    angle_tolerence=-1.0,
-    supercell_matrix=np.eye(3),
+        infile=None,
+        outfile='KPOINTS',
+        grid_size=40,
+        with_time_reversal=True,
+        recipe='hpkot',
+        threshold=1e-07,
+        symprec=1e-05,
+        angle_tolerence=-1.0,
+        supercell_matrix=np.eye(3),
 ):
     """
-	This module creates a KPOINTS file for band structure plotting.
-	"""
+    This module creates a KPOINTS file for band structure
+    plotting.
+
+    Parameters
+    ----------
+
+    infile : str, optional
+
+    outfile : str, optional
+
+    grid_size : int, optional
+
+    with_time_reversal : bool, optional
+
+    recepie : str, optional
+
+    threshold : float, optional
+
+    symprec : float, optional
+
+    angle_tolerence : float, optional
+
+    supercell_matrix: list, int
+
+    """
     welcome()
 
     file = open(infile, "r")
@@ -31,15 +55,14 @@ def kpath(
     for i in range(len(cell_matrix)):
         cell_matrix0 = np.array(cell_matrix[i].split())
         cell[i, :] = (cell_matrix0.astype(np.float)) * np.array(
-            POSCAR[1].split()
-        ).astype(np.float)
+            POSCAR[1].split()).astype(np.float)
 
     # positions
     # POSCAR index changed by Nicholas Pike from 5 -> 6 and from 7 -> 8
     # Previously, POSCAR[5] referenced the atom names i.e. Na Cl and not the
     # atom numbers
     atoms = np.array(POSCAR[6].split()).astype(np.int)
-    positions_matrix = POSCAR[8 : 8 + sum(atoms)]
+    positions_matrix = POSCAR[8:8 + sum(atoms)]
     positions = np.zeros(shape=(np.sum(atoms), 3))
 
     for j in range(len(positions_matrix)):
@@ -59,9 +82,8 @@ def kpath(
 
     # seekpath
     structure = (cell, positions, numbers)
-    kpath_dictionary = seekpath.get_path(
-        structure, with_time_reversal, recipe, threshold, symprec, angle_tolerence
-    )
+    kpath_dictionary = seekpath.get_path(structure, with_time_reversal, recipe,
+                                         threshold, symprec, angle_tolerence)
 
     path_array = [""] * 2 * len(kpath_dictionary["path"])
     count = 0
@@ -88,23 +110,18 @@ def kpath(
     k_file.write("reciprocal\n")
     for iterator in range(len(coord_matrix)):
         if iterator % 2 == 0:
-            k_file.write(
-                "%f %f %f ! %s\n"
-                % (
-                    coord_matrix[iterator, 0],
-                    coord_matrix[iterator, 1],
-                    coord_matrix[iterator, 2],
-                    path_array[iterator],
-                )
-            )
+            k_file.write("%f %f %f ! %s\n" % (
+                coord_matrix[iterator, 0],
+                coord_matrix[iterator, 1],
+                coord_matrix[iterator, 2],
+                path_array[iterator],
+            ))
         else:
-            k_file.write(
-                "%f %f %f ! %s\n\n"
-                % (
-                    coord_matrix[iterator, 0],
-                    coord_matrix[iterator, 1],
-                    coord_matrix[iterator, 2],
-                    path_array[iterator],
-                )
-            )
+            k_file.write("%f %f %f ! %s\n\n" % (
+                coord_matrix[iterator, 0],
+                coord_matrix[iterator, 1],
+                coord_matrix[iterator, 2],
+                path_array[iterator],
+            ))
     k_file.close()
+    return

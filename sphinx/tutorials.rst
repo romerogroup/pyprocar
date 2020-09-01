@@ -12,7 +12,7 @@ The following set of tutorials explains the basic usage of PyProcar. Files requi
    dos
    bandsdos
    2Dspin
-   3Dspin
+   fermi3D
    filter
    comparebands
    cat

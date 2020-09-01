@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -97,7 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="dos.html">Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bandsdos.html">Bands Structure with Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2Dspin.html">2D spin-texture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3Dspin.html">3D Fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fermi3D.html">3D Fermi surface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="filter.html">Filtering data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
@@ -194,14 +197,31 @@ The <span class="math notranslate nohighlight">\(k\)</span>-path generation util
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Y. Hinuma, G. Pizzi, Y. Kumagai, F. Oba, I. Tanaka, Band structure diagram paths based on crystallography, Computational Materials Science 128 (2017) 140–184.doi:10.1016/j.commatsci.2016.10.015.
 </pre></div>
 </div>
-<span class="target" id="module-pyprocar.scriptKpath"></span><dl class="function">
+<span class="target" id="module-pyprocar.scriptKpath"></span><p>&#64;author : Uthpala Herath</p>
+<dl class="function">
 <dt>
 <code class="sig-name descname">kpath(infile=None, outfile='KPOINTS', grid_size=40, with_time_reversal=True, recipe='hpkot', threshold=1e-07, symprec=1e-05, angle_tolerence=-1.0, supercell_matrix=array([[1., 0., 0.],</code></dt>
 <dt>
 <code class="sig-name descname">[0., 1., 0.],</code></dt>
 <dt>
 <code class="sig-name descname">[0., 0., 1.]]))</code></dt>
-<dd><p>This module creates a KPOINTS file for band structure plotting.</p>
+<dd><p>This module creates a KPOINTS file for band structure
+plotting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infile</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>outfile</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>grid_size</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>with_time_reversal</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>recepie</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>symprec</strong> (<em>float</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>angle_tolerence</strong> (<em>float</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>supercell_matrix</strong> (<em>list</em><em>, </em><em>int</em>) – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

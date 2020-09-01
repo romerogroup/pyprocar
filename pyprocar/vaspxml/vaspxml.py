@@ -16,6 +16,7 @@ import collections
 class VaspXML(collections.abc.Mapping):
     """contains."""
     def __init__(self, filename='vasprun.xml', dos_interpolation_factor=None):
+
         self.variables = {}
         self.dos_interpolation_factor = dos_interpolation_factor
 
