@@ -5,8 +5,9 @@ Created on Fri March 31 2020
 """
 import numpy as np
 import scipy.interpolate as interpolate
-from .isosurface import Isosurface
+from ..core import Isosurface
 from .brillouin_zone import BrillouinZone
+
 
 class FermiSurface3D(Isosurface):
     def __init__(self,
@@ -23,8 +24,7 @@ class FermiSurface3D(Isosurface):
                  cmap='viridis',
                  vmin=0,
                  vmax=1,
-                 supercell=[1,1,1]
-                 ):
+                 supercell=[1, 1, 1]):
         """
         
 
@@ -59,11 +59,6 @@ class FermiSurface3D(Isosurface):
 
         """
 
-
-
-
-
-
         self.kpoints = kpoints
         self.band = band
         self.spd = spd
@@ -74,7 +69,7 @@ class FermiSurface3D(Isosurface):
         self.projection_accuracy = projection_accuracy
         self.spin_texture = spin_texture
         self.spd_spin = spd_spin
-        
+
         self.brillouin_zone = self._get_brilloin_zone(supercell)
 
         Isosurface.__init__(self,
@@ -90,10 +85,9 @@ class FermiSurface3D(Isosurface):
             self.project_color(cmap, vmin, vmax)
         if self.spd_spin is not None and self.verts is not None:
             self.create_spin_texture()
-            
 
     def create_spin_texture(self):
-        
+
         if self.spd_spin is not None:
             XYZ_extended = self.XYZ.copy()
             vectors_extended_X = self.spd_spin[0].copy()
@@ -103,57 +97,69 @@ class FermiSurface3D(Isosurface):
             for ix in range(3):
                 for iy in range(self.supercell[ix]):
                     temp = self.XYZ.copy()
-                    temp[:,ix]+=1*(iy+1)
-                    XYZ_extended=np.append(XYZ_extended,temp,axis=0)
-                    vectors_extended_X = np.append(vectors_extended_X,self.spd_spin[0],axis=0)
-                    vectors_extended_Y = np.append(vectors_extended_Y,self.spd_spin[1],axis=0)
-                    vectors_extended_Z = np.append(vectors_extended_Z,self.spd_spin[2],axis=0)
+                    temp[:, ix] += 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(vectors_extended_X,
+                                                   self.spd_spin[0],
+                                                   axis=0)
+                    vectors_extended_Y = np.append(vectors_extended_Y,
+                                                   self.spd_spin[1],
+                                                   axis=0)
+                    vectors_extended_Z = np.append(vectors_extended_Z,
+                                                   self.spd_spin[2],
+                                                   axis=0)
                     temp = self.XYZ.copy()
-                    temp[:,ix]-=1*(iy+1)
-                    XYZ_extended= np.append(XYZ_extended,temp,axis=0)
-                    vectors_extended_X = np.append(vectors_extended_X,self.spd_spin[0],axis=0)
-                    vectors_extended_Y = np.append(vectors_extended_Y,self.spd_spin[1],axis=0)
-                    vectors_extended_Z = np.append(vectors_extended_Z,self.spd_spin[2],axis=0)
-
+                    temp[:, ix] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(vectors_extended_X,
+                                                   self.spd_spin[0],
+                                                   axis=0)
+                    vectors_extended_Y = np.append(vectors_extended_Y,
+                                                   self.spd_spin[1],
+                                                   axis=0)
+                    vectors_extended_Z = np.append(vectors_extended_Z,
+                                                   self.spd_spin[2],
+                                                   axis=0)
 
             # XYZ_extended = self.XYZ.copy()
             # scalars_extended = self.spd.copy()
-            
+
             XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
             # XYZ_transformed = XYZ_extended
-            
-            if self.projection_accuracy.lower()[0] == 'n': #normal
 
-                spin_X = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_X, self.verts, method="nearest"
-                    )
-                spin_Y = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Y, self.verts , method="nearest"
-                    )
-                spin_Z = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Z, self.verts , method="nearest"
-                    )
-                
-            elif self.projection_accuracy.lower()[0] =='h': #high
-                
-                spin_X = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_X, self.verts, method="linear"
-                    )
-                spin_Y = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Y, self.verts, method="linear"
-                    )
-                spin_Z = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Z, self.verts, method="linear"
-                    )
+            if self.projection_accuracy.lower()[0] == 'n':  #normal
 
-            self.set_vectors(spin_X,spin_Y,spin_Z)
+                spin_X = interpolate.griddata(XYZ_transformed,
+                                              vectors_extended_X,
+                                              self.verts,
+                                              method="nearest")
+                spin_Y = interpolate.griddata(XYZ_transformed,
+                                              vectors_extended_Y,
+                                              self.verts,
+                                              method="nearest")
+                spin_Z = interpolate.griddata(XYZ_transformed,
+                                              vectors_extended_Z,
+                                              self.verts,
+                                              method="nearest")
 
+            elif self.projection_accuracy.lower()[0] == 'h':  #high
 
-            
+                spin_X = interpolate.griddata(XYZ_transformed,
+                                              vectors_extended_X,
+                                              self.verts,
+                                              method="linear")
+                spin_Y = interpolate.griddata(XYZ_transformed,
+                                              vectors_extended_Y,
+                                              self.verts,
+                                              method="linear")
+                spin_Z = interpolate.griddata(XYZ_transformed,
+                                              vectors_extended_Z,
+                                              self.verts,
+                                              method="linear")
 
+            self.set_vectors(spin_X, spin_Y, spin_Z)
 
-
-    def project_color(self,cmap,vmin,vmax):
+    def project_color(self, cmap, vmin, vmax):
         """
         Projects the scalars to the surface.
 
@@ -174,37 +180,41 @@ class FermiSurface3D(Isosurface):
         if self.spd is not None:
             XYZ_extended = self.XYZ.copy()
             scalars_extended = self.spd.copy()
-            
+
             for ix in range(3):
                 for iy in range(self.supercell[ix]):
                     temp = self.XYZ.copy()
-                    temp[:,ix]+=1*(iy+1)
-                    XYZ_extended=np.append(XYZ_extended,temp,axis=0)
-                    scalars_extended = np.append(scalars_extended,self.spd,axis=0)
+                    temp[:, ix] += 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,
+                                                 self.spd,
+                                                 axis=0)
                     temp = self.XYZ.copy()
-                    temp[:,ix]-=1*(iy+1)
-                    XYZ_extended= np.append(XYZ_extended,temp,axis=0)
-                    scalars_extended = np.append(scalars_extended,self.spd,axis=0)
+                    temp[:, ix] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,
+                                                 self.spd,
+                                                 axis=0)
 
             # XYZ_extended = self.XYZ.copy()
             # scalars_extended = self.spd.copy()
-            
+
             XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
             # XYZ_transformed = XYZ_extended
-            
-            if self.projection_accuracy.lower()[0] == 'n': #normal
-                colors = interpolate.griddata(
-                    XYZ_transformed, scalars_extended, self.centers, method="nearest"
-                    )
-            elif self.projection_accuracy.lower()[0] =='h': #high
-                colors = interpolate.griddata(
-                        XYZ_transformed, scalars_extended, self.centers, method="linear"
-                        )
+
+            if self.projection_accuracy.lower()[0] == 'n':  #normal
+                colors = interpolate.griddata(XYZ_transformed,
+                                              scalars_extended,
+                                              self.centers,
+                                              method="nearest")
+            elif self.projection_accuracy.lower()[0] == 'h':  #high
+                colors = interpolate.griddata(XYZ_transformed,
+                                              scalars_extended,
+                                              self.centers,
+                                              method="linear")
 
             self.set_scalars(colors)
-            self.set_color_with_cmap(cmap,vmin,vmax)
+            self.set_color_with_cmap(cmap, vmin, vmax)
 
-
-
-    def _get_brilloin_zone(self,supercell):
-        return BrillouinZone(self.reciprocal_lattice,supercell)
+    def _get_brilloin_zone(self, supercell):
+        return BrillouinZone(self.reciprocal_lattice, supercell)

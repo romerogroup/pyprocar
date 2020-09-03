@@ -10,16 +10,18 @@ __date__ = "March 31, 2020"
 
 
 class Isosurface(Surface):
-    def __init__(self,
-             XYZ=None,
-             V=None,
-             isovalue=None,
-             V_matrix=None,
-             algorithm='lewiner',
-             interpolation_factor=1,
-             padding=None,
-             transform_matrix=None,
-             boundaries=None,):
+    def __init__(
+            self,
+            XYZ=None,
+            V=None,
+            isovalue=None,
+            V_matrix=None,
+            algorithm='lewiner',
+            interpolation_factor=1,
+            padding=None,
+            transform_matrix=None,
+            boundaries=None,
+    ):
         """
         This class contains a surface that finds all the poins correcponding 
         to the following equation
@@ -67,7 +69,7 @@ class Isosurface(Surface):
             for example the first brillouin zone 
 
         """
-    
+
         self.XYZ = np.array(XYZ)
         self.V = V
         self.isovalue = isovalue
@@ -77,22 +79,28 @@ class Isosurface(Surface):
         self.interpolation_factor = interpolation_factor
         self.transform_matrix = transform_matrix
         self.boundaries = boundaries
-        if self.algorithm not in ['classic','lewiner']:
-            print("The algorithm chose has to be from ['classic','lewiner'], automtically choosing 'lewiner'")
+        if self.algorithm not in ['classic', 'lewiner']:
+            print(
+                "The algorithm chose has to be from ['classic','lewiner'], automtically choosing 'lewiner'"
+            )
             self.algorithm = 'lewiner'
-    
-        if self.V_matrix is None:
-            self.V_matrix = map2matrix(self.XYZ,self.V)
-        
-        if self.padding is None:
-            self.padding = [self.nX//2,self.nY//2,self.nZ//2]
-        else:
-            self.padding = [self.nX//2*padding[0],self.nY//2*padding[1],self.nZ//2*padding[2]]
 
-        verts, faces, normals, values = self._get_isosurface(interpolation_factor)
+        if self.V_matrix is None:
+            self.V_matrix = map2matrix(self.XYZ, self.V)
+
+        if self.padding is None:
+            self.padding = [self.nX // 2, self.nY // 2, self.nZ // 2]
+        else:
+            self.padding = [
+                self.nX // 2 * padding[0], self.nY // 2 * padding[1],
+                self.nZ // 2 * padding[2]
+            ]
+
+        verts, faces, normals, values = self._get_isosurface(
+            interpolation_factor)
         if verts is not None and faces is not None:
             if transform_matrix is not None:
-                verts = np.dot(verts,transform_matrix)
+                verts = np.dot(verts, transform_matrix)
             """
             Python, unlike statically typed languages such as Java, allows complete
             freedom when calling methods during object initialization. However, 
@@ -104,14 +112,14 @@ class Isosurface(Surface):
             using the other surface provided.
             """
             if boundaries is not None:
-                suprecell_surface = Surface(verts=verts,faces=faces,face_normals=normals)
-                verts, faces = self.clip(suprecell_surface,boundaries)
+                suprecell_surface = Surface(verts=verts,
+                                            faces=faces,
+                                            face_normals=normals)
+                verts, faces = self.clip(suprecell_surface, boundaries)
 
-        Surface.__init__(self,verts=verts,faces=faces,face_normals=normals)
+        Surface.__init__(self, verts=verts, faces=faces, face_normals=normals)
 
-    
-
-    def clip(self,S1,S2):
+    def clip(self, S1, S2):
         """
         This function clips S1 using the boundaries of S2 and returns 
 
@@ -127,12 +135,11 @@ class Isosurface(Surface):
         verts,faces
 
         """
-        
+
         for iface in range(len(S2.faces)):
             normal = S2.face_normals[iface]
-            center = np.average(S2.verts[S2.faces[iface]],axis=0)
-            S1.pyvista_obj.clip(origin=center,
-                                          normal=normal,inplace=True)
+            center = np.average(S2.verts[S2.faces[iface]], axis=0)
+            S1.pyvista_obj.clip(origin=center, normal=normal, inplace=True)
         faces = []
         courser = 0
         for i in range(S1.pyvista_obj.n_faces):
@@ -141,11 +148,10 @@ class Isosurface(Surface):
             courser += 1
             for ipoint in range(npoints):
                 face.append(S1.pyvista_obj.faces[courser])
-                courser +=1
+                courser += 1
             faces.append(face)
-            
-        return S1.pyvista_obj.points,faces
 
+        return S1.pyvista_obj.points, faces
 
     @property
     def X(self):
@@ -184,7 +190,7 @@ class Isosurface(Surface):
 
         """
         return np.unique(self.XYZ[:, 2])
-        
+
     @property
     def dxyz(self):
         """
@@ -199,7 +205,7 @@ class Isosurface(Surface):
         dx = np.abs(self.X[-1] - self.X[-2])
         dy = np.abs(self.Y[-1] - self.Y[-2])
         dz = np.abs(self.Z[-1] - self.Z[-2])
-        return [dx,dy,dz]
+        return [dx, dy, dz]
 
     @property
     def nX(self):
@@ -253,30 +259,28 @@ class Isosurface(Surface):
             DESCRIPTION. [(mins[0],maxs[0]),(mins[1],maxs[1]),(mins[2],maxs[2])]
 
         """
-        
+
         padding_x = self.padding[0]
         padding_y = self.padding[1]
         padding_z = self.padding[2]
 
         eigen_matrix = np.pad(self.V_matrix,
-                              ((padding_x, padding_x), (padding_y, padding_y), 
-                                (padding_z, padding_z)), "wrap")
+                              ((padding_x, padding_x), (padding_y, padding_y),
+                               (padding_z, padding_z)), "wrap")
         try:
             verts, faces, normals, values = measure.marching_cubes_lewiner(
                 eigen_matrix, self.fermi)
             for ix in range(3):
                 verts[:, ix] -= verts[:, ix].min()
-                verts[:, ix] -= (verts[:, ix].max() - verts[:, ix].min()) / 2 #+self.origin[ix]
-                verts[:, ix] *= self.dxyz[ix] 
+                verts[:, ix] -= (verts[:, ix].max() -
+                                 verts[:, ix].min()) / 2  #+self.origin[ix]
+                verts[:, ix] *= self.dxyz[ix]
             mins = verts.min(axis=0)
             maxs = verts.max(axis=0)
-            
-            return [(mins[0],maxs[0]),(mins[1],maxs[1]),(mins[2],maxs[2])]
+
+            return [(mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2])]
         except:
             return None
-        
-                
-        
 
     def _get_isosurface(self, interp_factor=1):
         """
@@ -299,31 +303,29 @@ class Isosurface(Surface):
             DESCRIPTION. vlues
 
         """
-        
 
         # Amount of kpoints needed to add on to fully sample 1st BZ
-        
+
         padding_x = self.padding[0]
         padding_y = self.padding[1]
         padding_z = self.padding[2]
 
-            
         eigen_matrix = np.pad(self.V_matrix,
-                              ((padding_x, padding_x), (padding_y, padding_y), 
+                              ((padding_x, padding_x), (padding_y, padding_y),
                                (padding_z, padding_z)), "wrap")
 
         bnd = self.surface_boundaries
-        
+
         if interp_factor != 1:
             # Fourier interpolate the mapped function E(x,y,z)
-            
+
             eigen_matrix = fft_interpolate(eigen_matrix, interp_factor)
 
             # after the FFT we loose the center of the BZ, using numpy roll we
             # bring back the center of the BZ
             # eigen_matrix = np.roll(eigen_matrix,4  ,
             #     axis=[0, 1, 2])
-            
+
         try:
             verts, faces, normals, values = measure.marching_cubes_lewiner(
                 eigen_matrix, self.fermi)
@@ -331,28 +333,28 @@ class Isosurface(Surface):
             print("No isosurface for this band")
             return None, None, None, None
         # recenter
-        
+
         for ix in range(3):
             verts[:, ix] -= verts[:, ix].min()
-            verts[:, ix] -= (verts[:, ix].max() - verts[:, ix].min()) / 2 #+self.origin[ix]
+            verts[:, ix] -= (verts[:, ix].max() -
+                             verts[:, ix].min()) / 2  #+self.origin[ix]
             verts[:, ix] *= self.dxyz[ix] / interp_factor
             if bnd is not None and interp_factor != 1:
-                verts[:,ix] -= (verts[:,ix].min() - bnd[ix][0])
+                verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
             #     x_shift = verts[:,0].min() - bnd[0]
             # y_shift = verts[:,1].min() - bnd[1]
             # z_shift = verts[:,2].min() - bnd[2]
-            
+
         # transfare from fraction to cartesian
         # verts = np.dot(verts, self.reciprocal_)
         # new_faces = np.zeros(shape=(len(faces), 4))
         # new_faces[:, 0] = 3
         # new_faces[:, 1:] = faces
         # faces = new_faces
-        return verts, faces, normals, values    
+        return verts, faces, normals, values
 
 
-
-def map2matrix(XYZ,V):
+def map2matrix(XYZ, V):
     """
     mapps an Irregular grid to a regular grid
 
@@ -392,13 +394,14 @@ def map2matrix(XYZ,V):
                     # kpoint_matrix[ikx, iky, ikz] = [np.nan, np.nan, np.nan]
     return mapped_func
 
+
 def fft_interpolate(function, interpolation_factor=2):
     """
     if I = interpolation_factor
     This function withh recieve f(x,y,z) with dimensions of (nx,ny,nz)
     and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)
     """
-    
+
     eigen_fft = np.fft.fftn(function)
     shifted_fft = np.fft.fftshift(eigen_fft)
     nx, ny, nz = np.array(shifted_fft.shape)
@@ -413,5 +416,6 @@ def fft_interpolate(function, interpolation_factor=2):
     )
 
     new_matrix = np.fft.ifftshift(new_matrix)
-    interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor ** 3)
+    interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor**
+                                                        3)
     return interpolated

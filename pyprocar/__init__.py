@@ -51,7 +51,7 @@ from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser
 
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.fermisurface3d import FermiSurface3D
-from . import fermisurface3d
+# from . import fermisurface3d
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
 from pyprocar.procarplot import ProcarPlot

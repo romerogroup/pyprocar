@@ -1,13 +1,36 @@
 3D Fermi surface
 ================
 
-PyProcar's 3D Fermi surface utility is able to generate Fermi surface plots projected over spin, atoms and orbitals or a combination of one or many of each. This utility is also capable of projecting external properties that are provided on a mesh grid in momentum space. This feature is useful when one wants to project properties that are not provided in PROCAR file such as Fermi velocity, electron-phonon coupling and electron effective mass. We divide this section into three sub sections, plain Fermi surface, projection of properties from PROCAR and projection of properties from external file. 
+PyProcar's 3D Fermi surface utility is able to generate Fermi surface
+plots projected over spin, atoms and orbitals or a combination of one
+or many of each. This utility is also capable of projecting external
+properties that are provided on a mesh grid in momentum space. This
+feature is useful when one wants to project properties that are not
+provided in PROCAR file such as Fermi velocity, electron-phonon
+coupling and electron effective mass. We divide this section into
+three sub sections, plain Fermi surface, projection of properties from
+PROCAR and projection of properties from external file.
 
-NOTE:
 
-When plotting 3D Fermi surfaces, it is important to use a Monkhorst-Pack k-grid while setting ``ISYM=-1`` in the INCAR file (turn off symmetry). 
+.. note::
+   When plotting 3D Fermi surfaces, it is important to use a
+   Monkhorst-Pack k-grid while setting ``ISYM=-1`` in the INCAR file
+   (turn off symmetry).
+   
 
-======================
+3D surfaces
+===========
+This section focuses on how the 3d image is created, if you are only
+interested in using this functionality, you can skip this part and
+move to the `examples <fermi3D.html#examples>`_ section. A surface is
+created by adding a collection of small polygons. By increasing the
+number of polygons, one can increase the smoothness of the surface. 
+
+
+
+Examples
+========
+
 1. Plain Fermi surface
 ======================
 
@@ -17,7 +40,7 @@ Usage::
 
 The main arguments in this function are ``procar``, ``outcar``, ``bands``, ``scale``, ``mode`` and ``st``, where ``procar`` and ``outcar`` are the names of the input PROCAR and OUTCAR files respectively, ``bands`` is an array of the bands that are desired to be plotted. Note if ``bands = -1``, the function will try to plot all the bands provided in the PROCAR file. The kmesh will be interpolated by a factor of scale in each direction. The ``st`` tag controls the spin-texture plotting, and ``mode`` determines the type of projection of colors. There are additional keyword arguments that can be accessed in the help section of this function, such as ``face_color, cmap, atoms, orbitals, energy, transparent, nprocess`` etc. 
 
-===================================================
+
 2. Surface coloring based on properties from PROCAR
 ===================================================
 
@@ -25,7 +48,7 @@ Similar to the ``bandsplot()`` section one can choose to project the contributio
 
 For noncolinear calculations, this function is able to plot arrows in the direction of the spinors provided in the PROCAR file. To turn this functionality on the one can set ``st=True`` to turn the spin-texture ON. The user can choose between coloring all the arrows originated from one band with a specific color, or project the contribution of that arrow in a specific Cartesian direction. To better represent the spin-texture we use the key argument ``transparent=True`` which changes the opacity of the Fermi-surface to zero.
 
-======================================================================
+
 3. Surface coloring based on properties obtained from an external file
 ======================================================================
 

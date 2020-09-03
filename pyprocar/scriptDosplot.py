@@ -62,6 +62,8 @@ def dosplot(
         carried out in the directory of the calculation, one does not
         need to specify this argument.
 
+        e.g. ``filename='~/SrVO3/DOS/vasprun.xml'``
+
     mode : str, optional (default ``'plain'``)
         **mode** defines the mode of the plot. This parameter will be
         explained in details with exmaples in the tutorial.
@@ -69,22 +71,29 @@ def dosplot(
         ``'parametric_line'``, ``'stack'``,
         ``'stack_orbitals'``, ``'stack_species'``.
 
+        e.g. ``mode='stack'``
+
     interpolation_factor : int, optional (default ``None``)
         Number of points in energy axis is multiplied by this factor
         and interpolated using cubic
-        spline. e.g. ``interpolation_factor=3``
+        spline. 
+
+        e.g. ``interpolation_factor=3``
 
     orientation : str, optional (default ``horizontal'``)
         The orientation of the DOS plot.  options are
         ``'horizontal', 'vertical'``
+
+        e.g. ``orientation='vertical'``
 
     spin_colors : list str or tuples, (optional ``spin_colors=['blue',
         'red']``)
         **spin_colors** represent the colors the different spin
         ploarizations are going to be represented in the DOS
         plot. These colors can be chosen from any type of color
-        acceptable by
-        matplotlib(string,rgb,html). e.g. ``spin_colors=['blue','red']``,
+        acceptable by matplotlib(string,rgb,html).
+
+        e.g. ``spin_colors=['blue','red']``,
         ``spin_colors=[(0, 0, 1),(1, 0,0 )]``,
         ``spin_colors=['#0000ff','#ff0000']``
 
@@ -101,12 +110,16 @@ def dosplot(
         colors can be chosen from any type of color acceptable by
         matplotlib(string,rgb,html).
 
+        e.g. ``colors=['red', 'blue', 'green', 'magenta', 'cyan']``
+
     spins : list int, optional
         ``spins`` defines plotting of different spins channels present
         in the calculation, If the calculation is spin non-polorized
         the spins will be set by default to ``spins=[0]``. if the
         calculation is spin polorized this parameter can be set to 0
-        or 1 or both. e.g. ``spins=[0, 1]``
+        or 1 or both.
+
+        e.g. ``spins=[0, 1]``
 
     atoms : list int, optional
         ``atoms`` define the projection of the atoms in the Density of
@@ -118,7 +131,7 @@ def dosplot(
         ``mode='stack_orbitals'``. keep in mind that python counting
         starts from zero.
         e.g. for SrVO\ :sub:`3`\  we are choosing only the oxygen
-        atoms. ``atoms=[2,3,4]``, keep in mind that python counting
+        atoms. ``atoms=[2, 3, 4]``, keep in mind that python counting
         starts from zero, for a **POSCAR** similar to following::
 
             Sr1 V1 O3
@@ -163,6 +176,7 @@ def dosplot(
     elimit : list float, optional
         Energy window limit asked to plot. ``elimit`` has to be a two
         element python list(or numpy array).
+
         e.g. ``elimit=[-2, 2]``
         The default is set to the minimum and maximum of the energy
         window.
@@ -171,6 +185,7 @@ def dosplot(
        ``dos_limit`` defines the density of states axis limits on the
        graph. It is automatically set to select 10% higher than the
        maximum of density of states in the specified energy window.
+
        e.g. ``dos_limit=[0, 30]``
 
     cmap : str , optional (default 'jet')
@@ -179,20 +194,26 @@ def dosplot(
         color maps in matplotlib are provided in this web
         page. `https://matplotlib.org/2.0.1/users/colormaps.html
         <https://matplotlib.org/2.0.1/users/colormaps.html>`_
+        
+        e.g. ``cmap='plasma'``
 
     vmax : float, optional
         The maximum value in the color bar. ``cmap`` is only relevant
         in ``mode='parametric'``.
+
         e.g. ``vmax=1.0``
 
     vmin : float, optional
         The maximum value in the color bar. ``cmap`` is only relevant
         in ``mode='parametric'``.
+
         e.g. ``vmin=-1.0``
 
     grid : bool, optional (default Flase)
         Defines If a grid is plotted in the plot. The entry should be
         python boolian.
+
+        e.g. ``grid=True``
 
     savefig : str , optional (default None)
         ``savefig`` defines the file that the plot is going to be
@@ -200,27 +221,32 @@ def dosplot(
         matplotlib such as png, pdf, jpg, ...
         If not provided the plot will be shown in the
         interactive matplotlib mode.
+        
         e.g. ``savefig='DOS.png'``, ``savefig='DOS.pdf'``
 
     title : str, optional
         Defines the plot title asked to be added above the plot. If
         ``title`` is not defined, PyProcar will not add any title.
+        
         e.g. ``title="Total Density of States SrVO_$3$"``. One can use
         LaTex format as well.
 
     plot_total : bool, optional (default ``True``)
         If the total density of states is plotted as well as other
         options. The entry should be python boolian.
+        
         e.g. ``plot_total=True``
 
     code : str, optional (default ``'vasp'``)
         Defines the Density Functional Theory code used for the
         calculation. The default of this argument is vasp, so if the
         cal is done in vasp one does not need to define this argumnet.
+        
         e.g. ``code=vasp``, ``code=elk``, ``code=abinit``
 
     labels : list str, optional
         ``labels`` define the legends plotted in defining each spin.
+        
         e.g.  ``labels=['Oxygen-Up','Oxygen-Down']``,
         ``labels=['Oxygen-'+r'$\\uparrow$','Oxygen-'+r'$\\downarrow$']``
         Side means the string will be treated as raw string. This has
@@ -238,6 +264,7 @@ def dosplot(
         dictionary, with keys being specific species and values being
         projections of ``orbitals``. The following examples can
         clarify the python lingo.
+        
         e.g.  ``items={'Sr':[0],'O':[1,2,3],'V':[4,5,6,7,8]}`` or
         ``items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])``. The two
         examples are equivalent to each other. This will plot the
@@ -251,9 +278,10 @@ def dosplot(
         ``ax`` is a matplotlib axes. In case one wants to put plot
         generated from this plot in a different figure and treat the
         output as a subplot in a larger plot.
-        e.g. :: 
         
-            >>> # Creates a figure with 3 rows and 2 colomuns 
+        e.g. ::
+        
+            >>> # Creates a figure with 3 rows and 2 colomuns
             >>> fig, axs = plt.subplots(3, 2)
             >>> x = np.linspace(-np.pi, np.pi, 1000)
             >>> y = np.sin(x)
@@ -262,7 +290,8 @@ def dosplot(
             >>> plt.show()
 
     plt_show : bool, optional (default ``True``)
-        whether to show the generated plot or skip to the saving. 
+        whether to show the generated plot or skip to the saving.
+
         e.g. ``plt_show=True``
 
 
@@ -274,7 +303,7 @@ def dosplot(
     ax : matplotlib ax object
         The generated ax for this density of states.
         If one chooses ``plt_show=False``, one can modify the plot
-        using this returned object. 
+        using this returned object.
         e.g. ::
     
             >>> fig, ax = pyprocar.dosplot(mode='plain', plt_show=False)
