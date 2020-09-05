@@ -340,6 +340,12 @@ def dosplot(
 
     total = plot_total
     code = code.lower()
+
+    if orientation[0].lower() == 'h':
+        orientation = 'horizontal'
+    elif orientation[0].lower() == 'v':
+        orientation = 'vertical'
+
     if code == "vasp":
         vaspxml = VaspXML(filename=filename,
                           dos_interpolation_factor=interpolation_factor)
@@ -546,7 +552,7 @@ def dosplot(
         ax1.set_ylabel(r"$E-E_f$ [eV]")
         ax1.set_xlabel("Density of States [a.u.]")
         ax1.set_ylim(elimit)
-        ax1.set_xlim(ylim)  # we use ylim because the plot is vertiacal
+        ax1.set_xlim(ylim)  # we use ylim because the plot is vertical
 
     ax1.axhline(color="black", linestyle="--")
     ax1.axvline(color="black", linestyle="--")
