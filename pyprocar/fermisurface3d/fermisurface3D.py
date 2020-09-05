@@ -30,30 +30,43 @@ class FermiSurface3D(Isosurface):
 
         Parameters
         ----------
-        kpoints : TYPE, (n,3) float
-            DESCRIPTION. A list of kpoints used in the DFT calculation, this list has to be
-            (n,3), n being number of kpoints and 3 being the 3 different 
-            cartesian coordinates
-        band : TYPE, (n,) float
-            DESCRIPTION. A list of energies of ith band cooresponding to the kpoints
-        spd : TYPE, 
-            DESCRIPTION. numpy array containing the information about ptojection of atoms,
+        kpoints : (n,3) float
+            A list of kpoints used in the DFT calculation, this list
+            has to be (n,3), n being number of kpoints and 3 being the
+            3 different cartesian coordinates.
+        
+        band : (n,) float
+            A list of energies of ith band cooresponding to the
+            kpoints.
+
+        spd :
+            numpy array containing the information about ptojection of atoms,
             orbitals and spin on each band (check procarparser)
-        fermi : TYPE, float
-            DESCRIPTION. value of the fermi energy or any energy that one wants to find the 
-            isosurface with 
-        reciprocal_lattice : TYPE, (3,3)
-            DESCRIPTION. The default is None. Reciprocal lattice of the structure
-        interpolation_factor : TYPE, int
-            DESCRIPTION. The default is 1. number of kpoints in every direction will increase by this factor
+
+        fermi : float
+            Value of the fermi energy or any energy that one wants to
+            find the isosurface with.
+
+        reciprocal_lattice : (3,3) float
+            Reciprocal lattice of the structure.
+
+        interpolation_factor : int
+            The default is 1. number of kpoints in every direction
+            will increase by this factor.
+
         color : TYPE, optional
             DESCRIPTION. The default is None.
+
         projection_accuracy : TYPE, optional
             DESCRIPTION. The default is 'Normal'.
-        cmap : TYPE, string
-            DESCRIPTION. The default is 'viridis'. Color map used in projecting the colors on the surface
+
+        cmap : str
+            The default is 'viridis'. Color map used in projecting the
+            colors on the surface
+
         vmin : TYPE, float
             DESCRIPTION. The default is 0.
+
         vmax : TYPE, float
             DESCRIPTION. The default is 1.
 
@@ -127,7 +140,7 @@ class FermiSurface3D(Isosurface):
             XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
             # XYZ_transformed = XYZ_extended
 
-            if self.projection_accuracy.lower()[0] == 'n':  #normal
+            if self.projection_accuracy.lower()[0] == 'n':
 
                 spin_X = interpolate.griddata(XYZ_transformed,
                                               vectors_extended_X,
@@ -142,7 +155,7 @@ class FermiSurface3D(Isosurface):
                                               self.verts,
                                               method="nearest")
 
-            elif self.projection_accuracy.lower()[0] == 'h':  #high
+            elif self.projection_accuracy.lower()[0] == 'h':
 
                 spin_X = interpolate.griddata(XYZ_transformed,
                                               vectors_extended_X,
@@ -202,12 +215,12 @@ class FermiSurface3D(Isosurface):
             XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
             # XYZ_transformed = XYZ_extended
 
-            if self.projection_accuracy.lower()[0] == 'n':  #normal
+            if self.projection_accuracy.lower()[0] == 'n':
                 colors = interpolate.griddata(XYZ_transformed,
                                               scalars_extended,
                                               self.centers,
                                               method="nearest")
-            elif self.projection_accuracy.lower()[0] == 'h':  #high
+            elif self.projection_accuracy.lower()[0] == 'h':
                 colors = interpolate.griddata(XYZ_transformed,
                                               scalars_extended,
                                               self.centers,

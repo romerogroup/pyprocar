@@ -23,7 +23,7 @@ def fermi3D(
         colors=None,
         background_color='white',
         save_colors=False,
-        cmap='viridis',
+        cmap='jet',
         atoms=None,
         orbitals=None,
         spin=None,
@@ -62,7 +62,7 @@ def fermi3D(
     fermi : float, optional (default ``None``)
         Fermi energy at which the fermi surface is created. In other
         words fermi is the isovalue at which the fermi surface is
-        created. If not defined it is read from the OUTCAR file. 
+        created. If not defined it is read from the OUTCAR file.
 
         e.g. ``fermi=-5.49``
         
@@ -263,7 +263,7 @@ def fermi3D(
         turns this feature on and selects the path at which the file
         is going to be saved.
 
-        e.g. ``save2d='fermi.png'`` or ``save2d='~/MgB2/fermi.pdf'``
+        e.g. ``save2d='fermi.png'``
 
     camera_pos : list float, optional (default ``[1, 1, 1]``)
         This parameter defines the position of the camera where it is
@@ -383,9 +383,17 @@ def fermi3D(
     norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
     cmap = cm.get_cmap(cmap)
     scalars = np.arange(nsurface + 1) / nsurface
+
+    if save_colors is not None or save3d is not None:
+        for i in range(nsurface):
+            if surfaces[i].scalars is None:
+                surfaces[i].set_scalars([scalars[i]] * surfaces[i].nfaces)
+
     if colors is None:
         colors = np.array([cmap(norm(x)) for x in (scalars)]).reshape(-1, 4)
-
+    print(scalars)
+    print(colors)
+    print(cmap)
     if show or save2d:
         # sargs = dict(interactive=True)
         p.add_mesh(surfaces[0].brillouin_zone.pyvista_obj,
@@ -397,7 +405,7 @@ def fermi3D(
                 if mode == 'plain':
                     p.add_mesh(surfaces[isurface].pyvista_obj,
                                color=colors[isurface])
-                    text = 'Colors'
+                    text = 'Plain'
                 elif mode == 'parametric':
                     p.add_mesh(surfaces[isurface].pyvista_obj,
                                cmap=cmap,
@@ -417,16 +425,16 @@ def fermi3D(
                     p.remove_scalar_bar()
                 else:
                     p.add_mesh(arrows, color=arrow_color)
-
-        p.add_scalar_bar(title=text,
-                         n_labels=6,
-                         italic=False,
-                         bold=False,
-                         title_font_size=None,
-                         label_font_size=None,
-                         position_x=0.9,
-                         position_y=0.01,
-                         color='black')
+        if mode != 'plain' or spin_texture:
+            p.add_scalar_bar(title=text,
+                             n_labels=6,
+                             italic=False,
+                             bold=False,
+                             title_font_selfize=None,
+                             label_font_size=None,
+                             position_x=0.9,
+                             position_y=0.01,
+                             color='black')
 
         p.add_axes(xlabel='Kx',
                    ylabel='Ky',
@@ -450,10 +458,6 @@ def fermi3D(
             p.open_movie(savemp4)
             p.orbit_on_path(path)  #,viewup=camera_pos)
             # p.close()
-    if save_colors is None:
-        for i in range(nsurface):
-            if surfaces[i].scalars is None:
-                surfaces[i].set_scalars([scalars[i]] * surfaces[i].nfaces)
     s = boolean_add(surfaces)
     s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
     # s.pyvista_obj.plot()
