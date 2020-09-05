@@ -68,6 +68,7 @@ def bandsdosplot(
         title=None,
         kdirect=True,
         discontinuities=None,
+        plot_color_bar=True,
 ):
     """This function creates plots containing both DOS and bands."""
 
@@ -361,7 +362,8 @@ def bandsdosplot(
         if dos_mode == "parametric":
             plot_bar = False
         else:
-            plot_bar = True
+            if plot_color_bar:
+                plot_bar = True
         _, ax1 = plot.parametricPlot(
             cmap=cmap,
             vmin=vmin,
