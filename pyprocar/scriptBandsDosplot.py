@@ -362,8 +362,6 @@ def bandsdosplot(
         if dos_mode == "parametric":
             plot_bar = False
         else:
-            if plot_color_bar:
-                plot_bar = True
         _, ax1 = plot.parametricPlot(
             cmap=cmap,
             vmin=vmin,
@@ -371,7 +369,7 @@ def bandsdosplot(
             ticks=ticks,
             discontinuities=discontinuities,
             ax=ax1,
-            plot_bar=plot_bar,
+            plot_bar=plot_color_bar,
             mask=mask,
         )
 
