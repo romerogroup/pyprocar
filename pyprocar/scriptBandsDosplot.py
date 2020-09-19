@@ -10,6 +10,7 @@ import numpy as np
 
 from .doscarplot import DosPlot
 from .vaspxml import VaspXML
+from .lobsterparser import LobsterDOSParser, LobsterParser
 
 from .abinitparser import AbinitParser
 from .doscarplot import DosPlot
@@ -153,66 +154,80 @@ def bandsdosplot(
     #### READING KPOINTS FILE IF PRESENT ####
 
     # If KPOINTS file is given:
-    if kpointsfile is not None:
-        # Getting the high symmetry point names from KPOINTS file
-        f = open(kpointsfile)
-        KPread = f.read()
-        f.close()
-
-        KPmatrix = re.findall("reciprocal[\s\S]*", KPread)
-        tick_labels = np.array(re.findall("!\s(.*)", KPmatrix[0]))
-        knames = []
-        knames = [tick_labels[0]]
-
-        ################## Checking for discontinuities ########################
-        discont_indx = []
-        icounter = 1
-        while icounter < len(tick_labels) - 1:
-            if tick_labels[icounter] == tick_labels[icounter + 1]:
-                knames.append(tick_labels[icounter])
-                icounter = icounter + 2
-            else:
-                discont_indx.append(icounter)
-                knames.append(tick_labels[icounter] + "|" +
-                              tick_labels[icounter + 1])
-                icounter = icounter + 2
-        knames.append(tick_labels[-1])
-        discont_indx = list(dict.fromkeys(discont_indx))
-
-        ################# End of discontinuity check ##########################
-
-        # Added by Nicholas Pike to modify the output of seekpath to allow for
-        # latex rendering.
-        for i in range(len(knames)):
-            if knames[i] == "GAMMA":
-                knames[i] = "\Gamma"
-            else:
-                pass
-
-        knames = [str("$" + latx + "$") for latx in knames]
-
-        # getting the number of grid points from the KPOINTS file
-        f2 = open(kpointsfile)
-        KPreadlines = f2.readlines()
-        f2.close()
-        numgridpoints = int(KPreadlines[1].split()[0])
-
-        kticks = [0]
-        gridpoint = 0
-        for kt in range(len(knames) - 1):
-            gridpoint = gridpoint + numgridpoints
-            kticks.append(gridpoint - 1)
-
+    if code == "vasp":
+        
+        if kpointsfile is not None:
+            # Getting the high symmetry point names from KPOINTS file
+            f = open(kpointsfile)
+            KPread = f.read()
+            f.close()
+    
+            KPmatrix = re.findall("reciprocal[\s\S]*", KPread)
+            tick_labels = np.array(re.findall("!\s(.*)", KPmatrix[0]))
+            knames = []
+            knames = [tick_labels[0]]
+    
+            ################## Checking for discontinuities ########################
+            discont_indx = []
+            icounter = 1
+            while icounter < len(tick_labels) - 1:
+                if tick_labels[icounter] == tick_labels[icounter + 1]:
+                    knames.append(tick_labels[icounter])
+                    icounter = icounter + 2
+                else:
+                    discont_indx.append(icounter)
+                    knames.append(tick_labels[icounter] + "|" +
+                                  tick_labels[icounter + 1])
+                    icounter = icounter + 2
+            knames.append(tick_labels[-1])
+            discont_indx = list(dict.fromkeys(discont_indx))
+    
+            ################# End of discontinuity check ##########################
+    
+            # Added by Nicholas Pike to modify the output of seekpath to allow for
+            # latex rendering.
+            for i in range(len(knames)):
+                if knames[i] == "GAMMA":
+                    knames[i] = "\Gamma"
+                else:
+                    pass
+    
+            knames = [str("$" + latx + "$") for latx in knames]
+    
+            # getting the number of grid points from the KPOINTS file
+            f2 = open(kpointsfile)
+            KPreadlines = f2.readlines()
+            f2.close()
+            numgridpoints = int(KPreadlines[1].split()[0])
+    
+            kticks = [0]
+            gridpoint = 0
+            for kt in range(len(knames) - 1):
+                gridpoint = gridpoint + numgridpoints
+                kticks.append(gridpoint - 1)
+    
+            print("knames         : ", knames)
+            print("kticks         : ", kticks)
+    
+            # creating an array for discontunuity k-points. These are the indexes
+            # of the discontinuity k-points.
+            for k in discont_indx:
+                discontinuities.append(kticks[int(k / 2) + 1])
+            if discontinuities:
+                print("discont. list  : ", discontinuities)
+                
+    elif code == "lobster":
+        procarFile = LobsterParser()
+        
+        kticks = procarFile.kticks
+        knames = procarFile.knames
         print("knames         : ", knames)
         print("kticks         : ", kticks)
-
-        # creating an array for discontunuity k-points. These are the indexes
-        # of the discontinuity k-points.
-        for k in discont_indx:
-            discontinuities.append(kticks[int(k / 2) + 1])
-        if discontinuities:
-            print("discont. list  : ", discontinuities)
-
+        
+        vaspxml = LobsterDOSParser()
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+        if dos_spins is None:
+            dos_spins = np.arange(len(vaspxml.dos.total))
     #### END OF KPOINTS FILE DEPENDENT SECTION ####
 
     # spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
@@ -227,7 +242,12 @@ def bandsdosplot(
 
         if dos_spins is None:
             dos_spins = np.arange(len(vaspxml.dos.total))
-
+            
+    # elif code == "lobster":
+    #     procarFile = LobsterParser()
+    #     vaspxml = LobsterDOSParser()
+    #     dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+        
     # If ticks and names are given by the user manually:
     if kticks is not None and knames is not None:
         ticks = list(zip(kticks, knames))
@@ -254,7 +274,9 @@ def bandsdosplot(
                 fermi = outcarparser.FermiOutcar(outcar)
                 print("Fermi energy   :  %s eV (from OUTCAR)" % str(fermi))
             recLat = outcarparser.RecLatOutcar(outcar)
-
+    elif code == "lobster":
+        fermi = procarFile.fermi
+        recLat = procarFile.reclat
     # if kdirect = False, then the k-points will be in cartesian coordinates.
     # The output should be read to find the reciprocal lattice vectors to transform
     # from direct to cartesian
@@ -266,7 +288,14 @@ def bandsdosplot(
             procarFile.readFile(bands_file,
                                 permissive=False,
                                 recLattice=recLat)
-
+    # elif code == "lobster":
+    #     if kdirect:
+    #         procarFile.readFile(bands_file, permissive=False)
+    #     else:
+    #         procarFile.readFile(bands_file,
+    #                             permissive=False,
+    #                             recLattice=recLat)
+            
     # processing the data, getting an instance of the class that reduces the data
     data = ProcarSelect(procarFile, deepCopy=True, mode=bands_mode)
     numofbands = int(data.spd.shape[1] / 2)
@@ -319,7 +348,12 @@ def bandsdosplot(
 
     else:
         # Regular plotting method. For spin it plots density or magnetization.
-        data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
+        if code == 'lobster':
+            data.bands = (data.bands.transpose()).transpose()
+        else:
+            data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
+        
+        
         plot = ProcarPlot(data.bands, data.spd, data.kpoints)
 
     if vmin is None:
@@ -360,18 +394,19 @@ def bandsdosplot(
 
     elif bands_mode == "parametric":
         if dos_mode == "parametric":
-            plot_bar = False
+            plot_color_bar = False
         else:
+            plot_color_bar = True
         _, ax1 = plot.parametricPlot(
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
-            ticks=ticks,
-            discontinuities=discontinuities,
-            ax=ax1,
-            plot_bar=plot_color_bar,
-            mask=mask,
-        )
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        ticks=ticks,
+        discontinuities=discontinuities,
+        ax=ax1,
+        plot_bar=plot_color_bar,
+        mask=mask,
+    )
 
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")

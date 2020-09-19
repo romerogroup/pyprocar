@@ -7,39 +7,44 @@ Created on Mon Jun 15 15:50:22 2020
 
 import os
 import numpy as np
-from ..core import DensityOfStates
+
+from ..core import DensityOfStates, Structure
 from re import findall, search, match, DOTALL, MULTILINE, finditer, compile, sub
 
 
 class LobsterDOSParser:
-    def __init__(self, filename='DOSCAR.lobster'):
+    def __init__(self, filename='DOSCAR.lobster', dos_interpolation_factor = None ):
 
         if not os.path.isfile(filename):
             raise ValueError('ERROR: DOSCAR file not found')
 
         self.filename = filename
-
-        self.doscar = self.parse_doscar(filename)
-        self.ionsList = None
+        self.data = self.read()
         
-        if 'projected' in self.doscar:
+        self.dos_interpolation_factor = dos_interpolation_factor
+        self.test = None
+        self.test2 = None
+        
+        self.ionsList = None
+        if 'projected' in self.data:
             self.has_projected = True
-            self.nions = len(self.doscar['projected'])
+            self.nions = len(self.data['projected'])
         else:
             self.has_projected = False
             self.nions = None
 
-        self.ndos, self.total_ncols = self.doscar['total'].shape
-        
-        self.is_spin_polarized = False
+        self.ndos, self.total_ncols = self.data['total'].shape
+
         if self.total_ncols == 5:
             self.is_spin_polarized = True
             self.spins = ['dos_up','dos_down']
+        else:
+            self.is_spin_polarized = False
 
-#        self.total_dos = self.dos_to_dict['total']
-#
-#        if self.has_projected:
-#            self.projected_dos = self.dos_to_dict['projected']
+        # self.total_dos = self.dos_to_dict['total']
+
+        # if self.has_projected:
+        #     self.projected_dos = self.dos_to_dict['projected']
             
         rf = open('lobsterout', "r")
         self.lobsterout = rf.read()
@@ -49,152 +54,177 @@ class LobsterDOSParser:
     # This section parse for the total density of states and puts it in a 
     #Pychemia Density of States Object
     ###########################################################################
-    def _dos_dict(self):
+    def read(self):
+        """
+        Read and parse vasprun.xml.
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+        """
+        return self.parse_doscar(self.filename)
 
-        ret = {'energies': self.doscar['total'][:, 0]}
-        
-        if self.is_spin_polarized:
-            ret['dos_up'] = self.doscar['total'][:, 1]
-            ret['dos_down'] = self.doscar['total'][:, 2]
-            ret['integrated_dos_up'] = self.doscar['total'][:, 3]
-            ret['integrated_dos_down'] = self.doscar['total'][:, 4]
-        else:
-            ret['dos'] = self.doscar['total'][:, 1]
-            ret['integrated_dos'] = self.doscar['total'][:, 2]
-        return ret
 
     def _get_dos_total(self):
+        
+        energies = self.data['total'][:, 0]
+        dos_total = {'energies': energies}
+        
+        if self.is_spin_polarized:
+            dos_total['Spin-up'] = self.data['total'][:, 1]
+            dos_total['Spin-down'] = self.data['total'][:, 2]
+            #dos_total['integrated_dos_up'] = self.data['total'][:, 3]
+            #dos_total['integrated_dos_down'] = self.data['total'][:, 4]
+        else:
+            dos_total['Spin-up'] = self.data['total'][:, 1]
+            #dos_total['integrated_dos'] = self.data['total'][:, 2]
 
-        dos_total = self._dos_dict()
-
-        #self.test = dos_total
         return dos_total,list(dos_total.keys())
 
+
+    def _get_dos_projected(self, atoms=[]):
+
+        if len(atoms) == 0:
+            atoms = np.arange(self.initial_structure.natoms)
+
+        if 'projected' in list(self.data.keys()):
+            dos_projected = {}
+            ion_list = ["ion %s" % str(x + 1) for x in atoms
+                        ]  # using this name as vasrun.xml uses ion #
+            for i in range(len(ion_list)):
+                iatom = ion_list[i]
+                name = self.initial_structure.atoms[atoms[i]]
+
+                energies = self.data['projected'][i][:,0,0]
+                
+                dos_projected[name] = {'energies': energies}
+                if self.is_spin_polarized:
+                    dos_projected[name]['Spin-up'] = self.data['projected'][i][:, 1:,0]
+                    dos_projected[name]['Spin-down'] = self.data['projected'][i][:, 1:,1]
+                else:
+                    dos_projected[name]['Spin-up'] = self.data['projected'][i][:, 1:,0]
+            
+            return dos_projected, self.data['projected_labels_info']
+        else:
+            print(
+                "This calculation does not include partial density of states")
+            return None, None
+    
+    @property
+    def dos(self):
+        energies = self.dos_total['energies']
+        total = []
+        for ispin in self.dos_total:
+            if ispin == 'energies':
+                continue
+            total.append(self.dos_total[ispin])
+        # total = np.array(total).T
+        return DensityOfStates(
+            energies=energies,
+            total=total,
+            projected=self.dos_projected,
+            interpolation_factor=self.dos_interpolation_factor)
+  
+    @property
+    def dos_to_dict(self):
+        """
+        Returns the complete density (total,projected) of states as a python dictionary
+        """
+        return {
+            'total': self._get_dos_total(),
+            'projected': self._get_dos_projected()
+        }
+    
     @property
     def dos_total(self):
         """
         Returns the total density of states as a pychemia.visual.DensityOfSates object
         """
-        dos_total,labels = self._get_dos_total()
-        
-        return DensityOfStates(np.array([dos_total[x] for x in dos_total]).T, 
-                                         title='Total Density Of States',labels=[x.capitalize() for x in labels])
-    ###########################################################################
-    ###########################################################################
-    
-    ###########################################################################
-    # This section parses for the projected density of states and puts it in a 
-    # Pychemia Density of States Object
-    ###########################################################################
+        dos_total, labels = self._get_dos_total()
+        #dos_total['energies'] -= self.fermi
 
-    def _get_dos_projected(self):
-        proj_dos = {}
-        dos={}
-        
-        
-        """Makes an ion list"""
-        ions_list = self.doscar['ion_labels']
-        
-        
-        """Sorts the array from self.doscar['projected'][ions] to put in newly formed final array contatining all possible projected orbitals"""
-        for ion in range(len(ions_list)):
-            energies =  self.doscar['projected'][ion][:,0,0]
-            dos[ions_list[ion]] = {'energies': energies}
-            
-            
-            if self.is_spin_polarized == True:
-                for ispin in range(len(self.spins)):
-                    proj_array = np.zeros(shape = (len(self.doscar['projected'][0][:,0,0]), len(self.doscar['projected_labels_info'])-1))
-                    #self.test = proj_array
-                    """Goes through possible labels in self.doscar['projected'] for a given ion then puts columns in the appropiate index in the in final array"""
-                    
-                    if ispin == 0:
-                        proj_array[:,:] = self.doscar['projected'][ion][:,1:,0]
-                        dos[ions_list[ion]][self.spins[ispin]] = proj_array
-                    else:
-                        proj_array[:,:] = self.doscar['projected'][ion][:,1:,1]
-                        dos[ions_list[ion]][self.spins[ispin]] = proj_array
-                            
-            else:
-                proj_array = np.zeros(shape = (len(self.doscar['projected'][0][:,0,0]), len(self.doscar['projected_labels_info'])-1))
-                proj_array[:,:] = self.doscar['projected'][ion][:,1:,0]
-                dos[ions_list[ion]]["dos_up"] = proj_array
-        
-        final_labels = self.doscar['projected_labels_info']
-
-        return dos, final_labels
-
+        return dos_total
 
     @property
-    def dos_projected(self): 
+    def dos_projected(self):
         """
-        Returns the a list of projected density of states as a pychemia.visual.DensityOfSates object
-        each element refers to each atom
+        Returns the projected DOS as a multi-dimentional array, to be used in the
+        pyprocar.core.dos object
         """
         ret = []
-        ions_list = self.doscar['ion_labels']
-        
-        dos_projected,label_info = self._get_dos_projected()
-        
-        
-        if dos_projected == None:
+        dos_projected, info = self._get_dos_projected()
+        if dos_projected is None:
             return None
+        norbitals = len(info) - 1
+        info[0] = info[0].capitalize()
+        labels = []
+        labels.append(info[0])
+        ret = []
+        for iatom in dos_projected:
+            temp_atom = []
+            for iorbital in range(norbitals):
+                temp_spin = []
+                for key in dos_projected[iatom]:
+                    if key == 'energies':
+                        continue
+                    temp_spin.append(dos_projected[iatom][key][:, iorbital])
+                temp_atom.append(temp_spin)
+            ret.append([temp_atom])
+        return ret   
+    
+    
+#     ###########################################################################
+#     # This section parses for the projected density of states and puts it in a 
+#     # Pychemia Density of States Object
+#     ###########################################################################
 
-        ndos = len(dos_projected[list(dos_projected.keys())[0]]['energies'])
-        
-        
-        label_info[0] = label_info[0].capitalize()
- 
-        for iatom in range(len(dos_projected)):
-
-            labels = []
-            labels.append(label_info[0])
-            
-            
-            if self.is_spin_polarized == True:
-                for orbital in label_info[1:]:
-                    labels.append(orbital + '-Up')
-                for orbital in label_info[1:]:
-                    labels.append(orbital + '-Down')   
-            else:  
-                for orbital in label_info[1:]:
-                    labels.append(orbital)
-
-                    
-           
-            norbital = int((len(labels)-1)/len(self.spins))
-            
-            table = np.zeros(shape = (ndos,norbital*len(self.spins)+1))
-            table[:,0] = dos_projected[list(dos_projected.keys())[iatom]]['energies']
-       
-
-            start = 1
-            
-            for key in dos_projected[list(dos_projected.keys())[iatom]].keys():
-                
-                if key == 'energies':
-                    continue
-                
-                end = start + norbital
-                table[:,start:end] = dos_projected[list(dos_projected.keys())[iatom]][key]
-                start = end 
-            
-            
-            temp_dos = DensityOfStates(table,title='Projected Density Of States %s'%iatom,labels=labels)
-            ret.append(temp_dos)
-        return ret
- 
-
-#    ###########################################################################
-#    ###########################################################################
     @property
-    def dos_to_dict(self):
+    def species(self):
         """
-        Returns the complete density (total,projected) of states as a python dictionary        
+        Returns the species in POSCAR
         """
-        return {'total':self._get_dos_total(),'projected':self._get_dos_projected()}
-  
-#    ###########################################################################
+        return self.initial_structure.species
+
+    @property
+    def structures(self):
+        """
+        Returns a list of pychemia.core.Structure representing all the ionic step structures
+        """
+        symbols = [x.strip() for x in self.data['ions']]
+        structures = []
+
+        st = Structure(atoms=symbols)
+                      
+        structures.append(st)
+        return structures
+
+    @property
+    def structure(self):
+        """
+        crystal structure of the last step
+        """
+        return self.structures[-1]
+    
+    @property
+    def initial_structure(self):
+        """
+        Returns the initial Structure as a pychemia structure
+        """
+        return self.structures[0]
+    
+    @property
+    def final_structure(self):
+        """
+        Returns the final Structure as a pychemia structure
+        """
+
+        return self.structures[-1]
+
+
+#     ###########################################################################
+#     ###########################################################################
+#     ###########################################################################
+    
     def dos_parametric(self,atoms=None,orbitals=None,spin=None,title=None):
         """
         This function sums over the list of atoms and orbitals given 
@@ -210,29 +240,42 @@ class LobsterDOSParser:
         |  0  ||  1  ||  2  ||  3  ||  4  ||  5  ||  6  ||  7  ||  8  ||
         
         :param spin: which spins to be included. count from 0
-                     There are no sum over spins
+                      There are no sum over spins
         
         """
         projected = self.dos_projected
+        dos_projected,labelsInfo = self._get_dos_projected()
+        self.availiableOrbitals = list(labelsInfo.keys())
+        self.availiableOrbitals.pop(0)
         if atoms == None :
             atoms = np.arange(self.nions,dtype=int)
         if spin == None :
             spin = [0,1]
         if orbitals == None :
-            if len(spin) ==2 :
-                orbitals = np.arange((len(projected[0].labels)-1)//2,dtype=int)
-            else :
-                orbitals = np.arange((len(projected[0].labels)-1),dtype=int)
+            orbitals = np.arange((len(projected[0].labels)-1)//2,dtype=int)
         if title == None:
             title = 'Sum'
         orbitals = np.array(orbitals)
-        if len(spin) ==2:
+        
+        
+        if len(spin) == 2:
             labels = ['Energy','Spin-Up','Spin-Down']
             new_orbitals = []
             for ispin in spin :
                 new_orbitals.append(list(orbitals+ispin*(len(projected[0].labels)-1)//2))
+                
             orbitals = new_orbitals
+            
         else : 
+            
+            for x in orbitals:
+                
+                if (x+1 > (len(projected[0].labels)-1)//2 ):
+                    print('listed wrong amount of orbitals')
+                    print('Only use one or more of the following ' + str(np.arange((len(projected[0].labels)-1)//2,dtype=int)))
+                    print('Only use one or more of the following ' + str(np.arange((len(projected[0].labels)-1)//2,dtype=int)))
+                    print('They correspond to the following orbitals : ' + str(self.availiableOrbitals) )
+                    print('Again do not trust the plot that was just produced' )
             if spin[0] == 0:
                 labels = ['Energy','Spin-Up']
             elif spin[0] == 1:
@@ -249,11 +292,9 @@ class LobsterDOSParser:
             elif len(spin) == 1 :
                 ret[:,1]+=self.dos_projected[iatom].values[:,orbitals].sum(axis=1)
                 
-        return DensityOfStates(table=ret,title=title,labels=labels)        
+        return DensityOfStates(table=ret,title=title,labels=labels)
     
     
-    
-
     ###########################################################################
     # This section parses for the projected density of states and puts it in a 
     # Pychemia Density of States Object
@@ -383,37 +424,142 @@ class LobsterDOSParser:
                         
             
            
-            return {'total': total_dos, 'projected': final_projected, 'projected_labels_info':final_labels , 'ion_labels':ionsList}
+            return {'total': total_dos, 'projected': final_projected, 'projected_labels_info':final_labels , 'ions':ionsList}
 
         else:
-
+            
             return {'total': total_dos}
+
+    # @staticmethod
+    # def parse_doscar(filename):
+
+    #     if not os.path.isfile(filename):
+    #         raise ValueError('ERROR: DOSCAR file not found')
+
+    #     rf = open(filename)
+    #     data = rf.readlines()
+    #     rf.close()
+
+    #     rf = open("lobsterout", "r")
+    #     lobsterout = rf.read()
+    #     rf.close()
         
 
-              
-        
-    @property
-    def species(self):
-        """
-        Returns the species in POSCAR
-        """
+    #     if len(data) < 5:
+    #         raise ValueError('DOSCAR seems truncated')
 
-        raw_speciesList = findall(
-            "calculating FatBand for Element: ([a-zA-Z]*)[0-9] Orbital.*",
-            self.lobsterout,
-        )
-        self.speciesList = []
-        for x in raw_speciesList:
-            if x not in self.speciesList:
-                self.speciesList.append(x)
-        return self.speciesList
-    
-    @property
-    def symbols(self):
-        """
-        Returns the initial Structure as a pychemia structure
-        """
-        symbolsList = findall(
-            "calculating FatBand for Element: (.*) Orbital.*", self.lobsterout
-        )
-        return symbolsList
+    #     ionsList = findall("calculating FatBand for Element: (.*) Orbital.*", lobsterout)
+
+      
+    #     proj_ions = findall("calculating FatBand for Element: (.*) Orbital\(s\):\s*.*", lobsterout)
+  
+
+
+    #     # Skipping the first lines of header
+    #     iline = 5
+
+    #     header = [float(x) for x in data[iline].strip().split()]
+    #     ndos = int(header[2])
+    #     iline += 1
+
+    #     total_dos = [[float(x) for x in y.split()] for y in data[iline:iline + ndos]]
+    #     total_dos = np.array(total_dos)
+
+    #     iline += ndos
+
+    #     # In case there are more lines of data, they are the projected DOS
+        
+    #     if len(data) > iline:
+    #         projected_dos = []
+    #         proj_orbitals = []
+    #         ion_index =0
+            
+    #         while iline < len(data):
+       
+    #             header = [float(x) for x in data[iline].split(";")[0].split()]
+                
+    #             #print(header)
+  
+    #             proj_orbitals.append((proj_ions[ion_index],data[iline].split(";")[2]))
+    #             #print(proj_orbitals)
+    #             ion_index += 1    
+                
+                
+    #             ndos = int(header[2])
+    #             iline += 1
+    #             tmp_dos = [[float(x) for x in y.split()] for y in data[iline:iline + ndos]]
+    #             tmp_dos = np.array(tmp_dos)
+                
+    #             projected_dos.append(tmp_dos)
+               
+    #             iline += ndos
+    #         #[int(s) for s in str.split() if s.isdigit()]
+    #         final_projected = []
+    #         principal_list = []
+    #         for ion in proj_orbitals:
+    #             principalNum = [int(s) for s in ion[1] if s.isdigit()]
+    #             for n in principalNum:
+    #                 if n not in principal_list:
+    #                     principal_list.append(n)
+    #         print(principal_list)
+    #         return {'total': total_dos, 'projected': projected_dos, 'proj_labels_info':proj_orbitals, 'ions':ionsList,'principal_num':principal_list }
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        #if len(data) > iline:
+
+        #     projected_dos = []
+        #     proj_orbitals = []
+        #     ion_index =0
+        #     while iline < len(data):
+       
+        #         header = [float(x) for x in data[iline].split(";")[0].split()]
+                
+        #         #print(header)
+  
+        #         proj_orbitals.append((proj_ions[ion_index],data[iline].split(";")[2]))
+        #         #print(proj_orbitals)
+        #         ion_index += 1    
+                
+                
+        #         ndos = int(header[2])
+        #         iline += 1
+        #         tmp_dos = [[float(x) for x in y.split()] for y in data[iline:iline + ndos]]
+        #         tmp_dos = np.array(tmp_dos)
+                
+        #         projected_dos.append(tmp_dos)
+               
+        #         iline += ndos
+            #self.test = proj_orbitals
+            
+            
+           
+        #     return {'total': total_dos, 'projected': projected_dos, 'proj_labels_info':proj_orbitals, 'ions':ionsList}
+
+        # else:
+
+        #     return {'total': total_dos}
+        

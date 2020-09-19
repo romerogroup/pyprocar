@@ -6,6 +6,7 @@ Created on May 17 2020
 from .splash import welcome
 from .doscarplot import DosPlot
 from .vaspxml import VaspXML
+from .lobsterparser import LobsterDOSParser
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -359,6 +360,19 @@ def dosplot(
                 np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
         if elimit is None:
             elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
+    elif code == "lobster":
+        vaspxml = LobsterDOSParser(filename = "DOSCAR.lobster", dos_interpolation_factor=interpolation_factor)
+        dos_plot = DosPlot(dos= vaspxml.dos, structure= vaspxml.structure)
+        if atoms is None:
+            atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
+        if spins is None:
+            spins = list(np.arange(len(vaspxml.dos.total)))
+        if orbitals is None:
+            orbitals = list(
+                np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
+        if elimit is None:
+            elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
+        
     if mode == "plain":
         fig, ax1 = dos_plot.plot_total(
             spins=spins,
