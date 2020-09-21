@@ -638,7 +638,7 @@ class QEDOSParser:
 
             projected_dos.append(tmp_dict[name])
 
-        
+        self.test = total_dos
         project_labels = ['energies','s','p_y', 'p_z','p_x', 'd_xy', 'd_zy', 'd_z^2', 'd_zx','d_x^2-y^2']
         return {'total': total_dos,'projected': projected_dos, 'projected_labels_info':project_labels, 'ions': self.species_list}
         

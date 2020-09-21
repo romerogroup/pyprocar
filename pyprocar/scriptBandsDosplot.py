@@ -224,7 +224,8 @@ def bandsdosplot(
         knames = procarFile.knames
         print("knames         : ", knames)
         print("kticks         : ", kticks)
-        
+        if procarFile.discontinuities:
+            discontinuities = procarFile.discontinuities
         vaspxml = LobsterDOSParser()
         dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if dos_spins is None:
