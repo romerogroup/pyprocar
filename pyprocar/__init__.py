@@ -44,7 +44,7 @@ from pyprocar.abinitparser import AbinitParser
 from pyprocar.elkparser import ElkParser
 
 # Quantum Espresso
-from pyprocar.qeparser import QEParser
+from pyprocar.qeparser import QEParser, QEDOSParser
 
 # Lobster
 from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser

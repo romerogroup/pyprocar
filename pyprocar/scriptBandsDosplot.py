@@ -11,6 +11,7 @@ import numpy as np
 from .doscarplot import DosPlot
 from .vaspxml import VaspXML
 from .lobsterparser import LobsterDOSParser, LobsterParser
+from .qeparser import QEDOSParser, QEParser
 
 from .abinitparser import AbinitParser
 from .doscarplot import DosPlot
@@ -228,6 +229,21 @@ def bandsdosplot(
         dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if dos_spins is None:
             dos_spins = np.arange(len(vaspxml.dos.total))
+    
+    elif code == "qe":
+        procarFile = QEParser()
+        
+        kticks = procarFile.kticks
+        knames = procarFile.knames
+        print("knames         : ", knames)
+        print("kticks         : ", kticks)
+        # Retrieving knames and kticks from QE
+        if procarFile.discontinuities:
+            discontinuities = procarFile.discontinuities
+        vaspxml = QEDOSParser()
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+        if dos_spins is None:
+            dos_spins = np.arange(len(vaspxml.dos.total))
     #### END OF KPOINTS FILE DEPENDENT SECTION ####
 
     # spin = {"0": 0, "1": 1, "2": 2, "3": 3, "st": "st"}[str(spin)]
@@ -277,6 +293,9 @@ def bandsdosplot(
     elif code == "lobster":
         fermi = procarFile.fermi
         recLat = procarFile.reclat
+    elif code == "qe":
+        fermi = procarFile.fermi
+        recLat = procarFile.reclat
     # if kdirect = False, then the k-points will be in cartesian coordinates.
     # The output should be read to find the reciprocal lattice vectors to transform
     # from direct to cartesian
@@ -288,13 +307,7 @@ def bandsdosplot(
             procarFile.readFile(bands_file,
                                 permissive=False,
                                 recLattice=recLat)
-    # elif code == "lobster":
-    #     if kdirect:
-    #         procarFile.readFile(bands_file, permissive=False)
-    #     else:
-    #         procarFile.readFile(bands_file,
-    #                             permissive=False,
-    #                             recLattice=recLat)
+
             
     # processing the data, getting an instance of the class that reduces the data
     data = ProcarSelect(procarFile, deepCopy=True, mode=bands_mode)
@@ -348,7 +361,7 @@ def bandsdosplot(
 
     else:
         # Regular plotting method. For spin it plots density or magnetization.
-        if code == 'lobster':
+        if code == 'lobster' or code == 'qe':
             data.bands = (data.bands.transpose()).transpose()
         else:
             data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
