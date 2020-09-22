@@ -528,7 +528,7 @@ class QEDOSParser:
         rf.close()
         
         weight = float(findall("wk\s=\s*([-\.\d]*)",bandsOut)[0])
-        print(weight)
+
         ###################################################################   
         ####################################################################
         
@@ -608,7 +608,7 @@ class QEDOSParser:
             final_labels.pop(1)
             final_labels.pop(1)
 
-            final_dos[:,1:] = total_dos[:,1:]*weight
+            final_dos[:,1:] = final_dos[:,1:]*weight
             final_dos[:,0] = final_dos[:,0]/self.kpointsCount
             final_dos = delete(final_dos,1,1)
             final_dos = delete(final_dos,1,1)
