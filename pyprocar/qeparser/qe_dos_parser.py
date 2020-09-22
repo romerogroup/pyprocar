@@ -520,6 +520,17 @@ class QEDOSParser:
         data = rf.readlines()
         rf.close()
         
+        ###################################################################
+        # Getting k point weights
+        ###################################################################
+        rf = open("bands.out")
+        bandsOut = rf.read()
+        rf.close()
+        
+        weight = float(findall("wk\s=\s*([-\.\d]*)",bandsOut)[0])
+        ###################################################################   
+        ####################################################################
+        
         iline = 0
         header = [str(x) for x in data[iline].split()[2:]]
         header.pop(1)
@@ -546,8 +557,9 @@ class QEDOSParser:
             total_dos = add(tmp_dos,total_dos)
             iline += 1 
             iline += ndos
-        #total_dos[:,0] = total_dos[:,0]/self.kpointsCount
-        total_dos[:,:] = total_dos[:,:]/self.kpointsCount
+        total_dos[:,0] = total_dos[:,0]/self.kpointsCount
+        total_dos[:,1:] = total_dos[:,1:]*weight
+        
         total_dos = delete(total_dos,1,1)
         total_dos = delete(total_dos,1,1)
         
@@ -594,8 +606,9 @@ class QEDOSParser:
             final_labels.pop(1)
             final_labels.pop(1)
             final_labels.pop(1)
-            final_dos[:,:] = final_dos[:,:]/self.kpointsCount
-            #final_dos[:,0] = final_dos[:,0]/self.kpointsCount
+
+            total_dos[:,1:] = total_dos[:,1:]*weight
+            final_dos[:,0] = final_dos[:,0]/self.kpointsCount
             final_dos = delete(final_dos,1,1)
             final_dos = delete(final_dos,1,1)
             
