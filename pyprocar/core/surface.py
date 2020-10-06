@@ -60,13 +60,13 @@ class Surface(object):
         self.vert_colors = vert_colors
         self.vectors = vectors
         self.scalars = scalars
-
+        self.test = None
         self.pyvista_obj = None
         self.trimesh_obj = None
 
         if self.verts is not None and self.faces is not None:
             self._create_pyvista()
-            self._create_trimesh()
+            # self._create_trimesh()
             if self.face_normals is None:
                 self.face_normals = self.pyvista_obj.face_normals
             # if self.vert_normals is None:
@@ -150,7 +150,7 @@ class Surface(object):
             new_faces.append(len(iface))
             for ivert in iface:
                 new_faces.append(ivert)
-
+                
         self.pyvista_obj = pyvista.PolyData(verts, np.array(new_faces))
         if self.scalars is not None:
             self.pyvista_obj['scalars'] = self.scalars
@@ -172,12 +172,12 @@ class Surface(object):
                 point_3 = self.pyvista_obj.triangulate().faces[i + 3]
                 faces.append([point_1, point_2, point_3])
             self.trimesh_obj = trimesh.Trimesh(vertices=self.verts,
-                                               faces=faces)
+                                                faces=faces)
 
         else:
 
             self.trimesh_obj = trimesh.Trimesh(vertices=self.verts,
-                                               faces=self.faces)
+                                                faces=self.faces)
 
     def set_scalars(
             self,

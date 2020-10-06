@@ -74,6 +74,7 @@ class Isosurface(Surface):
         self.V = V
         self.isovalue = isovalue
         self.V_matrix = V_matrix
+        self.test = None
         self.algorithm = algorithm
         self.padding = padding
         self.interpolation_factor = interpolation_factor
@@ -95,9 +96,11 @@ class Isosurface(Surface):
                 self.nX // 2 * padding[0], self.nY // 2 * padding[1],
                 self.nZ // 2 * padding[2]
             ]
+       
 
         verts, faces, normals, values = self._get_isosurface(
             interpolation_factor)
+
         if verts is not None and faces is not None:
             if transform_matrix is not None:
                 verts = np.dot(verts, transform_matrix)
@@ -115,7 +118,8 @@ class Isosurface(Surface):
                 suprecell_surface = Surface(verts=verts,
                                             faces=faces,
                                             face_normals=normals)
-                verts, faces = self.clip(suprecell_surface, boundaries)
+                if not np.isnan(suprecell_surface.pyvista_obj.points[0,0]):
+                    verts, faces = self.clip(suprecell_surface, boundaries)
 
         Surface.__init__(self, verts=verts, faces=faces, face_normals=normals)
 
@@ -136,10 +140,18 @@ class Isosurface(Surface):
 
         """
 
+
         for iface in range(len(S2.faces)):
             normal = S2.face_normals[iface]
+            
+            
             center = np.average(S2.verts[S2.faces[iface]], axis=0)
+
+
+
             S1.pyvista_obj.clip(origin=center, normal=normal, inplace=True)
+        
+
         faces = []
         courser = 0
         for i in range(S1.pyvista_obj.n_faces):
@@ -150,6 +162,7 @@ class Isosurface(Surface):
                 face.append(S1.pyvista_obj.faces[courser])
                 courser += 1
             faces.append(face)
+            
 
         return S1.pyvista_obj.points, faces
 
@@ -269,7 +282,7 @@ class Isosurface(Surface):
                                (padding_z, padding_z)), "wrap")
         try:
             verts, faces, normals, values = measure.marching_cubes_lewiner(
-                eigen_matrix, self.fermi)
+                eigen_matrix, self.isovalue)
             for ix in range(3):
                 verts[:, ix] -= verts[:, ix].min()
                 verts[:, ix] -= (verts[:, ix].max() -
@@ -313,9 +326,9 @@ class Isosurface(Surface):
         eigen_matrix = np.pad(self.V_matrix,
                               ((padding_x, padding_x), (padding_y, padding_y),
                                (padding_z, padding_z)), "wrap")
-
+   
         bnd = self.surface_boundaries
-
+        
         if interp_factor != 1:
             # Fourier interpolate the mapped function E(x,y,z)
 
@@ -327,8 +340,10 @@ class Isosurface(Surface):
             #     axis=[0, 1, 2])
 
         try:
+            
             verts, faces, normals, values = measure.marching_cubes_lewiner(
-                eigen_matrix, self.fermi)
+                eigen_matrix, self.isovalue)
+            
         except BaseException:
             print("No isosurface for this band")
             return None, None, None, None
@@ -373,19 +388,31 @@ def map2matrix(XYZ, V):
     """
     XYZ = XYZ
     V = V
+    
     X = np.unique(XYZ[:, 0])
     Y = np.unique(XYZ[:, 1])
     Z = np.unique(XYZ[:, 2])
+    
     mapped_func = np.zeros(shape=(len(X), len(Y), len(Z)))
     #kpoint_matrix = np.zeros(shape=(len(kx), len(ky), len(kz), 3)) This was added to check if the mesh grid is working
+    print(len(X))
+    print(len(Y))
+    print(len(Z))
+    count = 0
     for ix in range(len(X)):
         condition1 = XYZ[:, 0] == X[ix]
+        count += 1
+        print(count)
         for iy in range(len(Y)):
             condition2 = XYZ[:, 1] == Y[iy]
+            
+            #print(count)
             for iz in range(len(Z)):
+                
                 condition3 = XYZ[:, 2] == Z[iz]
                 tot_cond = np.all([condition1, condition2, condition3], axis=0)
                 if len(V[tot_cond]) != 0:
+                    #print("hi")
                     mapped_func[ix, iy, iz] = V[tot_cond][0]
                     # kpoint_matrix[ikx, iky, ikz] = [
                     #     kx[ikx], ky[iky], kz[ikz]]
@@ -414,8 +441,9 @@ def fft_interpolate(function, interpolation_factor=2):
         "constant",
         constant_values=0,
     )
-
+    
     new_matrix = np.fft.ifftshift(new_matrix)
     interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor**
                                                         3)
+
     return interpolated

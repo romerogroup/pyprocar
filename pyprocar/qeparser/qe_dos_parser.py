@@ -13,7 +13,7 @@ Created on Sunday, May 24th
 from re import findall
 
 from numpy import array, dot, zeros, add, delete, append, arange
-from ..core import DensityOfStates, Structure
+from pyprocar.core import DensityOfStates, Structure
 
 import logging
 import os
@@ -21,12 +21,12 @@ import os
 
 class QEDOSParser:
     def __init__(
-        self, bandsin="bands.in", kpdosin="kpdos.in", outfile="scf.out", dos_interpolation_factor = None 
+        self, nscfin="nscf.in", pdosin="pdos.in", outfile="scf.out", dos_interpolation_factor = None 
     ):
 
         # Qe inputs
-        self.bandsin = bandsin
-        self.kfin = kpdosin
+        self.nscfin = nscfin
+        self.pdosin = pdosin
         self.outfile = outfile
 
         # This is not used since the extra files are useless for the parser
@@ -77,19 +77,19 @@ class QEDOSParser:
         self.orbitalCount = None
 
         # Opens the needed files
-        rf = open(self.bandsin, "r")
-        self.bandsIn = rf.read()
+        rf = open(self.nscfin, "r")
+        self.nscfIn = rf.read()
         rf.close()
 
-        rf = open(self.kfin, "r")
-        self.kpdosIn = rf.read()
+        rf = open(self.pdosin, "r")
+        self.pdosIn = rf.read()
         rf.close()
         
         
         self.test =None
         
         self.spinCalc = False
-        if len(findall("\s*nspin=(.*)",self.bandsIn)) != 0:
+        if len(findall("\s*nspin=(.*)",self.nscfIn)) != 0:
             self.spinCalc =  True
             self.is_spin_polarized = True
         else:
@@ -346,41 +346,19 @@ class QEDOSParser:
         ###############################################
 
         spinCalc = False
-        if len(findall("\s*nspin=(.*)",self.bandsIn)) != 0:
+        if len(findall("\s*nspin=(.*)",self.nscfIn)) != 0:
             spinCalc =  True
 
-        
-        
-        #######################################################################
-        # Finding high symmetry points
-        #######################################################################
 
-        self.nhigh_sym = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
-        raw_khigh_sym = findall(
-            "K_POINTS.*\n\s*[0-9]*.*\n" + self.nhigh_sym * "([0-9\s\.-]*).*\n",
-            self.bandsIn,
-        )[0]
-        # self.kpointsCount = 0
-
-        self.kticks = []
-        self.high_symmetry_points = zeros(shape=(self.nhigh_sym, 3))
-        tick_Count = 1
-        for ihs in range(self.nhigh_sym):
-            self.high_symmetry_points[ihs, :] = [
-                float(x) for x in raw_khigh_sym[ihs].split()[0:3]
-            ]
-            # kpoint_Count += raw_khigh_sym[ihs].split()[4]
-            self.kticks.append(tick_Count - 1)
-            tick_Count += int(raw_khigh_sym[ihs].split()[3])
         
         #######################################################################
         # Finding composition and specie data
         #######################################################################
 
-        self.nspecies = int(findall("ntyp\s*=\s*([0-9]*)", self.bandsIn)[0])
-        self.ionsCount = int(findall("nat\s*=\s*([0-9]*)", self.bandsIn)[0])
+        self.nspecies = int(findall("ntyp\s*=\s*([0-9]*)", self.nscfIn)[0])
+        self.ionsCount = int(findall("nat\s*=\s*([0-9]*)", self.nscfIn)[0])
         raw_species = findall(
-            "ATOMIC_SPECIES.*\n" + self.nspecies * "(.*).*\n", self.bandsIn
+            "ATOMIC_SPECIES.*\n" + self.nspecies * "(.*).*\n", self.nscfIn
         )[0]
         self.species_list = []
         if self.nspecies == 1:
@@ -392,7 +370,7 @@ class QEDOSParser:
                 self.composition[raw_species[nspec].split()[0]] = 0
 
         raw_ions = findall(
-            "ATOMIC_POSITIONS.*\n" + self.ionsCount * "(.*).*\n", self.bandsIn
+            "ATOMIC_POSITIONS.*\n" + self.ionsCount * "(.*).*\n", self.nscfIn
         )[0]
 
         if self.ionsCount == 1:
@@ -403,45 +381,29 @@ class QEDOSParser:
                     if raw_ions[ions].split()[0] == self.species_list[species]:
                         self.composition[raw_ions[ions].split()[0]] += 1
 
-        #######################################################################
-        # Finding k labels
-        #######################################################################
-
-        raw_ticks = findall(
-            "K_POINTS.*\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*!(.*)\n",
-            self.bandsIn,
-        )[0]
-
-        if len(raw_ticks) != self.nhigh_sym:
-            self.knames = [str(x) for x in range(self.nhigh_sym)]
-        else:
-            self.knames = [
-                "$%s$" % (x.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
-                for x in raw_ticks
-            ]
 
 
         #######################################################################
         # Reading the kpdos.out for outputfile labels
         #######################################################################
-        rf = open(self.kfin.split(".")[0] + ".out", "r")
-        kpdosout = rf.read()
+        rf = open(self.pdosin.split(".")[0] + ".out", "r")
+        pdosout = rf.read()
         rf.close()
 
         # The following lines get the number of states in kpdos.out and stores them in a list, in which their information is stored in a dictionary
         raw_natomwfc = findall(
-            r"(?<=\(read from pseudopotential files\)\:)[\s\S]*?(?=k)", kpdosout
+            r"(?<=\(read from pseudopotential files\)\:)[\s\S]*?(?=k)", pdosout
         )[0]
 
         natomwfc = len(findall("state[\s#]*(\d*)", raw_natomwfc))
 
         raw_wfc = findall(
             "\(read from pseudopotential files\)\:.*\n\n\s*" + natomwfc * "(.*)\n",
-            kpdosout,
+            pdosout,
         )[0]
 
         raw_states = []
-        kpdos_files=[]
+        pdos_files=[]
         states_list = []
         state_dict = {}
 
@@ -469,15 +431,15 @@ class QEDOSParser:
 
         
         #  This section was used to parse those extra files we discussed. It is not needed, I kept it just incase
-        output_prefix = findall("filpdos\s*=\s*'(.*)'", self.kpdosIn)[0]
+        output_prefix = findall("filpdos\s*=\s*'(.*)'", self.pdosIn)[0]
         self.filpdos = output_prefix
         #Find unique raw file labels
         for state in self.states:
             file = (state['species_num'],state['specie'].strip(),state['atm_wfc'],state['l'])
-            kpdos_files.append(file) if file not in kpdos_files else None
+            pdos_files.append(file) if file not in pdos_files else None
 
         #Convert raw file labels to final file string
-        for file in kpdos_files:
+        for file in pdos_files:
             if(file[3] == 0 ):
                 self.file_names.append(output_prefix + ".pdos_atm#" + str(file[0]) + "(" + file[1] + ")_wfc#" + str(file[2]) +  "(s)")
             elif (file[3] == 1 ):
@@ -487,30 +449,6 @@ class QEDOSParser:
             elif (file[3] == 3 ):
                 self.file_names.append(output_prefix + ".pdos_atm#" + str(file[0]) + "(" + file[1] + ")_wfc#" + str(file[2]) +  "(f)")
 
-        #######################################################################
-        # Kpoints and kpoints index
-        #######################################################################
-
-        # Finds the k points and stores them in an array
-        raw_kpoints = []
-        if(spinCalc == True):
-   
-            self.kpointsCount = int(len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))/2)
-            for k in range(len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))):
-                if(k<self.kpointsCount):
-                    raw_kpoints.append(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout)[k][0])
-           
-        else:
-            for k in range(len(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout))):
-                raw_kpoints.append(findall("k\s*=\s*(.*)\s*(.*)\s*(.*)", kpdosout)[k][0])
-            self.kpointsCount = len(raw_kpoints)
-      
-        self.kpoints = zeros(shape=(self.kpointsCount, 3))
-        for ik in range(len(raw_kpoints)):
-            for coord in range(3):
-                self.kpoints[ik][coord] = raw_kpoints[ik].split()[coord]
-
-            
             
     # @staticmethod  
     def parse_pdos(self):
@@ -523,21 +461,22 @@ class QEDOSParser:
         ###################################################################
         # Getting k point weights
         ###################################################################
-        rf = open("bands.out")
-        bandsOut = rf.read()
+        rf = open("nscf.out")
+        nscfOut = rf.read()
         rf.close()
         
-        weight = float(findall("wk\s=\s*([-\.\d]*)",bandsOut)[0])
+        weight = float(findall("wk\s=\s*([-\.\d]*)",nscfOut)[0])
 
         ###################################################################   
         ####################################################################
         
         iline = 0
         header = [str(x) for x in data[iline].split()[2:]]
-        header.pop(1)
+
         if(self.spinCalc == True):
             header.pop(1)
             header.pop(1)
+
         else:
             header.pop(1)
         header[0] = "Energy"
@@ -549,22 +488,15 @@ class QEDOSParser:
             
         iline += 1
         
-        ndos= int((len(data)-self.kpointsCount)/self.kpointsCount)
-        total_dos = [[float(x) for x in y.split()[1:]] for y in data[iline:iline + ndos]]
-        iline += 1 
-        iline += ndos
-        while iline < len(data):
-            tmp_dos = [[float(x) for x in y.split()[1:]] for y in data[iline:iline + ndos]]
-            total_dos = add(tmp_dos,total_dos)
-            iline += 1 
-            iline += ndos
-        total_dos[:,0] = total_dos[:,0]/self.kpointsCount
-        total_dos[:,1:] = total_dos[:,1:]*weight
+        ndos= len(data)-1
+
+        total_dos = [[float(x) for x in y.split()[0:]] for y in data[iline:iline + ndos]]
+
         
         total_dos = delete(total_dos,1,1)
         total_dos = delete(total_dos,1,1)
         
-        ###################################################################################
+        # ###################################################################################
         tmp_dict ={}        
         for filename in self.file_names:
             if not os.path.isfile(filename):
@@ -575,8 +507,7 @@ class QEDOSParser:
             rf.close()
     
     
-            if len(data) < 5:
-                raise ValueError('DOSCAR seems truncated')
+
     
             atmNum = findall("#(\d*)",filename)[0]
             atmName = findall("atm#\d*\(([a-zA-Z0-9]*)\)",filename)[0]
@@ -586,30 +517,23 @@ class QEDOSParser:
     
             iline = 0
             
-             # Skipping the first lines of header
+              # Skipping the first lines of header
             iline += 1
          
            
             
-            final_dos = [[float(x) for x in y.split()[1:]] for y in data[iline:iline + ndos]]
+            final_dos = [[float(x) for x in y.split()[0:]] for y in data[iline:iline + ndos]]
             iline += 1 
             iline += ndos
-            while iline < len(data):
-                
-                tmp_dos = [[float(x) for x in y.split()[1:]] for y in data[iline:iline + ndos]]
-                final_dos = add(tmp_dos,final_dos)
-               
-                iline += 1 
-                iline += ndos
+
             final_labels = data[0].split()
+
             final_labels.pop(0)
-            final_labels.pop(0)
+
             final_labels.pop(1)
             final_labels.pop(1)
             final_labels.pop(1)
 
-            final_dos[:,1:] = final_dos[:,1:]*weight
-            final_dos[:,0] = final_dos[:,0]/self.kpointsCount
             final_dos = delete(final_dos,1,1)
             final_dos = delete(final_dos,1,1)
             
@@ -652,7 +576,7 @@ class QEDOSParser:
 
             projected_dos.append(tmp_dict[name])
 
-        self.test = total_dos
+
         project_labels = ['energies','s','p_y', 'p_z','p_x', 'd_xy', 'd_zy', 'd_z^2', 'd_zx','d_x^2-y^2']
         return {'total': total_dos,'projected': projected_dos, 'projected_labels_info':project_labels, 'ions': self.species_list}
         

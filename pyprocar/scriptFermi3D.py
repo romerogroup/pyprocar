@@ -15,7 +15,7 @@ from .procarselect import ProcarSelect
 def fermi3D(
         procar='PROCAR',
         outcar='OUTCAR',
-        fermi=None,
+        fermi =None,
         bands=None,
         interpolation_factor=1,
         mode="plain",

@@ -376,7 +376,7 @@ def dosplot(
             elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
     
     elif code == "qe":
-        vaspxml = QEDOSParser(bandsin="bands.in", kpdosin="kpdos.in", outfile="scf.out", dos_interpolation_factor=interpolation_factor)
+        vaspxml = QEDOSParser(nscfin="nscf.in", pdosin="pdos.in", outfile="scf.out", dos_interpolation_factor=interpolation_factor)
         dos_plot = DosPlot(dos= vaspxml.dos, structure= vaspxml.structure)
         if atoms is None:
             atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))

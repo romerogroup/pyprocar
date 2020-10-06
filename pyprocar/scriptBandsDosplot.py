@@ -513,12 +513,10 @@ def bandsdosplot(
                 ax=ax2,
                 orientation="vertical",
             )
-            dos = dos_plot.VaspXML.dos_total
+            #dos = dos_plot.dos_total
         else:
             _, ax2 = dos_plot.plot_stack_species(
                 spins=dos_spins,
-                markersize=markersize,
-                marker=marker,
                 spin_colors=dos_spin_colors,
                 colors=dos_colors,
                 elimit=elimit,
@@ -526,7 +524,7 @@ def bandsdosplot(
                 ax=ax2,
                 orientation="vertical",
             )
-            dos = dos_plot.VaspXML.dos_total
+            #dos = dos_plot.dos_total
             _, ax2 = dos_plot.plot_total(
                 spins=dos_spins,
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
