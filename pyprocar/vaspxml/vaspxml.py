@@ -385,7 +385,10 @@ def conv(ele, _type):
     elif _type == 'logical':
         return text_to_bool(ele)
     elif _type == 'float':
-        return float(ele)
+        if '*' in ele:
+            return np.nan
+        else:
+            return float(ele)
 
 
 def get_varray(xml_tree):
