@@ -61,10 +61,10 @@ def bandsplot(
         show=True,
         lobstercode="qe",
         plot_color_bar=True,
+        verbose=True,
 ):
     """This function plots band structures
   """
-    welcome()
 
     # Turn interactive plotting off
     plt.ioff()
@@ -82,14 +82,15 @@ def bandsplot(
             human = False
     if orbitals is None:
         orbitals = [-1]
-
-    print("Script initiated")
-    print("code           : ", code)
-    print("input file     : ", procarfile)
-    print("mode           : ", mode)
-    print("spin comp.     : ", spin)
-    print("atoms list     : ", atoms)
-    print("orbs. list     : ", orbitals)
+    if verbose:
+        welcome()
+        print("Script initiated")
+        print("code           : ", code)
+        print("input file     : ", procarfile)
+        print("mode           : ", mode)
+        print("spin comp.     : ", spin)
+        print("atoms list     : ", atoms)
+        print("orbs. list     : ", orbitals)
 
     if (fermi is None and outcar is None and abinit_output is None
             and (code != "elk" and code != "qe" and code != "lobster")):

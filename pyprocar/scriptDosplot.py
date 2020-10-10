@@ -51,6 +51,7 @@ def dosplot(
         items={},
         ax=None,
         plt_show=True,
+        verbose=True,
 ):
     """
     This function plots the density of states in different formats
@@ -322,24 +323,24 @@ def dosplot(
         raise ValueError(
             "Mode should be choosed from ['plain', 'parametric_line','parametric','stack_species','stack_orbitals','stack']"
         )
+    if verbose:
+        welcome()
 
-    welcome()
-
-    # Verbose section
-    print("Script initiated")
-    print("code          : ", code)
-    print("File name     : ", filename)
-    print("mode          : ", mode)
-    print("spins         : ", spins)
-    print("atoms list    : ", atoms)
-    print("orbs. list    : ", orbitals)
-    print("energy range  : ", elimit)
-    print("colormap      : ", cmap)
-    print("vmax          : ", vmax)
-    print("vmin          : ", vmin)
-    print("grid enabled  : ", grid)
-    print("savefig       : ", savefig)
-    print("title         : ", title)
+        # Verbose section
+        print("Script initiated")
+        print("code          : ", code)
+        print("File name     : ", filename)
+        print("mode          : ", mode)
+        print("spins         : ", spins)
+        print("atoms list    : ", atoms)
+        print("orbs. list    : ", orbitals)
+        print("energy range  : ", elimit)
+        print("colormap      : ", cmap)
+        print("vmax          : ", vmax)
+        print("vmin          : ", vmin)
+        print("grid enabled  : ", grid)
+        print("savefig       : ", savefig)
+        print("title         : ", title)
 
     total = plot_total
     code = code.lower()
@@ -363,8 +364,10 @@ def dosplot(
         if elimit is None:
             elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
     elif code == "lobster":
-        vaspxml = LobsterDOSParser(filename = "DOSCAR.lobster", dos_interpolation_factor=interpolation_factor)
-        dos_plot = DosPlot(dos= vaspxml.dos, structure= vaspxml.structure)
+        vaspxml = LobsterDOSParser(
+            filename="DOSCAR.lobster",
+            dos_interpolation_factor=interpolation_factor)
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if atoms is None:
             atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
         if spins is None:
@@ -374,10 +377,13 @@ def dosplot(
                 np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
         if elimit is None:
             elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
-    
+
     elif code == "qe":
-        vaspxml = QEDOSParser(nscfin="nscf.in", pdosin="pdos.in", outfile="scf.out", dos_interpolation_factor=interpolation_factor)
-        dos_plot = DosPlot(dos= vaspxml.dos, structure= vaspxml.structure)
+        vaspxml = QEDOSParser(nscfin="nscf.in",
+                              pdosin="pdos.in",
+                              outfile="scf.out",
+                              dos_interpolation_factor=interpolation_factor)
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if atoms is None:
             atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
         if spins is None:
@@ -387,7 +393,7 @@ def dosplot(
                 np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
         if elimit is None:
             elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
-        
+
     if mode == "plain":
         fig, ax1 = dos_plot.plot_total(
             spins=spins,
