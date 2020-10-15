@@ -24,7 +24,8 @@ class FermiSurface3D(Isosurface):
                  cmap='viridis',
                  vmin=0,
                  vmax=1,
-                 supercell=[1, 1, 1]):
+                 supercell=[1, 1, 1],
+                 file = None):
         """
         
 
@@ -82,18 +83,30 @@ class FermiSurface3D(Isosurface):
         self.projection_accuracy = projection_accuracy
         self.spin_texture = spin_texture
         self.spd_spin = spd_spin
-
+        self.file = file
         self.brillouin_zone = self._get_brilloin_zone(supercell)
-
-        Isosurface.__init__(self,
-                            XYZ=self.kpoints,
-                            V=self.band,
-                            isovalue=self.fermi,
-                            algorithm='lewiner',
-                            interpolation_factor=interpolation_factor,
-                            padding=self.supercell,
-                            transform_matrix=self.reciprocal_lattice,
-                            boundaries=self.brillouin_zone)
+        # self.brillouin_zone = None
+        if self.file == "bxsf":
+            Isosurface.__init__(self,
+                                XYZ=self.kpoints,
+                                V=self.band,
+                                isovalue=self.fermi,
+                                algorithm='lewiner',
+                                interpolation_factor=interpolation_factor,
+                                padding=self.supercell,
+                                transform_matrix=self.reciprocal_lattice,
+                                boundaries=self.brillouin_zone,
+                                file = self.file)
+        else:
+            Isosurface.__init__(self,
+                                XYZ=self.kpoints,
+                                V=self.band,
+                                isovalue=self.fermi,
+                                algorithm='lewiner',
+                                interpolation_factor=interpolation_factor,
+                                padding=self.supercell,
+                                transform_matrix=self.reciprocal_lattice,
+                                boundaries=self.brillouin_zone)
         if self.spd is not None and self.verts is not None:
             self.project_color(cmap, vmin, vmax)
         if self.spd_spin is not None and self.verts is not None:

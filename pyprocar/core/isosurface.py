@@ -21,6 +21,7 @@ class Isosurface(Surface):
             padding=None,
             transform_matrix=None,
             boundaries=None,
+            file = None
     ):
         """
         This class contains a surface that finds all the poins correcponding 
@@ -74,12 +75,13 @@ class Isosurface(Surface):
         self.V = V
         self.isovalue = isovalue
         self.V_matrix = V_matrix
-        self.test = None
         self.algorithm = algorithm
         self.padding = padding
         self.interpolation_factor = interpolation_factor
         self.transform_matrix = transform_matrix
         self.boundaries = boundaries
+        self.file = "bxsf"
+        
         if self.algorithm not in ['classic', 'lewiner']:
             print(
                 "The algorithm chose has to be from ['classic','lewiner'], automtically choosing 'lewiner'"
@@ -114,6 +116,7 @@ class Isosurface(Surface):
             For this reason I will make one temporary surface and from there I will
             using the other surface provided.
             """
+
             if boundaries is not None:
                 suprecell_surface = Surface(verts=verts,
                                             faces=faces,
@@ -352,10 +355,17 @@ class Isosurface(Surface):
         for ix in range(3):
             verts[:, ix] -= verts[:, ix].min()
             verts[:, ix] -= (verts[:, ix].max() -
-                             verts[:, ix].min()) / 2  #+self.origin[ix]
+                              verts[:, ix].min()) / 2 
+            #verts[:, ix] += 0.5
+
+            #+self.origin[ix]
             verts[:, ix] *= self.dxyz[ix] / interp_factor
+            if self.file == "bxsf":
+                verts[:, ix] -= 0.5
             if bnd is not None and interp_factor != 1:
                 verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+                if self.file == "bxsf":
+                    verts[:, ix] -= 0.5
             #     x_shift = verts[:,0].min() - bnd[0]
             # y_shift = verts[:,1].min() - bnd[1]
             # z_shift = verts[:,2].min() - bnd[2]
@@ -395,14 +405,12 @@ def map2matrix(XYZ, V):
     
     mapped_func = np.zeros(shape=(len(X), len(Y), len(Z)))
     #kpoint_matrix = np.zeros(shape=(len(kx), len(ky), len(kz), 3)) This was added to check if the mesh grid is working
-    print(len(X))
-    print(len(Y))
-    print(len(Z))
+
     count = 0
     for ix in range(len(X)):
         condition1 = XYZ[:, 0] == X[ix]
         count += 1
-        print(count)
+
         for iy in range(len(Y)):
             condition2 = XYZ[:, 1] == Y[iy]
             
@@ -412,7 +420,7 @@ def map2matrix(XYZ, V):
                 condition3 = XYZ[:, 2] == Z[iz]
                 tot_cond = np.all([condition1, condition2, condition3], axis=0)
                 if len(V[tot_cond]) != 0:
-                    #print("hi")
+
                     mapped_func[ix, iy, iz] = V[tot_cond][0]
                     # kpoint_matrix[ikx, iky, ikz] = [
                     #     kx[ikx], ky[iky], kz[ikz]]

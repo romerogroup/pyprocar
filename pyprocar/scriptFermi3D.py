@@ -2,6 +2,7 @@
 
 import numpy as np
 import pyvista
+import pyvistaqt
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 from .core.surface import boolean_add
@@ -10,11 +11,12 @@ from .splash import welcome
 from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
-
+from .bxsfparser import BxsfParser
 
 def fermi3D(
         procar='PROCAR',
         outcar='OUTCAR',
+        infile = "in.bxsf",
         fermi =None,
         bands=None,
         interpolation_factor=1,
@@ -42,7 +44,7 @@ def fermi3D(
         perspective=True,
         save2d=False,
         camera_pos=[1, 1, 1],
-        widget=None,
+        widget=True,
         show=True,
 ):
     """
@@ -58,6 +60,11 @@ def fermi3D(
         Path to the OUTCAR file of the simulation
 
         e.g. ``outcar='~/MgB2/fermi/OUTCAR'``
+        
+    infile : str, optional (default ``infile = in.bxsf'``)
+        This is the path in the input bxsf file
+
+        e.g. ``infile = ni_fs.bxsf'``
 
     fermi : float, optional (default ``None``)
         Fermi energy at which the fermi surface is created. In other
@@ -216,7 +223,7 @@ def fermi3D(
 
     code : str, optional (default ``'vasp'``)
         The DFT code in which the calculation is performed with.
-
+        Also, if you want to read a .bxsf file set code ="bxsf"
         e.g. ``code='vasp'``
 
     vmin : float, optional
@@ -274,7 +281,7 @@ def fermi3D(
         e.g. ``camera_pos=[0.5, 1, -1]``
 
     widget : , optional
-        .. todo:: This functionality has not been implemented
+        .. todo:: View fermi surface in a widget
 
     show : bool, optional (default ``True``)
         If set to ``False`` it will not show the 3D plot.
@@ -290,9 +297,12 @@ def fermi3D(
     """
 
     welcome()
-
+    
     if show:
-        p = pyvista.Plotter()
+        if widget:
+            p = pyvistaqt.BackgroundPlotter()
+        else:
+            p = pyvista.Plotter()
 
     if code == 'vasp':
         outcarparser = UtilsProcar()
@@ -304,6 +314,12 @@ def fermi3D(
         procarFile = ProcarParser()
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
+    elif code == 'bxsf':
+        e_fermi = fermi
+        data = BxsfParser(infile = infile)
+        reciprocal_lattice  = data.rec_lattice
+        bands = np.arange(len(data.bandEnergy[0, :]))
+        
     if bands is None:
         bands = np.arange(len(data.bands[0, :]))
     surfaces = []
@@ -366,15 +382,28 @@ def fermi3D(
     counter = 0
     for iband in bands:
         print("Trying to extract isosurface for band %d" % iband)
-        surface = FermiSurface3D(kpoints=data.kpoints,
-                                 band=data.bands[:, iband],
-                                 spd=spd[counter],
-                                 spd_spin=spd_spin[counter],
-                                 fermi=e_fermi + fermi_shift,
-                                 reciprocal_lattice=reciprocal_lattice,
-                                 interpolation_factor=interpolation_factor,
-                                 projection_accuracy=projection_accuracy,
-                                 supercell=supercell)
+        if code == "bxsf":
+            surface = FermiSurface3D(kpoints=data.kpoints,
+                                     band=data.bandEnergy[:, iband],
+                                     spd=spd[counter],
+                                     spd_spin=spd_spin[counter],
+                                     fermi=e_fermi + fermi_shift,
+                                     reciprocal_lattice=reciprocal_lattice,
+                                     interpolation_factor=interpolation_factor,
+                                     projection_accuracy=projection_accuracy,
+                                     supercell=supercell,
+                                     file = "bxsf")
+        else:
+            surface = FermiSurface3D(kpoints=data.kpoints,
+                                     band=data.bands[:, iband],
+                                     spd=spd[counter],
+                                     spd_spin=spd_spin[counter],
+                                     fermi=e_fermi + fermi_shift,
+                                     reciprocal_lattice=reciprocal_lattice,
+                                     interpolation_factor=interpolation_factor,
+                                     projection_accuracy=projection_accuracy,
+                                     supercell=supercell)
+            
         if surface.verts is not None:
             surfaces.append(surface)
         counter += 1
@@ -444,9 +473,11 @@ def fermi3D(
 
         if not perspective:
             p.enable_parallel_projection()
+        
         p.set_background(background_color)
         p.set_position(camera_pos)
-        p.show(cpos=camera_pos, screenshot=save2d)
+        if not widget:
+            p.show(cpos=camera_pos, screenshot=save2d)
         # p.screenshot('1.png')
         # p.save_graphic('1.pdf')
         if savegif is not None:

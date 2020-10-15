@@ -37,6 +37,9 @@ import pychemia
 import pyvista
 import trimesh
 
+# Bxsf
+from pyprocar.bxsfparser import BxsfParser
+
 # Abinit
 from pyprocar.abinitparser import AbinitParser
 

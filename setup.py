@@ -25,6 +25,7 @@ setup(
         "pyprocar.doscarplot",
         "pyprocar.qeparser",
         "pyprocar.lobsterparser",
+        "pyprocar.bxsfparser"
     ],
     license="LICENSE.txt",
     data_files=[("", ["LICENSE.txt"])],

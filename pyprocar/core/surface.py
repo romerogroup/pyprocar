@@ -66,7 +66,7 @@ class Surface(object):
 
         if self.verts is not None and self.faces is not None:
             self._create_pyvista()
-            # self._create_trimesh()
+            self._create_trimesh()
             if self.face_normals is None:
                 self.face_normals = self.pyvista_obj.face_normals
             # if self.vert_normals is None:
