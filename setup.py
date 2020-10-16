@@ -39,6 +39,7 @@ setup(
         "scikit-image",
         "pychemia",
         "pyvista",
+	"pyvistaqt",
         "trimesh",
     ],
     scripts=["scripts/procar.py"],
