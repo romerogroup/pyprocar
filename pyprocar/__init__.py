@@ -37,6 +37,9 @@ import pychemia
 import pyvista
 import trimesh
 
+# Frmsf
+from pyprocar.frmsfparser import FrmsfParser
+
 # Bxsf
 from pyprocar.bxsfparser import BxsfParser
 
@@ -47,7 +50,7 @@ from pyprocar.abinitparser import AbinitParser
 from pyprocar.elkparser import ElkParser
 
 # Quantum Espresso
-from pyprocar.qeparser import QEParser, QEDOSParser
+from pyprocar.qeparser import QEParser, QEDOSParser, QEFermiParser
 
 # Lobster
 from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser

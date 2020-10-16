@@ -12,6 +12,8 @@ from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .bxsfparser import BxsfParser
+from .frmsfparser import FrmsfParser
+from .qeparser import QEFermiParser
 
 def fermi3D(
         procar='PROCAR',
@@ -314,11 +316,25 @@ def fermi3D(
         procarFile = ProcarParser()
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
+    elif code == 'qe':
+        procarFile = QEFermiParser()
+        data = ProcarSelect(procarFile, deepCopy=True)
+        reciprocal_lattice = procarFile.reclat
+        if fermi is None:
+            e_fermi = procarFile.fermi
+        else:
+            e_fermi = fermi
+        
     elif code == 'bxsf':
         e_fermi = fermi
         data = BxsfParser(infile = infile)
         reciprocal_lattice  = data.rec_lattice
         bands = np.arange(len(data.bandEnergy[0, :]))
+    elif code == 'frmsf':
+        e_fermi = fermi
+        data = FrmsfParser(infile = infile)
+        reciprocal_lattice  = data.rec_lattice
+        bands = np.arange(len(data.bands[0, :]))
         
     if bands is None:
         bands = np.arange(len(data.bands[0, :]))
@@ -385,6 +401,17 @@ def fermi3D(
         if code == "bxsf":
             surface = FermiSurface3D(kpoints=data.kpoints,
                                      band=data.bandEnergy[:, iband],
+                                     spd=spd[counter],
+                                     spd_spin=spd_spin[counter],
+                                     fermi=e_fermi + fermi_shift,
+                                     reciprocal_lattice=reciprocal_lattice,
+                                     interpolation_factor=interpolation_factor,
+                                     projection_accuracy=projection_accuracy,
+                                     supercell=supercell,
+                                     file = "bxsf")
+        elif code == "frmsf":
+            surface = FermiSurface3D(kpoints=data.kpoints,
+                                     band=data.bands[:, iband],
                                      spd=spd[counter],
                                      spd_spin=spd_spin[counter],
                                      fermi=e_fermi + fermi_shift,

@@ -80,7 +80,7 @@ class Isosurface(Surface):
         self.interpolation_factor = interpolation_factor
         self.transform_matrix = transform_matrix
         self.boundaries = boundaries
-        self.file = "bxsf"
+        self.file = file
         
         if self.algorithm not in ['classic', 'lewiner']:
             print(
