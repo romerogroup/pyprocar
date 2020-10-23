@@ -97,9 +97,7 @@ class ElkParser:
         """
         Returns the tasks calculated by elk
         """
-        return [
-            int(x) for x in findall("tasks\n\s*([0-9\s\n]*)", self.elkin)[0].split()
-        ]
+        return [int(x) for x in findall("tasks\s*([0-9\s\n]*)", self.elkin)[0].split()]
 
     @property
     def high_symmetry_points(self):
@@ -187,7 +185,11 @@ class ElkParser:
                 ispc += 1
 
         # Checking if spinpol = .true. in elk.in
-        self.spinpol = findall(r"spinpol\s*([.a-zA-Z]*)", self.elkin)[0]
+        try:
+            self.spinpol = findall(r"spinpol\s*([.a-zA-Z]*)", self.elkin)[0]
+        except IndexError:
+            self.spinpol = None
+
         if self.spinpol:
             if self.spinpol == ".true.":
                 print("\nElk colinear spin calculation detected.\n")

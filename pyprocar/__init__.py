@@ -1,11 +1,11 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.5.3"
+__version__ = "5.5.4"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
 __status__ = "Development"
-__date__ = "Aug 3rd, 2020"
+__date__ = "Oct 23rd, 2020"
 
 # Copyright (C) 2020 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
@@ -57,6 +57,7 @@ from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser
 
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.fermisurface3d import FermiSurface3D
+
 # from . import fermisurface3d
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarparser import ProcarParser
@@ -74,6 +75,7 @@ from .scriptCat import cat
 from .scriptDosplot import dosplot
 from .scriptFermi2D import fermi2D
 from .scriptFermi3D import fermi3D
+
 # from .scriptSpin_asymmetry import spin_asymmetry
 from .scriptFilter import filter
 from .scriptKmesh2D import generate2dkmesh
