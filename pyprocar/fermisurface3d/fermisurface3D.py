@@ -86,6 +86,7 @@ class FermiSurface3D(Isosurface):
         self.file = file
         self.brillouin_zone = self._get_brilloin_zone(supercell)
         # self.brillouin_zone = None
+        
         if self.file == "bxsf":
             Isosurface.__init__(self,
                                 XYZ=self.kpoints,

@@ -2,7 +2,7 @@
 
 import numpy as np
 import pyvista
-import pyvistaqt
+
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 from .core.surface import boolean_add
@@ -46,7 +46,7 @@ def fermi3D(
         perspective=True,
         save2d=False,
         camera_pos=[1, 1, 1],
-        widget=True,
+        widget=False,
         show=True,
 ):
     """
@@ -283,7 +283,7 @@ def fermi3D(
         e.g. ``camera_pos=[0.5, 1, -1]``
 
     widget : , optional
-        .. todo:: View fermi surface in a widget
+        .. todo:: 
 
     show : bool, optional (default ``True``)
         If set to ``False`` it will not show the 3D plot.
@@ -301,10 +301,7 @@ def fermi3D(
     welcome()
     
     if show:
-        if widget:
-            p = pyvistaqt.BackgroundPlotter()
-        else:
-            p = pyvista.Plotter()
+        p = pyvista.Plotter()
 
     if code == 'vasp':
         outcarparser = UtilsProcar()
@@ -316,6 +313,7 @@ def fermi3D(
         procarFile = ProcarParser()
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
+        
     elif code == 'qe':
         procarFile = QEFermiParser()
         data = ProcarSelect(procarFile, deepCopy=True)
