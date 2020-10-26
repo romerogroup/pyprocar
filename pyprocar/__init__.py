@@ -1,11 +1,11 @@
 __author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
 __copyright__ = "Copyright 2020"
-__version__ = "5.5.4"
+__version__ = "5.5.5"
 __email__ = (
     "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
 )
 __status__ = "Development"
-__date__ = "Oct 23rd, 2020"
+__date__ = "Oct 26th, 2020"
 
 # Copyright (C) 2020 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
 #
