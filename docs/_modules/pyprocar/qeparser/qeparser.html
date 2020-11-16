@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,19 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -38,6 +32,11 @@
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -53,7 +52,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -76,7 +75,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,7 +95,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -136,7 +133,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -239,7 +236,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">kpdosIn</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># The only method this parser takes. I could make more methods to increase its modularity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_readQEin</span><span class="p">()</span>
@@ -255,27 +252,80 @@
             <span class="n">spinCalc</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1">#######################################################################</span>
-        <span class="c1"># Finding high symmetry points</span>
+        <span class="c1"># Dealing with kpoints and labels</span>
         <span class="c1">#######################################################################</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
-            <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;([0-9\s\.-]*).*</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="c1"># self.kpointsCount = 0</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-        <span class="n">tick_Count</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">for</span> <span class="n">ihs</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span><span class="p">[</span><span class="n">ihs</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_khigh_sym</span><span class="p">[</span><span class="n">ihs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-            <span class="p">]</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_Count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">tick_Count</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_khigh_sym</span><span class="p">[</span><span class="n">ihs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">kmethod</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS[\s\{]*([a-z_]*)[\s\{]*&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         
+        <span class="k">if</span> <span class="n">kmethod</span> <span class="o">==</span> <span class="s1">&#39;crystal&#39;</span><span class="p">:</span>
+            <span class="n">numK</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            
+            <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">numK</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            
+            <span class="n">tickCountIndex</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">raw_high_symmetry</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_khigh_sym</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+    
+                    <span class="n">raw_high_symmetry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tickCountIndex</span><span class="p">)</span>
+                
+                <span class="n">tickCountIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">raw_high_symmetry</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">)</span>
+
+            
+        <span class="k">elif</span> <span class="n">kmethod</span> <span class="o">==</span> <span class="s1">&#39;crystal_b&#39;</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+                <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;([0-9\s\.-]*).*</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># self.kpointsCount = 0</span>
+    
+            <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">tick_Count</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">ihs</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span><span class="p">[</span><span class="n">ihs</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_khigh_sym</span><span class="p">[</span><span class="n">ihs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+                <span class="p">]</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_Count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">tick_Count</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_khigh_sym</span><span class="p">[</span><span class="n">ihs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">raw_ticks</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;.*!(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,)[</span><span class="mi">0</span><span class="p">]</span>
+    
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_ticks</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;vlvp1d&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_ticks</span>
+                <span class="p">]</span>
+                
+                
+        <span class="c1"># finds discontinuities </span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                    
+                    <span class="bp">self</span><span class="o">.</span><span class="n">discontinuities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+                    
+                    <span class="n">discon_name</span> <span class="o">=</span> <span class="s2">&quot;$&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;$&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">discon_name</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
         <span class="c1">#######################################################################</span>
         <span class="c1"># Finding composition and specie data</span>
         <span class="c1">#######################################################################</span>
@@ -305,39 +355,7 @@
                 <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">species_list</span><span class="p">)):</span>
                     <span class="k">if</span> <span class="n">raw_ions</span><span class="p">[</span><span class="n">ions</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">species_list</span><span class="p">[</span><span class="n">species</span><span class="p">]:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">raw_ions</span><span class="p">[</span><span class="n">ions</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="c1">#######################################################################</span>
-        <span class="c1"># Finding k labels</span>
-        <span class="c1">#######################################################################</span>
-
-        <span class="n">raw_ticks</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
-            <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;.*!(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_ticks</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;vlvp1d&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_ticks</span>
-            <span class="p">]</span>
-        
-        <span class="c1"># finds discontinuities </span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)):</span>
-            <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-                <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
                     
-                    <span class="bp">self</span><span class="o">.</span><span class="n">discontinuities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-                    
-                    <span class="n">discon_name</span> <span class="o">=</span> <span class="s2">&quot;$&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;$&quot;</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">discon_name</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-
-
 
         <span class="c1">#######################################################################</span>
         <span class="c1"># Reading the kpdos.out for outputfile labels</span>
@@ -426,10 +444,9 @@
 <span class="sd">                self.file_names.append(output_prefix + &quot;.pdos_atm#&quot; + str(file[0]) + &quot;(&quot; + file[1] + &quot;)_wfc#&quot; + str(file[2]) +  &quot;(f)&quot;)&quot;&quot;&quot;</span>
 
         <span class="c1">#######################################################################</span>
-        <span class="c1"># Kpoints and kpoints index</span>
+        <span class="c1"># Finds kpoints in kpdosout file. They are the k points in the reciprocal space</span>
         <span class="c1">#######################################################################</span>
 
-        <span class="c1"># Finds the k points and stores them in an array</span>
         <span class="n">raw_kpoints</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">spinCalc</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
 
@@ -508,18 +525,16 @@
             <span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="c1"># Finds the kpoints</span>
-
         <span class="n">k_string</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s?k =[\s-]</span><span class="si">{3}</span><span class="s2">?.+&quot;</span><span class="p">,</span> <span class="n">kpdosout</span><span class="p">)</span>
 
         <span class="sd">&quot;&quot;&quot;First loop goes through the kpoints and matches band information that follows the specific k point. The if else statment is used to catch unique cases, namely the end of the kpoints</span>
-<span class="sd">           Also sometimes there is a duplicate final k point so findall is used twice to deal with this case</span>
-<span class="sd">           Second loop goes through band information of a kpoint.The if else statments here again catches unique cases. This is when it hits the last the band or when it is the last band and the last kpoint</span>
-<span class="sd">           The other if else statement here catches the cases when there are no contributions at all and would return nothing</span>
-<span class="sd">           Third loop parses the projections of a band</span>
-<span class="sd">           The fourth loop then goes through the known possible states. The if statment ensures the there is a projection and matchs a projection to a known state.</span>
-<span class="sd">           The fifth loop then goes throguh the known possible orbitals. The if statment then matches the projection with a specific orbital.</span>
-<span class="sd">           Finally the projection is put into the spd array</span>
+<span class="sd">            Also sometimes there is a duplicate final k point so findall is used twice to deal with this case</span>
+<span class="sd">            Second loop goes through band information of a kpoint.The if else statments here again catches unique cases. This is when it hits the last the band or when it is the last band and the last kpoint</span>
+<span class="sd">            The other if else statement here catches the cases when there are no contributions at all and would return nothing</span>
+<span class="sd">            Third loop parses the projections of a band</span>
+<span class="sd">            The fourth loop then goes through the known possible states. The if statment ensures the there is a projection and matchs a projection to a known state.</span>
+<span class="sd">            The fifth loop then goes throguh the known possible orbitals. The if statment then matches the projection with a specific orbital.</span>
+<span class="sd">            Finally the projection is put into the spd array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k_string</span><span class="p">)):</span>
@@ -742,19 +757,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -765,6 +772,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

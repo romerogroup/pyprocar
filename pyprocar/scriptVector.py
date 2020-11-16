@@ -2,6 +2,7 @@ from .utilsprocar import UtilsProcar
 from .procarparser import ProcarParser
 from .procarselect import ProcarSelect
 from .procarplot import ProcarPlot
+from .fermisurface import FermiSurface
 from .splash import welcome
 
 
@@ -73,7 +74,7 @@ def Vector(
 
     # if energy was given I need to find the bands indexes crossing it
     if energy != None:
-        FerSurf = FermiSurface(sx.kpoints, sx.bands - fermi, sx.spd, recLat)
+        FerSurf = FermiSurface(sx.kpoints, sx.bands - fermi, sx.spd)
         FerSurf.FindEnergy(energy)
         bands = list(FerSurf.useful[0])
         print("Bands indexes crossing Energy  ", energy, ", are: ", bands)

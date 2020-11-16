@@ -20,22 +20,6 @@ pyprocar.fermisurface3d.fermisurface3D module
    :undoc-members:
    :show-inheritance:
 
-pyprocar.fermisurface3d.isosurface module
------------------------------------------
-
-.. automodule:: pyprocar.fermisurface3d.isosurface
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyprocar.fermisurface3d.surface module
---------------------------------------
-
-.. automodule:: pyprocar.fermisurface3d.surface
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------

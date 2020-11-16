@@ -10,14 +10,14 @@ class FermiSurface:
         """FermiSurface: Class to build and to plot a 2D fermi surface.  It
     finds the relevant bands (crossig the Fermi level) and interpolate
     them
-    
+
     args:
       kpoints: Numpy array with kpoints Nx3.
       bands: the bands with Fermi energy already substracted!, numpy array,
              Nkpoints x Nbands.
       spd: character (atomic, orbital) of each bands at each Kpoint, numpy
            array Nkpoints x Nbands.
-      loglevel(=logging.WARNING): the verbosity level. 
+      loglevel(=logging.WARNING): the verbosity level.
     """
         # Since some time ago Kpoints are in cartesian coords (ready to use)
         self.kpoints = kpoints

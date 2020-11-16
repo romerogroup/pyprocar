@@ -10,8 +10,9 @@ from .utilsprocar import UtilsProcar
 def cat(inFiles, outFile, gz=False, mergeparallel=False, fixformat=False):
     """
     This module concatenates multiple PROCARs.
-    set fixparallel = True for merging PROCARs generated from
-    parallel Abinit calculations.
+    set mergeparallel = True for merging PROCARs generated from
+    parallel Abinit calculations. Set fixformat = True to fix formatting issues
+    in the Abinit PROCAR file.
     """
     welcome()
 

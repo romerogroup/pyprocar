@@ -11,7 +11,8 @@ Please install the following dependencies prior to installing PyProcar.
 	* scikit-image
 	* pychemia
 	* pyvista
-
+	* trimesh
+	  
 To install PyProcar with pip use the following command::
 	
 	pip install pyprocar

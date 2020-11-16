@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,19 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -38,6 +32,11 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -53,7 +52,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -76,7 +75,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,7 +95,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -136,7 +133,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -164,6 +161,9 @@
 <span class="kn">from</span> <span class="nn">.splash</span> <span class="kn">import</span> <span class="n">welcome</span>
 <span class="kn">from</span> <span class="nn">.doscarplot</span> <span class="kn">import</span> <span class="n">DosPlot</span>
 <span class="kn">from</span> <span class="nn">.vaspxml</span> <span class="kn">import</span> <span class="n">VaspXML</span>
+<span class="kn">from</span> <span class="nn">.lobsterparser</span> <span class="kn">import</span> <span class="n">LobsterDOSParser</span>
+<span class="kn">from</span> <span class="nn">.qeparser</span> <span class="kn">import</span> <span class="n">QEDOSParser</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
@@ -206,6 +206,7 @@
         <span class="n">items</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">plt_show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function plots the density of states in different formats</span>
@@ -220,6 +221,8 @@
 <span class="sd">        carried out in the directory of the calculation, one does not</span>
 <span class="sd">        need to specify this argument.</span>
 
+<span class="sd">        e.g. ``filename=&#39;~/SrVO3/DOS/vasprun.xml&#39;``</span>
+
 <span class="sd">    mode : str, optional (default ``&#39;plain&#39;``)</span>
 <span class="sd">        **mode** defines the mode of the plot. This parameter will be</span>
 <span class="sd">        explained in details with exmaples in the tutorial.</span>
@@ -227,22 +230,29 @@
 <span class="sd">        ``&#39;parametric_line&#39;``, ``&#39;stack&#39;``,</span>
 <span class="sd">        ``&#39;stack_orbitals&#39;``, ``&#39;stack_species&#39;``.</span>
 
+<span class="sd">        e.g. ``mode=&#39;stack&#39;``</span>
+
 <span class="sd">    interpolation_factor : int, optional (default ``None``)</span>
 <span class="sd">        Number of points in energy axis is multiplied by this factor</span>
 <span class="sd">        and interpolated using cubic</span>
-<span class="sd">        spline. e.g. ``interpolation_factor=3``</span>
+<span class="sd">        spline. </span>
+
+<span class="sd">        e.g. ``interpolation_factor=3``</span>
 
 <span class="sd">    orientation : str, optional (default ``horizontal&#39;``)</span>
 <span class="sd">        The orientation of the DOS plot.  options are</span>
 <span class="sd">        ``&#39;horizontal&#39;, &#39;vertical&#39;``</span>
+
+<span class="sd">        e.g. ``orientation=&#39;vertical&#39;``</span>
 
 <span class="sd">    spin_colors : list str or tuples, (optional ``spin_colors=[&#39;blue&#39;,</span>
 <span class="sd">        &#39;red&#39;]``)</span>
 <span class="sd">        **spin_colors** represent the colors the different spin</span>
 <span class="sd">        ploarizations are going to be represented in the DOS</span>
 <span class="sd">        plot. These colors can be chosen from any type of color</span>
-<span class="sd">        acceptable by</span>
-<span class="sd">        matplotlib(string,rgb,html). e.g. ``spin_colors=[&#39;blue&#39;,&#39;red&#39;]``,</span>
+<span class="sd">        acceptable by matplotlib(string,rgb,html).</span>
+
+<span class="sd">        e.g. ``spin_colors=[&#39;blue&#39;,&#39;red&#39;]``,</span>
 <span class="sd">        ``spin_colors=[(0, 0, 1),(1, 0,0 )]``,</span>
 <span class="sd">        ``spin_colors=[&#39;#0000ff&#39;,&#39;#ff0000&#39;]``</span>
 
@@ -259,12 +269,16 @@
 <span class="sd">        colors can be chosen from any type of color acceptable by</span>
 <span class="sd">        matplotlib(string,rgb,html).</span>
 
+<span class="sd">        e.g. ``colors=[&#39;red&#39;, &#39;blue&#39;, &#39;green&#39;, &#39;magenta&#39;, &#39;cyan&#39;]``</span>
+
 <span class="sd">    spins : list int, optional</span>
 <span class="sd">        ``spins`` defines plotting of different spins channels present</span>
 <span class="sd">        in the calculation, If the calculation is spin non-polorized</span>
 <span class="sd">        the spins will be set by default to ``spins=[0]``. if the</span>
 <span class="sd">        calculation is spin polorized this parameter can be set to 0</span>
-<span class="sd">        or 1 or both. e.g. ``spins=[0, 1]``</span>
+<span class="sd">        or 1 or both.</span>
+
+<span class="sd">        e.g. ``spins=[0, 1]``</span>
 
 <span class="sd">    atoms : list int, optional</span>
 <span class="sd">        ``atoms`` define the projection of the atoms in the Density of</span>
@@ -276,7 +290,7 @@
 <span class="sd">        ``mode=&#39;stack_orbitals&#39;``. keep in mind that python counting</span>
 <span class="sd">        starts from zero.</span>
 <span class="sd">        e.g. for SrVO\ :sub:`3`\  we are choosing only the oxygen</span>
-<span class="sd">        atoms. ``atoms=[2,3,4]``, keep in mind that python counting</span>
+<span class="sd">        atoms. ``atoms=[2, 3, 4]``, keep in mind that python counting</span>
 <span class="sd">        starts from zero, for a **POSCAR** similar to following::</span>
 
 <span class="sd">            Sr1 V1 O3</span>
@@ -321,6 +335,7 @@
 <span class="sd">    elimit : list float, optional</span>
 <span class="sd">        Energy window limit asked to plot. ``elimit`` has to be a two</span>
 <span class="sd">        element python list(or numpy array).</span>
+
 <span class="sd">        e.g. ``elimit=[-2, 2]``</span>
 <span class="sd">        The default is set to the minimum and maximum of the energy</span>
 <span class="sd">        window.</span>
@@ -329,6 +344,7 @@
 <span class="sd">       ``dos_limit`` defines the density of states axis limits on the</span>
 <span class="sd">       graph. It is automatically set to select 10% higher than the</span>
 <span class="sd">       maximum of density of states in the specified energy window.</span>
+
 <span class="sd">       e.g. ``dos_limit=[0, 30]``</span>
 
 <span class="sd">    cmap : str , optional (default &#39;jet&#39;)</span>
@@ -337,20 +353,26 @@
 <span class="sd">        color maps in matplotlib are provided in this web</span>
 <span class="sd">        page. `https://matplotlib.org/2.0.1/users/colormaps.html</span>
 <span class="sd">        &lt;https://matplotlib.org/2.0.1/users/colormaps.html&gt;`_</span>
+<span class="sd">        </span>
+<span class="sd">        e.g. ``cmap=&#39;plasma&#39;``</span>
 
 <span class="sd">    vmax : float, optional</span>
 <span class="sd">        The maximum value in the color bar. ``cmap`` is only relevant</span>
 <span class="sd">        in ``mode=&#39;parametric&#39;``.</span>
+
 <span class="sd">        e.g. ``vmax=1.0``</span>
 
 <span class="sd">    vmin : float, optional</span>
 <span class="sd">        The maximum value in the color bar. ``cmap`` is only relevant</span>
 <span class="sd">        in ``mode=&#39;parametric&#39;``.</span>
+
 <span class="sd">        e.g. ``vmin=-1.0``</span>
 
 <span class="sd">    grid : bool, optional (default Flase)</span>
 <span class="sd">        Defines If a grid is plotted in the plot. The entry should be</span>
 <span class="sd">        python boolian.</span>
+
+<span class="sd">        e.g. ``grid=True``</span>
 
 <span class="sd">    savefig : str , optional (default None)</span>
 <span class="sd">        ``savefig`` defines the file that the plot is going to be</span>
@@ -358,27 +380,32 @@
 <span class="sd">        matplotlib such as png, pdf, jpg, ...</span>
 <span class="sd">        If not provided the plot will be shown in the</span>
 <span class="sd">        interactive matplotlib mode.</span>
+<span class="sd">        </span>
 <span class="sd">        e.g. ``savefig=&#39;DOS.png&#39;``, ``savefig=&#39;DOS.pdf&#39;``</span>
 
 <span class="sd">    title : str, optional</span>
 <span class="sd">        Defines the plot title asked to be added above the plot. If</span>
 <span class="sd">        ``title`` is not defined, PyProcar will not add any title.</span>
+<span class="sd">        </span>
 <span class="sd">        e.g. ``title=&quot;Total Density of States SrVO_$3$&quot;``. One can use</span>
 <span class="sd">        LaTex format as well.</span>
 
 <span class="sd">    plot_total : bool, optional (default ``True``)</span>
 <span class="sd">        If the total density of states is plotted as well as other</span>
 <span class="sd">        options. The entry should be python boolian.</span>
+<span class="sd">        </span>
 <span class="sd">        e.g. ``plot_total=True``</span>
 
 <span class="sd">    code : str, optional (default ``&#39;vasp&#39;``)</span>
 <span class="sd">        Defines the Density Functional Theory code used for the</span>
 <span class="sd">        calculation. The default of this argument is vasp, so if the</span>
 <span class="sd">        cal is done in vasp one does not need to define this argumnet.</span>
+<span class="sd">        </span>
 <span class="sd">        e.g. ``code=vasp``, ``code=elk``, ``code=abinit``</span>
 
 <span class="sd">    labels : list str, optional</span>
 <span class="sd">        ``labels`` define the legends plotted in defining each spin.</span>
+<span class="sd">        </span>
 <span class="sd">        e.g.  ``labels=[&#39;Oxygen-Up&#39;,&#39;Oxygen-Down&#39;]``,</span>
 <span class="sd">        ``labels=[&#39;Oxygen-&#39;+r&#39;$\\uparrow$&#39;,&#39;Oxygen-&#39;+r&#39;$\\downarrow$&#39;]``</span>
 <span class="sd">        Side means the string will be treated as raw string. This has</span>
@@ -396,6 +423,7 @@
 <span class="sd">        dictionary, with keys being specific species and values being</span>
 <span class="sd">        projections of ``orbitals``. The following examples can</span>
 <span class="sd">        clarify the python lingo.</span>
+<span class="sd">        </span>
 <span class="sd">        e.g.  ``items={&#39;Sr&#39;:[0],&#39;O&#39;:[1,2,3],&#39;V&#39;:[4,5,6,7,8]}`` or</span>
 <span class="sd">        ``items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])``. The two</span>
 <span class="sd">        examples are equivalent to each other. This will plot the</span>
@@ -409,9 +437,10 @@
 <span class="sd">        ``ax`` is a matplotlib axes. In case one wants to put plot</span>
 <span class="sd">        generated from this plot in a different figure and treat the</span>
 <span class="sd">        output as a subplot in a larger plot.</span>
-<span class="sd">        e.g. :: </span>
 <span class="sd">        </span>
-<span class="sd">            &gt;&gt;&gt; # Creates a figure with 3 rows and 2 colomuns </span>
+<span class="sd">        e.g. ::</span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; # Creates a figure with 3 rows and 2 colomuns</span>
 <span class="sd">            &gt;&gt;&gt; fig, axs = plt.subplots(3, 2)</span>
 <span class="sd">            &gt;&gt;&gt; x = np.linspace(-np.pi, np.pi, 1000)</span>
 <span class="sd">            &gt;&gt;&gt; y = np.sin(x)</span>
@@ -420,7 +449,8 @@
 <span class="sd">            &gt;&gt;&gt; plt.show()</span>
 
 <span class="sd">    plt_show : bool, optional (default ``True``)</span>
-<span class="sd">        whether to show the generated plot or skip to the saving. </span>
+<span class="sd">        whether to show the generated plot or skip to the saving.</span>
+
 <span class="sd">        e.g. ``plt_show=True``</span>
 
 
@@ -432,7 +462,7 @@
 <span class="sd">    ax : matplotlib ax object</span>
 <span class="sd">        The generated ax for this density of states.</span>
 <span class="sd">        If one chooses ``plt_show=False``, one can modify the plot</span>
-<span class="sd">        using this returned object. </span>
+<span class="sd">        using this returned object.</span>
 <span class="sd">        e.g. ::</span>
 <span class="sd">    </span>
 <span class="sd">            &gt;&gt;&gt; fig, ax = pyprocar.dosplot(mode=&#39;plain&#39;, plt_show=False)</span>
@@ -448,27 +478,33 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;Mode should be choosed from [&#39;plain&#39;, &#39;parametric_line&#39;,&#39;parametric&#39;,&#39;stack_species&#39;,&#39;stack_orbitals&#39;,&#39;stack&#39;]&quot;</span>
         <span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">welcome</span><span class="p">()</span>
 
-    <span class="n">welcome</span><span class="p">()</span>
-
-    <span class="c1"># Verbose section</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script initiated&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;code          : &quot;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File name     : &quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mode          : &quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;spins         : &quot;</span><span class="p">,</span> <span class="n">spins</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;atoms list    : &quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;orbs. list    : &quot;</span><span class="p">,</span> <span class="n">orbitals</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;energy range  : &quot;</span><span class="p">,</span> <span class="n">elimit</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;colormap      : &quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vmax          : &quot;</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vmin          : &quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;grid enabled  : &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;savefig       : &quot;</span><span class="p">,</span> <span class="n">savefig</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;title         : &quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+        <span class="c1"># Verbose section</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script initiated&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;code          : &quot;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File name     : &quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mode          : &quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;spins         : &quot;</span><span class="p">,</span> <span class="n">spins</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;atoms list    : &quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;orbs. list    : &quot;</span><span class="p">,</span> <span class="n">orbitals</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;energy range  : &quot;</span><span class="p">,</span> <span class="n">elimit</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;colormap      : &quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vmax          : &quot;</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vmin          : &quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;grid enabled  : &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;savefig       : &quot;</span><span class="p">,</span> <span class="n">savefig</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;title         : &quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
 
     <span class="n">total</span> <span class="o">=</span> <span class="n">plot_total</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;horizontal&#39;</span>
+    <span class="k">elif</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;vertical&#39;</span>
+
     <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
         <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">VaspXML</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
                           <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
@@ -482,6 +518,37 @@
                 <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobster&quot;</span><span class="p">:</span>
+        <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">LobsterDOSParser</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;DOSCAR.lobster&quot;</span><span class="p">,</span>
+            <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
+        <span class="n">dos_plot</span> <span class="o">=</span> <span class="n">DosPlot</span><span class="p">(</span><span class="n">dos</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
+        <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">QEDOSParser</span><span class="p">(</span><span class="n">nscfin</span><span class="o">=</span><span class="s2">&quot;nscf.in&quot;</span><span class="p">,</span>
+                              <span class="n">pdosin</span><span class="o">=</span><span class="s2">&quot;pdos.in&quot;</span><span class="p">,</span>
+                              <span class="n">outfile</span><span class="o">=</span><span class="s2">&quot;scf.out&quot;</span><span class="p">,</span>
+                              <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
+        <span class="n">dos_plot</span> <span class="o">=</span> <span class="n">DosPlot</span><span class="p">(</span><span class="n">dos</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">dos_plot</span><span class="o">.</span><span class="n">plot_total</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
@@ -675,7 +742,7 @@
         <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$E-E_f$ [eV]&quot;</span><span class="p">)</span>
         <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Density of States [a.u.]&quot;</span><span class="p">)</span>
         <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
-        <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>  <span class="c1"># we use ylim because the plot is vertiacal</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>  <span class="c1"># we use ylim because the plot is vertical</span>
 
     <span class="n">ax1</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
     <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
@@ -718,19 +785,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -741,6 +800,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

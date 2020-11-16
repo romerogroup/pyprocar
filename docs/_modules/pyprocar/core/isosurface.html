@@ -1,0 +1,654 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.core.isosurface &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyprocar.core.isosurface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyprocar.core.isosurface</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.surface</span> <span class="kn">import</span> <span class="n">Surface</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+<span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">measure</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;petavazohi@mail.wvu.edu&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;March 31, 2020&quot;</span>
+
+
+<div class="viewcode-block" id="Isosurface"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.isosurface.Isosurface">[docs]</a><span class="k">class</span> <span class="nc">Isosurface</span><span class="p">(</span><span class="n">Surface</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">XYZ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">isovalue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">V_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;lewiner&#39;</span><span class="p">,</span>
+            <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">transform_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">boundaries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This class contains a surface that finds all the poins correcponding </span>
+<span class="sd">        to the following equation</span>
+<span class="sd">        V(X,Y,Z) = f</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        XYZ : TYPE, list of lists of floats, (n,3)</span>
+<span class="sd">            DESCRIPTION. a list of coordinates [[x1,y1,z1],[x2,y2,z2],...] </span>
+<span class="sd">            corresponding V</span>
+<span class="sd">        V : TYPE, list of floats, (n,)</span>
+<span class="sd">            DESCRIPTION. a list of values [V1,V2,...] corresponding to XYZ</span>
+<span class="sd">            XYZ[0] &gt;&gt;&gt; V[0]</span>
+<span class="sd">            XYZ[1] &gt;&gt;&gt; V[1]</span>
+<span class="sd">        isovalue : TYPE, float</span>
+<span class="sd">            DESCRIPTION. The constant value of the surface (f)</span>
+<span class="sd">        V_matrix : TYPE, float (nx,ny,nz) </span>
+<span class="sd">            DESCRIPTION. one can present V_matrix instead of XYZ and V. </span>
+<span class="sd">            V_matrix is a matrix representation of XYZ and V together. This </span>
+<span class="sd">            matrix is generated if XYZ and V are provided. </span>
+<span class="sd">        algorithm : TYPE, string</span>
+<span class="sd">            DESCRIPTION. The default is &#39;lewiner&#39;. The algorithm used to find the isosurface, This </span>
+<span class="sd">            function used scikit-image to find the isosurface. possibilities </span>
+<span class="sd">            [&#39;classic&#39;,&#39;lewiner&#39;]</span>
+<span class="sd">        interpolation_factor : TYPE, int</span>
+<span class="sd">            DESCRIPTION. The default is 1. This module uses Fourier Transform </span>
+<span class="sd">            interpolation. interpolation factor will increase the grid points</span>
+<span class="sd">            in each direction by a this factor, the dafault is set to 1</span>
+<span class="sd">        padding : TYPE, list of float (3,)</span>
+<span class="sd">            DESCRIPTION. padding is used for periodic datasets such as bands in</span>
+<span class="sd">            a solid state calculation. e.g. The 1st BZ is not covered fully so</span>
+<span class="sd">            one might want to pad the matrix with wrap(look at padding in </span>
+<span class="sd">            numpy for wrap), afterwards one has to clip the surface to the </span>
+<span class="sd">            first BZ. easily doable using pyvista of trimesh</span>
+<span class="sd">            padding goes as follows np.pad(self.eigen_matrix,</span>
+<span class="sd">                              ((padding[0]/2, padding[0]/2),</span>
+<span class="sd">                              (padding[1]/2, padding[1]/2)</span>
+<span class="sd">                              (padding[2]/2, padding[2])),</span>
+<span class="sd">                              &quot;wrap&quot;)</span>
+<span class="sd">            In other words it creates a super cell withpadding</span>
+<span class="sd">        transform_matrix : TYPE, (3,3) float</span>
+<span class="sd">            DESCRIPTION. applies an transformation to the vertices VERTS_prime=T*VERTS</span>
+<span class="sd">        boundaries : TYPE, pyprocar surface</span>
+<span class="sd">            DESCRIPTION. The default is None. The boundaries in which the isosurface will be clipped with</span>
+<span class="sd">            for example the first brillouin zone </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">XYZ</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isovalue</span> <span class="o">=</span> <span class="n">isovalue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span> <span class="o">=</span> <span class="n">V_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_factor</span> <span class="o">=</span> <span class="n">interpolation_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform_matrix</span> <span class="o">=</span> <span class="n">transform_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span> <span class="o">=</span> <span class="n">boundaries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;classic&#39;</span><span class="p">,</span> <span class="s1">&#39;lewiner&#39;</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;The algorithm chose has to be from [&#39;classic&#39;,&#39;lewiner&#39;], automtically choosing &#39;lewiner&#39;&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="s1">&#39;lewiner&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span> <span class="o">=</span> <span class="n">map2matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nX</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nY</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nZ</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nX</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nY</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nZ</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">]</span>
+       
+
+        <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_isosurface</span><span class="p">(</span>
+            <span class="n">interpolation_factor</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">faces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transform_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">verts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">)</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Python, unlike statically typed languages such as Java, allows complete</span>
+<span class="sd">            freedom when calling methods during object initialization. However, </span>
+<span class="sd">            standard object-oriented principles apply to Python classes using deep </span>
+<span class="sd">            inheritance hierarchies. Therefore the developer has responsibility for </span>
+<span class="sd">            ensuring that objects are properly initialized when there are multiple </span>
+<span class="sd">            __init__ methods that need to be called.</span>
+<span class="sd">            For this reason I will make one temporary surface and from there I will</span>
+<span class="sd">            using the other surface provided.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="n">boundaries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">suprecell_surface</span> <span class="o">=</span> <span class="n">Surface</span><span class="p">(</span><span class="n">verts</span><span class="o">=</span><span class="n">verts</span><span class="p">,</span>
+                                            <span class="n">faces</span><span class="o">=</span><span class="n">faces</span><span class="p">,</span>
+                                            <span class="n">face_normals</span><span class="o">=</span><span class="n">normals</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">suprecell_surface</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">suprecell_surface</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">)</span>
+
+        <span class="n">Surface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verts</span><span class="o">=</span><span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="o">=</span><span class="n">faces</span><span class="p">,</span> <span class="n">face_normals</span><span class="o">=</span><span class="n">normals</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Isosurface.clip"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.isosurface.Isosurface.clip">[docs]</a>    <span class="k">def</span> <span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">S1</span><span class="p">,</span> <span class="n">S2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function clips S1 using the boundaries of S2 and returns </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        S1 : TYPE pyprocar surface</span>
+<span class="sd">            DESCRIPTION.</span>
+<span class="sd">        S2 : TYPE pyprocar surface</span>
+<span class="sd">            DESCRIPTION.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        verts,faces</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="k">for</span> <span class="n">iface</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">S2</span><span class="o">.</span><span class="n">faces</span><span class="p">)):</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">S2</span><span class="o">.</span><span class="n">face_normals</span><span class="p">[</span><span class="n">iface</span><span class="p">]</span>
+            
+            
+            <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">S2</span><span class="o">.</span><span class="n">verts</span><span class="p">[</span><span class="n">S2</span><span class="o">.</span><span class="n">faces</span><span class="p">[</span><span class="n">iface</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+
+            <span class="n">S1</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="n">normal</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+
+        <span class="n">faces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">courser</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S1</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">n_faces</span><span class="p">):</span>
+            <span class="n">npoints</span> <span class="o">=</span> <span class="n">S1</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">faces</span><span class="p">[</span><span class="n">courser</span><span class="p">]</span>
+            <span class="n">face</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">courser</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">ipoint</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
+                <span class="n">face</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S1</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">faces</span><span class="p">[</span><span class="n">courser</span><span class="p">])</span>
+                <span class="n">courser</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+            
+
+        <span class="k">return</span> <span class="n">S1</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">faces</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">X</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE numpy array </span>
+<span class="sd">            DESCRIPTION. list of grids in X direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE numpy array </span>
+<span class="sd">            DESCRIPTION. list of grids in Y direction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE numpy array </span>
+<span class="sd">            DESCRIPTION. list of grids in Z direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dxyz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            DESCRIPTION. length between points in each direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nX</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE int</span>
+<span class="sd">            DESCRIPTION. number of points in the grid in X direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE int</span>
+<span class="sd">            DESCRIPTION. number of points in the grid in Y direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nZ</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE int</span>
+<span class="sd">            DESCRIPTION. number of points in the grid in Z direction</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">surface_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function tries to find the isosurface using no interpolation to find the </span>
+<span class="sd">        correct positions of the surface to be able to shift to the interpolated one</span>
+<span class="sd">        to the correct position</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of tuples </span>
+<span class="sd">            DESCRIPTION. [(mins[0],maxs[0]),(mins[1],maxs[1]),(mins[2],maxs[2])]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">padding_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">padding_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">padding_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">eigen_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span><span class="p">,</span>
+                              <span class="p">((</span><span class="n">padding_x</span><span class="p">,</span> <span class="n">padding_x</span><span class="p">),</span> <span class="p">(</span><span class="n">padding_y</span><span class="p">,</span> <span class="n">padding_y</span><span class="p">),</span>
+                               <span class="p">(</span><span class="n">padding_z</span><span class="p">,</span> <span class="n">padding_z</span><span class="p">)),</span> <span class="s2">&quot;wrap&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">marching_cubes_lewiner</span><span class="p">(</span>
+                <span class="n">eigen_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isovalue</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span>
+                                 <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1">#+self.origin[ix]</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dxyz</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+            <span class="n">mins</span> <span class="o">=</span> <span class="n">verts</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">maxs</span> <span class="o">=</span> <span class="n">verts</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">[(</span><span class="n">mins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">mins</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">mins</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">maxs</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_isosurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interp_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        interp_factor : TYPE, optional</span>
+<span class="sd">            DESCRIPTION. The default is 1.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE</span>
+<span class="sd">            DESCRIPTION. verts</span>
+<span class="sd">        TYPE</span>
+<span class="sd">            DESCRIPTION. faces</span>
+<span class="sd">        TYPE</span>
+<span class="sd">            DESCRIPTION. normals</span>
+<span class="sd">        TYPE</span>
+<span class="sd">            DESCRIPTION. vlues</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Amount of kpoints needed to add on to fully sample 1st BZ</span>
+
+        <span class="n">padding_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">padding_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">padding_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">eigen_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span><span class="p">,</span>
+                              <span class="p">((</span><span class="n">padding_x</span><span class="p">,</span> <span class="n">padding_x</span><span class="p">),</span> <span class="p">(</span><span class="n">padding_y</span><span class="p">,</span> <span class="n">padding_y</span><span class="p">),</span>
+                               <span class="p">(</span><span class="n">padding_z</span><span class="p">,</span> <span class="n">padding_z</span><span class="p">)),</span> <span class="s2">&quot;wrap&quot;</span><span class="p">)</span>
+   
+        <span class="n">bnd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface_boundaries</span>
+        
+        <span class="k">if</span> <span class="n">interp_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Fourier interpolate the mapped function E(x,y,z)</span>
+
+            <span class="n">eigen_matrix</span> <span class="o">=</span> <span class="n">fft_interpolate</span><span class="p">(</span><span class="n">eigen_matrix</span><span class="p">,</span> <span class="n">interp_factor</span><span class="p">)</span>
+
+            <span class="c1"># after the FFT we loose the center of the BZ, using numpy roll we</span>
+            <span class="c1"># bring back the center of the BZ</span>
+            <span class="c1"># eigen_matrix = np.roll(eigen_matrix,4  ,</span>
+            <span class="c1">#     axis=[0, 1, 2])</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            
+            <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">measure</span><span class="o">.</span><span class="n">marching_cubes_lewiner</span><span class="p">(</span>
+                <span class="n">eigen_matrix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isovalue</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No isosurface for this band&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="c1"># recenter</span>
+
+        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span>
+                              <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span> 
+            <span class="c1">#verts[:, ix] += 0.5</span>
+
+            <span class="c1">#+self.origin[ix]</span>
+            <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dxyz</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">interp_factor</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.5</span>
+            <span class="k">if</span> <span class="n">bnd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">interp_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">bnd</span><span class="p">[</span><span class="n">ix</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
+                    <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.5</span>
+            <span class="c1">#     x_shift = verts[:,0].min() - bnd[0]</span>
+            <span class="c1"># y_shift = verts[:,1].min() - bnd[1]</span>
+            <span class="c1"># z_shift = verts[:,2].min() - bnd[2]</span>
+
+        <span class="c1"># transfare from fraction to cartesian</span>
+        <span class="c1"># verts = np.dot(verts, self.reciprocal_)</span>
+        <span class="c1"># new_faces = np.zeros(shape=(len(faces), 4))</span>
+        <span class="c1"># new_faces[:, 0] = 3</span>
+        <span class="c1"># new_faces[:, 1:] = faces</span>
+        <span class="c1"># faces = new_faces</span>
+        <span class="k">return</span> <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">values</span></div>
+
+
+<div class="viewcode-block" id="map2matrix"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.isosurface.map2matrix">[docs]</a><span class="k">def</span> <span class="nf">map2matrix</span><span class="p">(</span><span class="n">XYZ</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    mapps an Irregular grid to a regular grid</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    XYZ : TYPE</span>
+<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    V : TYPE</span>
+<span class="sd">        DESCRIPTION.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mapped_func : TYPE</span>
+<span class="sd">        DESCRIPTION.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">XYZ</span> <span class="o">=</span> <span class="n">XYZ</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">V</span>
+    
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    
+    <span class="n">mapped_func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Z</span><span class="p">)))</span>
+    <span class="c1">#kpoint_matrix = np.zeros(shape=(len(kx), len(ky), len(kz), 3)) This was added to check if the mesh grid is working</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+        <span class="n">condition1</span> <span class="o">=</span> <span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">X</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)):</span>
+            <span class="n">condition2</span> <span class="o">=</span> <span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">Y</span><span class="p">[</span><span class="n">iy</span><span class="p">]</span>
+            
+            <span class="c1">#print(count)</span>
+            <span class="k">for</span> <span class="n">iz</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Z</span><span class="p">)):</span>
+                
+                <span class="n">condition3</span> <span class="o">=</span> <span class="n">XYZ</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">Z</span><span class="p">[</span><span class="n">iz</span><span class="p">]</span>
+                <span class="n">tot_cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">,</span> <span class="n">condition3</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">tot_cond</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+
+                    <span class="n">mapped_func</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span> <span class="n">iy</span><span class="p">,</span> <span class="n">iz</span><span class="p">]</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">tot_cond</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="c1"># kpoint_matrix[ikx, iky, ikz] = [</span>
+                    <span class="c1">#     kx[ikx], ky[iky], kz[ikz]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">mapped_func</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span> <span class="n">iy</span><span class="p">,</span> <span class="n">iz</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                    <span class="c1"># kpoint_matrix[ikx, iky, ikz] = [np.nan, np.nan, np.nan]</span>
+    <span class="k">return</span> <span class="n">mapped_func</span></div>
+
+
+<div class="viewcode-block" id="fft_interpolate"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.isosurface.fft_interpolate">[docs]</a><span class="k">def</span> <span class="nf">fft_interpolate</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if I = interpolation_factor</span>
+<span class="sd">    This function withh recieve f(x,y,z) with dimensions of (nx,ny,nz)</span>
+<span class="sd">    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">eigen_fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="n">shifted_fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">eigen_fft</span><span class="p">)</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shifted_fft</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">pad_x</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">*</span> <span class="p">(</span><span class="n">interpolation_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">pad_y</span> <span class="o">=</span> <span class="n">ny</span> <span class="o">*</span> <span class="p">(</span><span class="n">interpolation_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">pad_z</span> <span class="o">=</span> <span class="n">nz</span> <span class="o">*</span> <span class="p">(</span><span class="n">interpolation_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">new_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+        <span class="n">shifted_fft</span><span class="p">,</span>
+        <span class="p">((</span><span class="n">pad_x</span><span class="p">,</span> <span class="n">pad_x</span><span class="p">),</span> <span class="p">(</span><span class="n">pad_y</span><span class="p">,</span> <span class="n">pad_y</span><span class="p">),</span> <span class="p">(</span><span class="n">pad_z</span><span class="p">,</span> <span class="n">pad_z</span><span class="p">)),</span>
+        <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="n">constant_values</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="n">new_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">new_matrix</span><span class="p">)</span>
+    <span class="n">interpolated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">new_matrix</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">interpolation_factor</span><span class="o">**</span>
+                                                        <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">interpolated</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

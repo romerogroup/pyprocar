@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,19 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -38,6 +32,11 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -53,7 +52,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -76,7 +75,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,7 +95,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -136,7 +133,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -172,7 +169,8 @@
 <span class="kn">from</span> <span class="nn">.utilsprocar</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
 
 <span class="c1"># import matplotlib</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;mathtext.default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;regular&quot;</span>  <span class="c1"># Roman [&#39;rm&#39;, &#39;cal&#39;, &#39;it&#39;, &#39;tt&#39;, &#39;sf&#39;,</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span>
+    <span class="s2">&quot;mathtext.default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;regular&quot;</span>  <span class="c1"># Roman [&#39;rm&#39;, &#39;cal&#39;, &#39;it&#39;, &#39;tt&#39;, &#39;sf&#39;,</span>
 <span class="c1">#                                                   &#39;bf&#39;, &#39;default&#39;, &#39;bb&#39;, &#39;frak&#39;,</span>
 <span class="c1">#                                                   &#39;circled&#39;, &#39;scr&#39;, &#39;regular&#39;]</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Georgia&quot;</span>
@@ -186,42 +184,42 @@
 
 
 <div class="viewcode-block" id="bandsplot"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptBandsplot.bandsplot">[docs]</a><span class="k">def</span> <span class="nf">bandsplot</span><span class="p">(</span>
-    <span class="n">procarfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
-    <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-    <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">markersize</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
-    <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
-    <span class="n">permissive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">human</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">savefig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">knames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">outcar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">kpointsfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
-    <span class="n">separate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">discontinuities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">lobstercode</span><span class="o">=</span><span class="s2">&quot;qe&quot;</span><span class="p">,</span>
+        <span class="n">procarfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+        <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">permissive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">human</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">savefig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">knames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">outcar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kpointsfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+        <span class="n">separate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">discontinuities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">lobstercode</span><span class="o">=</span><span class="s2">&quot;qe&quot;</span><span class="p">,</span>
+        <span class="n">plot_color_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;This function plots band structures</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-    <span class="n">welcome</span><span class="p">()</span>
 
     <span class="c1"># Turn interactive plotting off</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
@@ -239,21 +237,18 @@
             <span class="n">human</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">orbitals</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">welcome</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script initiated&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;code           : &quot;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;input file     : &quot;</span><span class="p">,</span> <span class="n">procarfile</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mode           : &quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;spin comp.     : &quot;</span><span class="p">,</span> <span class="n">spin</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;atoms list     : &quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;orbs. list     : &quot;</span><span class="p">,</span> <span class="n">orbitals</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script initiated&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;code           : &quot;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;input file     : &quot;</span><span class="p">,</span> <span class="n">procarfile</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mode           : &quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;spin comp.     : &quot;</span><span class="p">,</span> <span class="n">spin</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;atoms list     : &quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;orbs. list     : &quot;</span><span class="p">,</span> <span class="n">orbitals</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="n">outcar</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="n">abinit_output</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="p">(</span><span class="n">code</span> <span class="o">!=</span> <span class="s2">&quot;elk&quot;</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">!=</span> <span class="s2">&quot;qe&quot;</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">!=</span> <span class="s2">&quot;lobster&quot;</span><span class="p">)</span>
-    <span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">outcar</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">abinit_output</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="n">code</span> <span class="o">!=</span> <span class="s2">&quot;elk&quot;</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">!=</span> <span class="s2">&quot;qe&quot;</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">!=</span> <span class="s2">&quot;lobster&quot;</span><span class="p">)):</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;WARNING : Fermi Energy not set! Please set manually or provide output file and set code type.&quot;</span>
         <span class="p">)</span>
@@ -321,7 +316,8 @@
                 <span class="n">icounter</span> <span class="o">=</span> <span class="n">icounter</span> <span class="o">+</span> <span class="mi">2</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">discont_indx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">icounter</span><span class="p">)</span>
-                <span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span>
+                              <span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
                 <span class="n">icounter</span> <span class="o">=</span> <span class="n">icounter</span> <span class="o">+</span> <span class="mi">2</span>
         <span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_labels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">discont_indx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">discont_indx</span><span class="p">))</span>
@@ -449,7 +445,8 @@
     <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fermi</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">fermi</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy   :  </span><span class="si">%s</span><span class="s2"> eV (from Quantum Espresso output)&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy   :  </span><span class="si">%s</span><span class="s2"> eV (from Quantum Espresso output)&quot;</span> <span class="o">%</span>
+                  <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
 
     <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobster&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -498,7 +495,8 @@
         <span class="n">dataY</span><span class="o">.</span><span class="n">selectAtoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">fortran</span><span class="o">=</span><span class="n">human</span><span class="p">)</span>
         <span class="n">dataY</span><span class="o">.</span><span class="n">selectOrbital</span><span class="p">(</span><span class="n">orbitals</span><span class="p">)</span>
         <span class="c1"># getting the signed angle of each K-vector</span>
-        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.000000001</span><span class="p">))</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                           <span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.000000001</span><span class="p">))</span>
         <span class="n">sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
         <span class="n">cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
         <span class="n">sin</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">sin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
@@ -515,16 +513,14 @@
     <span class="k">if</span> <span class="n">separate</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">spin</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># plotting spin up bands separately</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="p">:</span><span class="n">numofbands</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">)</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="p">:</span><span class="n">numofbands</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span>
+                          <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plotting spin up bands...&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">spin</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># plotting spin down bands separately</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">numofbands</span><span class="p">:]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">)</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">numofbands</span><span class="p">:]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span>
+                          <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plotting spin down bands...&quot;</span><span class="p">)</span>
 
         <span class="n">plot</span> <span class="o">=</span> <span class="n">ProcarPlot</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
@@ -579,6 +575,7 @@
             <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
             <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
             <span class="n">discontinuities</span><span class="o">=</span><span class="n">discontinuities</span><span class="p">,</span>
+            <span class="n">plot_bar</span><span class="o">=</span><span class="n">plot_color_bar</span><span class="p">,</span>
             <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -607,7 +604,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">savefig</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># Added by Nicholas Pike to close memory issue of looping and creating many figures</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span>
+            <span class="p">)</span>  <span class="c1"># Added by Nicholas Pike to close memory issue of looping and creating many figures</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
@@ -633,19 +631,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -656,6 +646,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

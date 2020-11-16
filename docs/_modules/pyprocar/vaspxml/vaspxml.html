@@ -1,0 +1,886 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyprocar.vaspxml.vaspxml &mdash; PyProcar 5.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyProcar
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyProcar</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyprocar.vaspxml.vaspxml</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyprocar.vaspxml.vaspxml</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Aug 19 20:49:03 2020</span>
+
+<span class="sd">@author: Pedram Tavadze, Logan Lang</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">DensityOfStates</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+
+<div class="viewcode-block" id="VaspXML"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML">[docs]</a><span class="k">class</span> <span class="nc">VaspXML</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;contains.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span> <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dos_interpolation_factor</span> <span class="o">=</span> <span class="n">dos_interpolation_factor</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;File not found &#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spins_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;spin 1&#39;</span><span class="p">:</span> <span class="s1">&#39;Spin-up&#39;</span><span class="p">,</span> <span class="s1">&#39;spin 2&#39;</span><span class="p">:</span> <span class="s1">&#39;Spin-down&#39;</span><span class="p">}</span>
+        <span class="c1"># self.positions = None</span>
+        <span class="c1"># self.stress = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># self.array_sizes = {}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<div class="viewcode-block" id="VaspXML.read"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read and parse vasprun.xml.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TYPE</span>
+<span class="sd">            DESCRIPTION.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parse_vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_dos_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">spins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;total&#39;</span><span class="p">][</span><span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;total&#39;</span><span class="p">][</span><span class="s1">&#39;array&#39;</span><span class="p">]</span>
+                            <span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">]])[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">dos_total</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;energies&#39;</span><span class="p">:</span> <span class="n">energies</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">dos_total</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spins_dict</span><span class="p">[</span><span class="n">ispin</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;total&#39;</span><span class="p">][</span><span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+                <span class="p">[</span><span class="n">ispin</span><span class="p">])[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">dos_total</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">dos_total</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_get_dos_projected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="p">[]):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;partial&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">]:</span>
+            <span class="n">dos_projected</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">ion_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ion </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atoms</span>
+                        <span class="p">]</span>  <span class="c1"># using this name as vasrun.xml uses ion #</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ion_list</span><span class="p">)):</span>
+                <span class="n">iatom</span> <span class="o">=</span> <span class="n">ion_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">spins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;partial&#39;</span><span class="p">][</span><span class="s1">&#39;array&#39;</span><span class="p">]</span>
+                             <span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">iatom</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;partial&#39;</span><span class="p">][</span><span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+                    <span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">]])[:,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">dos_projected</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;energies&#39;</span><span class="p">:</span> <span class="n">energies</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
+                    <span class="n">dos_projected</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">spins_dict</span><span class="p">[</span><span class="n">ispin</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;partial&#39;</span><span class="p">][</span><span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+                        <span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">ispin</span><span class="p">][</span><span class="n">ispin</span><span class="p">])[:,</span> <span class="mi">1</span><span class="p">:]</span>
+            <span class="k">return</span> <span class="n">dos_projected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;partial&#39;</span><span class="p">][</span>
+                <span class="s1">&#39;array&#39;</span><span class="p">][</span><span class="s1">&#39;info&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;This calculation does not include partial density of states&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos_total</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos_total</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ispin</span> <span class="o">==</span> <span class="s1">&#39;energies&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">total</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dos_total</span><span class="p">[</span><span class="n">ispin</span><span class="p">])</span>
+        <span class="c1"># total = np.array(total).T</span>
+        <span class="k">return</span> <span class="n">DensityOfStates</span><span class="p">(</span>
+            <span class="n">energies</span><span class="o">=</span><span class="n">energies</span><span class="p">,</span>
+            <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">,</span>
+            <span class="n">projected</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dos_projected</span><span class="p">,</span>
+            <span class="n">interpolation_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dos_interpolation_factor</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dos_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the complete density (total,projected) of states as a python dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;total&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dos_total</span><span class="p">(),</span>
+            <span class="s1">&#39;projected&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dos_projected</span><span class="p">()</span>
+        <span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dos_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the total density of states as a pychemia.visual.DensityOfSates object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dos_total</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dos_total</span><span class="p">()</span>
+        <span class="n">dos_total</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span>
+
+        <span class="k">return</span> <span class="n">dos_total</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dos_projected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the projected DOS as a multi-dimentional array, to be used in the</span>
+<span class="sd">        pyprocar.core.dos object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dos_projected</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dos_projected</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">dos_projected</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">norbitals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="n">dos_projected</span><span class="p">:</span>
+            <span class="n">temp_atom</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">iorbital</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">norbitals</span><span class="p">):</span>
+                <span class="n">temp_spin</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dos_projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;energies&#39;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">temp_spin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dos_projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">key</span><span class="p">][:,</span> <span class="n">iorbital</span><span class="p">])</span>
+                <span class="n">temp_atom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_spin</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">temp_atom</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the kpoints used in the calculation in form of a pychemia.core.KPoints object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints_info&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;listgenerated&#39;</span><span class="p">:</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;path&#39;</span><span class="p">,</span>
+                <span class="n">kvertices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints_info&#39;</span><span class="p">][</span><span class="s1">&#39;kpoint_vertices&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints_info&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                           <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints_info&#39;</span><span class="p">][</span><span class="s1">&#39;kgrid&#39;</span><span class="p">],</span>
+                           <span class="n">shifts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints_info&#39;</span><span class="p">][</span><span class="s1">&#39;user_shift&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">kpoints</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kpoints_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of kpoints and weights used in the calculation in form of a pychemia.core.KPoints object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;reduced&#39;</span><span class="p">,</span>
+                    <span class="n">kpoints_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints&#39;</span><span class="p">][</span><span class="s1">&#39;kpoints_list&#39;</span><span class="p">],</span>
+                    <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kpoints&#39;</span><span class="p">][</span><span class="s1">&#39;k_weights&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">incar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the incar parameters used in the calculation as pychemia.code.vasp.VaspIncar object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;incar&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vasp_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all of the parameters vasp has used in this calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;vasp_params&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">potcar_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the information about pseudopotentials(POTCAR) used in this calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;atom_info&#39;</span><span class="p">][</span><span class="s1">&#39;atom_types&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fermi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the fermi energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">][</span><span class="s1">&#39;dos&#39;</span><span class="p">][</span><span class="s1">&#39;efermi&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the species in POSCAR</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">species</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of pychemia.core.Structure representing all the ionic step structures</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;atom_info&#39;</span><span class="p">][</span><span class="s1">&#39;symbols&#39;</span><span class="p">]]</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;structures&#39;</span><span class="p">]:</span>
+
+            <span class="n">st</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span>
+                           <span class="n">fractional_coordinates</span><span class="o">=</span><span class="n">ist</span><span class="p">[</span><span class="s1">&#39;reduced&#39;</span><span class="p">],</span>
+                           <span class="n">lattice</span><span class="o">=</span><span class="n">ist</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">])</span>
+            <span class="n">structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">structures</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        crystal structure of the last step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">forces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all the forces in ionic steps</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;forces&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">initial_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the initial Structure as a pychemia structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">final_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the final Structure as a pychemia structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">iteration_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of information in each electronic and ionic step of calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;calculation&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of energies in each electronic and ionic step [ionic step,electronic step, energy]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scf_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ion_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">double_counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;calculation&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s1">&#39;ewald&#39;</span> <span class="ow">in</span> <span class="n">calc</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">double_counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">double_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">scf_step</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">double_counter</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">double_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">ion_step</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">scf_step</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scf_step</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ion_step</span><span class="p">,</span> <span class="n">scf_step</span><span class="p">,</span> <span class="n">calc</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">][</span><span class="s1">&#39;e_0_energy&#39;</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">energies</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the last calculated energy of the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the last calculated energy of the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">convergence_electronic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a boolian representing if the last electronic self-consistent</span>
+<span class="sd">        calculation converged</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ediff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasp_parameters</span><span class="p">[</span><span class="s1">&#39;electronic&#39;</span><span class="p">][</span><span class="s1">&#39;EDIFF&#39;</span><span class="p">]</span>
+        <span class="n">last_dE</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">last_dE</span> <span class="o">&lt;</span> <span class="n">ediff</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">convergence_ionic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a boolian representing if the ionic part of the</span>
+<span class="sd">        calculation converged</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span>
+        <span class="n">nsteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">nsteps</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This calculation does not have ionic steps&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ediffg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vasp_parameters</span><span class="p">[</span><span class="s1">&#39;ionic&#39;</span><span class="p">][</span><span class="s1">&#39;EDIFFG&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ediffg</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">last_forces_abs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forces</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">last_forces_abs</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ediffg</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">last_ionic_energy</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[(</span>
+                    <span class="n">energies</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">nsteps</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">penultimate_ionic_energy</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[(</span><span class="n">energies</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span>
+                    <span class="n">nsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">last_dE</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">last_ionic_energy</span> <span class="o">-</span> <span class="n">penultimate_ionic_energy</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">last_dE</span> <span class="o">&lt;</span> <span class="n">ediffg</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">convergence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a boolian representing if the the electronic self-consistent</span>
+<span class="sd">        and ionic calculation converged</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convergence_electronic</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">convergence_ionic</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Always returns True, need to fix this according to reading the xml as if the calc is</span>
+<span class="sd">        not finished we will have errors in xml parser</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if vasprun.xml is read the calculation is finished</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="text_to_bool"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.text_to_bool">[docs]</a><span class="k">def</span> <span class="nf">text_to_bool</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians &quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span> <span class="ow">or</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;.True.&#39;</span> <span class="ow">or</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;.TRUE.&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="conv"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.conv">[docs]</a><span class="k">def</span> <span class="nf">conv</span><span class="p">(</span><span class="n">ele</span><span class="p">,</span> <span class="n">_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function converts the xml text to the type specified in the attrib of xml tree &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ele</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">ele</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s1">&#39;logical&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text_to_bool</span><span class="p">(</span><span class="n">ele</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">ele</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">ele</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_varray"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_varray">[docs]</a><span class="k">def</span> <span class="nf">get_varray</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns an array for each varray tag in vaspxml &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()])</span>
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="get_params"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_params">[docs]</a><span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;dest should be a dictionary</span>
+<span class="sd">    This function is recurcive #check spelling&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;separator&#39;</span><span class="p">:</span>
+            <span class="n">dest</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">dest</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">(</span>
+                <span class="n">ielement</span><span class="p">,</span> <span class="n">dest</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;type&#39;</span> <span class="ow">in</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">:</span>
+                <span class="n">_type</span> <span class="o">=</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_type</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
+            <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dest</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">dest</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dest</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">conv</span><span class="p">(</span>
+                    <span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">_type</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dest</span></div>
+
+
+<div class="viewcode-block" id="get_structure"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_structure">[docs]</a><span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a dictionary of the structure &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;crystal&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;basis&#39;</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_varray</span><span class="p">(</span><span class="n">isub</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;volume&#39;</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;volume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;rec_basis&#39;</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;rec_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_varray</span><span class="p">(</span><span class="n">isub</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;varray&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;positions&#39;</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;reduced&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_varray</span><span class="p">(</span><span class="n">ielement</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="get_scstep"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_scstep">[docs]</a><span class="k">def</span> <span class="nf">get_scstep</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function extracts the self-consistent step information &quot;&quot;&quot;</span>
+    <span class="n">scstep</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="p">{}}</span>
+    <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">isub</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
+            <span class="n">scstep</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;energy&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ienergy</span> <span class="ow">in</span> <span class="n">isub</span><span class="p">:</span>
+                <span class="n">scstep</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">][</span><span class="n">ienergy</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ienergy</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">scstep</span></div>
+
+
+<div class="viewcode-block" id="get_set"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_set">[docs]</a><span class="k">def</span> <span class="nf">get_set</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">,</span> <span class="n">ret</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This function will extract any element taged set recurcively&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">xml_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+        <span class="n">ret</span><span class="p">[</span><span class="n">xml_tree</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">get_varray</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span><span class="p">[</span><span class="n">xml_tree</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">xml_tree</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]][</span>
+                    <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">xml_tree</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]][</span>
+                    <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">get_set</span><span class="p">(</span>
+                        <span class="n">ielement</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="n">xml_tree</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]][</span>
+                            <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="get_general"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_general">[docs]</a><span class="k">def</span> <span class="nf">get_general</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">,</span> <span class="n">ret</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This function will parse any element in calculatio other than the structures, scsteps&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;dimension&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">tag</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">]:</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">iset</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_set</span><span class="p">(</span><span class="n">iset</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;efermi&#39;</span><span class="p">:</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;efermi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_general</span><span class="p">(</span><span class="n">ielement</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="parse_vasprun"><a class="viewcode-back" href="../../../pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.parse_vasprun">[docs]</a><span class="k">def</span> <span class="nf">parse_vasprun</span><span class="p">(</span><span class="n">vasprun</span><span class="p">):</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+    <span class="n">calculation</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">forces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">stresses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">orbital_magnetization</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">run_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">incar</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">general</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">kpoints_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">vasp_params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">kpoints_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">k_weights</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">atom_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ichild</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;generator&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">ichild</span><span class="p">:</span>
+                <span class="n">run_info</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ielement</span><span class="o">.</span><span class="n">text</span>
+
+        <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;incar&#39;</span><span class="p">:</span>
+            <span class="n">incar</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">(</span><span class="n">ichild</span><span class="p">,</span> <span class="n">incar</span><span class="p">)</span>
+
+        <span class="c1"># Skipping 1st structure which is primitive cell</span>
+        <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;kpoints&#39;</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">ichild</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span>
+                    <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ielement</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;listgenerated&#39;</span><span class="p">:</span>
+                        <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;kpoint_vertices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+
+                            <span class="k">if</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span> <span class="o">==</span> <span class="s1">&#39;divisions&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;ndivision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;kpoint_vertices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;divisions&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;kgrid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;usershift&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;user_shift&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;genvec1&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;genvec1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;genvec2&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;genvec2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;genvec3&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;genvec3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                                <span class="p">]</span>
+                            <span class="k">elif</span> <span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span><span class="p">:</span>
+                                <span class="n">kpoints_info</span><span class="p">[</span><span class="s1">&#39;shift&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                                <span class="p">]</span>
+
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;kpointlist&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                        <span class="n">kpoints_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ik</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()])</span>
+                    <span class="n">kpoints_list</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">kpoints_list</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;weights&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                        <span class="n">k_weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ik</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+                    <span class="n">k_weights</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">k_weights</span><span class="p">)</span>
+
+        <span class="c1"># Vasp Parameters</span>
+        <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;parameters&#39;</span><span class="p">:</span>
+            <span class="n">vasp_params</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">(</span><span class="n">ichild</span><span class="p">,</span> <span class="n">vasp_params</span><span class="p">)</span>
+
+        <span class="c1"># Atom info</span>
+        <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;atominfo&#39;</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">ichild</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;atoms&#39;</span><span class="p">:</span>
+                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;natom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;types&#39;</span><span class="p">:</span>
+                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;nspecies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;array&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;atoms&#39;</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">isub</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
+                                <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;symbols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                                <span class="k">for</span> <span class="n">isym</span> <span class="ow">in</span> <span class="n">isub</span><span class="p">:</span>
+                                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;symbols&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isym</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;atomtypes&#39;</span><span class="p">:</span>
+                        <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;atom_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">isub</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="n">isub</span><span class="p">:</span>
+                                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;atom_types&#39;</span><span class="p">][</span><span class="n">iatom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;atom_types&#39;</span><span class="p">][</span><span class="n">iatom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">][</span>
+                                        <span class="s1">&#39;natom_per_specie&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                                            <span class="n">iatom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;atom_types&#39;</span><span class="p">][</span>
+                                        <span class="n">iatom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">][</span><span class="s1">&#39;mass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                                            <span class="n">iatom</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;atom_types&#39;</span><span class="p">][</span>
+                                        <span class="n">iatom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">][</span><span class="s1">&#39;valance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                                            <span class="n">iatom</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                    <span class="n">atom_info</span><span class="p">[</span><span class="s1">&#39;atom_types&#39;</span><span class="p">][</span><span class="n">iatom</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">][</span>
+                                        <span class="s1">&#39;pseudopotential&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iatom</span><span class="p">[</span>
+                                            <span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;structure&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ichild</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;initialpos&#39;</span><span class="p">:</span>
+                <span class="n">initial_pos</span> <span class="o">=</span> <span class="n">get_structure</span><span class="p">(</span><span class="n">ichild</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;finalpos&#39;</span><span class="p">:</span>
+                <span class="n">final_pos</span> <span class="o">=</span> <span class="n">get_structure</span><span class="p">(</span><span class="n">ichild</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">ichild</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;calculation&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">ichild</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;scstep&#39;</span><span class="p">:</span>
+                    <span class="n">calculation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_scstep</span><span class="p">(</span><span class="n">ielement</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;structure&#39;</span><span class="p">:</span>
+                    <span class="n">structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_structure</span><span class="p">(</span><span class="n">ielement</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;varray&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;forces&#39;</span><span class="p">:</span>
+                        <span class="n">forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_varray</span><span class="p">(</span><span class="n">ielement</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;stress&#39;</span><span class="p">:</span>
+                        <span class="n">stresses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_varray</span><span class="p">(</span><span class="n">ielement</span><span class="p">))</span>
+
+                <span class="c1"># elif ielement.tag == &#39;eigenvalues&#39;:</span>
+                <span class="c1">#     for isub in ielement[0] :</span>
+                <span class="c1">#         if isub.tag == &#39;set&#39;:</span>
+                <span class="c1">#             for iset in isub :</span>
+                <span class="c1">#                 eigen_values[iset.attrib[&#39;comment&#39;]] = {}</span>
+                <span class="c1">#                 for ikpt in iset :</span>
+                <span class="c1">#                     eigen_values[iset.attrib[&#39;comment&#39;]][ikpt.attrib[&#39;comment&#39;]] = get_varray(ikpt)</span>
+
+                <span class="k">elif</span> <span class="n">ielement</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;separator&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ielement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;orbital magnetization&quot;</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">ielement</span><span class="p">:</span>
+                            <span class="n">orbital_magnetization</span><span class="p">[</span><span class="n">isub</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+                                <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isub</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                            <span class="p">]</span>
+
+                <span class="c1"># elif ielement.tag == &#39;dos&#39;:</span>
+                <span class="c1">#     for isub in ielement :</span>
+                <span class="c1">#         if &#39;name&#39; in isub.attrib:</span>
+                <span class="c1">#             if isub.attrib[&#39;name&#39;] == &#39;efermi&#39; :</span>
+                <span class="c1">#                 dos[&#39;efermi&#39;] = float(isub.text)</span>
+                <span class="c1">#             else :</span>
+                <span class="c1">#                 dos[isub.tag] = {}</span>
+                <span class="c1">#                 dos[isub.tag][&#39;info&#39;] = []</span>
+                <span class="c1">#               for iset in isub[0]  :</span>
+                <span class="c1">#                   if iset.tag == &#39;set&#39; :</span>
+                <span class="c1">#                       for isub_set in iset:</span>
+                <span class="c1">#                           dos[isub.tag] = get_set(isub_set,dos[isub.tag])</span>
+                <span class="c1">#                   elif iset.tag == &#39;field&#39; :</span>
+                <span class="c1">#                       dos[isub.tag][&#39;info&#39;].append(iset.text.strip(&#39; &#39;))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">general</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">general</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_general</span><span class="p">(</span>
+                        <span class="n">ielement</span><span class="p">,</span> <span class="n">general</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">])</span>
+        <span class="c1"># NEED TO ADD ORBITAL MAGNETIZATION</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;calculation&#39;</span><span class="p">:</span> <span class="n">calculation</span><span class="p">,</span>
+        <span class="s1">&#39;structures&#39;</span><span class="p">:</span> <span class="n">structures</span><span class="p">,</span>
+        <span class="s1">&#39;forces&#39;</span><span class="p">:</span> <span class="n">forces</span><span class="p">,</span>
+        <span class="s1">&#39;run_info&#39;</span><span class="p">:</span> <span class="n">run_info</span><span class="p">,</span>
+        <span class="s1">&#39;incar&#39;</span><span class="p">:</span> <span class="n">incar</span><span class="p">,</span>
+        <span class="s1">&#39;general&#39;</span><span class="p">:</span> <span class="n">general</span><span class="p">,</span>
+        <span class="s1">&#39;kpoints_info&#39;</span><span class="p">:</span> <span class="n">kpoints_info</span><span class="p">,</span>
+        <span class="s1">&#39;vasp_params&#39;</span><span class="p">:</span> <span class="n">vasp_params</span><span class="p">,</span>
+        <span class="s1">&#39;kpoints&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;kpoints_list&#39;</span><span class="p">:</span> <span class="n">kpoints_list</span><span class="p">,</span>
+            <span class="s1">&#39;k_weights&#39;</span><span class="p">:</span> <span class="n">k_weights</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;atom_info&#39;</span><span class="p">:</span> <span class="n">atom_info</span>
+    <span class="p">}</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Romero Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

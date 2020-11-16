@@ -2,7 +2,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -12,19 +13,12 @@
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -39,6 +33,11 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
@@ -54,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -77,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -98,7 +96,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -137,7 +134,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Index</li>
     
@@ -192,9 +189,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.abinitparser.html#pyprocar.abinitparser.abinitparser.AbinitParser">AbinitParser (class in pyprocar.abinitparser.abinitparser)</a>
 </li>
+      <li><a href="pyprocar.core.html#pyprocar.core.elements.atomic_mass">atomic_mass() (in module pyprocar.core.elements)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.elements.atomic_number">atomic_number() (in module pyprocar.core.elements)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.core.html#pyprocar.core.structure.Structure.atomic_numbers">atomic_numbers() (pyprocar.core.structure.Structure property)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.elements.atomic_symbol">atomic_symbol() (in module pyprocar.core.elements)</a>
 </li>
       <li><a href="pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot">atomicPlot() (pyprocar.procarplot.procarplot.ProcarPlot method)</a>
 </li>
@@ -212,7 +215,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bands.html#pyprocar.scriptBandsplot.bandsplot">bandsplot() (in module pyprocar.scriptBandsplot)</a>, <a href="pyprocar.html#pyprocar.scriptBandsplot.bandsplot">[1]</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.boolean_add">boolean_add() (in module pyprocar.fermisurface3d.surface)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.boolean_add">boolean_add() (in module pyprocar.core.surface)</a>
 </li>
       <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone">BrillouinZone (class in pyprocar.fermisurface3d.brillouin_zone)</a>
 </li>
@@ -224,17 +227,25 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cat.html#pyprocar.scriptCat.cat">cat() (in module pyprocar.scriptCat)</a>, <a href="pyprocar.html#pyprocar.scriptCat.cat">[1]</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.center_of_mass">center_of_mass() (pyprocar.fermisurface3d.surface.Surface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.center_of_mass">center_of_mass() (pyprocar.core.surface.Surface property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.centers">centers() (pyprocar.fermisurface3d.surface.Surface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.centers">centers() (pyprocar.core.surface.Surface property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.clip">clip() (pyprocar.fermisurface3d.isosurface.Isosurface method)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.clip">clip() (pyprocar.core.isosurface.Isosurface method)</a>
 </li>
       <li><a href="pyprocar.elkparser.html#pyprocar.elkparser.elkparser.ElkParser.composition">composition() (pyprocar.elkparser.elkparser.ElkParser property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.convert_from_pyvista_faces">convert_from_pyvista_faces() (in module pyprocar.fermisurface3d.surface)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.conv">conv() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.convergence">convergence() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.convergence_electronic">convergence_electronic() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.convergence_ionic">convergence_ionic() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.convert_from_pyvista_faces">convert_from_pyvista_faces() (in module pyprocar.core.surface)</a>
 </li>
       <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.create_spin_texture">create_spin_texture() (pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D method)</a>
 </li>
@@ -248,15 +259,23 @@
 </li>
       <li><a href="pyprocar.core.html#pyprocar.core.dos.DensityOfStates">DensityOfStates (class in pyprocar.core.dos)</a>
 </li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.dos">dos() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.dos_projected">dos_projected() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
       <li><a href="pyprocar.core.html#pyprocar.core.dos.DensityOfStates.dos_sum">dos_sum() (pyprocar.core.dos.DensityOfStates method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.dos_to_dict">dos_to_dict() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.dos_total">dos_total() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
       <li><a href="pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot">DosPlot (class in pyprocar.doscarplot.dosplot)</a>
 </li>
       <li><a href="dos.html#pyprocar.scriptDosplot.dosplot">dosplot() (in module pyprocar.scriptDosplot)</a>, <a href="pyprocar.html#pyprocar.scriptDosplot.dosplot">[1]</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.dxyz">dxyz() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.dxyz">dxyz() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -266,9 +285,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.elkparser.html#pyprocar.elkparser.elkparser.ElkParser">ElkParser (class in pyprocar.elkparser.elkparser)</a>
 </li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.energies">energies() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.export">export() (pyprocar.fermisurface3d.surface.Surface method)</a>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.energy">energy() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.export">export() (pyprocar.core.surface.Surface method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -283,10 +306,12 @@
 </li>
         <li><a href="pyprocar.qeparser.html#pyprocar.qeparser.qeparser.QEParser.fermi">(pyprocar.qeparser.qeparser.QEParser property)</a>
 </li>
+        <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.fermi">(pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
       </ul></li>
       <li><a href="2Dspin.html#pyprocar.scriptFermi2D.fermi2D">fermi2D() (in module pyprocar.scriptFermi2D)</a>, <a href="pyprocar.html#pyprocar.scriptFermi2D.fermi2D">[1]</a>
 </li>
-      <li><a href="pyprocar.html#pyprocar.scriptFermi3D.fermi3D">fermi3D() (in module pyprocar.scriptFermi3D)</a>
+      <li><a href="fermi3D.html#pyprocar.scriptFermi3D.fermi3D">fermi3D() (in module pyprocar.scriptFermi3D)</a>, <a href="pyprocar.html#pyprocar.scriptFermi3D.fermi3D">[1]</a>
 </li>
       <li><a href="pyprocar.utilsprocar.html#pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar">FermiOutcar() (pyprocar.utilsprocar.utilsprocar.UtilsProcar method)</a>
 </li>
@@ -296,7 +321,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.fft_interpolate">fft_interpolate() (in module pyprocar.fermisurface3d.isosurface)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.fft_interpolate">fft_interpolate() (in module pyprocar.core.isosurface)</a>
 </li>
       <li><a href="filter.html#pyprocar.scriptFilter.filter">filter() (in module pyprocar.scriptFilter)</a>, <a href="pyprocar.html#pyprocar.scriptFilter.filter">[1]</a>
 </li>
@@ -310,7 +335,11 @@
 </li>
       <li><a href="pyprocar.procarfilefilter.html#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin">FilterSpin() (pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter method)</a>
 </li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.final_structure">final_structure() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
       <li><a href="pyprocar.fermisurface.html#pyprocar.fermisurface.fermisurface.FermiSurface.FindEnergy">FindEnergy() (pyprocar.fermisurface.fermisurface.FermiSurface method)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.forces">forces() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -322,8 +351,20 @@
 </li>
       <li><a href="kmesh.html#pyprocar.scriptKmesh2D.generate2dkmesh">generate2dkmesh() (in module pyprocar.scriptKmesh2D)</a>, <a href="pyprocar.html#pyprocar.scriptKmesh2D.generate2dkmesh">[1]</a>
 </li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_general">get_general() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_params">get_params() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_scstep">get_scstep() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_set">get_set() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_structure">get_structure() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.get_varray">get_varray() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
       <li><a href="pyprocar.procarunfold.html#pyprocar.procarunfold.unfolder.Unfolder.get_weight">get_weight() (pyprocar.procarunfold.unfolder.Unfolder method)</a>
 </li>
       <li><a href="pyprocar.procarunfold.html#pyprocar.procarunfold.unfolder.Unfolder.get_weights">get_weights() (pyprocar.procarunfold.unfolder.Unfolder method)</a>
@@ -344,11 +385,19 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.incar">incar() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.initial_structure">initial_structure() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
       <li><a href="pyprocar.core.html#pyprocar.core.dos.interpolate">interpolate() (in module pyprocar.core.dos)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface">Isosurface (class in pyprocar.fermisurface3d.isosurface)</a>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.is_finished">is_finished() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface">Isosurface (class in pyprocar.core.isosurface)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.iteration_data">iteration_data() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -359,15 +408,23 @@
       <li><a href="pyprocar.elkparser.html#pyprocar.elkparser.elkparser.ElkParser.knames">knames() (pyprocar.elkparser.elkparser.ElkParser property)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.kpoints">kpoints() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.kpoints_list">kpoints_list() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.brillouin_zone.Lines">Lines (class in pyprocar.fermisurface3d.brillouin_zone)</a>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.last_energy">last_energy() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.brillouin_zone.Lines">Lines (class in pyprocar.fermisurface3d.brillouin_zone)</a>
+</li>
       <li><a href="pyprocar.lobsterparser.html#pyprocar.lobsterparser.lobsterparser.LobsterParser">LobsterParser (class in pyprocar.lobsterparser.lobsterparser)</a>
 </li>
   </ul></td>
@@ -378,7 +435,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.procarunfold.html#pyprocar.procarunfold.fatband.main">main() (in module pyprocar.procarunfold.fatband)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.map2matrix">map2matrix() (in module pyprocar.fermisurface3d.isosurface)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.map2matrix">map2matrix() (in module pyprocar.core.isosurface)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -400,7 +457,7 @@
 </li>
       <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.brillouin_zone.Lines.nface">nface() (pyprocar.fermisurface3d.brillouin_zone.Lines property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.nfaces">nfaces() (pyprocar.fermisurface3d.surface.Surface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.nfaces">nfaces() (pyprocar.core.surface.Surface property)</a>
 </li>
       <li><a href="pyprocar.elkparser.html#pyprocar.elkparser.elkparser.ElkParser.nhigh_sym">nhigh_sym() (pyprocar.elkparser.elkparser.ElkParser property)</a>
 </li>
@@ -416,13 +473,13 @@
       </ul></li>
       <li><a href="pyprocar.procarparser.html#pyprocar.procarparser.procarparser.ProcarParser.nspin">nspin() (pyprocar.procarparser.procarparser.ProcarParser property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.nverts">nverts() (pyprocar.fermisurface3d.surface.Surface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.nverts">nverts() (pyprocar.core.surface.Surface property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.nX">nX() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.nX">nX() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.nY">nY() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.nY">nY() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.nZ">nZ() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.nZ">nZ() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -439,6 +496,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.parametricPlot">parametricPlot() (pyprocar.procarplot.procarplot.ProcarPlot method)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.parse_vasprun">parse_vasprun() (in module pyprocar.vaspxml.vaspxml)</a>
 </li>
       <li><a href="pyprocar.fermisurface.html#pyprocar.fermisurface.fermisurface.FermiSurface.Plot">Plot() (pyprocar.fermisurface.fermisurface.FermiSurface method)</a>
 </li>
@@ -461,6 +520,8 @@
       <li><a href="pyprocar.procarplot.html#pyprocar.procarplot.procarplot.ProcarPlot.plotBands">plotBands() (pyprocar.procarplot.procarplot.ProcarPlot method)</a>
 </li>
       <li><a href="pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.plotter">plotter() (in module pyprocar.doscarplot.dosplot)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.potcar_info">potcar_info() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
 </li>
       <li><a href="pyprocar.procarfilefilter.html#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter">ProcarFileFilter (class in pyprocar.procarfilefilter.procarfilefilter)</a>
 </li>
@@ -488,7 +549,13 @@
 </li>
       <li><a href="pyprocar.core.html#module-pyprocar.core.dos">pyprocar.core.dos (module)</a>
 </li>
+      <li><a href="pyprocar.core.html#module-pyprocar.core.elements">pyprocar.core.elements (module)</a>
+</li>
+      <li><a href="pyprocar.core.html#module-pyprocar.core.isosurface">pyprocar.core.isosurface (module)</a>
+</li>
       <li><a href="pyprocar.core.html#module-pyprocar.core.structure">pyprocar.core.structure (module)</a>
+</li>
+      <li><a href="pyprocar.core.html#module-pyprocar.core.surface">pyprocar.core.surface (module)</a>
 </li>
       <li><a href="pyprocar.doscarplot.html#module-pyprocar.doscarplot">pyprocar.doscarplot (module)</a>
 </li>
@@ -504,15 +571,11 @@
 </li>
       <li><a href="pyprocar.fermisurface3d.html#module-pyprocar.fermisurface3d">pyprocar.fermisurface3d (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.fermisurface3d.html#module-pyprocar.fermisurface3d.brillouin_zone">pyprocar.fermisurface3d.brillouin_zone (module)</a>
 </li>
       <li><a href="pyprocar.fermisurface3d.html#module-pyprocar.fermisurface3d.fermisurface3D">pyprocar.fermisurface3d.fermisurface3D (module)</a>
-</li>
-      <li><a href="pyprocar.fermisurface3d.html#module-pyprocar.fermisurface3d.isosurface">pyprocar.fermisurface3d.isosurface (module)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#module-pyprocar.fermisurface3d.surface">pyprocar.fermisurface3d.surface (module)</a>
 </li>
       <li><a href="pyprocar.lobsterparser.html#module-pyprocar.lobsterparser">pyprocar.lobsterparser (module)</a>
 </li>
@@ -572,8 +635,6 @@
 </li>
       <li><a href="pyprocar.html#module-pyprocar.scriptRepair">pyprocar.scriptRepair (module)</a>, <a href="repair.html#module-pyprocar.scriptRepair">[1]</a>
 </li>
-      <li><a href="pyprocar.html#module-pyprocar.scriptSpin_asymmetry">pyprocar.scriptSpin_asymmetry (module)</a>
-</li>
       <li><a href="pyprocar.html#module-pyprocar.scriptUnfold">pyprocar.scriptUnfold (module)</a>, <a href="unfold.html#module-pyprocar.scriptUnfold">[1]</a>
 </li>
       <li><a href="pyprocar.html#module-pyprocar.scriptVector">pyprocar.scriptVector (module)</a>
@@ -583,6 +644,12 @@
       <li><a href="pyprocar.utilsprocar.html#module-pyprocar.utilsprocar">pyprocar.utilsprocar (module)</a>
 </li>
       <li><a href="pyprocar.utilsprocar.html#module-pyprocar.utilsprocar.utilsprocar">pyprocar.utilsprocar.utilsprocar (module)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#module-pyprocar.vaspxml">pyprocar.vaspxml (module)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#module-pyprocar.vaspxml.parser">pyprocar.vaspxml.parser (module)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#module-pyprocar.vaspxml.vaspxml">pyprocar.vaspxml.vaspxml (module)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -598,6 +665,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.read">read() (pyprocar.vaspxml.vaspxml.VaspXML method)</a>
+</li>
       <li><a href="pyprocar.procarparser.html#pyprocar.procarparser.procarparser.ProcarParser.readFile">readFile() (pyprocar.procarparser.procarparser.ProcarParser method)</a>
 </li>
       <li><a href="pyprocar.procarparser.html#pyprocar.procarparser.procarparser.ProcarParser.readFile2">readFile2() (pyprocar.procarparser.procarparser.ProcarParser method)</a>
@@ -632,11 +701,11 @@
 </li>
       <li><a href="pyprocar.procarselect.html#pyprocar.procarselect.procarselect.ProcarSelect.selectOrbital">selectOrbital() (pyprocar.procarselect.procarselect.ProcarSelect method)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.set_color_with_cmap">set_color_with_cmap() (pyprocar.fermisurface3d.surface.Surface method)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.set_color_with_cmap">set_color_with_cmap() (pyprocar.core.surface.Surface method)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.set_scalars">set_scalars() (pyprocar.fermisurface3d.surface.Surface method)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.set_scalars">set_scalars() (pyprocar.core.surface.Surface method)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface.set_vectors">set_vectors() (pyprocar.fermisurface3d.surface.Surface method)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface.set_vectors">set_vectors() (pyprocar.core.surface.Surface method)</a>
 </li>
       <li><a href="pyprocar.procarselect.html#pyprocar.procarselect.procarselect.ProcarSelect.setData">setData() (pyprocar.procarselect.procarselect.ProcarSelect method)</a>
 </li>
@@ -644,14 +713,14 @@
 </li>
       <li><a href="pyprocar.procarfilefilter.html#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile">setOutFile() (pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.lobsterparser.html#pyprocar.lobsterparser.lobsterparser.LobsterParser.spd">spd (pyprocar.lobsterparser.lobsterparser.LobsterParser attribute)</a>
 
       <ul>
         <li><a href="pyprocar.qeparser.html#pyprocar.qeparser.qeparser.QEParser.spd">(pyprocar.qeparser.qeparser.QEParser attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyprocar.elkparser.html#pyprocar.elkparser.elkparser.ElkParser.spd_orb">spd_orb() (pyprocar.elkparser.elkparser.ElkParser property)</a>
 
       <ul>
@@ -659,16 +728,22 @@
 </li>
       </ul></li>
       <li><a href="pyprocar.core.html#pyprocar.core.structure.Structure.species">species() (pyprocar.core.structure.Structure property)</a>
+
+      <ul>
+        <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.species">(pyprocar.vaspxml.vaspxml.VaspXML property)</a>
 </li>
-      <li><a href="pyprocar.html#pyprocar.scriptSpin_asymmetry.spin_asymmetry">spin_asymmetry() (in module pyprocar.scriptSpin_asymmetry)</a>
-</li>
+      </ul></li>
       <li><a href="pyprocar.fermisurface.html#pyprocar.fermisurface.fermisurface.FermiSurface.st">st() (pyprocar.fermisurface.fermisurface.FermiSurface method)</a>
 </li>
       <li><a href="pyprocar.core.html#pyprocar.core.structure.Structure">Structure (class in pyprocar.core.structure)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.surface.Surface">Surface (class in pyprocar.fermisurface3d.surface)</a>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.structure">structure() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
 </li>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.surface_boundaries">surface_boundaries() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.structures">structures() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.surface.Surface">Surface (class in pyprocar.core.surface)</a>
+</li>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.surface_boundaries">surface_boundaries() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -680,6 +755,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.text_to_bool">text_to_bool() (in module pyprocar.vaspxml.vaspxml)</a>
+</li>
       <li><a href="pyprocar.procarsymmetry.html#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate">Translate() (pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry method)</a>
 </li>
   </ul></td>
@@ -702,10 +779,14 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.html#pyprocar.scriptVector.Vector">Vector() (in module pyprocar.scriptVector)</a>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML.vasp_parameters">vasp_parameters() (pyprocar.vaspxml.vaspxml.VaspXML property)</a>
+</li>
+      <li><a href="pyprocar.vaspxml.html#pyprocar.vaspxml.vaspxml.VaspXML">VaspXML (class in pyprocar.vaspxml.vaspxml)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyprocar.html#pyprocar.scriptVector.Vector">Vector() (in module pyprocar.scriptVector)</a>
+</li>
       <li><a href="pyprocar.core.html#pyprocar.core.structure.Structure.volume">volume() (pyprocar.core.structure.Structure property)</a>
 </li>
   </ul></td>
@@ -726,7 +807,7 @@
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.X">X() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.X">X() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -734,7 +815,7 @@
 <h2 id="Y">Y</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.Y">Y() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.Y">Y() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -742,7 +823,7 @@
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.isosurface.Isosurface.Z">Z() (pyprocar.fermisurface3d.isosurface.Isosurface property)</a>
+      <li><a href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface.Z">Z() (pyprocar.core.isosurface.Isosurface property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -759,19 +840,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -782,6 +855,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

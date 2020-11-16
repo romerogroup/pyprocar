@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,19 +12,12 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -38,6 +32,11 @@
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -53,7 +52,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -76,7 +75,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,7 +95,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -136,7 +133,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -163,8 +160,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.interpolate</span> <span class="k">as</span> <span class="nn">interpolate</span>
-<span class="kn">from</span> <span class="nn">.isosurface</span> <span class="kn">import</span> <span class="n">Isosurface</span>
+<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">Isosurface</span>
 <span class="kn">from</span> <span class="nn">.brillouin_zone</span> <span class="kn">import</span> <span class="n">BrillouinZone</span>
+
 
 <div class="viewcode-block" id="FermiSurface3D"><a class="viewcode-back" href="../../../pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D">[docs]</a><span class="k">class</span> <span class="nc">FermiSurface3D</span><span class="p">(</span><span class="n">Isosurface</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -181,46 +179,54 @@
                  <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span>
                  <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                  <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">supercell</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-                 <span class="p">):</span>
+                 <span class="n">supercell</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                 <span class="n">file</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        </span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        kpoints : TYPE, (n,3) float</span>
-<span class="sd">            DESCRIPTION. A list of kpoints used in the DFT calculation, this list has to be</span>
-<span class="sd">            (n,3), n being number of kpoints and 3 being the 3 different </span>
-<span class="sd">            cartesian coordinates</span>
-<span class="sd">        band : TYPE, (n,) float</span>
-<span class="sd">            DESCRIPTION. A list of energies of ith band cooresponding to the kpoints</span>
-<span class="sd">        spd : TYPE, </span>
-<span class="sd">            DESCRIPTION. numpy array containing the information about ptojection of atoms,</span>
+<span class="sd">        kpoints : (n,3) float</span>
+<span class="sd">            A list of kpoints used in the DFT calculation, this list</span>
+<span class="sd">            has to be (n,3), n being number of kpoints and 3 being the</span>
+<span class="sd">            3 different cartesian coordinates.</span>
+<span class="sd">        </span>
+<span class="sd">        band : (n,) float</span>
+<span class="sd">            A list of energies of ith band cooresponding to the</span>
+<span class="sd">            kpoints.</span>
+
+<span class="sd">        spd :</span>
+<span class="sd">            numpy array containing the information about ptojection of atoms,</span>
 <span class="sd">            orbitals and spin on each band (check procarparser)</span>
-<span class="sd">        fermi : TYPE, float</span>
-<span class="sd">            DESCRIPTION. value of the fermi energy or any energy that one wants to find the </span>
-<span class="sd">            isosurface with </span>
-<span class="sd">        reciprocal_lattice : TYPE, (3,3)</span>
-<span class="sd">            DESCRIPTION. The default is None. Reciprocal lattice of the structure</span>
-<span class="sd">        interpolation_factor : TYPE, int</span>
-<span class="sd">            DESCRIPTION. The default is 1. number of kpoints in every direction will increase by this factor</span>
+
+<span class="sd">        fermi : float</span>
+<span class="sd">            Value of the fermi energy or any energy that one wants to</span>
+<span class="sd">            find the isosurface with.</span>
+
+<span class="sd">        reciprocal_lattice : (3,3) float</span>
+<span class="sd">            Reciprocal lattice of the structure.</span>
+
+<span class="sd">        interpolation_factor : int</span>
+<span class="sd">            The default is 1. number of kpoints in every direction</span>
+<span class="sd">            will increase by this factor.</span>
+
 <span class="sd">        color : TYPE, optional</span>
 <span class="sd">            DESCRIPTION. The default is None.</span>
+
 <span class="sd">        projection_accuracy : TYPE, optional</span>
 <span class="sd">            DESCRIPTION. The default is &#39;Normal&#39;.</span>
-<span class="sd">        cmap : TYPE, string</span>
-<span class="sd">            DESCRIPTION. The default is &#39;viridis&#39;. Color map used in projecting the colors on the surface</span>
+
+<span class="sd">        cmap : str</span>
+<span class="sd">            The default is &#39;viridis&#39;. Color map used in projecting the</span>
+<span class="sd">            colors on the surface</span>
+
 <span class="sd">        vmin : TYPE, float</span>
 <span class="sd">            DESCRIPTION. The default is 0.</span>
+
 <span class="sd">        vmax : TYPE, float</span>
 <span class="sd">            DESCRIPTION. The default is 1.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
-
-
-
-
 
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="n">band</span>
@@ -232,26 +238,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span> <span class="o">=</span> <span class="n">projection_accuracy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spin_texture</span> <span class="o">=</span> <span class="n">spin_texture</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span> <span class="o">=</span> <span class="n">spd_spin</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_brilloin_zone</span><span class="p">(</span><span class="n">supercell</span><span class="p">)</span>
-
-        <span class="n">Isosurface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                            <span class="n">XYZ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-                            <span class="n">V</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="p">,</span>
-                            <span class="n">isovalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi</span><span class="p">,</span>
-                            <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;lewiner&#39;</span><span class="p">,</span>
-                            <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-                            <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">,</span>
-                            <span class="n">transform_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                            <span class="n">boundaries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="p">)</span>
+        <span class="c1"># self.brillouin_zone = None</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
+            <span class="n">Isosurface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                <span class="n">XYZ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                                <span class="n">V</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="p">,</span>
+                                <span class="n">isovalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi</span><span class="p">,</span>
+                                <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;lewiner&#39;</span><span class="p">,</span>
+                                <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+                                <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">,</span>
+                                <span class="n">transform_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+                                <span class="n">boundaries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="p">,</span>
+                                <span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Isosurface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                <span class="n">XYZ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                                <span class="n">V</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="p">,</span>
+                                <span class="n">isovalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi</span><span class="p">,</span>
+                                <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;lewiner&#39;</span><span class="p">,</span>
+                                <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+                                <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">,</span>
+                                <span class="n">transform_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+                                <span class="n">boundaries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project_color</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">create_spin_texture</span><span class="p">()</span>
-            
 
 <div class="viewcode-block" id="FermiSurface3D.create_spin_texture"><a class="viewcode-back" href="../../../pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.create_spin_texture">[docs]</a>    <span class="k">def</span> <span class="nf">create_spin_texture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">vectors_extended_X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -261,57 +279,69 @@
             <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">[</span><span class="n">ix</span><span class="p">]):</span>
                     <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                    <span class="n">temp</span><span class="p">[:,</span><span class="n">ix</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">iy</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="n">XYZ_extended</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">vectors_extended_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">vectors_extended_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">vectors_extended_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Z</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">temp</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">iy</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">vectors_extended_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_X</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">vectors_extended_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Y</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">vectors_extended_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Z</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                     <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                    <span class="n">temp</span><span class="p">[:,</span><span class="n">ix</span><span class="p">]</span><span class="o">-=</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">iy</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="n">XYZ_extended</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">vectors_extended_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_X</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">vectors_extended_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">vectors_extended_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Z</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
+                    <span class="n">temp</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">iy</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">vectors_extended_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_X</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">vectors_extended_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Y</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">vectors_extended_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vectors_extended_Z</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="c1"># XYZ_extended = self.XYZ.copy()</span>
             <span class="c1"># scalars_extended = self.spd.copy()</span>
-            
+
             <span class="n">XYZ_transformed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
             <span class="c1"># XYZ_transformed = XYZ_extended</span>
-            
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="c1">#normal</span>
 
-                <span class="n">spin_X</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">vectors_extended_X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">spin_Y</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">vectors_extended_Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span> <span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">spin_Z</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">vectors_extended_Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span> <span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span>
-                    <span class="p">)</span>
-                
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span><span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="c1">#high</span>
-                
-                <span class="n">spin_X</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">vectors_extended_X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">spin_Y</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">vectors_extended_Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">spin_Z</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">vectors_extended_Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span>
-                    <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_vectors</span><span class="p">(</span><span class="n">spin_X</span><span class="p">,</span><span class="n">spin_Y</span><span class="p">,</span><span class="n">spin_Z</span><span class="p">)</span></div>
+                <span class="n">spin_X</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">vectors_extended_X</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+                <span class="n">spin_Y</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">vectors_extended_Y</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+                <span class="n">spin_Z</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">vectors_extended_Z</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
 
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
 
-            
+                <span class="n">spin_X</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">vectors_extended_X</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+                <span class="n">spin_Y</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">vectors_extended_Y</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+                <span class="n">spin_Z</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">vectors_extended_Z</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">verts</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_vectors</span><span class="p">(</span><span class="n">spin_X</span><span class="p">,</span> <span class="n">spin_Y</span><span class="p">,</span> <span class="n">spin_Z</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="FermiSurface3D.project_color"><a class="viewcode-back" href="../../../pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color">[docs]</a>    <span class="k">def</span> <span class="nf">project_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cmap</span><span class="p">,</span><span class="n">vmin</span><span class="p">,</span><span class="n">vmax</span><span class="p">):</span>
+<div class="viewcode-block" id="FermiSurface3D.project_color"><a class="viewcode-back" href="../../../pyprocar.fermisurface3d.html#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color">[docs]</a>    <span class="k">def</span> <span class="nf">project_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Projects the scalars to the surface.</span>
 
@@ -332,40 +362,44 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">scalars_extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            
+
             <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">[</span><span class="n">ix</span><span class="p">]):</span>
                     <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                    <span class="n">temp</span><span class="p">[:,</span><span class="n">ix</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">iy</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="n">XYZ_extended</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">scalars_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scalars_extended</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">temp</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">iy</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">scalars_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scalars_extended</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span>
+                                                 <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                     <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                    <span class="n">temp</span><span class="p">[:,</span><span class="n">ix</span><span class="p">]</span><span class="o">-=</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">iy</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="n">XYZ_extended</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">scalars_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scalars_extended</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">temp</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">iy</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">scalars_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scalars_extended</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span>
+                                                 <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="c1"># XYZ_extended = self.XYZ.copy()</span>
             <span class="c1"># scalars_extended = self.spd.copy()</span>
-            
+
             <span class="n">XYZ_transformed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
             <span class="c1"># XYZ_transformed = XYZ_extended</span>
-            
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="c1">#normal</span>
-                <span class="n">colors</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                    <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">scalars_extended</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span>
-                    <span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span><span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="c1">#high</span>
-                <span class="n">colors</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span>
-                        <span class="n">XYZ_transformed</span><span class="p">,</span> <span class="n">scalars_extended</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span>
-                        <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="n">colors</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">scalars_extended</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+                <span class="n">colors</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>
+                                              <span class="n">scalars_extended</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">centers</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">set_scalars</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_color_with_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span><span class="n">vmin</span><span class="p">,</span><span class="n">vmax</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_color_with_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span></div>
 
-
-
-    <span class="k">def</span> <span class="nf">_get_brilloin_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">supercell</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">BrillouinZone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span><span class="n">supercell</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_get_brilloin_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supercell</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BrillouinZone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span> <span class="n">supercell</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -378,19 +412,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -401,6 +427,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
