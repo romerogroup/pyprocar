@@ -5,7 +5,7 @@ Multiple PROCAR files from multiple DFT calculations can be combined with this u
 
 Usage::
 
-	pyprocar.cat(inFile=['PROCAR_G-K','PROCAR_K-M','PROCAR_M-G'], outFile='PROCAR_merged', gz=False, mergeparallel = False, fixformat = False)
+	pyprocar.cat(inFiles=['PROCAR_G-K','PROCAR_K-M','PROCAR_M-G'], outFile='PROCAR_merged', gz=False, mergeparallel = False, fixformat = False)
 
 If the PROCARs are in a compressed .gz file, set ``gz=True``.
 
