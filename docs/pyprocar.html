@@ -346,8 +346,10 @@
 <span id="pyprocar-scriptcat-module"></span><h2>pyprocar.scriptCat module<a class="headerlink" href="#module-pyprocar.scriptCat" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptCat.cat">
-<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param">inFiles</em>, <em class="sig-param">outFile</em>, <em class="sig-param">gz=False</em>, <em class="sig-param">mergeparallel=False</em>, <em class="sig-param">fixformat=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param">inFiles=None</em>, <em class="sig-param">outFile='PROCAR_merged'</em>, <em class="sig-param">gz=False</em>, <em class="sig-param">mergeparallel=False</em>, <em class="sig-param">fixformat=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module concatenates multiple PROCARs.
+If a list of input PROCAR files is not provided it will merge all the PROCAR_*
+files in the directory.
 set mergeparallel = True for merging PROCARs generated from
 parallel Abinit calculations. Set fixformat = True to fix formatting issues
 in the Abinit PROCAR file.</p>

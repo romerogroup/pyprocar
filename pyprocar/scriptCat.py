@@ -1,5 +1,6 @@
 import os
 import re
+import glob
 
 import numpy as np
 
@@ -7,14 +8,28 @@ from .splash import welcome
 from .utilsprocar import UtilsProcar
 
 
-def cat(inFiles, outFile, gz=False, mergeparallel=False, fixformat=False):
+def cat(
+    inFiles=None,
+    outFile="PROCAR_merged",
+    gz=False,
+    mergeparallel=False,
+    fixformat=False,
+):
     """
     This module concatenates multiple PROCARs.
+    If a list of input PROCAR files is not provided it will merge all the PROCAR_*
+    files in the directory.
     set mergeparallel = True for merging PROCARs generated from
     parallel Abinit calculations. Set fixformat = True to fix formatting issues
     in the Abinit PROCAR file.
     """
     welcome()
+
+    # reading in all PROCAR_* files and putting it into a list if not provided.
+    if inFiles is None:
+        inFiles = sorted(glob.glob("PROCAR_*"))
+    else:
+        pass
 
     print("Concatenating...")
     print("Input         : ", inFiles)  # ', '.join(inFiles)

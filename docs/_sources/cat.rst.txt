@@ -5,11 +5,11 @@ Multiple PROCAR files from multiple DFT calculations can be combined with this u
 
 Usage::
 
-	pyprocar.cat(['PROCAR_G-K','PROCAR_K-M','PROCAR_M-G'], 'PROCAR_merged', gz=False, mergeparallel = False, fixformat = False)
+	pyprocar.cat(inFile=['PROCAR_G-K','PROCAR_K-M','PROCAR_M-G'], outFile='PROCAR_merged', gz=False, mergeparallel = False, fixformat = False)
 
 If the PROCARs are in a compressed .gz file, set ``gz=True``.
 
-When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set ``mergeparallel=True``. To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set ``fixformat=True`` as well.
+When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set ``mergeparallel=True``. To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set ``fixformat=True`` as well. If inFiles is not provided it will put all the ``PROCAR_*`` files into the inFiles list. 
 
 .. automodule:: pyprocar.scriptCat
 	:members:
