@@ -14,8 +14,7 @@ from .splash import welcome
 from .utilsprocar import UtilsProcar
 
 # import matplotlib
-plt.rcParams[
-    "mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
+plt.rcParams["mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
 #                                                   'bf', 'default', 'bb', 'frak',
 #                                                   'circled', 'scr', 'regular']
 plt.rcParams["font.family"] = "Georgia"
@@ -29,39 +28,40 @@ plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
 
 
 def bandsplot(
-        procarfile=None,
-        mode="plain",
-        color="blue",
-        abinit_output=None,
-        spin=0,
-        atoms=None,
-        orbitals=None,
-        fermi=None,
-        elimit=[-2, 2],
-        mask=None,
-        markersize=0.02,
-        cmap="jet",
-        vmax=None,
-        vmin=None,
-        grid=True,
-        marker="o",
-        permissive=False,
-        human=False,
-        savefig=None,
-        kticks=None,
-        knames=None,
-        title=None,
-        outcar=None,
-        kpointsfile=None,
-        kdirect=True,
-        code="vasp",
-        separate=False,
-        ax=None,
-        discontinuities=None,
-        show=True,
-        lobstercode="qe",
-        plot_color_bar=True,
-        verbose=True,
+    procarfile=None,
+    mode="plain",
+    color="blue",
+    abinit_output=None,
+    spin=0,
+    atoms=None,
+    orbitals=None,
+    fermi=None,
+    elimit=[-2, 2],
+    mask=None,
+    markersize=0.02,
+    cmap="jet",
+    vmax=None,
+    vmin=None,
+    grid=True,
+    marker="o",
+    permissive=False,
+    human=False,
+    savefig=None,
+    kticks=None,
+    knames=None,
+    title=None,
+    outcar=None,
+    kpointsfile=None,
+    kdirect=True,
+    code="vasp",
+    separate=False,
+    ax=None,
+    discontinuities=None,
+    show=True,
+    lobstercode="qe",
+    plot_color_bar=True,
+    verbose=True,
+    linewidth=1,
 ):
     """This function plots band structures
   """
@@ -92,8 +92,12 @@ def bandsplot(
         print("atoms list     : ", atoms)
         print("orbs. list     : ", orbitals)
 
-    if (fermi is None and outcar is None and abinit_output is None
-            and (code != "elk" and code != "qe" and code != "lobster")):
+    if (
+        fermi is None
+        and outcar is None
+        and abinit_output is None
+        and (code != "elk" and code != "qe" and code != "lobster")
+    ):
         print(
             "WARNING : Fermi Energy not set! Please set manually or provide output file and set code type."
         )
@@ -161,8 +165,7 @@ def bandsplot(
                 icounter = icounter + 2
             else:
                 discont_indx.append(icounter)
-                knames.append(tick_labels[icounter] + "|" +
-                              tick_labels[icounter + 1])
+                knames.append(tick_labels[icounter] + "|" + tick_labels[icounter + 1])
                 icounter = icounter + 2
         knames.append(tick_labels[-1])
         discont_indx = list(dict.fromkeys(discont_indx))
@@ -290,8 +293,7 @@ def bandsplot(
     elif code == "qe":
         if fermi is None:
             fermi = procarFile.fermi
-            print("Fermi energy   :  %s eV (from Quantum Espresso output)" %
-                  str(fermi))
+            print("Fermi energy   :  %s eV (from Quantum Espresso output)" % str(fermi))
 
     elif code == "lobster":
         if fermi is None:
@@ -340,8 +342,7 @@ def bandsplot(
         dataY.selectAtoms(atoms, fortran=human)
         dataY.selectOrbital(orbitals)
         # getting the signed angle of each K-vector
-        angle = np.arctan2(dataX.kpoints[:, 1],
-                           (dataX.kpoints[:, 0] + 0.000000001))
+        angle = np.arctan2(dataX.kpoints[:, 1], (dataX.kpoints[:, 0] + 0.000000001))
         sin = np.sin(angle)
         cos = np.cos(angle)
         sin.shape = (sin.shape[0], 1)
@@ -358,14 +359,16 @@ def bandsplot(
     if separate:
         if spin == 0:
             # plotting spin up bands separately
-            data.bands = (data.bands[:, :numofbands].transpose() -
-                          np.array(fermi)).transpose()
+            data.bands = (
+                data.bands[:, :numofbands].transpose() - np.array(fermi)
+            ).transpose()
             print("Plotting spin up bands...")
 
         elif spin == 1:
             # plotting spin down bands separately
-            data.bands = (data.bands[:, numofbands:].transpose() -
-                          np.array(fermi)).transpose()
+            data.bands = (
+                data.bands[:, numofbands:].transpose() - np.array(fermi)
+            ).transpose()
             print("Plotting spin down bands...")
 
         plot = ProcarPlot(data.bands, data.spd, data.kpoints)
@@ -422,6 +425,7 @@ def bandsplot(
             discontinuities=discontinuities,
             plot_bar=plot_color_bar,
             ax=ax,
+            linewidth=linewidth,
         )
         if fermi is not None:
             ax1.set_ylabel(r"$E-E_f$ [eV]")
@@ -449,8 +453,7 @@ def bandsplot(
     else:
         if savefig:
             plt.savefig(savefig, bbox_inches="tight")
-            plt.close(
-            )  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+            plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
             return None, None
         else:
             if show:

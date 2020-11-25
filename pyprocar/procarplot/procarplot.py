@@ -120,6 +120,7 @@ class ProcarPlot:
         ax=None,
         figsize=(13, 9),
         plot_bar=True,
+        linewidth=1,
     ):
         from matplotlib.collections import LineCollection
         import matplotlib
@@ -176,7 +177,7 @@ class ProcarPlot:
                     segments = np.concatenate([points[:-1], points[1:]], axis=1)
                     lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
                     lc.set_array(z)
-                    lc.set_linewidth(1)
+                    lc.set_linewidth(linewidth)
                     ax.add_collection(lc)
                 if plot_bar:
                     cb = fig.colorbar(lc, ax=ax)
@@ -200,7 +201,7 @@ class ProcarPlot:
                     segments = np.concatenate([points[:-1], points[1:]], axis=1)
                     lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
                     lc.set_array(z)
-                    lc.set_linewidth(1)
+                    lc.set_linewidth(linewidth)
                     ax.add_collection(lc)
                 if plot_bar:
                     cb = fig.colorbar(lc, ax=ax)
@@ -216,7 +217,7 @@ class ProcarPlot:
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
                 lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
                 lc.set_array(z)
-                lc.set_linewidth(1)
+                lc.set_linewidth(linewidth)
                 ax.add_collection(lc)
             if plot_bar:
                 cb = fig.colorbar(lc, ax=ax)
