@@ -1,0 +1,2 @@
+include *.txt *.md *.json 
+recursive-include pyprocar *.json

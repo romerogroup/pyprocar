@@ -1,15 +1,6 @@
-__author__ = "Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He"
-__copyright__ = "Copyright 2020"
-__version__ = "5.5.8"
-__email__ = (
-    "fvmunoz@gmail.com/alromero@mail.wvu.edu/ukh0001@mix.wvu.edu/petavazohi@mix.wvu.edu"
-)
-__status__ = "Development"
-__date__ = "Nov 24th, 2020"
-
-# Copyright (C) 2020 Francisco Munoz,Aldo Romero,Sobhit Singh,Uthpala Herath,Pedram Tavadze,Eric Bousquet,Xu He
+# Copyright (C) 2020 Francisco Munoz, Aldo Romero, Sobhit Singh, Uthpala Herath, Pedram Tavadze, Eric Bousquet, Xu He
 #
-# This file is part of pyprocar.
+# This file is part of PyProcar.
 #
 # PyProcar is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -23,6 +14,14 @@ __date__ = "Nov 24th, 2020"
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with pyprocar.  If not, see <http://www.gnu.org/licenses/>.
+
+from .version import version as __version__
+from .version import author as __author__
+from .version import copyright as __copyright__
+from .version import email as __email__
+from .version import status as __status__
+from .version import date as __date__
+
 
 import logging
 import re
