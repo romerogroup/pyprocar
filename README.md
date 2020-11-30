@@ -35,6 +35,7 @@ Eric Bousquet <br />
 Xu He <br />
 Reese Boucher <br />
 Logan Lang <br />
+Freddy Farah <br />
 
 
 How to cite
