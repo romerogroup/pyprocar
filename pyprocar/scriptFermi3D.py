@@ -15,42 +15,44 @@ from .bxsfparser import BxsfParser
 from .frmsfparser import FrmsfParser
 from .qeparser import QEFermiParser
 
+
 def fermi3D(
-        procar='PROCAR',
-        outcar='OUTCAR',
-        infile = "in.bxsf",
-        fermi =None,
-        bands=None,
-        interpolation_factor=1,
-        mode="plain",
-        supercell=[1, 1, 1],
-        colors=None,
-        background_color='white',
-        save_colors=False,
-        cmap='jet',
-        atoms=None,
-        orbitals=None,
-        spin=None,
-        spin_texture=False,
-        arrow_color=None,
-        arrow_size=0.015,
-        only_spin=False,
-        fermi_shift=0,
-        projection_accuracy='normal',
-        code='vasp',
-        vmin=0,
-        vmax=1,
-        savegif=None,
-        savemp4=None,
-        save3d=None,
-        perspective=True,
-        save2d=False,
-        camera_pos=[1, 1, 1],
-        widget=False,
-        show=True,
+    procar="PROCAR",
+    outcar="OUTCAR",
+    infile="in.bxsf",
+    fermi=None,
+    bands=None,
+    interpolation_factor=1,
+    mode="plain",
+    supercell=[1, 1, 1],
+    colors=None,
+    background_color="white",
+    save_colors=False,
+    cmap="jet",
+    atoms=None,
+    orbitals=None,
+    spin=None,
+    spin_texture=False,
+    arrow_color=None,
+    arrow_size=0.015,
+    only_spin=False,
+    fermi_shift=0,
+    projection_accuracy="normal",
+    code="vasp",
+    vmin=0,
+    vmax=1,
+    savegif=None,
+    savemp4=None,
+    save3d=None,
+    perspective=True,
+    save2d=False,
+    camera_pos=[1, 1, 1],
+    widget=False,
+    show=True,
+    repair=True,
 ):
     """
-    
+
     Parameters
     ----------
     procar : str, optional (default ``'PROCAR'``)
@@ -62,7 +64,7 @@ def fermi3D(
         Path to the OUTCAR file of the simulation
 
         e.g. ``outcar='~/MgB2/fermi/OUTCAR'``
-        
+
     infile : str, optional (default ``infile = in.bxsf'``)
         This is the path in the input bxsf file
 
@@ -74,13 +76,13 @@ def fermi3D(
         created. If not defined it is read from the OUTCAR file.
 
         e.g. ``fermi=-5.49``
-        
+
     bands : list int, optional
         Which bands are going to be plotted in the fermi surface. The
         numbering is based on vasp outputs. If nothing is selected,
         this function will iterate over all the bands and plots the
         ones that cross fermi.
-        
+
         e.g. ``bands=[14, 15, 16, 17]``
 
     interpolation_factor : int, optional
@@ -107,7 +109,7 @@ def fermi3D(
         a 3d file is saved. The colors for when ``save3d`` is used, we
         recomend using qualitative colormaps, as this function will
         automatically choose colors from the colormaps.
-        
+
         e.g. ``colors=['red', 'blue', 'green']``
 
     background_color : str, optional (default ``white``)
@@ -121,7 +123,7 @@ def fermi3D(
         allows the projection to be stored in the 3D file.
 
         e.g. ``save_colors=True``
-    
+
     cmap : str, optional (default ``jet``)
         The color map used for color coding the projections. ``cmap``
         is only relevant in ``mode='parametric'``. A full list of
@@ -173,15 +175,15 @@ def fermi3D(
             |  0  |  1  |  2 |  3 |  4  |  5  |  6  |  7  |   8   |
             +-----+-----+----+----+-----+-----+-----+-----+-------+
         ``orbitals`` is only relavent in ``mode='parametric'``
-        
+
         e.g. ``orbitals=[1,2,3]`` will only select the p orbitals
         while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.
-        
+
         If nothing is specified pyprocar will select all the present
         orbitals.
 
     spin : list int, optional
-       
+
         e.g. ``spin=[0]``
 
     spin_texture : bool, optional (default False)
@@ -201,7 +203,7 @@ def fermi3D(
     arrow_size : int, optional
         As the name suggests defines the size of the arrows, when spin
         texture is selected.
-        
+
         e.g. ``arrow_size=3``
 
     only_spin : bool, optional
@@ -211,7 +213,7 @@ def fermi3D(
     fermi_shift : float, optional
         This parameter is useful when one wants to plot the iso-surface
         above or belove the fermi level.
-        
+
         e.g. ``fermi_shift=0.6``
 
     projection_accuracy : str, optional (default ``'normal'``)
@@ -283,7 +285,7 @@ def fermi3D(
         e.g. ``camera_pos=[0.5, 1, -1]``
 
     widget : , optional
-        .. todo:: 
+        .. todo::
 
     show : bool, optional (default ``True``)
         If set to ``False`` it will not show the 3D plot.
@@ -299,11 +301,17 @@ def fermi3D(
     """
 
     welcome()
-    
+
+    if code == "vasp" or code == "abinit":
+        if repair:
+            repairhandle = UtilsProcar()
+            repairhandle.ProcarRepair(procar, procar)
+            print("PROCAR repaired. Run with repair=False next time.")
+
     if show:
         p = pyvista.Plotter()
 
-    if code == 'vasp':
+    if code == "vasp":
         outcarparser = UtilsProcar()
         if fermi is None:
             e_fermi = outcarparser.FermiOutcar(outcar)
@@ -313,8 +321,8 @@ def fermi3D(
         procarFile = ProcarParser()
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
-        
-    elif code == 'qe':
+
+    elif code == "qe":
         procarFile = QEFermiParser()
         data = ProcarSelect(procarFile, deepCopy=True)
         reciprocal_lattice = procarFile.reclat
@@ -322,24 +330,24 @@ def fermi3D(
             e_fermi = procarFile.fermi
         else:
             e_fermi = fermi
-        
-    elif code == 'bxsf':
+
+    elif code == "bxsf":
         e_fermi = fermi
-        data = BxsfParser(infile = infile)
-        reciprocal_lattice  = data.rec_lattice
+        data = BxsfParser(infile=infile)
+        reciprocal_lattice = data.rec_lattice
         bands = np.arange(len(data.bandEnergy[0, :]))
-    elif code == 'frmsf':
+    elif code == "frmsf":
         e_fermi = fermi
-        data = FrmsfParser(infile = infile)
-        reciprocal_lattice  = data.rec_lattice
+        data = FrmsfParser(infile=infile)
+        reciprocal_lattice = data.rec_lattice
         bands = np.arange(len(data.bands[0, :]))
-        
+
     if bands is None:
         bands = np.arange(len(data.bands[0, :]))
     surfaces = []
 
     spd = []
-    if mode == 'parametric':
+    if mode == "parametric":
         if orbitals is None:
             orbitals = [-1]
         if atoms is None:
@@ -387,9 +395,9 @@ def fermi3D(
         dataY.selectOrbital(orbitals)
         dataZ.selectOrbital(orbitals)
         for iband in bands:
-            spd_spin.append([
-                dataX.spd[:, iband], dataY.spd[:, iband], dataZ.spd[:, iband]
-            ])
+            spd_spin.append(
+                [dataX.spd[:, iband], dataY.spd[:, iband], dataZ.spd[:, iband]]
+            )
     else:
         for iband in bands:
             spd_spin.append(None)
@@ -397,38 +405,44 @@ def fermi3D(
     for iband in bands:
         print("Trying to extract isosurface for band %d" % iband)
         if code == "bxsf":
-            surface = FermiSurface3D(kpoints=data.kpoints,
-                                     band=data.bandEnergy[:, iband],
-                                     spd=spd[counter],
-                                     spd_spin=spd_spin[counter],
-                                     fermi=e_fermi + fermi_shift,
-                                     reciprocal_lattice=reciprocal_lattice,
-                                     interpolation_factor=interpolation_factor,
-                                     projection_accuracy=projection_accuracy,
-                                     supercell=supercell,
-                                     file = "bxsf")
+            surface = FermiSurface3D(
+                kpoints=data.kpoints,
+                band=data.bandEnergy[:, iband],
+                spd=spd[counter],
+                spd_spin=spd_spin[counter],
+                fermi=e_fermi + fermi_shift,
+                reciprocal_lattice=reciprocal_lattice,
+                interpolation_factor=interpolation_factor,
+                projection_accuracy=projection_accuracy,
+                supercell=supercell,
+                file="bxsf",
+            )
         elif code == "frmsf":
-            surface = FermiSurface3D(kpoints=data.kpoints,
-                                     band=data.bands[:, iband],
-                                     spd=spd[counter],
-                                     spd_spin=spd_spin[counter],
-                                     fermi=e_fermi + fermi_shift,
-                                     reciprocal_lattice=reciprocal_lattice,
-                                     interpolation_factor=interpolation_factor,
-                                     projection_accuracy=projection_accuracy,
-                                     supercell=supercell,
-                                     file = "bxsf")
+            surface = FermiSurface3D(
+                kpoints=data.kpoints,
+                band=data.bands[:, iband],
+                spd=spd[counter],
+                spd_spin=spd_spin[counter],
+                fermi=e_fermi + fermi_shift,
+                reciprocal_lattice=reciprocal_lattice,
+                interpolation_factor=interpolation_factor,
+                projection_accuracy=projection_accuracy,
+                supercell=supercell,
+                file="bxsf",
+            )
         else:
-            surface = FermiSurface3D(kpoints=data.kpoints,
-                                     band=data.bands[:, iband],
-                                     spd=spd[counter],
-                                     spd_spin=spd_spin[counter],
-                                     fermi=e_fermi + fermi_shift,
-                                     reciprocal_lattice=reciprocal_lattice,
-                                     interpolation_factor=interpolation_factor,
-                                     projection_accuracy=projection_accuracy,
-                                     supercell=supercell)
-            
+            surface = FermiSurface3D(
+                kpoints=data.kpoints,
+                band=data.bands[:, iband],
+                spd=spd[counter],
+                spd_spin=spd_spin[counter],
+                fermi=e_fermi + fermi_shift,
+                reciprocal_lattice=reciprocal_lattice,
+                interpolation_factor=interpolation_factor,
+                projection_accuracy=projection_accuracy,
+                supercell=supercell,
+            )
+
         if surface.verts is not None:
             surfaces.append(surface)
         counter += 1
@@ -450,55 +464,57 @@ def fermi3D(
     print(cmap)
     if show or save2d:
         # sargs = dict(interactive=True)
-        p.add_mesh(surfaces[0].brillouin_zone.pyvista_obj,
-                   style='wireframe',
-                   line_width=3.5,
-                   color='black')
+        p.add_mesh(
+            surfaces[0].brillouin_zone.pyvista_obj,
+            style="wireframe",
+            line_width=3.5,
+            color="black",
+        )
         for isurface in range(nsurface):
             if not only_spin:
-                if mode == 'plain':
-                    p.add_mesh(surfaces[isurface].pyvista_obj,
-                               color=colors[isurface])
-                    text = 'Plain'
-                elif mode == 'parametric':
-                    p.add_mesh(surfaces[isurface].pyvista_obj,
-                               cmap=cmap,
-                               clim=[vmin, vmax])
+                if mode == "plain":
+                    p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
+                    text = "Plain"
+                elif mode == "parametric":
+                    p.add_mesh(
+                        surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
+                    )
                     p.remove_scalar_bar()
-                    text = 'Projection'
+                    text = "Projection"
             else:
-                text = 'Spin Texture'
+                text = "Spin Texture"
             if spin_texture:
                 # Example dataset with normals
                 # create a subset of arrows using the glyph filter
                 arrows = surfaces[isurface].pyvista_obj.glyph(
-                    orient="vectors", factor=arrow_size)
+                    orient="vectors", factor=arrow_size
+                )
 
                 if arrow_color is None:
                     p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
                     p.remove_scalar_bar()
                 else:
                     p.add_mesh(arrows, color=arrow_color)
-        if mode != 'plain' or spin_texture:
-            p.add_scalar_bar(title=text,
-                             n_labels=6,
-                             italic=False,
-                             bold=False,
-                             title_font_selfize=None,
-                             label_font_size=None,
-                             position_x=0.9,
-                             position_y=0.01,
-                             color='black')
+        if mode != "plain" or spin_texture:
+            p.add_scalar_bar(
+                title=text,
+                n_labels=6,
+                italic=False,
+                bold=False,
+                title_font_selfize=None,
+                label_font_size=None,
+                position_x=0.9,
+                position_y=0.01,
+                color="black",
+            )
 
-        p.add_axes(xlabel='Kx',
-                   ylabel='Ky',
-                   zlabel='Kz',
-                   line_width=6,
-                   labels_off=False)
+        p.add_axes(
+            xlabel="Kx", ylabel="Ky", zlabel="Kz", line_width=6, labels_off=False
+        )
 
         if not perspective:
             p.enable_parallel_projection()
-        
+
         p.set_background(background_color)
         p.set_position(camera_pos)
         if not widget:
@@ -508,11 +524,11 @@ def fermi3D(
         if savegif is not None:
             path = p.generate_orbital_path(n_points=36)
             p.open_gif(savegif)
-            p.orbit_on_path(path)  #,viewup=camera_pos)
+            p.orbit_on_path(path)  # ,viewup=camera_pos)
         if savemp4:
             path = p.generate_orbital_path(n_points=36)
             p.open_movie(savemp4)
-            p.orbit_on_path(path)  #,viewup=camera_pos)
+            p.orbit_on_path(path)  # ,viewup=camera_pos)
             # p.close()
     s = boolean_add(surfaces)
     s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
@@ -520,6 +536,6 @@ def fermi3D(
     # s.trimesh_obj.show()
 
     if save3d is not None:
-        extention = save3d.split('.')[-1]
+        extention = save3d.split(".")[-1]
         s.export(save3d, extention)
     return s, surfaces

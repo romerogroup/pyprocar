@@ -23,17 +23,19 @@ def unfold(
     savetab="unfold_result.csv",
     savefig="unfolded_band.png",
     exportplt=False,
+    repair=True,
+    code="vasp",
 ):
 
     """
 
     Parameters
-    ---------- 
+    ----------
     fname: PROCAR filename.
     poscar: POSCAR filename
     outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
     supercell_matrix: supercell matrix from primitive cell to supercell
-    ispin: For non-spin polarized system, ispin=None. 
+    ispin: For non-spin polarized system, ispin=None.
            For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.
     efermi: Fermi energy
     elimit: range of energy to be plotted.
@@ -41,7 +43,7 @@ def unfold(
     knames: see kticks
     print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.
     show_band: whether to plot the bands before unfolding.
-    width: the width of the unfolded band. 
+    width: the width of the unfolded band.
     color: color of the unfoled band.
     savetab: the csv file name of which  the table of unfolding result will be written into.
     savefig: the file name of which the figure will be saved.
@@ -49,6 +51,12 @@ def unfold(
 
     """
     welcome()
+
+    if code == "vasp" or code == "abinit":
+        if repair:
+            repairhandle = UtilsProcar()
+            repairhandle.ProcarRepair(fname, fname)
+            print("PROCAR repaired. Run with repair=False next time.")
 
     # Turn interactive plotting off
     plt.ioff()

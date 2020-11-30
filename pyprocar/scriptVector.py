@@ -15,9 +15,17 @@ def Vector(
     orbitals=None,
     outcar=None,
     scale=0.1,
+    code="vasp",
+    repair=True,
 ):
 
     welcome()
+
+    if code == "vasp" or code == "abinit":
+        if repair:
+            repairhandle = UtilsProcar()
+            repairhandle.ProcarRepair(infile, infile)
+            print("PROCAR repaired. Run with repair=False next time.")
 
     print("Input File    : ", infile)
     print("Bands         : ", bands)

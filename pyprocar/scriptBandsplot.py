@@ -62,6 +62,7 @@ def bandsplot(
     plot_color_bar=True,
     verbose=True,
     linewidth=1,
+    repair=True,
 ):
     """This function plots band structures
   """
@@ -74,6 +75,12 @@ def bandsplot(
     # First handling the options, to get feedback to the user and check
     # that the input makes sense.
     # It is quite long
+
+    if code == "vasp" or code == "abinit":
+        if repair:
+            repairhandle = UtilsProcar()
+            repairhandle.ProcarRepair(procarfile, procarfile)
+
     if atoms is None:
         atoms = [-1]
         if human is True:
@@ -84,7 +91,9 @@ def bandsplot(
         orbitals = [-1]
     if verbose:
         welcome()
-        print("Script initiated")
+        print("Script initiated...")
+        if repair:
+            print("PROCAR repaired. Run with repair=False next time.")
         print("code           : ", code)
         print("input file     : ", procarfile)
         print("mode           : ", mode)

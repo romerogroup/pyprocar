@@ -29,7 +29,8 @@ def fermi2D(
     st=False,
     noarrow=False,
     exportplt=False,
-    code='vasp',
+    code="vasp",
+    repair=True,
 ):
     """
   This module plots 2D Fermi surface.
@@ -39,6 +40,13 @@ def fermi2D(
 
     # Turn interactive plotting off
     plt.ioff()
+
+    # Repair PROCAR
+    if code == "vasp" or code == "abinit":
+        if repair:
+            repairhandle = UtilsProcar()
+            repairhandle.ProcarRepair(file, file)
+            print("PROCAR repaired. Run with repair=False next time.")
 
     if atoms is None:
         atoms = [-1]
@@ -74,7 +82,7 @@ def fermi2D(
     print("no_arrows       : ", noarrow)
 
     # first parse the outputs if given
-    if code == 'vasp':
+    if code == "vasp":
         if rec_basis is None and outcar:
             outcarparser = UtilsProcar()
             if fermi is None:
@@ -91,7 +99,7 @@ def fermi2D(
         # permissive incompatible with Fermi surfaces
         procarFile.readFile(file, permissive=False, recLattice=rec_basis)
 
-    elif code == 'elk':
+    elif code == "elk":
         procarFile = ElkParser()
         if rec_basis is None:
             if fermi is None:
@@ -104,7 +112,7 @@ def fermi2D(
             raise RuntimeError("Reciprocal Lattice not found")
         procarFile = Elkparser(kdirect=False)
 
-    elif code == 'abinit':
+    elif code == "abinit":
         if rec_basis is None and abinit_output:
             abinitparser = AbinitParser(abinit_output=abinit_output)
             if fermi is None:

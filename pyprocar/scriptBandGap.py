@@ -53,7 +53,13 @@ def getFermi(procar, code, outcar):  # from ScriptsBandPlot made into method
     return fermi
 
 
-def bandgap(procar=None, outcar=None, code="vasp", fermi=None):
+def bandgap(procar=None, outcar=None, code="vasp", fermi=None, repair=True):
+
+    if code == "vasp" or code == "abinit":
+        if repair:
+            repairhandle = UtilsProcar()
+            repairhandle.ProcarRepair(procar, procar)
+            print("PROCAR repaired. Run with repair=False next time.")
 
     bandGap = None
 
