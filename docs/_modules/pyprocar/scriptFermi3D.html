@@ -170,42 +170,44 @@
 <span class="kn">from</span> <span class="nn">.frmsfparser</span> <span class="kn">import</span> <span class="n">FrmsfParser</span>
 <span class="kn">from</span> <span class="nn">.qeparser</span> <span class="kn">import</span> <span class="n">QEFermiParser</span>
 
+
 <div class="viewcode-block" id="fermi3D"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptFermi3D.fermi3D">[docs]</a><span class="k">def</span> <span class="nf">fermi3D</span><span class="p">(</span>
-        <span class="n">procar</span><span class="o">=</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span>
-        <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span>
-        <span class="n">infile</span> <span class="o">=</span> <span class="s2">&quot;in.bxsf&quot;</span><span class="p">,</span>
-        <span class="n">fermi</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
-        <span class="n">supercell</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">background_color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
-        <span class="n">save_colors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span>
-        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">spin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">arrow_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">arrow_size</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span>
-        <span class="n">only_spin</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">fermi_shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">projection_accuracy</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span><span class="p">,</span>
-        <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
-        <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">savegif</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">savemp4</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">save3d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">perspective</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">save2d</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">camera_pos</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="n">widget</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">procar</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
+    <span class="n">outcar</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
+    <span class="n">infile</span><span class="o">=</span><span class="s2">&quot;in.bxsf&quot;</span><span class="p">,</span>
+    <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+    <span class="n">supercell</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">save_colors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+    <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">spin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">arrow_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">arrow_size</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span>
+    <span class="n">only_spin</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">fermi_shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">projection_accuracy</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">savegif</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">savemp4</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">save3d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">perspective</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save2d</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">camera_pos</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">widget</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    procar : str, optional (default ``&#39;PROCAR&#39;``)</span>
@@ -217,7 +219,7 @@
 <span class="sd">        Path to the OUTCAR file of the simulation</span>
 
 <span class="sd">        e.g. ``outcar=&#39;~/MgB2/fermi/OUTCAR&#39;``</span>
-<span class="sd">        </span>
+
 <span class="sd">    infile : str, optional (default ``infile = in.bxsf&#39;``)</span>
 <span class="sd">        This is the path in the input bxsf file</span>
 
@@ -229,13 +231,13 @@
 <span class="sd">        created. If not defined it is read from the OUTCAR file.</span>
 
 <span class="sd">        e.g. ``fermi=-5.49``</span>
-<span class="sd">        </span>
+
 <span class="sd">    bands : list int, optional</span>
 <span class="sd">        Which bands are going to be plotted in the fermi surface. The</span>
 <span class="sd">        numbering is based on vasp outputs. If nothing is selected,</span>
 <span class="sd">        this function will iterate over all the bands and plots the</span>
 <span class="sd">        ones that cross fermi.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``bands=[14, 15, 16, 17]``</span>
 
 <span class="sd">    interpolation_factor : int, optional</span>
@@ -262,7 +264,7 @@
 <span class="sd">        a 3d file is saved. The colors for when ``save3d`` is used, we</span>
 <span class="sd">        recomend using qualitative colormaps, as this function will</span>
 <span class="sd">        automatically choose colors from the colormaps.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``colors=[&#39;red&#39;, &#39;blue&#39;, &#39;green&#39;]``</span>
 
 <span class="sd">    background_color : str, optional (default ``white``)</span>
@@ -276,7 +278,7 @@
 <span class="sd">        allows the projection to be stored in the 3D file.</span>
 
 <span class="sd">        e.g. ``save_colors=True``</span>
-<span class="sd">    </span>
+
 <span class="sd">    cmap : str, optional (default ``jet``)</span>
 <span class="sd">        The color map used for color coding the projections. ``cmap``</span>
 <span class="sd">        is only relevant in ``mode=&#39;parametric&#39;``. A full list of</span>
@@ -328,15 +330,15 @@
 <span class="sd">            |  0  |  1  |  2 |  3 |  4  |  5  |  6  |  7  |   8   |</span>
 <span class="sd">            +-----+-----+----+----+-----+-----+-----+-----+-------+</span>
 <span class="sd">        ``orbitals`` is only relavent in ``mode=&#39;parametric&#39;``</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``orbitals=[1,2,3]`` will only select the p orbitals</span>
 <span class="sd">        while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If nothing is specified pyprocar will select all the present</span>
 <span class="sd">        orbitals.</span>
 
 <span class="sd">    spin : list int, optional</span>
-<span class="sd">       </span>
+
 <span class="sd">        e.g. ``spin=[0]``</span>
 
 <span class="sd">    spin_texture : bool, optional (default False)</span>
@@ -356,7 +358,7 @@
 <span class="sd">    arrow_size : int, optional</span>
 <span class="sd">        As the name suggests defines the size of the arrows, when spin</span>
 <span class="sd">        texture is selected.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``arrow_size=3``</span>
 
 <span class="sd">    only_spin : bool, optional</span>
@@ -366,7 +368,7 @@
 <span class="sd">    fermi_shift : float, optional</span>
 <span class="sd">        This parameter is useful when one wants to plot the iso-surface</span>
 <span class="sd">        above or belove the fermi level.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``fermi_shift=0.6``</span>
 
 <span class="sd">    projection_accuracy : str, optional (default ``&#39;normal&#39;``)</span>
@@ -438,7 +440,7 @@
 <span class="sd">        e.g. ``camera_pos=[0.5, 1, -1]``</span>
 
 <span class="sd">    widget : , optional</span>
-<span class="sd">        .. todo:: </span>
+<span class="sd">        .. todo::</span>
 
 <span class="sd">    show : bool, optional (default ``True``)</span>
 <span class="sd">        If set to ``False`` it will not show the 3D plot.</span>
@@ -454,11 +456,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">welcome</span><span class="p">()</span>
-    
+
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
+            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">pyvista</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;vasp&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
         <span class="n">outcarparser</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">outcarparser</span><span class="o">.</span><span class="n">FermiOutcar</span><span class="p">(</span><span class="n">outcar</span><span class="p">)</span>
@@ -468,8 +476,8 @@
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
         <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">ProcarSelect</span><span class="p">(</span><span class="n">procarFile</span><span class="p">,</span> <span class="n">deepCopy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;qe&#39;</span><span class="p">:</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">QEFermiParser</span><span class="p">()</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">ProcarSelect</span><span class="p">(</span><span class="n">procarFile</span><span class="p">,</span> <span class="n">deepCopy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">reclat</span>
@@ -477,24 +485,24 @@
             <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">fermi</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-        
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;bxsf&#39;</span><span class="p">:</span>
+
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
         <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">BxsfParser</span><span class="p">(</span><span class="n">infile</span> <span class="o">=</span> <span class="n">infile</span><span class="p">)</span>
-        <span class="n">reciprocal_lattice</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rec_lattice</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">BxsfParser</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rec_lattice</span>
         <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bandEnergy</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;frmsf&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;frmsf&quot;</span><span class="p">:</span>
         <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">FrmsfParser</span><span class="p">(</span><span class="n">infile</span> <span class="o">=</span> <span class="n">infile</span><span class="p">)</span>
-        <span class="n">reciprocal_lattice</span>  <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rec_lattice</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">FrmsfParser</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rec_lattice</span>
         <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
-        
+
     <span class="k">if</span> <span class="n">bands</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
     <span class="n">surfaces</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">spd</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;parametric&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">orbitals</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -542,9 +550,9 @@
         <span class="n">dataY</span><span class="o">.</span><span class="n">selectOrbital</span><span class="p">(</span><span class="n">orbitals</span><span class="p">)</span>
         <span class="n">dataZ</span><span class="o">.</span><span class="n">selectOrbital</span><span class="p">(</span><span class="n">orbitals</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
-            <span class="n">spd_spin</span><span class="o">.</span><span class="n">append</span><span class="p">([</span>
-                <span class="n">dataX</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span> <span class="n">dataY</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span> <span class="n">dataZ</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">]</span>
-            <span class="p">])</span>
+            <span class="n">spd_spin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">dataX</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span> <span class="n">dataY</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span> <span class="n">dataZ</span><span class="o">.</span><span class="n">spd</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">]]</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
             <span class="n">spd_spin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
@@ -552,38 +560,44 @@
     <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying to extract isosurface for band </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">iband</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
-            <span class="n">surface</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span><span class="n">kpoints</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-                                     <span class="n">band</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bandEnergy</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span>
-                                     <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
-                                     <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
-                                     <span class="n">fermi</span><span class="o">=</span><span class="n">e_fermi</span> <span class="o">+</span> <span class="n">fermi_shift</span><span class="p">,</span>
-                                     <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                                     <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-                                     <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
-                                     <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
-                                     <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">)</span>
+            <span class="n">surface</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
+                <span class="n">kpoints</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                <span class="n">band</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bandEnergy</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span>
+                <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
+                <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="n">e_fermi</span> <span class="o">+</span> <span class="n">fermi_shift</span><span class="p">,</span>
+                <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+                <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+                <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
+                <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
+                <span class="n">file</span><span class="o">=</span><span class="s2">&quot;bxsf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;frmsf&quot;</span><span class="p">:</span>
-            <span class="n">surface</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span><span class="n">kpoints</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-                                     <span class="n">band</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span>
-                                     <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
-                                     <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
-                                     <span class="n">fermi</span><span class="o">=</span><span class="n">e_fermi</span> <span class="o">+</span> <span class="n">fermi_shift</span><span class="p">,</span>
-                                     <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                                     <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-                                     <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
-                                     <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
-                                     <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">)</span>
+            <span class="n">surface</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
+                <span class="n">kpoints</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                <span class="n">band</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span>
+                <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
+                <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="n">e_fermi</span> <span class="o">+</span> <span class="n">fermi_shift</span><span class="p">,</span>
+                <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+                <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+                <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
+                <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
+                <span class="n">file</span><span class="o">=</span><span class="s2">&quot;bxsf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">surface</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span><span class="n">kpoints</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-                                     <span class="n">band</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span>
-                                     <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
-                                     <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
-                                     <span class="n">fermi</span><span class="o">=</span><span class="n">e_fermi</span> <span class="o">+</span> <span class="n">fermi_shift</span><span class="p">,</span>
-                                     <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                                     <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-                                     <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
-                                     <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">)</span>
-            
+            <span class="n">surface</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
+                <span class="n">kpoints</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                <span class="n">band</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span>
+                <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
+                <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">[</span><span class="n">counter</span><span class="p">],</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="n">e_fermi</span> <span class="o">+</span> <span class="n">fermi_shift</span><span class="p">,</span>
+                <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+                <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+                <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
+                <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">verts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
         <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -605,55 +619,57 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">show</span> <span class="ow">or</span> <span class="n">save2d</span><span class="p">:</span>
         <span class="c1"># sargs = dict(interactive=True)</span>
-        <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span>
-                   <span class="n">style</span><span class="o">=</span><span class="s1">&#39;wireframe&#39;</span><span class="p">,</span>
-                   <span class="n">line_width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
-                   <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+            <span class="n">surfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">&quot;wireframe&quot;</span><span class="p">,</span>
+            <span class="n">line_width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">isurface</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsurface</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">only_spin</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;plain&#39;</span><span class="p">:</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surfaces</span><span class="p">[</span><span class="n">isurface</span><span class="p">]</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span>
-                               <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">isurface</span><span class="p">])</span>
-                    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Plain&#39;</span>
-                <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;parametric&#39;</span><span class="p">:</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surfaces</span><span class="p">[</span><span class="n">isurface</span><span class="p">]</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span>
-                               <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-                               <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surfaces</span><span class="p">[</span><span class="n">isurface</span><span class="p">]</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">isurface</span><span class="p">])</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Plain&quot;</span>
+                <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric&quot;</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+                        <span class="n">surfaces</span><span class="p">[</span><span class="n">isurface</span><span class="p">]</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">]</span>
+                    <span class="p">)</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">remove_scalar_bar</span><span class="p">()</span>
-                    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Projection&#39;</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Projection&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Spin Texture&#39;</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Spin Texture&quot;</span>
             <span class="k">if</span> <span class="n">spin_texture</span><span class="p">:</span>
                 <span class="c1"># Example dataset with normals</span>
                 <span class="c1"># create a subset of arrows using the glyph filter</span>
                 <span class="n">arrows</span> <span class="o">=</span> <span class="n">surfaces</span><span class="p">[</span><span class="n">isurface</span><span class="p">]</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span>
-                    <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;vectors&quot;</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
+                    <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;vectors&quot;</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span>
+                <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">arrow_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">])</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">remove_scalar_bar</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;plain&#39;</span> <span class="ow">or</span> <span class="n">spin_texture</span><span class="p">:</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">add_scalar_bar</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
-                             <span class="n">n_labels</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-                             <span class="n">italic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="n">title_font_selfize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">label_font_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">position_x</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
-                             <span class="n">position_y</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-                             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;plain&quot;</span> <span class="ow">or</span> <span class="n">spin_texture</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">add_scalar_bar</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                <span class="n">n_labels</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                <span class="n">italic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">title_font_selfize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">label_font_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">position_x</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                <span class="n">position_y</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="n">p</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Kx&#39;</span><span class="p">,</span>
-                   <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Ky&#39;</span><span class="p">,</span>
-                   <span class="n">zlabel</span><span class="o">=</span><span class="s1">&#39;Kz&#39;</span><span class="p">,</span>
-                   <span class="n">line_width</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-                   <span class="n">labels_off</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+            <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Kx&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Ky&quot;</span><span class="p">,</span> <span class="n">zlabel</span><span class="o">=</span><span class="s2">&quot;Kz&quot;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">labels_off</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">perspective</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">enable_parallel_projection</span><span class="p">()</span>
-        
+
         <span class="n">p</span><span class="o">.</span><span class="n">set_background</span><span class="p">(</span><span class="n">background_color</span><span class="p">)</span>
         <span class="n">p</span><span class="o">.</span><span class="n">set_position</span><span class="p">(</span><span class="n">camera_pos</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">widget</span><span class="p">:</span>
@@ -663,11 +679,11 @@
         <span class="k">if</span> <span class="n">savegif</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">generate_orbital_path</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="n">savegif</span><span class="p">)</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">orbit_on_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1">#,viewup=camera_pos)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">orbit_on_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># ,viewup=camera_pos)</span>
         <span class="k">if</span> <span class="n">savemp4</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">generate_orbital_path</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">open_movie</span><span class="p">(</span><span class="n">savemp4</span><span class="p">)</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">orbit_on_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1">#,viewup=camera_pos)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">orbit_on_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># ,viewup=camera_pos)</span>
             <span class="c1"># p.close()</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">boolean_add</span><span class="p">(</span><span class="n">surfaces</span><span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">set_color_with_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
@@ -675,7 +691,7 @@
     <span class="c1"># s.trimesh_obj.show()</span>
 
     <span class="k">if</span> <span class="n">save3d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">extention</span> <span class="o">=</span> <span class="n">save3d</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">extention</span> <span class="o">=</span> <span class="n">save3d</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">s</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">save3d</span><span class="p">,</span> <span class="n">extention</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">s</span><span class="p">,</span> <span class="n">surfaces</span></div>
 </pre></div>

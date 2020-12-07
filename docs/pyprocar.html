@@ -313,7 +313,7 @@
 <span id="pyprocar-scriptbandgap-module"></span><h2>pyprocar.scriptBandGap module<a class="headerlink" href="#module-pyprocar.scriptBandGap" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptBandGap.bandgap">
-<code class="sig-prename descclassname">pyprocar.scriptBandGap.</code><code class="sig-name descname">bandgap</code><span class="sig-paren">(</span><em class="sig-param">procar=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">code='vasp'</em>, <em class="sig-param">fermi=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandGap.html#bandgap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandGap.bandgap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptBandGap.</code><code class="sig-name descname">bandgap</code><span class="sig-paren">(</span><em class="sig-param">procar=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">code='vasp'</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandGap.html#bandgap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandGap.bandgap" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -328,7 +328,7 @@
 &#64;author: Pedram Tavadze</p>
 <dl class="function">
 <dt id="pyprocar.scriptBandsDosplot.bandsdosplot">
-<code class="sig-prename descclassname">pyprocar.scriptBandsDosplot.</code><code class="sig-name descname">bandsdosplot</code><span class="sig-paren">(</span><em class="sig-param">bands_file='PROCAR', dos_file='vasprun.xml', outcar='OUTCAR', abinit_output=None, bands_mode='plain', dos_mode='plain', plot_total=True, fermi=None, mask=None, markersize=0.02, marker='o', atoms=None, orbitals=None, bands_spin=0, bands_separate=False, dos_spins=None, dos_labels=None, dos_spin_colors=[(1, 0, 0), (0, 0, 1)], dos_colors=None, dos_items=None, dos_interpolation_factor=None, dlimit=None, elimit=None, vmin=None, vmax=None, cmap='jet', grid=False, kpointsfile='KPOINTS', code='vasp', savefig=None, title=None, kdirect=True, discontinuities=None, plot_color_bar=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsDosplot.html#bandsdosplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsDosplot.bandsdosplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptBandsDosplot.</code><code class="sig-name descname">bandsdosplot</code><span class="sig-paren">(</span><em class="sig-param">bands_file='PROCAR', dos_file='vasprun.xml', outcar='OUTCAR', abinit_output=None, bands_mode='plain', dos_mode='plain', plot_total=True, fermi=None, mask=None, markersize=0.02, marker='o', atoms=None, orbitals=None, bands_spin=0, bands_separate=False, dos_spins=None, dos_labels=None, dos_spin_colors=[(1, 0, 0), (0, 0, 1)], dos_colors=None, dos_items=None, dos_interpolation_factor=None, dlimit=None, elimit=None, vmin=None, vmax=None, cmap='jet', grid=False, kpointsfile='KPOINTS', code='vasp', savefig=None, title=None, kdirect=True, discontinuities=None, plot_color_bar=True, repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsDosplot.html#bandsdosplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsDosplot.bandsdosplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function creates plots containing both DOS and bands.</p>
 </dd></dl>
 
@@ -337,7 +337,7 @@
 <span id="pyprocar-scriptbandsplot-module"></span><h2>pyprocar.scriptBandsplot module<a class="headerlink" href="#module-pyprocar.scriptBandsplot" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptBandsplot.bandsplot">
-<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param">procarfile=None, mode='plain', color='blue', abinit_output=None, spin=0, atoms=None, orbitals=None, fermi=None, elimit=[-2, 2], mask=None, markersize=0.02, cmap='jet', vmax=None, vmin=None, grid=True, marker='o', permissive=False, human=False, savefig=None, kticks=None, knames=None, title=None, outcar=None, kpointsfile=None, kdirect=True, code='vasp', separate=False, ax=None, discontinuities=None, show=True, lobstercode='qe', plot_color_bar=True, verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsplot.html#bandsplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param">procarfile=None, mode='plain', color='blue', abinit_output=None, spin=0, atoms=None, orbitals=None, fermi=None, elimit=[-2, 2], mask=None, markersize=0.02, cmap='jet', vmax=None, vmin=None, grid=True, marker='o', permissive=False, human=False, savefig=None, kticks=None, knames=None, title=None, outcar=None, kpointsfile=None, kdirect=True, code='vasp', separate=False, ax=None, discontinuities=None, show=True, lobstercode='qe', plot_color_bar=True, verbose=True, linewidth=1, repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsplot.html#bandsplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots band structures</p>
 </dd></dl>
 
@@ -346,13 +346,15 @@
 <span id="pyprocar-scriptcat-module"></span><h2>pyprocar.scriptCat module<a class="headerlink" href="#module-pyprocar.scriptCat" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptCat.cat">
-<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param">inFiles=None</em>, <em class="sig-param">outFile='PROCAR_merged'</em>, <em class="sig-param">gz=False</em>, <em class="sig-param">mergeparallel=False</em>, <em class="sig-param">fixformat=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param">inFiles=None</em>, <em class="sig-param">outFile='PROCAR_merged'</em>, <em class="sig-param">gz=False</em>, <em class="sig-param">mergeparallel=False</em>, <em class="sig-param">fixformat=False</em>, <em class="sig-param">nspin=1</em>, <em class="sig-param">abinit_output=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module concatenates multiple PROCARs.
 If a list of input PROCAR files is not provided it will merge all the PROCAR_*
 files in the directory.
 set mergeparallel = True for merging PROCARs generated from
 parallel Abinit calculations. Set fixformat = True to fix formatting issues
-in the Abinit PROCAR file.</p>
+in the Abinit PROCAR file.
+To detect if the calculation is spin-colinear it checks for the nsppol flag
+in the Abinit output file as set in abinit_output. If not present, set nspin.</p>
 </dd></dl>
 
 </div>
@@ -620,7 +622,7 @@ e.g.</p>
 <span id="pyprocar-scriptfermi2d-module"></span><h2>pyprocar.scriptFermi2D module<a class="headerlink" href="#module-pyprocar.scriptFermi2D" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptFermi2D.fermi2D">
-<code class="sig-prename descclassname">pyprocar.scriptFermi2D.</code><code class="sig-name descname">fermi2D</code><span class="sig-paren">(</span><em class="sig-param">file, outcar=None, abinit_output=None, spin=0, atoms=None, orbitals=None, energy=None, fermi=None, rec_basis=None, rot_symm=1, translate=[0, 0, 0], rotation=[0, 0, 0, 1], human=False, mask=None, savefig=None, st=False, noarrow=False, exportplt=False, code='vasp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFermi2D.html#fermi2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptFermi2D.fermi2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptFermi2D.</code><code class="sig-name descname">fermi2D</code><span class="sig-paren">(</span><em class="sig-param">file, outcar=None, abinit_output=None, spin=0, atoms=None, orbitals=None, energy=None, fermi=None, rec_basis=None, rot_symm=1, translate=[0, 0, 0], rotation=[0, 0, 0, 1], human=False, mask=None, savefig=None, st=False, noarrow=False, exportplt=False, code='vasp', repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFermi2D.html#fermi2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptFermi2D.fermi2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module plots 2D Fermi surface.</p>
 </dd></dl>
 
@@ -629,7 +631,7 @@ e.g.</p>
 <span id="pyprocar-scriptfermi3d-module"></span><h2>pyprocar.scriptFermi3D module<a class="headerlink" href="#module-pyprocar.scriptFermi3D" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptFermi3D.fermi3D">
-<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param">procar='PROCAR', outcar='OUTCAR', infile='in.bxsf', fermi=None, bands=None, interpolation_factor=1, mode='plain', supercell=[1, 1, 1], colors=None, background_color='white', save_colors=False, cmap='jet', atoms=None, orbitals=None, spin=None, spin_texture=False, arrow_color=None, arrow_size=0.015, only_spin=False, fermi_shift=0, projection_accuracy='normal', code='vasp', vmin=0, vmax=1, savegif=None, savemp4=None, save3d=None, perspective=True, save2d=False, camera_pos=[1, 1, 1], widget=False, show=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFermi3D.html#fermi3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param">procar='PROCAR', outcar='OUTCAR', infile='in.bxsf', fermi=None, bands=None, interpolation_factor=1, mode='plain', supercell=[1, 1, 1], colors=None, background_color='white', save_colors=False, cmap='jet', atoms=None, orbitals=None, spin=None, spin_texture=False, arrow_color=None, arrow_size=0.015, only_spin=False, fermi_shift=0, projection_accuracy='normal', code='vasp', vmin=0, vmax=1, savegif=None, savemp4=None, save3d=None, perspective=True, save2d=False, camera_pos=[1, 1, 1], widget=False, show=True, repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFermi3D.html#fermi3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -915,7 +917,7 @@ plotting.</p>
 <dt>
 <code class="sig-name descname">[0, 2, 0],</code></dt>
 <dt>
-<code class="sig-name descname">[0, 0, 2]]), ispin=None, efermi=None, shift_efermi=True, elimit=(-5, 15), kticks=[0, 36, 54, 86, 110, 147, 165, 199], knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'], print_kpts=False, show_band=True, width=4, color='blue', savetab='unfold_result.csv', savefig='unfolded_band.png', exportplt=False)</code></dt>
+<code class="sig-name descname">[0, 0, 2]]), ispin=None, efermi=None, shift_efermi=True, elimit=(-5, 15), kticks=[0, 36, 54, 86, 110, 147, 165, 199], knames=['$\Gamma$', 'K', 'M', '$\Gamma$', 'A', 'H', 'L', 'A'], print_kpts=False, show_band=True, width=4, color='blue', savetab='unfold_result.csv', savefig='unfolded_band.png', exportplt=False, repair=True, code='vasp')</code></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -945,7 +947,7 @@ plotting.</p>
 <span id="pyprocar-scriptvector-module"></span><h2>pyprocar.scriptVector module<a class="headerlink" href="#module-pyprocar.scriptVector" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="pyprocar.scriptVector.Vector">
-<code class="sig-prename descclassname">pyprocar.scriptVector.</code><code class="sig-name descname">Vector</code><span class="sig-paren">(</span><em class="sig-param">infile</em>, <em class="sig-param">bands=None</em>, <em class="sig-param">energy=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">scale=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptVector.html#Vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptVector.Vector" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptVector.</code><code class="sig-name descname">Vector</code><span class="sig-paren">(</span><em class="sig-param">infile</em>, <em class="sig-param">bands=None</em>, <em class="sig-param">energy=None</em>, <em class="sig-param">fermi=None</em>, <em class="sig-param">atoms=None</em>, <em class="sig-param">orbitals=None</em>, <em class="sig-param">outcar=None</em>, <em class="sig-param">scale=0.1</em>, <em class="sig-param">code='vasp'</em>, <em class="sig-param">repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptVector.html#Vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptVector.Vector" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

@@ -184,7 +184,8 @@
     <span class="n">st</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">noarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">exportplt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  This module plots 2D Fermi surface.</span>
@@ -194,6 +195,13 @@
 
     <span class="c1"># Turn interactive plotting off</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+
+    <span class="c1"># Repair PROCAR</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
+            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -229,7 +237,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no_arrows       : &quot;</span><span class="p">,</span> <span class="n">noarrow</span><span class="p">)</span>
 
     <span class="c1"># first parse the outputs if given</span>
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;vasp&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">rec_basis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">outcar</span><span class="p">:</span>
             <span class="n">outcarparser</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -246,7 +254,7 @@
         <span class="c1"># permissive incompatible with Fermi surfaces</span>
         <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">permissive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">recLattice</span><span class="o">=</span><span class="n">rec_basis</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;elk&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;elk&quot;</span><span class="p">:</span>
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ElkParser</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">rec_basis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -259,7 +267,7 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Reciprocal Lattice not found&quot;</span><span class="p">)</span>
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">Elkparser</span><span class="p">(</span><span class="n">kdirect</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;abinit&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">rec_basis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">abinit_output</span><span class="p">:</span>
             <span class="n">abinitparser</span> <span class="o">=</span> <span class="n">AbinitParser</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">abinit_output</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

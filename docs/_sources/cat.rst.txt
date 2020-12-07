@@ -1,3 +1,5 @@
+.. _labelcat:
+
 Concatenating multiple calculations
 ===================================
 
@@ -7,9 +9,12 @@ Usage::
 
 	pyprocar.cat(inFiles=['PROCAR_G-K','PROCAR_K-M','PROCAR_M-G'], outFile='PROCAR_merged', gz=False, mergeparallel = False, fixformat = False)
 
-If the PROCARs are in a compressed .gz file, set ``gz=True``.
+If the PROCARs are in a compressed .gz file, set ``gz=True``. If inFiles is not provided it will put all the ``PROCAR_*`` files into the inFiles list. 
 
-When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set ``mergeparallel=True``. To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set ``fixformat=True`` as well. If inFiles is not provided it will put all the ``PROCAR_*`` files into the inFiles list. 
+NOTE:
+
+When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set ``mergeparallel=True``. To detect if the calculation is spin polarized, provide ``abinit_output`` or set ``nspin`` value manually.
+To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set ``fixformat=True`` as well. 
 
 .. automodule:: pyprocar.scriptCat
 	:members:

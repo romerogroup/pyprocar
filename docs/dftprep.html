@@ -255,7 +255,7 @@ plot1d
 </ul>
 <p>Abinit version <span class="math notranslate nohighlight">\(9.x^*\)</span> generates a PROCAR similar to that of VASP when <code class="docutils literal notranslate"><span class="pre">prtprocar</span></code> is set in the input file.
 To provide the Abinit output file, use the flag <code class="docutils literal notranslate"><span class="pre">abinit_output=&lt;nameofoutputfile&gt;</span></code> in PyProcar functions.</p>
-<p>* Currenlty only available in a development version of Abinit.</p>
+<p>When running Abinit in parallel the PROCAR is split into multiple files. PyProcar’s <code class="docutils literal notranslate"><span class="pre">cat</span></code> function can merge these files together as explained in the section <a class="reference internal" href="cat.html#labelcat"><span class="std std-ref">Concatenating multiple calculations</span></a>. This also has an option to fix formatting issues in the Abinit PROCAR if needed.</p>
 </div>
 </div>
 

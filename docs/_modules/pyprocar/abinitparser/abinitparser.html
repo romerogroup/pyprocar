@@ -168,6 +168,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span> <span class="o">=</span> <span class="n">abinit_output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reclat</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reciprocal lattice vectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nspin</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># spin</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_readFermi</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_readRecLattice</span><span class="p">()</span>
@@ -177,10 +178,17 @@
     <span class="k">def</span> <span class="nf">_readFermi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
             <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span>
+
+        <span class="c1"># Converting from Hartree to eV</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="mf">27.211396641308</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span>
+
+        <span class="c1"># read spin (nsppol)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nspin</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;nsppol\s*=\s*([1-9]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_readRecLattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>

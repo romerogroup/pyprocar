@@ -6,6 +6,7 @@ import numpy as np
 
 from .splash import welcome
 from .utilsprocar import UtilsProcar
+from .abinitparser import AbinitParser
 
 
 def cat(
@@ -14,6 +15,8 @@ def cat(
     gz=False,
     mergeparallel=False,
     fixformat=False,
+    nspin=1,
+    abinit_output=None,
 ):
     """
     This module concatenates multiple PROCARs.
@@ -22,6 +25,8 @@ def cat(
     set mergeparallel = True for merging PROCARs generated from
     parallel Abinit calculations. Set fixformat = True to fix formatting issues
     in the Abinit PROCAR file.
+    To detect if the calculation is spin-colinear it checks for the nsppol flag
+    in the Abinit output file as set in abinit_output. If not present, set nspin.
     """
     welcome()
 
@@ -49,11 +54,11 @@ def cat(
         return
 
     elif mergeparallel == True and fixformat == False:
-        _mergeparallel(inFiles, outFile)
+        _mergeparallel(inFiles, outFile, nspin, abinit_output)
 
     elif mergeparallel == True and fixformat == True:
         outFile_temp = "outFile.tmp"
-        _mergeparallel(inFiles, outFile_temp)
+        _mergeparallel(inFiles, outFile_temp, nspin, abinit_output)
         _fixformat(outFile_temp, outFile)
         if os.path.exists(outFile_temp):
             os.remove(outFile_temp)
@@ -63,18 +68,58 @@ def cat(
         _fixformat(inFiles, outFile)
 
 
-def _mergeparallel(inputfiles=None, outputfile=None):
+def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None):
     """ This merges Procar files seperated between k-point ranges.
     Happens with parallel Abinit runs.
     """
     print("Merging parallel files...")
     filenames = sorted(inputfiles)
 
-    with open(outputfile, "w") as outfile:
-        for fname in filenames:
-            with open(fname) as infile:
-                for line in infile:
-                    outfile.write(line)
+    # creating an instance of the AbinitParser class
+    if abinit_output:
+        abinitparserobject = AbinitParser(abinit_output=abinit_output)
+        nspin = int(abinitparserobject.nspin)
+    else:
+        nspin = int(nspin)
+
+    if nspin != 2:
+        with open(outputfile, "w") as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
+
+    elif nspin == 2:
+        # for spin polarized calculations the spin down segments are saved in the
+        # second half of the PROCAR's but in reverse k-point order. So we have to
+        # fix the order and merge the second half of the PROCAR's.
+        spinup_list = filenames[: int(len(filenames) / 2)]
+        spindown_list = filenames[int(len(filenames) / 2) :]
+
+        # reading the second line of the header to set as the separating line
+        # in the colinear spin PROCAR.
+        fp = open(spinup_list[0], "r")
+        header1 = fp.readline()
+        header2 = fp.readline()
+        fp.close()
+
+        # second half of PROCAR files in reverse order.
+        spindown_list.reverse()
+
+        # Writing new PROCAR with first spin up, header2 and then
+        # spin down (reversed).
+        with open(outputfile, "w") as outfile:
+            for spinupfile in spinup_list:
+                with open(spinupfile) as infile:
+                    for line in infile:
+                        outfile.write(line)
+            outfile.write("\n")
+            outfile.write(header2)
+            outfile.write("\n")
+            for spindownfile in spindown_list:
+                with open(spindownfile) as infile:
+                    for line in infile:
+                        outfile.write(line)
 
 
 def _fixformat(inputfile=None, outputfile=None):

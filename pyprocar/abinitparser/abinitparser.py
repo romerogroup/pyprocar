@@ -13,6 +13,7 @@ class AbinitParser:
         self.abinit_output = abinit_output
         self.fermi = None
         self.reclat = None  # reciprocal lattice vectors
+        self.nspin = None  # spin
 
         self._readFermi()
         self._readRecLattice()
@@ -22,10 +23,17 @@ class AbinitParser:
     def _readFermi(self):
         rf = open(self.abinit_output, "r")
         data = rf.read()
-        rf.close()
         self.fermi = float(
             findall("Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)", data)[0]
         )
+
+        # Converting from Hartree to eV
+        self.fermi = 27.211396641308 * self.fermi
+
+        # read spin (nsppol)
+        self.nspin = findall(r"nsppol\s*=\s*([1-9]*)", data)[0]
+
+        rf.close()
 
     def _readRecLattice(self):
         rf = open(self.abinit_output, "r")

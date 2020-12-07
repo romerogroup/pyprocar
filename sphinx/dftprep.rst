@@ -105,4 +105,5 @@ Follow instructions on how to perform a Lobster analysis with Quantum Espresso. 
 Abinit version :math:`9.x^*` generates a PROCAR similar to that of VASP when ``prtprocar`` is set in the input file. 
 To provide the Abinit output file, use the flag ``abinit_output=<nameofoutputfile>`` in PyProcar functions.  
 
-\* Currenlty only available in a development version of Abinit.
+When running Abinit in parallel the PROCAR is split into multiple files. PyProcar's ``cat`` function can merge these files together as explained in the section :ref:`labelcat`. This also has an option to fix formatting issues in the Abinit PROCAR if needed. 
+

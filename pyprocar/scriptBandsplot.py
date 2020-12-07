@@ -337,6 +337,12 @@ def bandsplot(
     data = ProcarSelect(procarFile, deepCopy=True, mode=mode)
     numofbands = int(data.spd.shape[1] / 2)
 
+    # Unit conversions
+
+    # Abinit PROCAR has band energy units in Hartree. We need it in eV.
+    if code == "abinit":
+        data.bands = data.bands * 27.211396641308
+
     # handling the spin, `spin='st'` is not straightforward, needs
     # to calculate the k vector and its normal. Other `spin` values
     # are trivial.

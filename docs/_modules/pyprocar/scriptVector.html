@@ -170,9 +170,17 @@
     <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">outcar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
 
     <span class="n">welcome</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
+            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">infile</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input File    : &quot;</span><span class="p">,</span> <span class="n">infile</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bands         : &quot;</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span>

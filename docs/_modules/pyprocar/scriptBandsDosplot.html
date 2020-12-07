@@ -192,44 +192,51 @@
 
 
 <div class="viewcode-block" id="bandsdosplot"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptBandsDosplot.bandsdosplot">[docs]</a><span class="k">def</span> <span class="nf">bandsdosplot</span><span class="p">(</span>
-        <span class="n">bands_file</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
-        <span class="n">dos_file</span><span class="o">=</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span>
-        <span class="n">outcar</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
-        <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">bands_mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
-        <span class="n">dos_mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
-        <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">markersize</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
-        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">bands_spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">bands_separate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">dos_spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dos_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dos_spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
-        <span class="n">dos_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dos_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dlimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
-        <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">kpointsfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span>
-        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
-        <span class="n">savefig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">discontinuities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">plot_color_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">bands_file</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
+    <span class="n">dos_file</span><span class="o">=</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span>
+    <span class="n">outcar</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
+    <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">bands_mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+    <span class="n">dos_mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+    <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+    <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">bands_spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">bands_separate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">dos_spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dos_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dos_spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="n">dos_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dos_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dlimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">kpointsfile</span><span class="o">=</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span>
+    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+    <span class="n">savefig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">discontinuities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_color_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This function creates plots containing both DOS and bands.&quot;&quot;&quot;</span>
 
     <span class="n">welcome</span><span class="p">()</span>
+
+    <span class="c1"># Repair PROCAR</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
+            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">bands_file</span><span class="p">,</span> <span class="n">bands_file</span><span class="p">)</span>
 
     <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">constrained_layout</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
@@ -256,8 +263,12 @@
         <span class="n">dos_spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">dos_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span> <span class="s1">&#39;parametric&#39;</span><span class="p">,</span> <span class="s1">&#39;stack_species&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span> <span class="s1">&#39;stack&#39;</span>
+        <span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;parametric_line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;parametric&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;stack_species&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;stack_orbitals&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;stack&quot;</span><span class="p">,</span>
     <span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;Mode should be choosed from [&#39;plain&#39;, &#39;parametric_line&#39;,&#39;parametric&#39;,&#39;stack_species&#39;,&#39;stack_orbitals&#39;,&#39;stack&#39;]&quot;</span>
@@ -265,7 +276,9 @@
 
     <span class="c1"># Verbose section</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script initiated&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Script initiated...&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;code           : &quot;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bands file     : &quot;</span><span class="p">,</span> <span class="n">bands_file</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bands mode     : &quot;</span><span class="p">,</span> <span class="n">bands_mode</span><span class="p">)</span>
@@ -311,18 +324,18 @@
 
     <span class="c1"># If KPOINTS file is given:</span>
     <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
-        
+
         <span class="k">if</span> <span class="n">kpointsfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Getting the high symmetry point names from KPOINTS file</span>
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">kpointsfile</span><span class="p">)</span>
             <span class="n">KPread</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    
+
             <span class="n">KPmatrix</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;reciprocal[\s\S]*&quot;</span><span class="p">,</span> <span class="n">KPread</span><span class="p">)</span>
             <span class="n">tick_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;!\s(.*)&quot;</span><span class="p">,</span> <span class="n">KPmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
             <span class="n">knames</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="n">tick_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-    
+
             <span class="c1">################## Checking for discontinuities ########################</span>
             <span class="n">discont_indx</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">icounter</span> <span class="o">=</span> <span class="mi">1</span>
@@ -332,14 +345,15 @@
                     <span class="n">icounter</span> <span class="o">=</span> <span class="n">icounter</span> <span class="o">+</span> <span class="mi">2</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">discont_indx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">icounter</span><span class="p">)</span>
-                    <span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span>
-                                  <span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="n">tick_labels</span><span class="p">[</span><span class="n">icounter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span>
                     <span class="n">icounter</span> <span class="o">=</span> <span class="n">icounter</span> <span class="o">+</span> <span class="mi">2</span>
             <span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_labels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">discont_indx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">discont_indx</span><span class="p">))</span>
-    
+
             <span class="c1">################# End of discontinuity check ##########################</span>
-    
+
             <span class="c1"># Added by Nicholas Pike to modify the output of seekpath to allow for</span>
             <span class="c1"># latex rendering.</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">knames</span><span class="p">)):</span>
@@ -347,34 +361,34 @@
                     <span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;\Gamma&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
-    
+
             <span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="s2">&quot;$&quot;</span> <span class="o">+</span> <span class="n">latx</span> <span class="o">+</span> <span class="s2">&quot;$&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">latx</span> <span class="ow">in</span> <span class="n">knames</span><span class="p">]</span>
-    
+
             <span class="c1"># getting the number of grid points from the KPOINTS file</span>
             <span class="n">f2</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">kpointsfile</span><span class="p">)</span>
             <span class="n">KPreadlines</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
             <span class="n">f2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">numgridpoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">KPreadlines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-    
+
             <span class="n">kticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">gridpoint</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">kt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">knames</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">gridpoint</span> <span class="o">=</span> <span class="n">gridpoint</span> <span class="o">+</span> <span class="n">numgridpoints</span>
                 <span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gridpoint</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    
+
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;knames         : &quot;</span><span class="p">,</span> <span class="n">knames</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;kticks         : &quot;</span><span class="p">,</span> <span class="n">kticks</span><span class="p">)</span>
-    
+
             <span class="c1"># creating an array for discontunuity k-points. These are the indexes</span>
             <span class="c1"># of the discontinuity k-points.</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">discont_indx</span><span class="p">:</span>
                 <span class="n">discontinuities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kticks</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">discontinuities</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;discont. list  : &quot;</span><span class="p">,</span> <span class="n">discontinuities</span><span class="p">)</span>
-                
+
     <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobster&quot;</span><span class="p">:</span>
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">LobsterParser</span><span class="p">()</span>
-        
+
         <span class="n">kticks</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">kticks</span>
         <span class="n">knames</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">knames</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;knames         : &quot;</span><span class="p">,</span> <span class="n">knames</span><span class="p">)</span>
@@ -385,10 +399,10 @@
         <span class="n">dos_plot</span> <span class="o">=</span> <span class="n">DosPlot</span><span class="p">(</span><span class="n">dos</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dos_spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dos_spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">))</span>
-    
+
     <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">QEParser</span><span class="p">()</span>
-        
+
         <span class="n">kticks</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">kticks</span>
         <span class="n">knames</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">knames</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;knames         : &quot;</span><span class="p">,</span> <span class="n">knames</span><span class="p">)</span>
@@ -408,18 +422,19 @@
     <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
         <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
-        <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">VaspXML</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">dos_file</span><span class="p">,</span>
-                          <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="n">dos_interpolation_factor</span><span class="p">)</span>
+        <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">VaspXML</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">dos_file</span><span class="p">,</span> <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="n">dos_interpolation_factor</span>
+        <span class="p">)</span>
         <span class="n">dos_plot</span> <span class="o">=</span> <span class="n">DosPlot</span><span class="p">(</span><span class="n">dos</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dos_spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dos_spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">))</span>
-            
+
     <span class="c1"># elif code == &quot;lobster&quot;:</span>
     <span class="c1">#     procarFile = LobsterParser()</span>
     <span class="c1">#     vaspxml = LobsterDOSParser()</span>
     <span class="c1">#     dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)</span>
-        
+
     <span class="c1"># If ticks and names are given by the user manually:</span>
     <span class="k">if</span> <span class="n">kticks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">knames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">kticks</span><span class="p">,</span> <span class="n">knames</span><span class="p">))</span>
@@ -460,11 +475,8 @@
         <span class="k">if</span> <span class="n">kdirect</span><span class="p">:</span>
             <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">bands_file</span><span class="p">,</span> <span class="n">permissive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">bands_file</span><span class="p">,</span>
-                                <span class="n">permissive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">recLattice</span><span class="o">=</span><span class="n">recLat</span><span class="p">)</span>
+            <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">bands_file</span><span class="p">,</span> <span class="n">permissive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">recLattice</span><span class="o">=</span><span class="n">recLat</span><span class="p">)</span>
 
-            
     <span class="c1"># processing the data, getting an instance of the class that reduces the data</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">ProcarSelect</span><span class="p">(</span><span class="n">procarFile</span><span class="p">,</span> <span class="n">deepCopy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">bands_mode</span><span class="p">)</span>
     <span class="n">numofbands</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
@@ -485,8 +497,7 @@
         <span class="n">dataY</span><span class="o">.</span><span class="n">selectAtoms</span><span class="p">(</span><span class="n">bands_atoms</span><span class="p">,</span> <span class="n">fortran</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">dataY</span><span class="o">.</span><span class="n">selectOrbital</span><span class="p">(</span><span class="n">bands_orbitals</span><span class="p">)</span>
         <span class="c1"># getting the signed angle of each K-vector</span>
-        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
-                           <span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.000000001</span><span class="p">))</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="n">dataX</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.000000001</span><span class="p">))</span>
         <span class="n">sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
         <span class="n">cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
         <span class="n">sin</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">sin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
@@ -503,26 +514,27 @@
     <span class="k">if</span> <span class="n">bands_separate</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">bands_spin</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># plotting spin up bands separately</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="p">:</span><span class="n">numofbands</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span>
-                          <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="p">:</span><span class="n">numofbands</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plotting spin up bands...&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">bands_spin</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># plotting spin down bands separately</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">numofbands</span><span class="p">:]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span>
-                          <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span> <span class="n">numofbands</span><span class="p">:]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plotting spin down bands...&quot;</span><span class="p">)</span>
 
         <span class="n">plot</span> <span class="o">=</span> <span class="n">ProcarPlot</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Regular plotting method. For spin it plots density or magnetization.</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;lobster&#39;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s1">&#39;qe&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobster&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
             <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
-        
-        
+
         <span class="n">plot</span> <span class="o">=</span> <span class="n">ProcarPlot</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">spd</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -549,11 +561,7 @@
             <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">bands_mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plotBands</span><span class="p">(</span>
-            <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
-            <span class="n">discontinuities</span><span class="o">=</span><span class="n">discontinuities</span><span class="p">,</span>
-            <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">plotBands</span><span class="p">(</span><span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="n">discontinuities</span><span class="o">=</span><span class="n">discontinuities</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,)</span>
         <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$E-E_f$ [eV]&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -567,15 +575,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plot_color_bar</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">parametricPlot</span><span class="p">(</span>
-        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-        <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
-        <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
-        <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
-        <span class="n">discontinuities</span><span class="o">=</span><span class="n">discontinuities</span><span class="p">,</span>
-        <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
-        <span class="n">plot_bar</span><span class="o">=</span><span class="n">plot_color_bar</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-    <span class="p">)</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+            <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+            <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
+            <span class="n">discontinuities</span><span class="o">=</span><span class="n">discontinuities</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
+            <span class="n">plot_bar</span><span class="o">=</span><span class="n">plot_color_bar</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$E-E_f$ [eV]&quot;</span><span class="p">)</span>
@@ -585,10 +593,9 @@
             <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">dos_plot</span><span class="o">.</span><span class="n">plot_total</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">dos_spins</span><span class="p">,</span>
-                                     <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span>
-                                     <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
-                                     <span class="n">labels</span><span class="o">=</span><span class="n">dos_labels</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">dos_plot</span><span class="o">.</span><span class="n">plot_total</span><span class="p">(</span>
+            <span class="n">spins</span><span class="o">=</span><span class="n">dos_spins</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">dos_labels</span>
+        <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;parametric_line&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">total</span><span class="p">:</span>
@@ -668,7 +675,7 @@
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="c1">#dos = dos_plot.dos_total</span>
+            <span class="c1"># dos = dos_plot.dos_total</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">dos_plot</span><span class="o">.</span><span class="n">plot_stack_species</span><span class="p">(</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">dos_spins</span><span class="p">,</span>
@@ -679,7 +686,7 @@
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="c1">#dos = dos_plot.dos_total</span>
+            <span class="c1"># dos = dos_plot.dos_total</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">dos_plot</span><span class="o">.</span><span class="n">plot_total</span><span class="p">(</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">dos_spins</span><span class="p">,</span>
                 <span class="n">spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
@@ -763,7 +770,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dos_spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">cond</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">,</span>
-            <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cond</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.1</span>
+            <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cond</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">,</span>
         <span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
 
@@ -771,11 +778,14 @@
 
     <span class="k">if</span> <span class="n">dlimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">dlimit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dlimit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;stack_species&quot;</span> <span class="ow">or</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;stack_orbitals&quot;</span>
-          <span class="ow">or</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;stack&quot;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;stack_species&quot;</span>
+        <span class="ow">or</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;stack_orbitals&quot;</span>
+        <span class="ow">or</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;stack&quot;</span>
+    <span class="p">):</span>
         <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax2</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s1">&#39;plain&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">dos_mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
         <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
         <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>

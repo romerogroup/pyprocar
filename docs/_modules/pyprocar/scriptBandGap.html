@@ -208,7 +208,13 @@
     <span class="k">return</span> <span class="n">fermi</span></div>
 
 
-<div class="viewcode-block" id="bandgap"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptBandGap.bandgap">[docs]</a><span class="k">def</span> <span class="nf">bandgap</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span> <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="bandgap"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptBandGap.bandgap">[docs]</a><span class="k">def</span> <span class="nf">bandgap</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span> <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
+            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
 
     <span class="n">bandGap</span> <span class="o">=</span> <span class="kc">None</span>
 

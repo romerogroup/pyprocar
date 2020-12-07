@@ -161,6 +161,7 @@
 
 <span class="kn">from</span> <span class="nn">.splash</span> <span class="kn">import</span> <span class="n">welcome</span>
 <span class="kn">from</span> <span class="nn">.utilsprocar</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
+<span class="kn">from</span> <span class="nn">.abinitparser</span> <span class="kn">import</span> <span class="n">AbinitParser</span>
 
 
 <div class="viewcode-block" id="cat"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptCat.cat">[docs]</a><span class="k">def</span> <span class="nf">cat</span><span class="p">(</span>
@@ -169,6 +170,8 @@
     <span class="n">gz</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">mergeparallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">fixformat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">nspin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This module concatenates multiple PROCARs.</span>
@@ -177,6 +180,8 @@
 <span class="sd">    set mergeparallel = True for merging PROCARs generated from</span>
 <span class="sd">    parallel Abinit calculations. Set fixformat = True to fix formatting issues</span>
 <span class="sd">    in the Abinit PROCAR file.</span>
+<span class="sd">    To detect if the calculation is spin-colinear it checks for the nsppol flag</span>
+<span class="sd">    in the Abinit output file as set in abinit_output. If not present, set nspin.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">welcome</span><span class="p">()</span>
 
@@ -204,11 +209,11 @@
         <span class="k">return</span>
 
     <span class="k">elif</span> <span class="n">mergeparallel</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">fixformat</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">_mergeparallel</span><span class="p">(</span><span class="n">inFiles</span><span class="p">,</span> <span class="n">outFile</span><span class="p">)</span>
+        <span class="n">_mergeparallel</span><span class="p">(</span><span class="n">inFiles</span><span class="p">,</span> <span class="n">outFile</span><span class="p">,</span> <span class="n">nspin</span><span class="p">,</span> <span class="n">abinit_output</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mergeparallel</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">fixformat</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">outFile_temp</span> <span class="o">=</span> <span class="s2">&quot;outFile.tmp&quot;</span>
-        <span class="n">_mergeparallel</span><span class="p">(</span><span class="n">inFiles</span><span class="p">,</span> <span class="n">outFile_temp</span><span class="p">)</span>
+        <span class="n">_mergeparallel</span><span class="p">(</span><span class="n">inFiles</span><span class="p">,</span> <span class="n">outFile_temp</span><span class="p">,</span> <span class="n">nspin</span><span class="p">,</span> <span class="n">abinit_output</span><span class="p">)</span>
         <span class="n">_fixformat</span><span class="p">(</span><span class="n">outFile_temp</span><span class="p">,</span> <span class="n">outFile</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outFile_temp</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">outFile_temp</span><span class="p">)</span>
@@ -218,18 +223,58 @@
         <span class="n">_fixformat</span><span class="p">(</span><span class="n">inFiles</span><span class="p">,</span> <span class="n">outFile</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_mergeparallel</span><span class="p">(</span><span class="n">inputfiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_mergeparallel</span><span class="p">(</span><span class="n">inputfiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nspin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This merges Procar files seperated between k-point ranges.</span>
 <span class="sd">    Happens with parallel Abinit runs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Merging parallel files...&quot;</span><span class="p">)</span>
     <span class="n">filenames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">inputfiles</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
-                    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="c1"># creating an instance of the AbinitParser class</span>
+    <span class="k">if</span> <span class="n">abinit_output</span><span class="p">:</span>
+        <span class="n">abinitparserobject</span> <span class="o">=</span> <span class="n">AbinitParser</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">abinit_output</span><span class="p">)</span>
+        <span class="n">nspin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">abinitparserobject</span><span class="o">.</span><span class="n">nspin</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nspin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nspin</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nspin</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">nspin</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># for spin polarized calculations the spin down segments are saved in the</span>
+        <span class="c1"># second half of the PROCAR&#39;s but in reverse k-point order. So we have to</span>
+        <span class="c1"># fix the order and merge the second half of the PROCAR&#39;s.</span>
+        <span class="n">spinup_list</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="n">spindown_list</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="p">:]</span>
+
+        <span class="c1"># reading the second line of the header to set as the separating line</span>
+        <span class="c1"># in the colinear spin PROCAR.</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">spinup_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">header1</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">header2</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># second half of PROCAR files in reverse order.</span>
+        <span class="n">spindown_list</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="c1"># Writing new PROCAR with first spin up, header2 and then</span>
+        <span class="c1"># spin down (reversed).</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">spinupfile</span> <span class="ow">in</span> <span class="n">spinup_list</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">spinupfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header2</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">spindownfile</span> <span class="ow">in</span> <span class="n">spindown_list</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">spindownfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_fixformat</span><span class="p">(</span><span class="n">inputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
