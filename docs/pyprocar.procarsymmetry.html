@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyprocar.procarunfold package" href="pyprocar.procarunfold.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -208,9 +211,9 @@
 </div>
 <div class="section" id="module-pyprocar.procarsymmetry.procarsymmetry">
 <span id="pyprocar-procarsymmetry-procarsymmetry-module"></span><h2>pyprocar.procarsymmetry.procarsymmetry module<a class="headerlink" href="#module-pyprocar.procarsymmetry.procarsymmetry" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarsymmetry.procarsymmetry.</code><code class="sig-name descname">ProcarSymmetry</code><span class="sig-paren">(</span><em class="sig-param">kpoints</em>, <em class="sig-param">bands</em>, <em class="sig-param">character=None</em>, <em class="sig-param">sx=None</em>, <em class="sig-param">sy=None</em>, <em class="sig-param">sz=None</em>, <em class="sig-param">loglevel=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarsymmetry.procarsymmetry.</code><code class="sig-name descname">ProcarSymmetry</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kpoints</span></em>, <em class="sig-param"><span class="n">bands</span></em>, <em class="sig-param"><span class="n">character</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sz</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">loglevel</span><span class="o">=</span><span class="default_value">30</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -219,23 +222,23 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralRotation</span></code></a>(self, angle[, rotAxis, store])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralRotation</span></code></a>(angle[, rotAxis, store])</p></td>
 <td><p>Apply a rotation defined by an angle and an axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MirrorX</span></code></a>(self)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MirrorX</span></code></a>()</p></td>
 <td><p>Applies the given rotational crystal symmetry to the current system.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RotSymmetryZ</span></code></a>(self, order)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RotSymmetryZ</span></code></a>(order)</p></td>
 <td><p>Applies the given rotational crystal symmetry to the current system.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Translate</span></code></a>(self, newOrigin)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate" title="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Translate</span></code></a>(newOrigin)</p></td>
 <td><p>Centers the Kpoints at newOrigin, newOrigin is either and index (of some Kpoint) or the cartesian coordinates of one point in the reciprocal space.</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation">
-<code class="sig-name descname">GeneralRotation</code><span class="sig-paren">(</span><em class="sig-param">self, angle, rotAxis=[0, 0, 1], store=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.GeneralRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">GeneralRotation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">angle</span></em>, <em class="sig-param"><span class="n">rotAxis</span><span class="o">=</span><span class="default_value">[0, 0, 1]</span></em>, <em class="sig-param"><span class="n">store</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.GeneralRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.GeneralRotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a rotation defined by an angle and an axis.</p>
 <dl class="simple">
 <dt>Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin</dt><dd><p>vectors (if not the case, they will be empty
@@ -255,16 +258,16 @@ The RotAxis can be:</p>
 </div></blockquote>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX">
-<code class="sig-name descname">MirrorX</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.MirrorX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">MirrorX</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.MirrorX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.MirrorX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the given rotational crystal symmetry to the current
 system. ie: to unfold the irreductible BZ to the full BZ.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ">
-<code class="sig-name descname">RotSymmetryZ</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">order</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.RotSymmetryZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">RotSymmetryZ</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.RotSymmetryZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.RotSymmetryZ" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the given rotational crystal symmetry to the current
 system. ie: to unfold the irreductible BZ to the full BZ.</p>
 <p>Only rotations along z-axis are performed, you can use
@@ -273,9 +276,9 @@ self.GeneralRotation first.</p>
 doesn’t check the physics.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate">
-<code class="sig-name descname">Translate</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">newOrigin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.Translate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Translate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">newOrigin</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarsymmetry/procarsymmetry.html#ProcarSymmetry.Translate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarsymmetry.procarsymmetry.ProcarSymmetry.Translate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Centers the Kpoints at newOrigin, newOrigin is either and index (of
 some Kpoint) or the cartesian coordinates of one point in the
 reciprocal space.</p>
@@ -309,11 +312,19 @@ reciprocal space.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -324,7 +335,6 @@ reciprocal space.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

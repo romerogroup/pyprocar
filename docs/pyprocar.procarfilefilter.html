@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyprocar.procarparser package" href="pyprocar.procarparser.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -208,9 +211,9 @@
 </div>
 <div class="section" id="module-pyprocar.procarfilefilter.procarfilefilter">
 <span id="pyprocar-procarfilefilter-procarfilefilter-module"></span><h2>pyprocar.procarfilefilter.procarfilefilter module<a class="headerlink" href="#module-pyprocar.procarfilefilter.procarfilefilter" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarfilefilter.procarfilefilter.</code><code class="sig-name descname">ProcarFileFilter</code><span class="sig-paren">(</span><em class="sig-param">infile=None</em>, <em class="sig-param">outfile=None</em>, <em class="sig-param">loglevel=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarfilefilter.procarfilefilter.</code><code class="sig-name descname">ProcarFileFilter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">loglevel</span><span class="o">=</span><span class="default_value">30</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Process a PROCAR file fields line-wise, specially useful for HUGE
 files. This could be thought as pre-processing, writting a new
@@ -258,32 +261,32 @@ the new orbitals will have a generic meaningless name (o1, o2, o3)</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterAtoms</span></code></a>(self, atomsGroups)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterAtoms</span></code></a>(atomsGroups)</p></td>
 <td><p>Reads the file already set by SetInFile() and writes a new file already set by SetOutFile().</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterBands</span></code></a>(self, Min, Max)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterBands</span></code></a>(Min, Max)</p></td>
 <td><p>Reads the file already set by SetInFile() and writes a new file already set by SetOutFile().</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterKpoints</span></code></a>(self, Min, Max)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterKpoints</span></code></a>(Min, Max)</p></td>
 <td><p>Reads the file already set by SetInFile() and writes a new file already set by SetOutFile().</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterOrbitals</span></code></a>(self, orbitals, orbitalsNames)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterOrbitals</span></code></a>(orbitals, orbitalsNames)</p></td>
 <td><p>Reads the file already set by SetInFile() and writes a new file already set by SetOutFile().</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterSpin</span></code></a>(self, components)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterSpin</span></code></a>(components)</p></td>
 <td><p>Reads the file already set by SetInFile() and writes a new file already set by SetOutFile().</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setInFile</span></code></a>(self, infile)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setInFile</span></code></a>(infile)</p></td>
 <td><p>Sets a input file <cite>infile</cite>, it can contains the path to the file</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setOutFile</span></code></a>(self, outfile)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile" title="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setOutFile</span></code></a>(outfile)</p></td>
 <td><p>Sets a output file <cite>outfile</cite>, it can contains the path to the file</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms">
-<code class="sig-name descname">FilterAtoms</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">atomsGroups</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterAtoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FilterAtoms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atomsGroups</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterAtoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterAtoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the file already set by SetInFile() and writes a new
 file already set by SetOutFile(). The new file only has the
 selected/grouped atoms.</p>
@@ -301,9 +304,9 @@ contribution of atoms 1+2+3 and 4+5+6+7+8</p>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands">
-<code class="sig-name descname">FilterBands</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">Min</em>, <em class="sig-param">Max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterBands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FilterBands</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Min</span></em>, <em class="sig-param"><span class="n">Max</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterBands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterBands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the file already set by SetInFile() and writes a new
 file already set by SetOutFile(). The new file only has the
 selected bands.</p>
@@ -317,9 +320,9 @@ are the same used by vasp (ie written in the file).</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints">
-<code class="sig-name descname">FilterKpoints</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">Min</em>, <em class="sig-param">Max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterKpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FilterKpoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Min</span></em>, <em class="sig-param"><span class="n">Max</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterKpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterKpoints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the file already set by SetInFile() and writes a new
 file already set by SetOutFile(). The new file the
 selected bands.</p>
@@ -331,9 +334,9 @@ are the same used by vasp (i.e. written in the file). Not starting from zero</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals">
-<code class="sig-name descname">FilterOrbitals</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">orbitals</em>, <em class="sig-param">orbitalsNames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterOrbitals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FilterOrbitals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orbitals</span></em>, <em class="sig-param"><span class="n">orbitalsNames</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterOrbitals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterOrbitals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the file already set by SetInFile() and writes a new
 file already set by SetOutFile(). The new file only has the
 selected/grouped orbitals.</p>
@@ -358,9 +361,9 @@ However, [“foo”, “bar”, “baz”] is equally valid.</p>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin">
-<code class="sig-name descname">FilterSpin</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">components</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterSpin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FilterSpin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">components</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.FilterSpin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.FilterSpin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the file already set by SetInFile() and writes a new
 file already set by SetOutFile(). The new file only has the
 selected part of the density (sigma_i).</p>
@@ -377,15 +380,15 @@ be an issue with memory nowadays.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile">
-<code class="sig-name descname">setInFile</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">infile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.setInFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setInFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infile</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.setInFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setInFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a input file <cite>infile</cite>, it can contains the path to the file</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile">
-<code class="sig-name descname">setOutFile</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">outfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.setOutFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setOutFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outfile</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarfilefilter/procarfilefilter.html#ProcarFileFilter.setOutFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarfilefilter.procarfilefilter.ProcarFileFilter.setOutFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a output file <cite>outfile</cite>, it can contains the path to the file</p>
 </dd></dl>
 
@@ -417,11 +420,19 @@ be an issue with memory nowadays.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -432,7 +443,6 @@ be an issue with memory nowadays.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyprocar.procarselect package" href="pyprocar.procarselect.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -208,9 +211,9 @@
 </div>
 <div class="section" id="module-pyprocar.procarplot.procarplot">
 <span id="pyprocar-procarplot-procarplot-module"></span><h2>pyprocar.procarplot.procarplot module<a class="headerlink" href="#module-pyprocar.procarplot.procarplot" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.procarplot.procarplot.ProcarPlot">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarplot.procarplot.</code><code class="sig-name descname">ProcarPlot</code><span class="sig-paren">(</span><em class="sig-param">bands</em>, <em class="sig-param">spd</em>, <em class="sig-param">kpoints=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.procarplot.procarplot.</code><code class="sig-name descname">ProcarPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bands</span></em>, <em class="sig-param"><span class="n">spd</span></em>, <em class="sig-param"><span class="n">kpoints</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -219,7 +222,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot" title="pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">atomicPlot</span></code></a>(self[, cmap, vmin, vmax, ax])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot" title="pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">atomicPlot</span></code></a>([cmap, vmin, vmax, ax])</p></td>
 <td><p>Just a handler to parametricPlot.</p></td>
 </tr>
 </tbody>
@@ -241,28 +244,28 @@
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot">
-<code class="sig-name descname">atomicPlot</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">cmap='hot_r'</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.atomicPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">atomicPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'hot_r'</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.atomicPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.atomicPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Just a handler to parametricPlot. Useful to plot energy levels.</p>
 <p>It adds a fake k-point. Shouldn’t be invoked with more than one
 k-point
 ax not implemented here, not need</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarplot.procarplot.ProcarPlot.parametricPlot">
-<code class="sig-name descname">parametricPlot</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">cmap='jet'</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">ticks=None</em>, <em class="sig-param">discontinuities=[]</em>, <em class="sig-param">ax=None</em>, <em class="sig-param">figsize=(13</em>, <em class="sig-param">9)</em>, <em class="sig-param">plot_bar=True</em>, <em class="sig-param">linewidth=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.parametricPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.parametricPlot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parametricPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ticks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">discontinuities</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(13, 9)</span></em>, <em class="sig-param"><span class="n">plot_bar</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">linewidth</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.parametricPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.parametricPlot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarplot.procarplot.ProcarPlot.plotBands">
-<code class="sig-name descname">plotBands</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">size=0.02</em>, <em class="sig-param">marker='o'</em>, <em class="sig-param">ticks=None</em>, <em class="sig-param">color='blue'</em>, <em class="sig-param">discontinuities=[]</em>, <em class="sig-param">figsize=(13</em>, <em class="sig-param">9)</em>, <em class="sig-param">ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.plotBands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.plotBands" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plotBands</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">0.02</span></em>, <em class="sig-param"><span class="n">marker</span><span class="o">=</span><span class="default_value">'o'</span></em>, <em class="sig-param"><span class="n">ticks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'blue'</span></em>, <em class="sig-param"><span class="n">discontinuities</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(13, 9)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.plotBands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.plotBands" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.procarplot.procarplot.ProcarPlot.scatterPlot">
-<code class="sig-name descname">scatterPlot</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">size=50</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">cmap='hot_r'</em>, <em class="sig-param">vmax=None</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">marker='o'</em>, <em class="sig-param">ticks=None</em>, <em class="sig-param">discontinuities=[]</em>, <em class="sig-param">ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.scatterPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.scatterPlot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scatterPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'hot_r'</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">marker</span><span class="o">=</span><span class="default_value">'o'</span></em>, <em class="sig-param"><span class="n">ticks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">discontinuities</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/procarplot/procarplot.html#ProcarPlot.scatterPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.procarplot.procarplot.ProcarPlot.scatterPlot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -293,11 +296,19 @@ ax not implemented here, not need</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -308,7 +319,6 @@ ax not implemented here, not need</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

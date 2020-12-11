@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyprocar.scriptKpath &mdash; PyProcar 5.3.3 documentation</title>
+  <title>pyprocar.scriptKpath &mdash; PyProcar 5.5.0 documentation</title>
   
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
@@ -30,7 +31,9 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -84,10 +87,11 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyprocar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyprocar API</a></li>
 </ul>
 
             
@@ -152,27 +156,51 @@
            <div itemprop="articleBody">
             
   <h1>Source code for pyprocar.scriptKpath</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author : Uthpala Herath</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">seekpath</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">.splash</span> <span class="kn">import</span> <span class="n">welcome</span>
 
 
-<div class="viewcode-block" id="kpath"><a class="viewcode-back" href="../../test/pyprocar.html#pyprocar.scriptKpath.kpath">[docs]</a><span class="k">def</span> <span class="nf">kpath</span><span class="p">(</span>
-    <span class="n">infile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span>
-    <span class="n">grid_size</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">with_time_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">recipe</span><span class="o">=</span><span class="s1">&#39;hpkot&#39;</span><span class="p">,</span>
-    <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-07</span><span class="p">,</span>
-    <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span>
-    <span class="n">angle_tolerence</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">supercell_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+<div class="viewcode-block" id="kpath"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptKpath.kpath">[docs]</a><span class="k">def</span> <span class="nf">kpath</span><span class="p">(</span>
+        <span class="n">infile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span>
+        <span class="n">grid_size</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+        <span class="n">with_time_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">recipe</span><span class="o">=</span><span class="s1">&#39;hpkot&#39;</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-07</span><span class="p">,</span>
+        <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span>
+        <span class="n">angle_tolerence</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">supercell_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	This module creates a KPOINTS file for band structure plotting.</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+<span class="sd">    This module creates a KPOINTS file for band structure</span>
+<span class="sd">    plotting.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    infile : str, optional</span>
+
+<span class="sd">    outfile : str, optional</span>
+
+<span class="sd">    grid_size : int, optional</span>
+
+<span class="sd">    with_time_reversal : bool, optional</span>
+
+<span class="sd">    recepie : str, optional</span>
+
+<span class="sd">    threshold : float, optional</span>
+
+<span class="sd">    symprec : float, optional</span>
+
+<span class="sd">    angle_tolerence : float, optional</span>
+
+<span class="sd">    supercell_matrix: list, int</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">welcome</span><span class="p">()</span>
 
     <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
@@ -185,15 +213,14 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cell_matrix</span><span class="p">)):</span>
         <span class="n">cell_matrix0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cell_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
         <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell_matrix0</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="n">POSCAR</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+            <span class="n">POSCAR</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
     <span class="c1"># positions</span>
     <span class="c1"># POSCAR index changed by Nicholas Pike from 5 -&gt; 6 and from 7 -&gt; 8</span>
     <span class="c1"># Previously, POSCAR[5] referenced the atom names i.e. Na Cl and not the</span>
     <span class="c1"># atom numbers</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">POSCAR</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-    <span class="n">positions_matrix</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="p">[</span><span class="mi">8</span> <span class="p">:</span> <span class="mi">8</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atoms</span><span class="p">)]</span>
+    <span class="n">positions_matrix</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">8</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atoms</span><span class="p">)]</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">atoms</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">positions_matrix</span><span class="p">)):</span>
@@ -213,9 +240,8 @@
 
     <span class="c1"># seekpath</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
-    <span class="n">kpath_dictionary</span> <span class="o">=</span> <span class="n">seekpath</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span>
-        <span class="n">structure</span><span class="p">,</span> <span class="n">with_time_reversal</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">symprec</span><span class="p">,</span> <span class="n">angle_tolerence</span>
-    <span class="p">)</span>
+    <span class="n">kpath_dictionary</span> <span class="o">=</span> <span class="n">seekpath</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">with_time_reversal</span><span class="p">,</span> <span class="n">recipe</span><span class="p">,</span>
+                                         <span class="n">threshold</span><span class="p">,</span> <span class="n">symprec</span><span class="p">,</span> <span class="n">angle_tolerence</span><span class="p">)</span>
 
     <span class="n">path_array</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">kpath_dictionary</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -242,26 +268,21 @@
     <span class="n">k_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;reciprocal</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">iterator</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coord_matrix</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">iterator</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">k_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> ! </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                    <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                    <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-                    <span class="n">path_array</span><span class="p">[</span><span class="n">iterator</span><span class="p">],</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">k_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> ! </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="n">path_array</span><span class="p">[</span><span class="n">iterator</span><span class="p">],</span>
+            <span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">k_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> ! </span><span class="si">%s</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-                <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                    <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                    <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-                    <span class="n">path_array</span><span class="p">[</span><span class="n">iterator</span><span class="p">],</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-    <span class="n">k_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+            <span class="n">k_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> ! </span><span class="si">%s</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">coord_matrix</span><span class="p">[</span><span class="n">iterator</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="n">path_array</span><span class="p">[</span><span class="n">iterator</span><span class="p">],</span>
+            <span class="p">))</span>
+    <span class="n">k_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span></div>
 </pre></div>
 
            </div>

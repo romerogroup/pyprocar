@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyprocar.doscarplot package" href="pyprocar.doscarplot.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -210,9 +213,9 @@
 <span id="pyprocar-core-dos-module"></span><h2>pyprocar.core.dos module<a class="headerlink" href="#module-pyprocar.core.dos" title="Permalink to this headline">¶</a></h2>
 <p>Created on Wed Aug 19 20:49:03 2020</p>
 <p>&#64;author: Pedram Tavadze, Logan Lang</p>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.core.dos.DensityOfStates">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.dos.</code><code class="sig-name descname">DensityOfStates</code><span class="sig-paren">(</span><em class="sig-param">energies=None</em>, <em class="sig-param">total=None</em>, <em class="sig-param">projected=None</em>, <em class="sig-param">interpolation_factor=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/dos.html#DensityOfStates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.dos.DensityOfStates" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.dos.</code><code class="sig-name descname">DensityOfStates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">energies</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">total</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">projected</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interpolation_factor</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/dos.html#DensityOfStates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.dos.DensityOfStates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -221,7 +224,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.dos.DensityOfStates.dos_sum" title="pyprocar.core.dos.DensityOfStates.dos_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dos_sum</span></code></a>(self[, atoms, principal_q_numbers, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.dos.DensityOfStates.dos_sum" title="pyprocar.core.dos.DensityOfStates.dos_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dos_sum</span></code></a>([atoms, principal_q_numbers, …])</p></td>
 <td><p><table class="docutils align-default">
 <tbody>
 </tbody>
@@ -230,9 +233,9 @@
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.dos.DensityOfStates.dos_sum">
-<code class="sig-name descname">dos_sum</code><span class="sig-paren">(</span><em class="sig-param">self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/dos.html#DensityOfStates.dos_sum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.dos.DensityOfStates.dos_sum" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dos_sum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">principal_q_numbers</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/dos.html#DensityOfStates.dos_sum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.dos.DensityOfStates.dos_sum" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -255,9 +258,9 @@ order as input. The default is None.</p></li>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.dos.interpolate">
-<code class="sig-prename descclassname">pyprocar.core.dos.</code><code class="sig-name descname">interpolate</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">factor=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/dos.html#interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.dos.interpolate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.dos.</code><code class="sig-name descname">interpolate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">factor</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/dos.html#interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.dos.interpolate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interplates the function y=f(x) by increasing the x points by the factor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -280,9 +283,9 @@ order as input. The default is None.</p></li>
 </div>
 <div class="section" id="module-pyprocar.core.elements">
 <span id="pyprocar-core-elements-module"></span><h2>pyprocar.core.elements module<a class="headerlink" href="#module-pyprocar.core.elements" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.elements.atomic_mass">
-<code class="sig-prename descclassname">pyprocar.core.elements.</code><code class="sig-name descname">atomic_mass</code><span class="sig-paren">(</span><em class="sig-param">element</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/elements.html#atomic_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.elements.atomic_mass" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.elements.</code><code class="sig-name descname">atomic_mass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/elements.html#atomic_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.elements.atomic_mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a element symbol or element atomic number returns atomic mass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -297,9 +300,9 @@ order as input. The default is None.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.elements.atomic_number">
-<code class="sig-prename descclassname">pyprocar.core.elements.</code><code class="sig-name descname">atomic_number</code><span class="sig-paren">(</span><em class="sig-param">element</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/elements.html#atomic_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.elements.atomic_number" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.elements.</code><code class="sig-name descname">atomic_number</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/elements.html#atomic_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.elements.atomic_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given element symbol returns atomic number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -314,9 +317,9 @@ order as input. The default is None.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.elements.atomic_symbol">
-<code class="sig-prename descclassname">pyprocar.core.elements.</code><code class="sig-name descname">atomic_symbol</code><span class="sig-paren">(</span><em class="sig-param">atomic_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/elements.html#atomic_symbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.elements.atomic_symbol" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.elements.</code><code class="sig-name descname">atomic_symbol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atomic_number</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/elements.html#atomic_symbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.elements.atomic_symbol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given atomic number returns atomic symbol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -334,9 +337,9 @@ order as input. The default is None.</p></li>
 </div>
 <div class="section" id="module-pyprocar.core.isosurface">
 <span id="pyprocar-core-isosurface-module"></span><h2>pyprocar.core.isosurface module<a class="headerlink" href="#module-pyprocar.core.isosurface" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.core.isosurface.Isosurface">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.isosurface.</code><code class="sig-name descname">Isosurface</code><span class="sig-paren">(</span><em class="sig-param">XYZ=None</em>, <em class="sig-param">V=None</em>, <em class="sig-param">isovalue=None</em>, <em class="sig-param">V_matrix=None</em>, <em class="sig-param">algorithm='lewiner'</em>, <em class="sig-param">interpolation_factor=1</em>, <em class="sig-param">padding=None</em>, <em class="sig-param">transform_matrix=None</em>, <em class="sig-param">boundaries=None</em>, <em class="sig-param">file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#Isosurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.isosurface.</code><code class="sig-name descname">Isosurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">XYZ</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">V</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isovalue</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">V_matrix</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'lewiner'</span></em>, <em class="sig-param"><span class="n">interpolation_factor</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">padding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">transform_matrix</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">boundaries</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#Isosurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyprocar.core.surface.Surface" title="pyprocar.core.surface.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyprocar.core.surface.Surface</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -375,16 +378,16 @@ order as input. The default is None.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.isosurface.Isosurface.clip" title="pyprocar.core.isosurface.Isosurface.clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code></a>(self, S1, S2)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.isosurface.Isosurface.clip" title="pyprocar.core.isosurface.Isosurface.clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code></a>(S1, S2)</p></td>
 <td><p>This function clips S1 using the boundaries of S2 and returns</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(self[, file_obj, file_type])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>([file_obj, file_type])</p></td>
 <td><p>This function uses the export function from trimesh</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code>(self[, cmap, vmin, vmax])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code>([cmap, vmin, vmax])</p></td>
 <td><p>Sets colors for the trimesh object using the color map provided</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code>(self, scalars)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code>(scalars)</p></td>
 <td><p>Sets/Updates the scalars of the surface.</p></td>
 </tr>
 </tbody>
@@ -400,30 +403,30 @@ order as input. The default is None.</p></li>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.X">
 <em class="property">property </em><code class="sig-name descname">X</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.X" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. list of grids in X direction
 :rtype: TYPE numpy array</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.Y">
 <em class="property">property </em><code class="sig-name descname">Y</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.Y" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. list of grids in Y direction
 :rtype: TYPE numpy array</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.Z">
 <em class="property">property </em><code class="sig-name descname">Z</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.Z" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. list of grids in Z direction
 :rtype: TYPE numpy array</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.clip">
-<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">S1</em>, <em class="sig-param">S2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#Isosurface.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.clip" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">clip</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">S1</span></em>, <em class="sig-param"><span class="n">S2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#Isosurface.clip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.clip" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function clips S1 using the boundaries of S2 and returns</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -441,35 +444,35 @@ order as input. The default is None.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.dxyz">
 <em class="property">property </em><code class="sig-name descname">dxyz</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.dxyz" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. length between points in each direction
 :rtype: list</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.nX">
 <em class="property">property </em><code class="sig-name descname">nX</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.nX" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. number of points in the grid in X direction
 :rtype: TYPE int</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.nY">
 <em class="property">property </em><code class="sig-name descname">nY</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.nY" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. number of points in the grid in Y direction
 :rtype: TYPE int</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.nZ">
 <em class="property">property </em><code class="sig-name descname">nZ</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.nZ" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns: DESCRIPTION. number of points in the grid in Z direction
 :rtype: TYPE int</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.isosurface.Isosurface.surface_boundaries">
 <em class="property">property </em><code class="sig-name descname">surface_boundaries</code><a class="headerlink" href="#pyprocar.core.isosurface.Isosurface.surface_boundaries" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function tries to find the isosurface using no interpolation to find the
@@ -487,17 +490,17 @@ to the correct position</p>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.isosurface.fft_interpolate">
-<code class="sig-prename descclassname">pyprocar.core.isosurface.</code><code class="sig-name descname">fft_interpolate</code><span class="sig-paren">(</span><em class="sig-param">function</em>, <em class="sig-param">interpolation_factor=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#fft_interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.fft_interpolate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.isosurface.</code><code class="sig-name descname">fft_interpolate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em>, <em class="sig-param"><span class="n">interpolation_factor</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#fft_interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.fft_interpolate" title="Permalink to this definition">¶</a></dt>
 <dd><p>if I = interpolation_factor
 This function withh recieve f(x,y,z) with dimensions of (nx,ny,nz)
 and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.isosurface.map2matrix">
-<code class="sig-prename descclassname">pyprocar.core.isosurface.</code><code class="sig-name descname">map2matrix</code><span class="sig-paren">(</span><em class="sig-param">XYZ</em>, <em class="sig-param">V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#map2matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.map2matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.isosurface.</code><code class="sig-name descname">map2matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">XYZ</span></em>, <em class="sig-param"><span class="n">V</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/isosurface.html#map2matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.isosurface.map2matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>mapps an Irregular grid to a regular grid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -518,9 +521,9 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </div>
 <div class="section" id="module-pyprocar.core.structure">
 <span id="pyprocar-core-structure-module"></span><h2>pyprocar.core.structure module<a class="headerlink" href="#module-pyprocar.core.structure" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.core.structure.Structure">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.structure.</code><code class="sig-name descname">Structure</code><span class="sig-paren">(</span><em class="sig-param">atoms=None</em>, <em class="sig-param">fractional_coordinates=None</em>, <em class="sig-param">lattice=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/structure.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.structure.Structure" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.structure.</code><code class="sig-name descname">Structure</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fractional_coordinates</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lattice</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/structure.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.structure.Structure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -542,7 +545,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.atomic_numbers">
 <em class="property">property </em><code class="sig-name descname">atomic_numbers</code><a class="headerlink" href="#pyprocar.core.structure.Structure.atomic_numbers" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of atomic numbers</p>
@@ -556,7 +559,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.density">
 <em class="property">property </em><code class="sig-name descname">density</code><a class="headerlink" href="#pyprocar.core.structure.Structure.density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Density of the cell.</p>
@@ -570,7 +573,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.masses">
 <em class="property">property </em><code class="sig-name descname">masses</code><a class="headerlink" href="#pyprocar.core.structure.Structure.masses" title="Permalink to this definition">¶</a></dt>
 <dd><p>list of masses of each atom.</p>
@@ -584,7 +587,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.natoms">
 <em class="property">property </em><code class="sig-name descname">natoms</code><a class="headerlink" href="#pyprocar.core.structure.Structure.natoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of atoms</p>
@@ -598,7 +601,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.nspecies">
 <em class="property">property </em><code class="sig-name descname">nspecies</code><a class="headerlink" href="#pyprocar.core.structure.Structure.nspecies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of species present in the cell.</p>
@@ -612,7 +615,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.species">
 <em class="property">property </em><code class="sig-name descname">species</code><a class="headerlink" href="#pyprocar.core.structure.Structure.species" title="Permalink to this definition">¶</a></dt>
 <dd><p>list of different species present in the cell.</p>
@@ -626,7 +629,7 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.structure.Structure.volume">
 <em class="property">property </em><code class="sig-name descname">volume</code><a class="headerlink" href="#pyprocar.core.structure.Structure.volume" title="Permalink to this definition">¶</a></dt>
 <dd><p>Volume of the unit cell.</p>
@@ -645,9 +648,9 @@ and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)</p>
 </div>
 <div class="section" id="module-pyprocar.core.surface">
 <span id="pyprocar-core-surface-module"></span><h2>pyprocar.core.surface module<a class="headerlink" href="#module-pyprocar.core.surface" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.core.surface.Surface">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.surface.</code><code class="sig-name descname">Surface</code><span class="sig-paren">(</span><em class="sig-param">verts=None</em>, <em class="sig-param">faces=None</em>, <em class="sig-param">face_normals=None</em>, <em class="sig-param">vert_normals=None</em>, <em class="sig-param">face_colors=None</em>, <em class="sig-param">vert_colors=None</em>, <em class="sig-param">vectors=None</em>, <em class="sig-param">scalars=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.core.surface.</code><code class="sig-name descname">Surface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">verts</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">faces</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">face_normals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vert_normals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">face_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vert_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vectors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scalars</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Surface is a class that holds information about a surface
 To create a surface the minimum requirements are verts and faces</p>
@@ -688,13 +691,13 @@ the color using a color map</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.surface.Surface.export" title="pyprocar.core.surface.Surface.export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code></a>(self[, file_obj, file_type])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.surface.Surface.export" title="pyprocar.core.surface.Surface.export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code></a>([file_obj, file_type])</p></td>
 <td><p>This function uses the export function from trimesh</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.core.surface.Surface.set_color_with_cmap" title="pyprocar.core.surface.Surface.set_color_with_cmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code></a>(self[, cmap, vmin, vmax])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.core.surface.Surface.set_color_with_cmap" title="pyprocar.core.surface.Surface.set_color_with_cmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code></a>([cmap, vmin, vmax])</p></td>
 <td><p>Sets colors for the trimesh object using the color map provided</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.surface.Surface.set_scalars" title="pyprocar.core.surface.Surface.set_scalars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code></a>(self, scalars)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.core.surface.Surface.set_scalars" title="pyprocar.core.surface.Surface.set_scalars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code></a>(scalars)</p></td>
 <td><p>Sets/Updates the scalars of the surface.</p></td>
 </tr>
 </tbody>
@@ -710,7 +713,7 @@ the color using a color map</p></li>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.center_of_mass">
 <em class="property">property </em><code class="sig-name descname">center_of_mass</code><a class="headerlink" href="#pyprocar.core.surface.Surface.center_of_mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Center of mass of the vertices.
@@ -718,7 +721,7 @@ the color using a color map</p></li>
 :rtype: list float</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.centers">
 <em class="property">property </em><code class="sig-name descname">centers</code><a class="headerlink" href="#pyprocar.core.surface.Surface.centers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Centers of faces
@@ -726,9 +729,9 @@ the color using a color map</p></li>
 :rtype: list of floats (n,3)</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.export">
-<code class="sig-name descname">export</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">file_obj='output.glb'</em>, <em class="sig-param">file_type='glb'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.export" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">export</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_obj</span><span class="o">=</span><span class="default_value">'output.glb'</span></em>, <em class="sig-param"><span class="n">file_type</span><span class="o">=</span><span class="default_value">'glb'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.export" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function uses the export function from trimesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -746,7 +749,7 @@ the color using a color map</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.nfaces">
 <em class="property">property </em><code class="sig-name descname">nfaces</code><a class="headerlink" href="#pyprocar.core.surface.Surface.nfaces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of faces
@@ -754,7 +757,7 @@ the color using a color map</p></li>
 :rtype: int</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.nverts">
 <em class="property">property </em><code class="sig-name descname">nverts</code><a class="headerlink" href="#pyprocar.core.surface.Surface.nverts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number or vertices.
@@ -762,9 +765,9 @@ the color using a color map</p></li>
 :rtype: int</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.set_color_with_cmap">
-<code class="sig-name descname">set_color_with_cmap</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">cmap='viridis'</em>, <em class="sig-param">vmin=None</em>, <em class="sig-param">vmax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.set_color_with_cmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.set_color_with_cmap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_color_with_cmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'viridis'</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.set_color_with_cmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.set_color_with_cmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets colors for the trimesh object using the color map provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -777,9 +780,9 @@ the color using a color map</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.set_scalars">
-<code class="sig-name descname">set_scalars</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">scalars</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.set_scalars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.set_scalars" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_scalars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scalars</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.set_scalars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.set_scalars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets/Updates the scalars of the surface. Scalars represent a
 color using a color map.</p>
 <dl class="field-list simple">
@@ -789,16 +792,16 @@ color using a color map.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.core.surface.Surface.set_vectors">
-<code class="sig-name descname">set_vectors</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">vectors_X</em>, <em class="sig-param">vectors_Y</em>, <em class="sig-param">vectors_Z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.set_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.set_vectors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_vectors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vectors_X</span></em>, <em class="sig-param"><span class="n">vectors_Y</span></em>, <em class="sig-param"><span class="n">vectors_Z</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#Surface.set_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.Surface.set_vectors" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.surface.boolean_add">
-<code class="sig-prename descclassname">pyprocar.core.surface.</code><code class="sig-name descname">boolean_add</code><span class="sig-paren">(</span><em class="sig-param">surfaces</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#boolean_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.boolean_add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.surface.</code><code class="sig-name descname">boolean_add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">surfaces</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#boolean_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.boolean_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>This functtion uses boolean add from PyVista</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -813,9 +816,9 @@ color using a color map.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.core.surface.convert_from_pyvista_faces">
-<code class="sig-prename descclassname">pyprocar.core.surface.</code><code class="sig-name descname">convert_from_pyvista_faces</code><span class="sig-paren">(</span><em class="sig-param">pyvista_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#convert_from_pyvista_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.convert_from_pyvista_faces" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.core.surface.</code><code class="sig-name descname">convert_from_pyvista_faces</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pyvista_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/core/surface.html#convert_from_pyvista_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.core.surface.convert_from_pyvista_faces" title="Permalink to this definition">¶</a></dt>
 <dd><p>pyvista mesh faces are written in a 1d array, This function returns faces in
 a conventional way. A list of lists, where each list contains integers numbers of
 vert conections</p>
@@ -859,11 +862,19 @@ vert conections</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -874,7 +885,6 @@ vert conections</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Band unfolding" href="unfold.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -112,6 +114,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -150,7 +153,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
         
@@ -184,9 +187,9 @@
 <p>NOTE:</p>
 <p>When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set <code class="docutils literal notranslate"><span class="pre">mergeparallel=True</span></code>. To detect if the calculation is spin polarized, provide <code class="docutils literal notranslate"><span class="pre">abinit_output</span></code> or set <code class="docutils literal notranslate"><span class="pre">nspin</span></code> value manually.
 To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set <code class="docutils literal notranslate"><span class="pre">fixformat=True</span></code> as well.</p>
-<span class="target" id="module-pyprocar.scriptCat"></span><dl class="function">
+<span class="target" id="module-pyprocar.scriptCat"></span><dl class="py function">
 <dt id="pyprocar.scriptCat.cat">
-<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param">inFiles=None</em>, <em class="sig-param">outFile='PROCAR_merged'</em>, <em class="sig-param">gz=False</em>, <em class="sig-param">mergeparallel=False</em>, <em class="sig-param">fixformat=False</em>, <em class="sig-param">nspin=1</em>, <em class="sig-param">abinit_output=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptCat.</code><code class="sig-name descname">cat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inFiles</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outFile</span><span class="o">=</span><span class="default_value">'PROCAR_merged'</span></em>, <em class="sig-param"><span class="n">gz</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">mergeparallel</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fixformat</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">nspin</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">abinit_output</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
 <dd><p>This module concatenates multiple PROCARs.
 If a list of input PROCAR files is not provided it will merge all the PROCAR_*
 files in the directory.
@@ -219,11 +222,19 @@ in the Abinit output file as set in abinit_output. If not present, set nspin.</p
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -234,7 +245,6 @@ in the Abinit output file as set in abinit_output. If not present, set nspin.</p
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

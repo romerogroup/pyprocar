@@ -106,11 +106,15 @@ Currently, Elk only supports spin colinear plotting. Non colinear spin plotting 
 3. Atom projection
 ==================
 
-The projection of atoms onto bands can provide information such as which atoms contribute to the electronic states near the Fermi level. PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO_3, the indexes of ``atoms`` for Sr, V and the three O atoms would be 1,2 and 3,4,5 respectively. It is also possible to include more than one type of atom by using an array such as ``atoms = [1,2,3]``.
+The projection of atoms onto bands can provide information such as which atoms contribute to the electronic states near the Fermi level. PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO:math:`_3`, the indexes of ``atoms`` for Sr, V and the three O atoms would be 0,1 and 2,3,4 respectively. It is also possible to include more than one type of atom by using an array such as ``atoms = [0,1,3]``. The index 5 would correspond to the total contribution from all the atoms. 
 
 Usage::
 
 	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet', mode='parametric',atoms=[1])
+
+NOTE:
+
+The reason for this format which includes the "total" atomic contribution as the last atom index is because the PROCAR file from VASP which PyProcar was originally based on had a “tot” row for each k-point/band block that summed up all the atom contributions. So the parser was meant to incorporate that as well. The other DFT parsers followed suit to be consistent with this format.
 
 =====================
 4. Orbital projection

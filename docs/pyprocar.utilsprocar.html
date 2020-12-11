@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="setup module" href="setup.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -211,9 +214,9 @@
 </div>
 <div class="section" id="module-pyprocar.utilsprocar.utilsprocar">
 <span id="pyprocar-utilsprocar-utilsprocar-module"></span><h2>pyprocar.utilsprocar.utilsprocar module<a class="headerlink" href="#module-pyprocar.utilsprocar.utilsprocar" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.utilsprocar.utilsprocar.UtilsProcar">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.utilsprocar.utilsprocar.</code><code class="sig-name descname">UtilsProcar</code><span class="sig-paren">(</span><em class="sig-param">loglevel=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.utilsprocar.utilsprocar.</code><code class="sig-name descname">UtilsProcar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loglevel</span><span class="o">=</span><span class="default_value">30</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class store handy methods that do not fit any other place</p>
 <p>members:</p>
@@ -233,35 +236,35 @@ calculation.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiOutcar</span></code></a>(self, filename)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiOutcar</span></code></a>(filename)</p></td>
 <td><p>Just finds all E-fermi fields in the outcar file and keeps the last one (if more than one found).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeFiles</span></code></a>(self, inFiles, outFile[, gzipOut])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeFiles</span></code></a>(inFiles, outFile[, gzipOut])</p></td>
 <td><p>Concatenate two or more PROCAR files.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OpenFile</span></code></a>(self[, FileName])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OpenFile</span></code></a>([FileName])</p></td>
 <td><p>Tries to open a File, it has suitable values for PROCAR and can handle gzipped files</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcarRepair</span></code></a>(self, infilename, outfilename)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcarRepair</span></code></a>(infilename, outfilename)</p></td>
 <td><p>It Tries to repair some stupid problems due the stupid fixed format of the stupid fortran.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecLatOutcar</span></code></a>(self, filename)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar" title="pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecLatOutcar</span></code></a>(filename)</p></td>
 <td><p>Finds and return the reciprocal lattice vectors, if more than one set present, it return just the last one.</p></td>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar">
-<code class="sig-name descname">FermiOutcar</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.FermiOutcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FermiOutcar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.FermiOutcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.FermiOutcar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Just finds all E-fermi fields in the outcar file and keeps the
 last one (if more than one found).</p>
 <p>Args:
 -filename: the file name of the outcar to be readed</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles">
-<code class="sig-name descname">MergeFiles</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">inFiles</em>, <em class="sig-param">outFile</em>, <em class="sig-param">gzipOut=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.MergeFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">MergeFiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inFiles</span></em>, <em class="sig-param"><span class="n">outFile</span></em>, <em class="sig-param"><span class="n">gzipOut</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.MergeFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.MergeFiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate two or more PROCAR files. This methods
 takes care of the k-indexes.</p>
 <p>Useful when large number of K points have been calculated in
@@ -273,9 +276,9 @@ different PROCARs.</p>
 <p>Warning: spin polarized case is not Ok!</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile">
-<code class="sig-name descname">OpenFile</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">FileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.OpenFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">OpenFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">FileName</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.OpenFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.OpenFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tries to open a File, it has suitable values for PROCAR and can
 handle gzipped files</p>
 <p>Example:</p>
@@ -295,9 +298,9 @@ handle gzipped files</p>
 <p>If unable to open a file, it raises a “IOError” exception.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair">
-<code class="sig-name descname">ProcarRepair</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">infilename</em>, <em class="sig-param">outfilename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.ProcarRepair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ProcarRepair</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infilename</span></em>, <em class="sig-param"><span class="n">outfilename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.ProcarRepair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.ProcarRepair" title="Permalink to this definition">¶</a></dt>
 <dd><p>It Tries to repair some stupid problems due the stupid fixed
 format of the stupid fortran.</p>
 <p>Up to now it only separes k-points as the following:
@@ -307,9 +310,9 @@ k-point    61 :    0.00000000 -0.50000000 0.00000000 …</p>
 <p>But as I found new stupid errors they should be fixed here.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar">
-<code class="sig-name descname">RecLatOutcar</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.RecLatOutcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">RecLatOutcar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/utilsprocar/utilsprocar.html#UtilsProcar.RecLatOutcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.utilsprocar.utilsprocar.UtilsProcar.RecLatOutcar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds and return the reciprocal lattice vectors, if more than
 one set present, it return just the last one.</p>
 <p>Args:
@@ -344,11 +347,19 @@ one set present, it return just the last one.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -359,7 +370,6 @@ one set present, it return just the last one.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

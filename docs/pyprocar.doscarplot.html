@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyprocar.elkparser package" href="pyprocar.elkparser.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -210,9 +213,9 @@
 <span id="pyprocar-doscarplot-dosplot-module"></span><h2>pyprocar.doscarplot.dosplot module<a class="headerlink" href="#module-pyprocar.doscarplot.dosplot" title="Permalink to this headline">¶</a></h2>
 <p>Created on May 17 2020
 &#64;author: Pedram Tavadze</p>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.doscarplot.dosplot.</code><code class="sig-name descname">DosPlot</code><span class="sig-paren">(</span><em class="sig-param">dos=None</em>, <em class="sig-param">structure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.doscarplot.dosplot.</code><code class="sig-name descname">DosPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">structure</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -221,7 +224,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_total" title="pyprocar.doscarplot.dosplot.DosPlot.plot_total"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_total</span></code></a>(self[, spins, spin_colors, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_total" title="pyprocar.doscarplot.dosplot.DosPlot.plot_total"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_total</span></code></a>([spins, spin_colors, figsize, …])</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">param spins</dt>
 <dd class="field-odd"><p>DESCRIPTION. The default is None.</p>
@@ -254,34 +257,34 @@
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot.plot_parametric">
-<code class="sig-name descname">plot_parametric</code><span class="sig-paren">(</span><em class="sig-param">self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None, spin_colors=None, cmap='jet', vmin=0, vmax=1, elimit=None, figsize=(12, 6), ax=None, orientation='horizontal', labels=None, plot_bar=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_parametric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot_parametric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">principal_q_numbers</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(12, 6)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot_bar</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_parametric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot.plot_parametric_line">
-<code class="sig-name descname">plot_parametric_line</code><span class="sig-paren">(</span><em class="sig-param">self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None, spin_colors=None, figsize=(12, 6), ax=None, orientation='horizontal', labels=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_parametric_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric_line" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot_parametric_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">principal_q_numbers</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(12, 6)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_parametric_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric_line" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot.plot_stack">
-<code class="sig-name descname">plot_stack</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">items={}</em>, <em class="sig-param">spins=None</em>, <em class="sig-param">spin_colors=None</em>, <em class="sig-param">colors=None</em>, <em class="sig-param">elimit=None</em>, <em class="sig-param">figsize=(12</em>, <em class="sig-param">6)</em>, <em class="sig-param">ax=None</em>, <em class="sig-param">orientation='horizontal'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_stack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_stack" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot_stack</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(12, 6)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_stack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_stack" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot.plot_stack_orbitals">
-<code class="sig-name descname">plot_stack_orbitals</code><span class="sig-paren">(</span><em class="sig-param">self, atoms=None, principal_q_numbers=[-1], spins=None, spin_colors=None, colors=None, elimit=None, figsize=(12, 6), ax=None, orientation='horizontal'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_stack_orbitals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_stack_orbitals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot_stack_orbitals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">principal_q_numbers</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(12, 6)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_stack_orbitals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_stack_orbitals" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot.plot_stack_species">
-<code class="sig-name descname">plot_stack_species</code><span class="sig-paren">(</span><em class="sig-param">self, principal_q_numbers=[-1], orbitals=None, spins=None, spin_colors=None, colors=None, elimit=None, figsize=(12, 6), ax=None, orientation='horizontal'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_stack_species"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_stack_species" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot_stack_species</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">principal_q_numbers</span><span class="o">=</span><span class="default_value">[- 1]</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(12, 6)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_stack_species"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_stack_species" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.doscarplot.dosplot.DosPlot.plot_total">
-<code class="sig-name descname">plot_total</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">spins=None</em>, <em class="sig-param">spin_colors=None</em>, <em class="sig-param">figsize=(12</em>, <em class="sig-param">6)</em>, <em class="sig-param">ax=None</em>, <em class="sig-param">orientation='horizontal'</em>, <em class="sig-param">labels=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_total"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_total" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot_total</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">(12, 6)</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">'horizontal'</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#DosPlot.plot_total"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.DosPlot.plot_total" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -310,9 +313,9 @@
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.doscarplot.dosplot.plotter">
-<code class="sig-prename descclassname">pyprocar.doscarplot.dosplot.</code><code class="sig-name descname">plotter</code><span class="sig-paren">(</span><em class="sig-param">energies</em>, <em class="sig-param">dos</em>, <em class="sig-param">spins</em>, <em class="sig-param">spin_colors</em>, <em class="sig-param">figsize</em>, <em class="sig-param">ax</em>, <em class="sig-param">orientation</em>, <em class="sig-param">labels=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#plotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.plotter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.doscarplot.dosplot.</code><code class="sig-name descname">plotter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">energies</span></em>, <em class="sig-param"><span class="n">dos</span></em>, <em class="sig-param"><span class="n">spins</span></em>, <em class="sig-param"><span class="n">spin_colors</span></em>, <em class="sig-param"><span class="n">figsize</span></em>, <em class="sig-param"><span class="n">ax</span></em>, <em class="sig-param"><span class="n">orientation</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/doscarplot/dosplot.html#plotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.doscarplot.dosplot.plotter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -341,11 +344,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -356,7 +367,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

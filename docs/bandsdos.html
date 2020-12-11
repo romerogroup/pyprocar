@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2D spin-texture" href="2Dspin.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -121,6 +123,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -159,7 +162,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
         
@@ -456,9 +459,9 @@ This mode plots the contribution of the species and their specified orbitals as 
 <img alt="_images/bands_plain_dos_stack.png" src="_images/bands_plain_dos_stack.png" />
 <span class="target" id="module-pyprocar.scriptBandsDosplot"></span><p>Created on May 17 2020
 &#64;author: Pedram Tavadze</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pyprocar.scriptBandsDosplot.bandsdosplot">
-<code class="sig-prename descclassname">pyprocar.scriptBandsDosplot.</code><code class="sig-name descname">bandsdosplot</code><span class="sig-paren">(</span><em class="sig-param">bands_file='PROCAR', dos_file='vasprun.xml', outcar='OUTCAR', abinit_output=None, bands_mode='plain', dos_mode='plain', plot_total=True, fermi=None, mask=None, markersize=0.02, marker='o', atoms=None, orbitals=None, bands_spin=0, bands_separate=False, dos_spins=None, dos_labels=None, dos_spin_colors=[(1, 0, 0), (0, 0, 1)], dos_colors=None, dos_items=None, dos_interpolation_factor=None, dlimit=None, elimit=None, vmin=None, vmax=None, cmap='jet', grid=False, kpointsfile='KPOINTS', code='vasp', savefig=None, title=None, kdirect=True, discontinuities=None, plot_color_bar=True, repair=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsDosplot.html#bandsdosplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsDosplot.bandsdosplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyprocar.scriptBandsDosplot.</code><code class="sig-name descname">bandsdosplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bands_file</span><span class="o">=</span><span class="default_value">'PROCAR'</span></em>, <em class="sig-param"><span class="n">dos_file</span><span class="o">=</span><span class="default_value">'vasprun.xml'</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">'OUTCAR'</span></em>, <em class="sig-param"><span class="n">abinit_output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bands_mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">dos_mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">plot_total</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">markersize</span><span class="o">=</span><span class="default_value">0.02</span></em>, <em class="sig-param"><span class="n">marker</span><span class="o">=</span><span class="default_value">'o'</span></em>, <em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bands_spin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">bands_separate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">dos_spins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dos_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dos_spin_colors</span><span class="o">=</span><span class="default_value">[(1, 0, 0), (0, 0, 1)]</span></em>, <em class="sig-param"><span class="n">dos_colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dos_items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dlimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">kpointsfile</span><span class="o">=</span><span class="default_value">'KPOINTS'</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kdirect</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">discontinuities</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot_color_bar</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">repair</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsDosplot.html#bandsdosplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsDosplot.bandsdosplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function creates plots containing both DOS and bands.</p>
 </dd></dl>
 
@@ -486,11 +489,19 @@ This mode plots the contribution of the species and their specified orbitals as 
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -501,7 +512,6 @@ This mode plots the contribution of the species and their specified orbitals as 
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyprocar.scriptUnfold &mdash; PyProcar 5.3.3 documentation</title>
+  <title>pyprocar.scriptUnfold &mdash; PyProcar 5.5.0 documentation</title>
   
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
@@ -30,7 +31,9 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -84,10 +87,11 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../dftprep.html">DFT Preparation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyprocar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pyprocar API</a></li>
 </ul>
 
             
@@ -177,17 +181,19 @@
     <span class="n">savetab</span><span class="o">=</span><span class="s2">&quot;unfold_result.csv&quot;</span><span class="p">,</span>
     <span class="n">savefig</span><span class="o">=</span><span class="s2">&quot;unfolded_band.png&quot;</span><span class="p">,</span>
     <span class="n">exportplt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Parameters</span>
-<span class="sd">    ---------- </span>
+<span class="sd">    ----------</span>
 <span class="sd">    fname: PROCAR filename.</span>
 <span class="sd">    poscar: POSCAR filename</span>
 <span class="sd">    outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None</span>
 <span class="sd">    supercell_matrix: supercell matrix from primitive cell to supercell</span>
-<span class="sd">    ispin: For non-spin polarized system, ispin=None. </span>
+<span class="sd">    ispin: For non-spin polarized system, ispin=None.</span>
 <span class="sd">           For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</span>
 <span class="sd">    efermi: Fermi energy</span>
 <span class="sd">    elimit: range of energy to be plotted.</span>
@@ -195,7 +201,7 @@
 <span class="sd">    knames: see kticks</span>
 <span class="sd">    print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.</span>
 <span class="sd">    show_band: whether to plot the bands before unfolding.</span>
-<span class="sd">    width: the width of the unfolded band. </span>
+<span class="sd">    width: the width of the unfolded band.</span>
 <span class="sd">    color: color of the unfoled band.</span>
 <span class="sd">    savetab: the csv file name of which  the table of unfolding result will be written into.</span>
 <span class="sd">    savefig: the file name of which the figure will be saved.</span>
@@ -203,6 +209,12 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">welcome</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
+            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
+            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Turn interactive plotting off</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>

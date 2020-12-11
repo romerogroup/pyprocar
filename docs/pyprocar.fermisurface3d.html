@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -27,16 +33,11 @@
         <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyprocar.lobsterparser package" href="pyprocar.lobsterparser.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PyProcar
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
           
 
           
@@ -77,6 +78,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -138,6 +140,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -176,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">pyprocar API</a> &raquo;</li>
         
@@ -208,9 +211,9 @@
 </div>
 <div class="section" id="module-pyprocar.fermisurface3d.brillouin_zone">
 <span id="pyprocar-fermisurface3d-brillouin-zone-module"></span><h2>pyprocar.fermisurface3d.brillouin_zone module<a class="headerlink" href="#module-pyprocar.fermisurface3d.brillouin_zone" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.fermisurface3d.brillouin_zone.BrillouinZone">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.fermisurface3d.brillouin_zone.</code><code class="sig-name descname">BrillouinZone</code><span class="sig-paren">(</span><em class="sig-param">reciprocal_lattice</em>, <em class="sig-param">supercell</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/brillouin_zone.html#BrillouinZone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.fermisurface3d.brillouin_zone.</code><code class="sig-name descname">BrillouinZone</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">reciprocal_lattice</span></em>, <em class="sig-param"><span class="n">supercell</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/brillouin_zone.html#BrillouinZone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyprocar.core.html#pyprocar.core.surface.Surface" title="pyprocar.core.surface.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyprocar.core.surface.Surface</span></code></a></p>
 <p>A Surface object with verts, faces and line representation, representing
 the BrillouinZone</p>
@@ -235,16 +238,16 @@ the BrillouinZone</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(self[, file_obj, file_type])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>([file_obj, file_type])</p></td>
 <td><p>This function uses the export function from trimesh</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code>(self[, cmap, vmin, vmax])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code>([cmap, vmin, vmax])</p></td>
 <td><p>Sets colors for the trimesh object using the color map provided</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code>(self, scalars)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code>(scalars)</p></td>
 <td><p>Sets/Updates the scalars of the surface.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz" title="pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wigner_seitz</span></code></a>(self)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz" title="pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wigner_seitz</span></code></a>()</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">returns</dt>
 <dd class="field-odd"><p>Using the Wigner-Seitz Method, this function finds the 1st</p>
@@ -265,9 +268,9 @@ the BrillouinZone</p>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz">
-<code class="sig-name descname">wigner_seitz</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/brillouin_zone.html#BrillouinZone.wigner_seitz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">wigner_seitz</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/brillouin_zone.html#BrillouinZone.wigner_seitz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.BrillouinZone.wigner_seitz" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Using the Wigner-Seitz Method, this function finds the 1st
@@ -281,9 +284,9 @@ Brillouin Zone in terms of vertices and faces</p>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.fermisurface3d.brillouin_zone.Lines">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.fermisurface3d.brillouin_zone.</code><code class="sig-name descname">Lines</code><span class="sig-paren">(</span><em class="sig-param">verts=None</em>, <em class="sig-param">faces=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/brillouin_zone.html#Lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.Lines" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.fermisurface3d.brillouin_zone.</code><code class="sig-name descname">Lines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">verts</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">faces</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/brillouin_zone.html#Lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.Lines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -292,7 +295,7 @@ Brillouin Zone in terms of vertices and faces</p>
 </dl>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.fermisurface3d.brillouin_zone.Lines.nface">
 <em class="property">property </em><code class="sig-name descname">nface</code><a class="headerlink" href="#pyprocar.fermisurface3d.brillouin_zone.Lines.nface" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -304,9 +307,9 @@ Brillouin Zone in terms of vertices and faces</p>
 <span id="pyprocar-fermisurface3d-fermisurface3d-module"></span><h2>pyprocar.fermisurface3d.fermisurface3D module<a class="headerlink" href="#module-pyprocar.fermisurface3d.fermisurface3D" title="Permalink to this headline">¶</a></h2>
 <p>Created on Fri March 31 2020
 &#64;author: Pedram Tavadze</p>
-<dl class="class">
+<dl class="py class">
 <dt id="pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D">
-<em class="property">class </em><code class="sig-prename descclassname">pyprocar.fermisurface3d.fermisurface3D.</code><code class="sig-name descname">FermiSurface3D</code><span class="sig-paren">(</span><em class="sig-param">kpoints=None, band=None, spd=None, spd_spin=None, fermi=None, reciprocal_lattice=None, interpolation_factor=1, spin_texture=False, color=None, projection_accuracy='Normal', cmap='viridis', vmin=0, vmax=1, supercell=[1, 1, 1], file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/fermisurface3D.html#FermiSurface3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.fermisurface3d.fermisurface3D.</code><code class="sig-name descname">FermiSurface3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kpoints</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">band</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spd_spin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">reciprocal_lattice</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interpolation_factor</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">spin_texture</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">projection_accuracy</span><span class="o">=</span><span class="default_value">'Normal'</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'viridis'</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">supercell</span><span class="o">=</span><span class="default_value">[1, 1, 1]</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/fermisurface3D.html#FermiSurface3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="pyprocar.core.html#pyprocar.core.isosurface.Isosurface" title="pyprocar.core.isosurface.Isosurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyprocar.core.isosurface.Isosurface</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
@@ -345,19 +348,19 @@ Brillouin Zone in terms of vertices and faces</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code>(self, S1, S2)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code>(S1, S2)</p></td>
 <td><p>This function clips S1 using the boundaries of S2 and returns</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(self[, file_obj, file_type])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>([file_obj, file_type])</p></td>
 <td><p>This function uses the export function from trimesh</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color" title="pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_color</span></code></a>(self, cmap, vmin, vmax)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color" title="pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_color</span></code></a>(cmap, vmin, vmax)</p></td>
 <td><p>Projects the scalars to the surface.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code>(self[, cmap, vmin, vmax])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_color_with_cmap</span></code>([cmap, vmin, vmax])</p></td>
 <td><p>Sets colors for the trimesh object using the color map provided</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code>(self, scalars)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_scalars</span></code>(scalars)</p></td>
 <td><p>Sets/Updates the scalars of the surface.</p></td>
 </tr>
 </tbody>
@@ -376,14 +379,14 @@ Brillouin Zone in terms of vertices and faces</p>
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.create_spin_texture">
-<code class="sig-name descname">create_spin_texture</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/fermisurface3D.html#FermiSurface3D.create_spin_texture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.create_spin_texture" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_spin_texture</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/fermisurface3D.html#FermiSurface3D.create_spin_texture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.create_spin_texture" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color">
-<code class="sig-name descname">project_color</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">cmap</em>, <em class="sig-param">vmin</em>, <em class="sig-param">vmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/fermisurface3D.html#FermiSurface3D.project_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">project_color</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmap</span></em>, <em class="sig-param"><span class="n">vmin</span></em>, <em class="sig-param"><span class="n">vmax</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/fermisurface3d/fermisurface3D.html#FermiSurface3D.project_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.fermisurface3d.fermisurface3D.FermiSurface3D.project_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Projects the scalars to the surface.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -430,11 +433,19 @@ Brillouin Zone in terms of vertices and faces</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Romero Group
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -445,7 +456,6 @@ Brillouin Zone in terms of vertices and faces</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
