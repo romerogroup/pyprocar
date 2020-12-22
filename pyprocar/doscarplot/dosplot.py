@@ -162,8 +162,10 @@ class DosPlot:
             fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         if not elimit:
             elimit = [self.dos.energies.min(), self.dos.energies.max()]
-        cond1 = self.dos.energies >= elimit[0]
-        cond2 = self.dos.energies <= elimit[1]
+        deltaE = elimit[1]-elimit[0]
+        
+        cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
+        cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
 
         # dE = dos.energies[1] - dos.energies[0]
@@ -266,9 +268,11 @@ class DosPlot:
 
         dos_total = self.dos.total
         dos_projected_total = self.dos.dos_sum()
-
-        cond1 = self.dos.energies >= elimit[0]
-        cond2 = self.dos.energies <= elimit[1]
+        
+        deltaE = elimit[1]-elimit[0]
+        
+        cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
+        cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
 
         for ispin in spins:
@@ -374,9 +378,10 @@ class DosPlot:
         if not elimit:
             elimit = [self.dos.energies.min(), self.dos.energies.max()]
         # dos_projected_total = self.parsedData.dos_parametric()
-
-        cond1 = self.dos.energies >= elimit[0]
-        cond2 = self.dos.energies <= elimit[1]
+        deltaE = elimit[1]-elimit[0]
+        
+        cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
+        cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
 
         orb_names = ["s", "p", "d"]
@@ -486,9 +491,10 @@ class DosPlot:
             all_orbitals = "spdf"
         else:
             all_orbitals = ""
-
-        cond1 = self.dos.energies >= elimit[0]
-        cond2 = self.dos.energies <= elimit[1]
+        deltaE = elimit[1]-elimit[0]
+        
+        cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
+        cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
         counter = 0
         colors = {}

@@ -17,7 +17,7 @@ plt.rcParams["mathtext.default"] = "regular"
 # Roman ['rm', 'cal', 'it', 'tt', 'sf',
 #        'bf', 'default', 'bb', 'frak',
 #        'circled', 'scr', 'regular']
-plt.rcParams["font.family"] = "Georgia"
+plt.rcParams["font.family"] = "Arial"
 plt.rc("font", size=18)  # controls default text sizes
 plt.rc("axes", titlesize=22)  # fontsize of the axes title
 plt.rc("axes", labelsize=22)  # fontsize of the x and y labels

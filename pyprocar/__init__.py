@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seekpath
 import skimage
-import pychemia
+# import pychemia
 import pyvista
 import trimesh
 
