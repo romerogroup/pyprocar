@@ -34,7 +34,9 @@ class DosPlot:
                    figsize=figsize,
                    ax=None,
                    orientation="horizontal",
-                   labels=None):
+                   labels=None,
+                   linewidth=1,
+                   ):
         """
 
         Parameters
@@ -71,7 +73,7 @@ class DosPlot:
             spins = np.arange(len(self.dos.total))
 
         fig, ax = plotter(energies, dos, spins, spin_colors, figsize, ax,
-                          orientation, labels)
+                          orientation, linewidth, labels)
         return fig, ax
 
     def plot_parametric_line(self,
@@ -83,7 +85,9 @@ class DosPlot:
                              figsize=(12, 6),
                              ax=None,
                              orientation="horizontal",
-                             labels=None):
+                             labels=None,
+                             linewidth=1,
+                             ):
 
         if ax is None:
             if orientation == "horizontal":
@@ -107,7 +111,7 @@ class DosPlot:
         dos = self.dos.dos_sum(atoms, principal_q_numbers, orbitals, spins)
 
         fig, ax = plotter(self.dos.energies, dos, spins, spin_colors, figsize,
-                          ax, orientation, labels)
+                          ax, orientation, linewidth, labels)
         return fig, ax
 
     def plot_parametric(self,
@@ -163,7 +167,7 @@ class DosPlot:
         if not elimit:
             elimit = [self.dos.energies.min(), self.dos.energies.max()]
         deltaE = elimit[1]-elimit[0]
-        
+
         cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
         cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
@@ -268,9 +272,9 @@ class DosPlot:
 
         dos_total = self.dos.total
         dos_projected_total = self.dos.dos_sum()
-        
+
         deltaE = elimit[1]-elimit[0]
-        
+
         cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
         cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
@@ -379,7 +383,7 @@ class DosPlot:
             elimit = [self.dos.energies.min(), self.dos.energies.max()]
         # dos_projected_total = self.parsedData.dos_parametric()
         deltaE = elimit[1]-elimit[0]
-        
+
         cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
         cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
@@ -492,7 +496,7 @@ class DosPlot:
         else:
             all_orbitals = ""
         deltaE = elimit[1]-elimit[0]
-        
+
         cond1 = self.dos.energies >= elimit[0] - deltaE*0.05
         cond2 = self.dos.energies <= elimit[1] + deltaE*0.05
         cond = np.all([cond1, cond2], axis=0)
@@ -583,7 +587,9 @@ def plotter(energies,
             figsize,
             ax,
             orientation,
-            labels=None):
+            linewidth,
+            labels=None,
+            ):
 
     if spins is None:
         spins = np.arange(dos.shape[0])
@@ -603,9 +609,9 @@ def plotter(energies,
             if iy > 0 and len(spins) > 1:
                 y *= -1
             if labels is not None:
-                ax.plot(x, y, "r-", color=spin_colors[iy], label=labels[iy])
+                ax.plot(x, y, "r-", color=spin_colors[iy], label=labels[iy], linewidth=linewidth)
             else:
-                ax.plot(x, y, "r-", color=spin_colors[iy])
+                ax.plot(x, y, "r-", color=spin_colors[iy], linewidth=linewidth)
 
     elif orientation == "vertical":
         if ax is None:
@@ -619,7 +625,7 @@ def plotter(energies,
             if ix > 0 and len(spins) > 1:
                 x *= -1
             if labels is not None:
-                ax.plot(x, y, "r-", color=spin_colors[ix], label=labels[ix])
+                ax.plot(x, y, "r-", color=spin_colors[ix], label=labels[ix], linewidth=linewidth)
             else:
-                ax.plot(x, y, "r-", color=spin_colors[ix])
+                ax.plot(x, y, "r-", color=spin_colors[ix], linewidth=linewidth)
     return fig, ax

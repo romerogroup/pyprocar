@@ -40,6 +40,7 @@ def dosplot(
         elimit=None,
         dos_limit=None,
         cmap="jet",
+        linewidth=1,
         vmax=None,
         vmin=None,
         grid=False,
@@ -80,7 +81,7 @@ def dosplot(
     interpolation_factor : int, optional (default ``None``)
         Number of points in energy axis is multiplied by this factor
         and interpolated using cubic
-        spline. 
+        spline.
 
         e.g. ``interpolation_factor=3``
 
@@ -170,10 +171,10 @@ def dosplot(
             +-----+-----+----+----+-----+-----+-----+-----+-------+
         ``orbitals`` is only relavent in ``mode='parametric'``,
         ``mode='parametric_line'``, ``mode='stack_species'``.
-        
+
         e.g. ``orbitals=[1,2,3]`` will only select the p orbitals
         while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.
-        
+
         If nothing is specified pyprocar will select all the present
         orbitals.
 
@@ -198,8 +199,13 @@ def dosplot(
         color maps in matplotlib are provided in this web
         page. `https://matplotlib.org/2.0.1/users/colormaps.html
         <https://matplotlib.org/2.0.1/users/colormaps.html>`_
-        
+
         e.g. ``cmap='plasma'``
+
+    linewidth : str, optional (default 1)
+        The line width with which the total DOS is ploted
+
+        e.g. linewidth=2
 
     vmax : float, optional
         The maximum value in the color bar. ``cmap`` is only relevant
@@ -225,32 +231,32 @@ def dosplot(
         matplotlib such as png, pdf, jpg, ...
         If not provided the plot will be shown in the
         interactive matplotlib mode.
-        
+
         e.g. ``savefig='DOS.png'``, ``savefig='DOS.pdf'``
 
     title : str, optional
         Defines the plot title asked to be added above the plot. If
         ``title`` is not defined, PyProcar will not add any title.
-        
+
         e.g. ``title="Total Density of States SrVO_$3$"``. One can use
         LaTex format as well.
 
     plot_total : bool, optional (default ``True``)
         If the total density of states is plotted as well as other
         options. The entry should be python boolian.
-        
+
         e.g. ``plot_total=True``
 
     code : str, optional (default ``'vasp'``)
         Defines the Density Functional Theory code used for the
         calculation. The default of this argument is vasp, so if the
         cal is done in vasp one does not need to define this argumnet.
-        
+
         e.g. ``code=vasp``, ``code=elk``, ``code=abinit``
 
     labels : list str, optional
         ``labels`` define the legends plotted in defining each spin.
-        
+
         e.g.  ``labels=['Oxygen-Up','Oxygen-Down']``,
         ``labels=['Oxygen-'+r'$\\uparrow$','Oxygen-'+r'$\\downarrow$']``
         Side means the string will be treated as raw string. This has
@@ -268,7 +274,7 @@ def dosplot(
         dictionary, with keys being specific species and values being
         projections of ``orbitals``. The following examples can
         clarify the python lingo.
-        
+
         e.g.  ``items={'Sr':[0],'O':[1,2,3],'V':[4,5,6,7,8]}`` or
         ``items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])``. The two
         examples are equivalent to each other. This will plot the
@@ -282,9 +288,9 @@ def dosplot(
         ``ax`` is a matplotlib axes. In case one wants to put plot
         generated from this plot in a different figure and treat the
         output as a subplot in a larger plot.
-        
+
         e.g. ::
-        
+
             >>> # Creates a figure with 3 rows and 2 colomuns
             >>> fig, axs = plt.subplots(3, 2)
             >>> x = np.linspace(-np.pi, np.pi, 1000)
@@ -309,7 +315,7 @@ def dosplot(
         If one chooses ``plt_show=False``, one can modify the plot
         using this returned object.
         e.g. ::
-    
+
             >>> fig, ax = pyprocar.dosplot(mode='plain', plt_show=False)
             >>> ax.set_ylim(-2,2)
             >>> fig.show()
@@ -401,6 +407,7 @@ def dosplot(
             ax=ax,
             orientation=orientation,
             labels=labels,
+            linewidth=linewidth,
         )
 
     elif mode == "parametric_line":
@@ -413,6 +420,7 @@ def dosplot(
                 ax=ax,
                 orientation=orientation,
                 labels=labels,
+                linewidth=linewidth,
             )
 
         else:
@@ -421,6 +429,8 @@ def dosplot(
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax,
                 orientation=orientation,
+                linewidth=linewidth,
+
             )
             _, ax1 = dos_plot.plot_parametric_line(
                 atoms=atoms,
@@ -430,6 +440,7 @@ def dosplot(
                 ax=ax1,
                 orientation=orientation,
                 labels=labels,
+                linewidth=linewidth,
             )
     elif mode == "parametric":
         if not total:
@@ -466,6 +477,7 @@ def dosplot(
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax1,
                 orientation=orientation,
+                linewidth=linewidth,
             )
 
     elif mode == "stack_species":
@@ -496,6 +508,7 @@ def dosplot(
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax1,
                 orientation=orientation,
+                linewidth=linewidth,
             )
 
     elif mode == "stack_orbitals":
@@ -528,6 +541,7 @@ def dosplot(
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax1,
                 orientation=orientation,
+                linewidth=linewidth,
             )
 
     elif mode == "stack":
@@ -560,6 +574,7 @@ def dosplot(
                 spin_colors=[(0, 0, 0), (0, 0, 0)],
                 ax=ax1,
                 orientation=orientation,
+                linewidth=linewidth,
             )
 
     cond1 = vaspxml.dos.energies >= elimit[0]
@@ -592,7 +607,7 @@ def dosplot(
     ax1.axhline(color="black", linestyle="--")
     ax1.axvline(color="black", linestyle="--")
 
-    fig.tight_layout()
+    # fig.tight_layout()
     if grid:
         ax1.grid()
     if labels or "stack" in mode:
