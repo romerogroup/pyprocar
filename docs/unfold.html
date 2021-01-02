@@ -30,7 +30,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -221,33 +220,6 @@ Usage:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<span class="target" id="module-pyprocar.scriptUnfold"></span><dl class="py function">
-<dt id="pyprocar.scriptUnfold.unfold">
-<code class="sig-prename descclassname">pyprocar.scriptUnfold.</code><code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'PROCAR'</span></em>, <em class="sig-param"><span class="n">poscar</span><span class="o">=</span><span class="default_value">'POSCAR'</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">'OUTCAR'</span></em>, <em class="sig-param"><span class="n">supercell_matrix</span><span class="o">=</span><span class="default_value">array([[2, 0, 0], [0, 2, 0], [0, 0, 2]])</span></em>, <em class="sig-param"><span class="n">ispin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">efermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shift_efermi</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">(- 5, 15)</span></em>, <em class="sig-param"><span class="n">kticks</span><span class="o">=</span><span class="default_value">[0, 36, 54, 86, 110, 147, 165, 199]</span></em>, <em class="sig-param"><span class="n">knames</span><span class="o">=</span><span class="default_value">['$\\Gamma$', 'K', 'M', '$\\Gamma$', 'A', 'H', 'L', 'A']</span></em>, <em class="sig-param"><span class="n">print_kpts</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">show_band</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'blue'</span></em>, <em class="sig-param"><span class="n">savetab</span><span class="o">=</span><span class="default_value">'unfold_result.csv'</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">'unfolded_band.png'</span></em>, <em class="sig-param"><span class="n">exportplt</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">repair</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptUnfold.html#unfold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fname</strong> (<em>PROCAR filename.</em>) – </p></li>
-<li><p><strong>poscar</strong> (<em>POSCAR filename</em>) – </p></li>
-<li><p><strong>outcar</strong> (<em>OUTCAR filename</em><em>, </em><em>for reading fermi energy. You can also use efermi and set outcar=None</em>) – </p></li>
-<li><p><strong>supercell_matrix</strong> (<em>supercell matrix from primitive cell to supercell</em>) – </p></li>
-<li><p><strong>ispin</strong> (<em>For non-spin polarized system</em><em>, </em><em>ispin=None.</em>) – For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</p></li>
-<li><p><strong>efermi</strong> (<em>Fermi energy</em>) – </p></li>
-<li><p><strong>elimit</strong> (<em>range of energy to be plotted.</em>) – </p></li>
-<li><p><strong>kticks</strong> (<em>the indices of K points which has labels given in knames.</em>) – </p></li>
-<li><p><strong>knames</strong> (<em>see kticks</em>) – </p></li>
-<li><p><strong>print_kpts</strong> (<em>print all the kpoints to screen. This is to help find the kticks and knames.</em>) – </p></li>
-<li><p><strong>show_band</strong> (<em>whether to plot the bands before unfolding.</em>) – </p></li>
-<li><p><strong>width</strong> (<em>the width of the unfolded band.</em>) – </p></li>
-<li><p><strong>color</strong> (<em>color of the unfoled band.</em>) – </p></li>
-<li><p><strong>savetab</strong> (<em>the csv file name of which  the table of unfolding result will be written into.</em>) – </p></li>
-<li><p><strong>savefig</strong> (<em>the file name of which the figure will be saved.</em>) – </p></li>
-<li><p><strong>exportplt</strong> (<em>flag to export plot as matplotlib.pyplot object.</em>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 </div>
 </div>
 

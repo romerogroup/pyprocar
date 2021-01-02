@@ -67,31 +67,121 @@ First complete the Elk calculation and then run PyProcar in the same directory a
 
 Quantum Espresso v6.5+ is supported. 
 
-Run ``pw.x`` for the self-consistent calculation (output : scf.out) and the band structure calculation. The :math:`k`-path can be specified in bands.in which is used for the band structure calculation as follows::
+Run ``pw.x`` for the self-consistent calculation (output : scf.out) and the band structure calculation. The :math:`k`-path can be specified in bands.in which is used for the band structure calculation as one of the following::
 
-    K_POINTS {crystal_b}
-    10
-    0.00  0.00  0.00  30 !G
-    0.50  0.00  0.00  30 !M
-    0.333 0.333 0.00  30 !K
-    0.00  0.00  0.00  30 !G
-    0.00  0.00  0.50  30 !A
-    0.50  0.00  0.50  30 !L
-    0.333 0.333 0.50  30 !H
-    0.00  0.00  0.50  30 !A|L
-    0.50  0.00  0.00  30 !M|K
-    0.333 0.333 0.50  30 !H 
+```
+K_POINTS {crystal_b}
+8
+        0.0000000000       0.0000000000       0.0000000000       30 !G
+        0.5000000000       0.0000000000       0.5000000000       30 !X
+        0.6250000000       0.2500000000       0.6250000000       1  !U
+        0.3750000000       0.3750000000       0.7500000000       30 !K
+        0.0000000000       0.0000000000       0.0000000000       30 !G
+        0.5000000000       0.5000000000       0.5000000000       30 !L
+        0.5000000000       0.2500000000       0.7500000000       30 !W
+        0.5000000000       0.0000000000       0.5000000000       30 !X
+```
 
+The on labels a discontinuity that occurs.
+
+Explicit:
+
+``` 
+K_POINTS {crystal}
+269
+        0.0000000000       0.0000000000       0.0000000000       1.0000000000 !G
+        0.0083333333       0.0000000000       0.0083333333       1.0000000000
+        0.0166666667       0.0000000000       0.0166666667       1.0000000000
+        0.0250000000       0.0000000000       0.0250000000       1.0000000000
+        0.0333333333       0.0000000000       0.0333333333       1.0000000000
+        0.0416666667       0.0000000000       0.0416666667       1.0000000000
+        .
+        .
+        .
+        0.4916666667       0.0000000000       0.4916666667       1.0000000000
+        0.5000000000       0.0000000000       0.5000000000       1.0000000000 !X
+        0.5062500000       0.0125000000       0.5062500000       1.0000000000 
+        .
+        .
+        .
+        0.6125000000       0.2250000000       0.6125000000       1.0000000000
+        0.6187500000       0.2375000000       0.6187500000       1.0000000000
+        0.6250000000       0.2500000000       0.6250000000       1.0000000000 !U
+        0.3750000000       0.3750000000       0.7500000000       1.0000000000 !K
+        0.3691406250       0.3691406250       0.7382812500       1.0000000000
+        0.3632812500       0.3632812500       0.7265625000       1.0000000000
+        0.3574218750       0.3574218750       0.7148437500       1.0000000000
+        .
+        .
+        .
+        0.0058593750       0.0058593750       0.0117187500       1.0000000000
+        0.0000000000       0.0000000000       0.0000000000       1.0000000000 !G
+```
+
+- Explicitly listing kpoints as ''!kpoint" is important for labels
+
+To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7
+
+lobster_input_file must include explicit bands such as. 
+
+```
+createFatband F 2p_x 2p_y 2p_z 2s
+createFatband Li 1s 2s
+```
 Afterwards, to obtain the projections run ``projwfc.x`` on the kpdos.in file to retrieve kpdos.out. PyProcar should be run in this calculation directory.
 
 ============
-4. Lobster 
+4. Lobster
 ============
 
 - Required files : scf.in, scf.out, lobsterin, lobsterout, FATBAND*.lobter files
 - flag           : code='lobster', lobstercode='qe'
 
-Currently supported for Lobster with Quantum Espresso v6.5+. 
+Currently supported for Lobster with Quantum Espresso v6.3. 
+
+You must have the following settings for lobster:
+
+-  wf_collect = .true. in CONTROL
+
+-   nosym = .TRUE., noinv = .TRUE. in SYSTEM
+
+The kpoints for a lobster file must be listed in the scf.in file as the following.
+
+```
+K_POINTS crystal
+520
+   0.0000000   0.0000000   0.0000000   1.0
+   0.0000000   0.0000000   0.1428571   1.0
+   0.0000000   0.0000000   0.2857143   1.0
+   0.0000000   0.0000000   0.4285714   1.0
+   .
+   .
+   .
+   -0.1428571  -0.1428571  -0.2857143   1.0
+   -0.1428571  -0.1428571  -0.1428571   1.0
+   0.0000000000     0.0000000000     0.0000000000 0.0000 !G
+   0.0200000000     0.0200000000     0.0200000000 0.0000
+    .
+    .
+    .
+    0.4800000000     0.4800000000     0.4800000000 0.0000
+    0.5000000000     0.5000000000     0.5000000000 0.0000 !T
+    0.5110420726     0.4889579274     0.5000000000 0.0000
+    .
+    .
+    .
+    0.7539676705     0.2460323295     0.5000000000 0.0000
+    0.7650097432     0.2349902568     0.5000000000 0.0000 !H2
+    0.5000000000    -0.2349902568     0.2349902568 0.0000 !H0
+    0.5000000000    -0.2238002446     0.2238002446 0.0000
+    .
+    .
+```
+
+- The k meth and kpath must be listed explicitly. kmesh gets a weight of 1, and the path gets a weight of 0.
+- Explicitly listing kpoints as ''!kpoint" on the k path is important for labels
+
+To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7
 
 Follow instructions on how to perform a Lobster analysis with Quantum Espresso. Also refer to the files in the relevant ``examples`` directory.
 

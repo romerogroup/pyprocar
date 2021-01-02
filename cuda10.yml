@@ -1,0 +1,31 @@
+channels:
+  - defaults
+  - pytorch
+  - rdkit
+  - conda-forge
+dependencies:
+  - fastcluster
+  - pandas=1.0.3
+  - scikit-learn=0.22.1
+  - scipy=1.4.1
+  - pytorch=1.4.0
+  - cudatoolkit=10.1
+  - torchvision
+  - magma-cuda101=2.5.1
+  - rdkit=2020.03.1.0
+  - jupyter=1.0.0
+  - seaborn
+  - requests
+  - plotly
+  - pip
+  - pip:
+      - pymatgen==2020.3.13
+      - ruamel.yaml
+      - Python-Deprecated
+      - matminer
+      - torchtext
+      - jupyterlab
+      - pybtex
+      - mordred
+      - tqdm
+      - xenonpy
