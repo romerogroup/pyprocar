@@ -224,67 +224,61 @@ plot1d
 </ul>
 <p>Quantum Espresso v6.5+ is supported.</p>
 <p>Run <code class="docutils literal notranslate"><span class="pre">pw.x</span></code> for the self-consistent calculation (output : scf.out) and the band structure calculation. The <span class="math notranslate nohighlight">\(k\)</span>-path can be specified in bands.in which is used for the band structure calculation as one of the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>K_POINTS {crystal_b}
+8
+    0.0000000000       0.0000000000       0.0000000000       30 !G
+    0.5000000000       0.0000000000       0.5000000000       30 !X
+    0.6250000000       0.2500000000       0.6250000000       1  !U
+    0.3750000000       0.3750000000       0.7500000000       30 !K
+    0.0000000000       0.0000000000       0.0000000000       30 !G
+    0.5000000000       0.5000000000       0.5000000000       30 !L
+    0.5000000000       0.2500000000       0.7500000000       30 !W
+    0.5000000000       0.0000000000       0.5000000000       30 !X
 </pre></div>
 </div>
-<p>K_POINTS {crystal_b}
-8</p>
-<blockquote>
-<div><p>0.0000000000       0.0000000000       0.0000000000       30 !G
-0.5000000000       0.0000000000       0.5000000000       30 !X
-0.6250000000       0.2500000000       0.6250000000       1  !U
-0.3750000000       0.3750000000       0.7500000000       30 !K
-0.0000000000       0.0000000000       0.0000000000       30 !G
-0.5000000000       0.5000000000       0.5000000000       30 !L
-0.5000000000       0.2500000000       0.7500000000       30 !W
-0.5000000000       0.0000000000       0.5000000000       30 !X</p>
-</div></blockquote>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></p>
 <p>The on labels a discontinuity that occurs.</p>
 <p>Explicit:</p>
-<p><a href="#id5"><span class="problematic" id="id6">``</span></a>`
-K_POINTS {crystal}
-269</p>
-<blockquote>
-<div><p>0.0000000000       0.0000000000       0.0000000000       1.0000000000 !G
-0.0083333333       0.0000000000       0.0083333333       1.0000000000
-0.0166666667       0.0000000000       0.0166666667       1.0000000000
-0.0250000000       0.0000000000       0.0250000000       1.0000000000
-0.0333333333       0.0000000000       0.0333333333       1.0000000000
-0.0416666667       0.0000000000       0.0416666667       1.0000000000
-.
-.
-.
-0.4916666667       0.0000000000       0.4916666667       1.0000000000
-0.5000000000       0.0000000000       0.5000000000       1.0000000000 !X
-0.5062500000       0.0125000000       0.5062500000       1.0000000000
-.
-.
-.
-0.6125000000       0.2250000000       0.6125000000       1.0000000000
-0.6187500000       0.2375000000       0.6187500000       1.0000000000
-0.6250000000       0.2500000000       0.6250000000       1.0000000000 !U
-0.3750000000       0.3750000000       0.7500000000       1.0000000000 !K
-0.3691406250       0.3691406250       0.7382812500       1.0000000000
-0.3632812500       0.3632812500       0.7265625000       1.0000000000
-0.3574218750       0.3574218750       0.7148437500       1.0000000000
-.
-.
-.
-0.0058593750       0.0058593750       0.0117187500       1.0000000000
-0.0000000000       0.0000000000       0.0000000000       1.0000000000 !G</p>
-</div></blockquote>
-<p><a href="#id7"><span class="problematic" id="id8">``</span></a><a href="#id9"><span class="problematic" id="id10">`</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>K_POINTS {crystal}
+269
+    0.0000000000       0.0000000000       0.0000000000      1.0 !G
+    0.0083333333       0.0000000000       0.0083333333      1.0
+    0.0166666667       0.0000000000       0.0166666667      1.0
+    0.0250000000       0.0000000000       0.0250000000      1.0
+    0.0333333333       0.0000000000       0.0333333333      1.0
+    0.0416666667       0.0000000000       0.0416666667      1.0
+    .
+    .
+    .
+    0.4916666667       0.0000000000       0.4916666667      1.0
+    0.5000000000       0.0000000000       0.5000000000      1.0 !X
+    0.5062500000       0.0125000000       0.5062500000      1.0
+    .
+    .
+    .
+    0.6125000000       0.2250000000       0.6125000000      1.0
+    0.6187500000       0.2375000000       0.6187500000      1.0
+    0.6250000000       0.2500000000       0.6250000000      1.0 !U
+    0.3750000000       0.3750000000       0.7500000000      1.0 !K
+    0.3691406250       0.3691406250       0.7382812500      1.0
+    0.3632812500       0.3632812500       0.7265625000      1.0
+    0.3574218750       0.3574218750       0.7148437500      1.0
+    .
+    .
+    .
+    0.0058593750       0.0058593750       0.0117187500      1.0
+    0.0000000000       0.0000000000       0.0000000000      1.0 !G
+</pre></div>
+</div>
 <ul class="simple">
 <li><p>Explicitly listing kpoints as ‘’!kpoint” is important for labels</p></li>
 </ul>
 <p>To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7</p>
-<p>lobster_input_file must include explicit bands such as.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">createFatband</span> <span class="pre">F</span> <span class="pre">2p_x</span> <span class="pre">2p_y</span> <span class="pre">2p_z</span> <span class="pre">2s</span>
-<span class="pre">createFatband</span> <span class="pre">Li</span> <span class="pre">1s</span> <span class="pre">2s</span>
-<span class="pre">`</span></code>
-Afterwards, to obtain the projections run <code class="docutils literal notranslate"><span class="pre">projwfc.x</span></code> on the kpdos.in file to retrieve kpdos.out. PyProcar should be run in this calculation directory.</p>
+<p>lobster_input_file must include explicit bands such as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">createFatband</span> <span class="n">F</span> <span class="mi">2</span><span class="n">p_x</span> <span class="mi">2</span><span class="n">p_y</span> <span class="mi">2</span><span class="n">p_z</span> <span class="mi">2</span><span class="n">s</span>
+<span class="n">createFatband</span> <span class="n">Li</span> <span class="mi">1</span><span class="n">s</span> <span class="mi">2</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>Afterwards, to obtain the projections run <code class="docutils literal notranslate"><span class="pre">projwfc.x</span></code> on the kpdos.in file to retrieve kpdos.out. PyProcar should be run in this calculation directory.</p>
 </div>
 <div class="section" id="lobster">
 <h2>4. Lobster<a class="headerlink" href="#lobster" title="Permalink to this headline">¶</a></h2>
@@ -298,12 +292,10 @@ Afterwards, to obtain the projections run <code class="docutils literal notransl
 <li><p>wf_collect = .true. in CONTROL</p></li>
 <li><p>nosym = .TRUE., noinv = .TRUE. in SYSTEM</p></li>
 </ul>
-<p>The kpoints for a lobster file must be listed in the scf.in file as the following.</p>
-<p><a href="#id11"><span class="problematic" id="id12">``</span></a>`
-K_POINTS crystal
-520</p>
-<blockquote>
-<div><p>0.0000000   0.0000000   0.0000000   1.0
+<p>The kpoints for a lobster file must be listed in the scf.in file as the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>K_POINTS crystal
+520
+0.0000000   0.0000000   0.0000000   1.0
 0.0000000   0.0000000   0.1428571   1.0
 0.0000000   0.0000000   0.2857143   1.0
 0.0000000   0.0000000   0.4285714   1.0
@@ -313,9 +305,10 @@ K_POINTS crystal
 -0.1428571  -0.1428571  -0.2857143   1.0
 -0.1428571  -0.1428571  -0.1428571   1.0
 0.0000000000     0.0000000000     0.0000000000 0.0000 !G
-0.0200000000     0.0200000000     0.0200000000 0.0000</p>
-<blockquote>
-<div><p>.
+0.0200000000     0.0200000000     0.0200000000 0.0000
+.
+.
+.
 0.4800000000     0.4800000000     0.4800000000 0.0000
 0.5000000000     0.5000000000     0.5000000000 0.0000 !T
 0.5110420726     0.4889579274     0.5000000000 0.0000
@@ -327,10 +320,9 @@ K_POINTS crystal
 0.5000000000    -0.2349902568     0.2349902568 0.0000 !H0
 0.5000000000    -0.2238002446     0.2238002446 0.0000
 .
-.</p>
-</div></blockquote>
-</div></blockquote>
-<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+.
+</pre></div>
+</div>
 <ul class="simple">
 <li><p>The k meth and kpath must be listed explicitly. kmesh gets a weight of 1, and the path gets a weight of 0.</p></li>
 <li><p>Explicitly listing kpoints as ‘’!kpoint” on the k path is important for labels</p></li>
