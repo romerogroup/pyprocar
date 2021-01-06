@@ -21,10 +21,20 @@ class BxsfParser:
         self.rec_lattice = None
         self.numBands = None
         self.origin = None 
-        self.numPoints = None
+        self.nkfs_dim = None
+        self.nkfs = None
+        
+        self.nk_dim = None
+        self.nk = None
+        
         self.bandLabels = None
+        
         self.bandData = None
         
+        self.listExtra = None
+        
+        self.bandEnergy = None
+        self.bandEnergy_fs = None
         self.bands = None
         self.parse_bxsf()
         
@@ -38,18 +48,27 @@ class BxsfParser:
         self.rec_lattice = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n.*\n.*\n" + 3 * "\s*(.*)\s*\n", self.data)[0]
         self.rec_lattice = np.array([[float(y) for y in x.split()] for x in self.rec_lattice ])
 
-        self.numPoints =re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n(.*)", self.data)[0]
-        self.numPoints = np.array([int(x) for x in self.numPoints.split()])
+        raw_nkfs = re.findall("BEGIN\_BLOCK\_BANDGRID\_3D\n.*\n.*\n.*\n(.*)", self.data)[0]
+        self.nkfs_dim = np.array([int(x) for x in raw_nkfs.split()])
+        self.nkfs = np.product(self.nkfs_dim)
         
+        self.nk_dim = np.array([int(x) - 1 for x in raw_nkfs.split()])
+        self.nk = np.product(self.nk_dim)
         self.bandLabels = re.findall("BAND\:\s*(.*)", self.data)
         
         
-        self.kpoints = np.zeros(shape = [self.numPoints[0]*self.numPoints[1]*self.numPoints[2],3])
-        bandDataDim = list(self.numPoints)
+        #self.kpoints = np.zeros(shape = [self.nk_dim[0]*self.nk_dim[1]*self.nk_dim[2],3])
+        self.kpoints_fs = np.zeros(shape = [self.nkfs_dim[0]*self.nkfs_dim[1]*self.nkfs_dim[2],3])
+        
+        bandDataDim = list(self.nkfs_dim)
         bandDataDim.insert(0,self.numBands)
+        print(bandDataDim)
         self.bandData = np.zeros(shape = bandDataDim)
-        self.bandEnergy = np.zeros(shape = [self.numPoints[0]*self.numPoints[1]*self.numPoints[2],self.numBands])
-
+        self.kData = np.zeros(shape = list(self.nkfs_dim))
+        
+        self.bandEnergy_fs = np.zeros(shape = [self.nkfs_dim[0]*self.nkfs_dim[1]*self.nkfs_dim[2],self.numBands])
+      
+        
         for iband in range(self.numBands):
             counter = 0
             if (iband == self.numBands - 1):
@@ -59,11 +78,11 @@ class BxsfParser:
                 self.bands.pop(0)
                 self.bands.pop(0)
                 self.bands.pop(-1)
-                for k in range(self.numPoints[2]):
-                    for j in range(self.numPoints[1]):
-                        for i in range(self.numPoints[0]):
+                for k in range(self.nkfs_dim[2]):
+                    for j in range(self.nkfs_dim[1]):
+                        for i in range(self.nkfs_dim[0]):
                             self.bandData[iband,i,j,k] = self.bands[counter]
-                            self.bandEnergy[counter, iband] = self.bands[counter]
+                            self.bandEnergy_fs[counter, iband] = self.bands[counter]
                             counter += 1
             else:
                 expression = "BAND\:\s*" + self.bandLabels[iband] + "[\s\S]*(?=BAND\:\s*"+ self.bandLabels[iband+1]+ ")"
@@ -71,13 +90,25 @@ class BxsfParser:
                 self.bands.pop(0)
                 self.bands.pop(0)
                 self.bands = [float(x) for x in self.bands]
-                
+                self.listExtra = []
                 counter = 0
-                for i in range(self.numPoints[0]):
-                    for j in range(self.numPoints[1]):
-                        for k in range(self.numPoints[2]):
+                for i in range(self.nkfs_dim[0]):
+                    for j in range(self.nkfs_dim[1]):
+                        for k in range(self.nkfs_dim[2]):
+                            #print(counter)
                             self.bandData[iband,i,j,k] = self.bands[counter]
-                            self.bandEnergy[counter, iband] = self.bands[counter]
-                            self.kpoints[counter,:] = np.array([i/self.numPoints[0],j/self.numPoints[1],k/self.numPoints[2]])
+                            
+                            if i == self.nkfs_dim[0]-1 or j == self.nkfs_dim[1]-1 or k == self.nkfs_dim[2]-1:
+                                 self.listExtra.append(counter)
+                                 
+                            self.bandEnergy_fs[counter, iband] = self.bands[counter]
+                            self.kpoints_fs[counter,:] = np.array([(i)/(self.nkfs_dim[0]-1),(j)/(self.nkfs_dim[1]-1),(k)/(self.nkfs_dim[2]-1)])
                             counter += 1
+        
+                    
+    
+            self.kpoints = np.delete(self.kpoints_fs,self.listExtra, axis = 0)
+            #self.bandEnergy = self.bandEnergy_fs
+            self.bandEnergy = np.delete(self.bandEnergy_fs,self.listExtra , axis = 0)
+            
  

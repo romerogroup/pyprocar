@@ -123,6 +123,7 @@ class Isosurface(Surface):
                                             face_normals=normals)
                 if not np.isnan(suprecell_surface.pyvista_obj.points[0,0]):
                     verts, faces = self.clip(suprecell_surface, boundaries)
+                #verts, faces = self.clip(suprecell_surface, boundaries)
 
         Surface.__init__(self, verts=verts, faces=faces, face_normals=normals)
 
@@ -147,10 +148,7 @@ class Isosurface(Surface):
         for iface in range(len(S2.faces)):
             normal = S2.face_normals[iface]
             
-            
             center = np.average(S2.verts[S2.faces[iface]], axis=0)
-
-
 
             S1.pyvista_obj.clip(origin=center, normal=normal, inplace=True)
         
@@ -279,7 +277,7 @@ class Isosurface(Surface):
         padding_x = self.padding[0]
         padding_y = self.padding[1]
         padding_z = self.padding[2]
-
+        
         eigen_matrix = np.pad(self.V_matrix,
                               ((padding_x, padding_x), (padding_y, padding_y),
                                (padding_z, padding_z)), "wrap")
@@ -325,7 +323,7 @@ class Isosurface(Surface):
         padding_x = self.padding[0]
         padding_y = self.padding[1]
         padding_z = self.padding[2]
-
+        
         eigen_matrix = np.pad(self.V_matrix,
                               ((padding_x, padding_x), (padding_y, padding_y),
                                (padding_z, padding_z)), "wrap")
@@ -353,19 +351,36 @@ class Isosurface(Surface):
         # recenter
 
         for ix in range(3):
-            verts[:, ix] -= verts[:, ix].min()
-            verts[:, ix] -= (verts[:, ix].max() -
-                              verts[:, ix].min()) / 2 
-            #verts[:, ix] += 0.5
-
-            #+self.origin[ix]
-            verts[:, ix] *= self.dxyz[ix] / interp_factor
+            
             if self.file == "bxsf":
-                verts[:, ix] -= 0.5
-            if bnd is not None and interp_factor != 1:
-                verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
-                if self.file == "bxsf":
-                    verts[:, ix] -= 0.5
+     
+            # verts[:, ix] -= verts[:, ix].min()
+                verts[:, ix] *= self.dxyz[ix] / interp_factor
+                verts[:, ix] -= 0.5*self.supercell[ix]
+  
+            else:
+                verts[:, ix] -= verts[:, ix].min()
+                verts[:, ix] -= (verts[:, ix].max() -
+                                 verts[:, ix].min()) / 2
+                
+                verts[:, ix] *= self.dxyz[ix] / interp_factor
+                
+                if bnd is not None and interp_factor != 1:
+                    verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+            #+self.origin[ix]
+            # verts[:, ix] *= self.dxyz[ix] / interp_factor
+            
+            # print(self.dxyz)
+
+            # if self.file == "bxsf":
+            #     verts[:, ix] -= 0.5
+            # if bnd is not None and interp_factor != 1:
+            #     print((verts[:, ix].min() - bnd[ix][0]))
+            #     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+            #     if self.file == "bxsf":
+            #         verts[:, ix] -= 0.50
+                    
+                    
             #     x_shift = verts[:,0].min() - bnd[0]
             # y_shift = verts[:,1].min() - bnd[1]
             # z_shift = verts[:,2].min() - bnd[2]

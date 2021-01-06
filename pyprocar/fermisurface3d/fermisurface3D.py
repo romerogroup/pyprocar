@@ -84,9 +84,10 @@ class FermiSurface3D(Isosurface):
         self.spin_texture = spin_texture
         self.spd_spin = spd_spin
         self.file = file
-        self.brillouin_zone = self._get_brilloin_zone(supercell)
-        # self.brillouin_zone = None
         
+        self.brillouin_zone = self._get_brilloin_zone([1,1,1])
+        #self.brillouin_zone = None
+      
         if self.file == "bxsf":
             Isosurface.__init__(self,
                                 XYZ=self.kpoints,
