@@ -5,7 +5,7 @@ Created on Sunday, May 24th
 
 from re import findall, search, match, DOTALL, MULTILINE, finditer, compile
 
-from numpy import array, dot, linspace, sum, where, zeros, pi
+from numpy import array, dot, linspace, sum, where, zeros, pi, matmul, round, linalg
 import logging
 
 
@@ -241,7 +241,12 @@ class QEFermiParser:
         # Requires the reciprocal lattice vectors to be parsed from the output.
         if not self.kdirect:
             self.kpoints = dot(self.kpoints, self.reclat)
-
+        self.kpoints = matmul(self.kpoints, linalg.inv(self.reclat))
+        self.kpoints  = round( self.kpoints , 5)
+        for ik in range(len(self.kpoints[:,0])):
+            for ix in range(len(self.kpoints[0,:])):
+                if self.kpoints[ik,ix] < 0 :
+                    self.kpoints[ik,ix] += 1
         #######################################################################
         # Finds the band count and makes a band array
         #######################################################################
@@ -505,9 +510,9 @@ class QEFermiParser:
             findall(r"b\(3\)\s*=\s*\(([\d.\s+-e]*)", data)[0].split(), dtype="float64"
         )
 
-        reclat = (2 * pi / alat) * (array((b1, b2, b3)))
-
+        # reclat = (2 * pi / alat) * (array((b1, b2, b3)))
+        reclat = array((b1, b2, b3))
         # Transposing to get the correct format
-        reclat = reclat.T
+        reclat = reclat
 
         return reclat
