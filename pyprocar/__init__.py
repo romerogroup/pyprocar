@@ -52,7 +52,7 @@ from pyprocar.elkparser import ElkParser
 from pyprocar.qeparser import QEParser, QEDOSParser, QEFermiParser
 
 # Lobster
-from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser
+from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
 
 from pyprocar.fermisurface import FermiSurface
 from pyprocar.fermisurface3d import FermiSurface3D, BrillouinZone

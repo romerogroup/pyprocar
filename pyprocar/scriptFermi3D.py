@@ -14,6 +14,7 @@ from .procarselect import ProcarSelect
 from .bxsfparser import BxsfParser
 from .frmsfparser import FrmsfParser
 from .qeparser import QEFermiParser
+from .lobsterparser import LobsterFermiParser
 
 
 def fermi3D(
@@ -329,7 +330,15 @@ def fermi3D(
             e_fermi = data.fermi
         else:
             e_fermi = fermi
-
+    
+    elif code == "lobster":
+        data = LobsterFermiParser()
+        reciprocal_lattice = data.reclat
+        if fermi is None:
+            e_fermi = 0
+        else:
+            e_fermi = fermi
+        
     elif code == "bxsf":
         e_fermi = fermi
         data = BxsfParser(infile=infile)
@@ -430,6 +439,20 @@ def fermi3D(
                 supercell=supercell,
                 file="qe",
             )
+        elif code == "lobster":
+            surface = FermiSurface3D(
+                kpoints=data.kpoints,
+                band=data.bands[:, iband],
+                spd=spd[counter],
+                spd_spin=spd_spin[counter],
+                fermi=e_fermi + fermi_shift,
+                reciprocal_lattice=reciprocal_lattice,
+                interpolation_factor=interpolation_factor,
+                projection_accuracy=projection_accuracy,
+                supercell=supercell,
+                file="lobster",
+            )
+            
         elif code == "frmsf":
             surface = FermiSurface3D(
                 kpoints=data.kpoints,

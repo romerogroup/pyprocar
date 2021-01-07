@@ -88,7 +88,7 @@ class FermiSurface3D(Isosurface):
         self.brillouin_zone = self._get_brilloin_zone([1,1,1])
         #self.brillouin_zone = None
       
-        if self.file == "bxsf" or self.file =='qe':
+        if self.file == "bxsf" or self.file =='qe' or self.file == 'lobster':
             Isosurface.__init__(self,
                                 XYZ=self.kpoints,
                                 V=self.band,
