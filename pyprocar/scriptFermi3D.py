@@ -324,25 +324,35 @@ def fermi3D(
         data = ProcarSelect(procarFile, deepCopy=True)
 
     elif code == "qe":
-        data = QEFermiParser()
-        reciprocal_lattice = data.reclat
+        procarFile = QEFermiParser()
+        reciprocal_lattice = procarFile.reclat
+        data = ProcarSelect(procarFile, deepCopy=True)
         if fermi is None:
-            e_fermi = data.fermi
+            e_fermi = procarFile.fermi
         else:
             e_fermi = fermi
-    
+            
     elif code == "lobster":
-        data = LobsterFermiParser()
-        reciprocal_lattice = data.reclat
+        procarFile = LobsterFermiParser()
+        reciprocal_lattice = procarFile.reclat
+        data = ProcarSelect(procarFile, deepCopy=True)
         if fermi is None:
             e_fermi = 0
         else:
             e_fermi = fermi
+    # elif code == "lobster":
+    #     data = LobsterFermiParser()
+    #     reciprocal_lattice = data.reclat
+    #     if fermi is None:
+    #         e_fermi = 0
+    #     else:
+    #         e_fermi = fermi
         
     elif code == "bxsf":
         e_fermi = fermi
-        data = BxsfParser(infile=infile)
-        reciprocal_lattice = data.rec_lattice
+        procarFile = BxsfParser()
+        reciprocal_lattice = procarFile.reclat
+        data = ProcarSelect(procarFile, deepCopy=True)
         bands = np.arange(len(data.bandEnergy[0, :]))
         
     elif code == "frmsf":
@@ -415,8 +425,8 @@ def fermi3D(
         print("Trying to extract isosurface for band %d" % iband)
         if code == "bxsf":
             surface = FermiSurface3D(
-                kpoints=data.kpoints,
-                band=data.bandEnergy[:, iband],
+                kpoints=procarFile.kpoints,
+                band=procarFile.bandEnergy[:, iband],
                 spd=spd[counter],
                 spd_spin=spd_spin[counter],
                 fermi=e_fermi + fermi_shift,
@@ -428,8 +438,8 @@ def fermi3D(
             )
         elif code == "qe":
             surface = FermiSurface3D(
-                kpoints=data.kpoints,
-                band=data.bands[:, iband],
+                kpoints=procarFile.kpoints,
+                band=procarFile.bands[:, iband],
                 spd=spd[counter],
                 spd_spin=spd_spin[counter],
                 fermi=e_fermi + fermi_shift,
@@ -441,8 +451,8 @@ def fermi3D(
             )
         elif code == "lobster":
             surface = FermiSurface3D(
-                kpoints=data.kpoints,
-                band=data.bands[:, iband],
+                kpoints=procarFile.kpoints,
+                band=procarFile.bands[:, iband],
                 spd=spd[counter],
                 spd_spin=spd_spin[counter],
                 fermi=e_fermi + fermi_shift,
@@ -537,7 +547,7 @@ def fermi3D(
                 n_labels=6,
                 italic=False,
                 bold=False,
-                title_font_selfize=None,
+                title_font_size=None,
                 label_font_size=None,
                 position_x=0.9,
                 position_y=0.01,
