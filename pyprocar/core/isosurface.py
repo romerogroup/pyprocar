@@ -92,12 +92,13 @@ class Isosurface(Surface):
             self.V_matrix = map2matrix(self.XYZ, self.V)
 
         if self.padding is None:
-            self.padding = [self.nX // 2, self.nY // 2, self.nZ // 2]
+            self.padding = [self.nX*2 // 2, self.nY*2 // 2, self.nZ*2 // 2]
         else:
             self.padding = [
                 self.nX // 2 * padding[0], self.nY // 2 * padding[1],
                 self.nZ // 2 * padding[2]
             ]
+       
        
 
         verts, faces, normals, values = self._get_isosurface(
@@ -356,7 +357,7 @@ class Isosurface(Surface):
      
             # verts[:, ix] -= verts[:, ix].min()
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
-                verts[:, ix] -= 0.5*self.supercell[ix]
+                verts[:, ix] -= self.supercell[ix]
   
             else:
                 verts[:, ix] -= verts[:, ix].min()

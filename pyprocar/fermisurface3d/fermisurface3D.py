@@ -77,7 +77,7 @@ class FermiSurface3D(Isosurface):
         self.band = band
         self.spd = spd
         self.reciprocal_lattice = reciprocal_lattice
-        self.supercell = supercell
+        self.supercell = np.array(supercell)
         self.fermi = fermi
         self.interpolation_factor = interpolation_factor
         self.projection_accuracy = projection_accuracy
@@ -85,7 +85,7 @@ class FermiSurface3D(Isosurface):
         self.spd_spin = spd_spin
         self.file = file
         
-        self.brillouin_zone = self._get_brilloin_zone([1,1,1])
+        self.brillouin_zone = self._get_brilloin_zone(self.supercell)
         #self.brillouin_zone = None
       
         if self.file == "bxsf" or self.file =='qe' or self.file == 'lobster':
@@ -95,7 +95,7 @@ class FermiSurface3D(Isosurface):
                                 isovalue=self.fermi,
                                 algorithm='lewiner',
                                 interpolation_factor=interpolation_factor,
-                                padding=self.supercell,
+                                padding=self.supercell*2,
                                 transform_matrix=self.reciprocal_lattice,
                                 boundaries=self.brillouin_zone,
                                 file = self.file)
@@ -227,7 +227,7 @@ class FermiSurface3D(Isosurface):
             # XYZ_extended = self.XYZ.copy()
             # scalars_extended = self.spd.copy()
 
-            XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
+            #XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
             # XYZ_transformed = XYZ_extended
 
             if self.projection_accuracy.lower()[0] == 'n':

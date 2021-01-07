@@ -340,13 +340,7 @@ def fermi3D(
             e_fermi = 0
         else:
             e_fermi = fermi
-    # elif code == "lobster":
-    #     data = LobsterFermiParser()
-    #     reciprocal_lattice = data.reclat
-    #     if fermi is None:
-    #         e_fermi = 0
-    #     else:
-    #         e_fermi = fermi
+
         
     elif code == "bxsf":
         e_fermi = fermi
