@@ -227,8 +227,8 @@ class FermiSurface3D(Isosurface):
             # XYZ_extended = self.XYZ.copy()
             # scalars_extended = self.spd.copy()
 
-            #XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
-            # XYZ_transformed = XYZ_extended
+            XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
+            #XYZ_transformed = XYZ_extended
 
             if self.projection_accuracy.lower()[0] == 'n':
                 colors = interpolate.griddata(XYZ_transformed,

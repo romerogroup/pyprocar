@@ -344,10 +344,10 @@ def fermi3D(
         
     elif code == "bxsf":
         e_fermi = fermi
-        procarFile = BxsfParser()
-        reciprocal_lattice = procarFile.reclat
-        data = ProcarSelect(procarFile, deepCopy=True)
-        bands = np.arange(len(data.bandEnergy[0, :]))
+        procarFile = BxsfParser(infile= infile)
+        reciprocal_lattice = procarFile.rec_lattice
+        
+        bands = np.arange(len(procarFile.bandEnergy[0, :]))
         
     elif code == "frmsf":
         e_fermi = fermi
