@@ -14,4 +14,19 @@ PyProcar: A Python library for electronic structure pre/post-processing.,\n \
 Computer Physics Communications 251 (2020):107080.\n"
     )
 
+    dev_string = """
+Developers:
+- Francisco Muñoz
+- Aldo Romero
+- Sobhit Singh
+- Uthpala Herath
+- Pedram Tavadze
+- Eric Bousquet
+- Xu He
+- Reese Boucher
+- Logan Lang
+- Freddy Farah
+    """
+    print(dev_string)
+
     return
