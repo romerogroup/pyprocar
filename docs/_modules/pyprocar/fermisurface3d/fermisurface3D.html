@@ -30,7 +30,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
         <script src="../../../_static/clipboard.min.js"></script>
         <script src="../../../_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -235,24 +234,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="n">band</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="n">spd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">reciprocal_lattice</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">supercell</span> <span class="o">=</span> <span class="n">supercell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supercell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">supercell</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="n">fermi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_factor</span> <span class="o">=</span> <span class="n">interpolation_factor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span> <span class="o">=</span> <span class="n">projection_accuracy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spin_texture</span> <span class="o">=</span> <span class="n">spin_texture</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span> <span class="o">=</span> <span class="n">spd_spin</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_brilloin_zone</span><span class="p">(</span><span class="n">supercell</span><span class="p">)</span>
-        <span class="c1"># self.brillouin_zone = None</span>
         
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_brilloin_zone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">)</span>
+        <span class="c1">#self.brillouin_zone = None</span>
+      
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span><span class="s1">&#39;qe&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;lobster&#39;</span><span class="p">:</span>
             <span class="n">Isosurface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                 <span class="n">XYZ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
                                 <span class="n">V</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">band</span><span class="p">,</span>
                                 <span class="n">isovalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi</span><span class="p">,</span>
                                 <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;lewiner&#39;</span><span class="p">,</span>
                                 <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-                                <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">,</span>
+                                <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
                                 <span class="n">transform_matrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
                                 <span class="n">boundaries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="p">,</span>
                                 <span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
@@ -385,7 +385,7 @@
             <span class="c1"># scalars_extended = self.spd.copy()</span>
 
             <span class="n">XYZ_transformed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">XYZ_extended</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
-            <span class="c1"># XYZ_transformed = XYZ_extended</span>
+            <span class="c1">#XYZ_transformed = XYZ_extended</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_accuracy</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
                 <span class="n">colors</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">XYZ_transformed</span><span class="p">,</span>

@@ -30,7 +30,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
         <script src="../../../_static/clipboard.min.js"></script>
         <script src="../../../_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -250,12 +249,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span> <span class="o">=</span> <span class="n">map2matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nX</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nY</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nZ</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nX</span><span class="o">*</span><span class="mi">2</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nY</span><span class="o">*</span><span class="mi">2</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nZ</span><span class="o">*</span><span class="mi">2</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nX</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nY</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nZ</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">padding</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
             <span class="p">]</span>
+       
        
 
         <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_isosurface</span><span class="p">(</span>
@@ -281,6 +281,7 @@
                                             <span class="n">face_normals</span><span class="o">=</span><span class="n">normals</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">suprecell_surface</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]):</span>
                     <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">suprecell_surface</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">)</span>
+                <span class="c1">#verts, faces = self.clip(suprecell_surface, boundaries)</span>
 
         <span class="n">Surface</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verts</span><span class="o">=</span><span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="o">=</span><span class="n">faces</span><span class="p">,</span> <span class="n">face_normals</span><span class="o">=</span><span class="n">normals</span><span class="p">)</span>
 
@@ -305,10 +306,7 @@
         <span class="k">for</span> <span class="n">iface</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">S2</span><span class="o">.</span><span class="n">faces</span><span class="p">)):</span>
             <span class="n">normal</span> <span class="o">=</span> <span class="n">S2</span><span class="o">.</span><span class="n">face_normals</span><span class="p">[</span><span class="n">iface</span><span class="p">]</span>
             
-            
             <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">S2</span><span class="o">.</span><span class="n">verts</span><span class="p">[</span><span class="n">S2</span><span class="o">.</span><span class="n">faces</span><span class="p">[</span><span class="n">iface</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-
 
             <span class="n">S1</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="n">normal</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
@@ -437,7 +435,7 @@
         <span class="n">padding_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">padding_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">padding_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-
+        
         <span class="n">eigen_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span><span class="p">,</span>
                               <span class="p">((</span><span class="n">padding_x</span><span class="p">,</span> <span class="n">padding_x</span><span class="p">),</span> <span class="p">(</span><span class="n">padding_y</span><span class="p">,</span> <span class="n">padding_y</span><span class="p">),</span>
                                <span class="p">(</span><span class="n">padding_z</span><span class="p">,</span> <span class="n">padding_z</span><span class="p">)),</span> <span class="s2">&quot;wrap&quot;</span><span class="p">)</span>
@@ -483,7 +481,7 @@
         <span class="n">padding_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">padding_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">padding_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-
+        
         <span class="n">eigen_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_matrix</span><span class="p">,</span>
                               <span class="p">((</span><span class="n">padding_x</span><span class="p">,</span> <span class="n">padding_x</span><span class="p">),</span> <span class="p">(</span><span class="n">padding_y</span><span class="p">,</span> <span class="n">padding_y</span><span class="p">),</span>
                                <span class="p">(</span><span class="n">padding_z</span><span class="p">,</span> <span class="n">padding_z</span><span class="p">)),</span> <span class="s2">&quot;wrap&quot;</span><span class="p">)</span>
@@ -511,19 +509,36 @@
         <span class="c1"># recenter</span>
 
         <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-            <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-            <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span>
-                              <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span> 
-            <span class="c1">#verts[:, ix] += 0.5</span>
-
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;lobster&#39;</span><span class="p">:</span>
+     
+            <span class="c1"># verts[:, ix] -= verts[:, ix].min()</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dxyz</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">interp_factor</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+  
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span>
+                                 <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>
+                
+                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dxyz</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">interp_factor</span>
+                
+                <span class="k">if</span> <span class="n">bnd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">interp_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">bnd</span><span class="p">[</span><span class="n">ix</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
             <span class="c1">#+self.origin[ix]</span>
-            <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dxyz</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">/</span> <span class="n">interp_factor</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
-                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.5</span>
-            <span class="k">if</span> <span class="n">bnd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">interp_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">bnd</span><span class="p">[</span><span class="n">ix</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
-                    <span class="n">verts</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.5</span>
+            <span class="c1"># verts[:, ix] *= self.dxyz[ix] / interp_factor</span>
+            
+            <span class="c1"># print(self.dxyz)</span>
+
+            <span class="c1"># if self.file == &quot;bxsf&quot;:</span>
+            <span class="c1">#     verts[:, ix] -= 0.5</span>
+            <span class="c1"># if bnd is not None and interp_factor != 1:</span>
+            <span class="c1">#     print((verts[:, ix].min() - bnd[ix][0]))</span>
+            <span class="c1">#     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])</span>
+            <span class="c1">#     if self.file == &quot;bxsf&quot;:</span>
+            <span class="c1">#         verts[:, ix] -= 0.50</span>
+                    
+                    
             <span class="c1">#     x_shift = verts[:,0].min() - bnd[0]</span>
             <span class="c1"># y_shift = verts[:,1].min() - bnd[1]</span>
             <span class="c1"># z_shift = verts[:,2].min() - bnd[2]</span>

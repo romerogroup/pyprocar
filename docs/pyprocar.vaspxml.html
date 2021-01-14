@@ -161,14 +161,316 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="pyprocar-vaspxml-parser-module">
-<h2>pyprocar.vaspxml.parser module<a class="headerlink" href="#pyprocar-vaspxml-parser-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyprocar.vaspxml.parser">
+<span id="pyprocar-vaspxml-parser-module"></span><h2>pyprocar.vaspxml.parser module<a class="headerlink" href="#module-pyprocar.vaspxml.parser" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="pyprocar-vaspxml-vaspxml-module">
-<h2>pyprocar.vaspxml.vaspxml module<a class="headerlink" href="#pyprocar-vaspxml-vaspxml-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyprocar.vaspxml.vaspxml">
+<span id="pyprocar-vaspxml-vaspxml-module"></span><h2>pyprocar.vaspxml.vaspxml module<a class="headerlink" href="#module-pyprocar.vaspxml.vaspxml" title="Permalink to this headline">¶</a></h2>
+<p>Created on Wed Aug 19 20:49:03 2020</p>
+<p>&#64;author: Pedram Tavadze, Logan Lang</p>
+<dl class="py class">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML">
+<em class="property">class </em><code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">VaspXML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'vasprun.xml'</span></em>, <em class="sig-param"><span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#VaspXML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></p>
+<p>contains.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.convergence" title="pyprocar.vaspxml.vaspxml.VaspXML.convergence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convergence</span></code></a></dt><dd><p>Returns a boolian representing if the the electronic self-consistent</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.convergence_electronic" title="pyprocar.vaspxml.vaspxml.VaspXML.convergence_electronic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convergence_electronic</span></code></a></dt><dd><p>Returns a boolian representing if the last electronic self-consistent</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.convergence_ionic" title="pyprocar.vaspxml.vaspxml.VaspXML.convergence_ionic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convergence_ionic</span></code></a></dt><dd><p>Returns a boolian representing if the ionic part of the</p>
+</dd>
+<dt><strong>dos</strong></dt><dd></dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos_projected" title="pyprocar.vaspxml.vaspxml.VaspXML.dos_projected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dos_projected</span></code></a></dt><dd><p>Returns the projected DOS as a multi-dimentional array, to be used in the</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos_to_dict" title="pyprocar.vaspxml.vaspxml.VaspXML.dos_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dos_to_dict</span></code></a></dt><dd><p>Returns the complete density (total,projected) of states as a python dictionary</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos_total" title="pyprocar.vaspxml.vaspxml.VaspXML.dos_total"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dos_total</span></code></a></dt><dd><p>Returns the total density of states as a pychemia.visual.DensityOfSates object</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.energies" title="pyprocar.vaspxml.vaspxml.VaspXML.energies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">energies</span></code></a></dt><dd><p>Returns a list of energies in each electronic and ionic step [ionic step,electronic step, energy]</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.energy" title="pyprocar.vaspxml.vaspxml.VaspXML.energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">energy</span></code></a></dt><dd><p>Returns the last calculated energy of the system</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.fermi" title="pyprocar.vaspxml.vaspxml.VaspXML.fermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi</span></code></a></dt><dd><p>Returns the fermi energy</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.final_structure" title="pyprocar.vaspxml.vaspxml.VaspXML.final_structure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">final_structure</span></code></a></dt><dd><p>Returns the final Structure as a pychemia structure</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.forces" title="pyprocar.vaspxml.vaspxml.VaspXML.forces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forces</span></code></a></dt><dd><p>Returns all the forces in ionic steps</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.incar" title="pyprocar.vaspxml.vaspxml.VaspXML.incar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">incar</span></code></a></dt><dd><p>Returns the incar parameters used in the calculation as pychemia.code.vasp.VaspIncar object</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.initial_structure" title="pyprocar.vaspxml.vaspxml.VaspXML.initial_structure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initial_structure</span></code></a></dt><dd><p>Returns the initial Structure as a pychemia structure</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.is_finished" title="pyprocar.vaspxml.vaspxml.VaspXML.is_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_finished</span></code></a></dt><dd><p>Always returns True, need to fix this according to reading the xml as if the calc is</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.iteration_data" title="pyprocar.vaspxml.vaspxml.VaspXML.iteration_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iteration_data</span></code></a></dt><dd><p>Returns a list of information in each electronic and ionic step of calculation</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.kpoints" title="pyprocar.vaspxml.vaspxml.VaspXML.kpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kpoints</span></code></a></dt><dd><p>Returns the kpoints used in the calculation in form of a pychemia.core.KPoints object</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.kpoints_list" title="pyprocar.vaspxml.vaspxml.VaspXML.kpoints_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kpoints_list</span></code></a></dt><dd><p>Returns the list of kpoints and weights used in the calculation in form of a pychemia.core.KPoints object</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.last_energy" title="pyprocar.vaspxml.vaspxml.VaspXML.last_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_energy</span></code></a></dt><dd><p>Returns the last calculated energy of the system</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.potcar_info" title="pyprocar.vaspxml.vaspxml.VaspXML.potcar_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">potcar_info</span></code></a></dt><dd><p>Returns the information about pseudopotentials(POTCAR) used in this calculation</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.species" title="pyprocar.vaspxml.vaspxml.VaspXML.species"><code class="xref py py-obj docutils literal notranslate"><span class="pre">species</span></code></a></dt><dd><p>Returns the species in POSCAR</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.structure" title="pyprocar.vaspxml.vaspxml.VaspXML.structure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">structure</span></code></a></dt><dd><p>crystal structure of the last step</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.structures" title="pyprocar.vaspxml.vaspxml.VaspXML.structures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">structures</span></code></a></dt><dd><p>Returns a list of pychemia.core.Structure representing all the ionic step structures</p>
+</dd>
+<dt><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.vasp_parameters" title="pyprocar.vaspxml.vaspxml.VaspXML.vasp_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vasp_parameters</span></code></a></dt><dd><p>Returns all of the parameters vasp has used in this calculation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(k[,d])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyprocar.vaspxml.vaspxml.VaspXML.read" title="pyprocar.vaspxml.vaspxml.VaspXML.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
+<td><p>Read and parse vasprun.xml.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.convergence">
+<em class="property">property </em><code class="sig-name descname">convergence</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.convergence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolian representing if the the electronic self-consistent
+and ionic calculation converged</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.convergence_electronic">
+<em class="property">property </em><code class="sig-name descname">convergence_electronic</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.convergence_electronic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolian representing if the last electronic self-consistent
+calculation converged</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.convergence_ionic">
+<em class="property">property </em><code class="sig-name descname">convergence_ionic</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.convergence_ionic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolian representing if the ionic part of the
+calculation converged</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.dos">
+<em class="property">property </em><code class="sig-name descname">dos</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.dos_projected">
+<em class="property">property </em><code class="sig-name descname">dos_projected</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos_projected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the projected DOS as a multi-dimentional array, to be used in the
+pyprocar.core.dos object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.dos_to_dict">
+<em class="property">property </em><code class="sig-name descname">dos_to_dict</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the complete density (total,projected) of states as a python dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.dos_total">
+<em class="property">property </em><code class="sig-name descname">dos_total</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.dos_total" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total density of states as a pychemia.visual.DensityOfSates object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.energies">
+<em class="property">property </em><code class="sig-name descname">energies</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of energies in each electronic and ionic step [ionic step,electronic step, energy]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.energy">
+<em class="property">property </em><code class="sig-name descname">energy</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last calculated energy of the system</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.fermi">
+<em class="property">property </em><code class="sig-name descname">fermi</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.fermi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the fermi energy</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.final_structure">
+<em class="property">property </em><code class="sig-name descname">final_structure</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.final_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the final Structure as a pychemia structure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.forces">
+<em class="property">property </em><code class="sig-name descname">forces</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.forces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all the forces in ionic steps</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.incar">
+<em class="property">property </em><code class="sig-name descname">incar</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.incar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the incar parameters used in the calculation as pychemia.code.vasp.VaspIncar object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.initial_structure">
+<em class="property">property </em><code class="sig-name descname">initial_structure</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.initial_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the initial Structure as a pychemia structure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.is_finished">
+<em class="property">property </em><code class="sig-name descname">is_finished</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.is_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Always returns True, need to fix this according to reading the xml as if the calc is
+not finished we will have errors in xml parser</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.iteration_data">
+<em class="property">property </em><code class="sig-name descname">iteration_data</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.iteration_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of information in each electronic and ionic step of calculation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.kpoints">
+<em class="property">property </em><code class="sig-name descname">kpoints</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.kpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the kpoints used in the calculation in form of a pychemia.core.KPoints object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.kpoints_list">
+<em class="property">property </em><code class="sig-name descname">kpoints_list</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.kpoints_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of kpoints and weights used in the calculation in form of a pychemia.core.KPoints object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.last_energy">
+<em class="property">property </em><code class="sig-name descname">last_energy</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.last_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last calculated energy of the system</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.potcar_info">
+<em class="property">property </em><code class="sig-name descname">potcar_info</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.potcar_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the information about pseudopotentials(POTCAR) used in this calculation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#VaspXML.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and parse vasprun.xml.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.species">
+<em class="property">property </em><code class="sig-name descname">species</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.species" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the species in POSCAR</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.structure">
+<em class="property">property </em><code class="sig-name descname">structure</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>crystal structure of the last step</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.structures">
+<em class="property">property </em><code class="sig-name descname">structures</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.structures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of pychemia.core.Structure representing all the ionic step structures</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyprocar.vaspxml.vaspxml.VaspXML.vasp_parameters">
+<em class="property">property </em><code class="sig-name descname">vasp_parameters</code><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.VaspXML.vasp_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all of the parameters vasp has used in this calculation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.conv">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">conv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ele</span></em>, <em class="sig-param"><span class="n">_type</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#conv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function converts the xml text to the type specified in the attrib of xml tree</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.get_general">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">get_general</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xml_tree</span></em>, <em class="sig-param"><span class="n">ret</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#get_general"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.get_general" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will parse any element in calculatio other than the structures, scsteps</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.get_params">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">get_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xml_tree</span></em>, <em class="sig-param"><span class="n">dest</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>dest should be a dictionary
+This function is recurcive #check spelling</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.get_scstep">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">get_scstep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xml_tree</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#get_scstep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.get_scstep" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function extracts the self-consistent step information</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.get_set">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">get_set</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xml_tree</span></em>, <em class="sig-param"><span class="n">ret</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#get_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.get_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will extract any element taged set recurcively</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.get_structure">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">get_structure</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xml_tree</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#get_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.get_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of the structure</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.get_varray">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">get_varray</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xml_tree</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#get_varray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.get_varray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array for each varray tag in vaspxml</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.parse_vasprun">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">parse_vasprun</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vasprun</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#parse_vasprun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.parse_vasprun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyprocar.vaspxml.vaspxml.text_to_bool">
+<code class="sig-prename descclassname">pyprocar.vaspxml.vaspxml.</code><code class="sig-name descname">text_to_bool</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/vaspxml/vaspxml.html#text_to_bool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.vaspxml.vaspxml.text_to_bool" title="Permalink to this definition">¶</a></dt>
+<dd><p>boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians</p>
+</dd></dl>
+
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pyprocar.vaspxml">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyprocar.vaspxml" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

@@ -30,7 +30,6 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -175,7 +174,7 @@
 <span class="c1"># Roman [&#39;rm&#39;, &#39;cal&#39;, &#39;it&#39;, &#39;tt&#39;, &#39;sf&#39;,</span>
 <span class="c1">#        &#39;bf&#39;, &#39;default&#39;, &#39;bb&#39;, &#39;frak&#39;,</span>
 <span class="c1">#        &#39;circled&#39;, &#39;scr&#39;, &#39;regular&#39;]</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Georgia&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Arial&quot;</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>  <span class="c1"># controls default text sizes</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;axes&quot;</span><span class="p">,</span> <span class="n">titlesize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>  <span class="c1"># fontsize of the axes title</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;axes&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>  <span class="c1"># fontsize of the x and y labels</span>
@@ -198,6 +197,7 @@
         <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dos_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -238,7 +238,7 @@
 <span class="sd">    interpolation_factor : int, optional (default ``None``)</span>
 <span class="sd">        Number of points in energy axis is multiplied by this factor</span>
 <span class="sd">        and interpolated using cubic</span>
-<span class="sd">        spline. </span>
+<span class="sd">        spline.</span>
 
 <span class="sd">        e.g. ``interpolation_factor=3``</span>
 
@@ -328,10 +328,10 @@
 <span class="sd">            +-----+-----+----+----+-----+-----+-----+-----+-------+</span>
 <span class="sd">        ``orbitals`` is only relavent in ``mode=&#39;parametric&#39;``,</span>
 <span class="sd">        ``mode=&#39;parametric_line&#39;``, ``mode=&#39;stack_species&#39;``.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``orbitals=[1,2,3]`` will only select the p orbitals</span>
 <span class="sd">        while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If nothing is specified pyprocar will select all the present</span>
 <span class="sd">        orbitals.</span>
 
@@ -356,8 +356,13 @@
 <span class="sd">        color maps in matplotlib are provided in this web</span>
 <span class="sd">        page. `https://matplotlib.org/2.0.1/users/colormaps.html</span>
 <span class="sd">        &lt;https://matplotlib.org/2.0.1/users/colormaps.html&gt;`_</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``cmap=&#39;plasma&#39;``</span>
+
+<span class="sd">    linewidth : str, optional (default 1)</span>
+<span class="sd">        The line width with which the total DOS is ploted</span>
+
+<span class="sd">        e.g. linewidth=2</span>
 
 <span class="sd">    vmax : float, optional</span>
 <span class="sd">        The maximum value in the color bar. ``cmap`` is only relevant</span>
@@ -383,32 +388,32 @@
 <span class="sd">        matplotlib such as png, pdf, jpg, ...</span>
 <span class="sd">        If not provided the plot will be shown in the</span>
 <span class="sd">        interactive matplotlib mode.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``savefig=&#39;DOS.png&#39;``, ``savefig=&#39;DOS.pdf&#39;``</span>
 
 <span class="sd">    title : str, optional</span>
 <span class="sd">        Defines the plot title asked to be added above the plot. If</span>
 <span class="sd">        ``title`` is not defined, PyProcar will not add any title.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``title=&quot;Total Density of States SrVO_$3$&quot;``. One can use</span>
 <span class="sd">        LaTex format as well.</span>
 
 <span class="sd">    plot_total : bool, optional (default ``True``)</span>
 <span class="sd">        If the total density of states is plotted as well as other</span>
 <span class="sd">        options. The entry should be python boolian.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``plot_total=True``</span>
 
 <span class="sd">    code : str, optional (default ``&#39;vasp&#39;``)</span>
 <span class="sd">        Defines the Density Functional Theory code used for the</span>
 <span class="sd">        calculation. The default of this argument is vasp, so if the</span>
 <span class="sd">        cal is done in vasp one does not need to define this argumnet.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ``code=vasp``, ``code=elk``, ``code=abinit``</span>
 
 <span class="sd">    labels : list str, optional</span>
 <span class="sd">        ``labels`` define the legends plotted in defining each spin.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g.  ``labels=[&#39;Oxygen-Up&#39;,&#39;Oxygen-Down&#39;]``,</span>
 <span class="sd">        ``labels=[&#39;Oxygen-&#39;+r&#39;$\\uparrow$&#39;,&#39;Oxygen-&#39;+r&#39;$\\downarrow$&#39;]``</span>
 <span class="sd">        Side means the string will be treated as raw string. This has</span>
@@ -426,7 +431,7 @@
 <span class="sd">        dictionary, with keys being specific species and values being</span>
 <span class="sd">        projections of ``orbitals``. The following examples can</span>
 <span class="sd">        clarify the python lingo.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g.  ``items={&#39;Sr&#39;:[0],&#39;O&#39;:[1,2,3],&#39;V&#39;:[4,5,6,7,8]}`` or</span>
 <span class="sd">        ``items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])``. The two</span>
 <span class="sd">        examples are equivalent to each other. This will plot the</span>
@@ -440,9 +445,9 @@
 <span class="sd">        ``ax`` is a matplotlib axes. In case one wants to put plot</span>
 <span class="sd">        generated from this plot in a different figure and treat the</span>
 <span class="sd">        output as a subplot in a larger plot.</span>
-<span class="sd">        </span>
+
 <span class="sd">        e.g. ::</span>
-<span class="sd">        </span>
+
 <span class="sd">            &gt;&gt;&gt; # Creates a figure with 3 rows and 2 colomuns</span>
 <span class="sd">            &gt;&gt;&gt; fig, axs = plt.subplots(3, 2)</span>
 <span class="sd">            &gt;&gt;&gt; x = np.linspace(-np.pi, np.pi, 1000)</span>
@@ -467,7 +472,7 @@
 <span class="sd">        If one chooses ``plt_show=False``, one can modify the plot</span>
 <span class="sd">        using this returned object.</span>
 <span class="sd">        e.g. ::</span>
-<span class="sd">    </span>
+
 <span class="sd">            &gt;&gt;&gt; fig, ax = pyprocar.dosplot(mode=&#39;plain&#39;, plt_show=False)</span>
 <span class="sd">            &gt;&gt;&gt; ax.set_ylim(-2,2)</span>
 <span class="sd">            &gt;&gt;&gt; fig.show()</span>
@@ -559,6 +564,7 @@
             <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
             <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
             <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric_line&quot;</span><span class="p">:</span>
@@ -571,6 +577,7 @@
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -579,6 +586,8 @@
                 <span class="n">spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
+
             <span class="p">)</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">dos_plot</span><span class="o">.</span><span class="n">plot_parametric_line</span><span class="p">(</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
@@ -588,6 +597,7 @@
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
                 <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
             <span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">total</span><span class="p">:</span>
@@ -624,6 +634,7 @@
                 <span class="n">spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack_species&quot;</span><span class="p">:</span>
@@ -654,6 +665,7 @@
                 <span class="n">spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack_orbitals&quot;</span><span class="p">:</span>
@@ -686,6 +698,7 @@
                 <span class="n">spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack&quot;</span><span class="p">:</span>
@@ -718,6 +731,7 @@
                 <span class="n">spin_colors</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="n">cond1</span> <span class="o">=</span> <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -750,7 +764,7 @@
     <span class="n">ax1</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
     <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
 
-    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="c1"># fig.tight_layout()</span>
     <span class="k">if</span> <span class="n">grid</span><span class="p">:</span>
         <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">labels</span> <span class="ow">or</span> <span class="s2">&quot;stack&quot;</span> <span class="ow">in</span> <span class="n">mode</span><span class="p">:</span>

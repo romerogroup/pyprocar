@@ -30,7 +30,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
         <script src="../../../_static/clipboard.min.js"></script>
         <script src="../../../_static/copybutton.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -192,7 +191,9 @@
                    <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
                    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
-                   <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                   <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                   <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
@@ -229,7 +230,7 @@
             <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">))</span>
 
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotter</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">dos</span><span class="p">,</span> <span class="n">spins</span><span class="p">,</span> <span class="n">spin_colors</span><span class="p">,</span> <span class="n">figsize</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span>
-                          <span class="n">orientation</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+                          <span class="n">orientation</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="DosPlot.plot_parametric_line"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parametric_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -241,7 +242,9 @@
                              <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
                              <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                              <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
-                             <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                             <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="p">):</span>
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">:</span>
@@ -265,7 +268,7 @@
         <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">dos_sum</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">principal_q_numbers</span><span class="p">,</span> <span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="p">)</span>
 
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span> <span class="n">dos</span><span class="p">,</span> <span class="n">spins</span><span class="p">,</span> <span class="n">spin_colors</span><span class="p">,</span> <span class="n">figsize</span><span class="p">,</span>
-                          <span class="n">ax</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+                          <span class="n">ax</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="DosPlot.plot_parametric"><a class="viewcode-back" href="../../../pyprocar.doscarplot.html#pyprocar.doscarplot.dosplot.DosPlot.plot_parametric">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parametric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -320,8 +323,10 @@
             <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">),</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">elimit</span><span class="p">:</span>
             <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
-        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">deltaE</span> <span class="o">=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
         <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># dE = dos.energies[1] - dos.energies[0]</span>
@@ -425,8 +430,10 @@
         <span class="n">dos_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span>
         <span class="n">dos_projected_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">dos_sum</span><span class="p">()</span>
 
-        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">deltaE</span> <span class="o">=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
         <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
@@ -532,9 +539,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">elimit</span><span class="p">:</span>
             <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
         <span class="c1"># dos_projected_total = self.parsedData.dos_parametric()</span>
+        <span class="n">deltaE</span> <span class="o">=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
         <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">orb_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">]</span>
@@ -644,9 +652,10 @@
             <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;spdf&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">all_orbitals</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">deltaE</span> <span class="o">=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cond1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&gt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
+        <span class="n">cond2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">&lt;=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">deltaE</span><span class="o">*</span><span class="mf">0.05</span>
         <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">colors</span> <span class="o">=</span> <span class="p">{}</span>
@@ -735,7 +744,9 @@
             <span class="n">figsize</span><span class="p">,</span>
             <span class="n">ax</span><span class="p">,</span>
             <span class="n">orientation</span><span class="p">,</span>
-            <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">linewidth</span><span class="p">,</span>
+            <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">):</span>
 
     <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -755,9 +766,9 @@
             <span class="k">if</span> <span class="n">iy</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">y</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">iy</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">iy</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">iy</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;vertical&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -771,9 +782,9 @@
             <span class="k">if</span> <span class="n">ix</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">x</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">ix</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">ix</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;r-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">spin_colors</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 </pre></div>
 
