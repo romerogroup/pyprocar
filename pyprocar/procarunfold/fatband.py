@@ -57,6 +57,7 @@ def plot_band_weight(
                 # The alpha values sometimes goes above 1 so in those cases we will normalize
                 # the alpha values. -Uthpala
                 alpha_values = [lwidth / (width + 0.05) for lwidth in lwidths]
+
                 if max(alpha_values) > 1:
                     print("alpha is larger than 1. Renormalizing values.")
                     alpha_values = [

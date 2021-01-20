@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# import spglib
+import spglib
 import numpy as np
 from . import elements
 
 N_avogadro = 6.022140857e23
 
 
+
 class Structure:
-    def __init__(self, atoms=None, fractional_coordinates=None, lattice=None):
+    def __init__(self, 
+                 atoms=None, 
+                 cartesian_coordinates=None, 
+                 fractional_coordinates=None, 
+                 lattice=None):
         """
         Class to define a peridic crystal structure.
 
@@ -27,9 +32,13 @@ class Structure:
         None.
 
         """
-        self.fractional_coordinates = fractional_coordinates
-        self.atoms = atoms
-        self.lattice = lattice
+        self.fractional_coordinates = np.array(fractional_coordinates)
+        self.atoms = np.array(atoms)
+        self.lattice = np.array(lattice)
+        self.wyckoff_positions = None
+        self.group = None
+        self.get_wyckoff_positions()
+
 
     @property
     def volume(self):
@@ -122,17 +131,41 @@ class Structure:
         """
         return [elements.atomic_number(x) for x in self.atoms]
 
-    # @property
-    # def spglib_cell(self):
-    #     return (self.lattice, self.fractional_coordinates, self.atomic_numbers)
+    @property
+    def _spglib_cell(self):
+        return (self.lattice, self.fractional_coordinates, self.atomic_numbers)
 
-    # Question for uthpala: do you think we should include spglib?
+    def get_space_group_number(self, symprec=1e-5):
+        return spglib.get_symmetry_dataset(self._spglib_cell,
+                                           symprec)["number"]
 
-    # def get_space_group_number(self, symprec=1e-5):
-    #     return spglib.get_symmetry_dataset(self.spglib_cell, symprec)["number"]
+    def get_space_group_international(self, symprec=1e-5):
+        return spglib.get_symmetry_dataset(self._spglib_cell,
+                                           symprec)["international"]
 
-    # def get_space_group_international(self, symprec=1e-5):
-    #     return spglib.get_symmetry_dataset(self.spglib_cell, symprec)["international"]
+    def get_wyckoff_positions(self, symprec=1e-5):
+        wyckoff_positions = np.empty(shape=(self.natoms), dtype='<U4')
+        wyckoffs_temp = np.array(
+            spglib.get_symmetry_dataset(self._spglib_cell, 
+                                        symprec)["wyckoffs"])
+        group = np.zeros(shape=(self.natoms), dtype=np.int)
+        counter = 0
+        for iwyckoff in np.unique(wyckoffs_temp):
+            idx = np.where(wyckoffs_temp == iwyckoff)[0]
+            for ispc in np.unique(self.atoms[idx]):
+                idx2 = np.where(self.atoms[idx] == ispc)[0]
+                multiplicity = len(idx2)
+                wyckoff_positions[idx][idx2]
+                for i in idx[idx2]:
+                    wyckoff_positions[i] = str(multiplicity)+iwyckoff
+                    group[i] = counter
+                counter += 1
+        self.wyckoff_positions = wyckoff_positions
+        self.group = group
+        return wyckoff_positions
+    
+    
+    
+    def get_spglib_symmetry_dataset(self, symprec=1e-5):
+        return spglib.get_symmetry_dataset(self._spglib_cell,symprec)
 
-    # def get_wyckoff_positions(self, symprec=1e-5):
-    #     return spglib.get_symmetry_dataset(self.spglib_cell, symprec)["wyckoffs"]

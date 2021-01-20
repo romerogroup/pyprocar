@@ -229,17 +229,14 @@ atomic_masses = {
 def atomic_mass(element):
     """
     Given a element symbol or element atomic number returns atomic mass.
-
     Parameters
     ----------
     element : int,str
         atomic symbol or atomic number.
-
     Returns
     -------
     float
         atomic mass.
-
     """
     if type(element) is str:
         return atomic_masses[element]
@@ -249,33 +246,27 @@ def atomic_mass(element):
 def atomic_number(element):
     """
     Given element symbol returns atomic number.
-
     Parameters
     ----------
     element : str
         Atomic symbol.
-
     Returns
     -------
     int
         Atomic number.
-
     """
     return elements[element]
 
 def atomic_symbol(atomic_number):
     """
     Given atomic number returns atomic symbol.
-
     Parameters
     ----------
     atomic_number : int
         Atomic number.
-
     Returns
     -------
     str
         Atomic symbol.
-
     """
     return elements_reversed[atomic_number]

@@ -19,6 +19,8 @@ class ProcarUnfolder(object):
         self.procar = ProcarParser()
         self.procar.readFile2(self.fname, phase=True, ispin=ispin)
 
+        
+
     def _prepare_unfold_basis(self, ispin=None):
         # basis, which are the name of the bands e.g. 'Ti|dxy|0'
         # self.eigenvectors = np.zeros(
@@ -86,7 +88,7 @@ class ProcarUnfolder(object):
             iispin = ispin - 1
         xlist = [list(range(self.procar.kpointsCount))]
         uf = self.unfold(ispin=ispin)
-        if savetab is not None:
+        if savetab is not False:
             nk, nb = uf.shape
             tab = np.zeros((nb, nk * 2), dtype=float)
             tab[:, ::2] = self.procar.bands[iispin].T
