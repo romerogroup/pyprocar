@@ -21,5 +21,5 @@ class ElectronicBandStructure:
         self.kpoints = kpoints
         self.energies = energies
         self.projections = projections
-        
-        
+        self.structure = structure
+            
