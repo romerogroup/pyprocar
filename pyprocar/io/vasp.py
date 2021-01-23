@@ -4,7 +4,7 @@ import numpy as np
 from numpy import array
 import os
 import re
-from ..core import Structure, DensityOfStates
+from ..core import Structure, DensityOfStates, ElectronicBandStructure
 import xml.etree.ElementTree as ET
 import collections
 
@@ -38,7 +38,7 @@ class VaspXML(collections.abc.Mapping):
             DESCRIPTION.
 
         """
-        return parse_vasprun(self.filename)
+        return self.parse_vasprun(self.filename)
 
     @property
     def bands(self):
@@ -63,6 +63,7 @@ class VaspXML(collections.abc.Mapping):
     
     @property
     def bands_projected(self):
+        # projected[iatom][ikpoint][iband][iprincipal][iorbital][ispin]
         labels = self.data['general']['projected']['array']['info']
         spins = list(self.data['general']['projected']['array']['data'].keys())
         kpoints_list = list(self.data['general']['projected']['array']['data'][
@@ -71,20 +72,23 @@ class VaspXML(collections.abc.Mapping):
             spins[0]][kpoints_list[0]][kpoints_list[0]].keys())
         bands_projected = {'labels':labels}
         
+        nspins = len(spins)                
         nkpoints = len(kpoints_list)
         nbands = len(bands_list)
         norbitals = len(labels)
         natoms = self.initial_structure.natoms
-        for ispin in spins:
-            bands_projected[ispin] = np.zeros(
-                shape=(nkpoints, nbands, natoms, norbitals))
+        bands_projected['projection']=np.zeros(
+                shape=(nspins, nkpoints, nbands, natoms, norbitals))
+        for ispin, spn in enumerate(spins):
             for ikpoint, kpt in enumerate(kpoints_list):
                 for iband, bnd in enumerate(bands_list):
-                    bands_projected[ispin][ikpoint, iband, :, :] = np.array(
+                    bands_projected['projection'][ispin, ikpoint, iband, :, :] = np.array(
                         self.data['general']['projected']['array']['data'][
-                            ispin][kpt][kpt][bnd][bnd])
+                            spn][kpt][kpt][bnd][bnd])
+        bands_projected['projection'] = bands_projected[
+            'projection'].reshape(natoms, nkpoints, nbands, 1, norbitals, nspins)
         return bands_projected
-
+    
     def _get_dos_total(self):
 
         spins = list(
@@ -395,6 +399,329 @@ class VaspXML(collections.abc.Mapping):
         # if vasprun.xml is read the calculation is finished
         return True
 
+
+    def text_to_bool(self, text):
+        """boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians """
+        text = text.strip(' ')
+        if text == 'T' or text == '.True.' or text == '.TRUE.':
+            return True
+        else:
+            return False
+    
+    
+    def conv(self, ele, _type):
+        """This function converts the xml text to the type specified in the attrib of xml tree """
+    
+        if _type == 'string':
+            return ele.strip()
+        elif _type == 'int':
+            return int(ele)
+        elif _type == 'logical':
+            return self.text_to_bool(ele)
+        elif _type == 'float':
+            if '*' in ele:
+                return np.nan
+            else:
+                return float(ele)
+    
+    
+    def get_varray(self, xml_tree):
+        """Returns an array for each varray tag in vaspxml """
+        ret = []
+        for ielement in xml_tree:
+            ret.append([float(x) for x in ielement.text.split()])
+        return ret
+    
+    
+    def get_params(self, xml_tree, dest):
+        """dest should be a dictionary
+        This function is recurcive #check spelling"""
+        for ielement in xml_tree:
+            if ielement.tag == 'separator':
+                dest[ielement.attrib['name'].strip()] = {}
+                dest[ielement.attrib['name'].strip()] = self.get_params(
+                    ielement, dest[ielement.attrib['name']])
+            else:
+                if 'type' in ielement.attrib:
+                    _type = ielement.attrib['type']
+                else:
+                    _type = 'float'
+                if ielement.text is None:
+                    dest[ielement.attrib['name'].strip()] = None
+    
+                elif len(ielement.text.split()) > 1:
+                    dest[ielement.attrib['name'].strip()] = [
+                        self.conv(x, _type) for x in ielement.text.split()
+                    ]
+                else:
+                    dest[ielement.attrib['name'].strip()] = self.conv(
+                        ielement.text, _type)
+    
+        return dest
+    
+    
+    def get_structure(self,  xml_tree):
+        """Returns a dictionary of the structure """
+        ret = {}
+        for ielement in xml_tree:
+            if ielement.tag == 'crystal':
+                for isub in ielement:
+                    if isub.attrib['name'] == 'basis':
+                        ret['cell'] = self.get_varray(isub)
+                    elif isub.attrib['name'] == 'volume':
+                        ret['volume'] = float(isub.text)
+                    elif isub.attrib['name'] == 'rec_basis':
+                        ret['rec_cell'] = self.get_varray(isub)
+            elif ielement.tag == 'varray':
+                if ielement.attrib['name'] == 'positions':
+                    ret['reduced'] = self.get_varray(ielement)
+        return ret
+    
+    
+    def get_scstep(self, xml_tree):
+        """This function extracts the self-consistent step information """
+        scstep = {'time': {}, 'energy': {}}
+        for isub in xml_tree:
+            if isub.tag == 'time':
+                scstep['time'][isub.attrib['name']] = [
+                    float(x) for x in isub.text.split()
+                ]
+            elif isub.tag == 'energy':
+                for ienergy in isub:
+                    scstep['energy'][ienergy.attrib['name']] = float(ienergy.text)
+        return scstep
+    
+    
+    def get_set(self, xml_tree, ret):
+        """ This function will extract any element taged set recurcively"""
+        if xml_tree[0].tag == 'r':
+            ret[xml_tree.attrib['comment']] = self.get_varray(xml_tree)
+            return ret
+        else:
+            ret[xml_tree.attrib['comment']] = {}
+            for ielement in xml_tree:
+    
+                if ielement.tag == 'set':
+                    ret[xml_tree.attrib['comment']][
+                        ielement.attrib['comment']] = {}
+                    ret[xml_tree.attrib['comment']][
+                        ielement.attrib['comment']] = self.get_set(
+                            ielement, ret[xml_tree.attrib['comment']][
+                                ielement.attrib['comment']])
+            return ret
+    
+    
+    def get_general(self, xml_tree, ret):
+        """ This function will parse any element in calculatio other than the structures, scsteps"""
+        if 'dimension' in [x.tag for x in xml_tree]:
+            ret['info'] = []
+            ret['data'] = {}
+            for ielement in xml_tree:
+                if ielement.tag == 'field':
+                    ret['info'].append(ielement.text.strip(' '))
+                elif ielement.tag == 'set':
+                    for iset in ielement:
+                        ret['data'] = self.get_set(iset, ret['data'])
+            return ret
+        else:
+            for ielement in xml_tree:
+                if ielement.tag == 'i':
+                    if 'name' in ielement.attrib:
+                        if ielement.attrib['name'] == 'efermi':
+                            ret['efermi'] = float(ielement.text)
+                    continue
+                ret[ielement.tag] = {}
+                ret[ielement.tag] = self.get_general(ielement, ret[ielement.tag])
+            return ret
+    
+    
+    def parse_vasprun(self, vasprun):
+        tree = ET.parse(vasprun)
+        root = tree.getroot()
+    
+        calculation = []
+        structures = []
+        forces = []
+        stresses = []
+        orbital_magnetization = {}
+        run_info = {}
+        incar = {}
+        general = {}
+        kpoints_info = {}
+        vasp_params = {}
+        kpoints_list = []
+        k_weights = []
+        atom_info = {}
+        for ichild in root:
+    
+            if ichild.tag == 'generator':
+                for ielement in ichild:
+                    run_info[ielement.attrib['name']] = ielement.text
+    
+            elif ichild.tag == 'incar':
+                incar = self.get_params(ichild, incar)
+    
+            # Skipping 1st structure which is primitive cell
+            elif ichild.tag == 'kpoints':
+    
+                for ielement in ichild:
+                    if ielement.items()[0][0] == 'param':
+                        kpoints_info['mode'] = ielement.items()[0][1]
+                        if kpoints_info['mode'] == 'listgenerated':
+                            kpoints_info['kpoint_vertices'] = []
+                            for isub in ielement:
+    
+                                if isub.attrib == 'divisions':
+                                    kpoints_info['ndivision'] = int(isub.text)
+                                else:
+                                    if len(isub.text.split()) != 3:
+                                        continue
+                                    kpoints_info['kpoint_vertices'].append(
+                                        [float(x) for x in isub.text.split()])
+                        else:
+                            for isub in ielement:
+                                if isub.attrib['name'] == 'divisions':
+                                    kpoints_info['kgrid'] = [
+                                        int(x) for x in isub.text.split()
+                                    ]
+                                elif isub.attrib['name'] == 'usershift':
+                                    kpoints_info['user_shift'] = [
+                                        float(x) for x in isub.text.split()
+                                    ]
+                                elif isub.attrib['name'] == 'genvec1':
+                                    kpoints_info['genvec1'] = [
+                                        float(x) for x in isub.text.split()
+                                    ]
+                                elif isub.attrib['name'] == 'genvec2':
+                                    kpoints_info['genvec2'] = [
+                                        float(x) for x in isub.text.split()
+                                    ]
+                                elif isub.attrib['name'] == 'genvec3':
+                                    kpoints_info['genvec3'] = [
+                                        float(x) for x in isub.text.split()
+                                    ]
+                                elif isub.attrib['name'] == 'shift':
+                                    kpoints_info['shift'] = [
+                                        float(x) for x in isub.text.split()
+                                    ]
+    
+                    elif ielement.items()[0][1] == 'kpointlist':
+                        for ik in ielement:
+                            kpoints_list.append(
+                                [float(x) for x in ik.text.split()])
+                        kpoints_list = array(kpoints_list)
+                    elif ielement.items()[0][1] == 'weights':
+                        for ik in ielement:
+                            k_weights.append(float(ik.text))
+                        k_weights = array(k_weights)
+    
+            # Vasp Parameters
+            elif ichild.tag == 'parameters':
+                vasp_params = self.get_params(ichild, vasp_params)
+    
+            # Atom info
+            elif ichild.tag == 'atominfo':
+    
+                for ielement in ichild:
+                    if ielement.tag == 'atoms':
+                        atom_info['natom'] = int(ielement.text)
+                    elif ielement.tag == 'types':
+                        atom_info['nspecies'] = int(ielement.text)
+                    elif ielement.tag == 'array':
+                        if ielement.attrib['name'] == 'atoms':
+                            for isub in ielement:
+                                if isub.tag == 'set':
+                                    atom_info['symbols'] = []
+                                    for isym in isub:
+                                        atom_info['symbols'].append(isym[0].text)
+                        elif ielement.attrib['name'] == 'atomtypes':
+                            atom_info['atom_types'] = {}
+                            for isub in ielement:
+                                if isub.tag == 'set':
+                                    for iatom in isub:
+                                        atom_info['atom_types'][iatom[1].text] = {}
+                                        atom_info['atom_types'][iatom[1].text][
+                                            'natom_per_specie'] = int(
+                                                iatom[0].text)
+                                        atom_info['atom_types'][
+                                            iatom[1].text]['mass'] = float(
+                                                iatom[2].text)
+                                        atom_info['atom_types'][
+                                            iatom[1].text]['valance'] = float(
+                                                iatom[3].text)
+                                        atom_info['atom_types'][iatom[1].text][
+                                            'pseudopotential'] = iatom[
+                                                4].text.strip()
+    
+            elif ichild.tag == 'structure':
+                if ichild.attrib['name'] == 'initialpos':
+                    initial_pos = self.get_structure(ichild)
+                elif ichild.attrib['name'] == 'finalpos':
+                    final_pos = self.get_structure(ichild)
+    
+            elif ichild.tag == 'calculation':
+                for ielement in ichild:
+                    if ielement.tag == 'scstep':
+                        calculation.append(self.get_scstep(ielement))
+                    elif ielement.tag == 'structure':
+                        structures.append(self.get_structure(ielement))
+                    elif ielement.tag == 'varray':
+                        if ielement.attrib['name'] == 'forces':
+                            forces.append(self.get_varray(ielement))
+                        elif ielement.attrib['name'] == 'stress':
+                            stresses.append(self.get_varray(ielement))
+    
+                    # elif ielement.tag == 'eigenvalues':
+                    #     for isub in ielement[0] :
+                    #         if isub.tag == 'set':
+                    #             for iset in isub :
+                    #                 eigen_values[iset.attrib['comment']] = {}
+                    #                 for ikpt in iset :
+                    #                     eigen_values[iset.attrib['comment']][ikpt.attrib['comment']] = get_varray(ikpt)
+    
+                    elif ielement.tag == 'separator':
+                        if ielement.attrib['name'] == "orbital magnetization":
+                            for isub in ielement:
+                                orbital_magnetization[isub.attrib['name']] = [
+                                    float(x) for x in isub.text.split()
+                                ]
+    
+                    # elif ielement.tag == 'dos':
+                    #     for isub in ielement :
+                    #         if 'name' in isub.attrib:
+                    #             if isub.attrib['name'] == 'efermi' :
+                    #                 dos['efermi'] = float(isub.text)
+                    #             else :
+                    #                 dos[isub.tag] = {}
+                    #                 dos[isub.tag]['info'] = []
+                    #               for iset in isub[0]  :
+                    #                   if iset.tag == 'set' :
+                    #                       for isub_set in iset:
+                    #                           dos[isub.tag] = get_set(isub_set,dos[isub.tag])
+                    #                   elif iset.tag == 'field' :
+                    #                       dos[isub.tag]['info'].append(iset.text.strip(' '))
+                    else:
+                        general[ielement.tag] = {}
+                        general[ielement.tag] = self.get_general(
+                            ielement, general[ielement.tag])
+            # NEED TO ADD ORBITAL MAGNETIZATION
+    
+        return {
+            'calculation': calculation,
+            'structures': structures,
+            'forces': forces,
+            'run_info': run_info,
+            'incar': incar,
+            'general': general,
+            'kpoints_info': kpoints_info,
+            'vasp_params': vasp_params,
+            'kpoints': {
+                'kpoints_list': kpoints_list,
+                'k_weights': k_weights
+            },
+            'atom_info': atom_info
+        }
+
     def __contains__(self, x):
         return x in self.variables
 
@@ -406,396 +733,83 @@ class VaspXML(collections.abc.Mapping):
 
     def __len__(self):
         return self.variables.__len__()
-
-
-def text_to_bool(text):
-    """boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians """
-    text = text.strip(' ')
-    if text == 'T' or text == '.True.' or text == '.TRUE.':
-        return True
-    else:
-        return False
-
-
-def conv(ele, _type):
-    """This function converts the xml text to the type specified in the attrib of xml tree """
-
-    if _type == 'string':
-        return ele.strip()
-    elif _type == 'int':
-        return int(ele)
-    elif _type == 'logical':
-        return text_to_bool(ele)
-    elif _type == 'float':
-        if '*' in ele:
-            return np.nan
-        else:
-            return float(ele)
-
-
-def get_varray(xml_tree):
-    """Returns an array for each varray tag in vaspxml """
-    ret = []
-    for ielement in xml_tree:
-        ret.append([float(x) for x in ielement.text.split()])
-    return ret
-
-
-def get_params(xml_tree, dest):
-    """dest should be a dictionary
-    This function is recurcive #check spelling"""
-    for ielement in xml_tree:
-        if ielement.tag == 'separator':
-            dest[ielement.attrib['name'].strip()] = {}
-            dest[ielement.attrib['name'].strip()] = get_params(
-                ielement, dest[ielement.attrib['name']])
-        else:
-            if 'type' in ielement.attrib:
-                _type = ielement.attrib['type']
-            else:
-                _type = 'float'
-            if ielement.text is None:
-                dest[ielement.attrib['name'].strip()] = None
-
-            elif len(ielement.text.split()) > 1:
-                dest[ielement.attrib['name'].strip()] = [
-                    conv(x, _type) for x in ielement.text.split()
-                ]
-            else:
-                dest[ielement.attrib['name'].strip()] = conv(
-                    ielement.text, _type)
-
-    return dest
-
-
-def get_structure(xml_tree):
-    """Returns a dictionary of the structure """
-    ret = {}
-    for ielement in xml_tree:
-        if ielement.tag == 'crystal':
-            for isub in ielement:
-                if isub.attrib['name'] == 'basis':
-                    ret['cell'] = get_varray(isub)
-                elif isub.attrib['name'] == 'volume':
-                    ret['volume'] = float(isub.text)
-                elif isub.attrib['name'] == 'rec_basis':
-                    ret['rec_cell'] = get_varray(isub)
-        elif ielement.tag == 'varray':
-            if ielement.attrib['name'] == 'positions':
-                ret['reduced'] = get_varray(ielement)
-    return ret
-
-
-def get_scstep(xml_tree):
-    """This function extracts the self-consistent step information """
-    scstep = {'time': {}, 'energy': {}}
-    for isub in xml_tree:
-        if isub.tag == 'time':
-            scstep['time'][isub.attrib['name']] = [
-                float(x) for x in isub.text.split()
-            ]
-        elif isub.tag == 'energy':
-            for ienergy in isub:
-                scstep['energy'][ienergy.attrib['name']] = float(ienergy.text)
-    return scstep
-
-
-def get_set(xml_tree, ret):
-    """ This function will extract any element taged set recurcively"""
-    if xml_tree[0].tag == 'r':
-        ret[xml_tree.attrib['comment']] = get_varray(xml_tree)
-        return ret
-    else:
-        ret[xml_tree.attrib['comment']] = {}
-        for ielement in xml_tree:
-
-            if ielement.tag == 'set':
-                ret[xml_tree.attrib['comment']][
-                    ielement.attrib['comment']] = {}
-                ret[xml_tree.attrib['comment']][
-                    ielement.attrib['comment']] = get_set(
-                        ielement, ret[xml_tree.attrib['comment']][
-                            ielement.attrib['comment']])
-        return ret
-
-
-def get_general(xml_tree, ret):
-    """ This function will parse any element in calculatio other than the structures, scsteps"""
-    if 'dimension' in [x.tag for x in xml_tree]:
-        ret['info'] = []
-        ret['data'] = {}
-        for ielement in xml_tree:
-            if ielement.tag == 'field':
-                ret['info'].append(ielement.text.strip(' '))
-            elif ielement.tag == 'set':
-                for iset in ielement:
-                    ret['data'] = get_set(iset, ret['data'])
-        return ret
-    else:
-        for ielement in xml_tree:
-            if ielement.tag == 'i':
-                if 'name' in ielement.attrib:
-                    if ielement.attrib['name'] == 'efermi':
-                        ret['efermi'] = float(ielement.text)
-                continue
-            ret[ielement.tag] = {}
-            ret[ielement.tag] = get_general(ielement, ret[ielement.tag])
-        return ret
-
-
-def parse_vasprun(vasprun):
-    tree = ET.parse(vasprun)
-    root = tree.getroot()
-
-    calculation = []
-    structures = []
-    forces = []
-    stresses = []
-    orbital_magnetization = {}
-    run_info = {}
-    incar = {}
-    general = {}
-    kpoints_info = {}
-    vasp_params = {}
-    kpoints_list = []
-    k_weights = []
-    atom_info = {}
-    for ichild in root:
-
-        if ichild.tag == 'generator':
-            for ielement in ichild:
-                run_info[ielement.attrib['name']] = ielement.text
-
-        elif ichild.tag == 'incar':
-            incar = get_params(ichild, incar)
-
-        # Skipping 1st structure which is primitive cell
-        elif ichild.tag == 'kpoints':
-
-            for ielement in ichild:
-                if ielement.items()[0][0] == 'param':
-                    kpoints_info['mode'] = ielement.items()[0][1]
-                    if kpoints_info['mode'] == 'listgenerated':
-                        kpoints_info['kpoint_vertices'] = []
-                        for isub in ielement:
-
-                            if isub.attrib == 'divisions':
-                                kpoints_info['ndivision'] = int(isub.text)
-                            else:
-                                if len(isub.text.split()) != 3:
-                                    continue
-                                kpoints_info['kpoint_vertices'].append(
-                                    [float(x) for x in isub.text.split()])
-                    else:
-                        for isub in ielement:
-                            if isub.attrib['name'] == 'divisions':
-                                kpoints_info['kgrid'] = [
-                                    int(x) for x in isub.text.split()
-                                ]
-                            elif isub.attrib['name'] == 'usershift':
-                                kpoints_info['user_shift'] = [
-                                    float(x) for x in isub.text.split()
-                                ]
-                            elif isub.attrib['name'] == 'genvec1':
-                                kpoints_info['genvec1'] = [
-                                    float(x) for x in isub.text.split()
-                                ]
-                            elif isub.attrib['name'] == 'genvec2':
-                                kpoints_info['genvec2'] = [
-                                    float(x) for x in isub.text.split()
-                                ]
-                            elif isub.attrib['name'] == 'genvec3':
-                                kpoints_info['genvec3'] = [
-                                    float(x) for x in isub.text.split()
-                                ]
-                            elif isub.attrib['name'] == 'shift':
-                                kpoints_info['shift'] = [
-                                    float(x) for x in isub.text.split()
-                                ]
-
-                elif ielement.items()[0][1] == 'kpointlist':
-                    for ik in ielement:
-                        kpoints_list.append(
-                            [float(x) for x in ik.text.split()])
-                    kpoints_list = array(kpoints_list)
-                elif ielement.items()[0][1] == 'weights':
-                    for ik in ielement:
-                        k_weights.append(float(ik.text))
-                    k_weights = array(k_weights)
-
-        # Vasp Parameters
-        elif ichild.tag == 'parameters':
-            vasp_params = get_params(ichild, vasp_params)
-
-        # Atom info
-        elif ichild.tag == 'atominfo':
-
-            for ielement in ichild:
-                if ielement.tag == 'atoms':
-                    atom_info['natom'] = int(ielement.text)
-                elif ielement.tag == 'types':
-                    atom_info['nspecies'] = int(ielement.text)
-                elif ielement.tag == 'array':
-                    if ielement.attrib['name'] == 'atoms':
-                        for isub in ielement:
-                            if isub.tag == 'set':
-                                atom_info['symbols'] = []
-                                for isym in isub:
-                                    atom_info['symbols'].append(isym[0].text)
-                    elif ielement.attrib['name'] == 'atomtypes':
-                        atom_info['atom_types'] = {}
-                        for isub in ielement:
-                            if isub.tag == 'set':
-                                for iatom in isub:
-                                    atom_info['atom_types'][iatom[1].text] = {}
-                                    atom_info['atom_types'][iatom[1].text][
-                                        'natom_per_specie'] = int(
-                                            iatom[0].text)
-                                    atom_info['atom_types'][
-                                        iatom[1].text]['mass'] = float(
-                                            iatom[2].text)
-                                    atom_info['atom_types'][
-                                        iatom[1].text]['valance'] = float(
-                                            iatom[3].text)
-                                    atom_info['atom_types'][iatom[1].text][
-                                        'pseudopotential'] = iatom[
-                                            4].text.strip()
-
-        elif ichild.tag == 'structure':
-            if ichild.attrib['name'] == 'initialpos':
-                initial_pos = get_structure(ichild)
-            elif ichild.attrib['name'] == 'finalpos':
-                final_pos = get_structure(ichild)
-
-        elif ichild.tag == 'calculation':
-            for ielement in ichild:
-                if ielement.tag == 'scstep':
-                    calculation.append(get_scstep(ielement))
-                elif ielement.tag == 'structure':
-                    structures.append(get_structure(ielement))
-                elif ielement.tag == 'varray':
-                    if ielement.attrib['name'] == 'forces':
-                        forces.append(get_varray(ielement))
-                    elif ielement.attrib['name'] == 'stress':
-                        stresses.append(get_varray(ielement))
-
-                # elif ielement.tag == 'eigenvalues':
-                #     for isub in ielement[0] :
-                #         if isub.tag == 'set':
-                #             for iset in isub :
-                #                 eigen_values[iset.attrib['comment']] = {}
-                #                 for ikpt in iset :
-                #                     eigen_values[iset.attrib['comment']][ikpt.attrib['comment']] = get_varray(ikpt)
-
-                elif ielement.tag == 'separator':
-                    if ielement.attrib['name'] == "orbital magnetization":
-                        for isub in ielement:
-                            orbital_magnetization[isub.attrib['name']] = [
-                                float(x) for x in isub.text.split()
-                            ]
-
-                # elif ielement.tag == 'dos':
-                #     for isub in ielement :
-                #         if 'name' in isub.attrib:
-                #             if isub.attrib['name'] == 'efermi' :
-                #                 dos['efermi'] = float(isub.text)
-                #             else :
-                #                 dos[isub.tag] = {}
-                #                 dos[isub.tag]['info'] = []
-                #               for iset in isub[0]  :
-                #                   if iset.tag == 'set' :
-                #                       for isub_set in iset:
-                #                           dos[isub.tag] = get_set(isub_set,dos[isub.tag])
-                #                   elif iset.tag == 'field' :
-                #                       dos[isub.tag]['info'].append(iset.text.strip(' '))
-                else:
-                    general[ielement.tag] = {}
-                    general[ielement.tag] = get_general(
-                        ielement, general[ielement.tag])
-        # NEED TO ADD ORBITAL MAGNETIZATION
-
-    return {
-        'calculation': calculation,
-        'structures': structures,
-        'forces': forces,
-        'run_info': run_info,
-        'incar': incar,
-        'general': general,
-        'kpoints_info': kpoints_info,
-        'vasp_params': vasp_params,
-        'kpoints': {
-            'kpoints_list': kpoints_list,
-            'k_weights': k_weights
-        },
-        'atom_info': atom_info
-    }
-
-
-
-def parse_poscar(filename='CONTCAR'):
-    """
-    Reads VASP POSCAR file-type and returns the pyprocar structure
-
-    Parameters
-    ----------
-    filename : str, optional
-        Path to POSCAR file. The default is 'CONTCAR'.
-
-    Returns
-    -------
-    None.
-
-    """
-    rf = open(filename,'r')
-    lines = rf.readlines()
-    rf.close()
-    comment = lines[0]
-    scale = float(lines[1])
-    lattice = np.zeros(shape=(3, 3))
-    for i in range(3):
-        lattice[i, :] = [float(x) for x in lines[i+2].split()[:3]]
-    lattice *= scale
-    if any([char.isalpha() for char in lines[5]]):
-        species = [x for x in lines[5].split()]
-        shift = 1
-    else :
-        shift = 0
-        if os.path.exists('POTCAR'):
-            base_dir = filename.replace(filename.split(os.sep)[-1], "")
-            if base_dir=='':
-                base_dir='.'
-            rf = open(base_dir+os.sep+'POTCAR','r')
-            potcar = rf.read()
-            rf.close()
-            species = re.findall("\s*PAW[PBE_\s]*([A-Z][a-z]*)[_a-z]*[0-9]*[a-zA-Z]*[0-9]*.*\s[0-9.]*",
-                       potcar)[::2]
-    composition = [int(x) for x in lines[5+shift].split()]
-    atoms = []
-    for i in range(len(composition)):
-        for x in composition[i]*[species[i]]:
-            atoms.append(x)
-    natom = sum(composition)
-    if lines[6+shift][0].lower() == 's':
-        shift = 2
-    if lines[6+shift][0].lower() == 'd':
-        direct = True
-    elif lines[6+shift][0].lower() == 'c':
-        print("havn't implemented conversion to cartesian yet")
-        direct = False
-    coordinates = np.zeros(shape=(natom, 3))
-    for i in range(natom):
-        coordinates[i,:] = [float(x) for x in lines[i+7+shift].split()[:3]]
-    if direct :
-        return Structure(atoms=atoms, 
-                         fractional_coordinates=coordinates, 
-                         lattice=lattice)
-    else:
-        return Structure(atoms=atoms, 
-                         cartesian_coordinates=coordinates, 
-                         lattice=lattice)
     
+class Poscar(Structure):
+    def __init__(self, filename='CONTCAR'):
+        self.filename = filename
+        atoms, coordinates, lattice = self.parse_poscar()
+        Structure.__init__(self, atoms=atoms,
+                           fractional_coordinates=coordinates,
+                           lattice=lattice)
         
+        
+    def parse_poscar(self):
+        """
+        Reads VASP POSCAR file-type and returns the pyprocar structure
     
+        Parameters
+        ----------
+        filename : str, optional
+            Path to POSCAR file. The default is 'CONTCAR'.
+    
+        Returns
+        -------
+        None.
+    
+        """
+        rf = open(self.filename,'r')
+        lines = rf.readlines()
+        rf.close()
+        comment = lines[0]
+        self.comment = comment
+        scale = float(lines[1])
+        lattice = np.zeros(shape=(3, 3))
+        for i in range(3):
+            lattice[i, :] = [float(x) for x in lines[i+2].split()[:3]]
+        lattice *= scale
+        if any([char.isalpha() for char in lines[5]]):
+            species = [x for x in lines[5].split()]
+            shift = 1
+        else :
+            shift = 0
+            if os.path.exists('POTCAR'):
+                base_dir = self.filename.replace(
+                    self.filename.split(os.sep)[-1], "")
+                if base_dir=='':
+                    base_dir='.'
+                rf = open(base_dir+os.sep+'POTCAR','r')
+                potcar = rf.read()
+                rf.close()
+                species = re.findall("\s*PAW[PBE_\s]*([A-Z][a-z]*)[_a-z]*[0-9]*[a-zA-Z]*[0-9]*.*\s[0-9.]*",
+                           potcar)[::2]
+        composition = [int(x) for x in lines[5+shift].split()]
+        atoms = []
+        for i in range(len(composition)):
+            for x in composition[i]*[species[i]]:
+                atoms.append(x)
+        natom = sum(composition)
+        if lines[6+shift][0].lower() == 's':
+            shift = 2
+        if lines[6+shift][0].lower() == 'd':
+            direct = True
+        elif lines[6+shift][0].lower() == 'c':
+            print("havn't implemented conversion to cartesian yet")
+            direct = False
+        coordinates = np.zeros(shape=(natom, 3))
+        for i in range(natom):
+            coordinates[i,:] = [float(x) for x in lines[i+7+shift].split()[:3]]
+        
+        if direct :
+            return atoms, coordinates, lattice
+        
+class Procar(ElectronicBandStructure):
+    def __init__(self, filename="PROCAR"):
+        self.filename = filename
+        
+        
+
+        
+        
     
     
     

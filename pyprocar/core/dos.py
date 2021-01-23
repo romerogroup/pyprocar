@@ -26,7 +26,8 @@ class DensityOfStates:
             List of densities at each point. The default is None.
         projected : list float, optional
             dictionary by the following order
-            projected[iatom][iprincipal][iorbital][ispin].
+            projected[iatom][iprincipal][iorbital][ispin][ienergy].
+
             ``iprincipal`` works like the principal quantum number n. The last
             index should be the total. (iprincipal = -1)
             n = iprincipal => 0, 1, 2, 3, -1 => s, p, d, total
@@ -78,8 +79,12 @@ class DensityOfStates:
 
             self.energies = xs
 
-        self.ndos = len(self.energies)
+        
         self.total = np.array(self.total)
+
+    @property
+    def ndos(self):
+        return len(self.energies)
 
     def dos_sum(self,
                 atoms=None,

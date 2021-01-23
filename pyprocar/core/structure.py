@@ -37,6 +37,7 @@ class Structure:
         self.lattice = np.array(lattice)
         self.wyckoff_positions = None
         self.group = None
+        
         self.get_wyckoff_positions()
 
 
