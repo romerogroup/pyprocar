@@ -148,7 +148,7 @@ class ProcarParser:
         """
         self.log.debug("readKpoints")
         if not self.fileStr:
-            log.warning("You should invoke `procar.readFile()` instead. Returning")
+            self.log.warning("You should invoke `procar.readFile()` instead. Returning")
             return
 
         # finding all the K-points headers

@@ -12,10 +12,12 @@ import numpy as np
 class ElectronicBandStructure:
     def __init__(self,
                  kpoints=None,
-                 energies=None,
+                 eigen_values=None,
                  projected=None,
                  structure=None,
                  spd=None,
+                 labels=None,
+                 reciprocal_lattice=None,
                  interpolation_factor=None):
         """
         
@@ -51,13 +53,12 @@ class ElectronicBandStructure:
 
         """
         
-        
         self.kpoints = kpoints
-        self.energies = energies
+        self.eigen_values = eigen_values
         self.projected = projected
         self.structure = structure
         self.spd = spd
-        
+        self.reciprocal_lattice = reciprocal_lattice
                 
     @property
     def nkpoints(self):
@@ -65,6 +66,20 @@ class ElectronicBandStructure:
     
     @property
     def nbands(self):
-        return len(self.energies[0])
+        return len(self.eigen_values[0])
     
+    @property 
+    def natoms(self):
+        return len(self.projected)
     
+    @property
+    def nprincipal(self):
+        return len(self.projected[0][0][0])
+    
+    @property
+    def norbitals(self):
+        return len(self.projected[0][0][0][0])
+    
+    @property 
+    def nspins(self):
+        return len(self.projected[0][0][0][0][0])
