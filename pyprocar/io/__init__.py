@@ -1,1 +1,1 @@
-from .vasp import VaspXML, Poscar
+from . import vasp 
