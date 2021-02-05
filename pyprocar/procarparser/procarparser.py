@@ -640,7 +640,7 @@ class ProcarParser:
         procar=None,
         phase=False,
         permissive=False,
-        recLattice=None,
+        recciprocal_lattice=None,
         ispin=None,  # the only spin channle to read
     ):
         """
@@ -649,107 +649,103 @@ class ProcarParser:
         """
         # Fall back to readFile function if no phase
         self.bands = None
-        if not phase:
-            self.readFile(
-                procar=procar, phase=False, permissive=permissive, recLattice=recLattice
-            )
+        
+        if ispin is None:
+            nspin = 1
         else:
-            if ispin is None:
-                nspin = 1
-            else:
-                nspin = 2
-            iispin = 0
-            self.projections = None
-            ikpt = 0
-            iband = 0
-            nkread = 0
-            # with open(self.fname) as myfile:
-            f = self.utils.OpenFile(procar)
-            lines = iter(f.readlines())
-            last_iband = -1
-            for line in lines:
-                if line.startswith("# of k-points"):
-                    a = re.findall(":\s*([0-9]*)", line)
-                    self.kpointsCount, self.bandsCount, self.ionsCount = map(int, a)
-                    self.kpoints = np.zeros([self.kpointsCount, 3])
-                    self.kweights = np.zeros(self.kpointsCount)
-                    if self.bands is None:
-                        self.bands = np.zeros(
-                            [nspin, self.kpointsCount, self.bandsCount]
+            nspin = 2
+        iispin = 0
+        self.projections = None
+        ikpt = 0
+        iband = 0
+        nkread = 0
+        # with open(self.fname) as myfile:
+        f = self.utils.OpenFile(procar)
+        lines = iter(f.readlines())
+        last_iband = -1
+        for line in lines:
+            if line.startswith("# of k-points"):
+                a = re.findall(":\s*([0-9]*)", line)
+                self.kpointsCount, self.bandsCount, self.ionsCount = map(int, a)
+                self.kpoints = np.zeros([self.kpointsCount, 3])
+                self.kweights = np.zeros(self.kpointsCount)
+                if self.bands is None:
+                    self.bands = np.zeros(
+                        [nspin, self.kpointsCount, self.bandsCount]
+                    )
+            if line.strip().startswith("k-point"):
+                ss = line.strip().split()
+                ikpt = int(ss[1]) - 1
+                k0 = float(ss[3])
+                k1 = float(ss[4])
+                k2 = float(ss[5])
+                w = float(ss[-1])
+                self.kpoints[ikpt, :] = [k0, k1, k2]
+                self.kweights[ikpt] = w
+                nkread += 1
+                if nkread <= self.kpointsCount:
+                    iispin = 0
+                else:
+                    iispin = 1
+            if line.strip().startswith("band"):
+                ss = line.strip().split()
+                try:
+                    iband = int(ss[1]) - 1
+                except ValueError:
+                    iband = last_iband + 1
+                last_iband = iband
+                e = float(ss[4])
+                occ = float(ss[-1])
+                self.bands[iispin, ikpt, iband] = e
+            if line.strip().startswith("ion"):
+                if line.strip().endswith("tot"):
+                    self.orbitalName = line.strip().split()[1:-1]
+                    self.orbitalCount = len(self.orbitalName)
+                if self.projections is None:
+                    self.projections = np.zeros(
+                        [
+                            self.kpointsCount,
+                            self.bandsCount,
+                            self.ionsCount,
+                            self.orbitalCount,
+                        ]
+                    )
+                    self.carray = np.zeros(
+                        [
+                            self.kpointsCount,
+                            self.bandsCount,
+                            nspin,
+                            self.ionsCount,
+                            self.orbitalCount,
+                        ],
+                        dtype="complex",
+                    )
+                for i in range(self.ionsCount):
+                    line = next(lines)
+                    t = line.strip().split()
+                    if len(t) == self.orbitalCount + 2:
+                        self.projections[ikpt, iband, iispin, :] = [
+                            float(x) for x in t[1:-1]
+                        ]
+                    elif len(t) == self.orbitalCount * 2 + 2:
+                        self.carray[ikpt, iband, iispin, i, :] += np.array(
+                            [float(x) for x in t[1:-1:2]]
                         )
-                if line.strip().startswith("k-point"):
-                    ss = line.strip().split()
-                    ikpt = int(ss[1]) - 1
-                    k0 = float(ss[3])
-                    k1 = float(ss[4])
-                    k2 = float(ss[5])
-                    w = float(ss[-1])
-                    self.kpoints[ikpt, :] = [k0, k1, k2]
-                    self.kweights[ikpt] = w
-                    nkread += 1
-                    if nkread <= self.kpointsCount:
-                        iispin = 0
-                    else:
-                        iispin = 1
-                if line.strip().startswith("band"):
-                    ss = line.strip().split()
-                    try:
-                        iband = int(ss[1]) - 1
-                    except ValueError:
-                        iband = last_iband + 1
-                    last_iband = iband
-                    e = float(ss[4])
-                    occ = float(ss[-1])
-                    self.bands[iispin, ikpt, iband] = e
-                if line.strip().startswith("ion"):
-                    if line.strip().endswith("tot"):
-                        self.orbitalName = line.strip().split()[1:-1]
-                        self.orbitalCount = len(self.orbitalName)
-                    if self.projections is None:
-                        self.projections = np.zeros(
-                            [
-                                self.kpointsCount,
-                                self.bandsCount,
-                                self.ionsCount,
-                                self.orbitalCount,
-                            ]
+                        self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
+                            [float(x) for x in t[2::2]]
                         )
-                        self.carray = np.zeros(
-                            [
-                                self.kpointsCount,
-                                self.bandsCount,
-                                nspin,
-                                self.ionsCount,
-                                self.orbitalCount,
-                            ],
-                            dtype="complex",
+
+                    # Added by Francisco to parse older version of PROCAR format on Jun 11, 2019
+                    elif len(t) == self.orbitalCount * 1 + 1:
+                        self.carray[ikpt, iband, iispin, i, :] += np.array(
+                            [float(x) for x in t[1:]]
                         )
-                    for i in range(self.ionsCount):
                         line = next(lines)
                         t = line.strip().split()
-                        if len(t) == self.orbitalCount + 2:
-                            self.projections[ikpt, iband, iispin, :] = [
-                                float(x) for x in t[1:-1]
-                            ]
-                        elif len(t) == self.orbitalCount * 2 + 2:
-                            self.carray[ikpt, iband, iispin, i, :] += np.array(
-                                [float(x) for x in t[1:-1:2]]
-                            )
-                            self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
-                                [float(x) for x in t[2::2]]
-                            )
-
-                        # Added by Francisco to parse older version of PROCAR format on Jun 11, 2019
-                        elif len(t) == self.orbitalCount * 1 + 1:
-                            self.carray[ikpt, iband, iispin, i, :] += np.array(
-                                [float(x) for x in t[1:]]
-                            )
-                            line = next(lines)
-                            t = line.strip().split()
-                            self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
-                                [float(x) for x in t[1:]]
-                            )
-                        else:
-                            raise Exception(
-                                "Cannot parse line to projection: %s" % line
-                            )
+                        self.carray[ikpt, iband, iispin, i, :] += 1j * np.array(
+                            [float(x) for x in t[1:]]
+                        )
+                    else:
+                        raise Exception(
+                            "Cannot parse line to projection: %s" % line
+                        )

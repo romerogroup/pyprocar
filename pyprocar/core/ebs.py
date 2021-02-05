@@ -15,8 +15,7 @@ class ElectronicBandStructure:
         kpoints=None,
         eigen_values=None,
         projected=None,
-        structure=None,
-        spd=None,
+        projected_phase=None,
         labels=None,
         reciprocal_lattice=None,
         interpolation_factor=None,
@@ -58,10 +57,10 @@ class ElectronicBandStructure:
         self.kpoints = kpoints
         self.eigen_values = eigen_values
         self.projected = projected
-        self.structure = structure
-        self.spd = spd
+        self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
-        self.has_phase = False
+        if self.projected_phase is not None:
+            self.has_phase = None
 
 
 
@@ -90,48 +89,3 @@ class ElectronicBandStructure:
     def nspins(self):
         return len(self.projected[0][0][0][0][0])
 
-    def _spd2projected(self, nprinciples=1):
-        # This function is for VASP
-        # non-pol and colinear
-        # spd is formed as (nkpoints,nbands, nspin, natom+1, norbital+2)
-        # natom+1 > last column is total
-        # norbital+2 > 1st column is the number of atom last is total
-        # non-colinear
-        # spd is formed as (nkpoints,nbands, nspin +1 , natom+1, norbital+2)
-        # natom+1 > last column is total
-        # norbital+2 > 1st column is the number of atom last is total
-        # nspin +1 > last column is total
-        natoms = self.spd.shape[3] - 1
-        nkpoints = self.spd.shape[0]
-        
-        nbands = self.spd.shape[1]
-        norbitals = self.spd.shape[4] - 2
-        if self.spd.shape[2] == 4:
-            nspins = 3
-        else:
-            nspins = self.spd.shape[2]
-        if nspins == 2 :
-            nbands = int(self.spd.shape[1]/2)
-        else : 
-            nbands = self.spd.shape[1]
-        self.projected = np.zeros(
-            shape=(natoms, nkpoints, nbands, nprinciples, norbitals, nspins)
-        )
-        temp_spd = self.spd.copy()
-        # (nkpoints,nbands, nspin, natom, norbital)
-        temp_spd = np.swapaxes(temp_spd, 2, 4)
-        # (nkpoints,nbands, norbital , natom , nspin)
-        temp_spd = np.swapaxes(temp_spd, 2, 3)
-        # (nkpoints,nbands, natom, norbital, nspin)
-        temp_spd = np.swapaxes(temp_spd, 2, 1)
-        # (nkpoints, natom, nbands, norbital, nspin)
-        temp_spd = np.swapaxes(temp_spd, 1, 0)
-        # (natom, nkpoints, nbands, norbital, nspin)
-        # projected[iatom][ikpoint][iband][iprincipal][iorbital][ispin]
-        if nspins == 3:
-            self.projected[:, :, :, 0, :, :] = temp_spd[:-1, :, :, 1:-1, :-1]
-        elif nspins == 2:
-            self.projected[:, :, :, 0, :, 0] = temp_spd[:-1, :, :nbands, 1:-1, 0]
-            self.projected[:, :, :, 0, :, 1] = temp_spd[:-1, :, nbands:, 1:-1, 0]
-        else:
-            self.projected[:, :, :, 0, :, :] = temp_spd[:-1, :, :, 1:-1, :]
