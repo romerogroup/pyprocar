@@ -95,7 +95,7 @@ class FermiSurface3D(Isosurface):
                                 isovalue=self.fermi,
                                 algorithm='lewiner',
                                 interpolation_factor=interpolation_factor,
-                                padding=self.supercell*2,
+                                padding=self.supercell,#*2,
                                 transform_matrix=self.reciprocal_lattice,
                                 boundaries=self.brillouin_zone,
                                 file = self.file)
@@ -208,6 +208,7 @@ class FermiSurface3D(Isosurface):
         if self.spd is not None:
             XYZ_extended = self.XYZ.copy()
             scalars_extended = self.spd.copy()
+            
 
             for ix in range(3):
                 for iy in range(self.supercell[ix]):
@@ -226,9 +227,9 @@ class FermiSurface3D(Isosurface):
 
             # XYZ_extended = self.XYZ.copy()
             # scalars_extended = self.spd.copy()
-
+           
             XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
-            #XYZ_transformed = XYZ_extended
+            # XYZ_transformed = XYZ_extended
 
             if self.projection_accuracy.lower()[0] == 'n':
                 colors = interpolate.griddata(XYZ_transformed,

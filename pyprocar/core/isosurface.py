@@ -353,7 +353,7 @@ class Isosurface(Surface):
 
         for ix in range(3):
             
-            if self.file == "bxsf" or self.file == "qe" or self.file == 'lobster':
+            if self.file == "bxsf" or self.file == "qe": #or self.file == 'lobster':
      
             # verts[:, ix] -= verts[:, ix].min()
                 verts[:, ix] *= self.dxyz[ix] / interp_factor

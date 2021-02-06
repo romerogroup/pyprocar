@@ -1,0 +1,9 @@
+&projwfc
+   outdir='.',
+   prefix='LiF',
+   ngauss=0, degauss=0.036748
+   DeltaE=0.01
+   !kresolveddos=.true.
+   filpdos='lif.k'
+   filproj='lifproj.k'
+/

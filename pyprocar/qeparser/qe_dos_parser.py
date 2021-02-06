@@ -465,7 +465,7 @@ class QEDOSParser:
         nscfOut = rf.read()
         rf.close()
         
-        weight = float(findall("wk\s=\s*([-\.\d]*)",nscfOut)[0])
+        #weight = float(findall("wk\s=\s*([-\.\d]*)",nscfOut)[0])
 
         ###################################################################   
         ####################################################################
