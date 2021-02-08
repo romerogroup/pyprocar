@@ -6,6 +6,9 @@ Created on Sat Jan 16 2021
 """
 
 from scipy.interpolate import CubicSpline
+from matplotlib import pylab as plt
+from . import Structure
+from ..utils import Unfolder
 import numpy as np
 
 
@@ -13,9 +16,11 @@ class ElectronicBandStructure:
     def __init__(
         self,
         kpoints=None,
-        eigen_values=None,
+        eigenvalues=None,
+        fermi=None,
         projected=None,
         projected_phase=None,
+        weights=None,
         labels=None,
         reciprocal_lattice=None,
         interpolation_factor=None,
@@ -31,7 +36,7 @@ class ElectronicBandStructure:
             DESCRIPTION. The default is None.
         projected : list float, optional
             dictionary by the following order
-            projected[iatom][ikpoint][iband][iprincipal][iorbital][ispin].
+            projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin].
             ``iprincipal`` works like the principal quantum number n. The last
             index should be the total. (iprincipal = -1)
             n = iprincipal => 0, 1, 2, 3, -1 => s, p, d, total
@@ -55,37 +60,72 @@ class ElectronicBandStructure:
         """
 
         self.kpoints = kpoints
-        self.eigen_values = eigen_values
+        self.eigenvalues = eigenvalues
+        self.fermi=fermi
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
         if self.projected_phase is not None:
-            self.has_phase = None
-
-
-
+            self.has_phase = True
+        else :
+            self.has_phase = False
+        self.labels = labels
+        self.weights = weights
 
     @property
     def nkpoints(self):
-        return len(self.kpoints)
+        return self.projected.shape[0]
 
     @property
     def nbands(self):
-        return len(self.eigen_values[0])
+        return self.projected.shape[1]
 
     @property
     def natoms(self):
-        return len(self.projected)
+        return self.projected.shape[2]
 
     @property
     def nprincipals(self):
-        return len(self.projected[0][0][0])
+        return self.projected.shape[3]
 
     @property
     def norbitals(self):
-        return len(self.projected[0][0][0][0])
+        return self.projected.shape[4]
 
     @property
     def nspins(self):
-        return len(self.projected[0][0][0][0][0])
+        return self.projected.shape[5]
 
+
+    def plot(self):
+        
+        self.weights /= self.weights.max()
+        
+        for iband in range(self.nbands):
+            plt.scatter(np.arange(self.nkpoints), 
+                        self.eigenvalues[:,iband], 
+                        c=self.weights[:, iband].round(2),
+                        cmap='jet', 
+                        s=self.weights[:, iband]*10)
+            plt.plot(np.arange(self.nkpoints), 
+                        self.eigenvalues[:,iband], color='gray', alpha=0.1)
+        
+        plt.xlim(0, self.nkpoints)
+        # plt.ylim(-2, 2)
+        plt.show()
+
+    def update_weights(self, weights):
+        self.weights = weights
+        return
+
+    def unfold(self, 
+               transformation_matrix=None, 
+               structure=None,
+               ispin=0):
+        uf = Unfolder(ebs=self,
+                      transformation_matrix=transformation_matrix, 
+                      structure=structure, 
+                      ispin=0)
+        self.update_weights(uf.weights)
+        return        
+    

@@ -64,9 +64,10 @@ from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
+from pyprocar.procarunfold import ProcarUnfolder
 from pyprocar import doscarplot
 from pyprocar import vaspxml
-from pyprocar import core
+
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
@@ -86,3 +87,5 @@ from .scriptVector import Vector
 from .splash import welcome
 
 from . import io
+from . import core
+from . import utils

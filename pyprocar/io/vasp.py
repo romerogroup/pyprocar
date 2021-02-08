@@ -892,13 +892,14 @@ class Procar(ElectronicBandStructure):
         self.labels = self.orbitalName_old[:-1]
 
         self._read()
-
+        if self.has_phase:
+            self.carray = self.spd_phase[:, :, :, :-1, 1:-1]
         self.ebs = ElectronicBandStructure(
             kpoints=self.kpoints,
-            eigen_values=self.bands,
+            eigenvalues=self.bands,
             projected=self._spd2projected(self.spd),
             projected_phase=self._spd2projected(self.spd_phase),
-            labels=self.orbitalName,
+            labels=self.orbitalNames[:-1],
             reciprocal_lattice=reciprocal_lattice,
             interpolation_factor=interpolation_factor,
         )
@@ -1187,6 +1188,7 @@ class Procar(ElectronicBandStructure):
             )
         self.orbitalCount = size
         self.orbitalNames = self.spd[0].split()
+        
 
         # Now reading the bulk of data
         # The case of just one atom is handled differently since the VASP
@@ -1365,9 +1367,9 @@ class Procar(ElectronicBandStructure):
             dtype=np.complex_,
         )
 
-        for i in range(1, (self.orbitalCount) * 2 - 2):
-            temp[:, :, :, :, (i + 1) // 2].real = self.spd_phase[:, :, :, :, i - 1]
-            temp[:, :, :, :, (i + 1) // 2].imag = self.spd_phase[:, :, :, :, i]
+        for i in range(1, (self.orbitalCount) * 2 - 2, 2):
+            temp[:, :, :, :, (i + 1) // 2].real = self.spd_phase[:, :, :, :, i]
+            temp[:, :, :, :, (i + 1) // 2].imag = self.spd_phase[:, :, :, :, i + 1]
         temp[:, :, :, :, 0].real = self.spd_phase[:, :, :, :, 0]
         temp[:, :, :, :, -1].real = self.spd_phase[:, :, :, :, -1]
         self.spd_phase = temp
@@ -1400,7 +1402,7 @@ class Procar(ElectronicBandStructure):
         else:
             nbands = spd.shape[1]
         projected = np.zeros(
-            shape=(natoms, nkpoints, nbands, nprinciples, norbitals, nspins),
+            shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
             dtype=spd.dtype,
         )
         temp_spd = spd.copy()
@@ -1409,102 +1411,100 @@ class Procar(ElectronicBandStructure):
         # (nkpoints,nbands, norbital , natom , nspin)
         temp_spd = np.swapaxes(temp_spd, 2, 3)
         # (nkpoints,nbands, natom, norbital, nspin)
-        temp_spd = np.swapaxes(temp_spd, 2, 1)
-        # (nkpoints, natom, nbands, norbital, nspin)
-        temp_spd = np.swapaxes(temp_spd, 1, 0)
-        # (natom, nkpoints, nbands, norbital, nspin)
-        # projected[iatom][ikpoint][iband][iprincipal][iorbital][ispin]
+        # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
         if nspins == 3:
-            projected[:, :, :, 0, :, :] = temp_spd[:-1, :, :, 1:-1, :-1]
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
         elif nspins == 2:
-            projected[:, :, :, 0, :, 0] = temp_spd[:-1, :, :nbands, 1:-1, 0]
-            projected[:, :, :, 0, :, 1] = temp_spd[:-1, :, nbands:, 1:-1, 0]
+            projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1 , 1:-1, 0]
+            projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
         else:
-            projected[:, :, :, 0, :, :] = temp_spd[:-1, :, :, 1:-1, :]
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
         return projected
 
-    # def symmetrize(symprec=1e-5, outcar=None, spglib=True):
-    #     if outcar is not None:
-    #         with open(outcar) as f:
-    #             txt = f.readlines()
-    #         for i, line in enumerate(txt):
-    #             if "irot" in line:
-    #                 begin_table = i + 1
-    #             if "Subroutine" in line:
-    #                 end_table = i - 1
+    def symmetrize(self, symprec=1e-5, outcar=None, structure=None, spglib=True):
+        if outcar is not None:
+            with open(outcar) as f:
+                txt = f.readlines()
+            for i, line in enumerate(txt):
+                if "irot" in line:
+                    begin_table = i + 1
+                if "Subroutine" in line:
+                    end_table = i - 1
 
-    #         operators = np.zeros((end_table - begin_table, 9))
-    #         for i, line in enumerate(txt[begin_table:end_table]):
-    #             str_list = line.split()
-    #             num_list = [float(s) for s in str_list]
-    #             operator = np.array(num_list)
-    #             operators[i, :] = operator
-    #     else:
-    #         operators = self.structure.get_spglib_symmetry_dataset(symprec)
+            operators = np.zeros((end_table - begin_table, 9))
+            for i, line in enumerate(txt[begin_table:end_table]):
+                str_list = line.split()
+                num_list = [float(s) for s in str_list]
+                operator = np.array(num_list)
+                operators[i, :] = operator
+            rotations = []
 
-    #     rotations = []
-    #     for operator in operators:
-    #         det_A = operator[1]
-    #         # convert alpha to radians
-    #         alpha = np.pi * operator[2] / 180.0
-    #         # get rotation axis
-    #         x = operator[3]
-    #         y = operator[4]
-    #         z = operator[5]
+            for operator in operators:
+                det_A = operator[1]
+                # convert alpha to radians
+                alpha = np.pi * operator[2] / 180.0
+                # get rotation axis
+                x = operator[3]
+                y = operator[4]
+                z = operator[5]
+    
+                R = (
+                    np.array(
+                        [
+                            [
+                                np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
+                                x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
+                                x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
+                            ],
+                            [
+                                y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
+                                np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
+                                y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
+                            ],
+                            [
+                                z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
+                                z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
+                                np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
+                            ],
+                        ]
+                    )
+                    * det_A
+                )
+    
+                R = np.dot(
+                    np.dot(np.linalg.inv(structure.reciprocal_lattice), R),
+                    structure.reciprocal_lattice,
+                )
+                R = np.round_(R, decimals=3)
+                rotations.append(R)
+        elif structure is not None:
+            rotations = structure.get_spglib_symmetry_dataset(symprec)
 
-    #         R = (
-    #             np.array(
-    #                 [
-    #                     [
-    #                         np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
-    #                         x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
-    #                         x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
-    #                     ],
-    #                     [
-    #                         y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
-    #                         np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
-    #                         y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
-    #                     ],
-    #                     [
-    #                         z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
-    #                         z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
-    #                         np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
-    #                     ],
-    #                 ]
-    #             )
-    #             * det_A
-    #         )
 
-    #         R = np.dot(
-    #             np.dot(np.linalg.inv(self.reciprocal_lattice), R),
-    #             self.reciprocal_lattice,
-    #         )
-    #         R = np.round_(R, decimals=3)
-    #         rotations.append(R)
+        klist = []
+        bandlist = []
+        spdlist = []
+        # for each symmetry operation
+        
+        for i, _ in enumerate(rotations):
+            # for each point
+            for j, _ in enumerate(self.kpoints):
+                # apply symmetry operation to kpoint
+                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
+                sympoint = sympoint_vector.tolist()
 
-    #     klist = []
-    #     bandlist = []
-    #     spdlist = []
-    #     # for each symmetry operation
-    #     for i, _ in enumerate(rotations):
-    #         # for each point
-    #         for j, _ in enumerate(self.kpoints):
-    #             # apply symmetry operation to kpoint
-    #             sympoint_vector = np.dot(rotations[i], self.kpoints[j])
-    #             sympoint = sympoint_vector.tolist()
+                if sympoint not in klist:
+                    klist.append(sympoint)
 
-    #             if sympoint not in klist:
-    #                 klist.append(sympoint)
+                    band = self.bands[j].tolist()
+                    bandlist.append(band)
+                    spd = self.spd[j].tolist()
+                    spdlist.append(spd)
 
-    #                 band = self.bands[j].tolist()
-    #                 bandlist.append(band)
-    #                 self.spd = self.spd[j].tolist()
-    #                 spdlist.append(self.spd)
-
-    #     self.kpoints = np.array(klist)
-    #     self.bands = np.array(bandlist)
-    #     self.spd = np.array(spdlist)
-
+        self.kpoints = np.array(klist)
+        self.bands = np.array(bandlist)
+        self.spd = np.array(spdlist)
+        self.spd = self._spd2projected(self.spd)
 
 # # get files
 # procar_sym = input('Enter the filename/path for the PROCAR file:')

@@ -82,7 +82,7 @@ class Unfolder:
         vacancies, a ghost atom can be added. For add_atom, maybe we
         can just ignore them? Will it change the energy spectrum?
 
-        """
+        """  
         a1 = Atoms(symbols="H", positions=[(0, 0, 0)], cell=[1, 1, 1])
         sc = make_supercell(a1, self._scmat)
         rs = sc.get_scaled_positions()
