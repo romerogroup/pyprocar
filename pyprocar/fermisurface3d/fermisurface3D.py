@@ -95,7 +95,7 @@ class FermiSurface3D(Isosurface):
                                 isovalue=self.fermi,
                                 algorithm='lewiner',
                                 interpolation_factor=interpolation_factor,
-                                padding=self.supercell,#*2,
+                                padding=self.supercell*2,
                                 transform_matrix=self.reciprocal_lattice,
                                 boundaries=self.brillouin_zone,
                                 file = self.file)

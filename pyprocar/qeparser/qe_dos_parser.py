@@ -12,7 +12,7 @@ Created on Sunday, May 24th
 
 from re import findall
 
-from numpy import array, dot, zeros, add, delete, append, arange
+from numpy import array, dot, zeros, add, delete, append, arange, pi
 from pyprocar.core import DensityOfStates, Structure
 
 import logging
@@ -240,7 +240,7 @@ class QEDOSParser:
         symbols = [x.strip() for x in self.data['ions']]
         structures = []
 
-        st = Structure(atoms=symbols)
+        st = Structure(atoms=symbols)  #lattice = self.lattice)#, #fractional_coordinates = )
                       
         structures.append(st)
         return structures
@@ -415,6 +415,8 @@ class QEDOSParser:
                     state,
                 )[0]
             )
+        
+        self.species_list = []
         for state in raw_states:
             state_dict = {}
             state_dict = {
@@ -426,7 +428,12 @@ class QEDOSParser:
                 "m": int(state[5]),
             }
             states_list.append(state_dict)
-
+            
+            if state[2] not in self.species_list:
+                self.species_list.append(state[2])
+        
+        
+        
         self.states = states_list
 
         
@@ -492,7 +499,7 @@ class QEDOSParser:
 
         total_dos = [[float(x) for x in y.split()[0:]] for y in data[iline:iline + ndos]]
 
-        
+        # self.test = total_dos
         total_dos = delete(total_dos,1,1)
         total_dos = delete(total_dos,1,1)
         
@@ -581,8 +588,35 @@ class QEDOSParser:
         return {'total': total_dos,'projected': projected_dos, 'projected_labels_info':project_labels, 'ions': self.species_list}
         
        
-        
-       
+         
+    @property
+    def lattice(self):
+        """
+        Returns the reciprocal lattice read from .out
+        """
+        rf = open(self.outfile, "r")
+        data = rf.read()
+        rf.close()
+
+        alat = float(findall(r"alat\)\s*=\s*([\d.e+-]*)", data)[0])
+
+        a1 = array(
+            findall(r"a\(1\)\s*=\s*\(([\d.\s+-e]*)", data)[0].split(), dtype="float64"
+        )
+        a2 = array(
+            findall(r"a\(2\)\s*=\s*\(([\d.\s+-e]*)", data)[0].split(), dtype="float64"
+        )
+        a3 = array(
+            findall(r"a\(3\)\s*=\s*\(([\d.\s+-e]*)", data)[0].split(), dtype="float64"
+        )
+
+        lat = (2 * pi / alat) * (array((a1, a2, a3)))
+
+        # Transposing to get the correct format
+        #lat = lat.T
+
+        return lat
+
             
             
     

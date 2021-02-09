@@ -353,21 +353,42 @@ class Isosurface(Surface):
 
         for ix in range(3):
             
-            if self.file == "bxsf" or self.file == "qe": #or self.file == 'lobster':
+            if self.file == "bxsf" or self.file == "qe" or self.file == 'lobster':
      
-            # verts[:, ix] -= verts[:, ix].min()
+
+          
+                # verts[:, ix] -= verts[:, ix].min()
+                # verts[:, ix] -= (verts[:, ix].max() -
+                #                   verts[:, ix].min()) / 2
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
-                verts[:, ix] -= self.supercell[ix]
-  
+                
+                
+                # if bnd is not None and interp_factor != 1:
+                #     print((verts[:, ix].min() - bnd[ix][0]))
+                #     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+                    
+                    
+                
+                verts[:, ix] -= 1*self.supercell[ix]
+                # if bnd is not None and interp_factor != 1:
+                #     print((verts[:, ix].min() - bnd[ix][0]))
+                    # verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+                   
             else:
                 verts[:, ix] -= verts[:, ix].min()
                 verts[:, ix] -= (verts[:, ix].max() -
                                  verts[:, ix].min()) / 2
                 
-                verts[:, ix] *= self.dxyz[ix] / interp_factor
                 
+            
+                
+                
+                verts[:, ix] *= self.dxyz[ix] / interp_factor
+                # verts[:, ix] -= 2*self.supercell[ix]
+                #verts[:, ix] -= self.supercell[ix]
                 if bnd is not None and interp_factor != 1:
                     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+                    
             #+self.origin[ix]
             # verts[:, ix] *= self.dxyz[ix] / interp_factor
             

@@ -37,7 +37,8 @@ class Structure:
         self.lattice = np.array(lattice)
         self.wyckoff_positions = None
         self.group = None
-        self.get_wyckoff_positions()
+        if lattice is not None and fractional_coordinates is not None:
+            self.get_wyckoff_positions()
 
 
     @property
