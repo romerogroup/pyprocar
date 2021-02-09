@@ -764,8 +764,62 @@ class VaspXML(collections.abc.Mapping):
         return self.variables.__len__()
 
 
-class Poscar(object):
-    def __init__(self, filename="CONTCAR"):
+class Outcar(collections.abc.Mapping):
+    def __init__(self, filename="OUTCAR"):
+        self.variables = {}
+        self.filename = filename
+        self.reciprocal_lattice = None
+        self.efermi = None
+        self._parse_outcar()
+        
+        
+        
+    def _parse_outcar(self):
+        """Just finds all E-fermi fields in the outcar file and keeps the
+        last one (if more than one found).
+        
+        Args:
+            -filename: the file name of the outcar to be readed
+                
+        """
+        rf = open(self.filename, "r")
+        outcar = rf.read()
+        rf.close()
+        self.efermi = float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", outcar)[-1])
+        """Finds and return the reciprocal lattice vectors, if more than
+        one set present, it return just the last one.
+        
+        Args:
+            -filename: the name of the outcar file  to be read
+            
+        """
+        reciprocal_lattice = re.findall(r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", outcar)[-1]
+        reciprocal_lattice = reciprocal_lattice.split()
+        reciprocal_lattice = np.array(reciprocal_lattice, dtype=float)
+        # up to now I have, both direct and rec. lattices (3+3=6 columns)
+        reciprocal_lattice = np.reshape(reciprocal_lattice, (3, 6))
+        reciprocal_lattice = reciprocal_lattice[:, 3:]
+        self.reciprocal_lattice = reciprocal_lattice
+        
+        return 
+
+
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
+
+
+class Poscar(collections.abc.Mapping):
+    def __init__(self, filename="POSCAR"):
+        self.variables = {}
         self.filename = filename
         atoms, coordinates, lattice = self._parse_poscar()
         self.structure = Structure(
@@ -831,18 +885,30 @@ class Poscar(object):
 
         if direct:
             return atoms, coordinates, lattice
+        
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
 
 
-class Procar(ElectronicBandStructure):
+class Procar(collections.abc.Mapping):
     def __init__(
         self,
         filename="PROCAR",
         structure=None,
         reciprocal_lattice=None,
-        permissive=False,
+        efermi=None,
         interpolation_factor=1,
     ):
-
+        self.variables = {}
         self.filename = filename
         self.meta_lines = []
 
@@ -898,10 +964,12 @@ class Procar(ElectronicBandStructure):
             kpoints=self.kpoints,
             eigenvalues=self.bands,
             projected=self._spd2projected(self.spd),
+            efermi=efermi,
             projected_phase=self._spd2projected(self.spd_phase),
             labels=self.orbitalNames[:-1],
             reciprocal_lattice=reciprocal_lattice,
             interpolation_factor=interpolation_factor,
+            shifted_to_efermi=False,
         )
 
     def repair(self):
@@ -1505,6 +1573,19 @@ class Procar(ElectronicBandStructure):
         self.bands = np.array(bandlist)
         self.spd = np.array(spdlist)
         self.spd = self._spd2projected(self.spd)
+        
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
+
 
 # # get files
 # procar_sym = input('Enter the filename/path for the PROCAR file:')

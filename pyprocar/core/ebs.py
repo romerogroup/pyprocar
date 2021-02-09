@@ -17,13 +17,14 @@ class ElectronicBandStructure:
         self,
         kpoints=None,
         eigenvalues=None,
-        fermi=None,
+        efermi=None,
         projected=None,
         projected_phase=None,
         weights=None,
         labels=None,
         reciprocal_lattice=None,
         interpolation_factor=None,
+        shifted_to_efermi=False,
     ):
         """
 
@@ -60,8 +61,12 @@ class ElectronicBandStructure:
         """
 
         self.kpoints = kpoints
-        self.eigenvalues = eigenvalues
-        self.fermi=fermi
+        if not shifted_to_efermi:
+            self.eigenvalues = eigenvalues - efermi
+            self.shifted_to_efermi = True
+        else : 
+            self.shifted_to_efermi = True
+        self.efermi=efermi
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
@@ -97,21 +102,23 @@ class ElectronicBandStructure:
         return self.projected.shape[5]
 
 
-    def plot(self):
+    def plot(self, elimit=[-5, 5]):
         
         self.weights /= self.weights.max()
-        
+        plt.figure(figsize=(16, 9))
         for iband in range(self.nbands):
             plt.scatter(np.arange(self.nkpoints), 
                         self.eigenvalues[:,iband], 
                         c=self.weights[:, iband].round(2),
-                        cmap='jet', 
-                        s=self.weights[:, iband]*10)
+                        cmap='Blues', 
+                        s=self.weights[:, iband]*75)
             plt.plot(np.arange(self.nkpoints), 
                         self.eigenvalues[:,iband], color='gray', alpha=0.1)
         
         plt.xlim(0, self.nkpoints)
-        # plt.ylim(-2, 2)
+        plt.axhline(y=0, color='red', linestyle='--')
+        plt.ylim(elimit)
+        plt.tight_layout()
         plt.show()
 
     def update_weights(self, weights):

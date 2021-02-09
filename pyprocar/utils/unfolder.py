@@ -12,11 +12,13 @@ class Unfolder:
                  transformation_matrix=np.diag([1,1,1]), 
                  structure=None,
                  ispin=None,
+                 extend_BZ=False,
                  tol_radius=0.1):
         self.ebs = ebs
         self.trans_mat = transformation_matrix
         self.structure = structure
         self.ispin = ispin
+        self.extend_BZ = extend_BZ
         self.eigenvectors = None
         self.basis = None
         self.positions = None
@@ -37,6 +39,10 @@ class Unfolder:
             return None
         else :
             return int(N)
+
+
+    # def _ex
+
 
     def _prepare_unfold_basis(self):
         # basis, which are the name of the bands e.g. 'Ti|dxy|0'
@@ -111,7 +117,7 @@ class Unfolder:
         self.trans_indices = indices
         
         
-    def get_weight(self, evec, qpt, G=None):
+    def _get_weight(self, evec, qpt, G=None):
         """
         get the weight of a mode which has the wave vector of qpt and
         eigenvector of evec.
@@ -151,7 +157,7 @@ class Unfolder:
         weights = np.zeros([nqpts, nfreqs])
         for iqpt in range(nqpts):
             for ifreq in range(nfreqs):
-                weights[iqpt, ifreq] = self.get_weight(
+                weights[iqpt, ifreq] = self._get_weight(
                     self.eigenvectors[iqpt, ifreq, :], self.qpoints[iqpt])
         return weights
 
