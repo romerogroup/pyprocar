@@ -9,11 +9,9 @@ import numpy as np
 
 
 class DensityOfStates:
-    def __init__(self,
-                 energies=None,
-                 total=None,
-                 projected=None,
-                 interpolation_factor=None):
+    def __init__(
+        self, energies=None, total=None, projected=None, interpolation_factor=None
+    ):
         """
         A class that contains density of states calcuated by the a density
         functional theory calculation.
@@ -56,9 +54,8 @@ class DensityOfStates:
             interpolated = []
             for ispin in range(len(self.total)):
                 new_energy, new_total = interpolate(
-                    self.energies,
-                    self.total[ispin],
-                    factor=interpolation_factor)
+                    self.energies, self.total[ispin], factor=interpolation_factor
+                )
                 interpolated.append(new_total)
 
             self.total = interpolated
@@ -66,31 +63,22 @@ class DensityOfStates:
             for iatom in range(len(projected)):
                 for iprincipal in range(len(projected[iatom])):
                     for iorbital in range(len(projected[iatom][iprincipal])):
-                        for ispin in range(
-                                len(projected[iatom][iprincipal][iorbital])):
+                        for ispin in range(len(projected[iatom][iprincipal][iorbital])):
                             x = energies
                             y = projected[iatom][iprincipal][iorbital][ispin]
-                            xs, ys = interpolate(x,
-                                                 y,
-                                                 factor=interpolation_factor)
+                            xs, ys = interpolate(x, y, factor=interpolation_factor)
 
-                            self.projected[iatom][iprincipal][iorbital][
-                                ispin] = ys
+                            self.projected[iatom][iprincipal][iorbital][ispin] = ys
 
             self.energies = xs
 
-        
         self.total = np.array(self.total)
 
     @property
     def ndos(self):
         return len(self.energies)
 
-    def dos_sum(self,
-                atoms=None,
-                principal_q_numbers=[-1],
-                orbitals=None,
-                spins=None):
+    def dos_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
         """
         +-------+-----+------+------+------+------+------+------+------+------+
         |n-lm   |  0  |   1  |  2   |   3  |   4  |   5  |   6  |   7  |   8  |
@@ -176,5 +164,3 @@ def interpolate(x, y, factor=2):
     ys = cs(xs)
 
     return xs, ys
-
-

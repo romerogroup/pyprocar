@@ -13,44 +13,47 @@ __date__ = "March 31, 2020"
 
 class Surface(object):
     """
-        Surface is a class that holds information about a surface
-        To create a surface the minimum requirements are verts and faces
+    Surface is a class that holds information about a surface
+    To create a surface the minimum requirements are verts and faces
 
-        Parameters
-        ----------
-        verts : list of float (nverts,3)
-            The list of verticies that create the surface.
-        faces : list of integers (nfaces,3)
-            The default is None. The list of connectivity between
-            verts that create the surface.
-        face_normals : list of float (nfaces,3)
-            The list of normal vectors to each face.
-        vert_normals : list of float (nverts,3)
-            The list of normal vectors to each vertex.
-        face_colors : list of tuples floats (nfaces,3)
-            The list of colors of each face.
-            **example**:``face_colors=[(1,0,0),(1,0.5,0),...,(1,0,0)]``
-        vert_colors : list of tuples floats (nfaces,3)
-            The list of colors of each vertex.
-        vectors : list of floats (nfaces,3)
-            The list of vectors one wants to attach to the
-            surface(glyphs) Only useful in pyvista objects
-        scalars : list of floats (nfaces,)
-            The list of scalars for each face. This can represent
-            the color using a color map
-                
+    Parameters
+    ----------
+    verts : list of float (nverts,3)
+        The list of verticies that create the surface.
+    faces : list of integers (nfaces,3)
+        The default is None. The list of connectivity between
+        verts that create the surface.
+    face_normals : list of float (nfaces,3)
+        The list of normal vectors to each face.
+    vert_normals : list of float (nverts,3)
+        The list of normal vectors to each vertex.
+    face_colors : list of tuples floats (nfaces,3)
+        The list of colors of each face.
+        **example**:``face_colors=[(1,0,0),(1,0.5,0),...,(1,0,0)]``
+    vert_colors : list of tuples floats (nfaces,3)
+        The list of colors of each vertex.
+    vectors : list of floats (nfaces,3)
+        The list of vectors one wants to attach to the
+        surface(glyphs) Only useful in pyvista objects
+    scalars : list of floats (nfaces,)
+        The list of scalars for each face. This can represent
+        the color using a color map
+
 
 
     """
-    def __init__(self,
-                 verts=None,
-                 faces=None,
-                 face_normals=None,
-                 vert_normals=None,
-                 face_colors=None,
-                 vert_colors=None,
-                 vectors=None,
-                 scalars=None):
+
+    def __init__(
+        self,
+        verts=None,
+        faces=None,
+        face_normals=None,
+        vert_normals=None,
+        face_colors=None,
+        vert_colors=None,
+        vectors=None,
+        scalars=None,
+    ):
 
         self.verts = verts
         self.faces = faces
@@ -95,8 +98,7 @@ class Surface(object):
         if self.verts is not None:
             centers = np.zeros(shape=(len(self.faces), 3))
             for iface in range(self.nfaces):
-                centers[iface, 0:3] = np.average(self.verts[self.faces[iface]],
-                                                 axis=0)
+                centers[iface, 0:3] = np.average(self.verts[self.faces[iface]], axis=0)
         else:
             centers = None
         return centers
@@ -151,20 +153,20 @@ class Surface(object):
             new_faces.append(len(iface))
             for ivert in iface:
                 new_faces.append(ivert)
-                
+
         self.pyvista_obj = pyvista.PolyData(verts, np.array(new_faces))
         if self.scalars is not None:
-            self.pyvista_obj['scalars'] = self.scalars
-            self.pyvista_obj.set_active_scalars('scalars')
+            self.pyvista_obj["scalars"] = self.scalars
+            self.pyvista_obj.set_active_scalars("scalars")
         if self.vectors is not None:
-            self.pyvista_obj['vectors'] = self.vectors
-            self.pyvista_obj.set_active_vetors('vectors')
+            self.pyvista_obj["vectors"] = self.vectors
+            self.pyvista_obj.set_active_vetors("vectors")
 
     def _create_trimesh(self):
         """
         creates a trimesh object
         """
-        
+
         if np.any(np.array([len(x) for x in self.faces]) > 3):
             faces = []
             for i in range(0, len(self.pyvista_obj.triangulate().faces), 4):
@@ -172,17 +174,15 @@ class Surface(object):
                 point_2 = self.pyvista_obj.triangulate().faces[i + 2]
                 point_3 = self.pyvista_obj.triangulate().faces[i + 3]
                 faces.append([point_1, point_2, point_3])
-            self.trimesh_obj = trimesh.Trimesh(vertices=self.verts,
-                                                faces=faces)
+            self.trimesh_obj = trimesh.Trimesh(vertices=self.verts, faces=faces)
 
         else:
 
-            self.trimesh_obj = trimesh.Trimesh(vertices=self.verts,
-                                                faces=self.faces)
+            self.trimesh_obj = trimesh.Trimesh(vertices=self.verts, faces=self.faces)
 
     def set_scalars(
-            self,
-            scalars,
+        self,
+        scalars,
     ):
         """
         Sets/Updates the scalars of the surface. Scalars represent a
@@ -196,18 +196,18 @@ class Surface(object):
 
         """
         self.scalars = scalars
-        self.pyvista_obj['scalars'] = self.scalars
-        self.pyvista_obj.set_active_scalars('scalars')
+        self.pyvista_obj["scalars"] = self.scalars
+        self.pyvista_obj.set_active_scalars("scalars")
 
     def set_vectors(self, vectors_X, vectors_Y, vectors_Z):
 
         self.vectors = np.vstack([vectors_X, vectors_Y, vectors_Z]).T
-        self.pyvista_obj['vectors'] = self.vectors
+        self.pyvista_obj["vectors"] = self.vectors
         # self.pyvista_obj.set_active_scalars('vectors')
 
         # self.pyvista_obj.vectors = self.vectors
 
-    def set_color_with_cmap(self, cmap='viridis', vmin=None, vmax=None):
+    def set_color_with_cmap(self, cmap="viridis", vmin=None, vmax=None):
         """
         Sets colors for the trimesh object using the color map provided
 
@@ -236,16 +236,15 @@ class Surface(object):
         # only show one side comment the next line
         if len(self.trimesh_obj.faces) == self.nfaces:
             self.trimesh_obj.faces = np.vstack(
-                (self.trimesh_obj.faces, np.fliplr(self.trimesh_obj.faces)))
+                (self.trimesh_obj.faces, np.fliplr(self.trimesh_obj.faces))
+            )
 
         if len(self.trimesh_obj.faces) == self.nfaces:
             self.trimesh_obj.visual.face_colors = colors
         else:
-            self.trimesh_obj.visual.face_colors = np.append(colors,
-                                                            colors,
-                                                            axis=0)
+            self.trimesh_obj.visual.face_colors = np.append(colors, colors, axis=0)
 
-    def export(self, file_obj='output.glb', file_type='glb'):
+    def export(self, file_obj="output.glb", file_type="glb"):
         """
         This function uses the export function from trimesh
 
@@ -266,8 +265,8 @@ class Surface(object):
 
 def convert_from_pyvista_faces(pyvista_obj):
     """
-    pyvista mesh faces are written in a 1d array, This function returns faces in 
-    a conventional way. A list of lists, where each list contains integers numbers of 
+    pyvista mesh faces are written in a 1d array, This function returns faces in
+    a conventional way. A list of lists, where each list contains integers numbers of
     vert conections
 
     Parameters
@@ -278,7 +277,7 @@ def convert_from_pyvista_faces(pyvista_obj):
     Returns
     -------
     new_faces : TYPE list of lists
-        DESCRIPTION. A list of lists, where each list contains integers numbers of 
+        DESCRIPTION. A list of lists, where each list contains integers numbers of
     vert conections
 
     """
@@ -295,12 +294,12 @@ def convert_from_pyvista_faces(pyvista_obj):
 
 def boolean_add(surfaces):
     """
-    This functtion uses boolean add from PyVista 
+    This functtion uses boolean add from PyVista
 
     Parameters
     ----------
     surfaces : TYPE list of pyprocar.Surface
-        DESCRIPTION. 
+        DESCRIPTION.
 
     Returns
     -------
@@ -312,9 +311,11 @@ def boolean_add(surfaces):
     ret = surfaces[0].pyvista_obj.copy()
     for isurface in range(1, len(surfaces)):
         ret = ret.boolean_add(surfaces[isurface].pyvista_obj, inplace=False)
-    surf = Surface(verts=ret.points,
-                   faces=convert_from_pyvista_faces(ret),
-                   face_normals=ret.face_normals,
-                   vert_normals=ret.point_normals,
-                   scalars=ret.active_scalars)
+    surf = Surface(
+        verts=ret.points,
+        faces=convert_from_pyvista_faces(ret),
+        face_normals=ret.face_normals,
+        vert_normals=ret.point_normals,
+        scalars=ret.active_scalars,
+    )
     return surf

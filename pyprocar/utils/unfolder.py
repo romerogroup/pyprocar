@@ -12,13 +12,11 @@ class Unfolder:
                  transformation_matrix=np.diag([1,1,1]), 
                  structure=None,
                  ispin=None,
-                 extend_BZ=False,
                  tol_radius=0.1):
         self.ebs = ebs
         self.trans_mat = transformation_matrix
         self.structure = structure
         self.ispin = ispin
-        self.extend_BZ = extend_BZ
         self.eigenvectors = None
         self.basis = None
         self.positions = None
@@ -41,7 +39,9 @@ class Unfolder:
             return int(N)
 
 
-    # def _ex
+    # def _extend_BZ(self):
+        
+        
 
 
     def _prepare_unfold_basis(self):

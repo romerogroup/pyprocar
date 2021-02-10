@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ..core import Structure, DensityOfStates, ElectronicBandStructure
+from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
 import numpy as np
 from numpy import array
 import os
@@ -768,41 +768,40 @@ class Outcar(collections.abc.Mapping):
     def __init__(self, filename="OUTCAR"):
         self.variables = {}
         self.filename = filename
-        self.reciprocal_lattice = None
-        self.efermi = None
-        self._parse_outcar()
-        
-        
-        
-    def _parse_outcar(self):
+
+        rf = open(self.filename, "r")
+        self.file_str = rf.read()
+        rf.close()
+
+    @property
+    def efermi(self):
         """Just finds all E-fermi fields in the outcar file and keeps the
         last one (if more than one found).
-        
+
         Args:
             -filename: the file name of the outcar to be readed
-                
+
         """
-        rf = open(self.filename, "r")
-        outcar = rf.read()
-        rf.close()
-        self.efermi = float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", outcar)[-1])
+        return float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", self.file_str)[-1])
+
+    @property
+    def reciprocal_lattice(self):
         """Finds and return the reciprocal lattice vectors, if more than
         one set present, it return just the last one.
-        
+
         Args:
             -filename: the name of the outcar file  to be read
-            
+
         """
-        reciprocal_lattice = re.findall(r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", outcar)[-1]
+        reciprocal_lattice = re.findall(
+            r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", self.file_str
+        )[-1]
         reciprocal_lattice = reciprocal_lattice.split()
         reciprocal_lattice = np.array(reciprocal_lattice, dtype=float)
         # up to now I have, both direct and rec. lattices (3+3=6 columns)
         reciprocal_lattice = np.reshape(reciprocal_lattice, (3, 6))
         reciprocal_lattice = reciprocal_lattice[:, 3:]
-        self.reciprocal_lattice = reciprocal_lattice
-        
-        return 
-
+        return reciprocal_lattice
 
     def __contains__(self, x):
         return x in self.variables
@@ -885,7 +884,153 @@ class Poscar(collections.abc.Mapping):
 
         if direct:
             return atoms, coordinates, lattice
-        
+
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
+
+
+class Kpoints(collections.abc.Mapping):
+    def __init__(self, filename="KPOINTS", has_time_reversal=True):
+        self.variables = {}
+        self.filename = filename
+        self.file_str = None
+        self.metadata = None
+        self.mode = None
+        self.kgrid = None
+        self.kshift = None
+        self.ngrids = None
+        self.special_kpoints = None
+        self.knames = None
+        self.cartesian = False
+        self.automatic = False
+        self._parse_kpoints()
+        self.kpath = KPath(
+            knames=self.knames,
+            special_kpoints=self.special_kpoints,
+            ngrids=self.ngrids,
+            has_time_reversal=has_time_reversal,
+        )
+
+    def _parse_kpoints(self):
+        rf = open(self.filename, "r")
+        self.comment = rf.readline()
+        grids = rf.readline()
+        grids = grids[: grids.find("!")]
+        self.ngrids = [int(x) for x in grids.split()]
+        if self.ngrids[0] == 0:
+            self.automatic = True
+        mode = rf.readline()
+        if mode[0].lower() == "m":
+            self.mode = "monkhorst-pack"
+        elif mode[0].lower() == "g":
+            self.mode = "gamma"
+        elif mode[0].lower() == "l":
+            self.mode = "line"
+        if self.mode == "gamma" or self.mode == "monkhorst-pack":
+            kgrid = rf.readline()
+            kgrid = kgrid[: kgrid.find("!")]
+            self.kgrid = [int(x) for x in kgrid.split()]
+            shift = rf.readline()
+            shift = shift[: shift.find("!")]
+            self.kshift = [int(x) for x in shift.split()]
+            rf.close()
+        elif self.mode == "line":
+            if rf.readline()[0].lower() == "c":
+                self.cartesian = True
+            else:
+                self.cartesian = False
+            self.file_str = rf.read()
+            rf.close()
+            temp = np.array(
+                re.findall("([0-9.-]+)\s*([0-9.-]+)\s*([0-9.-]+)(.*)", self.file_str)
+            )
+            temp_special_kp = temp[:, :3].astype(float)
+            temp_knames = temp[:, -1]
+            nsegments = temp_special_kp.shape[0] // 2
+            if len(self.ngrids) == 1:
+                self.ngrids = [self.ngrids[0]] * nsegments
+            self.knames = np.reshape(
+                [x.replace("!", "").strip() for x in temp_knames], (nsegments, 2)
+            )
+            self.special_kpoints = temp_special_kp.reshape(nsegments, 2, 3)
+
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
+
+    # @property
+    # def mode(self):
+
+    #     KPmatrix = re.findall("reciprocal[\s\S]*", KPread)
+    #     tick_labels = np.array(re.findall("!\s(.*)", KPmatrix[0]))
+    #     knames = []
+    #     knames = [tick_labels[0]]
+
+    #     ################## Checking for discontinuities ########################
+    #     discont_indx = []
+    #     icounter = 1
+    #     while icounter < len(tick_labels) - 1:
+    #         if tick_labels[icounter] == tick_labels[icounter + 1]:
+    #             knames.append(tick_labels[icounter])
+    #             icounter = icounter + 2
+    #         else:
+    #             discont_indx.append(icounter)
+    #             knames.append(tick_labels[icounter] + "|" + tick_labels[icounter + 1])
+    #             icounter = icounter + 2
+    #     knames.append(tick_labels[-1])
+    #     discont_indx = list(dict.fromkeys(discont_indx))
+
+    #     ################# End of discontinuity check ##########################
+
+    #     # Added by Nicholas Pike to modify the output of seekpath to allow for
+    #     # latex rendering.
+    #     for i in range(len(knames)):
+    #         if knames[i] == "GAMMA":
+    #             knames[i] = "\Gamma"
+    #         else:
+    #             pass
+
+    #     knames = [str("$" + latx + "$") for latx in knames]
+
+    #     # getting the number of grid points from the KPOINTS file
+    #     f2 = open(kpointsfile)
+    #     KPreadlines = f2.readlines()
+    #     f2.close()
+    #     numgridpoints = int(KPreadlines[1].split()[0])
+
+    #     kticks = [0]
+    #     gridpoint = 0
+    #     for kt in range(len(knames) - 1):
+    #         gridpoint = gridpoint + numgridpoints
+    #         kticks.append(gridpoint - 1)
+
+    #     print("knames         : ", knames)
+    #     print("kticks         : ", kticks)
+
+    #     # creating an array for discontunuity k-points. These are the indexes
+    #     # of the discontinuity k-points.
+    #     for k in discont_indx:
+    #         discontinuities.append(kticks[int(k / 2) + 1])
+    #     if discontinuities:
+    #         print("discont. list  : ", discontinuities)
+
     def __contains__(self, x):
         return x in self.variables
 
@@ -915,6 +1060,7 @@ class Procar(collections.abc.Mapping):
         self.reciprocal_lattice = reciprocal_lattice
         self.file_str = None
         self.has_phase = None
+        self.kpoints = None
         self.bands = None
         self.spd = None
         self.spd_phase = None
@@ -1154,10 +1300,21 @@ class Procar(collections.abc.Mapping):
             raise RuntimeError(
                 "Kpoints number do not match with metadata (header of PROCAR)"
             )
-
-        if self.reciprocal_lattice is not None:
-            self.kpoints = np.dot(self.kpoints, self.reciprocal_lattice)
         return
+
+    @property
+    def kpoints_cartesian(self):
+        if self.reciprocal_lattice is not None:
+            return np.dot(self.kpoints, self.reciprocal_lattice)
+        else:
+            print(
+                "Please provide a reciprocal lattice when initiating the Procar class"
+            )
+            return
+
+    @property
+    def kpoints_reduced(self):
+        return self.kpoints
 
     def _read_bands(self):
         """Reads the bands header. A typical bands is:
@@ -1256,7 +1413,6 @@ class Procar(collections.abc.Mapping):
             )
         self.orbitalCount = size
         self.orbitalNames = self.spd[0].split()
-        
 
         # Now reading the bulk of data
         # The case of just one atom is handled differently since the VASP
@@ -1483,7 +1639,7 @@ class Procar(collections.abc.Mapping):
         if nspins == 3:
             projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
         elif nspins == 2:
-            projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1 , 1:-1, 0]
+            projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
             projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
         else:
             projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
@@ -1515,7 +1671,7 @@ class Procar(collections.abc.Mapping):
                 x = operator[3]
                 y = operator[4]
                 z = operator[5]
-    
+
                 R = (
                     np.array(
                         [
@@ -1538,7 +1694,7 @@ class Procar(collections.abc.Mapping):
                     )
                     * det_A
                 )
-    
+
                 R = np.dot(
                     np.dot(np.linalg.inv(structure.reciprocal_lattice), R),
                     structure.reciprocal_lattice,
@@ -1548,12 +1704,11 @@ class Procar(collections.abc.Mapping):
         elif structure is not None:
             rotations = structure.get_spglib_symmetry_dataset(symprec)
 
-
         klist = []
         bandlist = []
         spdlist = []
         # for each symmetry operation
-        
+
         for i, _ in enumerate(rotations):
             # for each point
             for j, _ in enumerate(self.kpoints):
@@ -1573,7 +1728,7 @@ class Procar(collections.abc.Mapping):
         self.bands = np.array(bandlist)
         self.spd = np.array(spdlist)
         self.spd = self._spd2projected(self.spd)
-        
+
     def __contains__(self, x):
         return x in self.variables
 
@@ -1585,35 +1740,3 @@ class Procar(collections.abc.Mapping):
 
     def __len__(self):
         return self.variables.__len__()
-
-
-# # get files
-# procar_sym = input('Enter the filename/path for the PROCAR file:')
-# repair(procar_sym, procar_sym)
-# outcar = input('Enter the filename/path for the OUTCAR file:')
-# repair(outcar, outcar)
-
-# # get kpoints, bands, spd from PROCAR
-# print('Getting structure data...')
-
-# procarFile = ProcarParser()
-# procarFile.readFile(procar_sym, False)
-# data_sym = ProcarSelect(procarFile, deepCopy=True)
-
-# kpoints_sym = data_sym.kpoints
-# bands_sym = data_sym.bands
-# spd_sym = data_sym.spd
-
-# # get the symmetry operations
-# print('Finding symmetries...')
-# outcarparser = UtilsProcar()
-# reciprocal_lattice = np.transpose(outcarparser.RecLatticeOutcar(outcar))
-# operators = outcarParse_Operators(outcar)
-# rotations = np.array([findR(op, reciprocal_lattice) for op in operators])
-
-# # apply symmetry operations and boundary conditions
-# print('Applying symmetry operations...')
-# kpoints_full, bands_full, spd_full = apply_symmetries(kpoints_sym, bands_sym, spd_sym, rotations)
-
-# bound_ops = -1.0*(kpoints_full > 0.5) + 1.0*(kpoints_full < -0.5)
-# kpoints_full += bound_ops
