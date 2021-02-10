@@ -159,7 +159,7 @@ class QEDOSParser:
     
     @property
     def dos(self):
-        energies = self.dos_total['energies']
+        energies = self.dos_total['energies'] - self.fermi
         total = []
         for ispin in self.dos_total:
             if ispin == 'energies':
@@ -187,8 +187,9 @@ class QEDOSParser:
         """
         Returns the total density of states as a pychemia.visual.DensityOfSates object
         """
+       
         dos_total, labels = self._get_dos_total()
-        #dos_total['energies'] -= self.fermi
+        # dos_total['energies'] -= self.fermi
 
         return dos_total
 
@@ -267,7 +268,24 @@ class QEDOSParser:
 
         return self.structures[-1]
 
+    @property
+    def fermi(self):
+        """
+        Returns the fermi energy read from .out
+        """
 
+        fi = open(self.outfile, "r")
+        data = fi.read()
+        fi.close()
+
+        data = data.split('the Fermi energy is')[1].split('ev')[0]
+        fermi = float(data)
+
+        #print((findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)))
+        #fermi = float(findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)[0])
+        
+        return fermi
+    
 #     ###########################################################################
 #     ###########################################################################
 #     ###########################################################################
@@ -500,9 +518,13 @@ class QEDOSParser:
         total_dos = [[float(x) for x in y.split()[0:]] for y in data[iline:iline + ndos]]
 
         # self.test = total_dos
-        total_dos = delete(total_dos,1,1)
-        total_dos = delete(total_dos,1,1)
-        
+        # total_dos = delete(total_dos,1,1)
+        # total_dos = delete(total_dos,1,1)
+        if(self.spinCalc == True):
+             total_dos = delete(total_dos,1,1)
+             total_dos = delete(total_dos,1,1)
+        else:
+             total_dos = delete(total_dos,1,1)
         # ###################################################################################
         tmp_dict ={}        
         for filename in self.file_names:
@@ -541,13 +563,17 @@ class QEDOSParser:
             final_labels.pop(1)
             final_labels.pop(1)
 
-            final_dos = delete(final_dos,1,1)
-            final_dos = delete(final_dos,1,1)
+            # final_dos = delete(final_dos,1,1)
+            # final_dos = delete(final_dos,1,1)
             
             
-            dos = zeros(shape=[len(final_dos[:,0]),10,2])
+            # dos = zeros(shape=[len(final_dos[:,0]),10,2])
             
             if self.is_spin_polarized == False:
+                final_dos = delete(final_dos,1,1)
+                dos = zeros(shape=[len(final_dos[:,0]),10,2])
+            
+                
                 dos[:,0,0] = final_dos[:,0]
                 if 's' == orbitalName:
                     dos[:,1,0] = final_dos[:,1]
@@ -556,6 +582,11 @@ class QEDOSParser:
                 elif 'd' == orbitalName:
                     dos[:,5:10,0] = final_dos[:,1:]
             else:
+                final_dos = delete(final_dos,1,1)
+                final_dos = delete(final_dos,1,1)
+                dos = zeros(shape=[len(final_dos[:,0]),10,2])
+            
+           
                 dos[:,0,0] = final_dos[:,0]
                 dos[:,0,1] = final_dos[:,0]
                 if 's' == orbitalName:
