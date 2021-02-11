@@ -13,3 +13,7 @@ class KPath:
         self.special_kpoints = special_kpoints
         self.ngrids = ngrids
         self.has_time_reversal = has_time_reversal
+
+    @property
+    def nsegmets(self):
+        return len(self.knames)

@@ -115,7 +115,54 @@ class ElectronicBandStructure:
     def kpoints_reduced(self):
         return self.kpoints
 
-    def extend_BZ(self, transformation_matrix=np.diag([1, 1, 1]), time_reversal=True):
+    def extend_BZ(
+        self, kpath, transformation_matrix=np.diag([1, 1, 1]), time_reversal=True
+    ):
+        trans_mat = transformation_matrix
+        end = 0
+        for isegment in range(kpath.nsegments):
+            kstart = kpath.special_kpoints[isegment][0]
+            kend = kpath.special_kpoints[isegment][1]
+            distance = np.linalg.norm(kend - kstart)
+
+            istart = end
+            iend = istart + kpath.ngrids[isegment]
+            kpoints = self.kpoints[istart:iend]
+            eigen_values = self.eigenvalues[istart:iend]
+            projected = self.projected[istart:iend]
+            if self.has_phase:
+                projected_phase = self.projected_phase[istart:iend]
+            dkx, dky, dkz = kpoints[1] - kpoints[0]
+            dk = np.linalg.norm([dkx, dky, dkz])
+            if distance == 0.5:
+                if not time_reversal:
+                    print(
+                        "The path {}->{} cannot be extended. Time reversal symmetry is off but length in reciprocal space is 0.5. \nPlease provide a path with length equal to 1.0 or turn time reversal symmetry on.".format(
+                            kpath.knames[isegment][0], kpath.knames[isegment][1]
+                        )
+                    )
+                    return
+                    # kpoints_flip = np.flip(kpoints)
+                    eigen_values_flip = np.flip(eigen_values)
+                    projected_flip = np.flip(projected)
+                    if self.has_phase:
+                        projected_phase_flip = np.flip(projected_phase)
+                    transformed_kstart, transformed_kend = np.dot(
+                        kpath.special_kpoints[isegment], trans_mat
+                    )
+                    pre_distance = np.linalg.norm(transformed_kstart - kstart)
+                    pro_distance = np.linalg.norm(transformed_kend - kend)
+
+                return
+            elif distance == 1.0:
+                return
+            else:
+                print(
+                    "The path {}->{} cannot be extended.".format(
+                        kpath.knames[isegment][0], kpath.knames[isegment][1]
+                    )
+                )
+                return
         trans_mat = transformation_matrix
         kmaxs = np.dot(self.kpoints, trans_mat).max(axis=0)
         kmins = np.dot(self.kpoints, trans_mat).min(axis=0)
