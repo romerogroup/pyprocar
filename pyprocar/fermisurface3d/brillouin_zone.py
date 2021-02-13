@@ -56,7 +56,7 @@ class BrillouinZone(Surface):
     A Surface object with verts, faces and line representation, representing
     the BrillouinZone
     """
-    def __init__(self, reciprocal_lattice, supercell):
+    def __init__(self, reciprocal_lattice, supercell=np.diag([1,1,1])):
         """
         Parameters
         ----------
@@ -65,7 +65,7 @@ class BrillouinZone(Surface):
 
         """
 
-        self.reciprocal = reciprocal_lattice * max(supercell)
+        self.reciprocal = reciprocal_lattice * np.array(supercell).max()
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
         verts, faces = self.wigner_seitz()
@@ -82,12 +82,12 @@ class BrillouinZone(Surface):
 
     def wigner_seitz(self):
         """
-        
+
         Returns
         -------
         TYPE
-            Using the Wigner-Seitz Method, this function finds the 1st 
-            Brillouin Zone in terms of vertices and faces 
+            Using the Wigner-Seitz Method, this function finds the 1st
+            Brillouin Zone in terms of vertices and faces
         """
 
         kpoints = []

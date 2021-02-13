@@ -6,10 +6,12 @@ Created on Sat Jan 16 2021
 """
 
 from scipy.interpolate import CubicSpline
-from matplotlib import pylab as plt
+from ..fermisurface3d import BrillouinZone
 from . import Structure
 from ..utils import Unfolder
 import numpy as np
+from matplotlib import pylab as plt
+import pyvista
 
 
 class ElectronicBandStructure:
@@ -61,7 +63,7 @@ class ElectronicBandStructure:
         """
 
         self.kpoints = kpoints
-        if not shifted_to_efermi:
+        if not shifted_to_efermi and efermi is not None:
             self.eigenvalues = eigenvalues - efermi
             self.shifted_to_efermi = True
         else:
@@ -172,7 +174,9 @@ class ElectronicBandStructure:
         kdx = np.abs(self.KX[-1] - self.KX[-2])
         kdy = np.abs(self.KY[-1] - self.KY[-2])
         kdz = np.abs(self.KZ[-1] - self.KZ[-2])
+        return
 
+    def apply_symmetries(self, operations=None, structure=None):
         return
 
     def plot(self, elimit=[-5, 5]):
@@ -213,3 +217,36 @@ class ElectronicBandStructure:
         )
         self.update_weights(uf.weights)
         return
+
+    def plot_kpoints(
+        self,
+        reduced=False,
+        show_brillouin_zone=True,
+        color="r",
+        point_size=5.0,
+        render_points_as_spheres=True,
+    ):
+        p = pyvista.Plotter()
+        if show_brillouin_zone:
+            if reduced:
+                brillouin_zone = BrillouinZone(np.diag([1, 1, 1]))
+            else:
+                brillouin_zone = BrillouinZone(self.reciprocal_lattice)
+
+            p.add_mesh(
+                brillouin_zone.pyvista_obj,
+                style="wireframe",
+                line_width=3.5,
+                color="black",
+            )
+        if reduced:
+            kpoints = self.kpoints_reduced
+        else:
+            kpoints = self.kpoints_cartesian
+        p.add_mesh(
+            kpoints,
+            color=color,
+            point_size=point_size,
+            render_points_as_spheres=render_points_as_spheres,
+        )
+        p.show()
