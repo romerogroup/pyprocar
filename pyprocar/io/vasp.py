@@ -1050,6 +1050,7 @@ class Procar(collections.abc.Mapping):
         filename="PROCAR",
         structure=None,
         reciprocal_lattice=None,
+        kpath=None,
         efermi=None,
         interpolation_factor=1,
     ):
@@ -1111,6 +1112,7 @@ class Procar(collections.abc.Mapping):
             eigenvalues=self.bands,
             projected=self._spd2projected(self.spd),
             efermi=efermi,
+            kpath=kpath,
             projected_phase=self._spd2projected(self.spd_phase),
             labels=self.orbitalNames[:-1],
             reciprocal_lattice=reciprocal_lattice,

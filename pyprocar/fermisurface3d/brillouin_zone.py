@@ -29,8 +29,8 @@ class Lines:
     def _get_connectivity(self):
         for iface in range(self.nface):
             self.connectivity.append(
-                [self.faces[iface][0],
-                 self.faces[iface][-1]])  # to connect the 1st and last point
+                [self.faces[iface][0], self.faces[iface][-1]]
+            )  # to connect the 1st and last point
             for ipoint in range(len(self.faces[iface]) - 1):
                 point_1 = self.faces[ipoint]
                 point_2 = self.faces[ipoint + 1]
@@ -47,8 +47,9 @@ class Lines:
         for iline in self.connectivity:
             entries.append(trimesh.path.entries.Line(iline))
 
-            self.trimesh_line = trimesh.path.path.Path(entries=entries,
-                                                       vertices=self.verts)
+            self.trimesh_line = trimesh.path.path.Path(
+                entries=entries, vertices=self.verts
+            )
 
 
 class BrillouinZone(Surface):
@@ -56,16 +57,28 @@ class BrillouinZone(Surface):
     A Surface object with verts, faces and line representation, representing
     the BrillouinZone
     """
-    def __init__(self, reciprocal_lattice, supercell=np.diag([1,1,1])):
+
+    def __init__(self, reciprocal_lattice, transformation_matrix=None):
         """
+
+
         Parameters
         ----------
         reciprocal_lattice : (3,3) float
-            Reciprocal Lattice
+            Reciprocal lattice used to generate Brillouin zone usgin Wigner Seitz.
+        transformation_matrix : (3,3) float, optional
+            Any transformation to be applied to the unit cell such as rotation
+            or supercell. The default is None.
+
+        Returns
+        -------
+        None.
 
         """
-
-        self.reciprocal = reciprocal_lattice * np.array(supercell).max()
+        if transformation_matrix is not None:
+            self.reciprocal = np.dot(reciprocal_lattice, transformation_matrix)
+        else:
+            self.reciprocal = reciprocal_lattice
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
         verts, faces = self.wigner_seitz()
@@ -74,7 +87,7 @@ class BrillouinZone(Surface):
 
         self._fix_normals_direction()
 
-        #self.pyvista_obj.face_normals*=-1
+        # self.pyvista_obj.face_normals*=-1
         # self.pyvista_obj['scalars'] = [0]*len(faces)
         # self.pyvista_obj.set_active_scalars('scalars')
 
@@ -94,8 +107,11 @@ class BrillouinZone(Surface):
         for i in range(-1, 2):
             for j in range(-1, 2):
                 for k in range(-1, 2):
-                    vec = i * self.reciprocal[0] + j * \
-                        self.reciprocal[1] + k * self.reciprocal[2]
+                    vec = (
+                        i * self.reciprocal[0]
+                        + j * self.reciprocal[1]
+                        + k * self.reciprocal[2]
+                    )
                     kpoints.append(vec)
         brill = Voronoi(np.array(kpoints))
         faces = []
@@ -115,6 +131,7 @@ class BrillouinZone(Surface):
 
             correction = np.sign(np.dot(n1, n2))
             self.face_normals[iface] = self.face_normals[iface] * correction
-            self.pyvista_obj.face_normals[
-                iface] = self.pyvista_obj.face_normals[iface] * correction
+            self.pyvista_obj.face_normals[iface] = (
+                self.pyvista_obj.face_normals[iface] * correction
+            )
             # self.trimesh_obj.face_normals[iface]*=correction
