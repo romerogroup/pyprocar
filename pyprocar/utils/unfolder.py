@@ -131,9 +131,9 @@ class Unfolder:
             G = np.zeros_like(qpt)
         weight = 0j
         N = self.nfold
-        self.ebs.has_phase = False
+        _phase = False
         for r_i, ind in zip(self.trans_rs, self.trans_indices):
-            if self.ebs.has_phase:
+            if _phase:
                 weight += (
                     np.vdot(evec, evec[ind])
                     * np.exp(1j * 2 * np.pi * np.dot(qpt + G, r_i))

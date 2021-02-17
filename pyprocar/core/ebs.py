@@ -70,6 +70,8 @@ class ElectronicBandStructure:
         else:
             self.shifted_to_efermi = True
         self.efermi = efermi
+        if self.efermi is None:
+            self.eigenvalues = eigenvalues
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
@@ -120,23 +122,17 @@ class ElectronicBandStructure:
         return self.kpoints
 
     def extend_BZ(
-        self,
-        transformation_matrix=np.diag([1, 1, 1]),
-        extention_scales=None,
-        time_reversal=True,
+        self, new_kpath, time_reversal=True,
     ):
-        if extention_scales is None:
-            print(
-                "Please extention_scales as an array with its elements corresponding to each kpath segment"
-            )
-            return
-        trans_mat = transformation_matrix
         iend = 0
-        extended_eigen_values = []
+
         for isegment in range(self.kpath.nsegments):
+            extended_kstart = new_kpath.special_kpoints[isegment][0]
+            extended_kend = new_kpath.special_kpoints[isegment][1]
+
             kstart = self.kpath.special_kpoints[isegment][0]
             kend = self.kpath.special_kpoints[isegment][1]
-            distance = np.linalg.norm(kend - kstart)
+
             istart = iend
             iend = istart + self.kpath.ngrids[isegment]
             kpoints = self.kpoints[istart:iend]
@@ -144,29 +140,142 @@ class ElectronicBandStructure:
             projected = self.projected[istart:iend]
             if self.has_phase:
                 projected_phase = self.projected_phase[istart:iend]
-            dkx, dky, dkz = kpoints[1] - kpoints[0]
-            dk = np.linalg.norm([dkx, dky, dkz])
+            dk_vec = kpoints[1] - kpoints[0]
+            dkx, dky, dkz = dk_vec
+            dk = np.linalg.norm(dk_vec)
+
+            nkpoints_pre_extention = int(
+                (np.linalg.norm(kstart - extended_kstart) / dk).round(4)
+            )+1
+            nkpoints_post_extention = int(
+                (np.linalg.norm(kend - extended_kend) / dk).round(4)
+            )+1
+
+            if nkpoints_pre_extention == 1:
+                nkpoints_pre_extention = 0
+            if nkpoints_post_extention == 1:
+                nkpoints_post_extention = 0
+
+            kpoints_pre = []
+            for ipoint in range(nkpoints_pre_extention, 0, -1):
+                kpoints_pre.append(kstart - dk_vec * ipoint)
+
+            if len(kpoints_pre) != 0:
+                kpoints_pre = np.array(kpoints_pre)
+            else :
+                kpoints_pre = []
+            kpoints_post = []
+            for ipoint in range(1, nkpoints_post_extention):
+                kpoints_post.append(kend + dk_vec * ipoint)
+            if len(kpoints_post) != 0:
+                kpoints_post = np.array(kpoints_post)
+            else :
+                kpoints_post = []
+
 
             if time_reversal:
-                eigen_values_flip = np.flip(eigen_values)
-                eigen_values_period = np.append(eigen_values_flip, eigen_values, axis=0)
-                if len(extended_eigen_values) == 0:
-                    extended_eigen_values = eigen_values_period
-                else:
-                    extended_eigen_values = np.append(
-                        extended_eigen_values, eigen_values_period, axis=0
-                    )
-                projected_flip = np.flip(projected)
-                projected_period = np.append(projected_flip, projected, axis=0)
+                eigen_values_flip = np.flip(eigen_values, axis=0)
+                eigen_values_period = np.append(
+                    eigen_values_flip[:-1], eigen_values, axis=0
+                )
+                projected_flip = np.flip(projected, axis=0)
+                projected_period = np.append(projected_flip[:-1], projected, axis=0)
 
                 if self.has_phase:
-                    projected_phase_flip = np.flip(projected_phase)
+                    projected_phase_flip = np.flip(projected_phase, axis=0).conjugate()
                     projected_phase_period = np.append(
-                        projected_phase_flip, projected_phase, axis=0
+                        projected_phase_flip[:-1], projected_phase, axis=0
                     )
-        self.eigenvalues = extended_eigen_values
-        self.kpoints = np.append(self.kpoints, self.kpoints, axis=0)
-        self.kpath.ngrids = [x * 2 for x in self.kpath.ngrids]
+                scale_factor = int(
+                    np.ceil(
+                        (nkpoints_post_extention + nkpoints_pre_extention)
+                        / self.kpath.ngrids[isegment]
+                    )
+                )
+                if scale_factor == 0:
+                    scale_factor = 1
+                eigen_values_period = np.pad(
+                    eigen_values_flip,
+                    ((0, scale_factor * len(eigen_values_period)), (0, 0)),
+                    mode="wrap",
+                )
+                projected_period = np.pad(
+                    projected_period,
+                    (
+                        (0, scale_factor * len(projected_period)),
+                        (0, 0),
+                        (0, 0),
+                        (0, 0),
+                        (0, 0),
+                        (0, 0),
+                    ),
+                    mode="wrap",
+                )
+                if self.has_phase:
+                    projected_phase_period = np.pad(
+                        projected_phase_period,
+                        (
+                            (0, scale_factor * len(projected_phase_period)),
+                            (0, 0),
+                            (0, 0),
+                            (0, 0),
+                            (0, 0),
+                            (0, 0),
+                        ),
+                        mode="wrap",
+                    )
+                if nkpoints_post_extention+nkpoints_pre_extention != 0:
+                    if nkpoints_pre_extention != 0:
+                        extended_kpoints = np.append(kpoints_pre, kpoints, axis=0)
+                        extended_eigen_values = np.append(
+                            eigen_values_period[-nkpoints_pre_extention:],
+                            eigen_values,
+                            axis=0,
+                        )
+
+                    if nkpoints_post_extention != 0:
+                        if nkpoints_pre_extention != 0:
+                            extended_kpoints = np.append(
+                                extended_kpoints, kpoints_post, axis=0
+                            )
+                            extended_eigen_values = np.append(
+                                extended_eigen_values,
+                                eigen_values_period[1:nkpoints_post_extention],
+                                axis=0,
+                            )
+                        else:
+                            extended_kpoints = np.append(kpoints, kpoints_post, axis=0)
+                            extended_eigen_values = np.append(
+                                eigen_values,
+                                eigen_values_period[1:nkpoints_post_extention],
+                                axis=0,
+                            )
+
+                else :
+                    extended_kpoints = kpoints
+                    extended_eigen_values = eigen_values
+
+                if isegment == 0:
+                    overall_kpoints = extended_kpoints
+                    overall_eigen_values = extended_eigen_values
+
+
+                else:
+                    overall_kpoints = np.append(
+                        overall_kpoints, extended_kpoints, axis=0
+                    )
+                    overall_eigen_values = np.append(
+                        overall_eigen_values, extended_eigen_values, axis=0
+                    )
+                self.kpath.ngrids[isegment] = len(extended_kpoints)
+                self.kpath.special_kpoints[isegment] = new_kpath.special_kpoints[
+                    isegment
+                ]
+
+
+
+        self.kpoints = overall_kpoints
+        self.eigenvalues = overall_eigen_values
 
         return
 
@@ -178,13 +287,19 @@ class ElectronicBandStructure:
         if self.weights is not None:
             self.weights /= self.weights.max()
         plt.figure(figsize=(16, 9))
-        x = []
+
         pos = 0
         for isegment in range(self.kpath.nsegments):
             kstart, kend = self.kpath.special_kpoints[isegment]
             distance = np.linalg.norm(kend - kstart)
-            x.append(np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]))
-            dk = x[-1][-1] - x[-1][-2]
+            if isegment == 0:
+                x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
+            else:
+                x = np.append(
+                    x,
+                    np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
+                    axis=0,
+                )
             pos += distance
         x = np.array(x).reshape(-1,)
 
@@ -200,6 +315,7 @@ class ElectronicBandStructure:
             plt.plot(
                 x, self.eigenvalues[:, iband], color="gray", alpha=0.5,
             )
+
         for ipos in self.kpath.tick_positions:
             plt.axvline(x[ipos], color="black")
         plt.xticks(x[self.kpath.tick_positions], self.kpath.tick_names)
