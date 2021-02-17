@@ -31,7 +31,6 @@ class ElectronicBandStructure:
     ):
         """
 
-
         Parameters
         ----------
         kpoints : TYPE, optional
@@ -124,6 +123,7 @@ class ElectronicBandStructure:
     def extend_BZ(
         self, new_kpath, time_reversal=True,
     ):
+
         iend = 0
 
         for isegment in range(self.kpath.nsegments):
