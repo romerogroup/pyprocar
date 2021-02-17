@@ -21,7 +21,6 @@ class Isosurface(Surface):
             padding=None,
             transform_matrix=None,
             boundaries=None,
-            file = None
     ):
         """
         This class contains a surface that finds all the poins correcponding 
@@ -80,7 +79,6 @@ class Isosurface(Surface):
         self.interpolation_factor = interpolation_factor
         self.transform_matrix = transform_matrix
         self.boundaries = boundaries
-        self.file = file
         
         if self.algorithm not in ['classic', 'lewiner']:
             print(
@@ -92,8 +90,10 @@ class Isosurface(Surface):
             self.V_matrix = map2matrix(self.XYZ, self.V)
 
         if self.padding is None:
+            
             self.padding = [self.nX*2 // 2, self.nY*2 // 2, self.nZ*2 // 2]
         else:
+            
             self.padding = [
                 self.nX // 2 * padding[0], self.nY // 2 * padding[1],
                 self.nZ // 2 * padding[2]
@@ -106,7 +106,7 @@ class Isosurface(Surface):
 
         if verts is not None and faces is not None:
             if transform_matrix is not None:
-                verts = np.dot(verts, transform_matrix)
+                verts = np.dot(verts,  transform_matrix)
             """
             Python, unlike statically typed languages such as Java, allows complete
             freedom when calling methods during object initialization. However, 
@@ -338,7 +338,7 @@ class Isosurface(Surface):
 
             # after the FFT we loose the center of the BZ, using numpy roll we
             # bring back the center of the BZ
-            # eigen_matrix = np.roll(eigen_matrix,4  ,
+            # eigen_matrix = np.roll(eigen_matrix, 4  ,
             #     axis=[0, 1, 2])
 
         try:
@@ -353,41 +353,24 @@ class Isosurface(Surface):
 
         for ix in range(3):
             
-            if self.file == "bxsf" or self.file == "qe" or self.file == 'lobster':
-     
-
-          
-                # verts[:, ix] -= verts[:, ix].min()
-                # verts[:, ix] -= (verts[:, ix].max() -
-                #                   verts[:, ix].min()) / 2
+            if np.any(self.XYZ >= 0.5):
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
-                
-                
-                # if bnd is not None and interp_factor != 1:
-                #     print((verts[:, ix].min() - bnd[ix][0]))
-                #     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
-                    
-                    
-                
                 verts[:, ix] -= 1*self.supercell[ix]
-                # if bnd is not None and interp_factor != 1:
-                #     print((verts[:, ix].min() - bnd[ix][0]))
-                    # verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+ 
                    
             else:
                 verts[:, ix] -= verts[:, ix].min()
                 verts[:, ix] -= (verts[:, ix].max() -
-                                 verts[:, ix].min()) / 2
-                
-                
-            
-                
+                                  verts[:, ix].min()) / 2
                 
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
-                # verts[:, ix] -= 2*self.supercell[ix]
-                #verts[:, ix] -= self.supercell[ix]
+
                 if bnd is not None and interp_factor != 1:
                     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+                    
+                    
+                    
+                    
                     
             #+self.origin[ix]
             # verts[:, ix] *= self.dxyz[ix] / interp_factor

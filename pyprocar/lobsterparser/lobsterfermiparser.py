@@ -209,6 +209,10 @@ class LobsterFermiParser:
             for coord in range(3):
                 self.kpoints[ik][coord] = raw_kpoints[ik][coord]
         # raw_kpoints = findall("(# K-Point \d+ :\s*[-\.\\d]*\s*[-\.\\d]*\s*[-\.\\d]*)", projFile)
+        # for kp in self.kpoints:
+        #     for x in range(3):
+        #         if kp[x] >= 0.5:
+        #             kp[x] -= 1
 
         # If kdirect=False, then the kgrid will be in cartesian coordinates.
         # Requires the reciprocal lattice vectors to be parsed from the output.
@@ -415,9 +419,9 @@ class LobsterFermiParser:
             findall(r"b\(3\)\s*=\s*\(([\d.\s+-e]*)", data)[0].split(), dtype="float64"
         )
 
-        reclat = (array((b1, b2, b3)))
+        reclat = array((b1, b2, b3))
 
         # Transposing to get the correct format
-        reclat = reclat
+        # reclat = reclat
 
         return reclat

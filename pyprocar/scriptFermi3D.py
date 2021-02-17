@@ -16,7 +16,6 @@ from .frmsfparser import FrmsfParser
 from .qeparser import QEFermiParser
 from .lobsterparser import LobsterFermiParser
 
-
 def fermi3D(
     procar="PROCAR",
     outcar="OUTCAR",
@@ -26,6 +25,7 @@ def fermi3D(
     interpolation_factor=1,
     mode="plain",
     supercell=[1, 1, 1],
+    extended_zone_directions = None,
     colors=None,
     background_color="white",
     save_colors=False,
@@ -104,6 +104,12 @@ def fermi3D(
         parameter can be used.
 
         e.g. ``supercell=[2, 2, 2]``
+    
+    extended_zone_directions : list of list of size 3, optional (default ``None``)
+        If one wants plot more than  brillouin zones in a particular direection, this
+        parameter can be used.
+
+        e.g. ``extended_zone_directions=[[1,0,0],[0,1,0],[0,0,1]]``
 
     colors : list str, optional
         List of colors for each band. This argument does not work when
@@ -417,61 +423,8 @@ def fermi3D(
     counter = 0
     for iband in bands:
         print("Trying to extract isosurface for band %d" % iband)
-        if code == "bxsf":
-            surface = FermiSurface3D(
-                kpoints=procarFile.kpoints,
-                band=procarFile.bandEnergy[:, iband],
-                spd=spd[counter],
-                spd_spin=spd_spin[counter],
-                fermi=e_fermi + fermi_shift,
-                reciprocal_lattice=reciprocal_lattice,
-                interpolation_factor=interpolation_factor,
-                projection_accuracy=projection_accuracy,
-                supercell=supercell,
-                file="bxsf",
-            )
-        elif code == "qe":
-            surface = FermiSurface3D(
-                kpoints=procarFile.kpoints,
-                band=procarFile.bands[:, iband],
-                spd=spd[counter],
-                spd_spin=spd_spin[counter],
-                fermi=e_fermi + fermi_shift,
-                reciprocal_lattice=reciprocal_lattice,
-                interpolation_factor=interpolation_factor,
-                projection_accuracy=projection_accuracy,
-                supercell=supercell,
-                file="qe",
-            )
-        elif code == "lobster":
-            surface = FermiSurface3D(
-                kpoints=procarFile.kpoints,
-                band=procarFile.bands[:, iband],
-                spd=spd[counter],
-                spd_spin=spd_spin[counter],
-                fermi=e_fermi + fermi_shift,
-                reciprocal_lattice=reciprocal_lattice,
-                interpolation_factor=interpolation_factor,
-                projection_accuracy=projection_accuracy,
-                supercell=supercell,
-                file="lobster",
-            )
-            
-        elif code == "frmsf":
-            surface = FermiSurface3D(
-                kpoints=data.kpoints,
-                band=data.bands[:, iband],
-                spd=spd[counter],
-                spd_spin=spd_spin[counter],
-                fermi=e_fermi + fermi_shift,
-                reciprocal_lattice=reciprocal_lattice,
-                interpolation_factor=interpolation_factor,
-                projection_accuracy=projection_accuracy,
-                supercell=supercell,
-                file="bxsf",
-            )
-        else:
-            surface = FermiSurface3D(
+        
+        surface = FermiSurface3D(
                 kpoints=data.kpoints,
                 band=data.bands[:, iband],
                 spd=spd[counter],
@@ -486,7 +439,7 @@ def fermi3D(
         if surface.verts is not None:
             surfaces.append(surface)
         counter += 1
-
+    
     nsurface = len(surfaces)
     norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
     cmap = cm.get_cmap(cmap)
@@ -502,6 +455,9 @@ def fermi3D(
     print(scalars)
     print(colors)
     print(cmap)
+    
+ 
+    fermi_surfaces = surfaces.copy()
     if show or save2d:
         # sargs = dict(interactive=True)
         p.add_mesh(
@@ -510,31 +466,75 @@ def fermi3D(
             line_width=3.5,
             color="black",
         )
+        if extended_zone_directions is not None:
+            extended_surfaces = []
+            extended_colors = []
+            for isurface in range(len(surfaces)):
+                extended_surfaces.append(surfaces[isurface].pyvista_obj) 
+                extended_colors.append(colors[isurface])
+            for direction in extended_zone_directions:    
+                for isurface in range(len(surfaces)):
+                    surface = surfaces[isurface].pyvista_obj.copy()
+                    surface.translate(np.dot(direction,reciprocal_lattice))
+                    extended_surfaces.append(surface)
+                    extended_colors.append(colors[isurface])
+            extended_colors.append(colors[-1])
+            surfaces = extended_surfaces
+            nsurface = len(extended_surfaces)
+            colors = extended_colors
         for isurface in range(nsurface):
             if not only_spin:
-                if mode == "plain":
-                    p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
-                    text = "Plain"
-                elif mode == "parametric":
-                    p.add_mesh(
-                        surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
-                    )
-                    p.remove_scalar_bar()
-                    text = "Projection"
+                try:
+                    if mode == "plain":
+                        p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
+                        text = "Plain"
+                    elif mode == "parametric":
+                        p.add_mesh(
+                            surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
+                        )
+                        p.remove_scalar_bar()
+                        text = "Projection"
+                except: 
+                    try:  
+                        if mode == "plain":
+                            p.add_mesh(surfaces[isurface], color=colors[isurface])
+                            text = "Plain"
+                        elif mode == "parametric":
+                            p.add_mesh(
+                                surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
+                            )
+                            p.remove_scalar_bar()
+                            text = "Projection"
+                    except:
+                        print("This is not a surface")
+                    
+                        
+  
             else:
                 text = "Spin Texture"
+                
             if spin_texture:
                 # Example dataset with normals
                 # create a subset of arrows using the glyph filter
-                arrows = surfaces[isurface].pyvista_obj.glyph(
-                    orient="vectors", factor=arrow_size
-                )
-
+                try:
+                    arrows = surfaces[isurface].pyvista_obj.glyph(
+                        orient="vectors", factor=arrow_size
+                    )
+                except:
+                    try:
+                        arrows = surfaces[isurface].glyph(
+                        orient="vectors", factor=arrow_size)
+                    except:
+                        print("This is not a surface")
+                        
+                    
                 if arrow_color is None:
                     p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
                     p.remove_scalar_bar()
                 else:
                     p.add_mesh(arrows, color=arrow_color)
+                    
+                    
         if mode != "plain" or spin_texture:
             p.add_scalar_bar(
                 title=text,
@@ -578,4 +578,7 @@ def fermi3D(
     if save3d is not None:
         extention = save3d.split(".")[-1]
         s.export(save3d, extention)
-    return s, surfaces
+    return s, fermi_surfaces
+
+
+    

@@ -307,10 +307,18 @@ def boolean_add(surfaces):
         DESCRIPTION. The unionized surface from surfaces
 
     """
+    try:
+        ret = surfaces[0].pyvista_obj.copy()
+        for isurface in range(1, len(surfaces)):
+            ret = ret.boolean_add(surfaces[isurface].pyvista_obj, inplace=False)
+    except:
+        try:
+            ret = surfaces[0].copy()
+            for isurface in range(1, len(surfaces)):
+                ret = ret.boolean_add(surfaces[isurface], inplace=False)
+        except:
+            print("Not a valid surface")
 
-    ret = surfaces[0].pyvista_obj.copy()
-    for isurface in range(1, len(surfaces)):
-        ret = ret.boolean_add(surfaces[isurface].pyvista_obj, inplace=False)
     surf = Surface(verts=ret.points,
                    faces=convert_from_pyvista_faces(ret),
                    face_normals=ret.face_normals,
