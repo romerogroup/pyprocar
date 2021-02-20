@@ -181,11 +181,10 @@ class ElectronicBandStructure:
                 projected_period = np.append(projected_flip[:-1], projected, axis=0)
 
                 if self.has_phase:
-                    projected_phase_flip = np.flip(projected_phase, axis=0).conjugate()
-                    #     * (1j * np.pi * np.linspace(0, 2, len(projected_phase)))[
-                    #         :, None, None, None, None, None
-                    #     ]
-                    # )
+                    projected_phase_flip = np.flip(projected_phase, axis=0).conjugate()# * (
+                    #     np.exp(-0.5j * np.pi * np.linspace(-0.01, 0.01, len(projected_ph
+
+
                     projected_phase_period = np.append(
                         projected_phase_flip[:-1], projected_phase, axis=0
                     )
@@ -332,8 +331,8 @@ class ElectronicBandStructure:
 
     def plot(self, elimit=[-5, 5]):
 
-        if self.weights is not None:
-            self.weights /= self.weights.max()
+        # if self.weights is not None:
+        #     self.weights /= self.weights.max()
         plt.figure(figsize=(16, 9))
 
         pos = 0
@@ -352,21 +351,55 @@ class ElectronicBandStructure:
         x = np.array(x).reshape(-1,)
 
         for iband in range(self.nbands):
-            # if self.weights is not None:
-            #     plt.scatter(
-            #         x,
-            #         self.eigenvalues[:, iband],
-            #         c=self.weights[:, iband].round(2),
-            #         cmap="Blues",
-            #         s=self.weights[:, iband] * 75,
-            #     )
-            r = np.absolute(self.projected_phase[:, iband, 0, 0, 0, 0])
-            phi = np.angle(self.projected_phase[:, iband, 0, 0, 0, 0])/x
+            if self.weights is not None:
+                plt.scatter(
+                    x,
+                    self.eigenvalues[:, iband],
+                    c=self.weights[:, iband].round(2),
+                    cmap="jet",
+                    s=self.weights[:, iband] * 75,
+                )
+
+            plt.plot(
+                x, self.eigenvalues[:, iband], color="gray", alpha=0.5,
+            )
+
+        for ipos in self.kpath.tick_positions:
+            plt.axvline(x[ipos], color="black")
+        plt.xticks(x[self.kpath.tick_positions], self.kpath.tick_names)
+        plt.xlim(0, x[-1])
+        plt.axhline(y=0, color="red", linestyle="--")
+        # plt.ylim(elimit)
+        plt.colorbar()
+        plt.tight_layout()
+
+        ####
+        plt.figure(figsize=(16, 9))
+
+        pos = 0
+        for isegment in range(self.kpath.nsegments):
+            kstart, kend = self.kpath.special_kpoints[isegment]
+            distance = np.linalg.norm(kend - kstart)
+            if isegment == 0:
+                x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
+            else:
+                x = np.append(
+                    x,
+                    np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
+                    axis=0,
+                )
+            pos += distance
+        x = np.array(x).reshape(-1,)
+
+        r = np.absolute(self.projected_phase).sum(axis=(2,3,4,5))
+        phi = np.angle(self.projected_phase).sum(axis=(2,3,4,5))
+        for iband in range(self.nbands):
+
 
             plt.scatter(
                 x,
                 self.eigenvalues[:, iband],
-                c=phi,
+                c=r[:,iband],
                 cmap="seismic",
             )
             plt.plot(
@@ -381,6 +414,7 @@ class ElectronicBandStructure:
         # plt.ylim(elimit)
         plt.colorbar()
         plt.tight_layout()
+
         plt.show()
 
     def update_weights(self, weights):
