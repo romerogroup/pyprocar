@@ -3,6 +3,7 @@
 Created on Sat Jan 16 2021
 
 @author: Pedram Tavadze
+@author: Freddy Farah
 """
 
 from scipy.interpolate import CubicSpline
@@ -27,7 +28,7 @@ class ElectronicBandStructure:
         labels=None,
         reciprocal_lattice=None,
         interpolation_factor=None,
-        shifted_to_efermi=False,
+        shifted_to_efermi=False
     ):
         """
 
@@ -81,6 +82,7 @@ class ElectronicBandStructure:
             self.has_phase = False
         self.labels = labels
         self.weights = weights
+
 
     @property
     def nkpoints(self):
@@ -487,3 +489,40 @@ class ElectronicBandStructure:
         )
 
         p.show()
+        
+    def ibz2fbz(self, rotations):
+        """Generates the full Brillouin zone from the irreducible Brillouin
+        zone using point symmetries.
+        
+        Parameters:
+            - self.kpoints: the kpoints used to sample the Brillouin zone
+            - self.projected: the projected band structure at each kpoint
+            - rotations: the point symmetry operations of the lattice
+        """
+        klist = []
+        plist = []
+        # for each symmetry operation
+
+        for i, _ in enumerate(rotations):
+            # for each point
+            for j, _ in enumerate(self.kpoints):
+                # apply symmetry operation to kpoint
+                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
+                # apply boundary conditions
+                #bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
+                #sympoint_vector += bound_ops
+                
+                sympoint = sympoint_vector.tolist()
+
+                if sympoint not in klist:
+                    klist.append(sympoint)
+
+                    projection = self.projected[j].tolist()
+                    plist.append(projection)
+
+
+        self.kpoints = np.array(klist)
+        self.projected = np.array(plist)
+        
+        
+        

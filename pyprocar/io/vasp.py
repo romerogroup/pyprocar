@@ -779,7 +779,7 @@ class Outcar(collections.abc.Mapping):
         last one (if more than one found).
 
         Args:
-            -filename: the file name of the outcar to be readed
+            -filename: the file name of the outcar to be read
 
         """
         return float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", self.file_str)[-1])
@@ -803,6 +803,82 @@ class Outcar(collections.abc.Mapping):
         reciprocal_lattice = reciprocal_lattice[:, 3:]
         return reciprocal_lattice
 
+    @property
+    def rotations(self):
+        """Finds the point symmetry operations included in the OUTCAR file 
+        and returns them in matrix form.
+        
+        Args:
+            -filename: the file name of the outcar file to be read
+            -reciprocal_lattice: reciprocal lattice of the structure
+        
+        """
+        
+        with open(self.filename) as f:
+            txt = f.readlines()
+
+        for i,line in enumerate(txt):
+            if 'irot' in line:
+                begin_table = i+1
+            if 'Subroutine' in line:
+                end_table = i-1
+    
+        operators = np.zeros((end_table-begin_table, 9))
+        for i,line in enumerate(txt[begin_table:end_table]):
+            str_list = line.split()
+            num_list = [float(s) for s in str_list]
+            operator = np.array(num_list)
+            operators[i,:] = operator
+            
+            
+        rotations = []
+
+        for operator in operators:
+            det_A = operator[1]
+            # convert alpha to radians
+            alpha = np.pi * operator[2] / 180.0
+            # get rotation axis
+            x = operator[3]
+            y = operator[4]
+            z = operator[5]
+
+            R = (
+                np.array(
+                    [
+                        [
+                            np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
+                            x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
+                            x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
+                        ],
+                        [
+                            y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
+                            np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
+                            y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
+                        ],
+                        [
+                            z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
+                            z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
+                            np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
+                        ],
+                    ]
+                )
+                * det_A
+            )
+    
+            reciprocal_lattice = np.transpose(self.reciprocal_lattice)
+            R = np.dot(
+                np.dot(np.linalg.inv(reciprocal_lattice), R),
+                reciprocal_lattice
+            )
+            R = np.round_(R, decimals=3)
+            rotations.append(R)
+            
+        return np.array(rotations)
+                
+            
+        
+        
+        
     def __contains__(self, x):
         return x in self.variables
 

@@ -246,3 +246,8 @@ class FermiSurface3D(Isosurface):
 
     def _get_brilloin_zone(self, supercell):
         return BrillouinZone(self.reciprocal_lattice, supercell)
+    
+    def ibz2fbz(self):
+        pass
+    
+    
