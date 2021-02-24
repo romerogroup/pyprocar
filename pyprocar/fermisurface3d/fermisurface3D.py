@@ -24,7 +24,7 @@ class FermiSurface3D(Isosurface):
                  cmap='viridis',
                  vmin=0,
                  vmax=1,
-                 supercell=[1, 1, 1],
+                 supercell=None,
                  file = None):
         """
         

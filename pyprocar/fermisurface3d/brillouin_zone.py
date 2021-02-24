@@ -75,12 +75,16 @@ class BrillouinZone(Surface):
         None.
 
         """
+        """
         if transformation_matrix is not None:
             self.reciprocal = np.dot(reciprocal_lattice, transformation_matrix)
         else:
             self.reciprocal = reciprocal_lattice
+        """
+        self.reciprocal = reciprocal_lattice
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
+        print(self.reciprocal, reciprocal_lattice)
         verts, faces = self.wigner_seitz()
 
         Surface.__init__(self, verts=verts, faces=faces)
@@ -113,6 +117,7 @@ class BrillouinZone(Surface):
                         + k * self.reciprocal[2]
                     )
                     kpoints.append(vec)
+        print(kpoints, self.reciprocal)
         brill = Voronoi(np.array(kpoints))
         faces = []
         for idict in brill.ridge_dict:
