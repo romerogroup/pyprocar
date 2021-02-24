@@ -31,3 +31,39 @@ def get_angle(v, w, radians=False):
         return np.arccos(cosine)
     else:
         return np.rad2deg(np.arccos(cosine))
+
+
+def fft_interpolate(function, interpolation_factor=2):
+    """
+
+
+    Parameters
+    ----------
+    function : TYPE
+        DESCRIPTION.
+    interpolation_factor : TYPE, optional
+        DESCRIPTION. The default is 2.
+
+    Returns
+    -------
+    interpolated : TYPE
+        DESCRIPTION.
+
+    """
+    function = np.array(function)
+    eigen_fft = np.fft.fftn(function)
+    shifted_fft = np.fft.fftshift(eigen_fft)
+    pad_width = []
+    for idim in range(function.ndim):
+        n = shifted_fft.shape[idim]
+        pad = n * (interpolation_factor - 1) // 2
+        pad_width.append([pad, pad])
+    new_matrix = np.pad(shifted_fft, pad_width, "constant", constant_values=0)
+    new_matrix = np.fft.ifftshift(new_matrix)
+    if "complex" in function.dtype.name:
+        interpolated = np.fft.ifftn(new_matrix) * (interpolation_factor * function.ndim)
+    else:
+        interpolated = np.real(np.fft.ifftn(new_matrix)) * (
+            interpolation_factor * function.ndim
+        )
+    return interpolated
