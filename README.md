@@ -107,6 +107,7 @@ will bring a help menu.
 Changelog
 --------------
 
+v5.6.3 Mar 5th, 2021 --  <br /> QE and elk bug fixes. <br />
 v5.6.2 Jan 11th, 2021 --  <br /> Updates and bugfixes to fermi surface and dos plotter. <br />
 v5.6.1 Dec 7th, 2020 -- Fixed bug in PyProcar.cat() for merging parallel Abinit files for spin polarized calculations. Converted units Ha to eV. <br />
 v5.6.0 Nov 30th, 2020 -- Repairs PROCAR file by default. Set flag repair=False to disable. <br />

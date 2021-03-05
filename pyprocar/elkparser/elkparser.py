@@ -337,7 +337,7 @@ class ElkParser:
         rf = open("LATTICE.OUT", "r")
         data = rf.read()
         rf.close()
-        lattice_block = findall(r"matrix\s*:([\s0-9.]*)Inverse", data)
+        lattice_block = findall(r"matrix\s*:([-+\s0-9.]*)Inverse", data)
         lattice_array = np.array(lattice_block[1].split(), dtype=float)
         reclat = lattice_array.reshape((3, 3))
         return reclat
