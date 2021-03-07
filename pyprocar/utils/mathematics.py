@@ -33,7 +33,8 @@ def get_angle(v, w, radians=False):
         return np.rad2deg(np.arccos(cosine))
 
 
-def fft_interpolate(function, interpolation_factor=2):
+
+def fft_interpolate(function, interpolation_factor=2, axis=None):
     """
 
 
@@ -43,6 +44,8 @@ def fft_interpolate(function, interpolation_factor=2):
         DESCRIPTION.
     interpolation_factor : TYPE, optional
         DESCRIPTION. The default is 2.
+    axis : TYPE, optional
+        DESCRIPTION. The default is None.
 
     Returns
     -------
@@ -50,20 +53,30 @@ def fft_interpolate(function, interpolation_factor=2):
         DESCRIPTION.
 
     """
+
+    if axis is None:
+        axis = np.arange(function.ndim)
+    if type(axis) is int:
+        axis = [axis]
     function = np.array(function)
     eigen_fft = np.fft.fftn(function)
     shifted_fft = np.fft.fftshift(eigen_fft)
     pad_width = []
+    factor = 0
     for idim in range(function.ndim):
-        n = shifted_fft.shape[idim]
-        pad = n * (interpolation_factor - 1) // 2
+        if idim in axis:
+            n = shifted_fft.shape[idim]
+            pad = n * (interpolation_factor - 1) // 2
+            factor += 1
+        else:
+            pad = 0
         pad_width.append([pad, pad])
     new_matrix = np.pad(shifted_fft, pad_width, "constant", constant_values=0)
     new_matrix = np.fft.ifftshift(new_matrix)
     if "complex" in function.dtype.name:
-        interpolated = np.fft.ifftn(new_matrix) * (interpolation_factor * function.ndim)
+        interpolated = np.fft.ifftn(new_matrix) * (interpolation_factor * factor)
     else:
         interpolated = np.real(np.fft.ifftn(new_matrix)) * (
-            interpolation_factor * function.ndim
+            interpolation_factor * factor
         )
     return interpolated

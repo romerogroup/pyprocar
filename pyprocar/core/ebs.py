@@ -9,7 +9,7 @@ Created on Sat Jan 16 2021
 from scipy.interpolate import CubicSpline
 from ..fermisurface3d import BrillouinZone
 from . import Structure
-from ..utils import Unfolder
+from ..utils import Unfolder, mathematics
 import numpy as np
 from matplotlib import pylab as plt
 import pyvista
@@ -136,13 +136,48 @@ class ElectronicBandStructure:
 
                 istart = iend
                 iend = istart + self.kpath.ngrids[isegment]
-                kpoints = self.kpoints[istart:iend]
                 eigenvalues = self.eigenvalues[istart:iend]
                 projected = self.projected[istart:iend]
+
+                interpolated_eigenvalues.append(
+                    mathematics.fft_interpolate(
+                        eigenvalues, interpolation_factor=interpolation_factor, axis=0,
+                    )
+                )
+
+                interpolated_projected.append(
+                    mathematics.fft_interpolate(
+                        projected, interpolation_factor=interpolation_factor, axis=0,
+                    )
+                )
                 if self.has_phase:
                     projected_phase = self.projected_phase[istart:iend]
-                for iband in range(self.nbands):
-                    sub_eigenval = eigenvalues[:, iband]
+                    interpolated_projected_phase.append(
+                        mathematics.fft_interpolate(
+                            projected_phase,
+                            interpolation_factor=interpolation_factor,
+                            axis=0,
+                        )
+                    )
+                self.kpath.ngrids[isegment] = interpolated_eigenvalues[-1].shape[0]
+                interpolated_kpoints.append(
+                    np.linspace(kstart, kend, self.kpath.ngrids[isegment])
+                )
+        self.kpoints = np.array(interpolated_kpoints).reshape(-1, 3)
+        self.eigenvalues = np.array(interpolated_eigenvalues).reshape(-1, self.nbands)
+        self.projected = np.array(interpolated_projected).reshape(
+            -1, self.nbands, self.natoms, self.nprincipals, self.norbitals, self.nspins
+        )
+        if self.has_phase:
+            self.projected_phase = np.array(interpolated_projected_phase).reshape(
+                -1,
+                self.nbands,
+                self.natoms,
+                self.nprincipals,
+                self.norbitals,
+                self.nspins,
+            )
+        return interpolated_eigenvalues
 
     def extend_BZ(
         self, new_kpath, time_reversal=True,
@@ -356,9 +391,9 @@ class ElectronicBandStructure:
 
     def plot(self, elimit=[-5, 5], figsize=(16, 9)):
 
-        # if self.weights is not None:
-        #     self.weights /= self.weights.max()
-        # plt.figure(figsize=figsize)
+        if self.weights is not None:
+            self.weights /= self.weights.max()
+        plt.figure(figsize=figsize)
 
         pos = 0
         for isegment in range(self.kpath.nsegments):
@@ -381,7 +416,7 @@ class ElectronicBandStructure:
         #             x,
         #             self.eigenvalues[:, iband],
         #             c=self.weights[:, iband].round(2),
-        #             cmap="jet",
+        #             cmap="Blues",
         #             s=self.weights[:, iband] * 75,
         #         )
 
@@ -394,8 +429,8 @@ class ElectronicBandStructure:
         # plt.xticks(x[self.kpath.tick_positions], self.kpath.tick_names)
         # plt.xlim(0, x[-1])
         # plt.axhline(y=0, color="red", linestyle="--")
-        # # plt.ylim(elimit)
-        # # plt.colorbar()
+        # plt.ylim(elimit)
+        # plt.colorbar()
         # plt.tight_layout()
 
         ####
@@ -418,25 +453,27 @@ class ElectronicBandStructure:
 
         # r = np.absolute(self.projected_phase).sum(axis=(2,3,4,5))
         # phi = np.angle(self.projected_phase).sum(axis=(2,3,4,5))
-        self.projected[self.projected == 0] = np.nan
+        # self.projected[self.projected == 0] = np.nan
         diff = self.projected[:, :, 0, 0, 0, 0]
-
+        diff[diff == 0] = np.nan
         # diff_phase = np.diff(self.projected_phase, axis=0)[:,:,0,0,0]
         # diff_phase = np.absolute(diff_phase)
+
         for iband in range(self.nbands):
 
             plt.scatter(
-                x[1:], self.eigenvalues[1:, iband], c=diff[1:, iband], cmap="jet",
+                x, self.eigenvalues[:, iband], cmap="jet", c=diff[:, iband]
             )
             plt.plot(
-                x[1:], self.eigenvalues[1:, iband], color="gray", alpha=0.5,
+                x, self.eigenvalues[:, iband], color="gray", alpha=0.5,
             )
         for ipos in self.kpath.tick_positions:
             plt.axvline(x[ipos], color="black")
         plt.xticks(x[self.kpath.tick_positions], self.kpath.tick_names)
         plt.xlim(0, x[-1])
         plt.axhline(y=0, color="red", linestyle="--")
-        # plt.ylim(elimit)
+
+        plt.ylim(elimit)
         plt.colorbar()
         plt.tight_layout()
 
