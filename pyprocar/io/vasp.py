@@ -1145,6 +1145,7 @@ class Procar(collections.abc.Mapping):
         self.bandsCount = None
         self.ionsCount = None
         self.ispin = None
+        self.structure = structure
 
         self.orbitalName = [
             "s",
@@ -1805,7 +1806,7 @@ class Procar(collections.abc.Mapping):
         self.kpoints = np.array(klist)
         self.bands = np.array(bandlist)
         self.spd = np.array(spdlist)
-        self.spd = self._spd2projected(self.spd)
+        self.spd = self._spd2projected(spd)
 
     def __contains__(self, x):
         return x in self.variables

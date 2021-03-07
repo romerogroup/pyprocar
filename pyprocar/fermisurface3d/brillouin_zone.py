@@ -84,8 +84,8 @@ class BrillouinZone(Surface):
         self.reciprocal = reciprocal_lattice
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
-        print(self.reciprocal, reciprocal_lattice)
         verts, faces = self.wigner_seitz()
+        print(verts, faces)
 
         Surface.__init__(self, verts=verts, faces=faces)
 
@@ -117,7 +117,7 @@ class BrillouinZone(Surface):
                         + k * self.reciprocal[2]
                     )
                     kpoints.append(vec)
-        print(kpoints, self.reciprocal)
+        #print(kpoints, self.reciprocal)
         brill = Voronoi(np.array(kpoints))
         faces = []
         for idict in brill.ridge_dict:

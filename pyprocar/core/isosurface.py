@@ -124,6 +124,8 @@ class Isosurface(Surface):
                     verts, faces = self.clip(suprecell_surface, boundaries)
                 # verts, faces = self.clip(suprecell_surface, boundaries)
 
+        
+        print(normals)
         Surface.__init__(self, verts=verts, faces=faces, face_normals=normals)
 
     def clip(self, S1, S2):

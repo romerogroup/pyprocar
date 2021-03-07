@@ -166,7 +166,6 @@ class Surface(object):
         """
         creates a trimesh object
         """
-
         if np.any(np.array([len(x) for x in self.faces]) > 3):
             faces = []
             for i in range(0, len(self.pyvista_obj.triangulate().faces), 4):
@@ -177,7 +176,6 @@ class Surface(object):
             self.trimesh_obj = trimesh.Trimesh(vertices=self.verts, faces=faces)
 
         else:
-
             self.trimesh_obj = trimesh.Trimesh(vertices=self.verts, faces=self.faces)
 
     def set_scalars(

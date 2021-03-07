@@ -15,6 +15,7 @@ from .bxsfparser import BxsfParser
 from .frmsfparser import FrmsfParser
 from .qeparser import QEFermiParser
 from .lobsterparser import LobsterFermiParser
+from .io.vasp import Outcar, Procar
 
 
 def fermi3D(
@@ -51,6 +52,9 @@ def fermi3D(
     widget=False,
     show=True,
     repair=True,
+    sym=False,
+    rotations=None,
+    symprec=1.e-5
 ):
     """
 
@@ -415,6 +419,16 @@ def fermi3D(
         for iband in bands:
             spd_spin.append(None)
     counter = 0
+    
+    #structure = Procar(procar).structure
+    if outcar is not None:
+        rotations = Outcar(outcar).rotations
+           
+    """
+    elif structure is not None:
+        rotations = structure.get_spglib_symmetry_dataset(symprec)
+    """
+    
     for iband in bands:
         print("Trying to extract isosurface for band %d" % iband)
         if code == "bxsf":
@@ -429,6 +443,8 @@ def fermi3D(
                 projection_accuracy=projection_accuracy,
                 supercell=supercell,
                 file="bxsf",
+                sym=sym,
+                rotations=rotations,
             )
         elif code == "qe":
             surface = FermiSurface3D(
@@ -442,6 +458,8 @@ def fermi3D(
                 projection_accuracy=projection_accuracy,
                 supercell=supercell,
                 file="qe",
+                sym=sym,
+                rotations=rotations,
             )
         elif code == "lobster":
             surface = FermiSurface3D(
@@ -455,6 +473,7 @@ def fermi3D(
                 projection_accuracy=projection_accuracy,
                 supercell=supercell,
                 file="lobster",
+                sym=sym,
             )
             
         elif code == "frmsf":
@@ -469,6 +488,8 @@ def fermi3D(
                 projection_accuracy=projection_accuracy,
                 supercell=supercell,
                 file="bxsf",
+                sym=sym,
+                rotations=rotations,
             )
         else:
             surface = FermiSurface3D(
@@ -481,6 +502,8 @@ def fermi3D(
                 interpolation_factor=interpolation_factor,
                 projection_accuracy=projection_accuracy,
                 supercell=supercell,
+                sym=sym,
+                rotations=rotations,
             )
 
         if surface.verts is not None:

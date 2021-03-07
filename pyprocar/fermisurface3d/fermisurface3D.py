@@ -25,7 +25,10 @@ class FermiSurface3D(Isosurface):
                  vmin=0,
                  vmax=1,
                  supercell=None,
-                 file = None):
+                 file = None,
+                 sym=False,
+                 rotations=None,
+                 ):
         """
         
 
@@ -72,7 +75,7 @@ class FermiSurface3D(Isosurface):
             DESCRIPTION. The default is 1.
 
         """
-
+        
         self.kpoints = kpoints
         self.band = band
         self.spd = spd
@@ -84,6 +87,8 @@ class FermiSurface3D(Isosurface):
         self.spin_texture = spin_texture
         self.spd_spin = spd_spin
         self.file = file
+        self.sym = sym
+        self.rotations = rotations
         
         self.brillouin_zone = self._get_brilloin_zone(self.supercell)
         #self.brillouin_zone = None
@@ -113,7 +118,11 @@ class FermiSurface3D(Isosurface):
             self.project_color(cmap, vmin, vmax)
         if self.spd_spin is not None and self.verts is not None:
             self.create_spin_texture()
-
+            
+        if self.sym == True:
+            self.ibz2fbz()
+            
+            
     def create_spin_texture(self):
 
         if self.spd_spin is not None:
@@ -248,6 +257,39 @@ class FermiSurface3D(Isosurface):
         return BrillouinZone(self.reciprocal_lattice, supercell)
     
     def ibz2fbz(self):
-        pass
+        """
+        Converts the irreducible Brilluoin zone to the full Brillouin zone.
+        
+        Parameters:
+        """
+        klist = []
+        bandlist = []
+        spdlist = []
+        
+        for i, _ in enumerate(self.rotations):
+            # for each point
+            for j, _ in enumerate(self.kpoints):
+                # apply symmetry operation to kpoint
+                sympoint_vector = np.dot(self.rotations[i], self.kpoints[j])
+                # apply boundary conditions
+                # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
+                # sympoint_vector += bound_ops
+
+                sympoint = sympoint_vector.tolist()
+
+                if sympoint not in klist:
+                    klist.append(sympoint)
+                    
+                    if self.band is not None:
+                        band = self.band[j].tolist()
+                        bandlist.append(band)
+                    if self.spd is not None:
+                        spd = self.spd[j].tolist()
+                        spdlist.append(spd)
+
+        self.kpoints = np.array(klist)
+        self.band = np.array(bandlist)
+        self.spd = np.array(spdlist)
+        
     
     
