@@ -31,4 +31,4 @@ pyprocar.bandsdosplot(code = "qe",
                       elimit=[-20,20],)
 
 
-pyprocar.dosplot(code='qe', mode='stack_orbitals',atoms=[0],elimit=[-13,6],plot_total=True)
+pyprocar.dosplot(code='qe', mode='stack_orbitals',atoms=[1],elimit=[-13,6],plot_total=True)

@@ -137,15 +137,18 @@ class QEDOSParser:
 
         if len(atoms) == 0:
             atoms = arange(self.initial_structure.natoms)
-
+      
+ 
         if 'projected' in list(self.data.keys()):
+            
             dos_projected = {}
             ion_list = ["ion %s" % str(x + 1) for x in atoms
                         ]  # using this name as vasrun.xml uses ion #
             for i in range(len(ion_list)):
                 iatom = ion_list[i]
-                name = self.initial_structure.atoms[atoms[i]]
-
+                #name = self.initial_structure.atoms[atoms[i]]
+                name = self.initial_structure.atoms[atoms[i]] + str(atoms[i])
+             
                 energies = self.data['projected'][i][:,0]
                 
                 dos_projected[name] = {'energies': energies}
@@ -212,11 +215,13 @@ class QEDOSParser:
         labels = []
         labels.append(info[0])
         ret = []
+     
         for iatom in dos_projected:
             temp_atom = []
             for iorbital in range(norbitals):
                 temp_spin = []
                 for key in dos_projected[iatom]:
+                    
                     if key == 'energies':
                         continue
                     temp_spin.append(dos_projected[iatom][key][:, iorbital])
@@ -539,6 +544,7 @@ class QEDOSParser:
              total_dos = delete(total_dos,1,1)
         # ###################################################################################
         tmp_dict ={}        
+       
         for filename in self.file_names:
             if not os.path.isfile(filename):
                 raise ValueError('ERROR: DOSCAR file not found')
@@ -553,8 +559,12 @@ class QEDOSParser:
             atmNum = findall("#(\d*)",filename)[0]
             atmName = findall("atm#\d*\(([a-zA-Z0-9]*)\)",filename)[0]
             orbitalName = findall("wfc#\d*\((\S)\)",filename)[0]
-            if atmName not in list(tmp_dict.keys()):
-                tmp_dict[atmName] = zeros(shape=[len(total_dos[:,0]),10,2])
+            
+            atmNumName = 'ion' + atmNum
+            if atmNumName not in list(tmp_dict.keys()):
+                tmp_dict[atmNumName] = zeros(shape=[len(total_dos[:,0]),10,2])
+            # if atmName not in list(tmp_dict.keys()):
+            #     tmp_dict[atmName] = zeros(shape=[len(total_dos[:,0]),10,2])
     
             iline = 0
             
@@ -610,8 +620,9 @@ class QEDOSParser:
                 elif 'd' == orbitalName:
                     dos[:,5:10,0] = final_dos[:,1::2]
                     dos[:,5:10,1] = final_dos[:,2::2]
-            tmp_dict[atmName] += dos
-            
+            # tmp_dict[atmName] += dos
+            tmp_dict[atmNumName] += dos
+           
         projected_dos = []
         for name in list(tmp_dict.keys()):
             for ispin in range(2):
@@ -625,7 +636,7 @@ class QEDOSParser:
                 tmp_dict[name][:,[8,9],ispin] = tmp_dict[name][:,[9,8],ispin]
 
             projected_dos.append(tmp_dict[name])
-
+            
 
         project_labels = ['energies','s','p_y', 'p_z','p_x', 'd_xy', 'd_zy', 'd_z^2', 'd_zx','d_x^2-y^2']
         return {'total': total_dos,'projected': projected_dos, 'projected_labels_info':project_labels, 'ions': self.species_list}
