@@ -387,7 +387,7 @@ def dosplot(
     elif code == "qe":
         vaspxml = QEDOSParser(nscfin="nscf.in",
                               pdosin="pdos.in",
-                              outfile="scf.out",
+                              scfOut="scf.out",
                               dos_interpolation_factor=interpolation_factor)
         dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if atoms is None:

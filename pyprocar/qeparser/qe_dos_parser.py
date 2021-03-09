@@ -21,14 +21,14 @@ import os
 
 class QEDOSParser:
     def __init__(
-        self, nscfin="nscf.in", pdosin="pdos.in", outfile="scf.out", dos_interpolation_factor = None 
+        self, nscfin="nscf.in", pdosin="pdos.in", scfOut="scf.out", dos_interpolation_factor = None 
     ):
 
         # Qe inputs
         self.nscfin = nscfin
         self.pdosin = pdosin
-        self.outfile = outfile
-
+        self.scfOut = scfOut
+   
         # This is not used since the extra files are useless for the parser
         self.file_names = []
         self.filpdos = None
@@ -80,7 +80,11 @@ class QEDOSParser:
         rf = open(self.nscfin, "r")
         self.nscfIn = rf.read()
         rf.close()
-
+ 
+        rf = open(self.scfOut, "r")
+        self.scfOut = rf.read()
+        rf.close()
+        
         rf = open(self.pdosin, "r")
         self.pdosIn = rf.read()
         rf.close()
@@ -238,7 +242,8 @@ class QEDOSParser:
         """
         Returns a list of pychemia.core.Structure representing all the ionic step structures
         """
-        symbols = [x.strip() for x in self.data['ions']]
+        # symbols = [x.strip() for x in self.data['ions']]
+        symbols = [x.strip() for x in self.ions]
         structures = []
 
         st = Structure(atoms=symbols)  #lattice = self.lattice)#, #fractional_coordinates = )
@@ -274,11 +279,11 @@ class QEDOSParser:
         Returns the fermi energy read from .out
         """
 
-        fi = open(self.outfile, "r")
-        data = fi.read()
-        fi.close()
+        # fi = open(self.scfOut, "r")
+        # data = fi.read()
+        # fi.close()
 
-        data = data.split('the Fermi energy is')[1].split('ev')[0]
+        data = self.scfOut.split('the Fermi energy is')[1].split('ev')[0]
         fermi = float(data)
 
         #print((findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)))
@@ -387,19 +392,26 @@ class QEDOSParser:
                 self.species_list.append(raw_species[nspec].split()[0])
                 self.composition[raw_species[nspec].split()[0]] = 0
 
-        raw_ions = findall(
-            "ATOMIC_POSITIONS.*\n" + self.ionsCount * "(.*).*\n", self.nscfIn
-        )[0]
-
+        # raw_ions = findall(
+        #     "ATOMIC_POSITIONS.*\n" + self.ionsCount * "(.*).*\n", self.nscfIn
+        # )[0]
+        
+        raw_ions = findall( "\s*Cartesian\saxes.*\n.*\n.*\n" + self.ionsCount * "(.*)\n", self.scfOut)[0]
+        self.ions = [x.split()[1] for x in raw_ions]
+        
+        
+        
         if self.ionsCount == 1:
             self.composition[raw_species.split()[0]] = 1
         else:
             for ions in range(self.ionsCount):
                 for species in range(len(self.species_list)):
-                    if raw_ions[ions].split()[0] == self.species_list[species]:
-                        self.composition[raw_ions[ions].split()[0]] += 1
+                    # if  raw_ions[ions].split()[0] == self.species_list[species]:
+                    #     self.composition[raw_ions[ions].split()[0]] += 1
+                    if  self.ions[ions] == self.species_list[species]:
+                        self.composition[self.ions[ions].split()[0]] += 1
 
-
+        
 
         #######################################################################
         # Reading the kpdos.out for outputfile labels

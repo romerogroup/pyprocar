@@ -504,7 +504,7 @@ class QEParser:
         self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1], axis=4)
         self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
         self.spd[:, :, :, -1, 0] = 0
-
+        
         # colinear spin polarized case
 
         # manipulating spd array for spin polarized calculations.
@@ -514,7 +514,7 @@ class QEParser:
         # When this is one, the the first half of bands (spin up) will have positive projections
         # and the second half (spin down) will have negative projections. This is to adhere to
         # the convention used in PyProcar to obtain spin density and spin magnetization.
-
+        self.bands -= self.fermi
         if spinCalc:
             print("\nQuantum Espresso colinear spin calculation detected.\n")
             self.spd2 = zeros(
