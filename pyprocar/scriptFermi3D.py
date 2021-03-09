@@ -47,101 +47,72 @@ def fermi3D(
     save3d=None,
     perspective=True,
     save2d=False,
-    show_curvature = False,
-    show_slice = False,
-    slice_normal=(1,0,0),
-    slice_planes = False,
     camera_pos=[1, 1, 1],
     widget=False,
     show=True,
     repair=True,
 ):
     """
-
     Parameters
     ----------
     procar : str, optional (default ``'PROCAR'``)
         Path to the PROCAR file of the simulation
-
         e.g. ``procar='~/MgB2/fermi/PROCAR'``
-
     outcar : str, optional (default ``'OUTCAR'``)
         Path to the OUTCAR file of the simulation
-
         e.g. ``outcar='~/MgB2/fermi/OUTCAR'``
-
     infile : str, optional (default ``infile = in.bxsf'``)
         This is the path in the input bxsf file
-
         e.g. ``infile = ni_fs.bxsf'``
-
     fermi : float, optional (default ``None``)
         Fermi energy at which the fermi surface is created. In other
         words fermi is the isovalue at which the fermi surface is
         created. If not defined it is read from the OUTCAR file.
-
         e.g. ``fermi=-5.49``
-
     bands : list int, optional
         Which bands are going to be plotted in the fermi surface. The
         numbering is based on vasp outputs. If nothing is selected,
         this function will iterate over all the bands and plots the
         ones that cross fermi.
-
         e.g. ``bands=[14, 15, 16, 17]``
-
     interpolation_factor : int, optional
         The kpoints grid will increase by this factor and interpolated
         at the new points using Fourier interpolation.
-
         e.g. If the kgrid is 5x5x5, ``interpolation_factor=4`` will
         lead to a kgrid of 20x20x20
-
     mode : str, optional (default ``mode='plain'``)
         Defines If the fermi surface will have any projection using
         colormaps or is a plotted with a uniform plain color.
-
         e.g. ``mode='plain'``, ``mode='parametric'``
-
     supercell : list int, optional (default ``[1, 1, 1]``)
         If one wants plot more than the 1st brillouin zone, this
         parameter can be used.
-
         e.g. ``supercell=[2, 2, 2]``
     
     extended_zone_directions : list of list of size 3, optional (default ``None``)
         If one wants plot more than  brillouin zones in a particular direection, this
         parameter can be used.
-
         e.g. ``extended_zone_directions=[[1,0,0],[0,1,0],[0,0,1]]``
-
     colors : list str, optional
         List of colors for each band. This argument does not work when
         a 3d file is saved. The colors for when ``save3d`` is used, we
         recomend using qualitative colormaps, as this function will
         automatically choose colors from the colormaps.
-
         e.g. ``colors=['red', 'blue', 'green']``
-
     background_color : str, optional (default ``white``)
         Defines the background color.
-
         e.g. ``background_color='gray'``
-
     save_colors : bool, optional (default ``False``)
         In case the plot is saved in 3D and some property of the
         material is projected on the fermi surface, this argument
         allows the projection to be stored in the 3D file.
-
         e.g. ``save_colors=True``
-
     cmap : str, optional (default ``jet``)
         The color map used for color coding the projections. ``cmap``
         is only relevant in ``mode='parametric'``. A full list of
         color maps in matplotlib are provided in this web
         page. `https://matplotlib.org/2.0.1/users/colormaps.html
         <https://matplotlib.org/2.0.1/users/colormaps.html>`_
-
     atoms : list int, optional
         ``atoms`` define the projection of the atoms on the fermi
         surfcae . In other words it selects only the contribution of the
@@ -150,11 +121,9 @@ def fermi3D(
         the input files of DFT package. ``atoms`` is only relevant in
         ``mode='parametric'``. keep in mind that python counting
         starts from zero.
-
         e.g. for SrVO\ :sub:`3`\  we are choosing only the oxygen
         atoms. ``atoms=[2, 3, 4]``, keep in mind that python counting
         starts from zero, for a **POSCAR** similar to following::
-
             Sr1 V1 O3
             1.0
             3.900891 0.000000 0.000000
@@ -168,10 +137,8 @@ def fermi3D(
             0.000000 0.500000 0.000000 O  atom 2
             0.000000 0.000000 0.500000 O  atom 3
             0.500000 0.000000 0.000000 O  atom 4
-
         if nothing is specified this parameter will consider all the
         atoms present.
-
     orbitals : list int, optional
         ``orbitals`` define the projection of orbitals on the fermi
         surface. In other words it selects only the contribution of
@@ -186,129 +153,92 @@ def fermi3D(
             |  0  |  1  |  2 |  3 |  4  |  5  |  6  |  7  |   8   |
             +-----+-----+----+----+-----+-----+-----+-----+-------+
         ``orbitals`` is only relavent in ``mode='parametric'``
-
         e.g. ``orbitals=[1,2,3]`` will only select the p orbitals
         while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.
-
         If nothing is specified pyprocar will select all the present
         orbitals.
-
     spin : list int, optional
-
         e.g. ``spin=[0]``
-
     spin_texture : bool, optional (default False)
         In non collinear calculation one can choose to plot the spin
         texture on the fermi surface.
-
         e.g. ``spin_texture=True``
-
     arrow_color : str, optional
         Defines the color of the arrows when
         ``spin_texture=True``. The default will select the colors
         based on the color map specified. If arrow_color is selected,
         all arrows will have the same color.
-
         e.g. ``arrow_color='red'``
-
     arrow_size : int, optional
         As the name suggests defines the size of the arrows, when spin
         texture is selected.
-
         e.g. ``arrow_size=3``
-
     only_spin : bool, optional
         If ``only_spin=True`` is selected, the fermi surface is not
         plotted and only the spins in the spin texture is plotted.
-
     fermi_shift : float, optional
         This parameter is useful when one wants to plot the iso-surface
         above or belove the fermi level.
-
         e.g. ``fermi_shift=0.6``
-
     projection_accuracy : str, optional (default ``'normal'``)
         Selected the accuracy of projected properties. ``'normal'`` and
         ``'high'`` are the only two options. ``'normal'`` uses the fast
         but rather inaccurate nearest neighbor interpolation, while
         ``'high'`` uses the more accurate linear interpolation for the
         projection of the properties.
-
         e.g. ``projection_accuracy='high'``
-
     code : str, optional (default ``'vasp'``)
         The DFT code in which the calculation is performed with.
         Also, if you want to read a .bxsf file set code ="bxsf"
         e.g. ``code='vasp'``
-
     vmin : float, optional
         The maximum value in the color bar. cmap is only relevant in
         ``mode='parametric'``.
-
         e.g. vmin=-1.0
-
     vmax : float, optional
         The maximum value in the color bar. cmap is only relevant in
         ``mode='parametric'``.
-
         e.g. vmax=1.0
-
     savegif : str, optional
         pyprocar can save the fermi surface in a gif
         format. ``savegif`` is the path to which the gif is saved.
-
         e.g. ``savegif='fermi.gif'`` or ``savegif='~/MgB2/fermi.gif'``
-
     savemp4 : str, optional
         pyprocar can save the fermi surface in a mp4 video format.
         ``savemp4`` is the path to which the video is saved.
-
         e.g. ``savegif='fermi.mp4'`` or ``savegif='~/MgB2/fermi.mp4'``
-
     save3d : str, optional
         pyprocar can save the fermi surface in a 3d file format.
         pyprocar uses the `trimesh <https://github.com/mikedh/trimesh>`_
         to save the 3d file. trimesh can export files with the
         following formats STL, binary PLY, ASCII OFF, OBJ, GLTF/GLB
         2.0, COLLADA. ``save3d`` is the path to which the file is saved.
-
         e.g. ``save3d='fermi.glb'``
-
     perspective : bool, optional
         To create the illusion of depth, perspective is used in 2d
         graphics. One can turn this feature off by ``perspective=False``
-
         e.g.  ``perspective=False``
-
     save2d : str, optional
         The fermi surface can be saved as a 2D image. This parameter
         turns this feature on and selects the path at which the file
         is going to be saved.
-
         e.g. ``save2d='fermi.png'``
-
     camera_pos : list float, optional (default ``[1, 1, 1]``)
         This parameter defines the position of the camera where it is
         looking at the fermi surface. This feature is important when
         one chooses to use the ``save2d``, ``savegif`` or ``savemp4``
         option.
-
         e.g. ``camera_pos=[0.5, 1, -1]``
-
     widget : , optional
         .. todo::
-
     show : bool, optional (default ``True``)
         If set to ``False`` it will not show the 3D plot.
-
     Returns
     -------
     s : pyprocar surface object
         The whole fermi surface added bands
-
     surfaces : list pyprocar surface objects
         list of fermi surface of each band
-
     """
 
     welcome()
@@ -462,25 +392,14 @@ def fermi3D(
     
  
     fermi_surfaces = surfaces.copy()
-    
-
-        
-                        
-                        
-    
     if show or save2d:
         # sargs = dict(interactive=True)
-        
-        
         p.add_mesh(
             surfaces[0].brillouin_zone.pyvista_obj,
             style="wireframe",
             line_width=3.5,
             color="black",
         )
-        
-        
-        
         if extended_zone_directions is not None:
             extended_surfaces = []
             extended_colors = []
@@ -497,133 +416,57 @@ def fermi3D(
             surfaces = extended_surfaces
             nsurface = len(extended_surfaces)
             colors = extended_colors
-            
-        if show_slice:
-            extended_surfaces = []
-            extended_colors = []
-            if extended_zone_directions is None:
-                for isurface in range(len(surfaces)):
-                    extended_surfaces.append(surfaces[isurface].pyvista_obj) 
-                surfaces = extended_surfaces
-                nsurface = len(extended_surfaces)
-            surfaceS =  surfaces[0]
-            for isurface in range(1,nsurface):
-                surfaceS = surfaceS + surfaces[isurface]
-            if mode == "plain":
-                text = "Plain"
-            elif mode == "parametric":
-                text = "Projection"
-            else:
-                text = "Spin Texture"
-
-            if slice_planes is True:
-                p.add_mesh_slice_orthogonal(surfaceS, cmap=cmap, clim=[vmin, vmax])
-                p.remove_scalar_bar()
-                 # XYZ - show 3D scene first
-                # slices = surfaceS.slice_orthogonal(x=0,y = 0 , z=0)
-                # p.subplot(1,1)
-                # p.add_mesh(slices, cmap=cmap, clim=[vmin, vmax])
-                # # p.show_grid()
-                # p.camera_position = camera_pos
-                # # XY
-                # p.subplot(0,0)
-                # p.add_mesh(slices, cmap=cmap, clim=[vmin, vmax])
-                # # p.show_grid()
-                # p.camera_position = 'xy'
-                # p.enable_parallel_projection()
-                # # ZY
-                # p.subplot(0,1)
-                # p.add_mesh(slices,cmap=cmap, clim=[vmin, vmax])
-                # # p.show_grid()
-                # p.camera_position = 'zy'
-                # p.enable_parallel_projection()
-                # # XZ
-                # p.subplot(1,0)
-                # p.add_mesh(slices,cmap=cmap, clim=[vmin, vmax])
-                # # p.show_grid()
-                # p.camera_position = 'xz'
-                # p.enable_parallel_projection()
-            else:
-                # slices = surfaceS.slice_along_axis(n=10, axis="z")
-                # p.add_mesh(slices, cmap=cmap, clim=[vmin, vmax])
-                p.add_mesh_slice(surfaceS, cmap=cmap, clim=[vmin, vmax])
-                p.remove_scalar_bar()
-                
- 
-        elif show_curvature is True:
-            extended_surfaces = []
-            extended_colors = []
-            if extended_zone_directions is None:
-                for isurface in range(len(surfaces)):
-                    extended_surfaces.append(surfaces[isurface].pyvista_obj) 
-                surfaces = extended_surfaces
-                nsurface = len(extended_surfaces)
-            surfaceS =  surfaces[0]
-            for isurface in range(1,nsurface):
-                surfaceS = surfaceS + surfaces[isurface]
-            if mode == "plain":
-                text = "Plain"
-            elif mode == "parametric":
-                text = "Projection"
-            else:
-                text = "Spin Texture"
-            # curvature_surface = surfaceS.curvature()
-            surfaceS.plot_curvature(curv_type = 'minimum')
-            # p.add_mesh(slices,cmap=cmap, clim=[vmin, vmax])
-            
-        else:
-            
-            for isurface in range(nsurface):
-                if not only_spin:
-                    try:
+        for isurface in range(nsurface):
+            if not only_spin:
+                try:
+                    if mode == "plain":
+                        p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
+                        text = "Plain"
+                    elif mode == "parametric":
+                        p.add_mesh(
+                            surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
+                        )
+                        p.remove_scalar_bar()
+                        text = "Projection"
+                except: 
+                    try:  
                         if mode == "plain":
-                            p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
+                            p.add_mesh(surfaces[isurface], color=colors[isurface])
                             text = "Plain"
                         elif mode == "parametric":
                             p.add_mesh(
-                                surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
+                                surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
                             )
                             p.remove_scalar_bar()
                             text = "Projection"
-                    except: 
-                        try:  
-                            if mode == "plain":
-                                p.add_mesh(surfaces[isurface], color=colors[isurface])
-                                text = "Plain"
-                            elif mode == "parametric":
-                                p.add_mesh(
-                                    surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
-                                )
-                                p.remove_scalar_bar()
-                                text = "Projection"
-                        except:
-                            print("This is not a surface")
-                        
-                            
-      
-                else:
-                    text = "Spin Texture"
-                    
-                if spin_texture:
-                    # Example dataset with normals
-                    # create a subset of arrows using the glyph filter
-                    try:
-                        arrows = surfaces[isurface].pyvista_obj.glyph(
-                            orient="vectors", factor=arrow_size
-                        )
                     except:
-                        try:
-                            arrows = surfaces[isurface].glyph(
-                            orient="vectors", factor=arrow_size)
-                        except:
-                            print("This is not a surface")
-                            
+                        print("This is not a surface")
+                    
                         
-                    if arrow_color is None:
-                        p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
-                        p.remove_scalar_bar()
-                    else:
-                        p.add_mesh(arrows, color=arrow_color)
+  
+            else:
+                text = "Spin Texture"
+                
+            if spin_texture:
+                # Example dataset with normals
+                # create a subset of arrows using the glyph filter
+                try:
+                    arrows = surfaces[isurface].pyvista_obj.glyph(
+                        orient="vectors", factor=arrow_size
+                    )
+                except:
+                    try:
+                        arrows = surfaces[isurface].glyph(
+                        orient="vectors", factor=arrow_size)
+                    except:
+                        print("This is not a surface")
+                        
+                    
+                if arrow_color is None:
+                    p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
+                    p.remove_scalar_bar()
+                else:
+                    p.add_mesh(arrows, color=arrow_color)
                     
                     
         if mode != "plain" or spin_texture:
@@ -647,10 +490,9 @@ def fermi3D(
             p.enable_parallel_projection()
 
         p.set_background(background_color)
-        # p.set_position(camera_pos)
+        p.set_position(camera_pos)
         if not widget:
             p.show(cpos=camera_pos, screenshot=save2d)
-            # p.show()
         # p.screenshot('1.png')
         # p.save_graphic('1.pdf')
         if savegif is not None:
@@ -662,7 +504,6 @@ def fermi3D(
             p.open_movie(savemp4)
             p.orbit_on_path(path)  # ,viewup=camera_pos)
             # p.close()
-    # p.show()
     s = boolean_add(surfaces)
     s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
     # s.pyvista_obj.plot()
