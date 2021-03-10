@@ -47,6 +47,9 @@ def fermi3D(
     save3d=None,
     perspective=True,
     save2d=False,
+    show_slice = False,
+    slice_normal=(1,0,0),
+    slice_planes = False,
     camera_pos=[1, 1, 1],
     widget=False,
     show=True,
@@ -392,14 +395,25 @@ def fermi3D(
     
  
     fermi_surfaces = surfaces.copy()
+    
+
+        
+                       
+                        
+    
     if show or save2d:
         # sargs = dict(interactive=True)
+        
+        
         p.add_mesh(
             surfaces[0].brillouin_zone.pyvista_obj,
             style="wireframe",
             line_width=3.5,
             color="black",
         )
+        
+        
+        
         if extended_zone_directions is not None:
             extended_surfaces = []
             extended_colors = []
@@ -416,57 +430,95 @@ def fermi3D(
             surfaces = extended_surfaces
             nsurface = len(extended_surfaces)
             colors = extended_colors
-        for isurface in range(nsurface):
-            if not only_spin:
-                try:
-                    if mode == "plain":
-                        p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
-                        text = "Plain"
-                    elif mode == "parametric":
-                        p.add_mesh(
-                            surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
-                        )
-                        p.remove_scalar_bar()
-                        text = "Projection"
-                except: 
-                    try:  
+            
+        if show_slice:
+            extended_surfaces = []
+            extended_colors = []
+            if extended_zone_directions is None:
+                for isurface in range(len(surfaces)):
+                    extended_surfaces.append(surfaces[isurface].pyvista_obj) 
+                surfaces = extended_surfaces
+                nsurface = len(extended_surfaces)
+            surfaceS =  surfaces[0]
+            for isurface in range(1,nsurface):
+                surfaceS = surfaceS + surfaces[isurface]
+            if mode == "plain":
+                text = "Plain"
+            elif mode == "parametric":
+                text = "Projection"
+            else:
+                text = "Spin Texture"
+
+            # if slice_planes is True:
+            #     slices = surfaceS.slice_orthogonal(x=0,y = 0 , z=0)
+
+            # else:
+            #     # slices = surfaceS.slice_along_axis(n=10, axis="z")
+            #     # p.add_mesh(slices, cmap=cmap, clim=[vmin, vmax])
+            #     # p.add_mesh(surfaceS,cmap=cmap, clim=[vmin, vmax])
+            #     def my_plane_func(normal, origin):
+            #         surfaceS.slice(normal=slice_normal, origin=(0,0,0))
+            #     #p.add_mesh_slice(surfaceS,normal= slice_normal, cmap=cmap, clim=[vmin, vmax])
+            #     p.add_plane_widget(my_plane_func)
+               
+                
+                #print(p.plane_sliced_meshes)
+            p.add_mesh_slice(surfaceS, cmap=cmap, clim=[vmin, vmax])
+            p.remove_scalar_bar()
+            
+        else:
+            
+            for isurface in range(nsurface):
+                if not only_spin:
+                    try:
                         if mode == "plain":
-                            p.add_mesh(surfaces[isurface], color=colors[isurface])
+                            p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
                             text = "Plain"
                         elif mode == "parametric":
                             p.add_mesh(
-                                surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
+                                surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
                             )
                             p.remove_scalar_bar()
                             text = "Projection"
-                    except:
-                        print("This is not a surface")
-                    
+                    except: 
+                        try:  
+                            if mode == "plain":
+                                p.add_mesh(surfaces[isurface], color=colors[isurface])
+                                text = "Plain"
+                            elif mode == "parametric":
+                                p.add_mesh(
+                                    surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
+                                )
+                                p.remove_scalar_bar()
+                                text = "Projection"
+                        except:
+                            print("This is not a surface")
                         
-  
-            else:
-                text = "Spin Texture"
-                
-            if spin_texture:
-                # Example dataset with normals
-                # create a subset of arrows using the glyph filter
-                try:
-                    arrows = surfaces[isurface].pyvista_obj.glyph(
-                        orient="vectors", factor=arrow_size
-                    )
-                except:
-                    try:
-                        arrows = surfaces[isurface].glyph(
-                        orient="vectors", factor=arrow_size)
-                    except:
-                        print("This is not a surface")
-                        
-                    
-                if arrow_color is None:
-                    p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
-                    p.remove_scalar_bar()
+                            
+      
                 else:
-                    p.add_mesh(arrows, color=arrow_color)
+                    text = "Spin Texture"
+                    
+                if spin_texture:
+                    # Example dataset with normals
+                    # create a subset of arrows using the glyph filter
+                    try:
+                        arrows = surfaces[isurface].pyvista_obj.glyph(
+                            orient="vectors", factor=arrow_size
+                        )
+                    except:
+                        try:
+                            arrows = surfaces[isurface].glyph(
+                            orient="vectors", factor=arrow_size)
+                        except:
+                            print("This is not a surface")
+                            
+                        
+                    if arrow_color is None:
+                        p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
+                        p.remove_scalar_bar()
+                    else:
+                        p.add_mesh(arrows, color=arrow_color)
                     
                     
         if mode != "plain" or spin_texture:
@@ -490,9 +542,10 @@ def fermi3D(
             p.enable_parallel_projection()
 
         p.set_background(background_color)
-        p.set_position(camera_pos)
+        # p.set_position(camera_pos)
         if not widget:
             p.show(cpos=camera_pos, screenshot=save2d)
+            # p.show()
         # p.screenshot('1.png')
         # p.save_graphic('1.pdf')
         if savegif is not None:
@@ -504,6 +557,7 @@ def fermi3D(
             p.open_movie(savemp4)
             p.orbit_on_path(path)  # ,viewup=camera_pos)
             # p.close()
+    # p.show()
     s = boolean_add(surfaces)
     s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
     # s.pyvista_obj.plot()
