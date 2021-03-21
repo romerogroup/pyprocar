@@ -19,10 +19,11 @@ class ElectronicBandStructure:
     def __init__(
         self,
         kpoints=None,
-        eigenvalues=None,
+        bands=None,
         efermi=None,
         projected=None,
         projected_phase=None,
+        spd=None,
         kpath=None,
         weights=None,
         labels=None,
@@ -64,14 +65,15 @@ class ElectronicBandStructure:
         """
 
         self.kpoints = kpoints
+        
         if not shifted_to_efermi and efermi is not None:
-            self.eigenvalues = eigenvalues - efermi
+            self.bands = bands - efermi
             self.shifted_to_efermi = True
         else:
             self.shifted_to_efermi = True
         self.efermi = efermi
         if self.efermi is None:
-            self.eigenvalues = eigenvalues
+            self.bands = bands
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
@@ -89,7 +91,7 @@ class ElectronicBandStructure:
 
     @property
     def nbands(self):
-        return self.eigenvalues.shape[1]
+        return self.bands.shape[1]
 
     @property
     def natoms(self):
@@ -127,7 +129,7 @@ class ElectronicBandStructure:
         if self.kpath is not None:
             iend = 0
             interpolated_kpoints = []
-            interpolated_eigenvalues = []
+            interpolated_bands = []
             interpolated_projected = []
             interpolated_projected_phase = []
             for isegment in range(self.kpath.nsegments):
@@ -136,12 +138,12 @@ class ElectronicBandStructure:
 
                 istart = iend
                 iend = istart + self.kpath.ngrids[isegment]
-                eigenvalues = self.eigenvalues[istart:iend]
+                bands = self.bands[istart:iend]
                 projected = self.projected[istart:iend]
 
-                interpolated_eigenvalues.append(
+                interpolated_bands.append(
                     mathematics.fft_interpolate(
-                        eigenvalues, interpolation_factor=interpolation_factor, axis=0,
+                        bands, interpolation_factor=interpolation_factor, axis=0,
                     )
                 )
 
@@ -159,12 +161,12 @@ class ElectronicBandStructure:
                             axis=0,
                         )
                     )
-                self.kpath.ngrids[isegment] = interpolated_eigenvalues[-1].shape[0]
+                self.kpath.ngrids[isegment] = interpolated_bands[-1].shape[0]
                 interpolated_kpoints.append(
                     np.linspace(kstart, kend, self.kpath.ngrids[isegment])
                 )
         self.kpoints = np.array(interpolated_kpoints).reshape(-1, 3)
-        self.eigenvalues = np.array(interpolated_eigenvalues).reshape(-1, self.nbands)
+        self.bands = np.array(interpolated_bands).reshape(-1, self.nbands)
         self.projected = np.array(interpolated_projected).reshape(
             -1, self.nbands, self.natoms, self.nprincipals, self.norbitals, self.nspins
         )
@@ -177,7 +179,7 @@ class ElectronicBandStructure:
                 self.norbitals,
                 self.nspins,
             )
-        return interpolated_eigenvalues
+        return interpolated_bands
 
     def extend_BZ(
         self, new_kpath, time_reversal=True,
@@ -195,7 +197,7 @@ class ElectronicBandStructure:
             istart = iend
             iend = istart + self.kpath.ngrids[isegment]
             kpoints = self.kpoints[istart:iend]
-            eigenvalues = self.eigenvalues[istart:iend]
+            bands = self.bands[istart:iend]
             projected = self.projected[istart:iend]
             if self.has_phase:
                 projected_phase = self.projected_phase[istart:iend]
@@ -232,12 +234,13 @@ class ElectronicBandStructure:
                 kpoints_post = []
 
             if time_reversal:
-                eigenvalues_flip = np.flip(eigenvalues, axis=0)
-                eigenvalues_period = np.append(
-                    eigenvalues_flip[:-1], eigenvalues, axis=0
+                bands_flip = np.flip(bands, axis=0)
+                bands_period = np.append(
+                    bands_flip[:-1], bands, axis=0
                 )
                 projected_flip = np.flip(projected, axis=0)
-                projected_period = np.append(projected_flip[:-1], projected, axis=0)
+                projected_period = np.append(
+                    projected_flip[:-1], projected, axis=0)
 
                 if self.has_phase:
                     projected_phase_flip = np.flip(
@@ -256,9 +259,9 @@ class ElectronicBandStructure:
                 )
                 # if scale_factor == 0:
                 #     scale_factor = 1
-                eigenvalues_period = np.pad(
-                    eigenvalues_flip,
-                    ((0, scale_factor * len(eigenvalues_period)), (0, 0)),
+                bands_period = np.pad(
+                    bands_flip,
+                    ((0, scale_factor * len(bands_period)), (0, 0)),
                     mode="wrap",
                 )
                 projected_period = np.pad(
@@ -288,10 +291,11 @@ class ElectronicBandStructure:
                     )
                 if nkpoints_post_extention + nkpoints_pre_extention != 0:
                     if nkpoints_pre_extention != 0:
-                        extended_kpoints = np.append(kpoints_pre, kpoints, axis=0)
-                        extended_eigenvalues = np.append(
-                            eigenvalues_period[-nkpoints_pre_extention:],
-                            eigenvalues,
+                        extended_kpoints = np.append(
+                            kpoints_pre, kpoints, axis=0)
+                        extended_bands = np.append(
+                            bands_period[-nkpoints_pre_extention:],
+                            bands,
                             axis=0,
                         )
                         extended_projected = np.append(
@@ -311,9 +315,9 @@ class ElectronicBandStructure:
                             extended_kpoints = np.append(
                                 extended_kpoints, kpoints_post, axis=0
                             )
-                            extended_eigenvalues = np.append(
-                                extended_eigenvalues,
-                                eigenvalues_period[1:nkpoints_post_extention],
+                            extended_bands = np.append(
+                                extended_bands,
+                                bands_period[1:nkpoints_post_extention],
                                 axis=0,
                             )
                             extended_projected = np.append(
@@ -328,10 +332,11 @@ class ElectronicBandStructure:
                                     axis=0,
                                 )
                         else:
-                            extended_kpoints = np.append(kpoints, kpoints_post, axis=0)
-                            extended_eigenvalues = np.append(
-                                eigenvalues,
-                                eigenvalues_period[1:nkpoints_post_extention],
+                            extended_kpoints = np.append(
+                                kpoints, kpoints_post, axis=0)
+                            extended_bands = np.append(
+                                bands,
+                                bands_period[1:nkpoints_post_extention],
                                 axis=0,
                             )
                             extended_projected = np.append(
@@ -348,13 +353,13 @@ class ElectronicBandStructure:
 
                 else:
                     extended_kpoints = kpoints
-                    extended_eigenvalues = eigenvalues
+                    extended_bands = bands
                     extended_projected = projected
                     if self.has_phase:
                         extended_projected_phase = projected_phase
                 if isegment == 0:
                     overall_kpoints = extended_kpoints
-                    overall_eigenvalues = extended_eigenvalues
+                    overall_bands = extended_bands
                     overall_projected = extended_projected
                     if self.has_phase:
                         overall_projected_phase = extended_projected_phase
@@ -363,8 +368,8 @@ class ElectronicBandStructure:
                     overall_kpoints = np.append(
                         overall_kpoints, extended_kpoints, axis=0
                     )
-                    overall_eigenvalues = np.append(
-                        overall_eigenvalues, extended_eigenvalues, axis=0
+                    overall_bands = np.append(
+                        overall_bands, extended_bands, axis=0
                     )
                     overall_projected = np.append(
                         overall_projected, extended_projected, axis=0
@@ -380,7 +385,7 @@ class ElectronicBandStructure:
                 ]
 
         self.kpoints = overall_kpoints
-        self.eigenvalues = overall_eigenvalues
+        self.bands = overall_bands
         self.projected = overall_projected
         if self.has_phase:
             self.projected_phase = overall_projected_phase
@@ -394,9 +399,9 @@ class ElectronicBandStructure:
         if self.weights is not None:
             self.weights /= self.weights.max()
         else:
-            self.weights = np.ones_like(self.eigenvalues)
+            self.weights = np.ones_like(self.bands)
 
-        self.eigenvalues[self.weights.round(1) == 0] = np.nan
+        self.bands[self.weights.round(1) == 0] = np.nan
         plt.figure(figsize=figsize)
 
         pos = 0
@@ -404,11 +409,13 @@ class ElectronicBandStructure:
             kstart, kend = self.kpath.special_kpoints[isegment]
             distance = np.linalg.norm(kend - kstart)
             if isegment == 0:
-                x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
+                x = np.linspace(pos, pos + distance,
+                                self.kpath.ngrids[isegment])
             else:
                 x = np.append(
                     x,
-                    np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
+                    np.linspace(pos, pos + distance,
+                                self.kpath.ngrids[isegment]),
                     axis=0,
                 )
             pos += distance
@@ -418,14 +425,14 @@ class ElectronicBandStructure:
             if self.weights is not None:
                 plt.scatter(
                     x,
-                    self.eigenvalues[:, iband],
+                    self.bands[:, iband],
                     c=self.weights[:, iband].round(2),
                     cmap="Blues",
                     s=self.weights[:, iband] * 75,
                 )
 
             plt.plot(
-                x, self.eigenvalues[:, iband], color="gray", alpha=0.8,
+                x, self.bands[:, iband], color="gray", alpha=0.8,
             )
 
         for ipos in self.kpath.tick_positions:
@@ -467,10 +474,10 @@ class ElectronicBandStructure:
         # for iband in range(self.nbands):
 
         #     plt.scatter(
-        #         x, self.eigenvalues[:, iband], cmap="jet", c=diff[:, iband]
+        #         x, self.bands[:, iband], cmap="jet", c=diff[:, iband]
         #     )
         #     plt.plot(
-        #         x, self.eigenvalues[:, iband], color="gray", alpha=0.5,
+        #         x, self.bands[:, iband], color="gray", alpha=0.5,
         #     )
         # for ipos in self.kpath.tick_positions:
         #     plt.axvline(x[ipos], color="black")

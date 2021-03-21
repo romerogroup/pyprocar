@@ -5,13 +5,11 @@ import sys
 
 
 class EBSPlot:
-    def __init__(self, bands, spd, kpoints=None):
-        self.bands = bands.transpose()
-        self.spd = spd.transpose()
-        self.kpoints = kpoints
+    def __init__(self, ebs):
+        self.ebs = ebs
         return
 
-    def plotBands(
+    def plot_bands(
         self,
         size=0.02,
         marker="o",
@@ -58,9 +56,11 @@ class EBSPlot:
                 # plotting
 
                 for i_tick in range(len(ticks) - 1):
-                    x = xaxis[ticks[i_tick] : ticks[i_tick + 1] + 1]
-                    y = self.bands.transpose()[ticks[i_tick] : ticks[i_tick + 1] + 1, :]
-                    ax.plot(x, y, "r-", marker=marker, markersize=size, color=color)
+                    x = xaxis[ticks[i_tick]: ticks[i_tick + 1] + 1]
+                    y = self.bands.transpose(
+                    )[ticks[i_tick]: ticks[i_tick + 1] + 1, :]
+                    ax.plot(x, y, "r-", marker=marker,
+                            markersize=size, color=color)
 
             #### END  OF MODIFIED DISCONTINUOUS BANDS ####
 
@@ -173,8 +173,10 @@ class EBSPlot:
                 # plotting
                 for y, z in zip(mbands, self.spd):
                     points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
-                    segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                    lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
+                    segments = np.concatenate(
+                        [points[:-1], points[1:]], axis=1)
+                    lc = LineCollection(
+                        segments, cmap=plt.get_cmap(cmap), norm=norm)
                     lc.set_array(z)
                     lc.set_linewidth(linewidth)
                     ax.add_collection(lc)
@@ -197,8 +199,10 @@ class EBSPlot:
                 # plotting
                 for y, z in zip(mbands, self.spd):
                     points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
-                    segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                    lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
+                    segments = np.concatenate(
+                        [points[:-1], points[1:]], axis=1)
+                    lc = LineCollection(
+                        segments, cmap=plt.get_cmap(cmap), norm=norm)
                     lc.set_array(z)
                     lc.set_linewidth(linewidth)
                     ax.add_collection(lc)
@@ -214,7 +218,8 @@ class EBSPlot:
             for y, z in zip(mbands, self.spd):
                 points = np.array([xaxis, y]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                lc = LineCollection(segments, cmap=plt.get_cmap(cmap), norm=norm)
+                lc = LineCollection(
+                    segments, cmap=plt.get_cmap(cmap), norm=norm)
                 lc.set_array(z)
                 lc.set_linewidth(linewidth)
                 ax.add_collection(lc)
@@ -285,7 +290,8 @@ class EBSPlot:
                 xaxis.shape = (1, ksize)
                 xaxis = xaxis.repeat(bsize, axis=0)
                 if mask is not None:
-                    mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+                    mbands = np.ma.masked_array(
+                        self.bands, np.abs(self.spd) < mask)
                 else:
                     mbands = self.bands
 
@@ -317,7 +323,8 @@ class EBSPlot:
                 xaxis.shape = (1, ksize)
                 xaxis = xaxis.repeat(bsize, axis=0)
                 if mask is not None:
-                    mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+                    mbands = np.ma.masked_array(
+                        self.bands, np.abs(self.spd) < mask)
                 else:
                     mbands = self.bands
 
@@ -343,7 +350,8 @@ class EBSPlot:
             xaxis.shape = (1, ksize)
             xaxis = xaxis.repeat(bsize, axis=0)
             if mask is not None:
-                mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+                mbands = np.ma.masked_array(
+                    self.bands, np.abs(self.spd) < mask)
             else:
                 mbands = self.bands
 

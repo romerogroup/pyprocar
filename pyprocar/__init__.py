@@ -71,6 +71,7 @@ from pyprocar import vaspxml
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
+from .scriptBandsplot import bandsplot1
 from .scriptCat import cat
 from .scriptDosplot import dosplot
 from .scriptFermi2D import fermi2D
