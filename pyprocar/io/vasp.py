@@ -1186,7 +1186,7 @@ class Procar(collections.abc.Mapping):
             self.carray = self.spd_phase[:, :, :, :-1, 1:-1]
         self.ebs = ElectronicBandStructure(
             kpoints=self.kpoints,
-            eigenvalues=self.bands,
+            bands=self.bands,
             projected=self._spd2projected(self.spd),
             efermi=efermi,
             kpath=kpath,

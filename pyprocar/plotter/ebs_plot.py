@@ -5,30 +5,18 @@ import sys
 
 
 class EBSPlot:
-    def __init__(self, ebs):
+    def __init__(self, ebs, ax=None):
         self.ebs = ebs
+
+        if ax is None:
+            fig = plt.figure()
+            self.ax = fig.add_subplot(111)
+        else:
+            self.ax = ax
         return
 
-    def plot_bands(
-        self,
-        size=0.02,
-        marker="o",
-        ticks=None,
-        color="blue",
-        discontinuities=[],
-        figsize=(13, 9),
-        ax=None,
-    ):
+    def plot_bands(self, color="blue"):
 
-        if not ax:
-            fig = plt.figure(figsize=figsize)
-            fig.tight_layout()
-            ax = fig.add_subplot(111)
-        else:
-            fig = plt.gca()
-
-        if size is not None:
-            size = size / 2
 
         if self.kpoints is not None:
             xaxis = [0]
