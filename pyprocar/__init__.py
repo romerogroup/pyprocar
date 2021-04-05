@@ -90,3 +90,4 @@ from .splash import welcome
 from . import io
 from . import core
 from . import utils
+from . import plotter

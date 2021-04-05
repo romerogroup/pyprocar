@@ -3,6 +3,7 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 from .io import vasp
+from .plotter import EBSPlot
 from .abinitparser import AbinitParser
 from .elkparser import ElkParser
 from .qeparser import QEParser
@@ -67,9 +68,9 @@ def bandsplot1(
     mode : TYPE, optional
         DESCRIPTION. The default is "plain".
     spin_mode : TYPE, optional
-        plain, magnetization, density, "spin_up", "spin_down", "both", "sx", 
+        plain, magnetization, density, "spin_up", "spin_down", "both", "sx",
         "sy", "sz", "spin_texture"
-        DESCRIPTION. The default is "plain". 
+        DESCRIPTION. The default is "plain".
     spin : TYPE, optional
         DESCRIPTION. The default is 0.
     atoms : TYPE, optional
@@ -170,9 +171,26 @@ def bandsplot1(
             kpath = kpoints.kpath
         procar = vasp.Procar(procar, structure, reciprocal_lattice,
                              kpath, fermi, interpolation_factor=interpolation_factor)
-        ebs = procar.ebs
-    return ebs
-        
+        ebs_plot = EBSPlot(ebs=procar.ebs, kpath=kpath)
+        # ebs_plot.plot_bands(spins=[0, 1],color='gray', opacity=0.3)
+        # ebs_plot.plot_bands(spins=[1])
+        V = ebs_plot.ebs.ebs_sum(atoms=[1])
+        Sr = ebs_plot.ebs.ebs_sum(atoms=[0])
+        O = ebs_plot.ebs.ebs_sum(atoms=[2,3,4])
+        ebs_plot.parametric_plot(color_weights=Sr, width_weights=Sr, cmap="Reds", opacity=0.7)
+        ebs_plot.parametric_plot(color_weights=V, width_weights=V , cmap="Blues", opacity=0.7)
+        ebs_plot.parametric_plot(color_weights=O, width_weights=O , cmap="Greens", opacity=0.7)
+        # ebs_plot.scatter_plot(color_weights=Sr, size_weights=Sr, cmap="Reds", opacity=0.7)
+        # ebs_plot.scatter_plot(color_weights=V, size_weights=V , cmap="Blues", opacity=0.7)
+        # ebs_plot.scatter_plot(color_weights=O, size_weights=O , cmap="Greens", opacity=0.7)
+        ebs_plot.set_xticks()
+        ebs_plot.set_xlim()
+        ebs_plot.set_ylim(elimit)
+        ebs_plot.draw_fermi()
+        plt.show()
+
+    return ebs_plot
+
     # if code == "vasp" or code == "abinit":
     #     if repair:
     #         repairhandle = UtilsProcar()

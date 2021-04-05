@@ -65,7 +65,7 @@ class ElectronicBandStructure:
         """
 
         self.kpoints = kpoints
-        
+
         if not shifted_to_efermi and efermi is not None:
             self.bands = bands - efermi
             self.shifted_to_efermi = True
@@ -123,7 +123,23 @@ class ElectronicBandStructure:
     def kpoints_reduced(self):
         return self.kpoints
 
-    # def reorder_bands(self):
+    def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
+
+        principal_q_numbers = np.array(principal_q_numbers)
+        if atoms is None:
+            atoms = np.arange(self.natoms, dtype=int)
+        if spins is None:
+            spins = np.arange(self.nspins, dtype=int)
+        if orbitals is None:
+            orbitals = np.arange(self.norbitals, dtype=int)
+
+        # sum over orbitals
+        ret = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
+        # sum over principle quantum number
+        ret = np.sum(ret[:, :, :, principal_q_numbers, :], axis=-2)
+        # sum over atoms
+        ret = np.sum(ret[:, :, atoms, :], axis=-2)
+        return ret
 
     def interpolate(self, interpolation_factor=2):
         if self.kpath is not None:
