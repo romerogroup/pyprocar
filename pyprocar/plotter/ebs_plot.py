@@ -47,7 +47,7 @@ class EBSPlot:
                                            ispin], color=color, alpha=opacity,
                 )
 
-    def scatter_plot(self,
+    def plot_scatter(self,
                      spins=None,
                      size=50,
                      mask=None,
@@ -93,7 +93,7 @@ class EBSPlot:
         #     cb = self.fig.colorbar(lc, ax=self.ax)
         #     cb.ax.tick_params(labelsize=20)
 
-    def parametric_plot(
+    def plot_parameteric(
         self,
         spins=None,
         cmap="jet",
