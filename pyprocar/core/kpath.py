@@ -42,7 +42,7 @@ class KPath:
                 tick_names[-1] += "|" + self.knames[isegment][0]
             else:
                 tick_names.append(self.knames[isegment][1])
-        tick_names.append(self.knames[-1][-1])
+        # tick_names.append(self.knames[-1][-1])
         return tick_names
 
     @property
