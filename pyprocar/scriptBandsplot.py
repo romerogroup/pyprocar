@@ -64,8 +64,7 @@ def bandsplot(
     linewidth=1,
     repair=True,
 ):
-    """This function plots band structures
-  """
+    """This function plots band structures"""
 
     # Turn interactive plotting off
     plt.ioff()

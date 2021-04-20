@@ -15,6 +15,7 @@ from .bxsfparser import BxsfParser
 from .frmsfparser import FrmsfParser
 from .qeparser import QEFermiParser
 from .lobsterparser import LobsterFermiParser
+from .abinitparser import AbinitParser
 from .io.vasp import Outcar, Procar
 
 
@@ -22,6 +23,7 @@ def fermi3D(
     procar="PROCAR",
     outcar="OUTCAR",
     infile="in.bxsf",
+    abinit_output=None,
     fermi=None,
     bands=None,
     interpolation_factor=1,
@@ -54,7 +56,7 @@ def fermi3D(
     repair=True,
     sym=False,
     rotations=None,
-    symprec=1.e-5
+    symprec=1.0e-5,
 ):
     """
 
@@ -69,6 +71,11 @@ def fermi3D(
         Path to the OUTCAR file of the simulation
 
         e.g. ``outcar='~/MgB2/fermi/OUTCAR'``
+
+    abinit_output : str, optional (default ``None``)
+        Path to the Abinit output file
+
+        e.g. ``outcar='~/MgB2/abinit.out'``
 
     infile : str, optional (default ``infile = in.bxsf'``)
         This is the path in the input bxsf file
@@ -327,6 +334,20 @@ def fermi3D(
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
 
+    elif code == "abinit":
+        procarFile = ProcarParser()
+        procarFile.readFile(procar, False)
+        abinitFile = AbinitParser(abinit_output=abinit_output)
+        if fermi is None:
+            e_fermi = abinitFile.fermi
+        else:
+            e_fermi = fermi
+        reciprocal_lattice = abinitFile.reclat
+        data = ProcarSelect(procarFile, deepCopy=True)
+
+        # Converting Ha to eV
+        data.bands = 27.211396641308 * data.bands
+
     elif code == "qe":
         procarFile = QEFermiParser()
         reciprocal_lattice = procarFile.reclat
@@ -335,7 +356,7 @@ def fermi3D(
             e_fermi = procarFile.fermi
         else:
             e_fermi = fermi
-            
+
     elif code == "lobster":
         procarFile = LobsterFermiParser()
         reciprocal_lattice = procarFile.reclat
@@ -345,14 +366,13 @@ def fermi3D(
         else:
             e_fermi = fermi
 
-        
     elif code == "bxsf":
         e_fermi = fermi
-        procarFile = BxsfParser(infile= infile)
+        procarFile = BxsfParser(infile=infile)
         reciprocal_lattice = procarFile.rec_lattice
-        
+
         bands = np.arange(len(procarFile.bandEnergy[0, :]))
-        
+
     elif code == "frmsf":
         e_fermi = fermi
         data = FrmsfParser(infile=infile)
@@ -419,16 +439,16 @@ def fermi3D(
         for iband in bands:
             spd_spin.append(None)
     counter = 0
-    
-    #structure = Procar(procar).structure
+
+    # structure = Procar(procar).structure
     if outcar is not None:
         rotations = Outcar(outcar).rotations
-           
+
     """
     elif structure is not None:
         rotations = structure.get_spglib_symmetry_dataset(symprec)
     """
-    
+
     for iband in bands:
         print("Trying to extract isosurface for band %d" % iband)
         if code == "bxsf":
@@ -475,7 +495,7 @@ def fermi3D(
                 file="lobster",
                 sym=sym,
             )
-            
+
         elif code == "frmsf":
             surface = FermiSurface3D(
                 kpoints=data.kpoints,
