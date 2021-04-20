@@ -47,6 +47,7 @@ def fermi3D(
     save3d=None,
     perspective=True,
     save2d=False,
+    show_curvature = False,
     show_slice = False,
     slice_normal=(1,0,0),
     slice_planes = False,
@@ -245,7 +246,9 @@ def fermi3D(
     """
 
     welcome()
-
+    ##########################################################################
+    # Code dependencies
+    ##########################################################################
     if code == "vasp" or code == "abinit":
         if repair:
             repairhandle = UtilsProcar()
@@ -297,10 +300,17 @@ def fermi3D(
         data = FrmsfParser(infile=infile)
         reciprocal_lattice = data.rec_lattice
         bands = np.arange(len(data.bands[0, :]))
-
-    if bands is None:
-        bands = np.arange(len(data.bands[0, :]))
-    surfaces = []
+        
+   
+    ##########################################################################
+    # Data Formating
+    ########################################################################## 
+        
+        
+    band_numbers = bands
+    if band_numbers is None:
+        band_numbers = np.arange(len(data.bands[0, :]))
+   
 
     spd = []
     if mode == "parametric":
@@ -314,10 +324,10 @@ def fermi3D(
         data.selectAtoms(atoms, fortran=False)
         data.selectOrbital(orbitals)
 
-        for iband in bands:
+        for iband in band_numbers:
             spd.append(data.spd[:, iband])
     else:
-        for iband in bands:
+        for iband in band_numbers:
             spd.append(None)
 
     spd_spin = []
@@ -350,55 +360,67 @@ def fermi3D(
         dataX.selectOrbital(orbitals)
         dataY.selectOrbital(orbitals)
         dataZ.selectOrbital(orbitals)
-        for iband in bands:
+        for iband in band_numbers:
             spd_spin.append(
                 [dataX.spd[:, iband], dataY.spd[:, iband], dataZ.spd[:, iband]]
             )
     else:
-        for iband in bands:
+        for iband in band_numbers:
             spd_spin.append(None)
-    counter = 0
-    for iband in bands:
-        print("Trying to extract isosurface for band %d" % iband)
-        
-        surface = FermiSurface3D(
-                kpoints=data.kpoints,
-                band=data.bands[:, iband],
-                spd=spd[counter],
-                spd_spin=spd_spin[counter],
-                fermi=e_fermi + fermi_shift,
-                reciprocal_lattice=reciprocal_lattice,
-                interpolation_factor=interpolation_factor,
-                projection_accuracy=projection_accuracy,
-                supercell=supercell,
-            )
 
-        if surface.verts is not None:
-            surfaces.append(surface)
-        counter += 1
+       
+    ##########################################################################
+    # Initialization of the Fermi Surface
+    ########################################################################## 
+
+    fermi_surface3D = FermiSurface3D(
+                                    kpoints=data.kpoints,
+                                    bands=data.bands,
+                                    band_numbers = band_numbers,
+                                    spd=spd,
+                                    spd_spin=spd_spin,
+                                    fermi=e_fermi + fermi_shift,
+                                    fermi_shift = fermi_shift,
+                                    reciprocal_lattice=reciprocal_lattice,
+                                    interpolation_factor=interpolation_factor,
+                                    projection_accuracy=projection_accuracy,
+                                    supercell=supercell,
+                                    vmin = vmin,
+                                    vmax=vmax,
+                                    extended_zone_directions = extended_zone_directions
+                                )
+    band_surfaces = fermi_surface3D.band_surfaces
+    fermi_surface = fermi_surface3D.fermi_surface
+    colors = fermi_surface3D.colors
+    brillouin_zone = fermi_surface3D.brillouin_zone
+
+    fermi_surface_area = fermi_surface3D.fermi_surface_area
+    band_surfaces_area = fermi_surface3D.band_surfaces_area
     
-    nsurface = len(surfaces)
-    norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
+    fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
+    band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
+    
+    test = fermi_surface_curvature
+    
+    # coloring variables
+    nsurface = len(band_surfaces)
+    # # norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
     cmap = cm.get_cmap(cmap)
     scalars = np.arange(nsurface + 1) / nsurface
-
-    if save_colors is not None or save3d is not None:
-        for i in range(nsurface):
-            if surfaces[i].scalars is None:
-                surfaces[i].set_scalars([scalars[i]] * surfaces[i].nfaces)
-
-    if colors is None:
-        colors = np.array([cmap(norm(x)) for x in (scalars)]).reshape(-1, 4)
-    print(scalars)
-    print(colors)
-    print(cmap)
-    
  
-    fermi_surfaces = surfaces.copy()
+    if save_colors is not False or save3d is not None:
+        for i in range(nsurface):
+            if band_surfaces[i].scalars is None:
+                band_surfaces[i].set_scalars([scalars[i]] * band_surfaces[i].nfaces)
+
+
+ 
+    fermi_surfaces = band_surfaces.copy()
     
 
-        
-                       
+    ##########################################################################
+    # Plotting the surface 
+    ########################################################################## 
                         
     
     if show or save2d:
@@ -406,114 +428,74 @@ def fermi3D(
         
         
         p.add_mesh(
-            surfaces[0].brillouin_zone.pyvista_obj,
+            brillouin_zone.pyvista_obj,
             style="wireframe",
             line_width=3.5,
             color="black",
         )
-        
-        
-        
-        if extended_zone_directions is not None:
-            extended_surfaces = []
-            extended_colors = []
-            for isurface in range(len(surfaces)):
-                extended_surfaces.append(surfaces[isurface].pyvista_obj) 
-                extended_colors.append(colors[isurface])
-            for direction in extended_zone_directions:    
-                for isurface in range(len(surfaces)):
-                    surface = surfaces[isurface].pyvista_obj.copy()
-                    surface.translate(np.dot(direction,reciprocal_lattice))
-                    extended_surfaces.append(surface)
-                    extended_colors.append(colors[isurface])
-            extended_colors.append(colors[-1])
-            surfaces = extended_surfaces
-            nsurface = len(extended_surfaces)
-            colors = extended_colors
             
         if show_slice:
-            extended_surfaces = []
-            extended_colors = []
-            if extended_zone_directions is None:
-                for isurface in range(len(surfaces)):
-                    extended_surfaces.append(surfaces[isurface].pyvista_obj) 
-                surfaces = extended_surfaces
-                nsurface = len(extended_surfaces)
-            surfaceS =  surfaces[0]
-            for isurface in range(1,nsurface):
-                surfaceS = surfaceS + surfaces[isurface]
             if mode == "plain":
                 text = "Plain"
+                p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
+                p.remove_scalar_bar()
             elif mode == "parametric":
                 text = "Projection"
+                p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
+                p.remove_scalar_bar()
             else:
                 text = "Spin Texture"
+                for isurface in range(nsurface):
+                    arrows = band_surfaces[isurface].glyph(
+                        orient="vectors", factor=arrow_size)
+                                
+                    if arrow_color is None:
+                        p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
+                        p.remove_scalar_bar()
+                    else:
+                        p.add_mesh(arrows, color=arrow_color)
 
-            # if slice_planes is True:
-            #     slices = surfaceS.slice_orthogonal(x=0,y = 0 , z=0)
-
-            # else:
-            #     # slices = surfaceS.slice_along_axis(n=10, axis="z")
-            #     # p.add_mesh(slices, cmap=cmap, clim=[vmin, vmax])
-            #     # p.add_mesh(surfaceS,cmap=cmap, clim=[vmin, vmax])
-            #     def my_plane_func(normal, origin):
-            #         surfaceS.slice(normal=slice_normal, origin=(0,0,0))
-            #     #p.add_mesh_slice(surfaceS,normal= slice_normal, cmap=cmap, clim=[vmin, vmax])
-            #     p.add_plane_widget(my_plane_func)
-               
-                
-                #print(p.plane_sliced_meshes)
-            p.add_mesh_slice(surfaceS, cmap=cmap, clim=[vmin, vmax])
-            p.remove_scalar_bar()
+      
+            # p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
+            # p.remove_scalar_bar()
+         
+            # p.add_mesh(fermi_surface,cmap=cmap, clim=[vmin, vmax] , opacity = 0.5 )
+            # slicesx = fermi_surface.slice_along_axis(n=5, axis="x")
+            # slicesz = fermi_surface.slice_along_axis(n=5, axis="z")
+            # slicesy = fermi_surface.slice_along_axis(n=5, axis="y")
+            # p.add_mesh(slicesx, cmap=cmap, clim=[vmin, vmax])
+            # p.add_mesh(slicesz, cmap=cmap, clim=[vmin, vmax])
+            # p.add_mesh(slicesy, cmap=cmap, clim=[vmin, vmax])
+            # fermi_surface.save("MgB2_fermi.vtk")
+            
+        elif show_curvature == True:
+            
+            cmin = np.percentile(fermi_surface_curvature, 10)
+            cmax = np.percentile(fermi_surface_curvature, 90)
+            p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
             
         else:
-            
             for isurface in range(nsurface):
                 if not only_spin:
-                    try:
-                        if mode == "plain":
-                            p.add_mesh(surfaces[isurface].pyvista_obj, color=colors[isurface])
-                            text = "Plain"
-                        elif mode == "parametric":
-                            p.add_mesh(
-                                surfaces[isurface].pyvista_obj, cmap=cmap, clim=[vmin, vmax]
-                            )
-                            p.remove_scalar_bar()
-                            text = "Projection"
-                    except: 
-                        try:  
-                            if mode == "plain":
-                                p.add_mesh(surfaces[isurface], color=colors[isurface])
-                                text = "Plain"
-                            elif mode == "parametric":
-                                p.add_mesh(
-                                    surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
-                                )
-                                p.remove_scalar_bar()
-                                text = "Projection"
-                        except:
-                            print("This is not a surface")
-                        
-                            
-      
+                    if mode == "plain":
+                        p.add_mesh(band_surfaces[isurface], color=colors[isurface])
+                        text = "Plain"
+                    elif mode == "parametric":
+                        p.add_mesh(
+                            band_surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
+                        )
+                        p.remove_scalar_bar()
+                        text = "Projection"
+
                 else:
                     text = "Spin Texture"
                     
                 if spin_texture:
                     # Example dataset with normals
                     # create a subset of arrows using the glyph filter
-                    try:
-                        arrows = surfaces[isurface].pyvista_obj.glyph(
-                            orient="vectors", factor=arrow_size
-                        )
-                    except:
-                        try:
-                            arrows = surfaces[isurface].glyph(
-                            orient="vectors", factor=arrow_size)
-                        except:
-                            print("This is not a surface")
+                    arrows = band_surfaces[isurface].glyph(
+                    orient="vectors", factor=arrow_size)
                             
-                        
                     if arrow_color is None:
                         p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
                         p.remove_scalar_bar()
@@ -558,15 +540,16 @@ def fermi3D(
             p.orbit_on_path(path)  # ,viewup=camera_pos)
             # p.close()
     # p.show()
-    s = boolean_add(surfaces)
-    s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
+    s = boolean_add(band_surfaces)
+    # s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
     # s.pyvista_obj.plot()
     # s.trimesh_obj.show()
 
     if save3d is not None:
         extention = save3d.split(".")[-1]
         s.export(save3d, extention)
-    return s, fermi_surfaces
+    # return s, fermi_surfaces, test
+    return test
 
 
     
