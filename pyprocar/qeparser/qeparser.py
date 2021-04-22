@@ -43,7 +43,7 @@ class QEParser:
 
         # Used to store atomic states at the top of the kpdos.out file
         self.states = None
-        
+
         self.spd = None
         """ for l=1:
               1 pz     (m=0)
@@ -99,14 +99,15 @@ class QEParser:
         #######################################################################
         # Dealing with kpoints and labels
         #######################################################################
-        kmethod = findall("K_POINTS[\s\{]*([a-z_]*)[\s\{]*",self.bandsIn)[0]
-        
-        if kmethod == 'crystal':
-            numK = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
-            
-            raw_khigh_sym = findall("K_POINTS.*\n\s*[0-9]*.*\n" + numK * "(.*)\n", self.bandsIn)[0]
+        kmethod = findall("K_POINTS[\s\{]*([a-z_]*)[\s\{]*", self.bandsIn)[0]
 
-            
+        if kmethod == "crystal":
+            numK = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
+
+            raw_khigh_sym = findall(
+                "K_POINTS.*\n\s*[0-9]*.*\n" + numK * "(.*)\n", self.bandsIn
+            )[0]
+
             tickCountIndex = 0
             raw_high_symmetry = []
             self.knames = []
@@ -114,26 +115,25 @@ class QEParser:
 
             for x in raw_khigh_sym:
                 if len(x.split()) == 5:
-    
+
                     raw_high_symmetry.append(
                         (float(x.split()[0]), float(x.split()[1]), float(x.split()[2]))
                     )
                     self.knames.append("$%s$" % x.split()[4].replace("!", ""))
                     self.kticks.append(tickCountIndex)
-                
+
                 tickCountIndex += 1
             self.high_symmetry_points = array(raw_high_symmetry)
             self.nhigh_sym = len(self.knames)
 
-            
-        elif kmethod == 'crystal_b': 
+        elif kmethod == "crystal_b":
             self.nhigh_sym = int(findall("K_POINTS.*\n([0-9]*)", self.bandsIn)[0])
             raw_khigh_sym = findall(
                 "K_POINTS.*\n\s*[0-9]*.*\n" + self.nhigh_sym * "([0-9\s\.-]*).*\n",
                 self.bandsIn,
             )[0]
             # self.kpointsCount = 0
-    
+
             self.kticks = []
             self.high_symmetry_points = zeros(shape=(self.nhigh_sym, 3))
             tick_Count = 1
@@ -141,13 +141,14 @@ class QEParser:
                 self.high_symmetry_points[ihs, :] = [
                     float(x) for x in raw_khigh_sym[ihs].split()[0:3]
                 ]
-                
+
                 self.kticks.append(tick_Count - 1)
                 tick_Count += int(raw_khigh_sym[ihs].split()[3])
             raw_ticks = findall(
-            "K_POINTS.*\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*!(.*)\n",
-            self.bandsIn,)[0]
-    
+                "K_POINTS.*\n\s*[0-9]*\s*[0-9]*.*\n" + self.nhigh_sym * ".*!(.*)\n",
+                self.bandsIn,
+            )[0]
+
             if len(raw_ticks) != self.nhigh_sym:
                 self.knames = [str(x) for x in range(self.nhigh_sym)]
             else:
@@ -155,22 +156,26 @@ class QEParser:
                     "$%s$" % (x.replace(",", "").replace("vlvp1d", "").replace(" ", ""))
                     for x in raw_ticks
                 ]
-                
-                
-        # finds discontinuities 
-        
-        for i in range(len(self.kticks)):
-            if(i < len(self.kticks)-1):
-                diff = self.kticks[ i+1 ] - self.kticks[i]
-                if diff == 1 :
-                    
-                    self.discontinuities.append(self.kticks[i])
 
-                    
-                    discon_name = "$" + self.knames[i].replace("$","") +"|"+ self.knames[i+1].replace("$","") + "$"
-                    self.knames.pop(i+1)
-                    self.knames[i] = discon_name
-                    self.kticks.pop(i+1)
+        # finds discontinuities
+
+        # for i in range(len(self.kticks)):
+        #     if i < len(self.kticks) - 1:
+        #         diff = self.kticks[i + 1] - self.kticks[i]
+        #         if diff == 1:
+
+        #             self.discontinuities.append(self.kticks[i])
+
+        #             discon_name = (
+        #                 "$"
+        #                 + self.knames[i].replace("$", "")
+        #                 + "|"
+        #                 + self.knames[i + 1].replace("$", "")
+        #                 + "$"
+        #             )
+        #             self.knames.pop(i + 1)
+        #             self.knames[i] = discon_name
+        #             self.kticks.pop(i + 1)
         #######################################################################
         # Finding composition and specie data
         #######################################################################
@@ -200,7 +205,6 @@ class QEParser:
                 for species in range(len(species_list)):
                     if raw_ions[ions].split()[0] == species_list[species]:
                         self.composition[raw_ions[ions].split()[0]] += 1
-                    
 
         #######################################################################
         # Reading the kpdos.out for outputfile labels
@@ -216,7 +220,8 @@ class QEParser:
 
         natomwfc = len(findall("state[\s#]*(\d*)", raw_natomwfc))
 
-        raw_wfc = findall("\(read from pseudopotential files\)\:.*\n\n\s*" + natomwfc * "(.*)\n",
+        raw_wfc = findall(
+            "\(read from pseudopotential files\)\:.*\n\n\s*" + natomwfc * "(.*)\n",
             kpdosout,
         )[0]
 
@@ -224,27 +229,27 @@ class QEParser:
 
         states_list = []
         state_dict = {}
- 
+
         # Read in raw states
         for state in raw_wfc:
-                #print(state)
+            # print(state)
 
-                state_index = int(state.split('#')[1].split(':')[0])
-                atom_index  = int(state.split('atom')[1].split('(')[0])
-                atom_name   = str(state.split('(')[1].split(')')[0])
-                wfc_index   = int(state.split('wfc')[1].split('(')[0])
-                l_index     = int(state.split('wfc')[1].split('l=')[1].split('m=')[0])
-                m_index     = int(state.split('wfc')[1].split('m=')[1].split(')')[0])
+            state_index = int(state.split("#")[1].split(":")[0])
+            atom_index = int(state.split("atom")[1].split("(")[0])
+            atom_name = str(state.split("(")[1].split(")")[0])
+            wfc_index = int(state.split("wfc")[1].split("(")[0])
+            l_index = int(state.split("wfc")[1].split("l=")[1].split("m=")[0])
+            m_index = int(state.split("wfc")[1].split("m=")[1].split(")")[0])
 
-                append = [state_index, atom_index, atom_name, wfc_index, l_index, m_index]
-                #append = (findall("state #\s*([0-9]+):\s*atom\s*([0-9]+)\s*\((.*)\s\),\s*wfc\s*([0-9]+)\s\(l=\s*([0-9]+)\s*m=\s*([0-9]+)\)", state)[0])
-                #print(append)
-                raw_states.append(append)
-                #int(state.split('#')[1].split(':')[0])
-                #findall("state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)", state)[0])
-            #)
-     
-        #print(raw_states)
+            append = [state_index, atom_index, atom_name, wfc_index, l_index, m_index]
+            # append = (findall("state #\s*([0-9]+):\s*atom\s*([0-9]+)\s*\((.*)\s\),\s*wfc\s*([0-9]+)\s\(l=\s*([0-9]+)\s*m=\s*([0-9]+)\)", state)[0])
+            # print(append)
+            raw_states.append(append)
+            # int(state.split('#')[1].split(':')[0])
+            # findall("state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)", state)[0])
+        # )
+
+        # print(raw_states)
         for state in raw_states:
             state_dict = {}
             state_dict = {
@@ -326,7 +331,7 @@ class QEParser:
         #######################################################################
 
         band_info = findall(r"====\se\(\s*(\d+)\)\s=\s*([-.\d]+)", kpdosout)
-        
+
         if spinCalc == True:
             self.bandsCount = int(len(band_info) / totK)
             self.bands = zeros(shape=(self.kpointsCount, self.bandsCount, 2))
@@ -385,10 +390,9 @@ class QEParser:
         for kp in range(len(k_string)):
             if kp == len(k_string) - 1:
                 expression = "(?<=" + k_string[kp] + ")[\s\S]*?(?=Lowdin Charges:)"
-                
+
                 expression_final_k = "(?<=" + k_string[kp - 1] + ")[\s\S]*?(?=$)"
-                
-                
+
                 k_info1 = findall(expression_final_k, kpdosout)[0]
 
                 k_info = findall(expression, k_info1)[0]
@@ -504,7 +508,7 @@ class QEParser:
         self.spd[:, :, :, :, -1] = sum(self.spd[:, :, :, :, 1:-1], axis=4)
         self.spd[:, :, :, -1, :] = self.spd.sum(axis=3)
         self.spd[:, :, :, -1, 0] = 0
-        
+
         # colinear spin polarized case
 
         # manipulating spd array for spin polarized calculations.
@@ -556,11 +560,11 @@ class QEParser:
         data = fi.read()
         fi.close()
 
-        data = data.split('the Fermi energy is')[1].split('ev')[0]
+        data = data.split("the Fermi energy is")[1].split("ev")[0]
         fermi = float(data)
 
-        #print((findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)))
-        #fermi = float(findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)[0])
+        # print((findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)))
+        # fermi = float(findall(r"the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev", data)[0])
         return fermi
 
     @property

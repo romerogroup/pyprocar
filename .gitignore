@@ -1,4 +1,7 @@
-# Latex 
+# test files
+test-*.py
+
+# Latex
 *.aux
 
 # Byte-compiled / optimized / DLL files
