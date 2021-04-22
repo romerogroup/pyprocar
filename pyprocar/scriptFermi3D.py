@@ -15,11 +15,13 @@ from .bxsfparser import BxsfParser
 from .frmsfparser import FrmsfParser
 from .qeparser import QEFermiParser
 from .lobsterparser import LobsterFermiParser
+from .abinitparser import AbinitParser
 
 def fermi3D(
     procar="PROCAR",
     outcar="OUTCAR",
     infile="in.bxsf",
+    abinit_output=None,
     fermi=None,
     bands=None,
     interpolation_factor=1,
@@ -65,6 +67,9 @@ def fermi3D(
     outcar : str, optional (default ``'OUTCAR'``)
         Path to the OUTCAR file of the simulation
         e.g. ``outcar='~/MgB2/fermi/OUTCAR'``
+    abinit_output : str, optional (default ``None``)
+        Path to the Abinit output file
+        e.g. ``outcar='~/MgB2/abinit.out'``
     infile : str, optional (default ``infile = in.bxsf'``)
         This is the path in the input bxsf file
         e.g. ``infile = ni_fs.bxsf'``
@@ -92,7 +97,7 @@ def fermi3D(
         If one wants plot more than the 1st brillouin zone, this
         parameter can be used.
         e.g. ``supercell=[2, 2, 2]``
-    
+
     extended_zone_directions : list of list of size 3, optional (default ``None``)
         If one wants plot more than  brillouin zones in a particular direection, this
         parameter can be used.
@@ -269,6 +274,20 @@ def fermi3D(
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
 
+    elif code == "abinit":
+        procarFile = ProcarParser()
+        procarFile.readFile(procar, False)
+        abinitFile = AbinitParser(abinit_output=abinit_output)
+        if fermi is None:
+            e_fermi = abinitFile.fermi
+        else:
+            e_fermi = fermi
+        reciprocal_lattice = abinitFile.reclat
+        data = ProcarSelect(procarFile, deepCopy=True)
+
+        # Converting Ha to eV
+        data.bands = 27.211396641308 * data.bands
+
     elif code == "qe":
         procarFile = QEFermiParser()
         reciprocal_lattice = procarFile.reclat
@@ -277,7 +296,7 @@ def fermi3D(
             e_fermi = procarFile.fermi
         else:
             e_fermi = fermi
-            
+
     elif code == "lobster":
         procarFile = LobsterFermiParser()
         reciprocal_lattice = procarFile.reclat
@@ -287,30 +306,30 @@ def fermi3D(
         else:
             e_fermi = fermi
 
-        
+
     elif code == "bxsf":
         e_fermi = fermi
         procarFile = BxsfParser(infile= infile)
         reciprocal_lattice = procarFile.rec_lattice
-        
+
         bands = np.arange(len(procarFile.bandEnergy[0, :]))
-        
+
     elif code == "frmsf":
         e_fermi = fermi
         data = FrmsfParser(infile=infile)
         reciprocal_lattice = data.rec_lattice
         bands = np.arange(len(data.bands[0, :]))
-        
-   
+
+
     ##########################################################################
     # Data Formating
-    ########################################################################## 
-        
-        
+    ##########################################################################
+
+
     band_numbers = bands
     if band_numbers is None:
         band_numbers = np.arange(len(data.bands[0, :]))
-   
+
 
     spd = []
     if mode == "parametric":
@@ -368,10 +387,10 @@ def fermi3D(
         for iband in band_numbers:
             spd_spin.append(None)
 
-       
+
     ##########################################################################
     # Initialization of the Fermi Surface
-    ########################################################################## 
+    ##########################################################################
 
     fermi_surface3D = FermiSurface3D(
                                     kpoints=data.kpoints,
@@ -396,44 +415,44 @@ def fermi3D(
 
     fermi_surface_area = fermi_surface3D.fermi_surface_area
     band_surfaces_area = fermi_surface3D.band_surfaces_area
-    
+
     fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
     band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
-    
+
     test = fermi_surface_curvature
-    
+
     # coloring variables
     nsurface = len(band_surfaces)
     # # norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
     cmap = cm.get_cmap(cmap)
     scalars = np.arange(nsurface + 1) / nsurface
- 
+
     if save_colors is not False or save3d is not None:
         for i in range(nsurface):
             if band_surfaces[i].scalars is None:
                 band_surfaces[i].set_scalars([scalars[i]] * band_surfaces[i].nfaces)
 
 
- 
+
     fermi_surfaces = band_surfaces.copy()
-    
+
 
     ##########################################################################
-    # Plotting the surface 
-    ########################################################################## 
-                        
-    
+    # Plotting the surface
+    ##########################################################################
+
+
     if show or save2d:
         # sargs = dict(interactive=True)
-        
-        
+
+
         p.add_mesh(
             brillouin_zone.pyvista_obj,
             style="wireframe",
             line_width=3.5,
             color="black",
         )
-            
+
         if show_slice:
             if mode == "plain":
                 text = "Plain"
@@ -448,17 +467,17 @@ def fermi3D(
                 for isurface in range(nsurface):
                     arrows = band_surfaces[isurface].glyph(
                         orient="vectors", factor=arrow_size)
-                                
+
                     if arrow_color is None:
                         p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
                         p.remove_scalar_bar()
                     else:
                         p.add_mesh(arrows, color=arrow_color)
 
-      
+
             # p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
             # p.remove_scalar_bar()
-         
+
             # p.add_mesh(fermi_surface,cmap=cmap, clim=[vmin, vmax] , opacity = 0.5 )
             # slicesx = fermi_surface.slice_along_axis(n=5, axis="x")
             # slicesz = fermi_surface.slice_along_axis(n=5, axis="z")
@@ -467,13 +486,13 @@ def fermi3D(
             # p.add_mesh(slicesz, cmap=cmap, clim=[vmin, vmax])
             # p.add_mesh(slicesy, cmap=cmap, clim=[vmin, vmax])
             # fermi_surface.save("MgB2_fermi.vtk")
-            
+
         elif show_curvature == True:
-            
+
             cmin = np.percentile(fermi_surface_curvature, 10)
             cmax = np.percentile(fermi_surface_curvature, 90)
             p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
-            
+
         else:
             for isurface in range(nsurface):
                 if not only_spin:
@@ -489,20 +508,20 @@ def fermi3D(
 
                 else:
                     text = "Spin Texture"
-                    
+
                 if spin_texture:
                     # Example dataset with normals
                     # create a subset of arrows using the glyph filter
                     arrows = band_surfaces[isurface].glyph(
                     orient="vectors", factor=arrow_size)
-                            
+
                     if arrow_color is None:
                         p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
                         p.remove_scalar_bar()
                     else:
                         p.add_mesh(arrows, color=arrow_color)
-                    
-                    
+
+
         if mode != "plain" or spin_texture:
             p.add_scalar_bar(
                 title=text,
@@ -552,4 +571,4 @@ def fermi3D(
     return test
 
 
-    
+

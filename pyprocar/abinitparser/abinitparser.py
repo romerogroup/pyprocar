@@ -40,7 +40,8 @@ class AbinitParser:
         data = rf.read()
         rf.close()
         lattice_block = findall(r"G\([1,2,3]\)=\s*([0-9.\s-]*)", data)
-        lattice_block = lattice_block[3:]
+        if len(lattice_block) > 3:
+            lattice_block = lattice_block[3:]
         self.reclat = array(
             [lattice_block[0:3][i].split() for i in range(len(lattice_block))],
             dtype=float,
