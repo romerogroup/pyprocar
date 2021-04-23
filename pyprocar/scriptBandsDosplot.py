@@ -622,13 +622,19 @@ def bandsdosplot(
         ylim = [0, vaspxml.dos.total[dos_spins[0], cond].max() * 1.1]
 
     if dlimit is not None:
-        ax2.set_xlim(dlimit[0], dlimit[1])
+        if len(dlimit) == 2:
+            ax2.set_xlim(dlimit[0], dlimit[1])
+        else :
+            ax2.set_xlim(dlimit[0],)
     elif (
         dos_mode == "stack_species"
         or dos_mode == "stack_orbitals"
         or dos_mode == "stack"
+        or dos_mode == "parametric"
+        or dos_mode == "parametric_line"
     ):
-        ax2.set_xlim(ax2.get_xlim()[0], ax2.get_xlim()[1] * 1.1)
+        # ax2.set_xlim(ax2.get_xlim()[0], ax2.get_xlim()[1] * 1.1)
+        ax2.set_xlim(ylim[0], ylim[1])
 
     elif dos_mode == "plain":
         ax2.set_xlim(ylim[0], ylim[1])
