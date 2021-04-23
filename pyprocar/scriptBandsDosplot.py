@@ -72,6 +72,7 @@ def bandsdosplot(
     discontinuities=None,
     plot_color_bar=True,
     repair=True,
+    show=True,
 ):
     """This function creates plots containing both DOS and bands."""
 
@@ -647,6 +648,6 @@ def bandsdosplot(
         fig.savefig(savefig, bbox_inches="tight")
         plt.close()
         return None, None
-    else:
+    if show:
         plt.show()
     return fig, ax1, ax2
