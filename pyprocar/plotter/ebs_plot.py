@@ -8,6 +8,24 @@ import sys
 
 class EBSPlot:
     def __init__(self, ebs, kpath=None, ax=None):
+        """
+        class to plot an electronic band structure.
+
+        Parameters
+        ----------
+        ebs : object
+            An electronic band structure object pyprocar.core.ElectronicBandStructure.
+        kpath : object, optional
+            A kpath object pyprocar.core.KPath. The default is None.
+        ax : object, optional
+            A matplotlib Axes object. If provided the plot will be located at that ax.
+            The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
         self.ebs = ebs
         self.kpath = kpath
         if ax is None:
@@ -20,6 +38,15 @@ class EBSPlot:
         self.x = self._get_x()
 
     def _get_x(self):
+        """
+        provides the x axis data of the plots
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
         pos = 0
         for isegment in range(self.kpath.nsegments):
             kstart, kend = self.kpath.special_kpoints[isegment]
@@ -38,6 +65,23 @@ class EBSPlot:
         return np.array(x).reshape(-1,)
 
     def plot_bands(self, spins=None, color="blue", opacity=1.0):
+        """
+        Plot the plain band structure.
+
+        Parameters
+        ----------
+        spins : list, optional
+            A list of the spins to be plotted. The default is None.
+        color : string, optional
+            Color for the bands. The default is "blue".
+        opacity : float, optional
+            Opacity level between 0.0 and 1.0. The default is 1.0.
+
+        Returns
+        -------
+        None.
+
+        """
         if spins is None:
             spins = range(self.ebs.nspins)
         for ispin in spins:
@@ -60,6 +104,41 @@ class EBSPlot:
                      color_weights=None,
                      plot_bar=True,
                      ):
+        """
+        
+
+        Parameters
+        ----------
+        spins : TYPE, optional
+            DESCRIPTION. The default is None.
+        size : TYPE, optional
+            DESCRIPTION. The default is 50.
+        mask : TYPE, optional
+            DESCRIPTION. The default is None.
+        cmap : TYPE, optional
+            DESCRIPTION. The default is "Reds".
+        vmin : TYPE, optional
+            DESCRIPTION. The default is 0.
+        vmax : TYPE, optional
+            DESCRIPTION. The default is 1.
+        marker : TYPE, optional
+            DESCRIPTION. The default is "o".
+        opacity : TYPE, optional
+            DESCRIPTION. The default is 1.0.
+        size_weights : TYPE, optional
+            DESCRIPTION. The default is None.
+        color_weights : TYPE, optional
+            DESCRIPTION. The default is None.
+        plot_bar : TYPE, optional
+            DESCRIPTION. The default is True.
+         : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         if spins is None:
             spins = range(self.ebs.nspins)
         if size_weights is None:
