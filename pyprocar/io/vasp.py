@@ -430,6 +430,7 @@ class Procar(collections.abc.Mapping):
         self._read()
         if self.has_phase:
             self.carray = self.spd_phase[:, :, :, :-1, 1:-1]
+            
         self.ebs = ElectronicBandStructure(
             kpoints=self.kpoints,
             bands=self.bands,
@@ -771,6 +772,7 @@ class Procar(collections.abc.Mapping):
         # "2" it has to macth with the number of entries of spd data.
 
         expected = self.bandsCount * self.kpointsCount * self.ispin
+        
         if expected == len(self.spd):
             pass
         # catching a non-collinear calc.
@@ -783,7 +785,7 @@ class Procar(collections.abc.Mapping):
                 )
             self.ispin = 4
         else:
-            raise RuntimeError("Shit happens")
+            raise RuntimeError("Incompatible file.")
 
         # checking for consistency
         for line in self.spd:

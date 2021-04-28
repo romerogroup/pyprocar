@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib
 import sys
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 
 
 class EBSPlot:
-    def __init__(self, ebs, kpath=None, ax=None):
+    def __init__(self, ebs, kpath=None, ax=None, spins=None, colors=None, opacities=None, linestyles=None, linewidths=None, labels=None):
         """
         class to plot an electronic band structure.
 
@@ -28,14 +29,48 @@ class EBSPlot:
         """
         self.ebs = ebs
         self.kpath = kpath
+        self.spins = spins
+        self.colors = colors
+        self.opacities = opacities
+        self.linestyles = linestyles
+        self.linewidths = linewidths
+        self.labels = labels
+        self.handles = []
+
         if ax is None:
-            self.fig = plt.figure()
+            self.fig = plt.figure(figsize=(9, 6))
             self.ax = self.fig.add_subplot(111)
         else:
             self.fig = plt.gcf()
             self.ax = ax
         # need to initiate kpath if kpath is not defined.
         self.x = self._get_x()
+
+        self._initiate_plot_args()
+
+    def _initiate_plot_args(self):
+
+        if self.spins is None:
+            self.spins = range(self.ebs.nspins)
+        self.nspins = len(self.spins)
+
+        if self.colors is None:
+            self.colors = np.array(["black", "red"])[:self.nspins]
+        if self.opacities is None:
+            self.opacities = np.array([1.0, 1.0])[:self.nspins]
+        if self.linestyles is None:
+            self.linestyles = np.array(["solid", "dashed"])[:self.nspins]
+        if self.linewidths is None:
+            self.linewidths = np.array([1, 1])[:self.nspins]
+        if self.labels is None:
+            self.labels = np.array([r'Spin $\uparrow$',
+                                    r'Spin $\downarrow$'])[:self.nspins]
+        # print(self.nspins)
+        # print(self.colors)
+        # print(self.opacities)
+        # print(self.linestyles)
+        # print(self.linewidths)
+        # print(self.labels)
 
     def _get_x(self):
         """
@@ -64,7 +99,7 @@ class EBSPlot:
             pos += distance
         return np.array(x).reshape(-1,)
 
-    def plot_bands(self, spins=None, color="blue", opacity=1.0):
+    def plot_bands(self):
         """
         Plot the plain band structure.
 
@@ -82,123 +117,126 @@ class EBSPlot:
         None.
 
         """
-        if spins is None:
-            spins = range(self.ebs.nspins)
-        for ispin in spins:
+
+        for ispin in range(self.ebs.bands.shape[2]):
             for iband in range(self.ebs.nbands):
-                self.ax.plot(
-                    self.x, self.ebs.bands[:, iband,
-                                           ispin], color=color, alpha=opacity,
+                handle = self.ax.plot(
+                    self.x, self.ebs.bands[:, iband, ispin], color=self.colors[ispin], alpha=self.opacities[
+                        ispin], linestyle=self.linestyles[ispin], label=self.labels[ispin], linewidth=self.linewidths[ispin],
                 )
+            self.handles.append(handle[0])
 
     def plot_scatter(self,
                      spins=None,
-                     size=50,
                      mask=None,
-                     cmap="Reds",
-                     vmin=0,
-                     vmax=1,
+                     cmap="Viridis",
+                     vmin=None,
+                     vmax=None,
                      marker="o",
                      opacity=1.0,
-                     size_weights=None,
+                     width_weights=None,
                      color_weights=None,
-                     plot_bar=True,
+                     plot_color_bar=True,
                      ):
-        """
-        
 
-        Parameters
-        ----------
-        spins : TYPE, optional
-            DESCRIPTION. The default is None.
-        size : TYPE, optional
-            DESCRIPTION. The default is 50.
-        mask : TYPE, optional
-            DESCRIPTION. The default is None.
-        cmap : TYPE, optional
-            DESCRIPTION. The default is "Reds".
-        vmin : TYPE, optional
-            DESCRIPTION. The default is 0.
-        vmax : TYPE, optional
-            DESCRIPTION. The default is 1.
-        marker : TYPE, optional
-            DESCRIPTION. The default is "o".
-        opacity : TYPE, optional
-            DESCRIPTION. The default is 1.0.
-        size_weights : TYPE, optional
-            DESCRIPTION. The default is None.
-        color_weights : TYPE, optional
-            DESCRIPTION. The default is None.
-        plot_bar : TYPE, optional
-            DESCRIPTION. The default is True.
-         : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        """
-        if spins is None:
-            spins = range(self.ebs.nspins)
-        if size_weights is None:
-            size_weights = np.ones(
-                shape=(self.ebs.nkpoints, self.ebs.nbands, self.ebs.nspins))
-        if color_weights is None:
-            color_weights = np.ones(
-                shape=(self.ebs.nkpoints, self.ebs.nbands, self.ebs.nspins))
-            plot_bar = False
-        if mask is not None:
-            mbands = np.ma.masked_array(
-                self.ebs.bands, np.abs(color_weights) < mask)
+        if width_weights is None:
+            width_weights = np.ones_like(self.ebs.bands)
         else:
-            mbands = self.ebs.bands
-        for ispin in spins:
-            for iband in range(self.ebs.nbands):
-                self.ax.scatter(
-                    self.x,
-                    mbands[:, iband, ispin],
-                    c=color_weights[:, iband, ispin].round(2),
-                    s=color_weights[:, iband, ispin].round(2)*size,
-                    edgecolors="none",
-                    linewidths=0,
-                    cmap=cmap,
-                    vmin=vmin,
-                    vmax=vmax,
-                    marker=marker,
-                    alpha=opacity
-                )
-        # if plot_bar:
-        #     cb = self.fig.colorbar(lc, ax=self.ax)
-        #     cb.ax.tick_params(labelsize=20)
+            self.linewidths *= 30
 
-    def plot_parameteric(
-        self,
-        spins=None,
-        cmap="jet",
-        vmin=None,
-        vmax=None,
-        mask=None,
-        linewidth=10,
-        opacity=1.0,
-        width_weights=None,
-        color_weights=None,
-        plot_bar=False,
-    ):
         if spins is None:
             spins = range(self.ebs.nspins)
+        if self.ebs.is_non_collinear:
+            spins = [0]
+
         if mask is not None:
             mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
 
-        if vmin is None:
-            vmin = color_weights.min()
-        if vmax is None:
-            vmax = color_weights.max()
-        print("normalizing to : ", (vmin, vmax))
-        norm = matplotlib.colors.Normalize(vmin, vmax)
+        if color_weights is not None:
+
+            if vmin is None:
+                vmin = color_weights.min()
+            if vmax is None:
+                vmax = color_weights.max()
+            print("normalizing to : ", (vmin, vmax))
+            norm = matplotlib.colors.Normalize(vmin, vmax)
+
+        for ispin in spins:
+            for iband in range(self.ebs.nbands):
+                if color_weights is None:
+                    sc = self.ax.scatter(
+                        self.x,
+                        mbands[:, iband, ispin],
+                        c=self.colors[ispin],
+                        s=width_weights[:, iband, ispin].round(2)*self.linewidths[ispin],
+                        edgecolors="none",
+                        linewidths=0,
+                        cmap=cmap,
+                        vmin=vmin,
+                        vmax=vmax,
+                        marker=marker,
+                        alpha=opacity,
+                    )
+                else:
+                    sc = self.ax.scatter(
+                        self.x,
+                        mbands[:, iband, ispin],
+                        c=color_weights[:, iband, ispin].round(2),
+                        s=width_weights[:, iband, ispin].round(2)*self.linewidths[ispin],
+                        edgecolors="none",
+                        linewidths=0,
+                        cmap=cmap,
+                        vmin=vmin,
+                        vmax=vmax,
+                        marker=marker,
+                        alpha=opacity,
+                        norm=norm,
+                    )
+        if plot_color_bar and color_weights is not None:
+            cb = self.fig.colorbar(sc, ax=self.ax)
+            cb.ax.tick_params(labelsize=20)    
+
+    def plot_parameteric(
+        self,
+        spins=None,
+        cmap="Viridis",
+        vmin=None,
+        vmax=None,
+        mask=None,
+        opacity=1.0,
+        width_weights=None,
+        color_weights=None,
+        plot_color_bar=False,
+    ):
+
+        if width_weights is None:
+            width_weights = np.ones_like(self.ebs.bands)
+        else:
+            self.linewidths *= 5
+
+        if spins is None:
+            spins = range(self.ebs.nspins)
+        if self.ebs.is_non_collinear:
+            spins = [0]
+
+        if mask is not None:
+            mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+        else:
+            # Faking a mask, all elemtnet are included
+            mbands = np.ma.masked_array(self.ebs.bands, False)
+
+        if color_weights is not None:
+
+            if vmin is None:
+                vmin = color_weights.min()
+            if vmax is None:
+                vmax = color_weights.max()
+            print("normalizing to : ", (vmin, vmax))
+            norm = matplotlib.colors.Normalize(vmin, vmax)
+
         for ispin in spins:
             # plotting
             for iband in range(self.ebs.nbands):
@@ -206,32 +244,93 @@ class EBSPlot:
                 points = np.array(
                     [self.x, self.ebs.bands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                lc = LineCollection(
-                    segments, cmap=plt.get_cmap(cmap), norm=norm)
-                lc.set_array(color_weights[:, iband, ispin])
-                lc.set_linewidth(linewidth*width_weights[:, iband, ispin])
+                if color_weights is None:
+                    lc = LineCollection(
+                        segments, colors=self.colors[ispin])
+                else:
+                    lc = LineCollection(
+                        segments, cmap=plt.get_cmap(cmap), norm=norm)
+                    lc.set_array(color_weights[:, iband, ispin])
+                lc.set_linewidth(
+                    width_weights[:, iband, ispin]*self.linewidths[ispin])
                 self.ax.add_collection(lc)
-        if plot_bar:
+        if plot_color_bar and color_weights is not None:
             cb = self.fig.colorbar(lc, ax=self.ax)
             cb.ax.tick_params(labelsize=20)
 
-
-    def set_xticks(self, color="black"):
-        for ipos in self.kpath.tick_positions:
+    def set_xticks(self, tick_positions=None, tick_names=None, color="black"):
+        if tick_positions is None:
+            tick_positions = self.kpath.tick_positions
+        if tick_names is None:
+            tick_names = self.kpath.tick_names
+        for ipos in tick_positions:
             self.ax.axvline(self.x[ipos], color=color)
-        self.ax.set_xticks(self.x[self.kpath.tick_positions])
-        self.ax.set_xticklabels(self.kpath.tick_names)
+        self.ax.set_xticks(self.x[tick_positions])
+        self.ax.set_xticklabels(tick_names)
+
+    def set_yticks(self, major=None, minor=None, interval=None):
+        if (major is None or minor is None):
+            if interval is None:
+                interval = (self.ebs.bands.min()-abs(self.ebs.bands.min())
+                            * 0.1, self.ebs.bands.max()*1.1)
+
+            interval = abs(interval[1] - interval[0])
+            if interval < 30 and interval >= 20:
+                major = 5
+                minor = 1
+            elif interval < 20 and interval >= 10:
+                major = 4
+                minor = 0.5
+            elif interval < 10 and interval >= 5:
+                major = 2
+                minor = 0.2
+            elif interval < 5 and interval >= 3:
+                major = 1
+                minor = 0.1
+            elif interval < 3 and interval >= 1:
+                major = 0.5
+                minor = 0.1
+            else:
+                pass
+        if major is not None and minor is not None:
+            self.ax.yaxis.set_major_locator(MultipleLocator(major))
+            self.ax.yaxis.set_minor_locator(MultipleLocator(minor))
+        self.ax.tick_params(
+            which='major',
+            axis="y",
+            direction="inout",
+            width=1,
+            length=5,
+            labelright=False,
+            right=True,
+            left=True)  # )
+
+        self.ax.tick_params(
+            which='minor',
+            axis="y",
+            direction="in",
+            left=True,
+            right=True)
 
     def set_xlim(self, interval=None):
         if interval is None:
             interval = (self.x[0], self.x[-1])
         self.ax.set_xlim(interval)
 
-    def set_ylim(self, interval):
+    def set_ylim(self, interval=None):
         if interval is None:
             interval = (self.ebs.bands.min()-abs(self.ebs.bands.min())
                         * 0.1, self.ebs.bands.max()*1.1)
         self.ax.set_ylim(interval)
 
-    def draw_fermi(self, color="red", linestyle="--"):
+    def set_xlabel(self, label="K vector"):
+        self.ax.set_xlabel(label)
+
+    def set_ylabel(self, label=r"E - E$_F$ (eV)"):
+        self.ax.set_ylabel(label)
+
+    def legend(self):
+        self.ax.legend(self.handles, self.labels)
+
+    def draw_fermi(self, color="blue", linestyle="dotted"):
         self.ax.axhline(y=0, color=color, linestyle=linestyle)

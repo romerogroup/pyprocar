@@ -38,11 +38,9 @@ class KPath:
         if len(self.knames) == 1:
             return tick_names
         for isegment in range(1, self.nsegments):
-            if self.knames[isegment][0] != tick_names[-1]:
+            if self.knames[isegment][0] != self.knames[isegment-1][1]:
                 tick_names[-1] += "|" + self.knames[isegment][0]
-            else:
-                tick_names.append(self.knames[isegment][1])
-        # tick_names.append(self.knames[-1][-1])
+            tick_names.append(self.knames[isegment][1])
         return tick_names
 
     @property

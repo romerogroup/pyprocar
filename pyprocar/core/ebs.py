@@ -110,6 +110,13 @@ class ElectronicBandStructure:
         return self.projected.shape[5]
 
     @property
+    def is_non_collinear(self):
+        if self.nspins == 3:
+            return True
+        else:
+            return False
+
+    @property
     def kpoints_cartesian(self):
         if self.reciprocal_lattice is not None:
             return np.dot(self.kpoints, self.reciprocal_lattice)
@@ -124,7 +131,7 @@ class ElectronicBandStructure:
         return self.kpoints
 
     def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
-
+        
         principal_q_numbers = np.array(principal_q_numbers)
         if atoms is None:
             atoms = np.arange(self.natoms, dtype=int)
@@ -132,13 +139,17 @@ class ElectronicBandStructure:
             spins = np.arange(self.nspins, dtype=int)
         if orbitals is None:
             orbitals = np.arange(self.norbitals, dtype=int)
-
         # sum over orbitals
         ret = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
         # sum over principle quantum number
         ret = np.sum(ret[:, :, :, principal_q_numbers, :], axis=-2)
         # sum over atoms
         ret = np.sum(ret[:, :, atoms, :], axis=-2)
+        # sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)
+        # in non-mag, non-colin nspin=1, in colin nspin=2
+        if self.is_non_collinear:
+            ret = np.sum(ret[:, :, spins], axis=-
+                         1).reshape(self.nkpoints, self.nbands, 1)
         return ret
 
     def interpolate(self, interpolation_factor=2):
@@ -197,7 +208,7 @@ class ElectronicBandStructure:
             )
         return interpolated_bands
 
-    def extend_BZ(
+    def _extend_BZ(
         self, new_kpath, time_reversal=True,
     ):
 

@@ -24,17 +24,22 @@ def bandsplot1(
         elkin="elk.in",
         mode="plain",
         spin_mode="plain",
-        spin=0,
+        linestyles=None,
+        spins=None,
         atoms=None,
         orbitals=None,
         fermi=None,
         interpolation_factor=1,
         mask=None,
-        color="blue",
-        cmap="jet",
+        colors=None,
+        weighted_width=False,
+        weighted_color=True,
+        cmap="viridis",
         marker="o",
         markersize=0.02,
-        linewidth=1,
+        linewidths=None,
+        opacities=None,
+        labels=None,
         vmax=None,
         vmin=None,
         grid=False,
@@ -43,13 +48,15 @@ def bandsplot1(
         elimit=None,
         ax=None,
         show=True,
+        legend=True,
         savefig=None,
         plot_color_bar=True,
         title=None,
         kdirect=True,
         code="vasp",
         lobstercode="qe",
-        verbose=True):
+        verbose=True,
+):
     """
 
 
@@ -71,8 +78,8 @@ def bandsplot1(
         plain, magnetization, density, "spin_up", "spin_down", "both", "sx",
         "sy", "sz", "spin_texture"
         DESCRIPTION. The default is "plain".
-    spin : TYPE, optional
-        DESCRIPTION. The default is 0.
+    spins : TYPE, optional
+        DESCRIPTION.
     atoms : TYPE, optional
         DESCRIPTION. The default is None.
     orbitals : TYPE, optional
@@ -81,8 +88,8 @@ def bandsplot1(
         DESCRIPTION. The default is None.
     mask : TYPE, optional
         DESCRIPTION. The default is None.
-    color : TYPE, optional
-        DESCRIPTION. The default is "blue".
+    colors : TYPE, optional
+        DESCRIPTION.
     cmap : TYPE, optional
         DESCRIPTION. The default is "jet".
     marker : TYPE, optional
@@ -171,22 +178,50 @@ def bandsplot1(
             kpath = kpoints.kpath
         procar = vasp.Procar(procar, structure, reciprocal_lattice,
                              kpath, fermi, interpolation_factor=interpolation_factor)
-        ebs_plot = EBSPlot(ebs=procar.ebs, kpath=kpath)
-        # ebs_plot.plot_bands(spins=[0, 1],color='gray', opacity=0.3)
-        # ebs_plot.plot_bands(spins=[1])
-        V = ebs_plot.ebs.ebs_sum(atoms=[1])
-        Sr = ebs_plot.ebs.ebs_sum(atoms=[0])
-        O = ebs_plot.ebs.ebs_sum(atoms=[2,3,4])
-        ebs_plot.plot_parameteric(color_weights=Sr, width_weights=Sr, cmap="Reds", opacity=0.7)
-        ebs_plot.plot_parameteric(color_weights=V, width_weights=V , cmap="Blues", opacity=0.7)
-        ebs_plot.plot_parameteric(color_weights=O, width_weights=O , cmap="Greens", opacity=0.7)
-        ebs_plot.plot_scatter(color_weights=Sr, size_weights=Sr, cmap="Reds", opacity=0.7)
-        ebs_plot.plot_scatter(spins=[0],color_weights=V, size_weights=V , cmap="Blues", opacity=0.5)
-        ebs_plot.plot_scatter(spins=[1],color_weights=O, size_weights=O , cmap="Greens", opacity=0.5)
-        ebs_plot.set_xticks()
-        ebs_plot.set_xlim()
-        ebs_plot.set_ylim(elimit)
-        ebs_plot.draw_fermi()
+        ebs_plot = EBSPlot(procar.ebs, kpath, ax, spins,
+                           colors, opacities, linestyles, linewidths, labels)
+
+    if mode == "plain":
+        ebs_plot.plot_bands()
+    elif mode == "parametric":
+        weights = ebs_plot.ebs.ebs_sum(
+            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
+        if weighted_color:
+            color_weights=weights
+        else:
+            color_weights=None
+        if weighted_width:
+            width_weights=weights
+        else:
+            width_weights=None
+        ebs_plot.plot_parameteric(
+            color_weights=color_weights, width_weights=width_weights, cmap=cmap, plot_color_bar=plot_color_bar)
+    elif mode == "scatter":
+        weights = ebs_plot.ebs.ebs_sum(
+            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
+        if weighted_color:
+            color_weights=weights
+        else:
+            color_weights=None
+        if weighted_width:
+            width_weights=weights
+        else:
+            width_weights=None
+        ebs_plot.plot_scatter(
+            color_weights=color_weights, width_weights=width_weights, cmap=cmap, plot_color_bar=plot_color_bar)
+    else:
+        print("Selected mode %s not valid. Please check the spelling " % mode)
+
+
+    ebs_plot.set_xticks()
+    ebs_plot.set_yticks(interval=elimit)
+    ebs_plot.set_xlim()
+    ebs_plot.set_ylim(elimit)
+    ebs_plot.draw_fermi()
+    ebs_plot.set_ylabel()
+    if legend:
+        ebs_plot.legend()
+    if show:
         plt.show()
 
     return ebs_plot
