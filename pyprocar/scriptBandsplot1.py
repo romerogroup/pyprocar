@@ -187,31 +187,30 @@ def bandsplot1(
         weights = ebs_plot.ebs.ebs_sum(
             atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
         if weighted_color:
-            color_weights=weights
+            color_weights = weights
         else:
-            color_weights=None
+            color_weights = None
         if weighted_width:
-            width_weights=weights
+            width_weights = weights
         else:
-            width_weights=None
+            width_weights = None
         ebs_plot.plot_parameteric(
-            color_weights=color_weights, width_weights=width_weights, cmap=cmap, plot_color_bar=plot_color_bar)
+            color_weights=color_weights, width_weights=width_weights, cmap=cmap, plot_color_bar=plot_color_bar, vmin=vmin, vmax=vmax)
     elif mode == "scatter":
         weights = ebs_plot.ebs.ebs_sum(
             atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
         if weighted_color:
-            color_weights=weights
+            color_weights = weights
         else:
-            color_weights=None
+            color_weights = None
         if weighted_width:
-            width_weights=weights
+            width_weights = weights
         else:
-            width_weights=None
+            width_weights = None
         ebs_plot.plot_scatter(
-            color_weights=color_weights, width_weights=width_weights, cmap=cmap, plot_color_bar=plot_color_bar)
+            color_weights=color_weights, width_weights=width_weights, cmap=cmap, plot_color_bar=plot_color_bar, vmin=vmin, vmax=vmax)
     else:
         print("Selected mode %s not valid. Please check the spelling " % mode)
-
 
     ebs_plot.set_xticks()
     ebs_plot.set_yticks(interval=elimit)
