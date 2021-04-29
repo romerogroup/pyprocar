@@ -307,7 +307,7 @@ def fermi3D(
             e_fermi = fermi
 
 
-   elif code == "bxsf":
+    elif code == "bxsf":
         e_fermi = fermi
         data = BxsfParser(infile= infile)
         reciprocal_lattice = data.reclat
