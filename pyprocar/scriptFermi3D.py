@@ -47,12 +47,11 @@ def fermi3D(
     savegif=None,
     savemp4=None,
     save3d=None,
+    save_meshio= False,
     perspective=True,
     save2d=False,
     show_curvature = False,
     show_slice = False,
-    slice_normal=(1,0,0),
-    slice_planes = False,
     camera_pos=[1, 1, 1],
     widget=False,
     show=True,
@@ -223,6 +222,8 @@ def fermi3D(
         following formats STL, binary PLY, ASCII OFF, OBJ, GLTF/GLB
         2.0, COLLADA. ``save3d`` is the path to which the file is saved.
         e.g. ``save3d='fermi.glb'``
+    save_meshio : bool, optional
+        pyprocar can use meshio to save any 3d format supported by it.
     perspective : bool, optional
         To create the illusion of depth, perspective is used in 2d
         graphics. One can turn this feature off by ``perspective=False``
@@ -232,6 +233,10 @@ def fermi3D(
         turns this feature on and selects the path at which the file
         is going to be saved.
         e.g. ``save2d='fermi.png'``
+    show_slice : bool, optional
+        Creates a widget which slices the fermi surface
+    show_curvature : bool, optional
+        plots the curvature of the fermi surface
     camera_pos : list float, optional (default ``[1, 1, 1]``)
         This parameter defines the position of the camera where it is
         looking at the fermi surface. This feature is important when
@@ -564,10 +569,13 @@ def fermi3D(
     # s.trimesh_obj.show()
 
     if save3d is not None:
-        extention = save3d.split(".")[-1]
-        s.export(save3d, extention)
-    # return s, fermi_surfaces, test
-    return test
+        if save_meshio == True:
+            pyvista.save_meshio(save3d,  fermi_surface)
+        else:
+            extention = save3d.split(".")[-1]
+            s.export(save3d, extention)
+    return s, fermi_surfaces, fermi_surface
+    # return test
 
 
 
