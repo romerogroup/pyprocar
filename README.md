@@ -7,13 +7,13 @@
 PyProcar
 ===========
 
-PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data obtained from the PROCAR format. Basically, the PROCAR format is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every k-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations, plotting partial density of states and generating a k-path for a given crystal structure. 
+PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. PyProcar provides a set of functions that manage data obtained from the PROCAR format. Basically, the PROCAR format is a projection of the Kohn-Sham states over atomic orbitals. That projection is performed to every k-point in the considered mesh, every energy band and every atom. PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super  cell, comparing band structures from multiple DFT calculations, plotting partial density of states and generating a k-path for a given crystal structure.
 
 Currently supports:
 
 1. VASP
-2. Elk 
-3. Quantum Espresso 
+2. Elk
+3. Quantum Espresso
 4. Abinit
 5. Lobster
 
@@ -40,7 +40,7 @@ Freddy Farah <br />
 
 How to cite
 -----------
-If you have used PyProcar in your work, please cite: 
+If you have used PyProcar in your work, please cite:
 
 [Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz, and Aldo H. Romero. "PyProcar: A Python library for electronic structure pre/post-processing". Computer Physics Communications 251 (2020): 107080.](https://www.sciencedirect.com/science/article/pii/S0010465519303935)
 
@@ -83,7 +83,7 @@ Installation
 
 with pip:
 
-	pip install pyprocar	
+	pip install pyprocar
 
 with conda:
 
@@ -93,20 +93,21 @@ Usage
 -----
 Typical use is as follows
 
-    import pyprocar 
+    import pyprocar
     pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain',code='vasp')
 
-Refer to the documentation for further details. 
+Refer to the documentation for further details.
 
 Stand-alone mode:
 
-    procar.py -h 
+    procar.py -h
 
 will bring a help menu.
 
 Changelog
 --------------
 
+v5.6.4 May 6th, 2021 --  <br /> Updates to Fermi surface plotter. <br />
 v5.6.3 Mar 5th, 2021 --  <br /> QE and elk bug fixes. <br />
 v5.6.2 Jan 11th, 2021 --  <br /> Updates and bugfixes to fermi surface and dos plotter. <br />
 v5.6.1 Dec 7th, 2020 -- Fixed bug in PyProcar.cat() for merging parallel Abinit files for spin polarized calculations. Converted units Ha to eV. <br />
