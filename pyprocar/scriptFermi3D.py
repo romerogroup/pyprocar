@@ -50,8 +50,13 @@ def fermi3D(
     save_meshio= False,
     perspective=True,
     save2d=False,
+    isoslider = False,
+    erange = 2,
     show_curvature = False,
     show_slice = False,
+    iso_slider = False,
+    iso_range = 2,
+    iso_surfaces = 10,
     camera_pos=[1, 1, 1],
     widget=False,
     show=True,
@@ -237,6 +242,14 @@ def fermi3D(
         Creates a widget which slices the fermi surface
     show_curvature : bool, optional
         plots the curvature of the fermi surface
+    iso_slider : bool, optional
+        plots a slider widget which controls which iso_energy value viewed
+    iso_range : float, optional
+        If iso_slider is True, this specifies the energy range 
+        around the fermi surface to view
+    iso_surfaces : int, optional
+        If iso_slider is True, this specifies how many surfaces to 
+        generate in the range specified around the fermi surface
     camera_pos : list float, optional (default ``[1, 1, 1]``)
         This parameter defines the position of the camera where it is
         looking at the fermi surface. This feature is important when
@@ -394,53 +407,80 @@ def fermi3D(
     ##########################################################################
     # Initialization of the Fermi Surface
     ##########################################################################
-
-    fermi_surface3D = FermiSurface3D(
-                                    kpoints=data.kpoints,
-                                    bands=data.bands,
-                                    band_numbers = band_numbers,
-                                    spd=spd,
-                                    spd_spin=spd_spin,
-                                    fermi=e_fermi,
-                                    fermi_shift = fermi_shift,
-                                    reciprocal_lattice=reciprocal_lattice,
-                                    interpolation_factor=interpolation_factor,
-                                    projection_accuracy=projection_accuracy,
-                                    supercell=supercell,
-                                    cmap=cmap,
-                                    vmin = vmin,
-                                    vmax=vmax,
-                                    extended_zone_directions = extended_zone_directions
-                                )
-    band_surfaces = fermi_surface3D.band_surfaces
-    fermi_surface = fermi_surface3D.fermi_surface
-    colors = fermi_surface3D.colors
-    brillouin_zone = fermi_surface3D.brillouin_zone
-
-    fermi_surface_area = fermi_surface3D.fermi_surface_area
-    band_surfaces_area = fermi_surface3D.band_surfaces_area
-
-    fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
-    band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
-
-    test = fermi_surface_curvature
-
-    # coloring variables
-    nsurface = len(band_surfaces)
-    # # norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
-    cmap = cm.get_cmap(cmap)
-    scalars = np.arange(nsurface + 1) / nsurface
-
-    if save_colors is not False or save3d is not None:
-        for i in range(nsurface):
-            if band_surfaces[i].scalars is None:
-                band_surfaces[i].set_scalars([scalars[i]] * band_surfaces[i].nfaces)
-
-
-
-    fermi_surfaces = band_surfaces.copy()
-
-
+    if iso_slider == False:
+        fermi_surface3D = FermiSurface3D(
+                                        kpoints=data.kpoints,
+                                        bands=data.bands,
+                                        band_numbers = band_numbers,
+                                        spd=spd,
+                                        spd_spin=spd_spin,
+                                        fermi=e_fermi,
+                                        fermi_shift = fermi_shift,
+                                        reciprocal_lattice=reciprocal_lattice,
+                                        interpolation_factor=interpolation_factor,
+                                        projection_accuracy=projection_accuracy,
+                                        supercell=supercell,
+                                        cmap=cmap,
+                                        vmin = vmin,
+                                        vmax=vmax,
+                                        extended_zone_directions = extended_zone_directions
+                                    )
+        band_surfaces = fermi_surface3D.band_surfaces
+        fermi_surface = fermi_surface3D.fermi_surface
+        colors = fermi_surface3D.colors
+        brillouin_zone = fermi_surface3D.brillouin_zone
+    
+        fermi_surface_area = fermi_surface3D.fermi_surface_area
+        band_surfaces_area = fermi_surface3D.band_surfaces_area
+    
+        fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
+        band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
+    
+        test = fermi_surface_curvature
+    
+        # coloring variables
+        nsurface = len(band_surfaces)
+        # # norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
+        cmap = cm.get_cmap(cmap)
+        scalars = np.arange(nsurface + 1) / nsurface
+    
+        if save_colors is not False or save3d is not None:
+            for i in range(nsurface):
+                if band_surfaces[i].scalars is None:
+                    band_surfaces[i].set_scalars([scalars[i]] * band_surfaces[i].nfaces)
+    
+    
+    
+        fermi_surfaces = band_surfaces.copy()
+        
+    elif iso_slider == True:
+       
+    
+        energy_values = np.linspace(e_fermi-iso_range/2,e_fermi+iso_range/2,iso_surfaces)
+        e_surfaces = []
+        
+        for e_value in energy_values:
+            fermi_surface3D = FermiSurface3D(
+                                            kpoints=data.kpoints,
+                                            bands=data.bands,
+                                            band_numbers = band_numbers,
+                                            spd=spd,
+                                            spd_spin=spd_spin,
+                                            fermi=e_value,
+                                            fermi_shift = fermi_shift,
+                                            reciprocal_lattice=reciprocal_lattice,
+                                            interpolation_factor=interpolation_factor,
+                                            projection_accuracy=projection_accuracy,
+                                            supercell=supercell,
+                                            cmap=cmap,
+                                            vmin = vmin,
+                                            vmax=vmax,
+                                            extended_zone_directions = extended_zone_directions
+                                        )
+            brillouin_zone = fermi_surface3D.brillouin_zone
+            e_surfaces.append(fermi_surface3D.fermi_surface)
+       
+    
     ##########################################################################
     # Plotting the surface
     ##########################################################################
@@ -456,7 +496,8 @@ def fermi3D(
             line_width=3.5,
             color="black",
         )
-
+        
+                
         if show_slice:
             if mode == "plain":
                 text = "Plain"
@@ -496,7 +537,23 @@ def fermi3D(
             cmin = np.percentile(fermi_surface_curvature, 10)
             cmax = np.percentile(fermi_surface_curvature, 90)
             p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
-
+            
+        elif iso_slider == True:
+            def create_mesh(value):
+                res = int(value)
+                closest_idx = find_nearest(energy_values, res)
+                p.add_mesh(e_surfaces[closest_idx], name='iso_surface')
+                p.remove_scalar_bar()
+                return
+            if mode == "plain":
+                text = "Plain"
+            elif mode == "parametric":
+                text = "Projection"
+            else:
+                text = "Spin Texture"
+            p.add_slider_widget(create_mesh, [np.amin(energy_values), np.amax(energy_values)], title='Energy iso-value',style='modern',color = 'black')
+            
+            
         else:
             for isurface in range(nsurface):
                 if not only_spin:
@@ -525,8 +582,9 @@ def fermi3D(
                     else:
                         p.add_mesh(arrows, color=arrow_color)
 
-
+        
         if mode != "plain" or spin_texture:
+            print('hi')
             p.add_scalar_bar(
                 title=text,
                 n_labels=6,
@@ -563,7 +621,8 @@ def fermi3D(
             p.orbit_on_path(path)  # ,viewup=camera_pos)
             # p.close()
     # p.show()
-    s = boolean_add(band_surfaces)
+    if iso_slider == False:
+        s = boolean_add(band_surfaces)
     # s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
     # s.pyvista_obj.plot()
     # s.trimesh_obj.show()
@@ -574,8 +633,13 @@ def fermi3D(
         else:
             extention = save3d.split(".")[-1]
             s.export(save3d, extention)
-    return s, fermi_surfaces, fermi_surface
-    # return test
+    if iso_slider == False:
+        return s, fermi_surfaces, fermi_surface
 
 
 
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx

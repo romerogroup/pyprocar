@@ -355,7 +355,8 @@ class Isosurface(Surface):
             
             if np.any(self.XYZ >= 0.5):
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
-                verts[:, ix] -= 1*self.supercell[ix]
+                # verts[:, ix] -= 1*self.supercell[ix]
+                verts[:, ix] -= 1*self.padding[ix]
  
                    
             else:
