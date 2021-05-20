@@ -50,8 +50,6 @@ def fermi3D(
     save_meshio= False,
     perspective=True,
     save2d=False,
-    isoslider = False,
-    erange = 2,
     show_curvature = False,
     show_slice = False,
     iso_slider = False,
