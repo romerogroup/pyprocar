@@ -340,6 +340,7 @@ class FermiSurface3D:
         spin_texture=False,
         colors=None,
         projection_accuracy="Normal",
+        curvature_type = 'mean',
         cmap="viridis",
         vmin=0,
         vmax=1,
@@ -440,7 +441,7 @@ class FermiSurface3D:
                 self.band_surfaces_obj.append(surface)
                 self.band_surfaces_area.append(surface.pyvista_obj.area)
                 self.band_surfaces.append(surface.pyvista_obj)
-                self.band_surfaces_curvature.append(surface.pyvista_obj.curvature())
+                self.band_surfaces_curvature.append(surface.pyvista_obj.curvature(curv_type=curvature_type))
             counter += 1
 
         nsurface = len(self.band_surfaces)
@@ -477,7 +478,7 @@ class FermiSurface3D:
             self.fermi_surface = self.fermi_surface + self.band_surfaces[isurface]
 
         self.fermi_surface_area = self.fermi_surface.area
-        self.fermi_surface_curvature = self.fermi_surface.curvature()
+        self.fermi_surface_curvature = self.fermi_surface.curvature(curv_type=curvature_type)
 
     def _get_brilloin_zone(self, supercell):
         return BrillouinZone(self.reciprocal_lattice, supercell)

@@ -51,6 +51,7 @@ def fermi3D(
     perspective=True,
     save2d=False,
     show_curvature = False,
+    curvature_type = 'mean',
     show_slice = False,
     iso_slider = False,
     iso_range = 2,
@@ -240,6 +241,9 @@ def fermi3D(
         Creates a widget which slices the fermi surface
     show_curvature : bool, optional
         plots the curvature of the fermi surface
+    curvature_type : str, optional
+        If show_curvature is True, this option chooses the type of curvature 
+        availible in Pyvista. ('mean', 'gaussian', 'maximum', 'minimum')
     iso_slider : bool, optional
         plots a slider widget which controls which iso_energy value viewed
     iso_range : float, optional
@@ -421,7 +425,8 @@ def fermi3D(
                                         cmap=cmap,
                                         vmin = vmin,
                                         vmax=vmax,
-                                        extended_zone_directions = extended_zone_directions
+                                        extended_zone_directions = extended_zone_directions,
+                                        curvature_type = curvature_type,
                                     )
         band_surfaces = fermi_surface3D.band_surfaces
         fermi_surface = fermi_surface3D.fermi_surface
@@ -531,10 +536,79 @@ def fermi3D(
             # fermi_surface.save("MgB2_fermi.vtk")
 
         elif show_curvature == True:
-
+            text = 'Curvature'
+            class MyCustomRoutine():
+                def __init__(self, actor):
+                    self.actor = actor # Expected PyVista mesh type
+                    # default parameters
+                    self.kwargs = {
+                        'lower_percentile': 10,
+                        'upper_percentile': 90,
+                    }
+            
+                def __call__(self, param, value):
+                    self.kwargs[param] = value
+                    # p.remove_scalar_bar()
+                    # p.add_scalar_bar(
+                    #     title=text,
+                    #     n_labels=6,
+                    #     italic=False,
+                    #     bold=False,
+                    #     title_font_size=None,
+                    #     label_font_size=None,
+                    #     position_x=0.9,
+                    #     position_y=0.01,
+                    #     color="black",
+                    #         )
+                    self.update()
+            
+                def update(self):
+                    # This is where you call your simulation
+                    p.remove_actor(actor)
+                    
+                    cmin = np.percentile(fermi_surface_curvature, self.kwargs['lower_percentile'])
+                    cmax = np.percentile(fermi_surface_curvature, self.kwargs['upper_percentile'])
+                    p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
+                   
+                    
+                    return
+                
             cmin = np.percentile(fermi_surface_curvature, 10)
             cmax = np.percentile(fermi_surface_curvature, 90)
-            p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
+            actor = p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
+            # p.add_scalar_bar(
+            #     title=text,
+            #     n_labels=6,
+            #     italic=False,
+            #     bold=False,
+            #     title_font_size=None,
+            #     label_font_size=None,
+            #     position_x=0.9,
+            #     position_y=0.01,
+            #     color="black",
+            # )
+            engine = MyCustomRoutine(actor)
+            p.add_slider_widget(
+                            callback=lambda value: engine('lower_percentile', int(value)),
+                            rng=[0, 100],
+                            value=10,
+                            title="Lower Percentile Curvature",
+                            pointa=(.025, .90), pointb=(.31, .90),
+                            style='modern',
+                            color = 'black'
+                        )
+            p.add_slider_widget(
+                            callback=lambda value: engine('upper_percentile', int(value)),
+                            rng=[0, 100],
+                            value=90,
+                            title="Upper Percentile Curvature",
+                            pointa=(.67, 0.90), pointb=(.98, 0.90),
+                            style='modern',
+                            color = 'black'
+                        )
+            
+
+            
             
         elif iso_slider == True:
             def create_mesh(value):
@@ -582,7 +656,6 @@ def fermi3D(
 
         
         if mode != "plain" or spin_texture:
-            print('hi')
             p.add_scalar_bar(
                 title=text,
                 n_labels=6,
