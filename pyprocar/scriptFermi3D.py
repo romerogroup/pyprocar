@@ -17,6 +17,10 @@ from .qeparser import QEFermiParser
 from .lobsterparser import LobsterFermiParser
 from .abinitparser import AbinitParser
 
+
+
+import vtk
+from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
 def fermi3D(
     procar="PROCAR",
     outcar="OUTCAR",
@@ -53,6 +57,9 @@ def fermi3D(
     show_curvature = False,
     curvature_type = 'mean',
     show_slice = False,
+    slice_normal = (1,0,0),
+    slice_origin = (0,0,0),
+    show_cross_section_area= False,
     iso_slider = False,
     iso_range = 2,
     iso_surfaces = 10,
@@ -239,6 +246,12 @@ def fermi3D(
         e.g. ``save2d='fermi.png'``
     show_slice : bool, optional
         Creates a widget which slices the fermi surface
+    slice_origin : tuple, optional
+        Origin to put the plane widget
+    slice_normal : bool, optional
+        Normal of the plane widget
+    show_cross_section_area : bool, optional
+        Shows the largest cross sectional area
     show_curvature : bool, optional
         plots the curvature of the fermi surface
     curvature_type : str, optional
@@ -432,10 +445,10 @@ def fermi3D(
         fermi_surface = fermi_surface3D.fermi_surface
         colors = fermi_surface3D.colors
         brillouin_zone = fermi_surface3D.brillouin_zone
-    
+        
         fermi_surface_area = fermi_surface3D.fermi_surface_area
         band_surfaces_area = fermi_surface3D.band_surfaces_area
-    
+        
         fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
         band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
     
@@ -447,7 +460,7 @@ def fermi3D(
         cmap = cm.get_cmap(cmap)
         scalars = np.arange(nsurface + 1) / nsurface
     
-        if save_colors is not False or save3d is not None:
+        if save_colors is not False or save3d is not None and len(bands)!=1:
             for i in range(nsurface):
                 if band_surfaces[i].scalars is None:
                     band_surfaces[i].set_scalars([scalars[i]] * band_surfaces[i].nfaces)
@@ -461,6 +474,7 @@ def fermi3D(
     
         energy_values = np.linspace(e_fermi-iso_range/2,e_fermi+iso_range/2,iso_surfaces)
         e_surfaces = []
+        
         
         for e_value in energy_values:
             fermi_surface3D = FermiSurface3D(
@@ -501,40 +515,27 @@ def fermi3D(
         )
         
                 
-        if show_slice:
-            if mode == "plain":
-                text = "Plain"
-                p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
-                p.remove_scalar_bar()
-            elif mode == "parametric":
-                text = "Projection"
-                p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
-                p.remove_scalar_bar()
+        if show_slice == True:
+            text = mode
+            if show_cross_section_area == True and bands != None:
+                if len(bands) == 1:
+                    add_mesh_slice_w_cross_sectional_area(plotter = p, mesh=fermi_surface, normal =slice_normal,origin = slice_origin, cmap=cmap, clim=[vmin, vmax])
+                    p.remove_scalar_bar()
+                else:
+                    print('---------------------------------------------')
+                    print("Can only show area of one band at a time")
+                    print('---------------------------------------------')
             else:
-                text = "Spin Texture"
-                for isurface in range(nsurface):
-                    arrows = band_surfaces[isurface].glyph(
-                        orient="vectors", factor=arrow_size)
+                if mode == "plain":
+                    text = "Plain"
+                    add_custom_mesh_slice(plotter = p, mesh=fermi_surface, normal =slice_normal,origin = slice_origin, cmap=cmap, clim=[vmin, vmax])
+                    p.remove_scalar_bar()
+                elif mode == "parametric":
+                    text = "Projection"
+                    add_custom_mesh_slice(plotter = p, mesh=fermi_surface, normal =slice_normal,origin = slice_origin, cmap=cmap, clim=[vmin, vmax])
+                    p.remove_scalar_bar()
 
-                    if arrow_color is None:
-                        p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
-                        p.remove_scalar_bar()
-                    else:
-                        p.add_mesh(arrows, color=arrow_color)
-
-
-            # p.add_mesh_slice(fermi_surface, cmap=cmap, clim=[vmin, vmax])
-            # p.remove_scalar_bar()
-
-            # p.add_mesh(fermi_surface,cmap=cmap, clim=[vmin, vmax] , opacity = 0.5 )
-            # slicesx = fermi_surface.slice_along_axis(n=5, axis="x")
-            # slicesz = fermi_surface.slice_along_axis(n=5, axis="z")
-            # slicesy = fermi_surface.slice_along_axis(n=5, axis="y")
-            # p.add_mesh(slicesx, cmap=cmap, clim=[vmin, vmax])
-            # p.add_mesh(slicesz, cmap=cmap, clim=[vmin, vmax])
-            # p.add_mesh(slicesy, cmap=cmap, clim=[vmin, vmax])
-            # fermi_surface.save("MgB2_fermi.vtk")
-
+     
         elif show_curvature == True:
             text = 'Curvature'
             class MyCustomRoutine():
@@ -548,18 +549,6 @@ def fermi3D(
             
                 def __call__(self, param, value):
                     self.kwargs[param] = value
-                    # p.remove_scalar_bar()
-                    # p.add_scalar_bar(
-                    #     title=text,
-                    #     n_labels=6,
-                    #     italic=False,
-                    #     bold=False,
-                    #     title_font_size=None,
-                    #     label_font_size=None,
-                    #     position_x=0.9,
-                    #     position_y=0.01,
-                    #     color="black",
-                    #         )
                     self.update()
             
                 def update(self):
@@ -569,24 +558,13 @@ def fermi3D(
                     cmin = np.percentile(fermi_surface_curvature, self.kwargs['lower_percentile'])
                     cmax = np.percentile(fermi_surface_curvature, self.kwargs['upper_percentile'])
                     p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
-                   
                     
                     return
                 
             cmin = np.percentile(fermi_surface_curvature, 10)
             cmax = np.percentile(fermi_surface_curvature, 90)
             actor = p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
-            # p.add_scalar_bar(
-            #     title=text,
-            #     n_labels=6,
-            #     italic=False,
-            #     bold=False,
-            #     title_font_size=None,
-            #     label_font_size=None,
-            #     position_x=0.9,
-            #     position_y=0.01,
-            #     color="black",
-            # )
+
             engine = MyCustomRoutine(actor)
             p.add_slider_widget(
                             callback=lambda value: engine('lower_percentile', int(value)),
@@ -679,7 +657,6 @@ def fermi3D(
         # p.set_position(camera_pos)
         if not widget:
             p.show(cpos=camera_pos, screenshot=save2d)
-            # p.show()
         # p.screenshot('1.png')
         # p.save_graphic('1.pdf')
         if savegif is not None:
@@ -706,8 +683,116 @@ def fermi3D(
             s.export(save3d, extention)
     if iso_slider == False:
         return s, fermi_surfaces, fermi_surface
+    
+
+def add_mesh_slice_w_cross_sectional_area(plotter, mesh, normal='x', generate_triangles=False,
+                       widget_color=None, assign_to_axis=None,
+                       tubing=False, origin_translation=True,origin = (0,0,0),
+                       outline_translation=False, implicit=True,
+                       normal_rotation=True, **kwargs):
+
+        name = kwargs.get('name', mesh.memory_address)
+        rng = mesh.get_data_range(kwargs.get('scalars', None))
+        kwargs.setdefault('clim', kwargs.pop('rng', rng))
+        mesh.set_active_scalars(kwargs.get('scalars', mesh.active_scalars_name))
+
+        plotter.add_mesh(mesh.outline(), name=name+"outline", opacity=0.0)
+
+        alg = vtk.vtkCutter() # Construct the cutter object
+        alg.SetInputDataObject(mesh) # Use the grid as the data we desire to cut
+        if not generate_triangles:
+            alg.GenerateTrianglesOff()
+
+        # if not hasattr(self, "plane_sliced_meshes"):
+        plotter.plane_sliced_meshes = []
+        plane_sliced_mesh = pyvista.wrap(alg.GetOutput())
+        plotter.plane_sliced_meshes.append(plane_sliced_mesh)
+        
+        user_slice = plotter.plane_sliced_meshes[0]
+        surface = user_slice.delaunay_2d()
+        plotter.add_text(f'Cross sectional area : {surface.area}', color = 'black')
+        def callback(normal, origin):
+            # create the plane for clipping
+            
+            plane = generate_plane(normal, origin)
+            
+            alg.SetCutFunction(plane) # the cutter to use the plane we made
+            alg.Update() # Perform the Cut
+            
+            plane_sliced_mesh.shallow_copy(alg.GetOutput())
+            
+            user_slice = plotter.plane_sliced_meshes[0]
+            surface = user_slice.delaunay_2d()
+            text = f'Cross sectional area : {surface.area}'
+            plotter.textActor.SetText(2, text)
 
 
+        plotter.add_plane_widget(callback=callback, bounds=mesh.bounds,
+                              factor=1.25, normal='x',
+                              color=widget_color, tubing=tubing,
+                              assign_to_axis=assign_to_axis,
+                              origin_translation=origin_translation,
+                              outline_translation=outline_translation,
+                              implicit=implicit, origin=origin,
+                              normal_rotation=normal_rotation)
+    
+        actor = plotter.add_mesh(plane_sliced_mesh, **kwargs)
+        
+        plotter.plane_widgets[0].SetNormal(normal)
+
+        return actor
+    
+def add_custom_mesh_slice(plotter, mesh, normal='x', generate_triangles=False,
+                       widget_color=None, assign_to_axis=None,
+                       tubing=False, origin_translation=True,origin = (0,0,0),
+                       outline_translation=False, implicit=True,
+                       normal_rotation=True, **kwargs):
+
+        name = kwargs.get('name', mesh.memory_address)
+        rng = mesh.get_data_range(kwargs.get('scalars', None))
+        kwargs.setdefault('clim', kwargs.pop('rng', rng))
+        mesh.set_active_scalars(kwargs.get('scalars', mesh.active_scalars_name))
+
+        plotter.add_mesh(mesh.outline(), name=name+"outline", opacity=0.0)
+
+        alg = vtk.vtkCutter() # Construct the cutter object
+        alg.SetInputDataObject(mesh) # Use the grid as the data we desire to cut
+        if not generate_triangles:
+            alg.GenerateTrianglesOff()
+
+        # if not hasattr(self, "plane_sliced_meshes"):
+        plotter.plane_sliced_meshes = []
+        plane_sliced_mesh = pyvista.wrap(alg.GetOutput())
+        plotter.plane_sliced_meshes.append(plane_sliced_mesh)
+        
+
+        def callback(normal, origin):
+            # create the plane for clipping
+            
+            plane = generate_plane(normal, origin)
+            
+            alg.SetCutFunction(plane) # the cutter to use the plane we made
+            alg.Update() # Perform the Cut
+            
+            plane_sliced_mesh.shallow_copy(alg.GetOutput())
+            
+
+
+
+        plotter.add_plane_widget(callback=callback, bounds=mesh.bounds,
+                              factor=1.25, normal='x',
+                              color=widget_color, tubing=tubing,
+                              assign_to_axis=assign_to_axis,
+                              origin_translation=origin_translation,
+                              outline_translation=outline_translation,
+                              implicit=implicit, origin=origin,
+                              normal_rotation=normal_rotation)
+    
+        actor = plotter.add_mesh(plane_sliced_mesh, **kwargs)
+        
+        plotter.plane_widgets[0].SetNormal(normal)
+
+        return actor
 
 
 def find_nearest(array, value):
