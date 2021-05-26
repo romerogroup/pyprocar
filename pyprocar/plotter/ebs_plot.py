@@ -63,8 +63,8 @@ class EBSPlot:
         if self.linewidths is None:
             self.linewidths = np.array([1, 1])[:self.nspins]
         if self.labels is None:
-            self.labels = np.array([r'Spin $\uparrow$',
-                                    r'Spin $\downarrow$'])[:self.nspins]
+            self.labels = np.array([r'$\uparrow$',
+                                    r'$\downarrow$'])[:self.nspins]
         # print(self.nspins)
         # print(self.colors)
         # print(self.opacities)
