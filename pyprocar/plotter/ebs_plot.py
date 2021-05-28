@@ -128,7 +128,8 @@ class EBSPlot:
 
     def plot_scatter(self,
                      spins=None,
-                     mask=None,
+                     width_mask=None,
+                     color_mask=None,
                      cmap="Viridis",
                      vmin=None,
                      vmax=None,
@@ -149,11 +150,15 @@ class EBSPlot:
         if self.ebs.is_non_collinear:
             spins = [0]
 
-        if mask is not None:
-            mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+        if width_mask is not None or color_mask is not None:
+            if width_mask is not None:
+                mbands = np.ma.masked_array(self.ebs.bands, np.abs(width_weights) < width_mask)
+            if color_mask is not None:
+                mbands = np.ma.masked_array(self.ebs.bands, np.abs(color_weights) < color_mask)
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
+
 
         if color_weights is not None:
 
@@ -205,7 +210,8 @@ class EBSPlot:
         cmap="Viridis",
         vmin=None,
         vmax=None,
-        mask=None,
+        width_mask=None,
+        color_mask=None,
         opacity=1.0,
         width_weights=None,
         color_weights=None,
@@ -222,8 +228,11 @@ class EBSPlot:
         if self.ebs.is_non_collinear:
             spins = [0]
 
-        if mask is not None:
-            mbands = np.ma.masked_array(self.bands, np.abs(self.spd) < mask)
+        if width_mask is not None or color_mask is not None:
+            if width_mask is not None:
+                mbands = np.ma.masked_array(self.ebs.bands, np.abs(width_weights) < width_mask)
+            if color_mask is not None:
+                mbands = np.ma.masked_array(self.ebs.bands, np.abs(color_weights) < color_mask)
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
@@ -242,7 +251,7 @@ class EBSPlot:
             for iband in range(self.ebs.nbands):
 
                 points = np.array(
-                    [self.x, self.ebs.bands[:, iband, ispin]]).T.reshape(-1, 1, 2)
+                    [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
                 if color_weights is None:
                     lc = LineCollection(

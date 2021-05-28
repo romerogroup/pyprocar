@@ -12,13 +12,11 @@ class Unfolder:
         ebs=None,
         transformation_matrix=np.diag([1, 1, 1]),
         structure=None,
-        ispin=None,
         tol_radius=0.1,
     ):
         self.ebs = ebs
         self.trans_mat = transformation_matrix
         self.structure = structure
-        self.ispin = ispin
         self.eigenvectors = None
         self.basis = None
         self.positions = None
@@ -52,14 +50,20 @@ class Unfolder:
         #     self.ispin -= 1
         self.basis = []
         self.positions = []
-        self.eigenvectors = np.reshape(
-            self.ebs.projected_phase[:, :, :, :, :, self.ispin],
-            (
-                self.ebs.nkpoints,
-                self.ebs.nbands,
-                self.ebs.natoms * self.ebs.nprincipals * self.ebs.norbitals,
-            ),
-        )
+        self.eigenvectors = np.zeros(
+            shape=(self.ebs.nkpoints,
+                   self.ebs.nbands,
+                   self.ebs.natoms * self.ebs.nprincipals * self.ebs.norbitals, self.ebs.nspins),
+            dtype=np.complex_)
+        for ispin in range(self.ebs.nspins):
+            self.eigenvectors[:, :, :, ispin] = np.reshape(
+                self.ebs.projected_phase[:, :, :, :, :, ispin],
+                (
+                    self.ebs.nkpoints,
+                    self.ebs.nbands,
+                    self.ebs.natoms * self.ebs.nprincipals * self.ebs.norbitals,
+                ),
+            )
         norm = np.linalg.norm(self.eigenvectors, ord=2, axis=2)
         self.eigenvectors /= norm[:, :, None]
 
@@ -69,7 +73,8 @@ class Unfolder:
                 for spin in range(1):
                     # todo: what about spin?
                     self.basis.append("%s|%s|%s" % (None, orb, spin))
-                    self.positions.append(self.structure.fractional_coordinates[iatom])
+                    self.positions.append(
+                        self.structure.fractional_coordinates[iatom])
 
     def _make_translate_maps(self):
         """
@@ -99,7 +104,8 @@ class Unfolder:
         indices = np.zeros([len(rs), len(positions)], dtype="int32")
         for i, ri in enumerate(rs):
             Tpositions = positions + np.array(ri)
-            close_to_int = lambda x: np.all(np.abs(x - np.round(x)) < self.tol_radius)
+            def close_to_int(x): return np.all(
+                np.abs(x - np.round(x)) < self.tol_radius)
             for i_basis, pos in enumerate(positions):
                 for j_basis, Tpos in enumerate(Tpositions):
                     dpos = Tpos - pos
@@ -154,10 +160,12 @@ class Unfolder:
         Get the weight for all the modes.
         """
         nqpts, nfreqs = self.eigenvectors.shape[0], self.eigenvectors.shape[1]
-        weights = np.zeros([nqpts, nfreqs])
-        for iqpt in range(nqpts):
-            for ifreq in range(nfreqs):
-                weights[iqpt, ifreq] = self._get_weight(
-                    self.eigenvectors[iqpt, ifreq, :], self.qpoints[iqpt]
-                )
-        return weights
+        weights = np.zeros([nqpts, nfreqs, self.ebs.nspins])
+        for ispin in range(self.ebs.nspins):
+            for iqpt in range(nqpts):
+                for ifreq in range(nfreqs):
+                    weights[iqpt, ifreq, ispin] = self._get_weight(
+                        self.eigenvectors[iqpt, ifreq,
+                                          :, ispin], self.qpoints[iqpt]
+                    )
+            return weights

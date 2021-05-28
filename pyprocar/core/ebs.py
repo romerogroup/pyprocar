@@ -37,8 +37,8 @@ class ElectronicBandStructure:
         ----------
         kpoints : TYPE, optional
             DESCRIPTION. The default is None.
-        energies : TYPE, optional
-            DESCRIPTION. The default is None.
+        bands : TYPE, optional
+            bands[ikpoin, iband, ispin]. The default is None.
         projected : list float, optional
             dictionary by the following order
             projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin].
@@ -522,14 +522,15 @@ class ElectronicBandStructure:
         self.weights = weights
         return
 
-    def unfold(self, transformation_matrix=None, structure=None, ispin=0):
+    def unfold(self, transformation_matrix=None, structure=None):
+        
         uf = Unfolder(
             ebs=self,
             transformation_matrix=transformation_matrix,
             structure=structure,
-            ispin=0,
         )
         self.update_weights(uf.weights)
+        
         return
 
     def plot_kpoints(
