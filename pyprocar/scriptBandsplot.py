@@ -408,9 +408,9 @@ def bandsplot(
             ax=ax,
         )
         if fermi is not None:
-            ax1.set_ylabel(r"$E-E_f$ [eV]")
+            ax1.set_ylabel(r"$E-E_F$ (eV)")
         else:
-            ax1.set_ylabel(r"Energy [eV]")
+            ax1.set_ylabel(r"Energy (eV)")
         if elimit is not None:
             ax1.set_ylim(elimit)
 
@@ -424,9 +424,9 @@ def bandsplot(
             ax=ax,
         )
         if fermi is not None:
-            ax1.set_ylabel(r"$E-E_f$ [eV]")
+            ax1.set_ylabel(r"$E-E_F$ (eV)")
         else:
-            ax1.set_ylabel(r"Energy [eV]")
+            ax1.set_ylabel(r"Energy (eV)")
         if elimit:
             ax1.set_ylim(elimit)
 
@@ -443,18 +443,18 @@ def bandsplot(
             linewidth=linewidth,
         )
         if fermi is not None:
-            ax1.set_ylabel(r"$E-E_f$ [eV]")
+            ax1.set_ylabel(r"$E-E_F$ (eV)")
         else:
-            ax1.set_ylabel(r"Energy [eV]")
+            ax1.set_ylabel(r"Energy (eV)")
         if elimit is not None:
             ax1.set_ylim(elimit)
 
     elif mode == "atomic":
         fig, ax1 = plot.atomicPlot(cmap=cmap, vmin=vmin, vmax=vmax, ax=ax)
         if fermi is not None:
-            ax1.set_ylabel(r"$E-E_f$ [eV]")
+            ax1.set_ylabel(r"$E-E_F$ (eV)")
         else:
-            ax1.set_ylabel(r"Energy [eV]")
+            ax1.set_ylabel(r"Energy (eV)")
         if elimit is not None:
             ax1.set_ylim(elimit)
     ###### end of mode dependent options ###########
