@@ -23,14 +23,14 @@ class Isosurface(Surface):
             boundaries=None,
     ):
         """
-        This class contains a surface that finds all the poins correcponding 
+        This class contains a surface that finds all the poins correcponding
         to the following equation
         V(X,Y,Z) = f
 
         Parameters
         ----------
         XYZ : TYPE, list of lists of floats, (n,3)
-            DESCRIPTION. a list of coordinates [[x1,y1,z1],[x2,y2,z2],...] 
+            DESCRIPTION. a list of coordinates [[x1,y1,z1],[x2,y2,z2],...]
             corresponding V
         V : TYPE, list of floats, (n,)
             DESCRIPTION. a list of values [V1,V2,...] corresponding to XYZ
@@ -38,23 +38,23 @@ class Isosurface(Surface):
             XYZ[1] >>> V[1]
         isovalue : TYPE, float
             DESCRIPTION. The constant value of the surface (f)
-        V_matrix : TYPE, float (nx,ny,nz) 
-            DESCRIPTION. one can present V_matrix instead of XYZ and V. 
-            V_matrix is a matrix representation of XYZ and V together. This 
-            matrix is generated if XYZ and V are provided. 
+        V_matrix : TYPE, float (nx,ny,nz)
+            DESCRIPTION. one can present V_matrix instead of XYZ and V.
+            V_matrix is a matrix representation of XYZ and V together. This
+            matrix is generated if XYZ and V are provided.
         algorithm : TYPE, string
-            DESCRIPTION. The default is 'lewiner'. The algorithm used to find the isosurface, This 
-            function used scikit-image to find the isosurface. possibilities 
+            DESCRIPTION. The default is 'lewiner'. The algorithm used to find the isosurface, This
+            function used scikit-image to find the isosurface. possibilities
             ['classic','lewiner']
         interpolation_factor : TYPE, int
-            DESCRIPTION. The default is 1. This module uses Fourier Transform 
+            DESCRIPTION. The default is 1. This module uses Fourier Transform
             interpolation. interpolation factor will increase the grid points
             in each direction by a this factor, the dafault is set to 1
         padding : TYPE, list of float (3,)
             DESCRIPTION. padding is used for periodic datasets such as bands in
             a solid state calculation. e.g. The 1st BZ is not covered fully so
-            one might want to pad the matrix with wrap(look at padding in 
-            numpy for wrap), afterwards one has to clip the surface to the 
+            one might want to pad the matrix with wrap(look at padding in
+            numpy for wrap), afterwards one has to clip the surface to the
             first BZ. easily doable using pyvista of trimesh
             padding goes as follows np.pad(self.eigen_matrix,
                               ((padding[0]/2, padding[0]/2),
@@ -66,7 +66,7 @@ class Isosurface(Surface):
             DESCRIPTION. applies an transformation to the vertices VERTS_prime=T*VERTS
         boundaries : TYPE, pyprocar surface
             DESCRIPTION. The default is None. The boundaries in which the isosurface will be clipped with
-            for example the first brillouin zone 
+            for example the first brillouin zone
 
         """
 
@@ -81,10 +81,11 @@ class Isosurface(Surface):
         self.boundaries = boundaries
         
         if self.algorithm not in ['classic', 'lewiner']:
+
             print(
                 "The algorithm chose has to be from ['classic','lewiner'], automtically choosing 'lewiner'"
             )
-            self.algorithm = 'lewiner'
+            self.algorithm = "lewiner"
 
         if self.V_matrix is None:
             self.V_matrix = map2matrix(self.XYZ, self.V)
@@ -92,17 +93,16 @@ class Isosurface(Surface):
         if self.padding is None:
             
             self.padding = [self.nX*2 // 2, self.nY*2 // 2, self.nZ*2 // 2]
+
         else:
             
             self.padding = [
-                self.nX // 2 * padding[0], self.nY // 2 * padding[1],
-                self.nZ // 2 * padding[2]
+                self.nX // 2 * padding[0],
+                self.nY // 2 * padding[1],
+                self.nZ // 2 * padding[2],
             ]
-       
-       
 
-        verts, faces, normals, values = self._get_isosurface(
-            interpolation_factor)
+        verts, faces, normals, values = self._get_isosurface(interpolation_factor)
 
         if verts is not None and faces is not None:
             if transform_matrix is not None:
@@ -119,18 +119,20 @@ class Isosurface(Surface):
             """
 
             if boundaries is not None:
-                suprecell_surface = Surface(verts=verts,
-                                            faces=faces,
-                                            face_normals=normals)
-                if not np.isnan(suprecell_surface.pyvista_obj.points[0,0]):
+                suprecell_surface = Surface(
+                    verts=verts, faces=faces, face_normals=normals
+                )
+                if not np.isnan(suprecell_surface.pyvista_obj.points[0, 0]):
                     verts, faces = self.clip(suprecell_surface, boundaries)
-                #verts, faces = self.clip(suprecell_surface, boundaries)
+                # verts, faces = self.clip(suprecell_surface, boundaries)
 
+        
+        print(normals)
         Surface.__init__(self, verts=verts, faces=faces, face_normals=normals)
 
     def clip(self, S1, S2):
         """
-        This function clips S1 using the boundaries of S2 and returns 
+        This function clips S1 using the boundaries of S2 and returns
 
         Parameters
         ----------
@@ -145,14 +147,12 @@ class Isosurface(Surface):
 
         """
 
-
         for iface in range(len(S2.faces)):
             normal = S2.face_normals[iface]
-            
+
             center = np.average(S2.verts[S2.faces[iface]], axis=0)
 
             S1.pyvista_obj.clip(origin=center, normal=normal, inplace=True)
-        
 
         faces = []
         courser = 0
@@ -164,18 +164,17 @@ class Isosurface(Surface):
                 face.append(S1.pyvista_obj.faces[courser])
                 courser += 1
             faces.append(face)
-            
 
         return S1.pyvista_obj.points, faces
 
     @property
     def X(self):
         """
-        
+
 
         Returns
         -------
-        TYPE numpy array 
+        TYPE numpy array
             DESCRIPTION. list of grids in X direction
 
         """
@@ -184,11 +183,11 @@ class Isosurface(Surface):
     @property
     def Y(self):
         """
-        
+
 
         Returns
         -------
-        TYPE numpy array 
+        TYPE numpy array
             DESCRIPTION. list of grids in Y direction
         """
         return np.unique(self.XYZ[:, 1])
@@ -196,11 +195,11 @@ class Isosurface(Surface):
     @property
     def Z(self):
         """
-        
+
 
         Returns
         -------
-        TYPE numpy array 
+        TYPE numpy array
             DESCRIPTION. list of grids in Z direction
 
         """
@@ -209,7 +208,7 @@ class Isosurface(Surface):
     @property
     def dxyz(self):
         """
-        
+
 
         Returns
         -------
@@ -225,7 +224,7 @@ class Isosurface(Surface):
     @property
     def nX(self):
         """
-        
+
 
         Returns
         -------
@@ -238,7 +237,7 @@ class Isosurface(Surface):
     @property
     def nY(self):
         """
-        
+
 
         Returns
         -------
@@ -251,7 +250,7 @@ class Isosurface(Surface):
     @property
     def nZ(self):
         """
-        
+
 
         Returns
         -------
@@ -264,13 +263,13 @@ class Isosurface(Surface):
     @property
     def surface_boundaries(self):
         """
-        This function tries to find the isosurface using no interpolation to find the 
+        This function tries to find the isosurface using no interpolation to find the
         correct positions of the surface to be able to shift to the interpolated one
         to the correct position
 
         Returns
         -------
-        list of tuples 
+        list of tuples
             DESCRIPTION. [(mins[0],maxs[0]),(mins[1],maxs[1]),(mins[2],maxs[2])]
 
         """
@@ -278,17 +277,21 @@ class Isosurface(Surface):
         padding_x = self.padding[0]
         padding_y = self.padding[1]
         padding_z = self.padding[2]
-        
-        eigen_matrix = np.pad(self.V_matrix,
-                              ((padding_x, padding_x), (padding_y, padding_y),
-                               (padding_z, padding_z)), "wrap")
+
+        eigen_matrix = np.pad(
+            self.V_matrix,
+            ((padding_x, padding_x), (padding_y, padding_y), (padding_z, padding_z)),
+            "wrap",
+        )
         try:
             verts, faces, normals, values = measure.marching_cubes_lewiner(
-                eigen_matrix, self.isovalue)
+                eigen_matrix, self.isovalue
+            )
             for ix in range(3):
                 verts[:, ix] -= verts[:, ix].min()
-                verts[:, ix] -= (verts[:, ix].max() -
-                                 verts[:, ix].min()) / 2  #+self.origin[ix]
+                verts[:, ix] -= (
+                    verts[:, ix].max() - verts[:, ix].min()
+                ) / 2  # +self.origin[ix]
                 verts[:, ix] *= self.dxyz[ix]
             mins = verts.min(axis=0)
             maxs = verts.max(axis=0)
@@ -299,7 +302,7 @@ class Isosurface(Surface):
 
     def _get_isosurface(self, interp_factor=1):
         """
-        
+
 
         Parameters
         ----------
@@ -324,13 +327,15 @@ class Isosurface(Surface):
         padding_x = self.padding[0]
         padding_y = self.padding[1]
         padding_z = self.padding[2]
-        
-        eigen_matrix = np.pad(self.V_matrix,
-                              ((padding_x, padding_x), (padding_y, padding_y),
-                               (padding_z, padding_z)), "wrap")
-   
+
+        eigen_matrix = np.pad(
+            self.V_matrix,
+            ((padding_x, padding_x), (padding_y, padding_y), (padding_z, padding_z)),
+            "wrap",
+        )
+
         bnd = self.surface_boundaries
-        
+
         if interp_factor != 1:
             # Fourier interpolate the mapped function E(x,y,z)
 
@@ -342,10 +347,11 @@ class Isosurface(Surface):
             #     axis=[0, 1, 2])
 
         try:
-            
+
             verts, faces, normals, values = measure.marching_cubes_lewiner(
-                eigen_matrix, self.isovalue)
-            
+                eigen_matrix, self.isovalue
+            )
+
         except BaseException:
             print("No isosurface for this band")
             return None, None, None, None
@@ -373,9 +379,9 @@ class Isosurface(Surface):
                     
                     
                     
-            #+self.origin[ix]
+
             # verts[:, ix] *= self.dxyz[ix] / interp_factor
-            
+
             # print(self.dxyz)
 
             # if self.file == "bxsf":
@@ -385,8 +391,7 @@ class Isosurface(Surface):
             #     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
             #     if self.file == "bxsf":
             #         verts[:, ix] -= 0.50
-                    
-                    
+
             #     x_shift = verts[:,0].min() - bnd[0]
             # y_shift = verts[:,1].min() - bnd[1]
             # z_shift = verts[:,2].min() - bnd[2]
@@ -419,13 +424,13 @@ def map2matrix(XYZ, V):
     """
     XYZ = XYZ
     V = V
-    
+
     X = np.unique(XYZ[:, 0])
     Y = np.unique(XYZ[:, 1])
     Z = np.unique(XYZ[:, 2])
-    
+
     mapped_func = np.zeros(shape=(len(X), len(Y), len(Z)))
-    #kpoint_matrix = np.zeros(shape=(len(kx), len(ky), len(kz), 3)) This was added to check if the mesh grid is working
+    # kpoint_matrix = np.zeros(shape=(len(kx), len(ky), len(kz), 3)) This was added to check if the mesh grid is working
 
     count = 0
     for ix in range(len(X)):
@@ -434,10 +439,10 @@ def map2matrix(XYZ, V):
 
         for iy in range(len(Y)):
             condition2 = XYZ[:, 1] == Y[iy]
-            
-            #print(count)
+
+            # print(count)
             for iz in range(len(Z)):
-                
+
                 condition3 = XYZ[:, 2] == Z[iz]
                 tot_cond = np.all([condition1, condition2, condition3], axis=0)
                 if len(V[tot_cond]) != 0:
@@ -470,9 +475,8 @@ def fft_interpolate(function, interpolation_factor=2):
         "constant",
         constant_values=0,
     )
-    
+
     new_matrix = np.fft.ifftshift(new_matrix)
-    interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor**
-                                                        3)
+    interpolated = np.real(np.fft.ifftn(new_matrix)) * (interpolation_factor ** 3)
 
     return interpolated

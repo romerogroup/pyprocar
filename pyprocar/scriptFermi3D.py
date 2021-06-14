@@ -107,7 +107,6 @@ def fermi3D(
         If one wants plot more than the 1st brillouin zone, this
         parameter can be used.
         e.g. ``supercell=[2, 2, 2]``
-
     extended_zone_directions : list of list of size 3, optional (default ``None``)
         If one wants plot more than  brillouin zones in a particular direection, this
         parameter can be used.

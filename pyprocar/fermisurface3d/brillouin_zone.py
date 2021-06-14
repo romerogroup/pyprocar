@@ -29,8 +29,8 @@ class Lines:
     def _get_connectivity(self):
         for iface in range(self.nface):
             self.connectivity.append(
-                [self.faces[iface][0],
-                 self.faces[iface][-1]])  # to connect the 1st and last point
+                [self.faces[iface][0], self.faces[iface][-1]]
+            )  # to connect the 1st and last point
             for ipoint in range(len(self.faces[iface]) - 1):
                 point_1 = self.faces[ipoint]
                 point_2 = self.faces[ipoint + 1]
@@ -47,8 +47,9 @@ class Lines:
         for iline in self.connectivity:
             entries.append(trimesh.path.entries.Line(iline))
 
-            self.trimesh_line = trimesh.path.path.Path(entries=entries,
-                                                       vertices=self.verts)
+            self.trimesh_line = trimesh.path.path.Path(
+                entries=entries, vertices=self.verts
+            )
 
 
 class BrillouinZone(Surface):
@@ -56,25 +57,41 @@ class BrillouinZone(Surface):
     A Surface object with verts, faces and line representation, representing
     the BrillouinZone
     """
-    def __init__(self, reciprocal_lattice, supercell):
+
+    def __init__(self, reciprocal_lattice, transformation_matrix=None):
         """
+
+
         Parameters
         ----------
         reciprocal_lattice : (3,3) float
-            Reciprocal Lattice
+            Reciprocal lattice used to generate Brillouin zone usgin Wigner Seitz.
+        transformation_matrix : (3,3) float, optional
+            Any transformation to be applied to the unit cell such as rotation
+            or supercell. The default is None.
+
+        Returns
+        -------
+        None.
 
         """
-
-        self.reciprocal = reciprocal_lattice * max(supercell)
+        """
+        if transformation_matrix is not None:
+            self.reciprocal = np.dot(reciprocal_lattice, transformation_matrix)
+        else:
+            self.reciprocal = reciprocal_lattice
+        """
+        self.reciprocal = reciprocal_lattice
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
         verts, faces = self.wigner_seitz()
+        print(verts, faces)
 
         Surface.__init__(self, verts=verts, faces=faces)
 
         self._fix_normals_direction()
 
-        #self.pyvista_obj.face_normals*=-1
+        # self.pyvista_obj.face_normals*=-1
         # self.pyvista_obj['scalars'] = [0]*len(faces)
         # self.pyvista_obj.set_active_scalars('scalars')
 
@@ -82,21 +99,25 @@ class BrillouinZone(Surface):
 
     def wigner_seitz(self):
         """
-        
+
         Returns
         -------
         TYPE
-            Using the Wigner-Seitz Method, this function finds the 1st 
-            Brillouin Zone in terms of vertices and faces 
+            Using the Wigner-Seitz Method, this function finds the 1st
+            Brillouin Zone in terms of vertices and faces
         """
 
         kpoints = []
         for i in range(-1, 2):
             for j in range(-1, 2):
                 for k in range(-1, 2):
-                    vec = i * self.reciprocal[0] + j * \
-                        self.reciprocal[1] + k * self.reciprocal[2]
+                    vec = (
+                        i * self.reciprocal[0]
+                        + j * self.reciprocal[1]
+                        + k * self.reciprocal[2]
+                    )
                     kpoints.append(vec)
+        #print(kpoints, self.reciprocal)
         brill = Voronoi(np.array(kpoints))
         faces = []
         for idict in brill.ridge_dict:
@@ -115,6 +136,7 @@ class BrillouinZone(Surface):
 
             correction = np.sign(np.dot(n1, n2))
             self.face_normals[iface] = self.face_normals[iface] * correction
-            self.pyvista_obj.face_normals[
-                iface] = self.pyvista_obj.face_normals[iface] * correction
+            self.pyvista_obj.face_normals[iface] = (
+                self.pyvista_obj.face_normals[iface] * correction
+            )
             # self.trimesh_obj.face_normals[iface]*=correction

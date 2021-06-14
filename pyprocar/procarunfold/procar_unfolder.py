@@ -49,7 +49,9 @@ class ProcarUnfolder(object):
                     self.basis.append("%s|%s|%s" % (None, orb, spin))
                     self.positions.append(
                         self.atoms.get_scaled_positions()[iatom])
-
+            
+            
+            
     def unfold(self, ispin=None):
         # spd: spd[kpoint][band][ispin][atom][orbital]
         # bands[kpt][iband]
@@ -67,7 +69,7 @@ class ProcarUnfolder(object):
             phase=False,
         )
         w = self.unfolder.get_weights()
-        return w
+        return w # , self.unfolder
 
     def plot(
             self,

@@ -13,6 +13,7 @@ from matplotlib import cm
 
 
 class FermiSurfaceBand3D(Isosurface):
+
     def __init__(
         self,
         kpoints=None,
@@ -30,6 +31,7 @@ class FermiSurfaceBand3D(Isosurface):
         vmax=1,
         supercell=[1, 1, 1],
     ):
+
         """
 
         Parameters
@@ -77,10 +79,13 @@ class FermiSurfaceBand3D(Isosurface):
         self.spin_texture = spin_texture
         self.spd_spin = spd_spin
 
+
         self.brillouin_zone = self._get_brilloin_zone(self.supercell)
         # self.brillouin_zone = None
 
+
         if np.any(self.kpoints >= 0.5):
+
             Isosurface.__init__(
                 self,
                 XYZ=self.kpoints,
@@ -91,6 +96,7 @@ class FermiSurfaceBand3D(Isosurface):
                 padding=self.supercell * 2,
                 transform_matrix=self.reciprocal_lattice,
                 boundaries=self.brillouin_zone,
+
             )
         else:
             Isosurface.__init__(
@@ -108,6 +114,9 @@ class FermiSurfaceBand3D(Isosurface):
             self.project_color(cmap, vmin, vmax)
         if self.spd_spin is not None and self.verts is not None:
             self.create_spin_texture()
+
+        if self.sym == True:
+            self.ibz2fbz()
 
     def create_spin_texture(self):
 
@@ -144,7 +153,7 @@ class FermiSurfaceBand3D(Isosurface):
                         vectors_extended_Z, self.spd_spin[2], axis=0
                     )
 
-            if np.any(self.XYZ >= 0.5):
+            if np.any(self.XYZ >= 0.5): # @logan : I think this should be before the above loop with another else statment
                 for iy in range(self.supercell[ix]):
                     temp = self.XYZ.copy()
                     temp[:, 0] -= 1 * (iy + 1)
@@ -252,22 +261,6 @@ class FermiSurfaceBand3D(Isosurface):
             XYZ_extended = self.XYZ.copy()
             scalars_extended = self.spd.copy()
 
-            # translations = itertools.product([-1,1,0],repeat = 3)
-
-            # for trans in translations:
-            #     for ix in range(len(trans)):
-            #         for iy in range( self.supercell[ix]):
-            #             temp = self.XYZ.copy()
-            #             temp[:, 0] += trans[0] * (iy + 1)
-            #             temp[:, 1] += trans[1] * (iy + 1)
-            #             temp[:, 2] += trans[2] * (iy + 1)
-            #             XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-            #             scalars_extended = np.append(scalars_extended,
-            #                                           self.spd,
-            #                                           axis=0)
-
-            # XYZ_extended = self.XYZ.copy()
-            # scalars_extended = self.spd.copy()
 
             for ix in range(3):
                 for iy in range(self.supercell[ix]):
@@ -279,7 +272,7 @@ class FermiSurfaceBand3D(Isosurface):
                     temp[:, ix] -= 1 * (iy + 1)
                     XYZ_extended = np.append(XYZ_extended, temp, axis=0)
                     scalars_extended = np.append(scalars_extended, self.spd, axis=0)
-            if np.any(self.XYZ >= 0.5):
+            if np.any(self.XYZ >= 0.5): # @logan same here
                 for iy in range(self.supercell[ix]):
                     temp = self.XYZ.copy()
                     temp[:, 0] -= 1 * (iy + 1)
@@ -306,6 +299,7 @@ class FermiSurfaceBand3D(Isosurface):
 
             XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
 
+
             # XYZ_transformed = XYZ_extended
 
             if self.projection_accuracy.lower()[0] == "n":
@@ -322,6 +316,7 @@ class FermiSurfaceBand3D(Isosurface):
 
     def _get_brilloin_zone(self, supercell):
         return BrillouinZone(self.reciprocal_lattice, supercell)
+
 
 
 class FermiSurface3D:
@@ -482,3 +477,38 @@ class FermiSurface3D:
 
     def _get_brilloin_zone(self, supercell):
         return BrillouinZone(self.reciprocal_lattice, supercell)
+
+    # def ibz2fbz(self):
+    #     """
+    #     Converts the irreducible Brilluoin zone to the full Brillouin zone.
+
+    #     Parameters:
+    #     """
+    #     klist = []
+    #     bandlist = []
+    #     spdlist = []
+
+    #     for i, _ in enumerate(self.rotations):
+    #         # for each point
+    #         for j, _ in enumerate(self.kpoints):
+    #             # apply symmetry operation to kpoint
+    #             sympoint_vector = np.dot(self.rotations[i], self.kpoints[j])
+    #             # apply boundary conditions
+    #             # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
+    #             # sympoint_vector += bound_ops
+
+    #             sympoint = sympoint_vector.tolist()
+
+    #             if sympoint not in klist:
+    #                 klist.append(sympoint)
+
+    #                 if self.band is not None:
+    #                     band = self.band[j].tolist()
+    #                     bandlist.append(band)
+    #                 if self.spd is not None:
+    #                     spd = self.spd[j].tolist()
+    #                     spdlist.append(spd)
+
+    #     self.kpoints = np.array(klist)
+    #     self.band = np.array(bandlist)
+    #     self.spd = np.array(spdlist)
