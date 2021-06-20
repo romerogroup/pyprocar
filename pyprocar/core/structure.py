@@ -4,7 +4,7 @@ import spglib
 import numpy as np
 from scipy.spatial import ConvexHull
 
-from . import Surface
+# from . import Surface
 from . import elements
 
 
