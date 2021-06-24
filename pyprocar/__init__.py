@@ -27,7 +27,7 @@ import logging
 import re
 import sys
 
-import ase
+# import ase
 import matplotlib.pyplot as plt
 import numpy as np
 import seekpath
@@ -71,7 +71,6 @@ from pyprocar import vaspxml
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
-from .scriptBandsplot1 import bandsplot1
 from .scriptCat import cat
 from .scriptDosplot import dosplot
 from .scriptFermi2D import fermi2D

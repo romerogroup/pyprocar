@@ -32,6 +32,13 @@ class VaspXML(collections.abc.Mapping):
         # self.array_sizes = {}
         self.data = self.read()
 
+    def repair(self):
+        """
+        repairs the wrong syntaxes in vasprun.xml
+        """
+        
+        
+
     def read(self):
         """
         Read and parse vasprun.xml.
