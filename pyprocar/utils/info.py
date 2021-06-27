@@ -3,6 +3,25 @@
 # to increase the speed of loading 
 # "symbol":[atomic#, atomic mass, electronegativity, melting, boiling, ionic radius,
 # covalant readius, electronic shell]
+orbital_names = {'s': [0],
+                 'p': [1, 2, 3],
+                 'd': [4, 5, 6, 7, 8],
+                 'f': [9, 10, 11, 12, 13, 14, 15],
+                 "py": 1,
+                 "pz": 2,
+                 "px": 3,
+                 "dxy": 4,
+                 "dyz": 5,
+                 "dz2": 6,
+                 "dxz": 7,
+                 "x2-y2": 8,
+                 "fy3x2": 9,
+                 "fxyz": 10,
+                 "fyz2": 11,
+                 "fz3": 12,
+                 "fxz2": 13,
+                 "fzx2": 14,
+                 }
 elements = {
     "H": 1,
     "He": 2,

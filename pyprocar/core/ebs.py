@@ -6,11 +6,14 @@ Created on Sat Jan 16 2021
 @author: Freddy Farah
 """
 
-from scipy.interpolate import CubicSpline
+
 from ..fermisurface3d import BrillouinZone
 from . import Structure
 from ..utils import Unfolder, mathematics
+from scipy.interpolate import CubicSpline
+import itertools
 import numpy as np
+import networkx as nx
 from matplotlib import pylab as plt
 import pyvista
 
@@ -84,6 +87,7 @@ class ElectronicBandStructure:
             self.has_phase = False
         self.labels = labels
         self.weights = weights
+        self.graph = None
 
     @property
     def nkpoints(self):
@@ -130,8 +134,50 @@ class ElectronicBandStructure:
     def kpoints_reduced(self):
         return self.kpoints
 
+    def reorder(self, plot=True):
+        nspins = self.nspins
+        if self.is_non_collinear:
+            nspins = 1
+            projected = np.sum(self.projected, axis=-1).reshape(self.nkpoints,
+                                                                self.nbands,
+                                                                self.natoms,
+                                                                self.nprincipals,
+                                                                self.norbitals,
+                                                                nspins)
+        else:
+            projected = self.projected
+        for ispin in range(nspins):
+
+            DG = nx.Graph()
+            X = np.arange(self.nkpoints)
+            DG.add_nodes_from([((i, j), {"pos": (X[i], self.bands[i, j, ispin])}) for i, j in itertools.product(
+                range(self.nkpoints), range(self.nbands))])
+
+            pos = nx.get_node_attributes(DG, "pos")
+            for ikpoint in range(self.nkpoints-1):
+                for iband in range(79,80):
+                    prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
+                                                                                      self.norbitals), self.nbands, axis=0)
+                    prj_1 = self.projected[ikpoint+1, :, :, :, :, ispin]                    
+                    prod = prj*prj_1
+                    jband = np.argwhere(prod == prod.max())[0][0]
+                    DG.add_edge((ikpoint, iband), (ikpoint+1, jband))
+                    
+
+            if plot:
+                plt.figure(figsize=(16, 9))
+                nodes = nx.draw_networkx_nodes(
+                    DG, pos, node_size=5, node_color=["blue", "red"][ispin])
+                edges = nx.draw_networkx_edges(
+                    DG,
+                    pos,
+                    edge_color='red'
+                )
+                plt.show()
+            return DG
+
     def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
-        
+
         principal_q_numbers = np.array(principal_q_numbers)
         if atoms is None:
             atoms = np.arange(self.natoms, dtype=int)
@@ -421,116 +467,19 @@ class ElectronicBandStructure:
     def apply_symmetries(self, operations=None, structure=None):
         return
 
-    def plot(self, elimit=[-5, 5], figsize=(16, 9)):
-
-        if self.weights is not None:
-            self.weights /= self.weights.max()
-        else:
-            self.weights = np.ones_like(self.bands)
-
-        self.bands[self.weights.round(1) == 0] = np.nan
-        plt.figure(figsize=figsize)
-
-        pos = 0
-        for isegment in range(self.kpath.nsegments):
-            kstart, kend = self.kpath.special_kpoints[isegment]
-            distance = np.linalg.norm(kend - kstart)
-            if isegment == 0:
-                x = np.linspace(pos, pos + distance,
-                                self.kpath.ngrids[isegment])
-            else:
-                x = np.append(
-                    x,
-                    np.linspace(pos, pos + distance,
-                                self.kpath.ngrids[isegment]),
-                    axis=0,
-                )
-            pos += distance
-        x = np.array(x).reshape(-1,)
-
-        for iband in range(self.nbands):
-            if self.weights is not None:
-                plt.scatter(
-                    x,
-                    self.bands[:, iband],
-                    c=self.weights[:, iband].round(2),
-                    cmap="Blues",
-                    s=self.weights[:, iband] * 75,
-                )
-
-            plt.plot(
-                x, self.bands[:, iband], color="gray", alpha=0.8,
-            )
-
-        for ipos in self.kpath.tick_positions:
-            plt.axvline(x[ipos], color="black")
-        plt.xticks(x[self.kpath.tick_positions], self.kpath.tick_names)
-        plt.xlim(0, x[-1])
-        plt.axhline(y=0, color="red", linestyle="--")
-        plt.ylim(elimit)
-        if self.weights is not None:
-            plt.colorbar()
-        plt.tight_layout()
-
-        ####
-        # plt.figure(figsize=figsize)
-
-        # pos = 0
-        # for isegment in range(self.kpath.nsegments):
-        #     kstart, kend = self.kpath.special_kpoints[isegment]
-        #     distance = np.linalg.norm(kend - kstart)
-        #     if isegment == 0:
-        #         x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
-        #     else:
-        #         x = np.append(
-        #             x,
-        #             np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
-        #             axis=0,
-        #         )
-        #     pos += distance
-        # x = np.array(x).reshape(-1,)
-
-        # # r = np.absolute(self.projected_phase).sum(axis=(2,3,4,5))
-        # # phi = np.angle(self.projected_phase).sum(axis=(2,3,4,5))
-        # # self.projected[self.projected == 0] = np.nan
-        # diff = self.projected[:, :, 0, 0, 0, 0]
-        # diff[diff == 0] = np.nan
-        # # diff_phase = np.diff(self.projected_phase, axis=0)[:,:,0,0,0]
-        # # diff_phase = np.absolute(diff_phase)
-
-        # for iband in range(self.nbands):
-
-        #     plt.scatter(
-        #         x, self.bands[:, iband], cmap="jet", c=diff[:, iband]
-        #     )
-        #     plt.plot(
-        #         x, self.bands[:, iband], color="gray", alpha=0.5,
-        #     )
-        # for ipos in self.kpath.tick_positions:
-        #     plt.axvline(x[ipos], color="black")
-        # plt.xticks(x[self.kpath.tick_positions], self.kpath.tick_names)
-        # plt.xlim(0, x[-1])
-        # plt.axhline(y=0, color="red", linestyle="--")
-
-        # plt.ylim(elimit)
-        # plt.colorbar()
-        # plt.tight_layout()
-
-        plt.show()
-
     def update_weights(self, weights):
         self.weights = weights
         return
 
     def unfold(self, transformation_matrix=None, structure=None):
-        
+
         uf = Unfolder(
             ebs=self,
             transformation_matrix=transformation_matrix,
             structure=structure,
         )
         self.update_weights(uf.weights)
-        
+
         return
 
     def plot_kpoints(

@@ -126,11 +126,20 @@ class EBSPlot:
                 )
             self.handles.append(handle[0])
 
+    def plot_order(self):
+        for ispin in range(self.ebs.bands.shape[2]):
+            for iband in range(self.ebs.nbands):
+                self.ax.plot(
+                    self.x, self.ebs.bands[:, iband, ispin], alpha=self.opacities[
+                        ispin],  linewidth=self.linewidths[ispin],
+                )
+
+
     def plot_scatter(self,
                      spins=None,
                      width_mask=None,
                      color_mask=None,
-                     cmap="Viridis",
+                     cmap=None,
                      vmin=None,
                      vmax=None,
                      marker="o",
@@ -139,11 +148,13 @@ class EBSPlot:
                      color_weights=None,
                      plot_color_bar=True,
                      ):
+        if cmap is None:
+            cmap = 'viridis'
 
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
         else:
-            self.linewidths *= 30
+            self.linewidths =[l*30 for l in self.linewidths]
 
         if spins is None:
             spins = range(self.ebs.nspins)
@@ -152,13 +163,14 @@ class EBSPlot:
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
-                mbands = np.ma.masked_array(self.ebs.bands, np.abs(width_weights) < width_mask)
+                mbands = np.ma.masked_array(
+                    self.ebs.bands, np.abs(width_weights) < width_mask)
             if color_mask is not None:
-                mbands = np.ma.masked_array(self.ebs.bands, np.abs(color_weights) < color_mask)
+                mbands = np.ma.masked_array(
+                    self.ebs.bands, np.abs(color_weights) < color_mask)
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
-
 
         if color_weights is not None:
 
@@ -176,7 +188,8 @@ class EBSPlot:
                         self.x,
                         mbands[:, iband, ispin],
                         c=self.colors[ispin],
-                        s=width_weights[:, iband, ispin].round(2)*self.linewidths[ispin],
+                        s=width_weights[:, iband, ispin].round(
+                            2)*self.linewidths[ispin],
                         edgecolors="none",
                         linewidths=0,
                         cmap=cmap,
@@ -190,7 +203,8 @@ class EBSPlot:
                         self.x,
                         mbands[:, iband, ispin],
                         c=color_weights[:, iband, ispin].round(2),
-                        s=width_weights[:, iband, ispin].round(2)*self.linewidths[ispin],
+                        s=width_weights[:, iband, ispin].round(
+                            2)*self.linewidths[ispin],
                         edgecolors="none",
                         linewidths=0,
                         cmap=cmap,
@@ -202,12 +216,12 @@ class EBSPlot:
                     )
         if plot_color_bar and color_weights is not None:
             cb = self.fig.colorbar(sc, ax=self.ax)
-            cb.ax.tick_params(labelsize=20)    
+            cb.ax.tick_params(labelsize=20)
 
     def plot_parameteric(
         self,
         spins=None,
-        cmap="Viridis",
+        cmap=None,
         vmin=None,
         vmax=None,
         width_mask=None,
@@ -217,11 +231,12 @@ class EBSPlot:
         color_weights=None,
         plot_color_bar=False,
     ):
-
+        if cmap is None:
+            cmap = 'viridis'
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
         else:
-            self.linewidths *= 5
+            self.linewidths = [l*5 for l in self.linewidths]
 
         if spins is None:
             spins = range(self.ebs.nspins)
@@ -230,9 +245,11 @@ class EBSPlot:
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
-                mbands = np.ma.masked_array(self.ebs.bands, np.abs(width_weights) < width_mask)
+                mbands = np.ma.masked_array(
+                    self.ebs.bands, np.abs(width_weights) < width_mask)
             if color_mask is not None:
-                mbands = np.ma.masked_array(self.ebs.bands, np.abs(color_weights) < color_mask)
+                mbands = np.ma.masked_array(
+                    self.ebs.bands, np.abs(color_weights) < color_mask)
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
@@ -253,6 +270,10 @@ class EBSPlot:
                 points = np.array(
                     [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
+                # this is to delete the segments on the high sym points
+                x = self.x
+                segments = np.delete(
+                    segments, np.where(x[1:] == x[:-1])[0], axis=0)
                 if color_weights is None:
                     lc = LineCollection(
                         segments, colors=self.colors[ispin])
@@ -266,6 +287,56 @@ class EBSPlot:
         if plot_color_bar and color_weights is not None:
             cb = self.fig.colorbar(lc, ax=self.ax)
             cb.ax.tick_params(labelsize=20)
+
+    def plot_parameteric_overlay(self,
+                                 spins=None,
+                                 cmaps=None,
+                                 vmin=None,
+                                 vmax=None,
+                                 weights=None,
+                                 plot_color_bar=False,
+                                 ):
+
+        self.linewidths = [l*7 for l in self.linewidths]
+        if cmaps is None:
+            cmaps = ['Reds', "Blues", "Greens",
+                     "Purples", "Oranges", "Greys"]
+        if spins is None:
+            spins = range(self.ebs.nspins)
+        if self.ebs.is_non_collinear:
+            spins = [0]
+        for iweight, weight in enumerate(weights):
+
+            if vmin is None:
+                vmin = 0
+            if vmax is None:
+                vmax = 1
+            norm = matplotlib.colors.Normalize(vmin, vmax)
+
+            for ispin in spins:
+                # plotting
+                for iband in range(self.ebs.nbands):
+
+                    points = np.array(
+                        [self.x, self.ebs.bands[:, iband, ispin]]).T.reshape(-1, 1, 2)
+                    segments = np.concatenate(
+                        [points[:-1], points[1:]], axis=1)
+                    # this is to delete the segments on the high sym points
+                    x = self.x
+                    segments = np.delete(
+                        segments, np.where(x[1:] == x[:-1])[0], axis=0)
+                    lc = LineCollection(
+                        segments, cmap=plt.get_cmap(cmaps[iweight]), norm=norm, alpha=self.opacities[0])
+                    lc.set_array(weight[:, iband, ispin])
+                    lc.set_linewidth(
+                        weight[:, iband, ispin]*self.linewidths[ispin])
+                    handle = self.ax.add_collection(lc)
+            handle.set_color(cmaps[iweight][:-1].lower())
+            handle.set_linewidth(self.linewidths)
+            self.handles.append(handle)
+            if plot_color_bar:
+                cb = self.fig.colorbar(lc, ax=self.ax)
+                cb.ax.tick_params(labelsize=20)
 
     def set_xticks(self, tick_positions=None, tick_names=None, color="black"):
         if tick_positions is None:

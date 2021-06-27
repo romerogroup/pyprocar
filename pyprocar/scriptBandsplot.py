@@ -2,6 +2,7 @@ import os
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+from .utils.info import orbital_names
 from .io import vasp
 from .plotter import EBSPlot
 from .abinitparser import AbinitParser
@@ -16,6 +17,7 @@ from .utilsprocar import UtilsProcar
 
 from .scriptBandsplot_old import bandsplot_old
 
+
 def bandsplot(
         procar="PROCAR",
         abinit_output="abinit.out",
@@ -28,6 +30,7 @@ def bandsplot(
         spins=None,
         atoms=None,
         orbitals=None,
+        items=None,
         fermi=None,
         interpolation_factor=1,
         projection_mask=None,
@@ -35,7 +38,7 @@ def bandsplot(
         colors=None,
         weighted_width=False,
         weighted_color=True,
-        cmap="viridis",
+        cmap=None,
         marker="o",
         markersize=0.02,
         linewidths=None,
@@ -141,8 +144,6 @@ def bandsplot(
     if old:
         bandsplot_old(**locals())
 
-
-
     # import matplotlib
     # Roman ['rm', 'cal', 'it', 'tt', 'sf',
     plt.rcParams["mathtext.default"] = "regular"
@@ -168,30 +169,13 @@ def bandsplot(
     structure = None
     reciprocal_lattice = None
     kpath = None
-
-    if code == "vasp":
-        if outcar is not None:
-            outcar = vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        if poscar is not None:
-            poscar = vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.reciprocal_lattice
-
-        if kpoints is not None:
-            kpoints = vasp.Kpoints(kpoints)
-            kpath = kpoints.kpath
-
-        procar = vasp.Procar(procar, structure, reciprocal_lattice,
-                             kpath, fermi, interpolation_factor=interpolation_factor)
-        ebs_plot = EBSPlot(procar.ebs, kpath, ax, spins,
-                           colors, opacities, linestyles, linewidths, labels)
+    ebs, kpath, structure, reciprocal_lattice = parse(
+        code, outcar, poscar, procar, reciprocal_lattice, kpoints, interpolation_factor, fermi)
+    ebs_plot = EBSPlot(ebs, kpath, ax, spins,
+                       colors, opacities, linestyles, linewidths, labels)
 
     if unfold_mode is not None:
-        if procar.has_phase and unfold_mode != "kpath":
+        if unfold_mode != "kpath":
             ebs_plot.ebs.unfold(
                 transformation_matrix=transformation_matrix, structure=structure)
         # elif unfold_mode != "kpath":
@@ -201,39 +185,74 @@ def bandsplot(
         for isegment in range(ebs_plot.kpath.nsegments):
             for ip in range(2):
                 ebs_plot.kpath.special_kpoints[isegment][ip] = np.dot(
-                    np.linalg.inv(transformation_matrix),ebs_plot.kpath.special_kpoints[isegment][ip])
+                    np.linalg.inv(transformation_matrix), ebs_plot.kpath.special_kpoints[isegment][ip])
 
     if mode == "plain":
         ebs_plot.plot_bands()
+    elif mode == "order":
+        ebs_plot.plot_order()
+    elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
+        weights = []
+        ebs_plot.labels = []
+        if mode == "overlay_species":
+            
+            for ispc in structure.species:
+                ebs_plot.labels.append(ispc)
+                atoms = np.where(
+                    structure.atoms == ispc)[0]
+                w = ebs_plot.ebs.ebs_sum(
+                    atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
+                weights.append(w)
+        if mode == "overlay_orbitals":
+            for iorb in ['s', 'p', 'd', 'f']:
+                if iorb == 'f' and not ebs_plot.ebs.norbitals > 9:
+                    continue
+                ebs_plot.labels.append(iorb)
+                orbitals = orbital_names[iorb]
+                w = ebs_plot.ebs.ebs_sum(
+                    atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
+                weights.append(w)
+
+        elif mode == "overlay":
+            if isinstance(items, dict):
+                items = [items]
+
+            if isinstance(items, list):
+                for it in items:
+                    for ispc in it:
+                        atoms = np.where(
+                            structure.atoms == ispc)[0]
+                        if isinstance(it[ispc][0], str):
+                            orbitals = []
+                            for iorb in it[ispc]:
+                                orbitals = np.append(
+                                    orbitals, orbital_names[iorb]).astype(np.int)
+                            ebs_plot.labels.append(ispc+'-'+"".join(it[ispc]))
+                        else:
+                            orbitals = it[ispc]
+                            ebs_plot.labels.append(ispc+'-'+"_".join(it[ispc]))
+                        w = ebs_plot.ebs.ebs_sum(
+                            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
+                        weights.append(w)
+        ebs_plot.plot_parameteric_overlay(
+            spins=spins,
+            cmaps=cmap,
+            vmin=vmin,
+            vmax=vmax,  
+            weights=weights,
+            plot_color_bar=plot_color_bar)
+
     else:
-        if atoms is not None and type(atoms[0]) is str:
+        if atoms is not None and isinstance(atoms[0], str):
             atoms_str = atoms
             atoms = []
             for iatom in np.unique(atoms_str):
                 atoms = np.append(atoms, np.where(
                     structure.atoms == iatom)[0]).astype(np.int)
 
-        if orbitals is not None and type(orbitals[0]) is str:
+        if orbitals is not None and isinstance(orbitals[0], str):
             orbital_str = orbitals
-            orbital_names = {'s': 0,
-                             'p': [1, 2, 3],
-                             'd': [4, 5, 6, 7, 8],
-                             'f': [9, 10, 11, 12, 13, 14, 15],
-                             "py": 1,
-                             "pz": 2,
-                             "px": 3,
-                             "dxy": 4,
-                             "dyz": 5,
-                             "dz2": 6,
-                             "dxz": 7,
-                             "x2-y2": 8,
-                             "fy3x2": 9,
-                             "fxyz": 10,
-                             "fyz2": 11,
-                             "fz3": 12,
-                             "fxz2": 13,
-                             "fzx2": 14,
-                             }
+
             orbitals = []
             for iorb in orbital_str:
                 orbitals = np.append(
@@ -285,6 +304,7 @@ def bandsplot(
                 plot_color_bar=plot_color_bar,
                 vmin=vmin,
                 vmax=vmax)
+
         else:
             print("Selected mode %s not valid. Please check the spelling " % mode)
 
@@ -303,3 +323,35 @@ def bandsplot(
     return ebs_plot
 
 
+def parse(code='vasp',
+          outcar=None,
+          poscar=None,
+          procar=None,
+          reciprocal_lattice=None,
+          kpoints=None,
+          interpolation_factor=1,
+          fermi=None):
+    ebs = None
+    kpath = None
+    structure = None
+
+    if code == "vasp":
+        if outcar is not None:
+            outcar = vasp.Outcar(outcar)
+            if fermi is None:
+                fermi = outcar.efermi
+            reciprocal_lattice = outcar.reciprocal_lattice
+        if poscar is not None:
+            poscar = vasp.Poscar(poscar)
+            structure = poscar.structure
+            if reciprocal_lattice is None:
+                reciprocal_lattice = poscar.structure.reciprocal_lattice
+
+        if kpoints is not None:
+            kpoints = vasp.Kpoints(kpoints)
+            kpath = kpoints.kpath
+
+        procar = vasp.Procar(procar, structure, reciprocal_lattice,
+                             kpath, fermi, interpolation_factor=interpolation_factor)
+        ebs = procar.ebs
+    return ebs, kpath, structure, reciprocal_lattice
