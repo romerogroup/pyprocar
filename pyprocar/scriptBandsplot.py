@@ -141,7 +141,7 @@ def bandsplot(
     None.
 
     """
-    if old:
+    if old or code!='vasp':
         bandsplot_old(**locals())
 
     # import matplotlib

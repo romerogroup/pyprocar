@@ -144,6 +144,7 @@ class ElectronicBandStructure:
                                                                 self.nprincipals,
                                                                 self.norbitals,
                                                                 nspins)
+            
         else:
             projected = self.projected
         for ispin in range(nspins):
@@ -155,15 +156,20 @@ class ElectronicBandStructure:
 
             pos = nx.get_node_attributes(DG, "pos")
             for ikpoint in range(self.nkpoints-1):
-                for iband in range(79,80):
+                for iband in range(self.nbands):
                     prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
-                                                                                      self.norbitals), self.nbands, axis=0)
-                    prj_1 = self.projected[ikpoint+1, :, :, :, :, ispin]                    
+                                                                                      self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
+                    prj_1 = projected[ikpoint+1, :, :, :, :, ispin]                  
                     prod = prj*prj_1
-                    jband = np.argwhere(prod == prod.max())[0][0]
-                    DG.add_edge((ikpoint, iband), (ikpoint+1, jband))
+                    prod = prod.sum(axis=-1)
+                    prod = prod.sum(axis=-1)
+                    prod = prod.sum(axis=-1)
+                    prod = np.exp(-1*prod)
                     
-
+                    DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
+                    
+                    
+            
             if plot:
                 plt.figure(figsize=(16, 9))
                 nodes = nx.draw_networkx_nodes(
