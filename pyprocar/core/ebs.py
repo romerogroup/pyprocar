@@ -6,9 +6,8 @@ Created on Sat Jan 16 2021
 @author: Freddy Farah
 """
 
-
-from ..fermisurface3d import BrillouinZone
 from . import Structure
+from ..fermisurface3d import BrillouinZone
 from ..utils import Unfolder, mathematics
 from scipy.interpolate import CubicSpline
 import itertools
@@ -135,52 +134,103 @@ class ElectronicBandStructure:
         return self.kpoints
 
     def reorder(self, plot=True):
+        e = 1e-3
         nspins = self.nspins
         if self.is_non_collinear:
             nspins = 1
-            projected = np.sum(self.projected, axis=-1).reshape(self.nkpoints,
-                                                                self.nbands,
-                                                                self.natoms,
-                                                                self.nprincipals,
-                                                                self.norbitals,
-                                                                nspins)
-            
+            # projected = np.sum(self.projected, axis=-1).reshape(self.nkpoints,
+            #                                                     self.nbands,
+            #                                                     self.natoms,
+            #                                                     self.nprincipals,
+            #                                                     self.norbitals,
+            #                                                     nspins)
+            projected = self.projected
+
         else:
             projected = self.projected
+        new_bands = np.zeros_like(self.bands)
+        new_projected = np.zeros_like(self.projected)
         for ispin in range(nspins):
 
-            DG = nx.Graph()
-            X = np.arange(self.nkpoints)
-            DG.add_nodes_from([((i, j), {"pos": (X[i], self.bands[i, j, ispin])}) for i, j in itertools.product(
-                range(self.nkpoints), range(self.nbands))])
+            # DG = nx.Graph()
+            # X = np.arange(self.nkpoints)
+            # DG.add_nodes_from(
+            #     [
+            #         ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
+            #         for i, j in itertools.product(
+            #             range(self.nkpoints), range(self.nbands)
+            #         )
+            #     ]
+            # )
 
-            pos = nx.get_node_attributes(DG, "pos")
-            for ikpoint in range(self.nkpoints-1):
+            # pos = nx.get_node_attributes(DG, "pos")
+            new_bands[0,:,ispin] = self.bands[0,:,ispin]
+            new_projected[0, :, :, :, :, :] = self.projected[0, :, :, :, :, :]
+            for ikpoint in range(self.nkpoints - 1):
+                order = []
+                
                 for iband in range(self.nbands):
-                    prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
-                                                                                      self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
-                    prj_1 = projected[ikpoint+1, :, :, :, :, ispin]                  
-                    prod = prj*prj_1
-                    prod = prod.sum(axis=-1)
-                    prod = prod.sum(axis=-1)
-                    prod = prod.sum(axis=-1)
-                    prod = np.exp(-1*prod)
+                    # prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
+                    #                                                                   self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
+                    dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
+                    if dK == 0:
+                        continue
+                    prj = np.repeat(
+                        np.sqrt(projected[ikpoint, iband, :, :, :, ispin].astype(np.complex_)).reshape(
+                            1, -1
+                        ),  
+                        self.nbands,
+                        axis=0,
+                    )
+                    prj /= np.linalg.norm(prj[0])
+                    prj_1 = np.sqrt(
+                        projected[ikpoint + 1, :, :, :, :, ispin].astype(np.complex_).reshape(
+                            self.nbands, -1
+                        )
+                    )
+                    prj_1 = prj_1.T / np.linalg.norm(prj_1, axis=1)
+                    prj_1 = prj_1.T
+                    # return prj, prj_1
+                    # prod = prj*prj_1
+                    # prod = prod.sum(axis=-1)
+                    # prod = prod.sum(axis=-1)
+                    # prod = prod.sum(axis=-1)
+                    # return prj, prj_1
+                    # # prod = np.exp(-1*prod* 1/(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]))
+                    # prod = np.exp(-1/abs(prod))
+                    # prod = np.exp(-1*abs(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]+e))
+                    dots = np.array([np.vdot(x, y) for x, y in zip(prj, prj_1)])
                     
-                    DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
+                    diff = np.linalg.norm(prj - prj_1, axis=1)
+                    dE = np.abs(
+                        self.bands[ikpoint + 1, :, ispin]
+                        - self.bands[ikpoint, iband, ispin]
+                    ) 
+                    dEdK = (dE / dK)
+                    jband = np.argsort(dots*dEdK)
+                    counter = 0
+                    # while jband[counter] in order:
+                    #     counter+=1
+                    order.append(jband[counter])  
                     
+                    # if iband !=0 and jband== 0:
+                    #     print(ikpoint, iband)
                     
-            
-            if plot:
-                plt.figure(figsize=(16, 9))
-                nodes = nx.draw_networkx_nodes(
-                    DG, pos, node_size=5, node_color=["blue", "red"][ispin])
-                edges = nx.draw_networkx_edges(
-                    DG,
-                    pos,
-                    edge_color='red'
-                )
-                plt.show()
-            return DG
+                    # print(iband, self.bands[ikpoint, iband, ispin], jband, self.bands[ikpoint, jband, ispin])
+                    
+                    # diffs.append(diff)
+                    # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
+                    # DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
+                if len(order) == 0:
+                    new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
+                    new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
+                else :
+                    new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
+                    new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
+                
+        self.bands = new_bands
+        self.projected = new_projected
+        return 
 
     def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
 
@@ -200,8 +250,9 @@ class ElectronicBandStructure:
         # sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)
         # in non-mag, non-colin nspin=1, in colin nspin=2
         if self.is_non_collinear:
-            ret = np.sum(ret[:, :, spins], axis=-
-                         1).reshape(self.nkpoints, self.nbands, 1)
+            ret = np.sum(ret[:, :, spins], axis=-1).reshape(
+                self.nkpoints, self.nbands, 1
+            )
         return ret
 
     def interpolate(self, interpolation_factor=2):
@@ -314,12 +365,9 @@ class ElectronicBandStructure:
 
             if time_reversal:
                 bands_flip = np.flip(bands, axis=0)
-                bands_period = np.append(
-                    bands_flip[:-1], bands, axis=0
-                )
+                bands_period = np.append(bands_flip[:-1], bands, axis=0)
                 projected_flip = np.flip(projected, axis=0)
-                projected_period = np.append(
-                    projected_flip[:-1], projected, axis=0)
+                projected_period = np.append(projected_flip[:-1], projected, axis=0)
 
                 if self.has_phase:
                     projected_phase_flip = np.flip(
@@ -370,12 +418,9 @@ class ElectronicBandStructure:
                     )
                 if nkpoints_post_extention + nkpoints_pre_extention != 0:
                     if nkpoints_pre_extention != 0:
-                        extended_kpoints = np.append(
-                            kpoints_pre, kpoints, axis=0)
+                        extended_kpoints = np.append(kpoints_pre, kpoints, axis=0)
                         extended_bands = np.append(
-                            bands_period[-nkpoints_pre_extention:],
-                            bands,
-                            axis=0,
+                            bands_period[-nkpoints_pre_extention:], bands, axis=0,
                         )
                         extended_projected = np.append(
                             projected_period[-nkpoints_pre_extention:],
@@ -411,12 +456,9 @@ class ElectronicBandStructure:
                                     axis=0,
                                 )
                         else:
-                            extended_kpoints = np.append(
-                                kpoints, kpoints_post, axis=0)
+                            extended_kpoints = np.append(kpoints, kpoints_post, axis=0)
                             extended_bands = np.append(
-                                bands,
-                                bands_period[1:nkpoints_post_extention],
-                                axis=0,
+                                bands, bands_period[1:nkpoints_post_extention], axis=0,
                             )
                             extended_projected = np.append(
                                 projected,
@@ -447,9 +489,7 @@ class ElectronicBandStructure:
                     overall_kpoints = np.append(
                         overall_kpoints, extended_kpoints, axis=0
                     )
-                    overall_bands = np.append(
-                        overall_bands, extended_bands, axis=0
-                    )
+                    overall_bands = np.append(overall_bands, extended_bands, axis=0)
                     overall_projected = np.append(
                         overall_projected, extended_projected, axis=0
                     )
@@ -480,9 +520,7 @@ class ElectronicBandStructure:
     def unfold(self, transformation_matrix=None, structure=None):
 
         uf = Unfolder(
-            ebs=self,
-            transformation_matrix=transformation_matrix,
-            structure=structure,
+            ebs=self, transformation_matrix=transformation_matrix, structure=structure,
         )
         self.update_weights(uf.weights)
 

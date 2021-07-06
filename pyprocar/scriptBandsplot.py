@@ -60,6 +60,7 @@ def bandsplot(
         code="vasp",
         lobstercode="qe",
         unfold_mode=None,
+        reorder=False,
         transformation_matrix=None,
         verbose=True,
         old=False,
@@ -190,7 +191,10 @@ def bandsplot(
     if mode == "plain":
         ebs_plot.plot_bands()
     elif mode == "order":
+        if reorder:
+            ebs_plot.ebs.reorder()    
         ebs_plot.plot_order()
+        
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
         ebs_plot.labels = []
