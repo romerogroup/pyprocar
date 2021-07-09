@@ -152,26 +152,26 @@ class ElectronicBandStructure:
         new_projected = np.zeros_like(self.projected)
         for ispin in range(nspins):
 
-            # DG = nx.Graph()
-            # X = np.arange(self.nkpoints)
-            # DG.add_nodes_from(
-            #     [
-            #         ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
-            #         for i, j in itertools.product(
-            #             range(self.nkpoints), range(self.nbands)
-            #         )
-            #     ]
-            # )
+            DG = nx.Graph()
+            X = np.arange(self.nkpoints)
+            DG.add_nodes_from(
+                [
+                    ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
+                    for i, j in itertools.product(
+                        range(self.nkpoints), range(self.nbands)
+                    )
+                ]
+            )
 
-            # pos = nx.get_node_attributes(DG, "pos")
+            pos = nx.get_node_attributes(DG, "pos")
             new_bands[0,:,ispin] = self.bands[0,:,ispin]
             new_projected[0, :, :, :, :, :] = self.projected[0, :, :, :, :, :]
             for ikpoint in range(self.nkpoints - 1):
                 order = []
                 
                 for iband in range(self.nbands):
-                    # prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
-                    #                                                                   self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
+                    prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
+                                                                                      self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
                     dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
                     if dK == 0:
                         continue
@@ -207,7 +207,7 @@ class ElectronicBandStructure:
                         - self.bands[ikpoint, iband, ispin]
                     ) 
                     dEdK = (dE / dK)
-                    jband = np.argsort(dots*dEdK)
+                    jband = np.argsort(diff)
                     counter = 0
                     # while jband[counter] in order:
                     #     counter+=1
@@ -220,16 +220,28 @@ class ElectronicBandStructure:
                     
                     # diffs.append(diff)
                     # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
-                    # DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
-                if len(order) == 0:
-                    new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
-                    new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
-                else :
-                    new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
-                    new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
+                    DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
+                    
+            if plot:
+                plt.figure(figsize=(16, 9))
+                nodes = nx.draw_networkx_nodes(
+                    DG, pos, node_size=5, node_color=["blue", "red"][ispin])
+                edges = nx.draw_networkx_edges(
+                    DG,
+                    pos,
+                    edge_color='red'
+                )
+                plt.show()
+
+        #         if len(order) == 0:
+        #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
+        #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
+        #         else :
+        #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
+        #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
                 
-        self.bands = new_bands
-        self.projected = new_projected
+        # self.bands = new_bands
+        # self.projected = new_projected
         return 
 
     def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
