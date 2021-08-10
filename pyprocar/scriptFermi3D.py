@@ -38,6 +38,9 @@ def fermi3D(
     cmap="jet",
     atoms=None,
     orbitals=None,
+    fermi_velocity = False,
+    fermi_velocity_vector = False,
+    effective_mass = False,
     spin=None,
     spin_texture=False,
     arrow_color=None,
@@ -175,6 +178,18 @@ def fermi3D(
         while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.
         If nothing is specified pyprocar will select all the present
         orbitals.
+    fermi_velocity_vector : bool, optional (default False)
+            Boolean value to calculate fermi velocity vectors on the fermi surface. 
+            Must be used with mode= "property_projection".
+            e.g. ``fermi_velocity_vector=True``
+    fermi_velocity : bool, optional (default False)
+        Boolean value to calculate magnitude of the fermi velocity on the fermi surface.
+        Must be used with mode= "property_projection".
+        e.g. ``fermi_velocity=True``
+    effective_mass : bool, optional (default False)
+        Boolean value to calculate the harmonic mean of the effective mass on the fermi surface.
+        Must be used with mode= "property_projection".
+        e.g. ``effective_mass=True``
     spin : list int, optional
         e.g. ``spin=[0]``
     spin_texture : bool, optional (default False)
@@ -375,6 +390,9 @@ def fermi3D(
 
         for iband in band_numbers:
             spd.append(data.spd[:, iband])
+    elif mode == "property_projection":
+        for iband in band_numbers:
+            spd.append(None)
     else:
         for iband in band_numbers:
             spd.append(None)
@@ -428,6 +446,9 @@ def fermi3D(
                                         band_numbers = band_numbers,
                                         spd=spd,
                                         spd_spin=spd_spin,
+                                        fermi_velocity = fermi_velocity,
+                                        fermi_velocity_vector = fermi_velocity_vector,
+                                        effective_mass = effective_mass,
                                         fermi=e_fermi,
                                         fermi_shift = fermi_shift,
                                         reciprocal_lattice=reciprocal_lattice,
@@ -440,6 +461,7 @@ def fermi3D(
                                         extended_zone_directions = extended_zone_directions,
                                         curvature_type = curvature_type,
                                     )
+        
         band_surfaces = fermi_surface3D.band_surfaces
         fermi_surface = fermi_surface3D.fermi_surface
         colors = fermi_surface3D.colors
@@ -482,6 +504,9 @@ def fermi3D(
                                             band_numbers = band_numbers,
                                             spd=spd,
                                             spd_spin=spd_spin,
+                                            fermi_velocity = fermi_velocity,
+                                            fermi_velocity_vector = fermi_velocity_vector,
+                                            effective_mass = effective_mass,
                                             fermi=e_value,
                                             fermi_shift = fermi_shift,
                                             reciprocal_lattice=reciprocal_lattice,
@@ -598,6 +623,9 @@ def fermi3D(
                 text = "Plain"
             elif mode == "parametric":
                 text = "Projection"
+            elif mode == "property_projection":
+                if fermi_velocity == True:
+                    text = "Projection"
             else:
                 text = "Spin Texture"
             p.add_slider_widget(create_mesh, [np.amin(energy_values), np.amax(energy_values)], title='Energy iso-value',style='modern',color = 'black')
@@ -615,7 +643,27 @@ def fermi3D(
                         )
                         p.remove_scalar_bar()
                         text = "Projection"
-
+                    elif mode == "property_projection":
+                       
+                        
+                        if fermi_velocity == True:
+                            text = "Fermi Velocity"
+                            p.add_mesh(band_surfaces[isurface], cmap=cmap)
+                        if effective_mass == True:
+                            text = "Effective Mass"
+                            p.add_mesh(band_surfaces[isurface], cmap=cmap)
+                            
+                        if fermi_velocity_vector == True:
+                            text = "Fermi Velocity"
+                            arrows = band_surfaces[isurface].glyph(
+                            orient="vectors",scale=False ,factor=arrow_size)
+                            p.add_mesh(band_surfaces[isurface], cmap=cmap)
+                            p.remove_scalar_bar()
+                            if arrow_color is None:
+                                p.add_mesh(arrows, cmap=cmap)
+                            else:
+                                p.add_mesh(arrows, color=arrow_color)
+                        p.remove_scalar_bar()
                 else:
                     text = "Spin Texture"
 
@@ -623,7 +671,7 @@ def fermi3D(
                     # Example dataset with normals
                     # create a subset of arrows using the glyph filter
                     arrows = band_surfaces[isurface].glyph(
-                    orient="vectors", factor=arrow_size)
+                    orient="vectors",scale=False ,factor=arrow_size)
 
                     if arrow_color is None:
                         p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
@@ -640,7 +688,7 @@ def fermi3D(
                 bold=False,
                 title_font_size=None,
                 label_font_size=None,
-                position_x=0.9,
+                position_x=0.4,
                 position_y=0.01,
                 color="black",
             )

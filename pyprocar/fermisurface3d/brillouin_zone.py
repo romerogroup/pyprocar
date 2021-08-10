@@ -85,7 +85,6 @@ class BrillouinZone(Surface):
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
         verts, faces = self.wigner_seitz()
-        print(verts, faces)
 
         Surface.__init__(self, verts=verts, faces=faces)
 
