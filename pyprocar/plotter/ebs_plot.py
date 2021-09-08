@@ -83,20 +83,23 @@ class EBSPlot:
 
         """
         pos = 0
-        for isegment in range(self.kpath.nsegments):
-            kstart, kend = self.kpath.special_kpoints[isegment]
-            distance = np.linalg.norm(kend - kstart)
-            if isegment == 0:
-                x = np.linspace(pos, pos + distance,
-                                self.kpath.ngrids[isegment])
-            else:
-                x = np.append(
-                    x,
-                    np.linspace(pos, pos + distance,
-                                self.kpath.ngrids[isegment]),
-                    axis=0,
-                )
-            pos += distance
+        if self.kpath is not None:
+            for isegment in range(self.kpath.nsegments):
+                kstart, kend = self.kpath.special_kpoints[isegment]
+                distance = np.linalg.norm(kend - kstart)
+                if isegment == 0:
+                    x = np.linspace(pos, pos + distance,
+                                    self.kpath.ngrids[isegment])
+                else:
+                    x = np.append(
+                        x,
+                        np.linspace(pos, pos + distance,
+                                    self.kpath.ngrids[isegment]),
+                        axis=0,
+                    )
+                pos += distance
+        else :
+            x = np.arange(0, self.ebs.nkpoints)
         return np.array(x).reshape(-1,)
 
     def plot_bands(self):
@@ -339,14 +342,15 @@ class EBSPlot:
                 cb.ax.tick_params(labelsize=20)
 
     def set_xticks(self, tick_positions=None, tick_names=None, color="black"):
-        if tick_positions is None:
-            tick_positions = self.kpath.tick_positions
-        if tick_names is None:
-            tick_names = self.kpath.tick_names
-        for ipos in tick_positions:
-            self.ax.axvline(self.x[ipos], color=color)
-        self.ax.set_xticks(self.x[tick_positions])
-        self.ax.set_xticklabels(tick_names)
+        if self.kpath is not None:
+            if tick_positions is None:
+                tick_positions = self.kpath.tick_positions
+            if tick_names is None:
+                tick_names = self.kpath.tick_names
+            for ipos in tick_positions:
+                self.ax.axvline(self.x[ipos], color=color)
+            self.ax.set_xticks(self.x[tick_positions])
+            self.ax.set_xticklabels(tick_names)
 
     def set_yticks(self, major=None, minor=None, interval=None):
         if (major is None or minor is None):

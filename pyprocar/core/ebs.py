@@ -152,18 +152,18 @@ class ElectronicBandStructure:
         new_projected = np.zeros_like(self.projected)
         for ispin in range(nspins):
 
-            DG = nx.Graph()
-            X = np.arange(self.nkpoints)
-            DG.add_nodes_from(
-                [
-                    ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
-                    for i, j in itertools.product(
-                        range(self.nkpoints), range(self.nbands)
-                    )
-                ]
-            )
+            # DG = nx.Graph()
+            # X = np.arange(self.nkpoints)
+            # DG.add_nodes_from(
+            #     [
+            #         ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
+            #         for i, j in itertools.product(
+            #             range(self.nkpoints), range(self.nbands)
+            #         )
+            #     ]
+            # )
 
-            pos = nx.get_node_attributes(DG, "pos")
+            # pos = nx.get_node_attributes(DG, "pos")
             new_bands[0,:,ispin] = self.bands[0,:,ispin]
             new_projected[0, :, :, :, :, :] = self.projected[0, :, :, :, :, :]
             for ikpoint in range(self.nkpoints - 1):
@@ -323,204 +323,204 @@ class ElectronicBandStructure:
             )
         return interpolated_bands
 
-    def _extend_BZ(
-        self, new_kpath, time_reversal=True,
-    ):
+    # def _extend_BZ(
+    #     self, new_kpath, time_reversal=True,
+    # ):
 
-        iend = 0
+    #     iend = 0
 
-        for isegment in range(self.kpath.nsegments):
-            extended_kstart = new_kpath.special_kpoints[isegment][0]
-            extended_kend = new_kpath.special_kpoints[isegment][1]
+    #     for isegment in range(self.kpath.nsegments):
+    #         extended_kstart = new_kpath.special_kpoints[isegment][0]
+    #         extended_kend = new_kpath.special_kpoints[isegment][1]
 
-            kstart = self.kpath.special_kpoints[isegment][0]
-            kend = self.kpath.special_kpoints[isegment][1]
+    #         kstart = self.kpath.special_kpoints[isegment][0]
+    #         kend = self.kpath.special_kpoints[isegment][1]
 
-            istart = iend
-            iend = istart + self.kpath.ngrids[isegment]
-            kpoints = self.kpoints[istart:iend]
-            bands = self.bands[istart:iend]
-            projected = self.projected[istart:iend]
-            if self.has_phase:
-                projected_phase = self.projected_phase[istart:iend]
-            dk_vec = kpoints[1] - kpoints[0]
-            dkx, dky, dkz = dk_vec
-            dk = np.linalg.norm(dk_vec)
+    #         istart = iend
+    #         iend = istart + self.kpath.ngrids[isegment]
+    #         kpoints = self.kpoints[istart:iend]
+    #         bands = self.bands[istart:iend]
+    #         projected = self.projected[istart:iend]
+    #         if self.has_phase:
+    #             projected_phase = self.projected_phase[istart:iend]
+    #         dk_vec = kpoints[1] - kpoints[0]
+    #         dkx, dky, dkz = dk_vec
+    #         dk = np.linalg.norm(dk_vec)
 
-            nkpoints_pre_extention = (
-                int((np.linalg.norm(kstart - extended_kstart) / dk).round(4)) + 1
-            )
-            nkpoints_post_extention = (
-                int((np.linalg.norm(kend - extended_kend) / dk).round(4)) + 1
-            )
+    #         nkpoints_pre_extention = (
+    #             int((np.linalg.norm(kstart - extended_kstart) / dk).round(4)) + 1
+    #         )
+    #         nkpoints_post_extention = (
+    #             int((np.linalg.norm(kend - extended_kend) / dk).round(4)) + 1
+    #         )
 
-            if nkpoints_pre_extention == 1:
-                nkpoints_pre_extention = 0
-            if nkpoints_post_extention == 1:
-                nkpoints_post_extention = 0
+    #         if nkpoints_pre_extention == 1:
+    #             nkpoints_pre_extention = 0
+    #         if nkpoints_post_extention == 1:
+    #             nkpoints_post_extention = 0
 
-            kpoints_pre = []
-            for ipoint in range(nkpoints_pre_extention, 0, -1):
-                kpoints_pre.append(kstart - dk_vec * ipoint)
+    #         kpoints_pre = []
+    #         for ipoint in range(nkpoints_pre_extention, 0, -1):
+    #             kpoints_pre.append(kstart - dk_vec * ipoint)
 
-            if len(kpoints_pre) != 0:
-                kpoints_pre = np.array(kpoints_pre)
-            else:
-                kpoints_pre = []
-            kpoints_post = []
-            for ipoint in range(1, nkpoints_post_extention):
-                kpoints_post.append(kend + dk_vec * ipoint)
-            if len(kpoints_post) != 0:
-                kpoints_post = np.array(kpoints_post)
-            else:
-                kpoints_post = []
+    #         if len(kpoints_pre) != 0:
+    #             kpoints_pre = np.array(kpoints_pre)
+    #         else:
+    #             kpoints_pre = []
+    #         kpoints_post = []
+    #         for ipoint in range(1, nkpoints_post_extention):
+    #             kpoints_post.append(kend + dk_vec * ipoint)
+    #         if len(kpoints_post) != 0:
+    #             kpoints_post = np.array(kpoints_post)
+    #         else:
+    #             kpoints_post = []
 
-            if time_reversal:
-                bands_flip = np.flip(bands, axis=0)
-                bands_period = np.append(bands_flip[:-1], bands, axis=0)
-                projected_flip = np.flip(projected, axis=0)
-                projected_period = np.append(projected_flip[:-1], projected, axis=0)
+    #         if time_reversal:
+    #             bands_flip = np.flip(bands, axis=0)
+    #             bands_period = np.append(bands_flip[:-1], bands, axis=0)
+    #             projected_flip = np.flip(projected, axis=0)
+    #             projected_period = np.append(projected_flip[:-1], projected, axis=0)
 
-                if self.has_phase:
-                    projected_phase_flip = np.flip(
-                        projected_phase, axis=0
-                    ).conjugate()  # * (
-                    #     np.exp(-0.5j * np.pi * np.linspace(-0.01, 0.01, len(projected_ph
+    #             if self.has_phase:
+    #                 projected_phase_flip = np.flip(
+    #                     projected_phase, axis=0
+    #                 ).conjugate()  # * (
+    #                 #     np.exp(-0.5j * np.pi * np.linspace(-0.01, 0.01, len(projected_ph
 
-                    projected_phase_period = np.append(
-                        projected_phase_flip[:-1], projected_phase, axis=0
-                    )
-                scale_factor = int(
-                    np.ceil(
-                        (nkpoints_post_extention + nkpoints_pre_extention)
-                        / self.kpath.ngrids[isegment]
-                    )
-                )
-                # if scale_factor == 0:
-                #     scale_factor = 1
-                bands_period = np.pad(
-                    bands_flip,
-                    ((0, scale_factor * len(bands_period)), (0, 0)),
-                    mode="wrap",
-                )
-                projected_period = np.pad(
-                    projected_period,
-                    (
-                        (0, scale_factor * len(projected_period)),
-                        (0, 0),
-                        (0, 0),
-                        (0, 0),
-                        (0, 0),
-                        (0, 0),
-                    ),
-                    mode="wrap",
-                )
-                if self.has_phase:
-                    projected_phase_period = np.pad(
-                        projected_phase_period,
-                        (
-                            (0, scale_factor * len(projected_phase_period)),
-                            (0, 0),
-                            (0, 0),
-                            (0, 0),
-                            (0, 0),
-                            (0, 0),
-                        ),
-                        mode="wrap",
-                    )
-                if nkpoints_post_extention + nkpoints_pre_extention != 0:
-                    if nkpoints_pre_extention != 0:
-                        extended_kpoints = np.append(kpoints_pre, kpoints, axis=0)
-                        extended_bands = np.append(
-                            bands_period[-nkpoints_pre_extention:], bands, axis=0,
-                        )
-                        extended_projected = np.append(
-                            projected_period[-nkpoints_pre_extention:],
-                            projected,
-                            axis=0,
-                        )
-                        if self.has_phase:
-                            extended_projected_phase = np.append(
-                                projected_phase_period[-nkpoints_pre_extention:],
-                                projected_phase,
-                                axis=0,
-                            )
+    #                 projected_phase_period = np.append(
+    #                     projected_phase_flip[:-1], projected_phase, axis=0
+    #                 )
+    #             scale_factor = int(
+    #                 np.ceil(
+    #                     (nkpoints_post_extention + nkpoints_pre_extention)
+    #                     / self.kpath.ngrids[isegment]
+    #                 )
+    #             )
+    #             # if scale_factor == 0:
+    #             #     scale_factor = 1
+    #             bands_period = np.pad(
+    #                 bands_flip,
+    #                 ((0, scale_factor * len(bands_period)), (0, 0)),
+    #                 mode="wrap",
+    #             )
+    #             projected_period = np.pad(
+    #                 projected_period,
+    #                 (
+    #                     (0, scale_factor * len(projected_period)),
+    #                     (0, 0),
+    #                     (0, 0),
+    #                     (0, 0),
+    #                     (0, 0),
+    #                     (0, 0),
+    #                 ),
+    #                 mode="wrap",
+    #             )
+    #             if self.has_phase:
+    #                 projected_phase_period = np.pad(
+    #                     projected_phase_period,
+    #                     (
+    #                         (0, scale_factor * len(projected_phase_period)),
+    #                         (0, 0),
+    #                         (0, 0),
+    #                         (0, 0),
+    #                         (0, 0),
+    #                         (0, 0),
+    #                     ),
+    #                     mode="wrap",
+    #                 )
+    #             if nkpoints_post_extention + nkpoints_pre_extention != 0:
+    #                 if nkpoints_pre_extention != 0:
+    #                     extended_kpoints = np.append(kpoints_pre, kpoints, axis=0)
+    #                     extended_bands = np.append(
+    #                         bands_period[-nkpoints_pre_extention:], bands, axis=0,
+    #                     )
+    #                     extended_projected = np.append(
+    #                         projected_period[-nkpoints_pre_extention:],
+    #                         projected,
+    #                         axis=0,
+    #                     )
+    #                     if self.has_phase:
+    #                         extended_projected_phase = np.append(
+    #                             projected_phase_period[-nkpoints_pre_extention:],
+    #                             projected_phase,
+    #                             axis=0,
+    #                         )
 
-                    if nkpoints_post_extention != 0:
-                        if nkpoints_pre_extention != 0:
-                            extended_kpoints = np.append(
-                                extended_kpoints, kpoints_post, axis=0
-                            )
-                            extended_bands = np.append(
-                                extended_bands,
-                                bands_period[1:nkpoints_post_extention],
-                                axis=0,
-                            )
-                            extended_projected = np.append(
-                                extended_projected,
-                                projected_period[1:nkpoints_post_extention],
-                                axis=0,
-                            )
-                            if self.has_phase:
-                                extended_projected_phase = np.append(
-                                    extended_projected_phase,
-                                    projected_phase_period[1:nkpoints_post_extention],
-                                    axis=0,
-                                )
-                        else:
-                            extended_kpoints = np.append(kpoints, kpoints_post, axis=0)
-                            extended_bands = np.append(
-                                bands, bands_period[1:nkpoints_post_extention], axis=0,
-                            )
-                            extended_projected = np.append(
-                                projected,
-                                projected_period[1:nkpoints_post_extention],
-                                axis=0,
-                            )
-                            if self.has_phase:
-                                extended_projected_phase = np.append(
-                                    projected_phase,
-                                    projected_phase_period[1:nkpoints_post_extention],
-                                    axis=0,
-                                )
+    #                 if nkpoints_post_extention != 0:
+    #                     if nkpoints_pre_extention != 0:
+    #                         extended_kpoints = np.append(
+    #                             extended_kpoints, kpoints_post, axis=0
+    #                         )
+    #                         extended_bands = np.append(
+    #                             extended_bands,
+    #                             bands_period[1:nkpoints_post_extention],
+    #                             axis=0,
+    #                         )
+    #                         extended_projected = np.append(
+    #                             extended_projected,
+    #                             projected_period[1:nkpoints_post_extention],
+    #                             axis=0,
+    #                         )
+    #                         if self.has_phase:
+    #                             extended_projected_phase = np.append(
+    #                                 extended_projected_phase,
+    #                                 projected_phase_period[1:nkpoints_post_extention],
+    #                                 axis=0,
+    #                             )
+    #                     else:
+    #                         extended_kpoints = np.append(kpoints, kpoints_post, axis=0)
+    #                         extended_bands = np.append(
+    #                             bands, bands_period[1:nkpoints_post_extention], axis=0,
+    #                         )
+    #                         extended_projected = np.append(
+    #                             projected,
+    #                             projected_period[1:nkpoints_post_extention],
+    #                             axis=0,
+    #                         )
+    #                         if self.has_phase:
+    #                             extended_projected_phase = np.append(
+    #                                 projected_phase,
+    #                                 projected_phase_period[1:nkpoints_post_extention],
+    #                                 axis=0,
+    #                             )
 
-                else:
-                    extended_kpoints = kpoints
-                    extended_bands = bands
-                    extended_projected = projected
-                    if self.has_phase:
-                        extended_projected_phase = projected_phase
-                if isegment == 0:
-                    overall_kpoints = extended_kpoints
-                    overall_bands = extended_bands
-                    overall_projected = extended_projected
-                    if self.has_phase:
-                        overall_projected_phase = extended_projected_phase
+    #             else:
+    #                 extended_kpoints = kpoints
+    #                 extended_bands = bands
+    #                 extended_projected = projected
+    #                 if self.has_phase:
+    #                     extended_projected_phase = projected_phase
+    #             if isegment == 0:
+    #                 overall_kpoints = extended_kpoints
+    #                 overall_bands = extended_bands
+    #                 overall_projected = extended_projected
+    #                 if self.has_phase:
+    #                     overall_projected_phase = extended_projected_phase
 
-                else:
-                    overall_kpoints = np.append(
-                        overall_kpoints, extended_kpoints, axis=0
-                    )
-                    overall_bands = np.append(overall_bands, extended_bands, axis=0)
-                    overall_projected = np.append(
-                        overall_projected, extended_projected, axis=0
-                    )
-                    if self.has_phase:
-                        overall_projected_phase = np.append(
-                            overall_projected_phase, extended_projected_phase, axis=0
-                        )
+    #             else:
+    #                 overall_kpoints = np.append(
+    #                     overall_kpoints, extended_kpoints, axis=0
+    #                 )
+    #                 overall_bands = np.append(overall_bands, extended_bands, axis=0)
+    #                 overall_projected = np.append(
+    #                     overall_projected, extended_projected, axis=0
+    #                 )
+    #                 if self.has_phase:
+    #                     overall_projected_phase = np.append(
+    #                         overall_projected_phase, extended_projected_phase, axis=0
+    #                     )
 
-                self.kpath.ngrids[isegment] = len(extended_kpoints)
-                self.kpath.special_kpoints[isegment] = new_kpath.special_kpoints[
-                    isegment
-                ]
+    #             self.kpath.ngrids[isegment] = len(extended_kpoints)
+    #             self.kpath.special_kpoints[isegment] = new_kpath.special_kpoints[
+    #                 isegment
+    #             ]
 
-        self.kpoints = overall_kpoints
-        self.bands = overall_bands
-        self.projected = overall_projected
-        if self.has_phase:
-            self.projected_phase = overall_projected_phase
-        return
+    #     self.kpoints = overall_kpoints
+    #     self.bands = overall_bands
+    #     self.projected = overall_projected
+    #     if self.has_phase:
+    #         self.projected_phase = overall_projected_phase
+    #     return
 
     def apply_symmetries(self, operations=None, structure=None):
         return
@@ -547,6 +547,8 @@ class ElectronicBandStructure:
         render_points_as_spheres=True,
         transformation_matrix=None,
     ):
+        """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
+        """
         p = pyvista.Plotter()
         if show_brillouin_zone:
             if reduced:
