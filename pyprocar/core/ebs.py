@@ -40,7 +40,7 @@ class ElectronicBandStructure:
         kpoints : TYPE, optional
             DESCRIPTION. The default is None.
         bands : TYPE, optional
-            bands[ikpoin, iband, ispin]. The default is None.
+            bands[ikpoint, iband, ispin]. The default is None.
         projected : list float, optional
             dictionary by the following order
             projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin].
@@ -133,8 +133,7 @@ class ElectronicBandStructure:
     def kpoints_reduced(self):
         return self.kpoints
 
-    def reorder(self, plot=True):
-        e = 1e-3
+    def reorder(self, plot=True, cutoff=0.2):
         nspins = self.nspins
         if self.is_non_collinear:
             nspins = 1
@@ -145,11 +144,15 @@ class ElectronicBandStructure:
             #                                                     self.norbitals,
             #                                                     nspins)
             projected = self.projected
+            projected_phase = self.projected_phase
+            
 
         else:
             projected = self.projected
+            projected_phase = self.projected_phase
         new_bands = np.zeros_like(self.bands)
         new_projected = np.zeros_like(self.projected)
+        new_projected_phase = np.zeros_like(self.projected_phase)
         for ispin in range(nspins):
 
             # DG = nx.Graph()
@@ -164,84 +167,117 @@ class ElectronicBandStructure:
             # )
 
             # pos = nx.get_node_attributes(DG, "pos")
-            new_bands[0,:,ispin] = self.bands[0,:,ispin]
-            new_projected[0, :, :, :, :, :] = self.projected[0, :, :, :, :, :]
-            for ikpoint in range(self.nkpoints - 1):
+            # S = np.zeros(shape=(self.nkpoints, self.nbands, self.nbands))
+            for ikpoint in range(1, self.nkpoints):
                 order = []
-                
                 for iband in range(self.nbands):
-                    prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
-                                                                                      self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
-                    dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
-                    if dK == 0:
-                        continue
-                    prj = np.repeat(
-                        np.sqrt(projected[ikpoint, iband, :, :, :, ispin].astype(np.complex_)).reshape(
-                            1, -1
-                        ),  
-                        self.nbands,
-                        axis=0,
-                    )
-                    prj /= np.linalg.norm(prj[0])
-                    prj_1 = np.sqrt(
-                        projected[ikpoint + 1, :, :, :, :, ispin].astype(np.complex_).reshape(
-                            self.nbands, -1
-                        )
-                    )
-                    prj_1 = prj_1.T / np.linalg.norm(prj_1, axis=1)
-                    prj_1 = prj_1.T
-                    # return prj, prj_1
-                    # prod = prj*prj_1
-                    # prod = prod.sum(axis=-1)
-                    # prod = prod.sum(axis=-1)
-                    # prod = prod.sum(axis=-1)
-                    # return prj, prj_1
-                    # # prod = np.exp(-1*prod* 1/(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]))
-                    # prod = np.exp(-1/abs(prod))
-                    # prod = np.exp(-1*abs(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]+e))
-                    dots = np.array([np.vdot(x, y) for x, y in zip(prj, prj_1)])
-                    
-                    diff = np.linalg.norm(prj - prj_1, axis=1)
-                    dE = np.abs(
-                        self.bands[ikpoint + 1, :, ispin]
-                        - self.bands[ikpoint, iband, ispin]
-                    ) 
-                    dEdK = (dE / dK)
-                    jband = np.argsort(diff)
-                    counter = 0
-                    # while jband[counter] in order:
-                    #     counter+=1
-                    order.append(jband[counter])  
-                    
-                    # if iband !=0 and jband== 0:
-                    #     print(ikpoint, iband)
-                    
-                    # print(iband, self.bands[ikpoint, iband, ispin], jband, self.bands[ikpoint, jband, ispin])
-                    
-                    # diffs.append(diff)
-                    # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
-                    DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
-                    
-            if plot:
-                plt.figure(figsize=(16, 9))
-                nodes = nx.draw_networkx_nodes(
-                    DG, pos, node_size=5, node_color=["blue", "red"][ispin])
-                edges = nx.draw_networkx_edges(
-                    DG,
-                    pos,
-                    edge_color='red'
-                )
-                plt.show()
+                    prj = []
+                    idx = []
+                    for jband in range(self.nbands):# range(max(0, iband-2), min(iband+2, self.nbands-1)):
+                        psi_i = projected_phase[ikpoint, iband, :, :, :, ispin].flatten() # |psi(k,iband)>=\sum u(atom, n, ml)
+                        psi_j = projected_phase[ikpoint-1, jband, :, :, :, ispin].flatten() # |psi(k+1,jband)>
+                        psi_i /= np.absolute(psi_i).sum()
+                        psi_j /= np.absolute(psi_j).sum()
+                        # diff = np.absolute(psi_i-psi_j).sum()
+                        diff = np.absolute(np.vdot(psi_i, psi_j))
+                        prj.append(diff)
+                        if iband == jband and  prj[-1] < cutoff:
+                            prj[-1] = cutoff
+                        idx.append(jband)
+                    jband = idx[np.argmax(prj)]
+                    self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]
+            # for ikpoint in range(1, self.nkpoints):
+            #     order = []
+            #     for iband in range(self.nbands):
+            #         prj = []
+            #         idx = []
+            #         slope = 
+            #         for jband in range(max(0, iband-2), min(iband+2, self.nbands-1)):
+            #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
+            #             dE = self.bands[ikpoint + 1, jband, ispin]
+            #                 - self.bands[ikpoint, iband, ispin]
+            #             ) 
+            #             dEdK = (dE / dK)
+                        
+            #             prj.append(dEdk)
+            #             if iband == jband and  prj[-1] < cutoff:
+            #                 prj[-1] = cutoff
+            #             idx.append(jband)
+            #         jband = idx[np.argmax(prj)]
+            #         self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]
 
-        #         if len(order) == 0:
-        #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
-        #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
-        #         else :
-        #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
-        #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
+        #             prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
+        #                                                                               self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
+        #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
+        #             if dK == 0:
+        #                 continue
+        #             prj = np.repeat(
+        #                 np.sqrt(projected[ikpoint, iband, :, :, :, ispin].astype(np.complex_)).reshape(
+        #                     1, -1
+        #                 ),  
+        #                 self.nbands,
+        #                 axis=0,
+        #             )
+        #             prj /= np.linalg.norm(prj[0])
+        #             prj_1 = np.sqrt(
+        #                 projected[ikpoint + 1, :, :, :, :, ispin].astype(np.complex_).reshape(
+        #                     self.nbands, -1
+        #                 )
+        #             )
+        #             prj_1 = prj_1.T / np.linalg.norm(prj_1, axis=1)
+        #             prj_1 = prj_1.T
+        #             # return prj, prj_1
+        #             # prod = prj*prj_1
+        #             # prod = prod.sum(axis=-1)
+        #             # prod = prod.sum(axis=-1)
+        #             # prod = prod.sum(axis=-1)
+        #             # return prj, prj_1
+        #             # # prod = np.exp(-1*prod* 1/(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]))
+        #             # prod = np.exp(-1/abs(prod))
+        #             # prod = np.exp(-1*abs(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]+e))
+        #             dots = np.array([np.vdot(x, y) for x, y in zip(prj, prj_1)])
+                    
+        #             diff = np.linalg.norm(prj - prj_1, axis=1)
+        #             dE = np.abs(
+        #                 self.bands[ikpoint + 1, :, ispin]
+        #                 - self.bands[ikpoint, iband, ispin]
+        #             ) 
+        #             dEdK = (dE / dK)
+        #             jband = np.argsort(diff)
+        #             counter = 0
+        #             # while jband[counter] in order:
+        #             #     counter+=1
+        #             order.append(jband[counter])  
+                    
+        #             # if iband !=0 and jband== 0:
+        #             #     print(ikpoint, iband)
+                    
+        #             # print(iband, self.bands[ikpoint, iband, ispin], jband, self.bands[ikpoint, jband, ispin])
+                    
+        #             # diffs.append(diff)
+        #             # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
+        #             DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
+                    
+        #     if plot:
+        #         plt.figure(figsize=(16, 9))
+        #         nodes = nx.draw_networkx_nodes(
+        #             DG, pos, node_size=5, node_color=["blue", "red"][ispin])
+        #         edges = nx.draw_networkx_edges(
+        #             DG,
+        #             pos,
+        #             edge_color='red'
+        #         )
+        #         plt.show()
+
+        # #         if len(order) == 0:
+        # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
+        # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
+        # #         else :
+        # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
+        # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
                 
-        # self.bands = new_bands
-        # self.projected = new_projected
+        # # self.bands = new_bands
+        # # self.projected = new_projected
         return 
 
     def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):

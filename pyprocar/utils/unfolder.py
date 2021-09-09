@@ -2,8 +2,6 @@
 
 import numpy as np
 from ..core import Structure
-from ase.atoms import Atoms
-from ase.build import make_supercell
 
 
 class Unfolder:
