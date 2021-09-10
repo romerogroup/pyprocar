@@ -14,7 +14,8 @@ from .splash import welcome
 from .utilsprocar import UtilsProcar
 
 # import matplotlib
-plt.rcParams["mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
+plt.rcParams[
+    "mathtext.default"] = "regular"  # Roman ['rm', 'cal', 'it', 'tt', 'sf',
 #                                                   'bf', 'default', 'bb', 'frak',
 #                                                   'circled', 'scr', 'regular']
 plt.rcParams["font.family"] = "Arial"
@@ -101,12 +102,8 @@ def bandsplot_old(
         print("atoms list     : ", atoms)
         print("orbs. list     : ", orbitals)
 
-    if (
-        fermi is None
-        and outcar is None
-        and abinit_output is None
-        and (code != "elk" and code != "qe" and code != "lobster")
-    ):
+    if (fermi is None and outcar is None and abinit_output is None
+            and (code != "elk" and code != "qe" and code != "lobster")):
         print(
             "WARNING : Fermi Energy not set! Please set manually or provide output file and set code type."
         )
@@ -174,7 +171,8 @@ def bandsplot_old(
                 icounter = icounter + 2
             else:
                 discont_indx.append(icounter)
-                knames.append(tick_labels[icounter] + "|" + tick_labels[icounter + 1])
+                knames.append(tick_labels[icounter] + "|" +
+                              tick_labels[icounter + 1])
                 icounter = icounter + 2
         knames.append(tick_labels[-1])
         discont_indx = list(dict.fromkeys(discont_indx))
@@ -302,7 +300,8 @@ def bandsplot_old(
     elif code == "qe":
         if fermi is None:
             fermi = procarFile.fermi
-            print("Fermi energy   :  %s eV (from Quantum Espresso output)" % str(fermi))
+            print("Fermi energy   :  %s eV (from Quantum Espresso output)" %
+                  str(fermi))
 
     elif code == "lobster":
         if fermi is None:
@@ -357,7 +356,8 @@ def bandsplot_old(
         dataY.selectAtoms(atoms, fortran=human)
         dataY.selectOrbital(orbitals)
         # getting the signed angle of each K-vector
-        angle = np.arctan2(dataX.kpoints[:, 1], (dataX.kpoints[:, 0] + 0.000000001))
+        angle = np.arctan2(dataX.kpoints[:, 1],
+                           (dataX.kpoints[:, 0] + 0.000000001))
         sin = np.sin(angle)
         cos = np.cos(angle)
         sin.shape = (sin.shape[0], 1)
@@ -374,16 +374,14 @@ def bandsplot_old(
     if separate:
         if spin == 0:
             # plotting spin up bands separately
-            data.bands = (
-                data.bands[:, :numofbands].transpose() - np.array(fermi)
-            ).transpose()
+            data.bands = (data.bands[:, :numofbands].transpose() -
+                          np.array(fermi)).transpose()
             print("Plotting spin up bands...")
 
         elif spin == 1:
             # plotting spin down bands separately
-            data.bands = (
-                data.bands[:, numofbands:].transpose() - np.array(fermi)
-            ).transpose()
+            data.bands = (data.bands[:, numofbands:].transpose() -
+                          np.array(fermi)).transpose()
             print("Plotting spin down bands...")
 
         plot = ProcarPlot(data.bands, data.spd, data.kpoints)
@@ -468,7 +466,8 @@ def bandsplot_old(
     else:
         if savefig:
             plt.savefig(savefig, bbox_inches="tight")
-            plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+            plt.close(
+            )  # Added by Nicholas Pike to close memory issue of looping and creating many figures
             return None, None
         else:
             if show:
