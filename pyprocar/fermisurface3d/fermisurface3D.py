@@ -103,7 +103,7 @@ class FermiSurfaceBand3D(Isosurface):
         self.brillouin_zone = self._get_brilloin_zone(self.supercell)
 
 
-        if np.any(self.kpoints >= 0.5):
+        if np.any(self.kpoints > 0.5):
 
             Isosurface.__init__(
                 self,
@@ -185,7 +185,7 @@ class FermiSurfaceBand3D(Isosurface):
                     vectors_extended_Z, vectors[2], axis=0
                 )
 
-        if np.any(self.XYZ >= 0.5): # @logan : I think this should be before the above loop with another else statment
+        if np.any(self.XYZ > 0.5): # @logan : I think this should be before the above loop with another else statment
             for iy in range(self.supercell[ix]):
                 temp = self.XYZ.copy()
                 temp[:, 0] -= 1 * (iy + 1)
@@ -309,7 +309,7 @@ class FermiSurfaceBand3D(Isosurface):
                         vectors_extended_Z, self.spd_spin[2], axis=0
                     )
 
-            if np.any(self.XYZ >= 0.5): # @logan : I think this should be before the above loop with another else statment
+            if np.any(self.XYZ > 0.5): # @logan : I think this should be before the above loop with another else statment
                 for iy in range(self.supercell[ix]):
                     temp = self.XYZ.copy()
                     temp[:, 0] -= 1 * (iy + 1)
@@ -428,7 +428,7 @@ class FermiSurfaceBand3D(Isosurface):
                 temp[:, ix] -= 1 * (iy + 1)
                 XYZ_extended = np.append(XYZ_extended, temp, axis=0)
                 scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-        if np.any(self.XYZ >= 0.5): # @logan same here
+        if np.any(self.XYZ > 0.5): # @logan same here
             for iy in range(self.supercell[ix]):
                 temp = self.XYZ.copy()
                 temp[:, 0] -= 1 * (iy + 1)
