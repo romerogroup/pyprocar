@@ -26,6 +26,7 @@ from .version import date as __date__
 import logging
 import re
 import sys
+import os
 
 # import ase
 import matplotlib.pyplot as plt
@@ -91,3 +92,6 @@ from . import io
 from . import core
 from . import utils
 from . import plotter
+from .utils.defaults import Settings
+
+

@@ -5,10 +5,10 @@ from matplotlib.collections import LineCollection
 import matplotlib
 import sys
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
-
+from ..utils.defaults import settings
 
 class EBSPlot:
-    def __init__(self, ebs, kpath=None, ax=None, spins=None, colors=None, opacities=None, linestyles=None, linewidths=None, labels=None):
+    def __init__(self, ebs, kpath=None, ax=None, spins=None, **kwargs):
         """
         class to plot an electronic band structure.
 
@@ -27,18 +27,17 @@ class EBSPlot:
         None.
 
         """
+        
         self.ebs = ebs
         self.kpath = kpath
         self.spins = spins
-        self.colors = colors
-        self.opacities = opacities
-        self.linestyles = linestyles
-        self.linewidths = linewidths
-        self.labels = labels
         self.handles = []
+        settings.modify(kwargs)
 
+        
+        figsize=tuple(settings.general.figure_size)
         if ax is None:
-            self.fig = plt.figure(figsize=(9, 6))
+            self.fig = plt.figure(figsize=figsize)
             self.ax = self.fig.add_subplot(111)
         else:
             self.fig = plt.gcf()
@@ -48,30 +47,21 @@ class EBSPlot:
 
         self._initiate_plot_args()
 
+        
     def _initiate_plot_args(self):
 
         if self.spins is None:
             self.spins = range(self.ebs.nspins)
         self.nspins = len(self.spins)
-
-        if self.colors is None:
-            self.colors = np.array(["black", "red"])[:self.nspins]
-        if self.opacities is None:
-            self.opacities = np.array([1.0, 1.0])[:self.nspins]
-        if self.linestyles is None:
-            self.linestyles = np.array(["solid", "dashed"])[:self.nspins]
-        if self.linewidths is None:
-            self.linewidths = np.array([1, 1])[:self.nspins]
-        if self.labels is None:
-            self.labels = np.array([r'$\uparrow$',
-                                    r'$\downarrow$'])[:self.nspins]
-        # print(self.nspins)
-        # print(self.colors)
-        # print(self.opacities)
-        # print(self.linestyles)
-        # print(self.linewidths)
-        # print(self.labels)
-
+        if self.ebs.is_non_collinear:
+            self.spins = [0]
+        self.set_xticks()
+        self.set_yticks()
+        self.set_xlabel()
+        self.set_ylabel()
+        self.set_xlim()
+        self.set_ylim()
+        
     def _get_x(self):
         """
         provides the x axis data of the plots
@@ -124,45 +114,36 @@ class EBSPlot:
         for ispin in range(self.ebs.bands.shape[2]):
             for iband in range(self.ebs.nbands):
                 handle = self.ax.plot(
-                    self.x, self.ebs.bands[:, iband, ispin], color=self.colors[ispin], alpha=self.opacities[
-                        ispin], linestyle=self.linestyles[ispin], label=self.labels[ispin], linewidth=self.linewidths[ispin],
+                    self.x, self.ebs.bands[:, iband, ispin], color=settings.ebs.color[ispin], alpha=settings.ebs.opacity[
+                        ispin], linestyle=settings.ebs.linestyle[ispin], label=settings.ebs.label[ispin], linewidth=settings.ebs.linewidth[ispin],
                 )
             self.handles.append(handle[0])
 
-    def plot_order(self):
-        for ispin in range(self.ebs.bands.shape[2]):
-            for iband in range(self.ebs.nbands):
-                self.ax.plot(
-                    self.x, self.ebs.bands[:, iband, ispin], alpha=self.opacities[
-                        ispin],  linewidth=self.linewidths[ispin],
-                )
+
+    # def plot_order(self):
+    #     for ispin in range(self.ebs.bands.shape[2]):
+    #         for iband in range(self.ebs.nbands):
+    #             self.ax.plot(
+    #                 self.x, self.ebs.bands[:, iband, ispin], alpha=self.opacities[
+    #                     ispin],  linewidth=self.linewidths[ispin],
+    #             )
 
 
     def plot_scatter(self,
-                     spins=None,
                      width_mask=None,
                      color_mask=None,
-                     cmap=None,
                      vmin=None,
                      vmax=None,
-                     marker="o",
-                     opacity=1.0,
                      width_weights=None,
                      color_weights=None,
-                     plot_color_bar=True,
                      ):
-        if cmap is None:
-            cmap = 'viridis'
 
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
+            markersize = settings.ebs.markersize
         else:
-            self.linewidths =[l*30 for l in self.linewidths]
+            markersize =[l*30 for l in settings.ebs.markersize]
 
-        if spins is None:
-            spins = range(self.ebs.nspins)
-        if self.ebs.is_non_collinear:
-            spins = [0]
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
@@ -182,24 +163,22 @@ class EBSPlot:
             if vmax is None:
                 vmax = color_weights.max()
             print("normalizing to : ", (vmin, vmax))
-            norm = matplotlib.colors.Normalize(vmin, vmax)
-
-        for ispin in spins:
+        for ispin in self.spins:
             for iband in range(self.ebs.nbands):
                 if color_weights is None:
                     sc = self.ax.scatter(
                         self.x,
                         mbands[:, iband, ispin],
-                        c=self.colors[ispin],
+                        c=settings.ebs.color[ispin],
                         s=width_weights[:, iband, ispin].round(
-                            2)*self.linewidths[ispin],
+                            2)*markersize[ispin],
                         edgecolors="none",
                         linewidths=0,
-                        cmap=cmap,
+                        cmap=settings.ebs.color_map,
                         vmin=vmin,
                         vmax=vmax,
-                        marker=marker,
-                        alpha=opacity,
+                        marker=settings.ebs.marker[ispin],
+                        alpha=settings.ebs.opacity[ispin],
                     )
                 else:
                     sc = self.ax.scatter(
@@ -207,39 +186,34 @@ class EBSPlot:
                         mbands[:, iband, ispin],
                         c=color_weights[:, iband, ispin].round(2),
                         s=width_weights[:, iband, ispin].round(
-                            2)*self.linewidths[ispin],
+                            2)*markersize[ispin],
                         edgecolors="none",
                         linewidths=0,
-                        cmap=cmap,
+                        cmap=settings.ebs.color_map,
                         vmin=vmin,
                         vmax=vmax,
-                        marker=marker,
-                        alpha=opacity,
-                        norm=norm,
+                        marker=settings.ebs.marker[ispin],
+                        alpha=settings.ebs.opacity[ispin],
                     )
-        if plot_color_bar and color_weights is not None:
+        if settings.ebs.plot_color_bar and color_weights is not None:
             cb = self.fig.colorbar(sc, ax=self.ax)
             cb.ax.tick_params(labelsize=20)
 
     def plot_parameteric(
         self,
         spins=None,
-        cmap=None,
         vmin=None,
         vmax=None,
         width_mask=None,
         color_mask=None,
-        opacity=1.0,
         width_weights=None,
         color_weights=None,
-        plot_color_bar=False,
     ):
-        if cmap is None:
-            cmap = 'viridis'
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
+            linewidth = settings.ebs.linewidth
         else:
-            self.linewidths = [l*5 for l in self.linewidths]
+            linewidth = [l*5 for l in settings.ebs.linewidth]
 
         if spins is None:
             spins = range(self.ebs.nspins)
@@ -267,9 +241,7 @@ class EBSPlot:
             norm = matplotlib.colors.Normalize(vmin, vmax)
 
         for ispin in spins:
-            # plotting
             for iband in range(self.ebs.nbands):
-
                 points = np.array(
                     [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
@@ -279,30 +251,36 @@ class EBSPlot:
                     segments, np.where(x[1:] == x[:-1])[0], axis=0)
                 if color_weights is None:
                     lc = LineCollection(
-                        segments, colors=self.colors[ispin])
+                        segments, colors=settings.ebs.color[ispin], linestyle=settings.ebs.linestyle[ispin])
                 else:
                     lc = LineCollection(
-                        segments, cmap=plt.get_cmap(cmap), norm=norm)
+                        segments, cmap=plt.get_cmap(settings.ebs.color_map), norm=norm)
                     lc.set_array(color_weights[:, iband, ispin])
                 lc.set_linewidth(
-                    width_weights[:, iband, ispin]*self.linewidths[ispin])
-                self.ax.add_collection(lc)
-        if plot_color_bar and color_weights is not None:
+                    width_weights[:, iband, ispin]*linewidth[ispin])
+                lc.set_linestyle(settings.ebs.linestyle[ispin])
+                handle = self.ax.add_collection(lc)
+            # if color_weights is not None:
+            #     handle.set_color(color_map[iweight][:-1].lower())
+            handle.set_linewidth(linewidth)
+            self.handles.append(handle)
+
+        if settings.ebs.plot_color_bar and color_weights is not None:
             cb = self.fig.colorbar(lc, ax=self.ax)
             cb.ax.tick_params(labelsize=20)
 
     def plot_parameteric_overlay(self,
                                  spins=None,
-                                 cmaps=None,
                                  vmin=None,
                                  vmax=None,
                                  weights=None,
                                  plot_color_bar=False,
                                  ):
 
-        self.linewidths = [l*7 for l in self.linewidths]
-        if cmaps is None:
-            cmaps = ['Reds', "Blues", "Greens",
+        
+        linewidth = [l*7 for l in settings.ebs.linewidth]
+        if type(settings.ebs.color_map) is str:
+            color_map = ['Reds', "Blues", "Greens",
                      "Purples", "Oranges", "Greys"]
         if spins is None:
             spins = range(self.ebs.nspins)
@@ -319,7 +297,7 @@ class EBSPlot:
             for ispin in spins:
                 # plotting
                 for iband in range(self.ebs.nbands):
-
+                    
                     points = np.array(
                         [self.x, self.ebs.bands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                     segments = np.concatenate(
@@ -329,15 +307,16 @@ class EBSPlot:
                     segments = np.delete(
                         segments, np.where(x[1:] == x[:-1])[0], axis=0)
                     lc = LineCollection(
-                        segments, cmap=plt.get_cmap(cmaps[iweight]), norm=norm, alpha=self.opacities[0])
+                        segments, cmap=plt.get_cmap(color_map[iweight]), norm=norm, alpha=settings.ebs.opacity[0])
                     lc.set_array(weight[:, iband, ispin])
                     lc.set_linewidth(
-                        weight[:, iband, ispin]*self.linewidths[ispin])
+                        weight[:, iband, ispin]*linewidth[ispin])
                     handle = self.ax.add_collection(lc)
-            handle.set_color(cmaps[iweight][:-1].lower())
-            handle.set_linewidth(self.linewidths)
+            handle.set_color(color_map[iweight][:-1].lower())
+            handle.set_linewidth(linewidth)
             self.handles.append(handle)
-            if plot_color_bar:
+
+            if settings.ebs.plot_color_bar:
                 cb = self.fig.colorbar(lc, ax=self.ax)
                 cb.ax.tick_params(labelsize=20)
 
@@ -351,6 +330,10 @@ class EBSPlot:
                 self.ax.axvline(self.x[ipos], color=color)
             self.ax.set_xticks(self.x[tick_positions])
             self.ax.set_xticklabels(tick_names)
+            self.ax.tick_params(
+                which='major',
+                axis='x',
+                direction='in')
 
     def set_yticks(self, major=None, minor=None, interval=None):
         if (major is None or minor is None):
@@ -387,7 +370,7 @@ class EBSPlot:
             length=5,
             labelright=False,
             right=True,
-            left=True)  # )
+            left=True) 
 
         self.ax.tick_params(
             which='minor',
@@ -413,8 +396,28 @@ class EBSPlot:
     def set_ylabel(self, label=r"E - E$_F$ (eV)"):
         self.ax.set_ylabel(label)
 
-    def legend(self):
-        self.ax.legend(self.handles, self.labels)
+    def legend(self, labels=None):
+        if labels == None:
+            labels = settings.ebs.label
+        self.ax.legend(self.handles, labels)
 
-    def draw_fermi(self, color="blue", linestyle="dotted"):
-        self.ax.axhline(y=0, color=color, linestyle=linestyle)
+    def draw_fermi(self, color="blue", linestyle="dotted", linewidth=1):
+        self.ax.axhline(y=0, color=color, linestyle=linestyle, linewidth=linewidth)
+
+
+    def grid(self):
+        self.ax.grid(
+            settings.ebs.grid,
+            which=settings.ebs.grid_which,
+            color=settings.ebs.grid_color,
+            linestyle=settings.ebs.grid_linestyle,
+            linewidth=settings.ebs.grid_linewidth)
+        
+        
+    def show(self):
+        plt.show()
+
+    def save(self, filename='bands.pdf'):        
+        plt.savefig(filename, bbox_inches="tight")
+        plt.clf()
+    
