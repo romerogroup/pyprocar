@@ -157,7 +157,7 @@ def bandsplot_old(
         KPread = f.read()
         f.close()
 
-        KPmatrix = re.findall("reciprocal[\s\S]*", KPread)
+        KPmatrix = re.findall("reciprocal[\s\S]*", KPread, flags=re.IGNORECASE)
         tick_labels = np.array(re.findall("!\s(.*)", KPmatrix[0]))
         knames = []
         knames = [tick_labels[0]]
