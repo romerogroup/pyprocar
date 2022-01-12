@@ -49,12 +49,13 @@ class Settings:
         for item in changes:
             if item in self.config:
                 self.__setattr__(item, changes[item])
-            else:
-                for key in self.config:
-                    if item in self.config[key]:
-                        eval(
-                            "self.{}.__setattr__(item, changes[item])".format(key))
-                        eval("self.{}.check_equivalents(changes)".format(key))
+            # else:
+            #     for key in self.config:
+            #         print(key, self.config[key])
+            #         if item in self.config[key]:
+            #             eval(
+            #                 "self.{}.__setattr__(item, changes[item])".format(key))
+            #             eval("self.{}.check_equivalents(changes)".format(key))
 
     def check_equivalents(self, config):
         for item in equivalents:
@@ -81,7 +82,6 @@ class Settings:
     def __len__(self):
         return self.config.__len__()
 
-
 def type_convert(inp):
     inp = inp.strip()
     try:
@@ -95,7 +95,7 @@ def type_convert(inp):
         elif "$" in inp:
             ret = r"{}".format(inp)
         else:
-            ret = inp.lower()
+            ret = inp
     return ret
 
 

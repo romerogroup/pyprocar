@@ -1,19 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from .splash import welcome
+from .utils.defaults import settings
+from .utils.info import orbital_names
+from .plotter import EBSPlot
+from . import io
 
 
 def unfold(
     procar="PROCAR",
     poscar="POSCAR",
     outcar="OUTCAR",
-    procar="PROCAR",
     abinit_output="abinit.out",
     transformation_matrix=np.diag([2, 2, 2]),
     kpoints=None,
     elkin="elk.in",
     code="vasp",
     mode="plain",
+    unfold_mode="both",
     spins=None,
     atoms=None,
     orbitals=None,
@@ -67,36 +71,90 @@ def unfold(
     ebs = None
     kpath = None
     structure = None
+    labels=None
+    settings.general.modify(kwargs)
 
-    settings.modify(kwargs)
+    settings.unfold.modify(kwargs)
+    settings.ebs.modify(settings.unfold.config)
 
     if code == "vasp":
         if outcar is not None:
             outcar = io.vasp.Outcar(outcar)
-        if fermi is None:
-            fermi = outcar.efermi
+            if fermi is None:
+                fermi = outcar.efermi
             reciprocal_lattice = outcar.reciprocal_lattice
         if poscar is not None:
             poscar = io.vasp.Poscar(poscar)
             structure = poscar.structure
-        if reciprocal_lattice is None:
-            reciprocal_lattice = poscar.structure.reciprocal_lattice
+            if reciprocal_lattice is None:
+                reciprocal_lattice = poscar.structure.reciprocal_lattice
 
         if kpoints is not None:
             kpoints = io.vasp.Kpoints(kpoints)
             kpath = kpoints.kpath
 
-            procar = io.vasp.Procar(
-                procar,
-                structure,
-                reciprocal_lattice,
-                kpath,
-                fermi,
-                interpolation_factor=interpolation_factor,
-            )
-            ebs = procar.ebs
+        procar = io.vasp.Procar(
+            procar,
+            structure,
+            reciprocal_lattice,
+            kpath,
+            fermi,
+            interpolation_factor=interpolation_factor,
+        )
+        ebs = procar.ebs
 
-            ebs_plot = EBSPlot(ebs, kpath, ax, spins)
+    ebs_plot = EBSPlot(ebs, kpath, ax, spins)
+
+
+    if mode is not None:
+        if not procar.has_phase :
+            raise ValueError("The provided electronic band structure file does not include phases")
+        ebs_plot.ebs.unfold(
+            transformation_matrix=transformation_matrix, structure=structure)
+    if unfold_mode == 'both':
+        width_weights = ebs_plot.ebs.weights
+        width_mask = unfold_mask
+        color_weights = ebs_plot.ebs.weights
+        color_mask = unfold_mask
+    elif unfold_mode == 'thickness':
+        width_weight = ebs_plot.ebs.weights
+        width_mask = unfold_mask
+    elif unfold_mode == 'color':
+        color_weights = ebs_plot.ebs.weights
+        color_mask = unfold_mask
+    else :
+        raise ValueError("Invalid unfold_mode was selected: {unfold_mode} please select from the following 'both', 'thickness','color'")
+
+    if mode == "plain":
+        ebs_plot.plot_bands()
+        ebs_plot.plot_parameteric(color_weights=color_weights,
+                                  width_weights=width_weights,
+                                  color_mask=color_mask,
+                                  width_mask=width_mask,
+                                  vmin=vmin,
+                                  vmax=vmax)
+        ebs_plot.handles = ebs_plot.handles[:ebs_plot.nspins]
+
+    ebs_plot.set_xticks(kticks, knames)
+    ebs_plot.set_yticks(interval=elimit)
+    ebs_plot.set_xlim()
+    ebs_plot.set_ylim(elimit)
+    ebs_plot.draw_fermi(
+        color=settings.ebs.fermi_color,
+        linestyle=settings.ebs.fermi_linestyle,
+        linewidth=settings.ebs.fermi_linewidth,
+    )
+    ebs_plot.set_ylabel()
+    if settings.ebs.grid:
+        ebs_plot.grid()
+    if settings.ebs.legend:
+        ebs_plot.legend(labels)
+    if savefig is not None:
+        ebs_plot.save(savefig)
+    if show:
+        ebs_plot.show()
+    return ebs_plot
+
 
 
 #     if efermi is not None:

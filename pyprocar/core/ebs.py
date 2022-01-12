@@ -303,61 +303,171 @@ class ElectronicBandStructure:
             )
         return ret
 
-    def interpolate(self, interpolation_factor=2):
-        if self.kpath is not None:
-            iend = 0
-            interpolated_kpoints = []
-            interpolated_bands = []
-            interpolated_projected = []
-            interpolated_projected_phase = []
-            for isegment in range(self.kpath.nsegments):
-                kstart = self.kpath.special_kpoints[isegment][0]
-                kend = self.kpath.special_kpoints[isegment][1]
+    def apply_symmetries(self, operations=None, structure=None):
+        return
 
-                istart = iend
-                iend = istart + self.kpath.ngrids[isegment]
-                bands = self.bands[istart:iend]
-                projected = self.projected[istart:iend]
+    def update_weights(self, weights):
+        self.weights = weights
+        return
 
-                interpolated_bands.append(
-                    mathematics.fft_interpolate(
-                        bands, interpolation_factor=interpolation_factor, axis=0,
-                    )
-                )
+    def unfold(self, transformation_matrix=None, structure=None):
 
-                interpolated_projected.append(
-                    mathematics.fft_interpolate(
-                        projected, interpolation_factor=interpolation_factor, axis=0,
-                    )
-                )
-                if self.has_phase:
-                    projected_phase = self.projected_phase[istart:iend]
-                    interpolated_projected_phase.append(
-                        mathematics.fft_interpolate(
-                            projected_phase,
-                            interpolation_factor=interpolation_factor,
-                            axis=0,
-                        )
-                    )
-                self.kpath.ngrids[isegment] = interpolated_bands[-1].shape[0]
-                interpolated_kpoints.append(
-                    np.linspace(kstart, kend, self.kpath.ngrids[isegment])
-                )
-        self.kpoints = np.array(interpolated_kpoints).reshape(-1, 3)
-        self.bands = np.array(interpolated_bands).reshape(-1, self.nbands)
-        self.projected = np.array(interpolated_projected).reshape(
-            -1, self.nbands, self.natoms, self.nprincipals, self.norbitals, self.nspins
+        uf = Unfolder(
+            ebs=self, transformation_matrix=transformation_matrix, structure=structure,
         )
-        if self.has_phase:
-            self.projected_phase = np.array(interpolated_projected_phase).reshape(
-                -1,
-                self.nbands,
-                self.natoms,
-                self.nprincipals,
-                self.norbitals,
-                self.nspins,
+        self.update_weights(uf.weights)
+
+        return
+
+    def plot_kpoints(
+        self,
+        reduced=False,
+        show_brillouin_zone=True,
+        color="r",
+        point_size=4.0,
+        render_points_as_spheres=True,
+        transformation_matrix=None,
+    ):
+        """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
+        """
+        p = pyvista.Plotter()
+        if show_brillouin_zone:
+            if reduced:
+                brillouin_zone = BrillouinZone(
+                    np.diag([1, 1, 1]), transformation_matrix,
+                )
+                brillouin_zone_non = BrillouinZone(np.diag([1, 1, 1]),)
+            else:
+                brillouin_zone = BrillouinZone(
+                    self.reciprocal_lattice, transformation_matrix
+                )
+                brillouin_zone_non = BrillouinZone(self.reciprocal_lattice,)
+
+            p.add_mesh(
+                brillouin_zone.pyvista_obj,
+                style="wireframe",
+                line_width=3.5,
+                color="black",
             )
-        return interpolated_bands
+            p.add_mesh(
+                brillouin_zone_non.pyvista_obj,
+                style="wireframe",
+                line_width=3.5,
+                color="white",
+            )
+        if reduced:
+            kpoints = self.kpoints_reduced
+        else:
+            kpoints = self.kpoints_cartesian
+        p.add_mesh(
+            kpoints,
+            color=color,
+            point_size=point_size,
+            render_points_as_spheres=render_points_as_spheres,
+        )
+        if transformation_matrix is not None:
+            p.add_mesh(
+                np.dot(kpoints, transformation_matrix),
+                color="blue",
+                point_size=point_size,
+                render_points_as_spheres=render_points_as_spheres,
+            )
+        p.add_axes(
+            xlabel="Kx", ylabel="Ky", zlabel="Kz", line_width=6, labels_off=False
+        )
+
+        p.show()
+
+    def ibz2fbz(self, rotations):
+        """Generates the full Brillouin zone from the irreducible Brillouin
+        zone using point symmetries.
+
+        Parameters:
+            - self.kpoints: the kpoints used to sample the Brillouin zone
+            - self.projected: the projected band structure at each kpoint
+            - rotations: the point symmetry operations of the lattice
+        """
+        klist = []
+        plist = []
+        # for each symmetry operation
+
+        for i, _ in enumerate(rotations):
+            # for each point
+            for j, _ in enumerate(self.kpoints):
+                # apply symmetry operation to kpoint
+                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
+                # apply boundary conditions
+                # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
+                # sympoint_vector += bound_ops
+
+                sympoint = sympoint_vector.tolist()
+
+                if sympoint not in klist:
+                    klist.append(sympoint)
+
+                    projection = self.projected[j].tolist()
+                    plist.append(projection)
+
+        self.kpoints = np.array(klist)
+        self.projected = np.array(plist)
+
+
+
+    # def interpolate(self, interpolation_factor=2):
+    #     if self.kpath is not None:
+    #         iend = 0
+    #         interpolated_kpoints = []
+    #         interpolated_bands = []
+    #         interpolated_projected = []
+    #         interpolated_projected_phase = []
+    #         for isegment in range(self.kpath.nsegments):
+    #             kstart = self.kpath.special_kpoints[isegment][0]
+    #             kend = self.kpath.special_kpoints[isegment][1]
+
+    #             istart = iend
+    #             iend = istart + self.kpath.ngrids[isegment]
+    #             bands = self.bands[istart:iend]
+    #             projected = self.projected[istart:iend]
+
+    #             interpolated_bands.append(
+    #                 mathematics.fft_interpolate(
+    #                     bands, interpolation_factor=interpolation_factor, axis=0,
+    #                 )
+    #             )
+
+    #             interpolated_projected.append(
+    #                 mathematics.fft_interpolate(
+    #                     projected, interpolation_factor=interpolation_factor, axis=0,
+    #                 )
+    #             )
+    #             if self.has_phase:
+    #                 projected_phase = self.projected_phase[istart:iend]
+    #                 interpolated_projected_phase.append(
+    #                     mathematics.fft_interpolate(
+    #                         projected_phase,
+    #                         interpolation_factor=interpolation_factor,
+    #                         axis=0,
+    #                     )
+    #                 )
+    #             self.kpath.ngrids[isegment] = interpolated_bands[-1].shape[0]
+    #             interpolated_kpoints.append(
+    #                 np.linspace(kstart, kend, self.kpath.ngrids[isegment])
+    #             )
+    #     self.kpoints = np.array(interpolated_kpoints).reshape(-1, 3)
+    #     self.bands = np.array(interpolated_bands).reshape(-1, self.nbands)
+    #     self.projected = np.array(interpolated_projected).reshape(
+    #         -1, self.nbands, self.natoms, self.nprincipals, self.norbitals, self.nspins
+    #     )
+    #     if self.has_phase:
+    #         self.projected_phase = np.array(interpolated_projected_phase).reshape(
+    #             -1,
+    #             self.nbands,
+    #             self.natoms,
+    #             self.nprincipals,
+    #             self.norbitals,
+    #             self.nspins,
+    #         )
+    #     return interpolated_bands
 
     # def _extend_BZ(
     #     self, new_kpath, time_reversal=True,
@@ -557,111 +667,3 @@ class ElectronicBandStructure:
     #     if self.has_phase:
     #         self.projected_phase = overall_projected_phase
     #     return
-
-    def apply_symmetries(self, operations=None, structure=None):
-        return
-
-    def update_weights(self, weights):
-        self.weights = weights
-        return
-
-    def unfold(self, transformation_matrix=None, structure=None):
-
-        uf = Unfolder(
-            ebs=self, transformation_matrix=transformation_matrix, structure=structure,
-        )
-        self.update_weights(uf.weights)
-
-        return
-
-    def plot_kpoints(
-        self,
-        reduced=False,
-        show_brillouin_zone=True,
-        color="r",
-        point_size=4.0,
-        render_points_as_spheres=True,
-        transformation_matrix=None,
-    ):
-        """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
-        """
-        p = pyvista.Plotter()
-        if show_brillouin_zone:
-            if reduced:
-                brillouin_zone = BrillouinZone(
-                    np.diag([1, 1, 1]), transformation_matrix,
-                )
-                brillouin_zone_non = BrillouinZone(np.diag([1, 1, 1]),)
-            else:
-                brillouin_zone = BrillouinZone(
-                    self.reciprocal_lattice, transformation_matrix
-                )
-                brillouin_zone_non = BrillouinZone(self.reciprocal_lattice,)
-
-            p.add_mesh(
-                brillouin_zone.pyvista_obj,
-                style="wireframe",
-                line_width=3.5,
-                color="black",
-            )
-            p.add_mesh(
-                brillouin_zone_non.pyvista_obj,
-                style="wireframe",
-                line_width=3.5,
-                color="white",
-            )
-        if reduced:
-            kpoints = self.kpoints_reduced
-        else:
-            kpoints = self.kpoints_cartesian
-        p.add_mesh(
-            kpoints,
-            color=color,
-            point_size=point_size,
-            render_points_as_spheres=render_points_as_spheres,
-        )
-        if transformation_matrix is not None:
-            p.add_mesh(
-                np.dot(kpoints, transformation_matrix),
-                color="blue",
-                point_size=point_size,
-                render_points_as_spheres=render_points_as_spheres,
-            )
-        p.add_axes(
-            xlabel="Kx", ylabel="Ky", zlabel="Kz", line_width=6, labels_off=False
-        )
-
-        p.show()
-
-    def ibz2fbz(self, rotations):
-        """Generates the full Brillouin zone from the irreducible Brillouin
-        zone using point symmetries.
-
-        Parameters:
-            - self.kpoints: the kpoints used to sample the Brillouin zone
-            - self.projected: the projected band structure at each kpoint
-            - rotations: the point symmetry operations of the lattice
-        """
-        klist = []
-        plist = []
-        # for each symmetry operation
-
-        for i, _ in enumerate(rotations):
-            # for each point
-            for j, _ in enumerate(self.kpoints):
-                # apply symmetry operation to kpoint
-                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
-                # apply boundary conditions
-                # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
-                # sympoint_vector += bound_ops
-
-                sympoint = sympoint_vector.tolist()
-
-                if sympoint not in klist:
-                    klist.append(sympoint)
-
-                    projection = self.projected[j].tolist()
-                    plist.append(projection)
-
-        self.kpoints = np.array(klist)
-        self.projected = np.array(plist)
