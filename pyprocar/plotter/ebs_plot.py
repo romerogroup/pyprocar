@@ -247,8 +247,8 @@ class EBSPlot:
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
                 # this is to delete the segments on the high sym points
                 x = self.x
-                segments = np.delete(
-                    segments, np.where(x[1:] == x[:-1])[0], axis=0)
+                # segments = np.delete(
+                #     segments, np.where(x[1:] == x[:-1])[0], axis=0)
                 if color_weights is None:
                     lc = LineCollection(
                         segments, colors=settings.ebs.color[ispin], linestyle=settings.ebs.linestyle[ispin])

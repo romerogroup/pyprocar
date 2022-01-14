@@ -138,6 +138,7 @@ def unfold(
                                   width_mask=unfold_mask,
                                   vmin=vmin,
                                   vmax=vmax)
+        
         ebs_plot.handles = ebs_plot.handles[:ebs_plot.nspins]
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
