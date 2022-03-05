@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>pyprocar.qeparser.qeparser &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +13,16 @@
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +32,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/clipboard.min.js"></script>
         <script src="../../../_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -52,7 +57,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -116,6 +121,8 @@
         <div class="rst-content">
         
           
+
+
 
 
 
@@ -200,7 +207,7 @@
 
         <span class="c1"># Used to store atomic states at the top of the kpdos.out file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="kc">None</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="sd">&quot;&quot;&quot; for l=1:</span>
 <span class="sd">              1 pz     (m=0)</span>
@@ -256,14 +263,15 @@
         <span class="c1">#######################################################################</span>
         <span class="c1"># Dealing with kpoints and labels</span>
         <span class="c1">#######################################################################</span>
-        <span class="n">kmethod</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS[\s\{]*([a-z_]*)[\s\{]*&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        
-        <span class="k">if</span> <span class="n">kmethod</span> <span class="o">==</span> <span class="s1">&#39;crystal&#39;</span><span class="p">:</span>
-            <span class="n">numK</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-            
-            <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">numK</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">kmethod</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS[\s\{]*([a-z_]*)[\s\{]*&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-            
+        <span class="k">if</span> <span class="n">kmethod</span> <span class="o">==</span> <span class="s2">&quot;crystal&quot;</span><span class="p">:</span>
+            <span class="n">numK</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+                <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">numK</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
             <span class="n">tickCountIndex</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">raw_high_symmetry</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[]</span>
@@ -271,26 +279,25 @@
 
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_khigh_sym</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-    
+
                     <span class="n">raw_high_symmetry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tickCountIndex</span><span class="p">)</span>
-                
+
                 <span class="n">tickCountIndex</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">raw_high_symmetry</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">)</span>
 
-            
-        <span class="k">elif</span> <span class="n">kmethod</span> <span class="o">==</span> <span class="s1">&#39;crystal_b&#39;</span><span class="p">:</span> 
+        <span class="k">elif</span> <span class="n">kmethod</span> <span class="o">==</span> <span class="s2">&quot;crystal_b&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">([0-9]*)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">raw_khigh_sym</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
                 <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;([0-9\s\.-]*).*</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,</span>
             <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="c1"># self.kpointsCount = 0</span>
-    
+
             <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
             <span class="n">tick_Count</span> <span class="o">=</span> <span class="mi">1</span>
@@ -298,13 +305,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">high_symmetry_points</span><span class="p">[</span><span class="n">ihs</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_khigh_sym</span><span class="p">[</span><span class="n">ihs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
                 <span class="p">]</span>
-                
+
                 <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tick_Count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">tick_Count</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_khigh_sym</span><span class="p">[</span><span class="n">ihs</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
             <span class="n">raw_ticks</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
-            <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;.*!(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,)[</span><span class="mi">0</span><span class="p">]</span>
-    
+                <span class="s2">&quot;K_POINTS.*</span><span class="se">\n</span><span class="s2">\s*[0-9]*\s*[0-9]*.*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span> <span class="o">*</span> <span class="s2">&quot;.*!(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bandsIn</span><span class="p">,</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_ticks</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nhigh_sym</span><span class="p">)]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -312,22 +320,26 @@
                     <span class="s2">&quot;$</span><span class="si">%s</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;vlvp1d&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
                     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">raw_ticks</span>
                 <span class="p">]</span>
-                
-                
-        <span class="c1"># finds discontinuities </span>
-        
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)):</span>
-            <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-                <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
-                    
-                    <span class="bp">self</span><span class="o">.</span><span class="n">discontinuities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
-                    
-                    <span class="n">discon_name</span> <span class="o">=</span> <span class="s2">&quot;$&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot;|&quot;</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;$&quot;</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">knames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">discon_name</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># finds discontinuities</span>
+
+        <span class="c1"># for i in range(len(self.kticks)):</span>
+        <span class="c1">#     if i &lt; len(self.kticks) - 1:</span>
+        <span class="c1">#         diff = self.kticks[i + 1] - self.kticks[i]</span>
+        <span class="c1">#         if diff == 1:</span>
+
+        <span class="c1">#             self.discontinuities.append(self.kticks[i])</span>
+
+        <span class="c1">#             discon_name = (</span>
+        <span class="c1">#                 &quot;$&quot;</span>
+        <span class="c1">#                 + self.knames[i].replace(&quot;$&quot;, &quot;&quot;)</span>
+        <span class="c1">#                 + &quot;|&quot;</span>
+        <span class="c1">#                 + self.knames[i + 1].replace(&quot;$&quot;, &quot;&quot;)</span>
+        <span class="c1">#                 + &quot;$&quot;</span>
+        <span class="c1">#             )</span>
+        <span class="c1">#             self.knames.pop(i + 1)</span>
+        <span class="c1">#             self.knames[i] = discon_name</span>
+        <span class="c1">#             self.kticks.pop(i + 1)</span>
         <span class="c1">#######################################################################</span>
         <span class="c1"># Finding composition and specie data</span>
         <span class="c1">#######################################################################</span>
@@ -357,7 +369,6 @@
                 <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">species_list</span><span class="p">)):</span>
                     <span class="k">if</span> <span class="n">raw_ions</span><span class="p">[</span><span class="n">ions</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">species_list</span><span class="p">[</span><span class="n">species</span><span class="p">]:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">raw_ions</span><span class="p">[</span><span class="n">ions</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
-                    
 
         <span class="c1">#######################################################################</span>
         <span class="c1"># Reading the kpdos.out for outputfile labels</span>
@@ -373,7 +384,8 @@
 
         <span class="n">natomwfc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;state[\s#]*(\d*)&quot;</span><span class="p">,</span> <span class="n">raw_natomwfc</span><span class="p">))</span>
 
-        <span class="n">raw_wfc</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="s2">&quot;\(read from pseudopotential files\)\:.*</span><span class="se">\n\n</span><span class="s2">\s*&quot;</span> <span class="o">+</span> <span class="n">natomwfc</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">raw_wfc</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;\(read from pseudopotential files\)\:.*</span><span class="se">\n\n</span><span class="s2">\s*&quot;</span> <span class="o">+</span> <span class="n">natomwfc</span> <span class="o">*</span> <span class="s2">&quot;(.*)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">kpdosout</span><span class="p">,</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -381,27 +393,27 @@
 
         <span class="n">states_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
- 
+
         <span class="c1"># Read in raw states</span>
         <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">raw_wfc</span><span class="p">:</span>
-                <span class="c1">#print(state)</span>
+            <span class="c1"># print(state)</span>
 
-                <span class="n">state_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">atom_index</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;atom&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">atom_name</span>   <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">wfc_index</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;wfc&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">l_index</span>     <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;wfc&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;l=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;m=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">m_index</span>     <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;wfc&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;m=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">state_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">atom_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;atom&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">atom_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">wfc_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;wfc&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">l_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;wfc&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;l=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;m=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">m_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;wfc&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;m=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
-                <span class="n">append</span> <span class="o">=</span> <span class="p">[</span><span class="n">state_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">atom_name</span><span class="p">,</span> <span class="n">wfc_index</span><span class="p">,</span> <span class="n">l_index</span><span class="p">,</span> <span class="n">m_index</span><span class="p">]</span>
-                <span class="c1">#append = (findall(&quot;state #\s*([0-9]+):\s*atom\s*([0-9]+)\s*\((.*)\s\),\s*wfc\s*([0-9]+)\s\(l=\s*([0-9]+)\s*m=\s*([0-9]+)\)&quot;, state)[0])</span>
-                <span class="c1">#print(append)</span>
-                <span class="n">raw_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">append</span><span class="p">)</span>
-                <span class="c1">#int(state.split(&#39;#&#39;)[1].split(&#39;:&#39;)[0])</span>
-                <span class="c1">#findall(&quot;state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)&quot;, state)[0])</span>
-            <span class="c1">#)</span>
-     
-        <span class="c1">#print(raw_states)</span>
+            <span class="n">append</span> <span class="o">=</span> <span class="p">[</span><span class="n">state_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">atom_name</span><span class="p">,</span> <span class="n">wfc_index</span><span class="p">,</span> <span class="n">l_index</span><span class="p">,</span> <span class="n">m_index</span><span class="p">]</span>
+            <span class="c1"># append = (findall(&quot;state #\s*([0-9]+):\s*atom\s*([0-9]+)\s*\((.*)\s\),\s*wfc\s*([0-9]+)\s\(l=\s*([0-9]+)\s*m=\s*([0-9]+)\)&quot;, state)[0])</span>
+            <span class="c1"># print(append)</span>
+            <span class="n">raw_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">append</span><span class="p">)</span>
+            <span class="c1"># int(state.split(&#39;#&#39;)[1].split(&#39;:&#39;)[0])</span>
+            <span class="c1"># findall(&quot;state #\s*([0-9]*):\s*atom\s*([0-9]*)\s*\((.*)\s\),\s*wfc\s*([0-9]*)\s\(l=\s*([0-9])\s*m=\s*([0-9])\)&quot;, state)[0])</span>
+        <span class="c1"># )</span>
+
+        <span class="c1"># print(raw_states)</span>
         <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">raw_states</span><span class="p">:</span>
             <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -483,7 +495,7 @@
         <span class="c1">#######################################################################</span>
 
         <span class="n">band_info</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;====\se\(\s*(\d+)\)\s=\s*([-.\d]+)&quot;</span><span class="p">,</span> <span class="n">kpdosout</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">spinCalc</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">band_info</span><span class="p">)</span> <span class="o">/</span> <span class="n">totK</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpointsCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandsCount</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
@@ -542,10 +554,9 @@
         <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k_string</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">kp</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">k_string</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">expression</span> <span class="o">=</span> <span class="s2">&quot;(?&lt;=&quot;</span> <span class="o">+</span> <span class="n">k_string</span><span class="p">[</span><span class="n">kp</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;)[\s\S]*?(?=Lowdin Charges:)&quot;</span>
-                
+
                 <span class="n">expression_final_k</span> <span class="o">=</span> <span class="s2">&quot;(?&lt;=&quot;</span> <span class="o">+</span> <span class="n">k_string</span><span class="p">[</span><span class="n">kp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;)[\s\S]*?(?=$)&quot;</span>
-                
-                
+
                 <span class="n">k_info1</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="n">expression_final_k</span><span class="p">,</span> <span class="n">kpdosout</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
                 <span class="n">k_info</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">k_info1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -671,7 +682,7 @@
         <span class="c1"># When this is one, the the first half of bands (spin up) will have positive projections</span>
         <span class="c1"># and the second half (spin down) will have negative projections. This is to adhere to</span>
         <span class="c1"># the convention used in PyProcar to obtain spin density and spin magnetization.</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span>
         <span class="k">if</span> <span class="n">spinCalc</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Quantum Espresso colinear spin calculation detected.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spd2</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span>
@@ -713,11 +724,11 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="n">fi</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;the Fermi energy is&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;ev&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;the Fermi energy is&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;ev&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">fermi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="c1">#print((findall(r&quot;the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev&quot;, data)))</span>
-        <span class="c1">#fermi = float(findall(r&quot;the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev&quot;, data)[0])</span>
+        <span class="c1"># print((findall(r&quot;the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev&quot;, data)))</span>
+        <span class="c1"># fermi = float(findall(r&quot;the\s*Fermi\s*energy\s*is\s*([\s\d.]*)ev&quot;, data)[0])</span>
         <span class="k">return</span> <span class="n">fermi</span>
 
     <span class="nd">@property</span>
@@ -753,28 +764,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

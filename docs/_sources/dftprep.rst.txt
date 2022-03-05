@@ -3,7 +3,7 @@
 DFT Preparation
 ================
 
-This section discusses steps to perform DFT calculations to obtain data reqired to run PyProcar for post-processing. Examples of these are available in the ``examples`` directory of the github repository. Features that require non-collinear spin calculations such as 2D spin texture plots and 3D Fermi surfaces with spin texture is currently only supported for VASP calculations. Band unfolding is also limited to VASP calculations since the phase of the wavefunctions is only parsed from the VASP PROCAR file. Support for these features in other DFT codes will be available in the future.
+This section discusses steps to perform DFT calculations to obtain data required to run PyProcar for post-processing. Examples of these are available in the ``examples`` directory of the Github repository. Features that require non-collinear spin calculations such as 2D spin texture plots and 3D Fermi surfaces with spin texture is currently only supported for VASP calculations. Band unfolding is also limited to VASP calculations since the phase of the wavefunctions is only parsed from the VASP PROCAR file. Support for these features in other DFT codes will be available in the future.
 
 The flag is to be set in PyProcar functions to select the DFT code.
 
@@ -20,9 +20,9 @@ E.g.::
 - flag           : code='vasp' (default)
 
 In the VASP code, the wavefunction projection information is written into the PROCAR file when ``LORBIT=11`` is set in the INCAR file. For band unfolding, set ``LORBIT=12`` to include phase projections of the wave functions.
-An OUTCAR file required to extract the Fermi-energy and reciprocal lattice vectors. If a KPOINTS file is provided, the :math:`k`-path will automatically be labeled in the band structure.
+An OUTCAR file is required to extract the Fermi-energy and reciprocal lattice vectors. If a KPOINTS file is provided, the :math:`k`-path will automatically be labeled in the band structure.
 To perform spin colinear calculations set ``ISPIN = 2`` in the ``INCAR``.
-To perform spin non-colinear calculatios set ``ISPIN = 2`` and ``LNONCOLLINEAR = .TRUE.``.
+To perform spin non-colinear calculations set ``ISPIN = 2`` and ``LNONCOLLINEAR = .TRUE.``.
 
 First perform a self-consistent calculation with a :math:`k`-mesh grid. Then set ``ICHARG=11`` in the INCAR and create a KPOINTS file containing the :math:-`k`-path. This can be done with the :ref:`labelkpath` feature in PyProcar. 
 
@@ -56,18 +56,56 @@ A :math:`k`-path can be specified in elk.in as follows::
     0.5      0.5      0.5 : R
     0.5      0.0      0.0 : X
 
-First complete the Elk calculation and then run PyProcar in the same directory as the Elk calculations were performed.
+First, complete the Elk calculation and then run PyProcar in the same directory as the Elk calculations were performed.
 
 ===================
 3. Quantum Espresso
 ===================
 
-- Required files : bands.in, kpdos.in, kpdos.out, scf.out
+- Required files : bands.in, kpdos.in, pdos.in,scf.in, atomic_proj.xml
 - flag           : code='qe'
 
 Quantum Espresso v6.5+ is supported. 
 
-Run ``pw.x`` for the self-consistent calculation (output : scf.out) and the band structure calculation. The :math:`k`-path can be specified in bands.in which is used for the band structure calculation as one of the following::
+To use Pyprocar with QE, one has to run various calculations in independent directories. Here, we will show examples for the different calculations
+
+**Band Structure** 
+
+1. Create directory called ``bands``.
+2. Run ``pw.x`` on your ``scf.in`` file. 
+3. Run ``pw.x`` on your ``bands.in`` file.  (Read kpoints section on how to add labels)
+4. Run ``projwfc.x`` on your ``kpdos.in`` file (Make sure kresolveddos=.true.). 
+5. Make sure to copy the atomic_proj.xml file that is found in the .save directory into the main directory
+6. Run pyprocar.bandsplot(dirname = 'bands' ,mode = 'plain', code = 'qe')
+
+**Density of States** 
+
+1. Create directory called ``dos``. 
+2. Run ``pw.x`` on your ``scf.in`` file. 
+3. Run ``pw.x`` on your ``nscf.in`` file. 
+4. Run ``projwfc.x`` on your ``pdos.in`` file (Make sure kresolveddos=.false.). 
+5. Make sure to copy the atomic_proj.xml file that is found in the .save directory into the main directory
+6. Run pyprocar.dosplot(dirname = 'bands' ,mode = 'plain', code = 'qe')
+
+**Band Structure and Density of States** 
+
+1. Run the band structure and dos calculation as stated above
+
+5. Run pyprocar.bandsdosplot(bands_dirname = 'bands', dos_dirname = 'dos', bands_mode = 'plain', dos_mode = 'plain', code = 'qe')
+
+**Fermi** 
+
+1. Create directory called ``fermi``. 
+2. Run ``pw.x`` on your ``scf.in`` file. 
+3. Run ``pw.x`` on your ``nscf.in`` file. 
+4. Run ``projwfc.x`` on your ``kpdos.in`` file (Make sure kresolveddos=.true.). 
+5. Make sure to copy the atomic_proj.xml file that is found in the .save directory into the main directory
+6. Run pyprocar.fermi3D
+
+
+**K-Points Format**
+
+The :math:`k`-path can be specified in ``bands.in`` which is used for the band structure calculation as one of the following::
 
 
     K_POINTS {crystal_b}
@@ -82,7 +120,7 @@ Run ``pw.x`` for the self-consistent calculation (output : scf.out) and the band
         0.5000000000       0.0000000000       0.5000000000       30 !X
 
 
-The on labels a discontinuity that occurs.
+Where the one occurs is at the place of a discontinuity.
 
 Explicit::
 
@@ -121,14 +159,6 @@ Explicit::
 - Explicitly listing kpoints as ''!kpoint" is important for labels
 
 To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7
-
-lobster_input_file must include explicit bands such as::
-
-
-    createFatband F 2p_x 2p_y 2p_z 2s
-    createFatband Li 1s 2s
-
-Afterwards, to obtain the projections run ``projwfc.x`` on the kpdos.in file to retrieve kpdos.out. PyProcar should be run in this calculation directory.
 
 ============
 4. Lobster
@@ -182,6 +212,13 @@ The kpoints for a lobster file must be listed in the scf.in file as the followin
 - Explicitly listing kpoints as ''!kpoint" on the k path is important for labels
 
 To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7
+
+lobster_input_file must include explicit bands such as::
+
+
+    createFatband F 2p_x 2p_y 2p_z 2s
+    createFatband Li 1s 2s
+
 
 Follow instructions on how to perform a Lobster analysis with Quantum Espresso. Also refer to the files in the relevant ``examples`` directory.
 

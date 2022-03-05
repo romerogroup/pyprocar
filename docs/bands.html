@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Band structure &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +14,16 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +33,13 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -54,7 +61,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -157,6 +164,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -170,7 +179,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/bands.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -184,10 +193,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="band-structure">
+  <section id="band-structure">
 <span id="labelbands"></span><h1>Band structure<a class="headerlink" href="#band-structure" title="Permalink to this headline">¶</a></h1>
 <p>PyProcar goes beyond the conventional plain band structure to plot the projected bands that carry even more information. The projected bands are color coded in an informative manner to portray fine details.</p>
-<div class="section" id="plain-band-structure">
+<section id="plain-band-structure">
 <h2>1. Plain band structure<a class="headerlink" href="#plain-band-structure" title="Permalink to this headline">¶</a></h2>
 <p>This is the most basic type of band structure. No projection information is contained here. In order to use the plain mode one sets <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code>. <code class="docutils literal notranslate"><span class="pre">elimit</span></code> sets the energy window limits. <code class="docutils literal notranslate"><span class="pre">outcar</span></code> specifies the <strong>OUTCAR</strong> file. For Abinit calculations, <code class="docutils literal notranslate"><span class="pre">abinit_output</span></code> is used instead. <code class="docutils literal notranslate"><span class="pre">color</span></code> lets the user use any color available in the matplotlib package. If an output file is not present one can set <code class="docutils literal notranslate"><span class="pre">fermi</span></code> manually. One may save the plot using the <code class="docutils literal notranslate"><span class="pre">savefig</span></code> tag, for example, <code class="docutils literal notranslate"><span class="pre">savefig='figure.png'</span></code> with a desired image file format. This applies to all other band structure plotting functions in PyProcar as well. For Elk, setting file=’PROCAR’ and outcar=’OUTCAR’ is not necessary. As long as the path to <strong>elk.in</strong> is defined or PyProcar is executed in the directory of calculation, PyProcar will work of the files needed for the bandsplot.</p>
 <p>Usage:</p>
@@ -238,8 +247,8 @@ plot1d
 </pre></div>
 </div>
 <p>This is valid for the rest of the band plotting modes as well.</p>
-</div>
-<div class="section" id="spin-projection">
+</section>
+<section id="spin-projection">
 <h2>2. Spin projection<a class="headerlink" href="#spin-projection" title="Permalink to this headline">¶</a></h2>
 <p>For collinear spin polarized and non-collinear spin calculations of DFT codes, PyProcar is able to plot the bands considering spin density (magnitude), spin magnetization and spin channels separately.</p>
 <p>For non-collinear spin calculations, <code class="docutils literal notranslate"><span class="pre">spin=0</span></code> plots the spin density (magnitude) and <code class="docutils literal notranslate"><span class="pre">spin=1,2,3</span></code> corresponds to spins oriented in <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span> and <span class="math notranslate nohighlight">\(S_z\)</span> directions respectively. Setting <code class="docutils literal notranslate"><span class="pre">spin='st'</span></code> plots the spin texture perpendicular in the plane (<span class="math notranslate nohighlight">\(k_x\)</span>, <span class="math notranslate nohighlight">\(k_y\)</span>) to each (<span class="math notranslate nohighlight">\(k_x\)</span>,i <span class="math notranslate nohighlight">\(k_y\)</span>) vector. This is useful for Rashba-like states in surfaces. For parametric plots such as spin, atom and orbitals, the user should set <code class="docutils literal notranslate"><span class="pre">mode=`parametric'</span></code>. <code class="docutils literal notranslate"><span class="pre">cmap</span></code> refers to the matplotlib color map used for the parametric plotting and can be modified by using the same color maps used in matplotlib. <code class="docutils literal notranslate"><span class="pre">cmap='seismic'</span></code> is recommended for parametric spin band structure plots.  For colinear spin calculations setting <code class="docutils literal notranslate"><span class="pre">spin=0</span></code> plots the spin density (magnitude) and <code class="docutils literal notranslate"><span class="pre">spin=1</span></code> plots the spin magnetization. Spin channels can also be plot separately (see below).</p>
@@ -271,8 +280,8 @@ plot1d
 </div>
 <p>Note:</p>
 <p>Currently, Elk only supports spin colinear plotting. Non colinear spin plotting will be implemented in the future.</p>
-</div>
-<div class="section" id="atom-projection">
+</section>
+<section id="atom-projection">
 <h2>3. Atom projection<a class="headerlink" href="#atom-projection" title="Permalink to this headline">¶</a></h2>
 <p>The projection of atoms onto bands can provide information such as which atoms contribute to the electronic states near the Fermi level. PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO:math:<cite>_3</cite>, the indexes of <code class="docutils literal notranslate"><span class="pre">atoms</span></code> for Sr, V and the three O atoms would be 0,1 and 2,3,4 respectively. It is also possible to include more than one type of atom by using an array such as <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[0,1,3]</span></code>. The index 5 would correspond to the total contribution from all the atoms.</p>
 <p>Usage:</p>
@@ -281,8 +290,8 @@ plot1d
 </div>
 <p>NOTE:</p>
 <p>The reason for this format which includes the “total” atomic contribution as the last atom index is because the PROCAR file from VASP which PyProcar was originally based on had a “tot” row for each k-point/band block that summed up all the atom contributions. So the parser was meant to incorporate that as well. The other DFT parsers followed suit to be consistent with this format.</p>
-</div>
-<div class="section" id="orbital-projection">
+</section>
+<section id="orbital-projection">
 <h2>4. Orbital projection<a class="headerlink" href="#orbital-projection" title="Permalink to this headline">¶</a></h2>
 <p>The projection of atomic orbitals onto bands is also useful to identify the contribution of orbitals to bands. For instance, to identify correlated <span class="math notranslate nohighlight">\(d\)</span> or <span class="math notranslate nohighlight">\(f\)</span> orbitals in a strongly correlated material near the Fermi level. It is possible to include more than one type of orbital projection. The mapping of the index of orbitals to be used in <code class="docutils literal notranslate"><span class="pre">orbitals</span></code> is as follows (this is the same order from the PROCAR file). Quantum Espresso, VASP and Abinit follows this order.</p>
 <img alt="_images/orbitals.png" src="_images/orbitals.png" />
@@ -293,8 +302,8 @@ plot1d
 </div>
 <p>One or many of the above can be combined together to allow the user to probe into more specific queries such as a collinear spin projection of a certain orbital of a certain atom.</p>
 <p>Different modes of band structures are useful for obtaining information for different cases. The four modes available within PyProcar are <code class="docutils literal notranslate"><span class="pre">plain,</span> <span class="pre">scatter,</span> <span class="pre">parametric</span></code> and <code class="docutils literal notranslate"><span class="pre">atomic</span></code>. The <code class="docutils literal notranslate"><span class="pre">plain</span></code> bands contain no projection information. The <code class="docutils literal notranslate"><span class="pre">scatter</span></code> mode creates a scatter plot of points. The <code class="docutils literal notranslate"><span class="pre">parametric</span></code> mode interpolates between points to create bands which are also projectable. Finally, the <code class="docutils literal notranslate"><span class="pre">atomic</span></code> mode is useful to plot energy levels for atoms. To  set  maximum  and  minimum  projections  for  color  map,  one  could  use <code class="docutils literal notranslate"><span class="pre">vmin</span></code> and <code class="docutils literal notranslate"><span class="pre">vmax</span></code> tags.</p>
-</div>
-<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+</section>
+<section id="export-plot-as-a-matplotlib-pyplot-object">
 <h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
 <p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
 Usage:</p>
@@ -303,12 +312,12 @@ Usage:</p>
 <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="converting-k-points-from-reduced-to-cartesian-coordinates">
+</section>
+<section id="converting-k-points-from-reduced-to-cartesian-coordinates">
 <h2>Converting <span class="math notranslate nohighlight">\(k\)</span>-points from reduced to cartesian coordinates<a class="headerlink" href="#converting-k-points-from-reduced-to-cartesian-coordinates" title="Permalink to this headline">¶</a></h2>
 <p>PyProcar defaults to plotting using the reduced coordinates of the <span class="math notranslate nohighlight">\(k\)</span>-points. If one wishes to plot using cartesian coordinates, set <code class="docutils literal notranslate"><span class="pre">kdirect=False</span></code>. However, an <code class="docutils literal notranslate"><span class="pre">OUTCAR</span></code> must be supplied for this case to retrieve the reciprocal lattice vectors to transform the coordinates from reduced to cartesian. Note that for the case of Elk, the output is automatically retrieved so it is not necessary to provide it for the conversion.</p>
-</div>
-<div class="section" id="plotting-band-structures-with-a-discontinuous-k-path">
+</section>
+<section id="plotting-band-structures-with-a-discontinuous-k-path">
 <h2>Plotting band structures with a discontinuous <span class="math notranslate nohighlight">\(k\)</span>-path<a class="headerlink" href="#plotting-band-structures-with-a-discontinuous-k-path" title="Permalink to this headline">¶</a></h2>
 <p>PyProcar allows the plotting of band structures with a discontinuous <span class="math notranslate nohighlight">\(k\)</span>-path. If a <code class="docutils literal notranslate"><span class="pre">KPOINTS</span></code> file with the <span class="math notranslate nohighlight">\(k\)</span>-path is supplied, PyProcar will automatically find the <span class="math notranslate nohighlight">\(k\)</span>-point indices where the discontinuities occur. If not, one may manually set it with the <code class="docutils literal notranslate"><span class="pre">discontinuities</span></code> variable. For example, the <span class="math notranslate nohighlight">\(k\)</span>-path <code class="docutils literal notranslate"><span class="pre">G-X-M-G-R-X</span> <span class="pre">M-R</span> <span class="pre">X-M-G</span></code> with 40 grid points should be set as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">knames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">Gamma$&#39;</span><span class="p">,</span> <span class="s1">&#39;$X$&#39;</span><span class="p">,</span> <span class="s1">&#39;$M$&#39;</span><span class="p">,</span> <span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">Gamma$&#39;</span><span class="p">,</span> <span class="s1">&#39;$R$&#39;</span><span class="p">,</span> <span class="s1">&#39;$X/M$&#39;</span><span class="p">,</span> <span class="s1">&#39;$R/X$&#39;</span><span class="p">,</span> <span class="s1">&#39;$M$&#39;</span><span class="p">,</span> <span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">Gamma$&#39;</span><span class="p">]</span>
@@ -318,50 +327,91 @@ Usage:</p>
 </div>
 <img alt="_images/continuousbands.png" src="_images/continuousbands.png" />
 <span class="target" id="module-pyprocar.scriptBandsplot"></span><dl class="py function">
-<dt id="pyprocar.scriptBandsplot.bandsplot">
-<code class="sig-prename descclassname">pyprocar.scriptBandsplot.</code><code class="sig-name descname">bandsplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">procarfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'blue'</span></em>, <em class="sig-param"><span class="n">abinit_output</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">[- 2, 2]</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">markersize</span><span class="o">=</span><span class="default_value">0.02</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">marker</span><span class="o">=</span><span class="default_value">'o'</span></em>, <em class="sig-param"><span class="n">permissive</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">human</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kticks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">knames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kpointsfile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kdirect</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em>, <em class="sig-param"><span class="n">separate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">discontinuities</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">lobstercode</span><span class="o">=</span><span class="default_value">'qe'</span></em>, <em class="sig-param"><span class="n">plot_color_bar</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">linewidth</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">repair</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsplot.html#bandsplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function plots band structures</p>
+<dt class="sig sig-object py" id="pyprocar.scriptBandsplot.bandsplot">
+<span class="sig-prename descclassname"><span class="pre">pyprocar.scriptBandsplot.</span></span><span class="sig-name descname"><span class="pre">bandsplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PROCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abinit_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'abinit.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elkin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elk.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vasp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbitals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptBandsplot.html#bandsplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scriptBandsplot.bandsplot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>procar</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “PROCAR”.</p></li>
+<li><p><strong>abinit_output</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “abinit.out”.</p></li>
+<li><p><strong>outcar</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – <dl class="simple">
+<dt>DESCRIPTION. The default is “OUTCAR”.</dt><dd><p>kpoints : TYPE, optional</p>
+</dd>
+</dl>
+<p>DESCRIPTION. The default is “KPOINTS”.</p>
+</p></li>
+<li><p><strong>elkin</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “elk.in”.</p></li>
+<li><p><strong>mode</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “plain”.</p></li>
+<li><p><strong>spin_mode</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – plain, magnetization, density, “spin_up”, “spin_down”, “both”, “sx”,
+“sy”, “sz”, “spin_texture”
+DESCRIPTION. The default is “plain”.</p></li>
+<li><p><strong>spins</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION.</p></li>
+<li><p><strong>atoms</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>orbitals</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>fermi</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>mask</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>colors</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION.</p></li>
+<li><p><strong>cmap</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “jet”.</p></li>
+<li><p><strong>marker</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “o”.</p></li>
+<li><p><strong>markersize</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 0.02.</p></li>
+<li><p><strong>linewidth</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 1.</p></li>
+<li><p><strong>vmax</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>vmin</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>grid</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is False.</p></li>
+<li><p><strong>kticks</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>knames</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>elimit</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>ax</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>show</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is True.</p></li>
+<li><p><strong>savefig</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>plot_color_bar</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is True.</p></li>
+<li><p><strong>title</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
+<li><p><strong>kdirect</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is True.</p></li>
+<li><p><strong>code</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “vasp”.</p></li>
+<li><p><strong>lobstercode</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is “qe”.</p></li>
+<li><p><strong>verbose</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="dos.html" class="btn btn-neutral float-right" title="Density of States" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="kmesh.html" class="btn btn-neutral float-left" title="k-mesh generator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="dos.html" class="btn btn-neutral float-right" title="Density of States" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="kmesh.html" class="btn btn-neutral float-left" title="k-mesh generator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>pyprocar.core.elements &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +13,16 @@
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +32,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/clipboard.min.js"></script>
         <script src="../../../_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -52,7 +57,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -116,6 +121,8 @@
         <div class="rst-content">
         
           
+
+
 
 
 
@@ -269,171 +276,166 @@
     <span class="s2">&quot;Mt&quot;</span><span class="p">:</span> <span class="mi">109</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="n">elements_reversed</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span> <span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">elements_reversed</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
 <span class="n">atomic_masses</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mf">1.0079</span><span class="p">,</span>
-    <span class="s1">&#39;He&#39;</span><span class="p">:</span> <span class="mf">4.0026</span><span class="p">,</span>
-    <span class="s1">&#39;Li&#39;</span><span class="p">:</span> <span class="mf">6.941</span><span class="p">,</span>
-    <span class="s1">&#39;Be&#39;</span><span class="p">:</span> <span class="mf">9.0122</span><span class="p">,</span>
-    <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="mf">10.811</span><span class="p">,</span>
-    <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mf">12.0107</span><span class="p">,</span>
-    <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="mf">14.0067</span><span class="p">,</span>
-    <span class="s1">&#39;O&#39;</span><span class="p">:</span> <span class="mf">15.9994</span><span class="p">,</span>
-    <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="mf">18.9984</span><span class="p">,</span>
-    <span class="s1">&#39;Ne&#39;</span><span class="p">:</span> <span class="mf">20.1797</span><span class="p">,</span>
-    <span class="s1">&#39;Na&#39;</span><span class="p">:</span> <span class="mf">22.9897</span><span class="p">,</span>
-    <span class="s1">&#39;Mg&#39;</span><span class="p">:</span> <span class="mf">24.305</span><span class="p">,</span>
-    <span class="s1">&#39;Al&#39;</span><span class="p">:</span> <span class="mf">26.9815</span><span class="p">,</span>
-    <span class="s1">&#39;Si&#39;</span><span class="p">:</span> <span class="mf">28.0855</span><span class="p">,</span>
-    <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="mf">30.9738</span><span class="p">,</span>
-    <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="mf">32.065</span><span class="p">,</span>
-    <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="mf">35.453</span><span class="p">,</span>
-    <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="mf">39.0983</span><span class="p">,</span>
-    <span class="s1">&#39;Ar&#39;</span><span class="p">:</span> <span class="mf">39.948</span><span class="p">,</span>
-    <span class="s1">&#39;Ca&#39;</span><span class="p">:</span> <span class="mf">40.078</span><span class="p">,</span>
-    <span class="s1">&#39;Sc&#39;</span><span class="p">:</span> <span class="mf">44.9559</span><span class="p">,</span>
-    <span class="s1">&#39;Ti&#39;</span><span class="p">:</span> <span class="mf">47.867</span><span class="p">,</span>
-    <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="mf">50.9415</span><span class="p">,</span>
-    <span class="s1">&#39;Cr&#39;</span><span class="p">:</span> <span class="mf">51.9961</span><span class="p">,</span>
-    <span class="s1">&#39;Mn&#39;</span><span class="p">:</span> <span class="mf">54.938</span><span class="p">,</span>
-    <span class="s1">&#39;Fe&#39;</span><span class="p">:</span> <span class="mf">55.845</span><span class="p">,</span>
-    <span class="s1">&#39;Ni&#39;</span><span class="p">:</span> <span class="mf">58.6934</span><span class="p">,</span>
-    <span class="s1">&#39;Co&#39;</span><span class="p">:</span> <span class="mf">58.9332</span><span class="p">,</span>
-    <span class="s1">&#39;Cu&#39;</span><span class="p">:</span> <span class="mf">63.546</span><span class="p">,</span>
-    <span class="s1">&#39;Zn&#39;</span><span class="p">:</span> <span class="mf">65.39</span><span class="p">,</span>
-    <span class="s1">&#39;Ga&#39;</span><span class="p">:</span> <span class="mf">69.723</span><span class="p">,</span>
-    <span class="s1">&#39;Ge&#39;</span><span class="p">:</span> <span class="mf">72.64</span><span class="p">,</span>
-    <span class="s1">&#39;As&#39;</span><span class="p">:</span> <span class="mf">74.9216</span><span class="p">,</span>
-    <span class="s1">&#39;Se&#39;</span><span class="p">:</span> <span class="mf">78.96</span><span class="p">,</span>
-    <span class="s1">&#39;Br&#39;</span><span class="p">:</span> <span class="mf">79.904</span><span class="p">,</span>
-    <span class="s1">&#39;Kr&#39;</span><span class="p">:</span> <span class="mf">83.8</span><span class="p">,</span>
-    <span class="s1">&#39;Rb&#39;</span><span class="p">:</span> <span class="mf">85.4678</span><span class="p">,</span>
-    <span class="s1">&#39;Sr&#39;</span><span class="p">:</span> <span class="mf">87.62</span><span class="p">,</span>
-    <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mf">88.9059</span><span class="p">,</span>
-    <span class="s1">&#39;Zr&#39;</span><span class="p">:</span> <span class="mf">91.224</span><span class="p">,</span>
-    <span class="s1">&#39;Nb&#39;</span><span class="p">:</span> <span class="mf">92.9064</span><span class="p">,</span>
-    <span class="s1">&#39;Mo&#39;</span><span class="p">:</span> <span class="mf">95.94</span><span class="p">,</span>
-    <span class="s1">&#39;Tc&#39;</span><span class="p">:</span> <span class="mf">98.0</span><span class="p">,</span>
-    <span class="s1">&#39;Ru&#39;</span><span class="p">:</span> <span class="mf">101.07</span><span class="p">,</span>
-    <span class="s1">&#39;Rh&#39;</span><span class="p">:</span> <span class="mf">102.9055</span><span class="p">,</span>
-    <span class="s1">&#39;Pd&#39;</span><span class="p">:</span> <span class="mf">106.42</span><span class="p">,</span>
-    <span class="s1">&#39;Ag&#39;</span><span class="p">:</span> <span class="mf">107.8682</span><span class="p">,</span>
-    <span class="s1">&#39;Cd&#39;</span><span class="p">:</span> <span class="mf">112.411</span><span class="p">,</span>
-    <span class="s1">&#39;In&#39;</span><span class="p">:</span> <span class="mf">114.818</span><span class="p">,</span>
-    <span class="s1">&#39;Sn&#39;</span><span class="p">:</span> <span class="mf">118.71</span><span class="p">,</span>
-    <span class="s1">&#39;Sb&#39;</span><span class="p">:</span> <span class="mf">121.76</span><span class="p">,</span>
-    <span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="mf">126.9045</span><span class="p">,</span>
-    <span class="s1">&#39;Te&#39;</span><span class="p">:</span> <span class="mf">127.6</span><span class="p">,</span>
-    <span class="s1">&#39;Xe&#39;</span><span class="p">:</span> <span class="mf">131.293</span><span class="p">,</span>
-    <span class="s1">&#39;Cs&#39;</span><span class="p">:</span> <span class="mf">132.9055</span><span class="p">,</span>
-    <span class="s1">&#39;Ba&#39;</span><span class="p">:</span> <span class="mf">137.327</span><span class="p">,</span>
-    <span class="s1">&#39;La&#39;</span><span class="p">:</span> <span class="mf">138.9055</span><span class="p">,</span>
-    <span class="s1">&#39;Ce&#39;</span><span class="p">:</span> <span class="mf">140.116</span><span class="p">,</span>
-    <span class="s1">&#39;Pr&#39;</span><span class="p">:</span> <span class="mf">140.9077</span><span class="p">,</span>
-    <span class="s1">&#39;Nd&#39;</span><span class="p">:</span> <span class="mf">144.24</span><span class="p">,</span>
-    <span class="s1">&#39;Pm&#39;</span><span class="p">:</span> <span class="mf">145.0</span><span class="p">,</span>
-    <span class="s1">&#39;Sm&#39;</span><span class="p">:</span> <span class="mf">150.36</span><span class="p">,</span>
-    <span class="s1">&#39;Eu&#39;</span><span class="p">:</span> <span class="mf">151.964</span><span class="p">,</span>
-    <span class="s1">&#39;Gd&#39;</span><span class="p">:</span> <span class="mf">157.25</span><span class="p">,</span>
-    <span class="s1">&#39;Tb&#39;</span><span class="p">:</span> <span class="mf">158.9253</span><span class="p">,</span>
-    <span class="s1">&#39;Dy&#39;</span><span class="p">:</span> <span class="mf">162.5</span><span class="p">,</span>
-    <span class="s1">&#39;Ho&#39;</span><span class="p">:</span> <span class="mf">164.9303</span><span class="p">,</span>
-    <span class="s1">&#39;Er&#39;</span><span class="p">:</span> <span class="mf">167.259</span><span class="p">,</span>
-    <span class="s1">&#39;Tm&#39;</span><span class="p">:</span> <span class="mf">168.9342</span><span class="p">,</span>
-    <span class="s1">&#39;Yb&#39;</span><span class="p">:</span> <span class="mf">173.04</span><span class="p">,</span>
-    <span class="s1">&#39;Lu&#39;</span><span class="p">:</span> <span class="mf">174.967</span><span class="p">,</span>
-    <span class="s1">&#39;Hf&#39;</span><span class="p">:</span> <span class="mf">178.49</span><span class="p">,</span>
-    <span class="s1">&#39;Ta&#39;</span><span class="p">:</span> <span class="mf">180.9479</span><span class="p">,</span>
-    <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="mf">183.84</span><span class="p">,</span>
-    <span class="s1">&#39;Re&#39;</span><span class="p">:</span> <span class="mf">186.207</span><span class="p">,</span>
-    <span class="s1">&#39;Os&#39;</span><span class="p">:</span> <span class="mf">190.23</span><span class="p">,</span>
-    <span class="s1">&#39;Ir&#39;</span><span class="p">:</span> <span class="mf">192.217</span><span class="p">,</span>
-    <span class="s1">&#39;Pt&#39;</span><span class="p">:</span> <span class="mf">195.078</span><span class="p">,</span>
-    <span class="s1">&#39;Au&#39;</span><span class="p">:</span> <span class="mf">196.9665</span><span class="p">,</span>
-    <span class="s1">&#39;Hg&#39;</span><span class="p">:</span> <span class="mf">200.59</span><span class="p">,</span>
-    <span class="s1">&#39;Tl&#39;</span><span class="p">:</span> <span class="mf">204.3833</span><span class="p">,</span>
-    <span class="s1">&#39;Pb&#39;</span><span class="p">:</span> <span class="mf">207.2</span><span class="p">,</span>
-    <span class="s1">&#39;Bi&#39;</span><span class="p">:</span> <span class="mf">208.9804</span><span class="p">,</span>
-    <span class="s1">&#39;Po&#39;</span><span class="p">:</span> <span class="mf">209.0</span><span class="p">,</span>
-    <span class="s1">&#39;At&#39;</span><span class="p">:</span> <span class="mf">210.0</span><span class="p">,</span>
-    <span class="s1">&#39;Rn&#39;</span><span class="p">:</span> <span class="mf">222.0</span><span class="p">,</span>
-    <span class="s1">&#39;Fr&#39;</span><span class="p">:</span> <span class="mf">223.0</span><span class="p">,</span>
-    <span class="s1">&#39;Ra&#39;</span><span class="p">:</span> <span class="mf">226.0</span><span class="p">,</span>
-    <span class="s1">&#39;Ac&#39;</span><span class="p">:</span> <span class="mf">227.0</span><span class="p">,</span>
-    <span class="s1">&#39;Pa&#39;</span><span class="p">:</span> <span class="mf">231.0359</span><span class="p">,</span>
-    <span class="s1">&#39;Th&#39;</span><span class="p">:</span> <span class="mf">232.0381</span><span class="p">,</span>
-    <span class="s1">&#39;Np&#39;</span><span class="p">:</span> <span class="mf">237.0</span><span class="p">,</span>
-    <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="mf">238.0289</span><span class="p">,</span>
-    <span class="s1">&#39;Am&#39;</span><span class="p">:</span> <span class="mf">243.0</span><span class="p">,</span>
-    <span class="s1">&#39;Pu&#39;</span><span class="p">:</span> <span class="mf">244.0</span><span class="p">,</span>
-    <span class="s1">&#39;Cm&#39;</span><span class="p">:</span> <span class="mf">247.0</span><span class="p">,</span>
-    <span class="s1">&#39;Bk&#39;</span><span class="p">:</span> <span class="mf">247.0</span><span class="p">,</span>
-    <span class="s1">&#39;Cf&#39;</span><span class="p">:</span> <span class="mf">251.0</span><span class="p">,</span>
-    <span class="s1">&#39;Es&#39;</span><span class="p">:</span> <span class="mf">252.0</span><span class="p">,</span>
-    <span class="s1">&#39;Fm&#39;</span><span class="p">:</span> <span class="mf">257.0</span><span class="p">,</span>
-    <span class="s1">&#39;Md&#39;</span><span class="p">:</span> <span class="mf">258.0</span><span class="p">,</span>
-    <span class="s1">&#39;No&#39;</span><span class="p">:</span> <span class="mf">259.0</span><span class="p">,</span>
-    <span class="s1">&#39;Rf&#39;</span><span class="p">:</span> <span class="mf">261.0</span><span class="p">,</span>
-    <span class="s1">&#39;Lr&#39;</span><span class="p">:</span> <span class="mf">262.0</span><span class="p">,</span>
-    <span class="s1">&#39;Db&#39;</span><span class="p">:</span> <span class="mf">262.0</span><span class="p">,</span>
-    <span class="s1">&#39;Bh&#39;</span><span class="p">:</span> <span class="mf">264.0</span><span class="p">,</span>
-    <span class="s1">&#39;Sg&#39;</span><span class="p">:</span> <span class="mf">266.0</span><span class="p">,</span>
-    <span class="s1">&#39;Mt&#39;</span><span class="p">:</span> <span class="mf">268.0</span><span class="p">,</span>
-    <span class="s1">&#39;Rg&#39;</span><span class="p">:</span> <span class="mf">272.0</span><span class="p">,</span>
-    <span class="s1">&#39;Hs&#39;</span><span class="p">:</span> <span class="mf">277.0</span><span class="p">}</span>
+    <span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mf">1.0079</span><span class="p">,</span>
+    <span class="s2">&quot;He&quot;</span><span class="p">:</span> <span class="mf">4.0026</span><span class="p">,</span>
+    <span class="s2">&quot;Li&quot;</span><span class="p">:</span> <span class="mf">6.941</span><span class="p">,</span>
+    <span class="s2">&quot;Be&quot;</span><span class="p">:</span> <span class="mf">9.0122</span><span class="p">,</span>
+    <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="mf">10.811</span><span class="p">,</span>
+    <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="mf">12.0107</span><span class="p">,</span>
+    <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="mf">14.0067</span><span class="p">,</span>
+    <span class="s2">&quot;O&quot;</span><span class="p">:</span> <span class="mf">15.9994</span><span class="p">,</span>
+    <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="mf">18.9984</span><span class="p">,</span>
+    <span class="s2">&quot;Ne&quot;</span><span class="p">:</span> <span class="mf">20.1797</span><span class="p">,</span>
+    <span class="s2">&quot;Na&quot;</span><span class="p">:</span> <span class="mf">22.9897</span><span class="p">,</span>
+    <span class="s2">&quot;Mg&quot;</span><span class="p">:</span> <span class="mf">24.305</span><span class="p">,</span>
+    <span class="s2">&quot;Al&quot;</span><span class="p">:</span> <span class="mf">26.9815</span><span class="p">,</span>
+    <span class="s2">&quot;Si&quot;</span><span class="p">:</span> <span class="mf">28.0855</span><span class="p">,</span>
+    <span class="s2">&quot;P&quot;</span><span class="p">:</span> <span class="mf">30.9738</span><span class="p">,</span>
+    <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="mf">32.065</span><span class="p">,</span>
+    <span class="s2">&quot;Cl&quot;</span><span class="p">:</span> <span class="mf">35.453</span><span class="p">,</span>
+    <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="mf">39.0983</span><span class="p">,</span>
+    <span class="s2">&quot;Ar&quot;</span><span class="p">:</span> <span class="mf">39.948</span><span class="p">,</span>
+    <span class="s2">&quot;Ca&quot;</span><span class="p">:</span> <span class="mf">40.078</span><span class="p">,</span>
+    <span class="s2">&quot;Sc&quot;</span><span class="p">:</span> <span class="mf">44.9559</span><span class="p">,</span>
+    <span class="s2">&quot;Ti&quot;</span><span class="p">:</span> <span class="mf">47.867</span><span class="p">,</span>
+    <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="mf">50.9415</span><span class="p">,</span>
+    <span class="s2">&quot;Cr&quot;</span><span class="p">:</span> <span class="mf">51.9961</span><span class="p">,</span>
+    <span class="s2">&quot;Mn&quot;</span><span class="p">:</span> <span class="mf">54.938</span><span class="p">,</span>
+    <span class="s2">&quot;Fe&quot;</span><span class="p">:</span> <span class="mf">55.845</span><span class="p">,</span>
+    <span class="s2">&quot;Ni&quot;</span><span class="p">:</span> <span class="mf">58.6934</span><span class="p">,</span>
+    <span class="s2">&quot;Co&quot;</span><span class="p">:</span> <span class="mf">58.9332</span><span class="p">,</span>
+    <span class="s2">&quot;Cu&quot;</span><span class="p">:</span> <span class="mf">63.546</span><span class="p">,</span>
+    <span class="s2">&quot;Zn&quot;</span><span class="p">:</span> <span class="mf">65.39</span><span class="p">,</span>
+    <span class="s2">&quot;Ga&quot;</span><span class="p">:</span> <span class="mf">69.723</span><span class="p">,</span>
+    <span class="s2">&quot;Ge&quot;</span><span class="p">:</span> <span class="mf">72.64</span><span class="p">,</span>
+    <span class="s2">&quot;As&quot;</span><span class="p">:</span> <span class="mf">74.9216</span><span class="p">,</span>
+    <span class="s2">&quot;Se&quot;</span><span class="p">:</span> <span class="mf">78.96</span><span class="p">,</span>
+    <span class="s2">&quot;Br&quot;</span><span class="p">:</span> <span class="mf">79.904</span><span class="p">,</span>
+    <span class="s2">&quot;Kr&quot;</span><span class="p">:</span> <span class="mf">83.8</span><span class="p">,</span>
+    <span class="s2">&quot;Rb&quot;</span><span class="p">:</span> <span class="mf">85.4678</span><span class="p">,</span>
+    <span class="s2">&quot;Sr&quot;</span><span class="p">:</span> <span class="mf">87.62</span><span class="p">,</span>
+    <span class="s2">&quot;Y&quot;</span><span class="p">:</span> <span class="mf">88.9059</span><span class="p">,</span>
+    <span class="s2">&quot;Zr&quot;</span><span class="p">:</span> <span class="mf">91.224</span><span class="p">,</span>
+    <span class="s2">&quot;Nb&quot;</span><span class="p">:</span> <span class="mf">92.9064</span><span class="p">,</span>
+    <span class="s2">&quot;Mo&quot;</span><span class="p">:</span> <span class="mf">95.94</span><span class="p">,</span>
+    <span class="s2">&quot;Tc&quot;</span><span class="p">:</span> <span class="mf">98.0</span><span class="p">,</span>
+    <span class="s2">&quot;Ru&quot;</span><span class="p">:</span> <span class="mf">101.07</span><span class="p">,</span>
+    <span class="s2">&quot;Rh&quot;</span><span class="p">:</span> <span class="mf">102.9055</span><span class="p">,</span>
+    <span class="s2">&quot;Pd&quot;</span><span class="p">:</span> <span class="mf">106.42</span><span class="p">,</span>
+    <span class="s2">&quot;Ag&quot;</span><span class="p">:</span> <span class="mf">107.8682</span><span class="p">,</span>
+    <span class="s2">&quot;Cd&quot;</span><span class="p">:</span> <span class="mf">112.411</span><span class="p">,</span>
+    <span class="s2">&quot;In&quot;</span><span class="p">:</span> <span class="mf">114.818</span><span class="p">,</span>
+    <span class="s2">&quot;Sn&quot;</span><span class="p">:</span> <span class="mf">118.71</span><span class="p">,</span>
+    <span class="s2">&quot;Sb&quot;</span><span class="p">:</span> <span class="mf">121.76</span><span class="p">,</span>
+    <span class="s2">&quot;I&quot;</span><span class="p">:</span> <span class="mf">126.9045</span><span class="p">,</span>
+    <span class="s2">&quot;Te&quot;</span><span class="p">:</span> <span class="mf">127.6</span><span class="p">,</span>
+    <span class="s2">&quot;Xe&quot;</span><span class="p">:</span> <span class="mf">131.293</span><span class="p">,</span>
+    <span class="s2">&quot;Cs&quot;</span><span class="p">:</span> <span class="mf">132.9055</span><span class="p">,</span>
+    <span class="s2">&quot;Ba&quot;</span><span class="p">:</span> <span class="mf">137.327</span><span class="p">,</span>
+    <span class="s2">&quot;La&quot;</span><span class="p">:</span> <span class="mf">138.9055</span><span class="p">,</span>
+    <span class="s2">&quot;Ce&quot;</span><span class="p">:</span> <span class="mf">140.116</span><span class="p">,</span>
+    <span class="s2">&quot;Pr&quot;</span><span class="p">:</span> <span class="mf">140.9077</span><span class="p">,</span>
+    <span class="s2">&quot;Nd&quot;</span><span class="p">:</span> <span class="mf">144.24</span><span class="p">,</span>
+    <span class="s2">&quot;Pm&quot;</span><span class="p">:</span> <span class="mf">145.0</span><span class="p">,</span>
+    <span class="s2">&quot;Sm&quot;</span><span class="p">:</span> <span class="mf">150.36</span><span class="p">,</span>
+    <span class="s2">&quot;Eu&quot;</span><span class="p">:</span> <span class="mf">151.964</span><span class="p">,</span>
+    <span class="s2">&quot;Gd&quot;</span><span class="p">:</span> <span class="mf">157.25</span><span class="p">,</span>
+    <span class="s2">&quot;Tb&quot;</span><span class="p">:</span> <span class="mf">158.9253</span><span class="p">,</span>
+    <span class="s2">&quot;Dy&quot;</span><span class="p">:</span> <span class="mf">162.5</span><span class="p">,</span>
+    <span class="s2">&quot;Ho&quot;</span><span class="p">:</span> <span class="mf">164.9303</span><span class="p">,</span>
+    <span class="s2">&quot;Er&quot;</span><span class="p">:</span> <span class="mf">167.259</span><span class="p">,</span>
+    <span class="s2">&quot;Tm&quot;</span><span class="p">:</span> <span class="mf">168.9342</span><span class="p">,</span>
+    <span class="s2">&quot;Yb&quot;</span><span class="p">:</span> <span class="mf">173.04</span><span class="p">,</span>
+    <span class="s2">&quot;Lu&quot;</span><span class="p">:</span> <span class="mf">174.967</span><span class="p">,</span>
+    <span class="s2">&quot;Hf&quot;</span><span class="p">:</span> <span class="mf">178.49</span><span class="p">,</span>
+    <span class="s2">&quot;Ta&quot;</span><span class="p">:</span> <span class="mf">180.9479</span><span class="p">,</span>
+    <span class="s2">&quot;W&quot;</span><span class="p">:</span> <span class="mf">183.84</span><span class="p">,</span>
+    <span class="s2">&quot;Re&quot;</span><span class="p">:</span> <span class="mf">186.207</span><span class="p">,</span>
+    <span class="s2">&quot;Os&quot;</span><span class="p">:</span> <span class="mf">190.23</span><span class="p">,</span>
+    <span class="s2">&quot;Ir&quot;</span><span class="p">:</span> <span class="mf">192.217</span><span class="p">,</span>
+    <span class="s2">&quot;Pt&quot;</span><span class="p">:</span> <span class="mf">195.078</span><span class="p">,</span>
+    <span class="s2">&quot;Au&quot;</span><span class="p">:</span> <span class="mf">196.9665</span><span class="p">,</span>
+    <span class="s2">&quot;Hg&quot;</span><span class="p">:</span> <span class="mf">200.59</span><span class="p">,</span>
+    <span class="s2">&quot;Tl&quot;</span><span class="p">:</span> <span class="mf">204.3833</span><span class="p">,</span>
+    <span class="s2">&quot;Pb&quot;</span><span class="p">:</span> <span class="mf">207.2</span><span class="p">,</span>
+    <span class="s2">&quot;Bi&quot;</span><span class="p">:</span> <span class="mf">208.9804</span><span class="p">,</span>
+    <span class="s2">&quot;Po&quot;</span><span class="p">:</span> <span class="mf">209.0</span><span class="p">,</span>
+    <span class="s2">&quot;At&quot;</span><span class="p">:</span> <span class="mf">210.0</span><span class="p">,</span>
+    <span class="s2">&quot;Rn&quot;</span><span class="p">:</span> <span class="mf">222.0</span><span class="p">,</span>
+    <span class="s2">&quot;Fr&quot;</span><span class="p">:</span> <span class="mf">223.0</span><span class="p">,</span>
+    <span class="s2">&quot;Ra&quot;</span><span class="p">:</span> <span class="mf">226.0</span><span class="p">,</span>
+    <span class="s2">&quot;Ac&quot;</span><span class="p">:</span> <span class="mf">227.0</span><span class="p">,</span>
+    <span class="s2">&quot;Pa&quot;</span><span class="p">:</span> <span class="mf">231.0359</span><span class="p">,</span>
+    <span class="s2">&quot;Th&quot;</span><span class="p">:</span> <span class="mf">232.0381</span><span class="p">,</span>
+    <span class="s2">&quot;Np&quot;</span><span class="p">:</span> <span class="mf">237.0</span><span class="p">,</span>
+    <span class="s2">&quot;U&quot;</span><span class="p">:</span> <span class="mf">238.0289</span><span class="p">,</span>
+    <span class="s2">&quot;Am&quot;</span><span class="p">:</span> <span class="mf">243.0</span><span class="p">,</span>
+    <span class="s2">&quot;Pu&quot;</span><span class="p">:</span> <span class="mf">244.0</span><span class="p">,</span>
+    <span class="s2">&quot;Cm&quot;</span><span class="p">:</span> <span class="mf">247.0</span><span class="p">,</span>
+    <span class="s2">&quot;Bk&quot;</span><span class="p">:</span> <span class="mf">247.0</span><span class="p">,</span>
+    <span class="s2">&quot;Cf&quot;</span><span class="p">:</span> <span class="mf">251.0</span><span class="p">,</span>
+    <span class="s2">&quot;Es&quot;</span><span class="p">:</span> <span class="mf">252.0</span><span class="p">,</span>
+    <span class="s2">&quot;Fm&quot;</span><span class="p">:</span> <span class="mf">257.0</span><span class="p">,</span>
+    <span class="s2">&quot;Md&quot;</span><span class="p">:</span> <span class="mf">258.0</span><span class="p">,</span>
+    <span class="s2">&quot;No&quot;</span><span class="p">:</span> <span class="mf">259.0</span><span class="p">,</span>
+    <span class="s2">&quot;Rf&quot;</span><span class="p">:</span> <span class="mf">261.0</span><span class="p">,</span>
+    <span class="s2">&quot;Lr&quot;</span><span class="p">:</span> <span class="mf">262.0</span><span class="p">,</span>
+    <span class="s2">&quot;Db&quot;</span><span class="p">:</span> <span class="mf">262.0</span><span class="p">,</span>
+    <span class="s2">&quot;Bh&quot;</span><span class="p">:</span> <span class="mf">264.0</span><span class="p">,</span>
+    <span class="s2">&quot;Sg&quot;</span><span class="p">:</span> <span class="mf">266.0</span><span class="p">,</span>
+    <span class="s2">&quot;Mt&quot;</span><span class="p">:</span> <span class="mf">268.0</span><span class="p">,</span>
+    <span class="s2">&quot;Rg&quot;</span><span class="p">:</span> <span class="mf">272.0</span><span class="p">,</span>
+    <span class="s2">&quot;Hs&quot;</span><span class="p">:</span> <span class="mf">277.0</span><span class="p">,</span>
+<span class="p">}</span>
+
 
 <div class="viewcode-block" id="atomic_mass"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.elements.atomic_mass">[docs]</a><span class="k">def</span> <span class="nf">atomic_mass</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a element symbol or element atomic number returns atomic mass.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    element : int,str</span>
 <span class="sd">        atomic symbol or atomic number.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        atomic mass.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">atomic_masses</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
     <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">atomic_masses</span><span class="p">[</span><span class="n">elements_reversed</span><span class="p">[</span><span class="n">element</span><span class="p">]]</span></div>
 
+
 <div class="viewcode-block" id="atomic_number"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.elements.atomic_number">[docs]</a><span class="k">def</span> <span class="nf">atomic_number</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given element symbol returns atomic number.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    element : str</span>
 <span class="sd">        Atomic symbol.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
 <span class="sd">        Atomic number.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">elements</span><span class="p">[</span><span class="n">element</span><span class="p">]</span></div>
+
 
 <div class="viewcode-block" id="atomic_symbol"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.elements.atomic_symbol">[docs]</a><span class="k">def</span> <span class="nf">atomic_symbol</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given atomic number returns atomic symbol.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    atomic_number : int</span>
 <span class="sd">        Atomic number.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    str</span>
 <span class="sd">        Atomic symbol.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">elements_reversed</span><span class="p">[</span><span class="n">atomic_number</span><span class="p">]</span></div>
 </pre></div>
@@ -442,28 +444,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

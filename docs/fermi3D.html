@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>3D Fermi surface &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +14,16 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +33,13 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -54,7 +61,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -157,6 +164,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -170,7 +179,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/fermi3D.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -184,7 +193,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="d-fermi-surface">
+  <section id="d-fermi-surface">
 <h1>3D Fermi surface<a class="headerlink" href="#d-fermi-surface" title="Permalink to this headline">¶</a></h1>
 <p>PyProcar’s 3D Fermi surface utility is able to generate Fermi surface
 plots projected over spin, atoms and orbitals or a combination of one
@@ -201,7 +210,7 @@ PROCAR and projection of properties from external file.</p>
 Monkhorst-Pack k-grid while setting <code class="docutils literal notranslate"><span class="pre">ISYM=-1</span></code> in the INCAR file
 (turn off symmetry).</p>
 </div>
-<div class="section" id="d-surfaces">
+<section id="d-surfaces">
 <h2>3D surfaces<a class="headerlink" href="#d-surfaces" title="Permalink to this headline">¶</a></h2>
 <p>This section focuses on how the 3d image is created, if you are only
 interested in using this functionality, you can skip this part and
@@ -270,15 +279,15 @@ trimesh and pyvista as well with the following citation information.</p>
       <span class="n">author</span> <span class="o">=</span> <span class="p">{{</span><span class="n">Dawson</span><span class="o">-</span><span class="n">Haggerty</span> <span class="n">et</span> <span class="n">al</span><span class="o">.</span><span class="p">}},</span>
       <span class="n">title</span> <span class="o">=</span> <span class="p">{</span><span class="n">trimesh</span><span class="p">},</span>
       <span class="n">url</span> <span class="o">=</span> <span class="p">{</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">trimsh</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="p">},</span>
-      <span class="n">version</span> <span class="o">=</span> <span class="p">{</span><span class="mf">3.2</span><span class="o">.</span><span class="mi">0</span><span class="p">},</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="p">{</span><span class="mf">3.2.0</span><span class="p">},</span>
       <span class="n">date</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2019</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">8</span><span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <p><a class="reference external" href="https://joss.theoj.org/papers/10.21105/joss.01450">PyVista</a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">sullivan2019pyvista</span><span class="p">,</span>
-<span class="n">doi</span> <span class="o">=</span> <span class="p">{</span><span class="mf">10.21105</span><span class="o">/</span><span class="n">joss</span><span class="o">.</span><span class="mi">01450</span><span class="p">},</span>
-<span class="n">url</span> <span class="o">=</span> <span class="p">{</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">doi</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="mf">10.21105</span><span class="o">/</span><span class="n">joss</span><span class="o">.</span><span class="mi">01450</span><span class="p">},</span>
+<span class="n">doi</span> <span class="o">=</span> <span class="p">{</span><span class="mf">10.21105</span><span class="o">/</span><span class="n">joss</span><span class="mf">.01450</span><span class="p">},</span>
+<span class="n">url</span> <span class="o">=</span> <span class="p">{</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">doi</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="mf">10.21105</span><span class="o">/</span><span class="n">joss</span><span class="mf">.01450</span><span class="p">},</span>
 <span class="n">year</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2019</span><span class="p">},</span>
 <span class="n">month</span> <span class="o">=</span> <span class="p">{</span><span class="n">may</span><span class="p">},</span>
 <span class="n">publisher</span> <span class="o">=</span> <span class="p">{</span><span class="n">The</span> <span class="n">Open</span> <span class="n">Journal</span><span class="p">},</span>
@@ -291,11 +300,11 @@ trimesh and pyvista as well with the following citation information.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h2>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>As a standard example for plotting fermi surfaces we use MgB<sub>2</sub>and SrFeO<sub>3</sub>.</p>
-<div class="section" id="plain-fermi-surface">
+<section id="plain-fermi-surface">
 <h3>1. Plain Fermi surface<a class="headerlink" href="#plain-fermi-surface" title="Permalink to this headline">¶</a></h3>
 <p>This mode is activated by selecting the argument <code class="docutils literal notranslate"><span class="pre">mode</span></code> equal to
 <code class="docutils literal notranslate"><span class="pre">'plain'</span></code>. This mode plots each band in fermi a different color,
@@ -312,13 +321,13 @@ however there won’t be any color projection.</p>
 </pre></div>
 </div>
 <p>The main arguments in this function are <code class="docutils literal notranslate"><span class="pre">procar</span></code>, <code class="docutils literal notranslate"><span class="pre">outcar</span></code>, <code class="docutils literal notranslate"><span class="pre">bands</span></code>, <code class="docutils literal notranslate"><span class="pre">scale</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">st</span></code>, where <code class="docutils literal notranslate"><span class="pre">procar</span></code> and <code class="docutils literal notranslate"><span class="pre">outcar</span></code> are the names of the input PROCAR and OUTCAR files respectively, <code class="docutils literal notranslate"><span class="pre">bands</span></code> is an array of the bands that are desired to be plotted. Note if <code class="docutils literal notranslate"><span class="pre">bands</span> <span class="pre">=</span> <span class="pre">-1</span></code>, the function will try to plot all the bands provided in the PROCAR file. The kmesh will be interpolated by a factor of scale in each direction. The <code class="docutils literal notranslate"><span class="pre">st</span></code> tag controls the spin-texture plotting, and <code class="docutils literal notranslate"><span class="pre">mode</span></code> determines the type of projection of colors. There are additional keyword arguments that can be accessed in the help section of this function, such as <code class="docutils literal notranslate"><span class="pre">face_color,</span> <span class="pre">cmap,</span> <span class="pre">atoms,</span> <span class="pre">orbitals,</span> <span class="pre">energy,</span> <span class="pre">transparent,</span> <span class="pre">nprocess</span></code> etc.</p>
-</div>
-<div class="section" id="surface-coloring-based-on-properties-from-procar">
+</section>
+<section id="surface-coloring-based-on-properties-from-procar">
 <h3>2. Surface coloring based on properties from PROCAR<a class="headerlink" href="#surface-coloring-based-on-properties-from-procar" title="Permalink to this headline">¶</a></h3>
 <p>Similar to the <code class="docutils literal notranslate"><span class="pre">bandsplot()</span></code> section one can choose to project the contribution of different properties provided in the PROCAR file, such as atom, orbital and spin contributions. The projection can be represented by different color mapping schemes chosen by the user. The projection is not restricted to only one property at a time, so it can be chosen from all the provided properties. For example, one might want to see the contribution of the orbitals <span class="math notranslate nohighlight">\(p_x\)</span>, <span class="math notranslate nohighlight">\(p_y\)</span>, <span class="math notranslate nohighlight">\(p_z\)</span> from specific atoms, this function will parse the desired contributions and projects the sum of contributions on each face. To use this functionality one has to change the mode from <code class="docutils literal notranslate"><span class="pre">plain</span></code> to <code class="docutils literal notranslate"><span class="pre">parametric</span></code> and choose the atoms, orbitals, spin that are desired to be projected.</p>
 <p>For noncolinear calculations, this function is able to plot arrows in the direction of the spinors provided in the PROCAR file. To turn this functionality on the one can set <code class="docutils literal notranslate"><span class="pre">st=True</span></code> to turn the spin-texture ON. The user can choose between coloring all the arrows originated from one band with a specific color, or project the contribution of that arrow in a specific Cartesian direction. To better represent the spin-texture we use the key argument <code class="docutils literal notranslate"><span class="pre">transparent=True</span></code> which changes the opacity of the Fermi-surface to zero.</p>
-</div>
-<div class="section" id="surface-coloring-based-on-properties-obtained-from-an-external-file">
+</section>
+<section id="surface-coloring-based-on-properties-obtained-from-an-external-file">
 <h3>3. Surface coloring based on properties obtained from an external file<a class="headerlink" href="#surface-coloring-based-on-properties-obtained-from-an-external-file" title="Permalink to this headline">¶</a></h3>
 <p>Similar to the previous section, this function is able to read an external file, containing information about a scalar or a vector field in BZ and project the field on the Fermi surface. This file does not need to have the same mesh grid as the PROCAR file as long as the mesh sampling is fine enough. This function performs an interpolation on the provided data and evaluates functions at the center of each face on the Fermi surface. The external file should have the following format:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">band</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">band</span> <span class="n">number</span><span class="o">&gt;</span>
@@ -331,58 +340,52 @@ however there won’t be any color projection.</p>
 </div>
 <p>The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on.</p>
 <span class="target" id="module-pyprocar.scriptFermi3D"></span><dl class="py function">
-<dt id="pyprocar.scriptFermi3D.fermi3D">
-<code class="sig-prename descclassname">pyprocar.scriptFermi3D.</code><code class="sig-name descname">fermi3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">procar</span><span class="o">=</span><span class="default_value">'PROCAR'</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">'OUTCAR'</span></em>, <em class="sig-param"><span class="n">infile</span><span class="o">=</span><span class="default_value">'in.bxsf'</span></em>, <em class="sig-param"><span class="n">fermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bands</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interpolation_factor</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'plain'</span></em>, <em class="sig-param"><span class="n">supercell</span><span class="o">=</span><span class="default_value">[1, 1, 1]</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">background_color</span><span class="o">=</span><span class="default_value">'white'</span></em>, <em class="sig-param"><span class="n">save_colors</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'jet'</span></em>, <em class="sig-param"><span class="n">atoms</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orbitals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spin_texture</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">arrow_color</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrow_size</span><span class="o">=</span><span class="default_value">0.015</span></em>, <em class="sig-param"><span class="n">only_spin</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fermi_shift</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">projection_accuracy</span><span class="o">=</span><span class="default_value">'normal'</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em>, <em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">savegif</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">savemp4</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">save3d</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">perspective</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">save2d</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">camera_pos</span><span class="o">=</span><span class="default_value">[1, 1, 1]</span></em>, <em class="sig-param"><span class="n">widget</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">repair</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFermi3D.html#fermi3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyprocar.scriptFermi3D.fermi3D">
+<span class="sig-prename descclassname"><span class="pre">pyprocar.scriptFermi3D.</span></span><span class="sig-name descname"><span class="pre">fermi3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PROCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OUTCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'in.bxsf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abinit_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supercell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extended_zone_directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'white'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbitals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_velocity_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effective_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_texture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.015</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_spin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_accuracy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vasp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savegif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savemp4</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save3d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_meshio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perspective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save2d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curvature_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_slice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_normal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_cross_section_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_slider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_surfaces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repair</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptFermi3D.html#fermi3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scriptFermi3D.fermi3D" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>procar</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'PROCAR'</span></code>)) – <p>Path to the PROCAR file of the simulation</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">procar='~/MgB2/fermi/PROCAR'</span></code></p>
-</p></li>
-<li><p><strong>outcar</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'OUTCAR'</span></code>)) – <p>Path to the OUTCAR file of the simulation</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">outcar='~/MgB2/fermi/OUTCAR'</span></code></p>
-</p></li>
-<li><p><strong>infile</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">infile</span> <span class="pre">=</span> <span class="pre">in.bxsf'</span></code>)) – <p>This is the path in the input bxsf file</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">infile</span> <span class="pre">=</span> <span class="pre">ni_fs.bxsf'</span></code></p>
-</p></li>
-<li><p><strong>fermi</strong> (float, optional (default <code class="docutils literal notranslate"><span class="pre">None</span></code>)) – <p>Fermi energy at which the fermi surface is created. In other
+<li><p><strong>procar</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'PROCAR'</span></code>)) – Path to the PROCAR file of the simulation
+e.g. <code class="docutils literal notranslate"><span class="pre">procar='~/MgB2/fermi/PROCAR'</span></code></p></li>
+<li><p><strong>outcar</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'OUTCAR'</span></code>)) – Path to the OUTCAR file of the simulation
+e.g. <code class="docutils literal notranslate"><span class="pre">outcar='~/MgB2/fermi/OUTCAR'</span></code></p></li>
+<li><p><strong>abinit_output</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">None</span></code>)) – Path to the Abinit output file
+e.g. <code class="docutils literal notranslate"><span class="pre">outcar='~/MgB2/abinit.out'</span></code></p></li>
+<li><p><strong>infile</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">infile</span> <span class="pre">=</span> <span class="pre">in.bxsf'</span></code>)) – This is the path in the input bxsf file
+e.g. <code class="docutils literal notranslate"><span class="pre">infile</span> <span class="pre">=</span> <span class="pre">ni_fs.bxsf'</span></code></p></li>
+<li><p><strong>fermi</strong> (float, optional (default <code class="docutils literal notranslate"><span class="pre">None</span></code>)) – Fermi energy at which the fermi surface is created. In other
 words fermi is the isovalue at which the fermi surface is
-created. If not defined it is read from the OUTCAR file.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">fermi=-5.49</span></code></p>
-</p></li>
-<li><p><strong>bands</strong> (<em>list int</em><em>, </em><em>optional</em>) – <p>Which bands are going to be plotted in the fermi surface. The
+created. If not defined it is read from the OUTCAR file.
+e.g. <code class="docutils literal notranslate"><span class="pre">fermi=-5.49</span></code></p></li>
+<li><p><strong>bands</strong> (<em>list int</em><em>, </em><em>optional</em>) – Which bands are going to be plotted in the fermi surface. The
 numbering is based on vasp outputs. If nothing is selected,
 this function will iterate over all the bands and plots the
-ones that cross fermi.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">bands=[14,</span> <span class="pre">15,</span> <span class="pre">16,</span> <span class="pre">17]</span></code></p>
-</p></li>
-<li><p><strong>interpolation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>The kpoints grid will increase by this factor and interpolated
-at the new points using Fourier interpolation.</p>
-<p>e.g. If the kgrid is 5x5x5, <code class="docutils literal notranslate"><span class="pre">interpolation_factor=4</span></code> will
-lead to a kgrid of 20x20x20</p>
-</p></li>
-<li><p><strong>mode</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code>)) – <p>Defines If the fermi surface will have any projection using
-colormaps or is a plotted with a uniform plain color.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code>, <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code></p>
-</p></li>
-<li><p><strong>supercell</strong> (list int, optional (default <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></code>)) – <p>If one wants plot more than the 1st brillouin zone, this
-parameter can be used.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">supercell=[2,</span> <span class="pre">2,</span> <span class="pre">2]</span></code></p>
-</p></li>
-<li><p><strong>colors</strong> (<em>list str</em><em>, </em><em>optional</em>) – <p>List of colors for each band. This argument does not work when
+ones that cross fermi.
+e.g. <code class="docutils literal notranslate"><span class="pre">bands=[14,</span> <span class="pre">15,</span> <span class="pre">16,</span> <span class="pre">17]</span></code></p></li>
+<li><p><strong>interpolation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – The kpoints grid will increase by this factor and interpolated
+at the new points using Fourier interpolation.
+e.g. If the kgrid is 5x5x5, <code class="docutils literal notranslate"><span class="pre">interpolation_factor=4</span></code> will
+lead to a kgrid of 20x20x20</p></li>
+<li><p><strong>mode</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code>)) – Defines If the fermi surface will have any projection using
+colormaps or is a plotted with a uniform plain color.
+e.g. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code>, <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code></p></li>
+<li><p><strong>supercell</strong> (list int, optional (default <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></code>)) – If one wants plot more than the 1st brillouin zone, this
+parameter can be used.
+e.g. <code class="docutils literal notranslate"><span class="pre">supercell=[2,</span> <span class="pre">2,</span> <span class="pre">2]</span></code></p></li>
+<li><p><strong>extended_zone_directions</strong> (list of list of size 3, optional (default <code class="docutils literal notranslate"><span class="pre">None</span></code>)) – If one wants plot more than  brillouin zones in a particular direection, this
+parameter can be used.
+e.g. <code class="docutils literal notranslate"><span class="pre">extended_zone_directions=[[1,0,0],[0,1,0],[0,0,1]]</span></code></p></li>
+<li><p><strong>colors</strong> (<em>list str</em><em>, </em><em>optional</em>) – List of colors for each band. This argument does not work when
 a 3d file is saved. The colors for when <code class="docutils literal notranslate"><span class="pre">save3d</span></code> is used, we
 recomend using qualitative colormaps, as this function will
-automatically choose colors from the colormaps.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">colors=['red',</span> <span class="pre">'blue',</span> <span class="pre">'green']</span></code></p>
-</p></li>
-<li><p><strong>background_color</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">white</span></code>)) – <p>Defines the background color.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">background_color='gray'</span></code></p>
-</p></li>
-<li><p><strong>save_colors</strong> (bool, optional (default <code class="docutils literal notranslate"><span class="pre">False</span></code>)) – <p>In case the plot is saved in 3D and some property of the
+automatically choose colors from the colormaps.
+e.g. <code class="docutils literal notranslate"><span class="pre">colors=['red',</span> <span class="pre">'blue',</span> <span class="pre">'green']</span></code></p></li>
+<li><p><strong>background_color</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">white</span></code>)) – Defines the background color.
+e.g. <code class="docutils literal notranslate"><span class="pre">background_color='gray'</span></code></p></li>
+<li><p><strong>save_colors</strong> (bool, optional (default <code class="docutils literal notranslate"><span class="pre">False</span></code>)) – In case the plot is saved in 3D and some property of the
 material is projected on the fermi surface, this argument
-allows the projection to be stored in the 3D file.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">save_colors=True</span></code></p>
-</p></li>
+allows the projection to be stored in the 3D file.
+e.g. <code class="docutils literal notranslate"><span class="pre">save_colors=True</span></code></p></li>
 <li><p><strong>cmap</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">jet</span></code>)) – The color map used for color coding the projections. <code class="docutils literal notranslate"><span class="pre">cmap</span></code>
 is only relevant in <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>. A full list of
 color maps in matplotlib are provided in this web
@@ -393,8 +396,8 @@ atoms provided. Atoms has to be a python list(or numpy array)
 containing the atom indices. Atom indices has to be order of
 the input files of DFT package. <code class="docutils literal notranslate"><span class="pre">atoms</span></code> is only relevant in
 <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>. keep in mind that python counting
-starts from zero.</p>
-<p>e.g. for SrVO<sub>3</sub> we are choosing only the oxygen
+starts from zero.
+e.g. for SrVO<sub>3</sub> we are choosing only the oxygen
 atoms. <code class="docutils literal notranslate"><span class="pre">atoms=[2,</span> <span class="pre">3,</span> <span class="pre">4]</span></code>, keep in mind that python counting
 starts from zero, for a <strong>POSCAR</strong> similar to following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sr1</span> <span class="n">V1</span> <span class="n">O3</span>
@@ -459,81 +462,91 @@ in <strong>VASP</strong>.</p>
 </tbody>
 </table>
 </div></blockquote>
-<p><code class="docutils literal notranslate"><span class="pre">orbitals</span></code> is only relavent in <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code></p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code> will only select the p orbitals
-while <code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code> will select the d orbitals.</p>
-<p>If nothing is specified pyprocar will select all the present
+<p><code class="docutils literal notranslate"><span class="pre">orbitals</span></code> is only relavent in <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>
+e.g. <code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code> will only select the p orbitals
+while <code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code> will select the d orbitals.
+If nothing is specified pyprocar will select all the present
 orbitals.</p>
 </p></li>
+<li><p><strong>fermi_velocity_vector</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default False</em><em>)</em>) – Boolean value to calculate fermi velocity vectors on the fermi surface.
+Must be used with mode= “property_projection”.
+e.g. <code class="docutils literal notranslate"><span class="pre">fermi_velocity_vector=True</span></code></p></li>
+<li><p><strong>fermi_velocity</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default False</em><em>)</em>) – Boolean value to calculate magnitude of the fermi velocity on the fermi surface.
+Must be used with mode= “property_projection”.
+e.g. <code class="docutils literal notranslate"><span class="pre">fermi_velocity=True</span></code></p></li>
+<li><p><strong>effective_mass</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default False</em><em>)</em>) – Boolean value to calculate the harmonic mean of the effective mass on the fermi surface.
+Must be used with mode= “property_projection”.
+e.g. <code class="docutils literal notranslate"><span class="pre">effective_mass=True</span></code></p></li>
 <li><p><strong>spin</strong> (<em>list int</em><em>, </em><em>optional</em>) – e.g. <code class="docutils literal notranslate"><span class="pre">spin=[0]</span></code></p></li>
-<li><p><strong>spin_texture</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default False</em><em>)</em>) – <p>In non collinear calculation one can choose to plot the spin
-texture on the fermi surface.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">spin_texture=True</span></code></p>
-</p></li>
-<li><p><strong>arrow_color</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Defines the color of the arrows when
+<li><p><strong>spin_texture</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default False</em><em>)</em>) – In non collinear calculation one can choose to plot the spin
+texture on the fermi surface.
+e.g. <code class="docutils literal notranslate"><span class="pre">spin_texture=True</span></code></p></li>
+<li><p><strong>arrow_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Defines the color of the arrows when
 <code class="docutils literal notranslate"><span class="pre">spin_texture=True</span></code>. The default will select the colors
 based on the color map specified. If arrow_color is selected,
-all arrows will have the same color.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">arrow_color='red'</span></code></p>
-</p></li>
-<li><p><strong>arrow_size</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>As the name suggests defines the size of the arrows, when spin
-texture is selected.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">arrow_size=3</span></code></p>
-</p></li>
+all arrows will have the same color.
+e.g. <code class="docutils literal notranslate"><span class="pre">arrow_color='red'</span></code></p></li>
+<li><p><strong>arrow_size</strong> (<em>int</em><em>, </em><em>optional</em>) – As the name suggests defines the size of the arrows, when spin
+texture is selected.
+e.g. <code class="docutils literal notranslate"><span class="pre">arrow_size=3</span></code></p></li>
 <li><p><strong>only_spin</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">only_spin=True</span></code> is selected, the fermi surface is not
 plotted and only the spins in the spin texture is plotted.</p></li>
-<li><p><strong>fermi_shift</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>This parameter is useful when one wants to plot the iso-surface
-above or belove the fermi level.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">fermi_shift=0.6</span></code></p>
-</p></li>
-<li><p><strong>projection_accuracy</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'normal'</span></code>)) – <p>Selected the accuracy of projected properties. <code class="docutils literal notranslate"><span class="pre">'normal'</span></code> and
+<li><p><strong>fermi_shift</strong> (<em>float</em><em>, </em><em>optional</em>) – This parameter is useful when one wants to plot the iso-surface
+above or belove the fermi level.
+e.g. <code class="docutils literal notranslate"><span class="pre">fermi_shift=0.6</span></code></p></li>
+<li><p><strong>projection_accuracy</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'normal'</span></code>)) – Selected the accuracy of projected properties. <code class="docutils literal notranslate"><span class="pre">'normal'</span></code> and
 <code class="docutils literal notranslate"><span class="pre">'high'</span></code> are the only two options. <code class="docutils literal notranslate"><span class="pre">'normal'</span></code> uses the fast
 but rather inaccurate nearest neighbor interpolation, while
 <code class="docutils literal notranslate"><span class="pre">'high'</span></code> uses the more accurate linear interpolation for the
-projection of the properties.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">projection_accuracy='high'</span></code></p>
-</p></li>
+projection of the properties.
+e.g. <code class="docutils literal notranslate"><span class="pre">projection_accuracy='high'</span></code></p></li>
 <li><p><strong>code</strong> (str, optional (default <code class="docutils literal notranslate"><span class="pre">'vasp'</span></code>)) – The DFT code in which the calculation is performed with.
 Also, if you want to read a .bxsf file set code =”bxsf”
 e.g. <code class="docutils literal notranslate"><span class="pre">code='vasp'</span></code></p></li>
-<li><p><strong>vmin</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>The maximum value in the color bar. cmap is only relevant in
-<code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>.</p>
-<p>e.g. vmin=-1.0</p>
-</p></li>
-<li><p><strong>vmax</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>The maximum value in the color bar. cmap is only relevant in
-<code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>.</p>
-<p>e.g. vmax=1.0</p>
-</p></li>
-<li><p><strong>savegif</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>pyprocar can save the fermi surface in a gif
-format. <code class="docutils literal notranslate"><span class="pre">savegif</span></code> is the path to which the gif is saved.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">savegif='fermi.gif'</span></code> or <code class="docutils literal notranslate"><span class="pre">savegif='~/MgB2/fermi.gif'</span></code></p>
-</p></li>
-<li><p><strong>savemp4</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>pyprocar can save the fermi surface in a mp4 video format.
-<code class="docutils literal notranslate"><span class="pre">savemp4</span></code> is the path to which the video is saved.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">savegif='fermi.mp4'</span></code> or <code class="docutils literal notranslate"><span class="pre">savegif='~/MgB2/fermi.mp4'</span></code></p>
-</p></li>
+<li><p><strong>vmin</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value in the color bar. cmap is only relevant in
+<code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>.
+e.g. vmin=-1.0</p></li>
+<li><p><strong>vmax</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value in the color bar. cmap is only relevant in
+<code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code>.
+e.g. vmax=1.0</p></li>
+<li><p><strong>savegif</strong> (<em>str</em><em>, </em><em>optional</em>) – pyprocar can save the fermi surface in a gif
+format. <code class="docutils literal notranslate"><span class="pre">savegif</span></code> is the path to which the gif is saved.
+e.g. <code class="docutils literal notranslate"><span class="pre">savegif='fermi.gif'</span></code> or <code class="docutils literal notranslate"><span class="pre">savegif='~/MgB2/fermi.gif'</span></code></p></li>
+<li><p><strong>savemp4</strong> (<em>str</em><em>, </em><em>optional</em>) – pyprocar can save the fermi surface in a mp4 video format.
+<code class="docutils literal notranslate"><span class="pre">savemp4</span></code> is the path to which the video is saved.
+e.g. <code class="docutils literal notranslate"><span class="pre">savegif='fermi.mp4'</span></code> or <code class="docutils literal notranslate"><span class="pre">savegif='~/MgB2/fermi.mp4'</span></code></p></li>
 <li><p><strong>save3d</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>pyprocar can save the fermi surface in a 3d file format.
 pyprocar uses the <a class="reference external" href="https://github.com/mikedh/trimesh">trimesh</a>
 to save the 3d file. trimesh can export files with the
 following formats STL, binary PLY, ASCII OFF, OBJ, GLTF/GLB
-2.0, COLLADA. <code class="docutils literal notranslate"><span class="pre">save3d</span></code> is the path to which the file is saved.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">save3d='fermi.glb'</span></code></p>
+2.0, COLLADA. <code class="docutils literal notranslate"><span class="pre">save3d</span></code> is the path to which the file is saved.
+e.g. <code class="docutils literal notranslate"><span class="pre">save3d='fermi.glb'</span></code></p>
 </p></li>
-<li><p><strong>perspective</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>To create the illusion of depth, perspective is used in 2d
-graphics. One can turn this feature off by <code class="docutils literal notranslate"><span class="pre">perspective=False</span></code></p>
-<p>e.g.  <code class="docutils literal notranslate"><span class="pre">perspective=False</span></code></p>
-</p></li>
-<li><p><strong>save2d</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>The fermi surface can be saved as a 2D image. This parameter
+<li><p><strong>save_meshio</strong> (<em>bool</em><em>, </em><em>optional</em>) – pyprocar can use meshio to save any 3d format supported by it.</p></li>
+<li><p><strong>perspective</strong> (<em>bool</em><em>, </em><em>optional</em>) – To create the illusion of depth, perspective is used in 2d
+graphics. One can turn this feature off by <code class="docutils literal notranslate"><span class="pre">perspective=False</span></code>
+e.g.  <code class="docutils literal notranslate"><span class="pre">perspective=False</span></code></p></li>
+<li><p><strong>save2d</strong> (<em>str</em><em>, </em><em>optional</em>) – The fermi surface can be saved as a 2D image. This parameter
 turns this feature on and selects the path at which the file
-is going to be saved.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">save2d='fermi.png'</span></code></p>
-</p></li>
-<li><p><strong>camera_pos</strong> (list float, optional (default <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></code>)) – <p>This parameter defines the position of the camera where it is
+is going to be saved.
+e.g. <code class="docutils literal notranslate"><span class="pre">save2d='fermi.png'</span></code></p></li>
+<li><p><strong>show_slice</strong> (<em>bool</em><em>, </em><em>optional</em>) – Creates a widget which slices the fermi surface</p></li>
+<li><p><strong>slice_origin</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Origin to put the plane widget</p></li>
+<li><p><strong>slice_normal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Normal of the plane widget</p></li>
+<li><p><strong>show_cross_section_area</strong> (<em>bool</em><em>, </em><em>optional</em>) – Shows the largest cross sectional area</p></li>
+<li><p><strong>show_curvature</strong> (<em>bool</em><em>, </em><em>optional</em>) – plots the curvature of the fermi surface</p></li>
+<li><p><strong>curvature_type</strong> (<em>str</em><em>, </em><em>optional</em>) – If show_curvature is True, this option chooses the type of curvature
+availible in Pyvista. (‘mean’, ‘gaussian’, ‘maximum’, ‘minimum’)</p></li>
+<li><p><strong>iso_slider</strong> (<em>bool</em><em>, </em><em>optional</em>) – plots a slider widget which controls which iso_energy value viewed</p></li>
+<li><p><strong>iso_range</strong> (<em>float</em><em>, </em><em>optional</em>) – If iso_slider is True, this specifies the energy range
+around the fermi surface to view</p></li>
+<li><p><strong>iso_surfaces</strong> (<em>int</em><em>, </em><em>optional</em>) – If iso_slider is True, this specifies how many surfaces to
+generate in the range specified around the fermi surface</p></li>
+<li><p><strong>camera_pos</strong> (list float, optional (default <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></code>)) – This parameter defines the position of the camera where it is
 looking at the fermi surface. This feature is important when
 one chooses to use the <code class="docutils literal notranslate"><span class="pre">save2d</span></code>, <code class="docutils literal notranslate"><span class="pre">savegif</span></code> or <code class="docutils literal notranslate"><span class="pre">savemp4</span></code>
-option.</p>
-<p>e.g. <code class="docutils literal notranslate"><span class="pre">camera_pos=[0.5,</span> <span class="pre">1,</span> <span class="pre">-1]</span></code></p>
-</p></li>
+option.
+e.g. <code class="docutils literal notranslate"><span class="pre">camera_pos=[0.5,</span> <span class="pre">1,</span> <span class="pre">-1]</span></code></p></li>
 <li><p><strong>widget</strong> (<em>, </em><em>optional</em>) – </p></li>
 <li><p><strong>show</strong> (bool, optional (default <code class="docutils literal notranslate"><span class="pre">True</span></code>)) – If set to <code class="docutils literal notranslate"><span class="pre">False</span></code> it will not show the 3D plot.</p></li>
 </ul>
@@ -548,46 +561,38 @@ option.</p>
 </dl>
 </dd></dl>
 
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="filter.html" class="btn btn-neutral float-right" title="Filtering data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="2Dspin.html" class="btn btn-neutral float-left" title="2D spin-texture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="filter.html" class="btn btn-neutral float-right" title="Filtering data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="2Dspin.html" class="btn btn-neutral float-left" title="2D spin-texture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

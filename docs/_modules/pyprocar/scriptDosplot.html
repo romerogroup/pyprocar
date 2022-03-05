@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>pyprocar.scriptDosplot &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +13,16 @@
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +32,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -52,7 +57,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -131,6 +136,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -165,7 +172,7 @@
 <span class="kn">from</span> <span class="nn">.vaspxml</span> <span class="kn">import</span> <span class="n">VaspXML</span>
 <span class="kn">from</span> <span class="nn">.lobsterparser</span> <span class="kn">import</span> <span class="n">LobsterDOSParser</span>
 <span class="kn">from</span> <span class="nn">.qeparser</span> <span class="kn">import</span> <span class="n">QEDOSParser</span>
-
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">io</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
@@ -186,6 +193,7 @@
 
 <div class="viewcode-block" id="dosplot"><a class="viewcode-back" href="../../pyprocar.html#pyprocar.scriptDosplot.dosplot">[docs]</a><span class="k">def</span> <span class="nf">dosplot</span><span class="p">(</span>
         <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
         <span class="n">interpolation_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
@@ -541,11 +549,13 @@
         <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
 
+
     <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
-        <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">QEDOSParser</span><span class="p">(</span><span class="n">nscfin</span><span class="o">=</span><span class="s2">&quot;nscf.in&quot;</span><span class="p">,</span>
-                              <span class="n">pdosin</span><span class="o">=</span><span class="s2">&quot;pdos.in&quot;</span><span class="p">,</span>
-                              <span class="n">outfile</span><span class="o">=</span><span class="s2">&quot;scf.out&quot;</span><span class="p">,</span>
-                              <span class="n">dos_interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dirname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dirname</span> <span class="o">=</span> <span class="s2">&quot;dos&quot;</span>
+        <span class="n">vaspxml</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">qe</span><span class="o">.</span><span class="n">QEParser</span><span class="p">(</span><span class="n">scfIn_filename</span> <span class="o">=</span> <span class="s2">&quot;scf.in&quot;</span><span class="p">,</span> <span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">bandsIn_filename</span> <span class="o">=</span> <span class="s2">&quot;bands.in&quot;</span><span class="p">,</span> 
+                             <span class="n">pdosIn_filename</span> <span class="o">=</span> <span class="s2">&quot;pdos.in&quot;</span><span class="p">,</span> <span class="n">kpdosIn_filename</span> <span class="o">=</span> <span class="s2">&quot;kpdos.in&quot;</span><span class="p">,</span> <span class="n">atomic_proj_xml</span> <span class="o">=</span> <span class="s2">&quot;atomic_proj.xml&quot;</span><span class="p">,</span> 
+                             <span class="n">dos_interpolation_factor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">dos_plot</span> <span class="o">=</span> <span class="n">DosPlot</span><span class="p">(</span><span class="n">dos</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">dos</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">vaspxml</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
@@ -796,28 +806,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

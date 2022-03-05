@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Band unfolding &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +14,16 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +33,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -54,7 +60,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -151,6 +157,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -164,7 +172,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/unfold.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -178,7 +186,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="band-unfolding">
+  <section id="band-unfolding">
 <h1>Band unfolding<a class="headerlink" href="#band-unfolding" title="Permalink to this headline">¶</a></h1>
 <p>Often times, we need to perform DFT calculations for a supercell geometry rather than the primitive cell. In such cases the band structure becomes quite sophisticated due to the folding of the BZ, and it is difficult to compare the band structure of supercell with that of the primitive cell. The purpose of the band unfolding scheme is to represent the bands within the primitive cell BZ. By calculating the unfolding weight function and plotting the fat bands with the line width proportional to the weight, the unfolded bands can be highlighted.</p>
 <p>Note:
@@ -207,7 +215,7 @@ First, calculate the band structure in the primitive cell BZ. The PROCAR should 
         <span class="n">exportplt</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="export-plot-as-a-matplotlib-pyplot-object">
+<section id="export-plot-as-a-matplotlib-pyplot-object">
 <h2>Export plot as a matplotlib.pyplot object<a class="headerlink" href="#export-plot-as-a-matplotlib-pyplot-object" title="Permalink to this headline">¶</a></h2>
 <p>PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
 This can be enabled by setting <code class="docutils literal notranslate"><span class="pre">exportplt</span> <span class="pre">=</span> <span class="pre">True</span></code>.
@@ -221,8 +229,8 @@ Usage:</p>
 </pre></div>
 </div>
 <span class="target" id="module-pyprocar.scriptUnfold"></span><dl class="py function">
-<dt id="pyprocar.scriptUnfold.unfold">
-<code class="sig-prename descclassname">pyprocar.scriptUnfold.</code><code class="sig-name descname">unfold</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'PROCAR'</span></em>, <em class="sig-param"><span class="n">poscar</span><span class="o">=</span><span class="default_value">'POSCAR'</span></em>, <em class="sig-param"><span class="n">outcar</span><span class="o">=</span><span class="default_value">'OUTCAR'</span></em>, <em class="sig-param"><span class="n">supercell_matrix</span><span class="o">=</span><span class="default_value">array([[2, 0, 0], [0, 2, 0], [0, 0, 2]])</span></em>, <em class="sig-param"><span class="n">ispin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">efermi</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shift_efermi</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">elimit</span><span class="o">=</span><span class="default_value">(- 5, 15)</span></em>, <em class="sig-param"><span class="n">kticks</span><span class="o">=</span><span class="default_value">[0, 36, 54, 86, 110, 147, 165, 199]</span></em>, <em class="sig-param"><span class="n">knames</span><span class="o">=</span><span class="default_value">['$\\Gamma$', 'K', 'M', '$\\Gamma$', 'A', 'H', 'L', 'A']</span></em>, <em class="sig-param"><span class="n">print_kpts</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">show_band</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'blue'</span></em>, <em class="sig-param"><span class="n">savetab</span><span class="o">=</span><span class="default_value">'unfold_result.csv'</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">'unfolded_band.png'</span></em>, <em class="sig-param"><span class="n">exportplt</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">repair</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">code</span><span class="o">=</span><span class="default_value">'vasp'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptUnfold.html#unfold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyprocar.scriptUnfold.unfold">
+<span class="sig-prename descclassname"><span class="pre">pyprocar.scriptUnfold.</span></span><span class="sig-name descname"><span class="pre">unfold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PROCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POSCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OUTCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vaspxml</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abinit_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'abinit.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[2,</span> <span class="pre">0,</span> <span class="pre">0],</span> <span class="pre">[0,</span> <span class="pre">2,</span> <span class="pre">0],</span> <span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">2]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elkin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elk.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vasp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unfold_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbitals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unfold_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savetab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unfold_result.csv'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptUnfold.html#unfold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -247,45 +255,37 @@ Usage:</p>
 </dl>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="bandgap.html" class="btn btn-neutral float-right" title="Band gap calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="cat.html" class="btn btn-neutral float-left" title="Concatenating multiple calculations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="bandgap.html" class="btn btn-neutral float-right" title="Band gap calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cat.html" class="btn btn-neutral float-left" title="Concatenating multiple calculations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

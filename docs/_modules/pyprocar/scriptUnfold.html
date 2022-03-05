@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>pyprocar.scriptUnfold &mdash; PyProcar 5.5.0 documentation</title>
   
@@ -13,11 +13,16 @@
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -27,12 +32,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -52,7 +57,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> PyProcar
+            <a href="../../index.html" class="icon icon-home"> PyProcar
           
 
           
@@ -131,6 +136,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -157,154 +164,360 @@
   <h1>Source code for pyprocar.scriptUnfold</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">.procarunfold</span> <span class="kn">import</span> <span class="n">ProcarUnfolder</span>
-<span class="kn">from</span> <span class="nn">.utilsprocar</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
 <span class="kn">from</span> <span class="nn">.splash</span> <span class="kn">import</span> <span class="n">welcome</span>
+<span class="kn">from</span> <span class="nn">.utils.defaults</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">.utils.info</span> <span class="kn">import</span> <span class="n">orbital_names</span>
+<span class="kn">from</span> <span class="nn">.plotter</span> <span class="kn">import</span> <span class="n">EBSPlot</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">io</span>
 
 
 <div class="viewcode-block" id="unfold"><a class="viewcode-back" href="../../unfold.html#pyprocar.scriptUnfold.unfold">[docs]</a><span class="k">def</span> <span class="nf">unfold</span><span class="p">(</span>
-    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
-    <span class="n">poscar</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span>
-    <span class="n">outcar</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
-    <span class="n">supercell_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
-    <span class="n">ispin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">efermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">shift_efermi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">elimit</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
-    <span class="n">kticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">86</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">147</span><span class="p">,</span> <span class="mi">165</span><span class="p">,</span> <span class="mi">199</span><span class="p">],</span>
-    <span class="n">knames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;$\Gamma$&quot;</span><span class="p">,</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;$\Gamma$&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">],</span>
-    <span class="n">print_kpts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">show_band</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
-    <span class="n">savetab</span><span class="o">=</span><span class="s2">&quot;unfold_result.csv&quot;</span><span class="p">,</span>
-    <span class="n">savefig</span><span class="o">=</span><span class="s2">&quot;unfolded_band.png&quot;</span><span class="p">,</span>
-    <span class="n">exportplt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+        <span class="n">procar</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
+        <span class="n">poscar</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span>
+        <span class="n">outcar</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
+        <span class="n">vaspxml</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">abinit_output</span><span class="o">=</span><span class="s2">&quot;abinit.out&quot;</span><span class="p">,</span>
+        <span class="n">transformation_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+        <span class="n">kpoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elkin</span><span class="o">=</span><span class="s2">&quot;elk.in&quot;</span><span class="p">,</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;plain&quot;</span><span class="p">,</span>
+        <span class="n">unfold_mode</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">projection_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">unfold_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">interpolation_type</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">knames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">savefig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">savetab</span><span class="o">=</span><span class="s2">&quot;unfold_result.csv&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    fname: PROCAR filename.</span>
-<span class="sd">    poscar: POSCAR filename</span>
-<span class="sd">    outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None</span>
-<span class="sd">    supercell_matrix: supercell matrix from primitive cell to supercell</span>
-<span class="sd">    ispin: For non-spin polarized system, ispin=None.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fname: PROCAR filename.</span>
+<span class="sd">        poscar: POSCAR filename</span>
+<span class="sd">        outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None</span>
+<span class="sd">        supercell_matrix: supercell matrix from primitive cell to supercell</span>
+<span class="sd">        ispin: For non-spin polarized system, ispin=None.</span>
 <span class="sd">           For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</span>
-<span class="sd">    efermi: Fermi energy</span>
-<span class="sd">    elimit: range of energy to be plotted.</span>
-<span class="sd">    kticks: the indices of K points which has labels given in knames.</span>
-<span class="sd">    knames: see kticks</span>
-<span class="sd">    print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.</span>
-<span class="sd">    show_band: whether to plot the bands before unfolding.</span>
-<span class="sd">    width: the width of the unfolded band.</span>
-<span class="sd">    color: color of the unfoled band.</span>
-<span class="sd">    savetab: the csv file name of which  the table of unfolding result will be written into.</span>
-<span class="sd">    savefig: the file name of which the figure will be saved.</span>
-<span class="sd">    exportplt: flag to export plot as matplotlib.pyplot object.</span>
+<span class="sd">        efermi: Fermi energy</span>
+<span class="sd">        elimit: range of energy to be plotted.</span>
+<span class="sd">        kticks: the indices of K points which has labels given in knames.</span>
+<span class="sd">        knames: see kticks</span>
+<span class="sd">        print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.</span>
+<span class="sd">        show_band: whether to plot the bands before unfolding.</span>
+<span class="sd">        width: the width of the unfolded band.</span>
+<span class="sd">        color: color of the unfoled band.</span>
+<span class="sd">        savetab: the csv file name of which  the table of unfolding result will be written into.</span>
+<span class="sd">        savefig: the file name of which the figure will be saved.</span>
+<span class="sd">        exportplt: flag to export plot as matplotlib.pyplot object.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
     <span class="n">welcome</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
-            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
-            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">kpath</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ebs</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">kpath</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">labels</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="c1"># Turn interactive plotting off</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">unfold</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">unfold</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">efermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">fermi</span> <span class="o">=</span> <span class="n">efermi</span>
-    <span class="k">elif</span> <span class="n">outcar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">outcarparser</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
-        <span class="n">fermi</span> <span class="o">=</span> <span class="n">outcarparser</span><span class="o">.</span><span class="n">FermiOutcar</span><span class="p">(</span><span class="n">outcar</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">outcar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outcar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Outcar</span><span class="p">(</span><span class="n">outcar</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fermi</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">efermi</span>
+            <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+        <span class="k">elif</span> <span class="n">vaspxml</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vasprun</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">VaspXML</span><span class="p">(</span><span class="n">vaspxml</span><span class="p">)</span>
+            <span class="n">fermi</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">fermi</span>
+            
+        <span class="k">if</span> <span class="n">poscar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">poscar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">poscar</span><span class="p">)</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span>
+            <span class="k">if</span> <span class="n">reciprocal_lattice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+
+        <span class="k">if</span> <span class="n">kpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Kpoints</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)</span>
+            <span class="n">kpath</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">kpath</span>
+
+        <span class="n">procar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Procar</span><span class="p">(</span>
+            <span class="n">procar</span><span class="p">,</span>
+            <span class="n">structure</span><span class="p">,</span>
+            <span class="n">reciprocal_lattice</span><span class="p">,</span>
+            <span class="n">kpath</span><span class="p">,</span>
+            <span class="n">fermi</span><span class="p">,</span>
+            <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ebs</span> <span class="o">=</span> <span class="n">procar</span><span class="o">.</span><span class="n">ebs</span>
+
+    <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">EBSPlot</span><span class="p">(</span><span class="n">ebs</span><span class="p">,</span> <span class="n">kpath</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">spins</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">procar</span><span class="o">.</span><span class="n">has_phase</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The provided electronic band structure file does not include phases&quot;</span><span class="p">)</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">unfold</span><span class="p">(</span>
+            <span class="n">transformation_matrix</span><span class="o">=</span><span class="n">transformation_matrix</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unfold_mode</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span><span class="p">:</span>
+        <span class="n">width_weights</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weights</span>
+        <span class="n">width_mask</span> <span class="o">=</span> <span class="n">unfold_mask</span>
+        <span class="n">color_weights</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weights</span>
+        <span class="n">color_mask</span> <span class="o">=</span> <span class="n">unfold_mask</span>
+    <span class="k">elif</span> <span class="n">unfold_mode</span> <span class="o">==</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span>
+        <span class="n">width_weight</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weights</span>
+        <span class="n">width_mask</span> <span class="o">=</span> <span class="n">unfold_mask</span>
+    <span class="k">elif</span> <span class="n">unfold_mode</span> <span class="o">==</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span>
+        <span class="n">color_weights</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weights</span>
+        <span class="n">color_mask</span> <span class="o">=</span> <span class="n">unfold_mask</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid unfold_mode was selected: </span><span class="si">{unfold_mode}</span><span class="s2"> please select from the following &#39;both&#39;, &#39;thickness&#39;,&#39;color&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">plot_bands</span><span class="p">()</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">plot_parameteric</span><span class="p">(</span><span class="n">color_weights</span><span class="o">=</span><span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span>
+                                  <span class="n">width_weights</span><span class="o">=</span><span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span>
+                                  <span class="n">color_mask</span><span class="o">=</span><span class="n">unfold_mask</span><span class="p">,</span>
+                                  <span class="n">width_mask</span><span class="o">=</span><span class="n">unfold_mask</span><span class="p">,</span>
+                                  <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                                  <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">handles</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">handles</span><span class="p">[:</span><span class="n">ebs_plot</span><span class="o">.</span><span class="n">nspins</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;overlay&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_species&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_orbitals&quot;</span><span class="p">]:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay_species&quot;</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">:</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ispc</span><span class="p">)</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span> <span class="o">==</span> <span class="n">ispc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
+                    <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                    <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay_orbitals&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">iorb</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">iorb</span> <span class="o">==</span> <span class="s2">&quot;f&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span> <span class="o">&gt;</span> <span class="mi">9</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iorb</span><span class="p">)</span>
+                <span class="n">orbitals</span> <span class="o">=</span> <span class="n">orbital_names</span><span class="p">[</span><span class="n">iorb</span><span class="p">]</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
+                    <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                    <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ispc</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+                        <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span> <span class="o">==</span> <span class="n">ispc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">ispc</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                            <span class="n">orbitals</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="k">for</span> <span class="n">iorb</span> <span class="ow">in</span> <span class="n">it</span><span class="p">[</span><span class="n">ispc</span><span class="p">]:</span>
+                                <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">orbitals</span><span class="p">,</span> <span class="n">orbital_names</span><span class="p">[</span><span class="n">iorb</span><span class="p">]</span>
+                                <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+                            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ispc</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">ispc</span><span class="p">]))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">it</span><span class="p">[</span><span class="n">ispc</span><span class="p">]</span>
+                            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ispc</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">ispc</span><span class="p">]))</span>
+                        <span class="n">w</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span>
+                            <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
+                            <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                            <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">plot_parameteric_overlay</span><span class="p">(</span>
+            <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s2">&quot;Fermi energy is not given, neither an OUTCAR contains it.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">atoms_str</span> <span class="o">=</span> <span class="n">atoms</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">atoms_str</span><span class="p">):</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span> <span class="o">==</span> <span class="n">iatom</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">int</span>
+                <span class="p">)</span>
 
-    <span class="n">uf</span> <span class="o">=</span> <span class="n">ProcarUnfolder</span><span class="p">(</span>
-        <span class="n">procar</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="n">poscar</span><span class="o">=</span><span class="n">poscar</span><span class="p">,</span> <span class="n">supercell_matrix</span><span class="o">=</span><span class="n">supercell_matrix</span><span class="p">,</span> <span class="n">ispin</span><span class="o">=</span><span class="n">ispin</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="n">print_kpts</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">ik</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">uf</span><span class="o">.</span><span class="n">procar</span><span class="o">.</span><span class="n">kpoints</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">ik</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-    <span class="n">axes</span> <span class="o">=</span> <span class="n">uf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">efermi</span><span class="o">=</span><span class="n">fermi</span><span class="p">,</span>
-        <span class="n">ispin</span><span class="o">=</span><span class="n">ispin</span><span class="p">,</span>
-        <span class="n">shift_efermi</span><span class="o">=</span><span class="n">shift_efermi</span><span class="p">,</span>
-        <span class="n">ylim</span><span class="o">=</span><span class="n">elimit</span><span class="p">,</span>
-        <span class="n">ktick</span><span class="o">=</span><span class="n">kticks</span><span class="p">,</span>
-        <span class="n">kname</span><span class="o">=</span><span class="n">knames</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-        <span class="n">savetab</span><span class="o">=</span><span class="n">savetab</span><span class="p">,</span>
-        <span class="n">show_band</span><span class="o">=</span><span class="n">show_band</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">orbitals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">orbital_str</span> <span class="o">=</span> <span class="n">orbitals</span>
 
-    <span class="k">if</span> <span class="n">exportplt</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">plt</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">iorb</span> <span class="ow">in</span> <span class="n">orbital_str</span><span class="p">:</span>
+                <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">orbital_names</span><span class="p">[</span><span class="n">iorb</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">ebs_plot</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span>
+            <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span>
+        <span class="p">)</span>
 
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">savefig</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># Added by Nicholas Pike to close memory issue of looping and creating many figures</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weighted_color</span><span class="p">:</span>
+            <span class="n">color_weights</span> <span class="o">=</span> <span class="n">weights</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">return</span></div>
+            <span class="n">color_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">weighted_width</span><span class="p">:</span>
+            <span class="n">width_weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">width_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">color_mask</span> <span class="o">=</span> <span class="n">projection_mask</span>
+        <span class="n">width_mask</span> <span class="o">=</span> <span class="n">projection_mask</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric&quot;</span><span class="p">:</span>
+            <span class="n">ebs_plot</span><span class="o">.</span><span class="n">plot_parameteric</span><span class="p">(</span>
+                <span class="n">color_weights</span><span class="o">=</span><span class="n">color_weights</span><span class="p">,</span>
+                <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
+                <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
+                <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
+                <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;scatter&quot;</span><span class="p">:</span>
+            <span class="n">ebs_plot</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
+                <span class="n">color_weights</span><span class="o">=</span><span class="n">color_weights</span><span class="p">,</span>
+                <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
+                <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
+                <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
+                <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected mode </span><span class="si">%s</span><span class="s2"> not valid. Please check the spelling &quot;</span> <span class="o">%</span> <span class="n">mode</span><span class="p">)</span>
+
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">kticks</span><span class="p">,</span> <span class="n">knames</span><span class="p">)</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">elimit</span><span class="p">)</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">()</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_color</span><span class="p">,</span>
+        <span class="n">linestyle</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_linestyle</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_linewidth</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">grid</span><span class="p">:</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">legend</span><span class="p">:</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">savefig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">savefig</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ebs_plot</span></div>
 
 
-<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     An example of how to use</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     import pyprocar</span>
-<span class="c1">#     import numpy as np</span>
-<span class="c1">#     pyprocar.unfold(</span>
-<span class="c1">#         fname=&#39;PROCAR&#39;,</span>
-<span class="c1">#         poscar=&#39;POSCAR&#39;,</span>
-<span class="c1">#         outcar=&#39;OUTCAR&#39;,</span>
-<span class="c1">#         supercell_matrix=np.diag([2, 2, 2]),</span>
-<span class="c1">#         efermi=None,</span>
-<span class="c1">#         shift_efermi=True,</span>
-<span class="c1">#         ispin=0,</span>
-<span class="c1">#         elimit=(-5, 15),</span>
-<span class="c1">#         kticks=[0, 36, 54, 86, 110, 147, 165, 199],</span>
-<span class="c1">#         knames=[&#39;$\Gamma$&#39;, &#39;K&#39;, &#39;M&#39;, &#39;$\Gamma$&#39;, &#39;A&#39;, &#39;H&#39;, &#39;L&#39;, &#39;A&#39;],</span>
-<span class="c1">#         print_kpts=False,</span>
-<span class="c1">#         show_band=True,</span>
-<span class="c1">#         savefig=&#39;unfolded_band.png&#39;)</span>
+
+<span class="c1">#     if efermi is not None:</span>
+<span class="c1">#         fermi = efermi</span>
+<span class="c1">#     elif outcar is not None:</span>
+<span class="c1">#         outcarparser = UtilsProcar()</span>
+<span class="c1">#         fermi = outcarparser.FermiOutcar(outcar)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         raise Warning(&quot;Fermi energy is not given, neither an OUTCAR contains it.&quot;)</span>
+
+<span class="c1">#     uf = ProcarUnfolder(</span>
+<span class="c1">#         procar=fname, poscar=poscar, supercell_matrix=supercell_matrix, ispin=ispin</span>
+<span class="c1">#     )</span>
+<span class="c1">#     if print_kpts:</span>
+<span class="c1">#         for ik, k in enumerate(uf.procar.kpoints):</span>
+<span class="c1">#             print(ik, k)</span>
+<span class="c1">#     axes = uf.plot(</span>
+<span class="c1">#         efermi=fermi,</span>
+<span class="c1">#         ispin=ispin,</span>
+<span class="c1">#         shift_efermi=shift_efermi,</span>
+<span class="c1">#         ylim=elimit,</span>
+<span class="c1">#         ktick=kticks,</span>
+<span class="c1">#         kname=knames,</span>
+<span class="c1">#         color=color,</span>
+<span class="c1">#         width=width,</span>
+<span class="c1">#         savetab=savetab,</span>
+<span class="c1">#         show_band=show_band,</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     if exportplt:</span>
+<span class="c1">#         return plt</span>
+
+<span class="c1">#     else:</span>
+<span class="c1">#         if savefig:</span>
+<span class="c1">#             plt.savefig(savefig, bbox_inches=&quot;tight&quot;)</span>
+<span class="c1">#             plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             plt.show()</span>
+<span class="c1">#         return</span>
+
+
+<span class="c1"># # if __name__ == &#39;__main__&#39;:</span>
+<span class="c1"># #     &quot;&quot;&quot;</span>
+<span class="c1"># #     An example of how to use</span>
+<span class="c1"># #     &quot;&quot;&quot;</span>
+<span class="c1"># #     import pyprocar</span>
+<span class="c1"># #     import numpy as np</span>
+<span class="c1"># #     pyprocar.unfold(</span>
+<span class="c1"># #         fname=&#39;PROCAR&#39;,</span>
+<span class="c1"># #         poscar=&#39;POSCAR&#39;,</span>
+<span class="c1"># #         outcar=&#39;OUTCAR&#39;,</span>
+<span class="c1"># #         supercell_matrix=np.diag([2, 2, 2]),</span>
+<span class="c1"># #         efermi=None,</span>
+<span class="c1"># #         shift_efermi=True,</span>
+<span class="c1"># #         ispin=0,</span>
+<span class="c1"># #         elimit=(-5, 15),</span>
+<span class="c1"># #         kticks=[0, 36, 54, 86, 110, 147, 165, 199],</span>
+<span class="c1"># #         knames=[&#39;$\Gamma$&#39;, &#39;K&#39;, &#39;M&#39;, &#39;$\Gamma$&#39;, &#39;A&#39;, &#39;H&#39;, &#39;L&#39;, &#39;A&#39;],</span>
+<span class="c1"># #         print_kpts=False,</span>
+<span class="c1"># #         show_band=True,</span>
+<span class="c1"># #         savefig=&#39;unfolded_band.png&#39;)</span>
 </pre></div>
 
            </div>
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Romero Group
+        &#169; Copyright 2020, Romero Group.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
