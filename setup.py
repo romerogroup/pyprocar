@@ -78,7 +78,7 @@ setup(
         "trimesh",
     ],
     data_files=[("", ["LICENSE.txt"])],
-    package_data={"": ["setup.json"]},
+    package_data={"": ["setup.json", '*.ini'] },
     scripts=["scripts/procar.py"],
     packages=find_packages(exclude=["scripts", "examples"]),
 )

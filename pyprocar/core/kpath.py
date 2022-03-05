@@ -8,7 +8,7 @@ from ..utils import mathematics
 
 class KPath:
     def __init__(
-        self, knames=None, special_kpoints=None, ngrids=None, has_time_reversal=True,
+        self, knames=None, kticks= None, special_kpoints=None, ngrids=None, has_time_reversal=True,
     ):
         latex = "$"
         for x in knames:
@@ -17,6 +17,7 @@ class KPath:
         self.knames = [[latex + x[0] + latex, latex + x[1] + latex] for x in knames]
         self.special_kpoints = special_kpoints
         self.ngrids = ngrids
+        self.kticks = kticks
         self.has_time_reversal = has_time_reversal
 
     @property
@@ -25,11 +26,14 @@ class KPath:
 
     @property
     def tick_positions(self):
-        pos = 0
-        tick_positions = [pos]
-        for isegment in range(self.nsegments):
-            pos += self.ngrids[isegment]
-            tick_positions.append(pos - 1)
+        if self.kticks is None:
+            pos = 0
+            tick_positions = [pos]
+            for isegment in range(self.nsegments):
+                pos += self.ngrids[isegment]
+                tick_positions.append(pos - 1)
+        else:
+            tick_positions = self.kticks
         return tick_positions
 
     @property

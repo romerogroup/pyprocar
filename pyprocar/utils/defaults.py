@@ -39,7 +39,7 @@ class Settings:
                     attr = config[item].split(',')
                     attr = [type_convert(x) for x in attr]
                 else:
-                    attr = type_convert(config[item])
+                    attr = type_convert(config[item])     
                 self.__setattr__(item, attr)
         self.check_equivalents(config)
 
@@ -100,4 +100,4 @@ def type_convert(inp):
 
 
 base_path = os.sep.join(inspect.getfile(Settings).split(os.sep)[:-1])
-settings = Settings(filename=base_path + os.sep + 'default_settings.ini')
+settings = Settings(filename= base_path + os.sep + 'default_settings.ini')

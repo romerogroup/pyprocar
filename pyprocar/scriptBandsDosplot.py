@@ -12,7 +12,7 @@ from .doscarplot import DosPlot
 from .vaspxml import VaspXML
 from .lobsterparser import LobsterDOSParser, LobsterParser
 from .qeparser import QEDOSParser, QEParser
-
+from . import io
 from .abinitparser import AbinitParser
 from .doscarplot import DosPlot
 from .elkparser import ElkParser
@@ -39,6 +39,8 @@ plt.rc("legend", fontsize=18)  # legend fontsize
 def bandsdosplot(
     bands_file="PROCAR",
     dos_file="vasprun.xml",
+    dos_dirname = None,
+    bands_dirname = None,
     outcar="OUTCAR",
     abinit_output=None,
     bands_mode="plain",
@@ -142,6 +144,9 @@ def bandsdosplot(
         fermi = 0
 
     print("fermi energy   : ", fermi)
+
+    if elimit is None:
+        elimit = [-5,5]
     print("energy range   : ", elimit)
 
     if mask is not None:
@@ -246,8 +251,15 @@ def bandsdosplot(
         if dos_spins is None:
             dos_spins = np.arange(len(vaspxml.dos.total))
 
+
     elif code == "qe":
-        procarFile = QEParser()
+        if dos_dirname is None:
+            dos_dirname = "dos"
+        if bands_dirname is None:
+            bands_dirname = "bands" 
+
+        procarFile = io.qe.QEParser(scfIn_filename = "scf.in", dirname = bands_dirname, bandsIn_filename = "bands.in", 
+                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", dos_interpolation_factor = None)
 
         kticks = procarFile.kticks
         knames = procarFile.knames
@@ -256,7 +268,10 @@ def bandsdosplot(
         # Retrieving knames and kticks from QE
         if procarFile.discontinuities:
             discontinuities = procarFile.discontinuities
-        vaspxml = QEDOSParser()
+
+
+        vaspxml = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dos_dirname, bandsIn_filename = "bands.in", 
+                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", dos_interpolation_factor = None)
         dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if dos_spins is None:
             dos_spins = np.arange(len(vaspxml.dos.total))
@@ -311,8 +326,8 @@ def bandsdosplot(
         fermi = procarFile.fermi
         recLat = procarFile.reclat
     elif code == "qe":
-        fermi = procarFile.fermi
-        recLat = procarFile.reclat
+        fermi = procarFile.efermi
+        recLat = procarFile.reciprocal_lattice
     # if kdirect = False, then the k-points will be in cartesian coordinates.
     # The output should be read to find the reciprocal lattice vectors to transform
     # from direct to cartesian
@@ -377,9 +392,9 @@ def bandsdosplot(
     else:
         # Regular plotting method. For spin it plots density or magnetization.
         if code == "lobster" or code == "qe":
-            data.bands = (data.bands.transpose()).transpose()
+            data.bands = (data.bands[:,:,0].transpose() - np.array(fermi)).transpose()
         else:
-            data.bands = (data.bands.transpose() - np.array(fermi)).transpose()
+            data.bands = (data.bands.transpose()).transpose()
 
         plot = ProcarPlot(data.bands, data.spd, data.kpoints)
 

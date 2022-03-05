@@ -73,7 +73,7 @@ class EBSPlot:
 
         """
         pos = 0
-        if self.kpath is not None:
+        if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
                 distance = np.linalg.norm(kend - kstart)

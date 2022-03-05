@@ -1,2 +1,2 @@
-include *.txt *.md *.json 
+include *.txt *.md *.json
 recursive-include pyprocar *.json

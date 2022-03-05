@@ -14,6 +14,7 @@ from .utils.defaults import settings
 def bandsplot(
     procar="PROCAR",
     abinit_output="abinit.out",
+    dirname = None,
     poscar=None,
     outcar=None,
     kpoints=None,
@@ -117,7 +118,7 @@ def bandsplot(
     None.
 
     """
-    if old or code != "vasp":
+    if old or code not in ('vasp', "qe"):
         procarfile = procar
         bandsplot_old(**locals())
 
@@ -131,47 +132,23 @@ def bandsplot(
     kpath = None
     ebs = None
     kpath = None
-    structure = None
 
     settings.modify(kwargs)
 
-    if code == "vasp":
-        if outcar is not None:
-            outcar = io.vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        if poscar is not None:
-            poscar = io.vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-        if kpoints is not None:
-            kpoints = io.vasp.Kpoints(kpoints)
-            kpath = kpoints.kpath
-
-        procar = io.vasp.Procar(
-            procar,
-            structure,
-            reciprocal_lattice,
-            kpath,
-            fermi,
-            interpolation_factor=interpolation_factor,
-        )
-        ebs = procar.ebs
+    ebs, kpath, structure, reciprocal_lattice = parse(
+        code, dirname ,outcar, poscar, procar, reciprocal_lattice, kpoints,
+        interpolation_factor, fermi)
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
 
+ 
+    labels = []
     if mode == "plain":
         ebs_plot.plot_bands()
 
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
-
-        labels = []
         if mode == "overlay_species":
-
             for ispc in structure.species:
                 labels.append(ispc)
                 atoms = np.where(structure.atoms == ispc)[0]
@@ -287,10 +264,70 @@ def bandsplot(
     ebs_plot.set_ylabel()
     if settings.ebs.grid:
         ebs_plot.grid()
-    if settings.ebs.legend:
+    if settings.ebs.legend and len(labels) != 0:
         ebs_plot.legend(labels)
     if savefig is not None:
         ebs_plot.save(savefig)
     if show:
         ebs_plot.show()
     return ebs_plot
+
+
+def parse(code='vasp',
+          dirname = "",
+          outcar=None,
+          poscar=None,
+          procar=None,
+          reciprocal_lattice=None,
+          kpoints=None,
+          interpolation_factor=1,
+          fermi=None):
+    ebs = None
+    kpath = None
+    structure = None
+
+    if code == "vasp":
+        if outcar is not None:
+            outcar = io.vasp.Outcar(outcar)
+            if fermi is None:
+                fermi = outcar.efermi
+            reciprocal_lattice = outcar.reciprocal_lattice
+        if poscar is not None:
+            poscar = io.vasp.Poscar(poscar)
+            structure = poscar.structure
+            if reciprocal_lattice is None:
+                reciprocal_lattice = poscar.structure.reciprocal_lattice
+
+        if kpoints is not None:
+            kpoints = io.vasp.Kpoints(kpoints)
+            kpath = kpoints.kpath
+
+        procar = io.vasp.Procar(procar,
+                             structure,
+                             reciprocal_lattice,
+                             kpath,
+                             fermi,
+                             interpolation_factor=interpolation_factor)
+        ebs = procar.ebs
+        
+        
+    elif code == "qe":
+        if dirname is None:
+            dirname = "bands"
+        parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+                             dos_interpolation_factor = None)
+        if fermi is None:
+            fermi = parser.efermi
+        reciprocal_lattice = parser.reciprocal_lattice
+    
+        structure = parser.structure
+        
+        kpoints = parser.kpoints
+        kpath = parser.kpath
+
+        ebs = parser.ebs
+        
+        
+
+    return ebs, kpath, structure, reciprocal_lattice

@@ -8,7 +8,7 @@ from .doscarplot import DosPlot
 from .vaspxml import VaspXML
 from .lobsterparser import LobsterDOSParser
 from .qeparser import QEDOSParser
-
+from . import io
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -29,6 +29,7 @@ plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
 
 def dosplot(
         filename="vasprun.xml",
+        dirname = None,
         mode="plain",
         interpolation_factor=None,
         orientation="horizontal",
@@ -384,11 +385,13 @@ def dosplot(
         if elimit is None:
             elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
 
+
     elif code == "qe":
-        vaspxml = QEDOSParser(nscfin="nscf.in",
-                              pdosin="pdos.in",
-                              scfOut="scf.out",
-                              dos_interpolation_factor=interpolation_factor)
+        if dirname is None:
+            dirname = "dos"
+        vaspxml = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+                             dos_interpolation_factor = None)
         dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
         if atoms is None:
             atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
