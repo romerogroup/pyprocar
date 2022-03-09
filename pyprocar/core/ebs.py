@@ -72,6 +72,7 @@ class ElectronicBandStructure:
             self.bands = bands - efermi
             self.shifted_to_efermi = True
         else:
+            self.bands = bands 
             self.shifted_to_efermi = True
         self.efermi = efermi
         if self.efermi is None:

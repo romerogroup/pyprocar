@@ -73,10 +73,22 @@ class DensityOfStates:
             self.energies = xs
 
         self.total = np.array(self.total)
+        self.projected = np.array(self.projected)
 
     @property
     def ndos(self):
         return len(self.energies)
+
+    @property
+    def nspins(self):
+        return len(self.total)
+    
+    @property
+    def is_non_collinear(self):
+        if self.nspins == 3:
+            return True
+        else:
+            return False
 
     def dos_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
         """

@@ -140,7 +140,7 @@ class QEParser():
                                     labels=self.orbitalNames[:-1],
                                     reciprocal_lattice=self.reciprocal_lattice,
                                     interpolation_factor=dos_interpolation_factor,
-                                    shifted_to_efermi=False,
+                                    shifted_to_efermi=True,
                                 )
 
         else:
@@ -333,7 +333,7 @@ class QEParser():
     
     @property
     def dos(self):
-        energies = self.dos_total['energies'] - self.efermi
+        energies = self.dos_total['energies'] #- self.efermi
         total = []
         for ispin in self.dos_total:
             if ispin == 'energies':
@@ -961,6 +961,7 @@ class QEParser():
         """
         Returns the fermi energy read from .out
         """
+        
         return 2 * float(self.root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
         
     @property

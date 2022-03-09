@@ -117,7 +117,7 @@ class EBSPlot:
                     self.x, self.ebs.bands[:, iband, ispin], color=settings.ebs.color[ispin], alpha=settings.ebs.opacity[
                         ispin], linestyle=settings.ebs.linestyle[ispin], label=settings.ebs.label[ispin], linewidth=settings.ebs.linewidth[ispin],
                 )
-            self.handles.append(handle[0])
+                self.handles.append(handle)
 
 
     # def plot_order(self):
