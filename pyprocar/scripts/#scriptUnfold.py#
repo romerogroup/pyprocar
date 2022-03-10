@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from .splash import welcome
-from .utils.defaults import settings
-from .utils.info import orbital_names
-from .plotter import EBSPlot
-from . import io
+from ..splash import welcome
+from ..utils.defaults import settings
+from ..utils.info import orbital_names
+from ..plotter import EBSPlot
+from .. import io
 
 
 def unfold(

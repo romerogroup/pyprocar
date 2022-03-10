@@ -5,17 +5,17 @@ import pyvista
 
 from matplotlib import colors as mpcolors
 from matplotlib import cm
-from .core.surface import boolean_add
-from .fermisurface3d import FermiSurface3D
-from .splash import welcome
-from .utilsprocar import UtilsProcar
-from .procarparser import ProcarParser
-from .procarselect import ProcarSelect
-from .bxsfparser import BxsfParser
-from .frmsfparser import FrmsfParser
-from .qeparser import QEFermiParser
-from .lobsterparser import LobsterFermiParser
-from .abinitparser import AbinitParser
+from ..core.surface import boolean_add
+from ..fermisurface3d import FermiSurface3D
+from ..splash import welcome
+from ..utilsprocar import UtilsProcar
+from ..procarparser import ProcarParser
+from ..procarselect import ProcarSelect
+from ..bxsfparser import BxsfParser
+from ..frmsfparser import FrmsfParser
+from ..qeparser import QEFermiParser
+from ..lobsterparser import LobsterFermiParser
+from ..abinitparser import AbinitParser
 
 
 

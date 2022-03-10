@@ -1,10 +1,10 @@
 import numpy as np
-from .abinitparser import AbinitParser
-from .elkparser import ElkParser
-from .procarparser import ProcarParser
-from .qeparser import QEParser
-from .lobsterparser import LobsterParser
-from .utilsprocar import UtilsProcar
+from ..abinitparser import AbinitParser
+from ..elkparser import ElkParser
+from ..procarparser import ProcarParser
+from ..qeparser import QEParser
+from ..lobsterparser import LobsterParser
+from ..utilsprocar import UtilsProcar
 
 
 def getFermi(procar, code, outcar):  # from ScriptsBandPlot made into method

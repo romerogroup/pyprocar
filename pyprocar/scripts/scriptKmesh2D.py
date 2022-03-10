@@ -1,5 +1,5 @@
 import numpy as np
-from .splash import welcome
+from ..splash import welcome
 
 
 def generate2dkmesh(x1, y1, x2, y2, z, nkx, nky):

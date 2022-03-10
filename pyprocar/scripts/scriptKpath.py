@@ -3,7 +3,7 @@
 """
 import seekpath
 import numpy as np
-from .splash import welcome
+from ..splash import welcome
 
 
 def kpath(

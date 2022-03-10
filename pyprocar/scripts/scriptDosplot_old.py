@@ -2,36 +2,42 @@
 Created on May 17 2020
 @author: Pedram Tavadze
 """
-
-from .splash import welcome
-
-from .io import vasp, qe 
+# from .elkparser import ElkParser
+from ..splash import welcome
+from ..doscarplot import DosPlot
+from ..vaspxml import VaspXML
+from ..lobsterparser import LobsterDOSParser
+from ..qeparser import QEDOSParser
+from .. import io
 import numpy as np
 import matplotlib.pyplot as plt
-from .utils.info import orbital_names
-from .scriptDosplot_old import dosplot_old
-from .plotter import EDOSPlot
-from .utils.defaults import settings
+
+# import matplotlib
+plt.rcParams["mathtext.default"] = "regular"
+# Roman ['rm', 'cal', 'it', 'tt', 'sf',
+#        'bf', 'default', 'bb', 'frak',
+#        'circled', 'scr', 'regular']
+plt.rcParams["font.family"] = "Arial"
+plt.rc("font", size=18)  # controls default text sizes
+plt.rc("axes", titlesize=22)  # fontsize of the axes title
+plt.rc("axes", labelsize=22)  # fontsize of the x and y labels
+plt.rc("xtick", labelsize=22)  # fontsize of the tick labels
+plt.rc("ytick", labelsize=22)  # fontsize of the tick labels
+# plt.rc('legend', fontsize=22)    # legend fontsize
+# plt.rc('figure', titlesize=22)  # fontsize of the figure title
 
 
-def dosplot(
+def dosplot_old(
         filename="vasprun.xml",
         dirname = None,
-        name = "dos",
-        poscar=None,
-        procar="PROCAR",
-        outcar=None,
         mode="plain",
         interpolation_factor=None,
         orientation="horizontal",
         spin_colors=None,
-        spin_labels=None,
         colors=None,
         spins=None,
         atoms=None,
         orbitals=None,
-        items={},
-        fermi=None,
         elimit=None,
         dos_limit=None,
         cmap="jet",
@@ -42,13 +48,12 @@ def dosplot(
         savefig=None,
         title=None,
         plot_total=True,
-        projection_mask=None,
         code="vasp",
-        labels=None, 
+        labels=None,
+        items={},
         ax=None,
+        plt_show=True,
         verbose=True,
-        old=False,
-        show = True
 ):
     """
     This function plots the density of states in different formats
@@ -317,179 +322,317 @@ def dosplot(
             >>> fig.show()
 
     """
-    
-    
-    if old or code not in ('vasp', "qe"):
-        procarfile = procar
-        dosplot_old(**locals())
 
     if mode not in [
             'plain', 'parametric_line', 'parametric', 'stack_species',
-            'stack_orbitals', 'stack']:
+            'stack_orbitals', 'stack'
+    ]:
         raise ValueError(
             "Mode should be choosed from ['plain', 'parametric_line','parametric','stack_species','stack_orbitals','stack']"
         )
+    if verbose:
+        welcome()
+
+        # Verbose section
+        print("Script initiated")
+        print("code          : ", code)
+        print("File name     : ", filename)
+        print("mode          : ", mode)
+        print("spins         : ", spins)
+        print("atoms list    : ", atoms)
+        print("orbs. list    : ", orbitals)
+        print("energy range  : ", elimit)
+        print("colormap      : ", cmap)
+        print("vmax          : ", vmax)
+        print("vmin          : ", vmin)
+        print("grid enabled  : ", grid)
+        print("savefig       : ", savefig)
+        print("title         : ", title)
+
+    total = plot_total
+    code = code.lower()
 
     if orientation[0].lower() == 'h':
         orientation = 'horizontal'
     elif orientation[0].lower() == 'v':
         orientation = 'vertical'
 
-    structure = None
-    reciprocal_lattice = None
-    dos, structure, reciprocal_lattice = parse(
-        code, dirname ,outcar, poscar, procar, reciprocal_lattice,
-        interpolation_factor, fermi)
-
-    if elimit is None:
-        elimit = [dos.energies.min(), dos.energies.max()]
-    
-    edos_plot = EDOSPlot(dos = dos, structure = structure, spins = spins, orientation = orientation)
-    
-    labels = []
-    if mode == "plain":
-        edos_plot.plot_dos(orientation = orientation)
-
-    if mode == "parametric":
-        if atoms is None:
-            atoms = list(np.arange(edos_plot.structure.natoms, dtype=int))
-        if spins is None:
-            spins = list(np.arange(len(edos_plot.dos.total)))
-        if orbitals is None:
-            orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
-        
-        edos_plot.plot_parametric(
-                        atoms=atoms,
-                        principal_q_numbers=[-1],
-                        orbitals=orbitals,
-                        spin_colors=spin_colors,
-                        spin_labels=spin_labels,
-                        colors = colors,
-                        cmap=cmap,
-                        vmin=0,
-                        vmax=1,
-                        orientation = orientation,
-                        plot_total=plot_total,
-                        plot_bar=True)
-
-    if mode == "parametric_line":
-        if atoms is None:
-            atoms = list(np.arange(edos_plot.structure.natoms, dtype=int))
-        if spins is None:
-            spins = list(np.arange(len(edos_plot.dos.total)))
-        if orbitals is None:
-            orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
-        
-        edos_plot.plot_parametric_line(
-                        atoms=atoms,
-                        principal_q_numbers=[-1],
-                        orbitals=orbitals,
-                        spin_colors=spin_colors,
-                        orientation=orientation
-                        )
-
-    if mode == "stack_species":
-        edos_plot.plot_stack_species(
-            orbitals=orbitals,
-            spin_colors=spin_colors,
-            spin_labels = spin_labels,
-            colors = colors,
-            plot_total = plot_total,
-            orientation=orientation,
-        )
-
-    elif mode == "stack_orbitals":
-        edos_plot.plot_stack_orbitals(
-            atoms=atoms,
-            spin_colors=spin_colors,
-            spin_labels = spin_labels,
-            colors = colors,
-            plot_total = plot_total,
-            orientation=orientation,
-        )
-
-    elif mode == "stack":
-        edos_plot.plot_stack(
-            items=items,
-            spin_colors=spin_colors,
-            spin_labels = spin_labels,
-            colors=colors,
-            orientation=orientation,
-        )
-
-    edos_plot.draw_fermi(
-            orientation = orientation,
-            color=settings.edos.fermi_color,
-            linestyle=settings.edos.fermi_linestyle,
-            linewidth=settings.edos.fermi_linewidth,
-        )
-    if orientation == 'horizontal':
-        if elimit is not None:
-            edos_plot.set_xlim(elimit)
-        if dos_limit is not None:
-            edos_plot.set_ylim(dos_limit)
-    elif orientation == 'vertical' :
-        if elimit is not None:
-            edos_plot.set_ylim(elimit)
-        if dos_limit is not None:
-            edos_plot.set_xlim(dos_limit)
-
-    if settings.edos.grid:
-        edos_plot.grid()
-    if settings.edos.legend and len(edos_plot.labels) != 0:
-        edos_plot.legend(edos_plot.labels)
-    if savefig is not None:
-        edos_plot.save(savefig)
-    if show:
-        edos_plot.show()
-    return edos_plot
-
-def parse(code='vasp',
-          dirname = "",
-          outcar=None,
-          poscar=None,
-          procar=None,
-          reciprocal_lattice=None,
-          kpoints=None,
-          interpolation_factor=1,
-          fermi=None):
-    ebs = None
-    kpath = None
-    structure = None
-
     if code == "vasp":
-        if outcar is not None:
-            outcar = vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        if poscar is not None:
-            poscar = vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.structure.reciprocal_lattice
+        vaspxml = VaspXML(filename=filename,
+                          dos_interpolation_factor=interpolation_factor)
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+        if atoms is None:
+            atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
+        if spins is None:
+            spins = list(np.arange(len(vaspxml.dos.total)))
+        if orbitals is None:
+            orbitals = list(
+                np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
+        if elimit is None:
+            elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
+    elif code == "lobster":
+        vaspxml = LobsterDOSParser(
+            filename="DOSCAR.lobster",
+            dos_interpolation_factor=interpolation_factor)
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+        if atoms is None:
+            atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
+        if spins is None:
+            spins = list(np.arange(len(vaspxml.dos.total)))
+        if orbitals is None:
+            orbitals = list(
+                np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
+        if elimit is None:
+            elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
 
 
-        vaspxml = vasp.VaspXML(filename="vasprun.xml",
-                               dos_interpolation_factor=None) 
-        
-        dos = vaspxml.dos
-        
-        
     elif code == "qe":
         if dirname is None:
             dirname = "dos"
-        parser = qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+        vaspxml = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
                              pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
                              dos_interpolation_factor = None)
-        if fermi is None:
-            fermi = parser.efermi
-        reciprocal_lattice = parser.reciprocal_lattice
-    
-        structure = parser.structure
-        
-        dos = parser.dos
-        
-    
-    return dos,  structure, reciprocal_lattice
+        dos_plot = DosPlot(dos=vaspxml.dos, structure=vaspxml.structure)
+        if atoms is None:
+            atoms = list(np.arange(vaspxml.structure.natoms, dtype=int))
+        if spins is None:
+            spins = list(np.arange(len(vaspxml.dos.total)))
+        if orbitals is None:
+            orbitals = list(
+                np.arange(len(vaspxml.dos.projected[0][0]), dtype=int))
+        if elimit is None:
+            elimit = [vaspxml.dos.energies.min(), vaspxml.dos.energies.max()]
 
+    if mode == "plain":
+        fig, ax1 = dos_plot.plot_total(
+            spins=spins,
+            spin_colors=spin_colors,
+            ax=ax,
+            orientation=orientation,
+            labels=labels,
+            linewidth=linewidth,
+        )
+
+    elif mode == "parametric_line":
+        if not total:
+            fig, ax1 = dos_plot.plot_parametric_line(
+                atoms=atoms,
+                spins=spins,
+                orbitals=orbitals,
+                spin_colors=spin_colors,
+                ax=ax,
+                orientation=orientation,
+                labels=labels,
+                linewidth=linewidth,
+            )
+
+        else:
+            fig, ax1 = dos_plot.plot_total(
+                spins=spins,
+                spin_colors=[(0, 0, 0), (0, 0, 0)],
+                ax=ax,
+                orientation=orientation,
+                linewidth=linewidth,
+
+            )
+            _, ax1 = dos_plot.plot_parametric_line(
+                atoms=atoms,
+                spins=spins,
+                orbitals=orbitals,
+                spin_colors=spin_colors,
+                ax=ax1,
+                orientation=orientation,
+                labels=labels,
+                linewidth=linewidth,
+            )
+    elif mode == "parametric":
+        if not total:
+            fig, ax1 = dos_plot.plot_parametric(
+                atoms=atoms,
+                spins=spins,
+                orbitals=orbitals,
+                spin_colors=spin_colors,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                elimit=elimit,
+                ax=ax,
+                orientation=orientation,
+                labels=labels,
+            )
+        else:
+            fig, ax1 = dos_plot.plot_parametric(
+                atoms=atoms,
+                spins=spins,
+                orbitals=orbitals,
+                spin_colors=spin_colors,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                elimit=elimit,
+                ax=ax,
+                orientation=orientation,
+                labels=labels,
+            )
+
+            _, ax1 = dos_plot.plot_total(
+                spins=spins,
+                spin_colors=[(0, 0, 0), (0, 0, 0)],
+                ax=ax1,
+                orientation=orientation,
+                linewidth=linewidth,
+            )
+
+    elif mode == "stack_species":
+        if not total:
+            fig, ax1 = dos_plot.plot_stack_species(
+                spins=spins,
+                orbitals=orbitals,
+                spin_colors=spin_colors,
+                colors=colors,
+                elimit=elimit,
+                figsize=(12, 6),
+                ax=ax,
+                orientation=orientation,
+            )
+        else:
+            fig, ax1 = dos_plot.plot_stack_species(
+                spins=spins,
+                orbitals=orbitals,
+                spin_colors=spin_colors,
+                colors=colors,
+                elimit=elimit,
+                figsize=(12, 6),
+                ax=ax,
+                orientation=orientation,
+            )
+            _, ax1 = dos_plot.plot_total(
+                spins=spins,
+                spin_colors=[(0, 0, 0), (0, 0, 0)],
+                ax=ax1,
+                orientation=orientation,
+                linewidth=linewidth,
+            )
+
+    elif mode == "stack_orbitals":
+        if not total:
+            fig, ax1 = dos_plot.plot_stack_orbitals(
+                spins=spins,
+                atoms=atoms,
+                spin_colors=spin_colors,
+                colors=colors,
+                elimit=elimit,
+                figsize=(12, 6),
+                ax=ax,
+                orientation=orientation,
+            )
+
+        else:
+            fig, ax1 = dos_plot.plot_stack_orbitals(
+                spins=spins,
+                atoms=atoms,
+                spin_colors=spin_colors,
+                colors=colors,
+                elimit=elimit,
+                figsize=(12, 6),
+                ax=ax,
+                orientation=orientation,
+            )
+
+            _, ax1 = dos_plot.plot_total(
+                spins=spins,
+                spin_colors=[(0, 0, 0), (0, 0, 0)],
+                ax=ax1,
+                orientation=orientation,
+                linewidth=linewidth,
+            )
+
+    elif mode == "stack":
+        if not total:
+            fig, ax1 = dos_plot.plot_stack(
+                items=items,
+                spins=spins,
+                spin_colors=spin_colors,
+                colors=colors,
+                elimit=elimit,
+                figsize=(12, 6),
+                ax=ax,
+                orientation=orientation,
+            )
+
+        else:
+            fig, ax1 = dos_plot.plot_stack(
+                items=items,
+                spins=spins,
+                spin_colors=colors,
+                colors=colors,
+                elimit=elimit,
+                figsize=(12, 6),
+                ax=ax,
+                orientation=orientation,
+            )
+
+            _, ax1 = dos_plot.plot_total(
+                spins=spins,
+                spin_colors=[(0, 0, 0), (0, 0, 0)],
+                ax=ax1,
+                orientation=orientation,
+                linewidth=linewidth,
+            )
+
+    cond1 = vaspxml.dos.energies >= elimit[0]
+    cond2 = vaspxml.dos.energies <= elimit[1]
+    cond = np.all([cond1, cond2], axis=0)
+
+    if dos_limit is not None:
+        ylim = dos_limit
+    else:
+        if len(spins) > 1:
+            ylim = [
+                vaspxml.dos.total[1, cond].max() * -1.1,
+                vaspxml.dos.total[0, cond].max() * 1.1
+            ]
+        else:
+            ylim = [0, vaspxml.dos.total[spins[0], cond].max() * 1.1]
+
+    if orientation == "horizontal":
+        ax1.set_xlabel(r"$E-E_f$ [eV]")
+        ax1.set_ylabel("Density of States [a.u.]")
+        ax1.set_xlim(elimit)
+        ax1.set_ylim(ylim)
+
+    elif orientation == "vertical":
+        ax1.set_ylabel(r"$E-E_f$ [eV]")
+        ax1.set_xlabel("Density of States [a.u.]")
+        ax1.set_ylim(elimit)
+        ax1.set_xlim(ylim)  # we use ylim because the plot is vertical
+
+    ax1.axhline(color="black", linestyle="--")
+    ax1.axvline(color="black", linestyle="--")
+
+    # fig.tight_layout()
+    if grid:
+        ax1.grid()
+    if labels or "stack" in mode:
+        ax1.legend()
+    if title:
+        ax1.set_title(title, fontsize=17)
+
+    if savefig:
+
+        fig.savefig(savefig, bbox_inches="tight")
+        plt.close(
+        )  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+        return None, None
+    else:
+        plt.show(block=plt_show)
+
+    return fig, ax1
+
+
+#
+#
+## if __name__ == "__main__":
+## bandsplot(mode='parametric',elimit=[-6,6],orbitals=[4,5,6,7,8],vmin=0,vmax=1, code='elk')
+## knames=['$\Gamma$', '$X$', '$M$', '$\Gamma$', '$R$','$X$'],
+## kticks=[0, 8, 16, 24, 38, 49])

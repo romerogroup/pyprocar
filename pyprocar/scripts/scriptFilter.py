@@ -1,5 +1,5 @@
-from .procarfilefilter import ProcarFileFilter
-from .splash import welcome
+from ..procarfilefilter import ProcarFileFilter
+from ..splash import welcome
 
 
 def filter(

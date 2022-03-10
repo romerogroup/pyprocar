@@ -4,9 +4,9 @@ import glob
 
 import numpy as np
 
-from .splash import welcome
-from .utilsprocar import UtilsProcar
-from .abinitparser import AbinitParser
+from ..splash import welcome
+from ..utilsprocar import UtilsProcar
+from ..abinitparser import AbinitParser
 
 
 def cat(

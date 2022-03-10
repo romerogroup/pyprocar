@@ -3,12 +3,12 @@ import re
 
 # import matplotlib.pyplot as plt
 import numpy as np
-from .utils.info import orbital_names
-from . import io
-from .plotter import EBSPlot
-from .splash import welcome
+from ..utils.info import orbital_names
+from .. import io
+from ..plotter import EBSPlot
+from ..splash import welcome
 from .scriptBandsplot_old import bandsplot_old
-from .utils.defaults import settings
+from ..utils.defaults import settings
 
 
 def bandsplot(

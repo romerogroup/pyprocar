@@ -1,17 +1,17 @@
-from .splash import welcome
+from ..splash import welcome
 
-from .io import vasp, qe 
+from ..io import vasp, qe 
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from .utils.info import orbital_names
+from ..utils.info import orbital_names
 from .scriptBandsDosplot_old import bandsdosplot_old
 
 from .scriptDosplot import dosplot
 from .scriptBandsplot import bandsplot
-from .plotter import EDOSPlot
-from .plotter import EBSPlot
-from .utils.defaults import settings
+from ..plotter import EDOSPlot, EBSPlot
+
+from ..utils.defaults import settings
 
 import inspect
 bands_settings = {key:value for key,value in zip(inspect.getfullargspec(bandsplot).args,inspect.getfullargspec(bandsplot).defaults)}

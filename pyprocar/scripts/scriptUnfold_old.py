@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from .procarunfold import ProcarUnfolder
-from .utilsprocar import UtilsProcar
+from ..procarunfold import ProcarUnfolder
+from ..utilsprocar import UtilsProcar
 
 def unfold(
         fname='PROCAR',

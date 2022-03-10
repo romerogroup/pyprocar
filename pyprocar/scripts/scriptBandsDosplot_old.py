@@ -8,19 +8,19 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .doscarplot import DosPlot
-from .vaspxml import VaspXML
-from .lobsterparser import LobsterDOSParser, LobsterParser
-from .qeparser import QEDOSParser, QEParser
-from . import io
-from .abinitparser import AbinitParser
-from .doscarplot import DosPlot
-from .elkparser import ElkParser
-from .procarparser import ProcarParser
-from .procarplot import ProcarPlot
-from .procarselect import ProcarSelect
-from .splash import welcome
-from .utilsprocar import UtilsProcar
+from ..doscarplot import DosPlot
+from ..vaspxml import VaspXML
+from ..lobsterparser import LobsterDOSParser, LobsterParser
+from ..qeparser import QEDOSParser, QEParser
+from .. import io
+from ..abinitparser import AbinitParser
+from ..doscarplot import DosPlot
+from ..elkparser import ElkParser
+from ..procarparser import ProcarParser
+from ..procarplot import ProcarPlot
+from ..procarselect import ProcarSelect
+from ..splash import welcome
+from ..utilsprocar import UtilsProcar
 
 plt.rcParams["mathtext.default"] = "regular"
 # Roman ['rm', 'cal', 'it', 'tt', 'sf',

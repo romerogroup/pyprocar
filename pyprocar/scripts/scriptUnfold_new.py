@@ -2,17 +2,17 @@ import os
 import re
 import matplotlib.pyplot as plt
 import numpy as np
-from .io import vasp
-from .plotter import EBSPlot
-from .abinitparser import AbinitParser
-from .elkparser import ElkParser
-from .qeparser import QEParser
-from .lobsterparser import LobsterParser
-from .procarparser import ProcarParser
-from .procarplot import ProcarPlot
-from .procarselect import ProcarSelect
-from .splash import welcome
-from .utilsprocar import UtilsProcar
+from ..io import vasp
+from ..plotter import EBSPlot
+from ..abinitparser import AbinitParser
+from ..elkparser import ElkParser
+from ..qeparser import QEParser
+from ..lobsterparser import LobsterParser
+from ..procarparser import ProcarParser
+from ..procarplot import ProcarPlot
+from ..procarselect import ProcarSelect
+from ..splash import welcome
+from ..utilsprocar import UtilsProcar
 
 
 def unfold(

@@ -1,5 +1,5 @@
-from .utilsprocar import UtilsProcar
-from .splash import welcome
+from ..utilsprocar import UtilsProcar
+from ..splash import welcome
 
 
 # calls ProcarRepair

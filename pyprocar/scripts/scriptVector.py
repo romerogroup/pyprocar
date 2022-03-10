@@ -1,9 +1,9 @@
-from .utilsprocar import UtilsProcar
-from .procarparser import ProcarParser
-from .procarselect import ProcarSelect
-from .procarplot import ProcarPlot
-from .fermisurface import FermiSurface
-from .splash import welcome
+from ..utilsprocar import UtilsProcar
+from ..procarparser import ProcarParser
+from ..procarselect import ProcarSelect
+from ..procarplot import ProcarPlot
+from ..fermisurface import FermiSurface
+from ..splash import welcome
 
 
 def Vector(
