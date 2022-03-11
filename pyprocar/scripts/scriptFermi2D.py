@@ -1,11 +1,11 @@
 from ..utilsprocar import UtilsProcar
-from ..procarparser import ProcarParser
+from ..io import ProcarParser
 from ..procarselect import ProcarSelect
 from ..procarplot import ProcarPlot
 from ..procarsymmetry import ProcarSymmetry
 from ..fermisurface import FermiSurface
-from ..elkparser import ElkParser
-from ..abinitparser import AbinitParser
+from ..io import ElkParser
+from ..io import AbinitParser
 import matplotlib.pyplot as plt
 from ..splash import welcome
 

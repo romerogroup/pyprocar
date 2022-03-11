@@ -1,5 +1,5 @@
 from ..utilsprocar import UtilsProcar
-from ..procarparser import ProcarParser
+from ..io import ProcarParser
 from ..procarselect import ProcarSelect
 from ..procarplot import ProcarPlot
 from ..fermisurface import FermiSurface

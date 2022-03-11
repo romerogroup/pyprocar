@@ -8,7 +8,7 @@ Created on Mon Jun 15 15:50:22 2020
 import os
 import numpy as np
 
-from ..core import DensityOfStates, Structure
+from ...core import DensityOfStates, Structure
 from re import findall, search, match, DOTALL, MULTILINE, finditer, compile, sub
 
 

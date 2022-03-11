@@ -9,13 +9,13 @@ from ..core.surface import boolean_add
 from ..fermisurface3d import FermiSurface3D
 from ..splash import welcome
 from ..utilsprocar import UtilsProcar
-from ..procarparser import ProcarParser
+from ..io import ProcarParser
 from ..procarselect import ProcarSelect
-from ..bxsfparser import BxsfParser
-from ..frmsfparser import FrmsfParser
-from ..qeparser import QEFermiParser
-from ..lobsterparser import LobsterFermiParser
-from ..abinitparser import AbinitParser
+from ..io import BxsfParser
+from ..io import FrmsfParser
+from ..io import QEFermiParser
+from ..io import LobsterFermiParser
+from ..io import AbinitParser
 
 
 

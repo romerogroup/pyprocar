@@ -3,7 +3,7 @@ from ase.io import read
 from .unfolder import Unfolder
 import matplotlib.pyplot as plt
 from .fatband import plot_band_weight
-from ..procarparser import ProcarParser
+from ..io import ProcarParser
 
 
 class ProcarUnfolder(object):

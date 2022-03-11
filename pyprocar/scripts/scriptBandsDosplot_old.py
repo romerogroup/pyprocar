@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..doscarplot import DosPlot
-from ..vaspxml import VaspXML
-from ..lobsterparser import LobsterDOSParser, LobsterParser
-from ..qeparser import QEDOSParser, QEParser
+from ..io import VaspXML
+from ..io import LobsterDOSParser, LobsterParser
+from ..io import QEDOSParser, QEParser
 from .. import io
-from ..abinitparser import AbinitParser
+from ..io import AbinitParser
 from ..doscarplot import DosPlot
-from ..elkparser import ElkParser
-from ..procarparser import ProcarParser
+from ..io import ElkParser
+from ..io import ProcarParser
 from ..procarplot import ProcarPlot
 from ..procarselect import ProcarSelect
 from ..splash import welcome

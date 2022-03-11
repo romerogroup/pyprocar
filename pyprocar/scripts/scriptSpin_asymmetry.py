@@ -15,7 +15,7 @@ from ..fermisurface3d import FermiSurface3D
 from ..splash import welcome
 from ..fermisurface3d import FermiSurface3D
 from ..utilsprocar import UtilsProcar
-from ..procarparser import ProcarParser
+from ..io import ProcarParser
 from ..procarselect import ProcarSelect
 
 def spin_asymmetry(procar='PROCAR',

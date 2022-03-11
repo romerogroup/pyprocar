@@ -5,9 +5,9 @@ Created on May 17 2020
 # from .elkparser import ElkParser
 from ..splash import welcome
 from ..doscarplot import DosPlot
-from ..vaspxml import VaspXML
-from ..lobsterparser import LobsterDOSParser
-from ..qeparser import QEDOSParser
+from ..io import VaspXML
+from ..io import LobsterDOSParser
+from ..io import QEDOSParser
 from .. import io
 import numpy as np
 import matplotlib.pyplot as plt

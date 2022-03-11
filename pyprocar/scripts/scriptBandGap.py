@@ -1,9 +1,9 @@
 import numpy as np
-from ..abinitparser import AbinitParser
-from ..elkparser import ElkParser
-from ..procarparser import ProcarParser
-from ..qeparser import QEParser
-from ..lobsterparser import LobsterParser
+from ..io import AbinitParser
+from ..io import ElkParser
+from ..io import ProcarParser
+from ..io import QEParser
+from ..io import LobsterParser
 from ..utilsprocar import UtilsProcar
 
 

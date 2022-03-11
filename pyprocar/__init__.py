@@ -37,41 +37,24 @@ import skimage
 import pyvista
 import trimesh
 
-# Frmsf
-from pyprocar.frmsfparser import FrmsfParser
+# from pyprocar.fermisurface import FermiSurface
+# from pyprocar.fermisurface3d import FermiSurface3D, BrillouinZone
 
-# Bxsf
-from pyprocar.bxsfparser import BxsfParser
 
-# Abinit
-from pyprocar.abinitparser import AbinitParser
-
-# Elk
-from pyprocar.elkparser import ElkParser
-
-# Quantum Espresso
-from pyprocar.qeparser import QEParser, QEDOSParser, QEFermiParser
-
-# Lobster
-from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
-
-from pyprocar.fermisurface import FermiSurface
-from pyprocar.fermisurface3d import FermiSurface3D, BrillouinZone
-
-# from . import fermisurface3d
 from pyprocar.procarfilefilter import ProcarFileFilter
-from pyprocar.procarparser import ProcarParser
 from pyprocar.procarplot import ProcarPlot
 from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarunfold import ProcarUnfolder
 from pyprocar import doscarplot
-from pyprocar import vaspxml
+
 
 from .splash import welcome
 
 from .scripts import *
+from .io import *
+from .fermisurface3d import *
 from . import io
 from . import core
 from . import utils

@@ -5,7 +5,7 @@ Created on Wed Aug 19 20:49:03 2020
 @author: Pedram Tavadze, Logan Lang
 """
 
-from ..core import Structure, DensityOfStates
+from ...core import Structure, DensityOfStates
 from numpy import array
 import xml.etree.ElementTree as ET
 import os
