@@ -129,7 +129,7 @@ class QEParser():
             self.bandsIn = rf.read()
             rf.close()
             self.getKpointLabels()
-            
+
             self.ebs = ElectronicBandStructure(
                                     kpoints=self.kpoints,
                                     bands=self.bands,
@@ -140,7 +140,8 @@ class QEParser():
                                     labels=self.orbitalNames[:-1],
                                     reciprocal_lattice=self.reciprocal_lattice,
                                     interpolation_factor=dos_interpolation_factor,
-                                    shifted_to_efermi=True,
+                                    # shifted_to_efermi=True,
+                                    # shifted_to_efermi=False,
                                 )
 
         else:
@@ -333,7 +334,8 @@ class QEParser():
     
     @property
     def dos(self):
-        energies = self.dos_total['energies'] #- self.efermi
+        
+        energies = self.dos_total['energies'] - self.efermi / 2
         total = []
         for ispin in self.dos_total:
             if ispin == 'energies':
@@ -364,7 +366,6 @@ class QEParser():
         """
        
         dos_total, labels = self._get_dos_total()
-        # dos_total['energies'] -= self.fermi
 
         return dos_total
 
@@ -927,15 +928,17 @@ class QEParser():
         nkpoints = spd.shape[0]
 
         nbands = spd.shape[1]
+        nspins = spd.shape[2]
+        
         norbitals = spd.shape[4] - 2
-        if spd.shape[2] == 4:
-            nspins = 3
-        else:
-            nspins = spd.shape[2]
-        if nspins == 2:
-            nbands = int(spd.shape[1] / 2)
-        else:
-            nbands = spd.shape[1]
+        # if spd.shape[2] == 4:
+        #     nspins = 3
+        # else:
+        #     nspins = spd.shape[2]
+        # if nspins == 2:
+        #     nbands = int(spd.shape[1] / 2)
+        # else:
+        #     nbands = spd.shape[1]
         projected = np.zeros(
             shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
             dtype=spd.dtype,
@@ -947,13 +950,13 @@ class QEParser():
         temp_spd = np.swapaxes(temp_spd, 2, 3)
         # (nkpoints,nbands, natom, norbital, nspin)
         # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
-        if nspins == 3:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
-        elif nspins == 2:
-            projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
-            projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
-        else:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+        # if nspins == 3:
+        #     projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
+        # elif nspins == 2:
+        #     projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
+        #     projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
+        # else:
+        projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
         return projected
     
     @property 

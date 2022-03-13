@@ -39,8 +39,9 @@ class EDOSPlot:
         self.structure = structure
         
         if spins is None:
-            self.spins = range(self.dos.nspins)
+            self.spins = np.arange(self.dos.nspins, dtype=int)
             self.nspins = len(self.spins)
+            
         else:
             self.spins = spins
             self.nspins = len(self.spins)
@@ -116,7 +117,6 @@ class EDOSPlot:
                         plot_bar=True,
                         orientation = 'horizontal'):
 
-
         if spin_colors is None:
             spin_colors = settings.edos.spin_colors
         if spin_labels is None:
@@ -125,11 +125,17 @@ class EDOSPlot:
             self.set_xlabel('Energy (eV)')
             self.set_ylabel('DOS')
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
-            self.set_ylim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_ylim([0,self.dos.total.max()])
+            else:
+                self.set_ylim([-self.dos.total.max(),self.dos.total.max()])
         elif orientation == 'vertical':
             self.set_xlabel('DOS')
             self.set_ylabel('Energy (eV)')
-            self.set_xlim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_xlim([0,self.dos.total.max()])
+            else:
+                self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
             self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
         
         cmap = mpl.cm.get_cmap(cmap)
@@ -177,16 +183,28 @@ class EDOSPlot:
                     
             
             if plot_total == True:
-                if orientation == 'horizontal':
-                    self.ax.plot(
-                            self.dos.energies, self.dos.total[0, :], color= 'black', alpha=settings.edos.opacity[ispin], 
-                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                        )
-                elif orientation == 'vertical':
-                    self.ax.plot(
-                            self.dos.total[0, :], self.dos.energies,  color= 'black', alpha=settings.edos.opacity[ispin], 
-                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                        )
+                if ispin == 0:
+                    if orientation == 'horizontal':
+                        self.ax.plot(
+                                self.dos.energies, self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
+                    elif orientation == 'vertical':
+                        self.ax.plot(
+                                self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
+                else:
+                    if orientation == 'horizontal':
+                        self.ax.plot(
+                                self.dos.energies, -self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
+                    elif orientation == 'vertical':
+                        self.ax.plot(
+                                -self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
 
     def plot_parametric_line(self,
                              atoms=None,
@@ -206,10 +224,13 @@ class EDOSPlot:
             self.set_ylabel('DOS')
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
+            self.set_ylim([0,self.dos.total.max()])
+
         elif orientation == 'vertical':
             self.set_xlabel('DOS')
             self.set_ylabel('Energy (eV)')
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
+            self.set_xlim([0,self.dos.total.max()])
             self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
 
         dos_summed = self.dos.dos_sum(atoms, principal_q_numbers, orbitals, self.spins)
@@ -251,10 +272,18 @@ class EDOSPlot:
             self.set_ylabel('DOS Cumlative')
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_ylim([0,self.dos.total.max()])
+            else:
+                self.set_ylim([-self.dos.total.max(),self.dos.total.max()])
         elif orientation == 'vertical':
             self.set_xlabel('DOS Cumlative')
             self.set_ylabel('Energy (eV)')
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_xlim([0,self.dos.total.max()])
+            else:
+                self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
             self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
 
         if orbitals:
@@ -341,16 +370,28 @@ class EDOSPlot:
                 self.labels.append(self.structure.species[specie] + label + spin_labels[ispin])
 
             if plot_total == True:
-                if orientation == 'horizontal':
-                    self.ax.plot(
-                            self.dos.energies, self.dos.total[0, :], color= 'black', alpha=settings.edos.opacity[ispin], 
-                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                        )
-                elif orientation == 'vertical':
-                    self.ax.plot(
-                            self.dos.total[0, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
-                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                        )
+                if ispin == 0:
+                    if orientation == 'horizontal':
+                        self.ax.plot(
+                                self.dos.energies, self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
+                    elif orientation == 'vertical':
+                        self.ax.plot(
+                                self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
+                else:
+                    if orientation == 'horizontal':
+                        self.ax.plot(
+                                self.dos.energies, -self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
+                    elif orientation == 'vertical':
+                        self.ax.plot(
+                                -self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                                linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                            )
 
     def plot_stack_orbitals(self,
             atoms=None,
@@ -374,10 +415,18 @@ class EDOSPlot:
             self.set_ylabel('DOS Cumlative')
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_ylim([0,self.dos.total.max()])
+            else:
+                self.set_ylim([-self.dos.total.max(),self.dos.total.max()])
         elif orientation == 'vertical':
             self.set_xlabel('DOS Cumlative')
             self.set_ylabel('Energy (eV)')
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_xlim([0,self.dos.total.max()])
+            else:
+                self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
             self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
         atom_names = ""
         if atoms:
@@ -446,16 +495,28 @@ class EDOSPlot:
                 bottom += y
 
         if plot_total == True:
-            if orientation == 'horizontal':
-                self.ax.plot(
-                        self.dos.energies, self.dos.total[0, :], color= 'black', alpha=settings.edos.opacity[ispin], 
-                        linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                    )
-            elif orientation == 'vertical':
-                self.ax.plot(
-                        self.dos.total[0, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
-                        linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                    )
+            if ispin == 0:
+                if orientation == 'horizontal':
+                    self.ax.plot(
+                            self.dos.energies, self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
+                elif orientation == 'vertical':
+                    self.ax.plot(
+                            self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
+            else:
+                if orientation == 'horizontal':
+                    self.ax.plot(
+                            self.dos.energies, -self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
+                elif orientation == 'vertical':
+                    self.ax.plot(
+                            -self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
             
     def plot_stack(self,
                     items=None,
@@ -481,10 +542,18 @@ class EDOSPlot:
             self.set_ylabel('DOS Cumlative')
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_ylim([0,self.dos.total.max()])
+            else:
+                self.set_ylim([-self.dos.total.max(),self.dos.total.max()])
         elif orientation == 'vertical':
             self.set_xlabel('DOS Cumlative')
             self.set_ylabel('Energy (eV)')
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
+            if len(self.spins) == 1:
+                self.set_xlim([0,self.dos.total.max()])
+            else:
+                self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
             self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
 
         dos_total = self.dos.total
@@ -502,7 +571,6 @@ class EDOSPlot:
             counter += 1
 
         dos_projected_total = self.dos.dos_sum(spins=self.spins)
-
         for ispin in self.spins:
 
             bottom = np.zeros_like(self.dos.energies)
@@ -564,16 +632,28 @@ class EDOSPlot:
                 bottom += y
 
         if plot_total == True:
-            if orientation == 'horizontal':
-                self.ax.plot(
-                        self.dos.energies, self.dos.total[0, :], color= 'black', alpha=settings.edos.opacity[ispin], 
-                        linestyle=settings.edos.linestyle[0], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                    )
-            elif orientation == 'vertical':
-                self.ax.plot(
-                        self.dos.total[0, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
-                        linestyle=settings.edos.linestyle[0], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
-                    )
+            if ispin == 0:
+                if orientation == 'horizontal':
+                    self.ax.plot(
+                            self.dos.energies, self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
+                elif orientation == 'vertical':
+                    self.ax.plot(
+                            self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
+            else:
+                if orientation == 'horizontal':
+                    self.ax.plot(
+                            self.dos.energies, -self.dos.total[ispin, :], color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
+                elif orientation == 'vertical':
+                    self.ax.plot(
+                            -self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.edos.opacity[ispin], 
+                            linestyle=settings.edos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.edos.linewidth[ispin],
+                        )
 
     def set_xticks(self, tick_positions=None, tick_names=None, color="black"):
         if tick_positions is not None:

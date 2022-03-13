@@ -219,6 +219,7 @@ class EBSPlot:
             spins = range(self.ebs.nspins)
         if self.ebs.is_non_collinear:
             spins = [0]
+        
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
@@ -293,11 +294,9 @@ class EBSPlot:
             if vmax is None:
                 vmax = 1
             norm = matplotlib.colors.Normalize(vmin, vmax)
-
             for ispin in spins:
                 # plotting
                 for iband in range(self.ebs.nbands):
-                    
                     points = np.array(
                         [self.x, self.ebs.bands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                     segments = np.concatenate(

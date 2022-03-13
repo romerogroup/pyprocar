@@ -68,16 +68,17 @@ class ElectronicBandStructure:
 
         self.kpoints = kpoints
 
-        if not shifted_to_efermi and efermi is not None:
+        # if not shifted_to_efermi and efermi is not None:
 
-            self.bands = bands - efermi
-            self.shifted_to_efermi = True
-        else:
-            self.bands = bands 
-            self.shifted_to_efermi = True
+        #     self.bands = bands - efermi
+        #     self.shifted_to_efermi = True
+        # else:
+        #     self.bands = bands 
+        #     self.shifted_to_efermi = True
+
+        self.bands = bands - efermi
         self.efermi = efermi
-        if self.efermi is None:
-            self.bands = bands
+        
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice

@@ -364,7 +364,6 @@ def dosplot(
                         orbitals=orbitals,
                         spin_colors=spin_colors,
                         spin_labels=spin_labels,
-                        colors = colors,
                         cmap=cmap,
                         vmin=0,
                         vmax=1,
@@ -415,6 +414,7 @@ def dosplot(
             spin_labels = spin_labels,
             colors=colors,
             orientation=orientation,
+            plot_total = plot_total,
         )
 
     edos_plot.draw_fermi(
@@ -484,6 +484,7 @@ def parse(code='vasp',
                              dos_interpolation_factor = None)
         if fermi is None:
             fermi = parser.efermi
+        
         reciprocal_lattice = parser.reciprocal_lattice
     
         structure = parser.structure

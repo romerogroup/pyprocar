@@ -148,6 +148,7 @@ def bandsplot(
 
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
+        
         if mode == "overlay_species":
             for ispc in structure.species:
                 labels.append(ispc)
@@ -219,7 +220,7 @@ def bandsplot(
         weights = ebs_plot.ebs.ebs_sum(
             atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
         )
-
+        
         if settings.ebs.weighted_color:
             color_weights = weights
         else:
