@@ -97,6 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html#abinit">5. Abinit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyprocar API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pyprocar.html">pyprocar package</a><ul class="current">
@@ -130,7 +131,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKmesh2D">pyprocar.scriptKmesh2D module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKpath">pyprocar.scriptKpath module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptRepair">pyprocar.scriptRepair module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#pyprocar-scriptspin-asymmetry-module">pyprocar.scriptSpin_asymmetry module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptSpin_asymmetry">pyprocar.scriptSpin_asymmetry module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptUnfold">pyprocar.scriptUnfold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptVector">pyprocar.scriptVector module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.splash">pyprocar.splash module</a></li>
@@ -220,51 +221,6 @@
 <span id="pyprocar-lobsterparser-lobsterparser-module"></span><h2>pyprocar.lobsterparser.lobsterparser module<a class="headerlink" href="#module-pyprocar.lobsterparser.lobsterparser" title="Permalink to this headline">¶</a></h2>
 <p>Created on Thu Jun 25 03:12:50 2020
 &#64;author: Logan Lang</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pyprocar.lobsterparser.lobsterparser.LobsterParser">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyprocar.lobsterparser.lobsterparser.</span></span><span class="sig-name descname"><span class="pre">LobsterParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lobsterin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lobsterin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lobsterout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lobsterout'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scfin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'scf.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'scf.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lobstercode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qe'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/lobsterparser/lobsterparser.html#LobsterParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.lobsterparser.lobsterparser.LobsterParser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference internal" href="#pyprocar.lobsterparser.lobsterparser.LobsterParser.fermi" title="pyprocar.lobsterparser.lobsterparser.LobsterParser.fermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi</span></code></a></dt><dd><p>Returns the fermi energy read from .out</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.lobsterparser.lobsterparser.LobsterParser.reclat" title="pyprocar.lobsterparser.lobsterparser.LobsterParser.reclat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reclat</span></code></a></dt><dd><p>Returns the reciprocal lattice read from .out</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.lobsterparser.lobsterparser.LobsterParser.fermi">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">fermi</span></span><a class="headerlink" href="#pyprocar.lobsterparser.lobsterparser.LobsterParser.fermi" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the fermi energy read from .out</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.lobsterparser.lobsterparser.LobsterParser.reclat">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">reclat</span></span><a class="headerlink" href="#pyprocar.lobsterparser.lobsterparser.LobsterParser.reclat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the reciprocal lattice read from .out</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyprocar.lobsterparser.lobsterparser.LobsterParser.spd">
-<span class="sig-name descname"><span class="pre">spd</span></span><a class="headerlink" href="#pyprocar.lobsterparser.lobsterparser.LobsterParser.spd" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>for l=1:</dt><dd><p>1 pz     (m=0)
-2 px     (real combination of m=+/-1 with cosine)
-3 py     (real combination of m=+/-1 with sine)</p>
-</dd>
-<dt>for l=2:</dt><dd><p>1 dz2    (m=0)
-2 dzx    (real combination of m=+/-1 with cosine)
-3 dzy    (real combination of m=+/-1 with sine)
-4 dx2-y2 (real combination of m=+/-2 with cosine)
-5 dxy    (real combination of m=+/-2 with sine)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-pyprocar.lobsterparser">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyprocar.lobsterparser" title="Permalink to this headline">¶</a></h2>

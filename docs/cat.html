@@ -98,6 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html#abinit">5. Abinit</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="kpath.html">Generating a k-path</a></li>
 <li class="toctree-l2"><a class="reference internal" href="repair.html">Repair</a></li>
@@ -195,20 +196,7 @@
 <p>NOTE:</p>
 <p>When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set <code class="docutils literal notranslate"><span class="pre">mergeparallel=True</span></code>. To detect if the calculation is spin polarized, provide <code class="docutils literal notranslate"><span class="pre">abinit_output</span></code> or set <code class="docutils literal notranslate"><span class="pre">nspin</span></code> value manually.
 To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set <code class="docutils literal notranslate"><span class="pre">fixformat=True</span></code> as well.</p>
-<span class="target" id="module-pyprocar.scriptCat"></span><dl class="py function">
-<dt class="sig sig-object py" id="pyprocar.scriptCat.cat">
-<span class="sig-prename descclassname"><span class="pre">pyprocar.scriptCat.</span></span><span class="sig-name descname"><span class="pre">cat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inFiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PROCAR_merged'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mergeparallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nspin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abinit_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptCat.html#cat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scriptCat.cat" title="Permalink to this definition">¶</a></dt>
-<dd><p>This module concatenates multiple PROCARs.
-If a list of input PROCAR files is not provided it will merge all the PROCAR_*
-files in the directory.
-set mergeparallel = True for merging PROCARs generated from
-parallel Abinit calculations. Set fixformat = True to fix formatting issues
-in the Abinit PROCAR file.
-To detect if the calculation is spin-colinear it checks for the nsppol flag
-in the Abinit output file as set in abinit_output. If not present, set nspin.</p>
-</dd></dl>
-
-</section>
+<span class="target" id="module-pyprocar.scriptCat"></span></section>
 
 
            </div>

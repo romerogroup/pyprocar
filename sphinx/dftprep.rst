@@ -169,13 +169,45 @@ To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7
 
 Currently supported for Lobster with Quantum Espresso v6.3. 
 
+To use Pyprocar with Lobster, one has to run various calculations in independent directories. Here, we will show examples of the different calculations.
+
+**Band Structure** 
+
+1. Create a directory called ``bands``.
+2. Run ``pw.x`` on your ``scf.in`` file. 
+3. Run ``lobster.x`` on ``lobsterin``  file in same directory.
+6. Run pyprocar.bandsplot(dirname = 'bands' ,mode = 'plain', code = 'qe', lobster = True)
+
+**Density of States** 
+
+1. Create a directory called ``dos``.
+2. Run ``pw.x`` on your ``scf.in`` file. 
+3. Run ``lobster.x`` on ``lobsterin``  file in same directory.
+4. Run pyprocar.dosplot(dirname = 'dos' ,mode = 'plain', code = 'qe', lobster = True)
+
+**Band Structure and Density of States** 
+
+1. Run the band structure and dos calculation as stated above
+
+5. Run pyprocar.bandsdosplot(bands_dirname = 'bands', dos_dirname = 'dos', bands_mode = 'plain', dos_mode = 'plain', code = 'qe', lobster = True)
+
+**Fermi** 
+
+1. Create a directory called ``fermi``.
+2. Run ``pw.x`` on your ``scf.in`` file. 
+3. Run ``lobster.x`` on ``lobsterin`` file in same directory.
+4. Run pyprocar.fermi3D
+
+**KPOINTS**
+
+The kpoints for a lobster calculation must be listed in a specific format for a particular DFT code. Right now we only support QE, but additional support will be added for VASP and ABINIT.
+
+**QE**
+
 You must have the following settings for lobster:
 
 -  wf_collect = .true. in CONTROL
-
--   nosym = .TRUE., noinv = .TRUE. in SYSTEM
-
-The kpoints for a lobster file must be listed in the scf.in file as the following::
+-  nosym = .TRUE., noinv = .TRUE. in SYSTEM::
 
 
     K_POINTS crystal
@@ -211,18 +243,16 @@ The kpoints for a lobster file must be listed in the scf.in file as the followin
 - The k meth and kpath must be listed explicitly. kmesh gets a weight of 1, and the path gets a weight of 0.
 - Explicitly listing kpoints as ''!kpoint" on the k path is important for labels
 
-To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7
-
 lobster_input_file must include explicit bands such as::
 
 
     createFatband F 2p_x 2p_y 2p_z 2s
     createFatband Li 1s 2s
 
-
-Follow instructions on how to perform a Lobster analysis with Quantum Espresso. Also refer to the files in the relevant ``examples`` directory.
+Refer to Fe/Lobster_QE in the examples directory for example inputs
 
 =========
+
 5. Abinit
 =========
 

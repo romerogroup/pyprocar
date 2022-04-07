@@ -102,9 +102,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#elk">2. Elk</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#quantum-espresso">3. Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lobster">4. Lobster</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#abinit">5. Abinit</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="#abinit">5. Abinit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">pyprocar API</a></li>
 </ul>
@@ -326,12 +326,42 @@ plot1d
 <li><p>flag           : code=’lobster’, lobstercode=’qe’</p></li>
 </ul>
 <p>Currently supported for Lobster with Quantum Espresso v6.3.</p>
+<p>To use Pyprocar with Lobster, one has to run various calculations in independent directories. Here, we will show examples of the different calculations.</p>
+<p><strong>Band Structure</strong></p>
+<ol class="arabic simple">
+<li><p>Create a directory called <code class="docutils literal notranslate"><span class="pre">bands</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">pw.x</span></code> on your <code class="docutils literal notranslate"><span class="pre">scf.in</span></code> file.</p></li>
+</ol>
+<p>3. Run <code class="docutils literal notranslate"><span class="pre">lobster.x</span></code> on <code class="docutils literal notranslate"><span class="pre">lobsterin</span></code>  file in same directory.
+6. Run pyprocar.bandsplot(dirname = ‘bands’ ,mode = ‘plain’, code = ‘qe’, lobster = True)</p>
+<p><strong>Density of States</strong></p>
+<ol class="arabic simple">
+<li><p>Create a directory called <code class="docutils literal notranslate"><span class="pre">dos</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">pw.x</span></code> on your <code class="docutils literal notranslate"><span class="pre">scf.in</span></code> file.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">lobster.x</span></code> on <code class="docutils literal notranslate"><span class="pre">lobsterin</span></code>  file in same directory.</p></li>
+<li><p>Run pyprocar.dosplot(dirname = ‘dos’ ,mode = ‘plain’, code = ‘qe’, lobster = True)</p></li>
+</ol>
+<p><strong>Band Structure and Density of States</strong></p>
+<ol class="arabic simple">
+<li><p>Run the band structure and dos calculation as stated above</p></li>
+</ol>
+<ol class="arabic simple" start="5">
+<li><p>Run pyprocar.bandsdosplot(bands_dirname = ‘bands’, dos_dirname = ‘dos’, bands_mode = ‘plain’, dos_mode = ‘plain’, code = ‘qe’, lobster = True)</p></li>
+</ol>
+<p><strong>Fermi</strong></p>
+<ol class="arabic simple">
+<li><p>Create a directory called <code class="docutils literal notranslate"><span class="pre">fermi</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">pw.x</span></code> on your <code class="docutils literal notranslate"><span class="pre">scf.in</span></code> file.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">lobster.x</span></code> on <code class="docutils literal notranslate"><span class="pre">lobsterin</span></code> file in same directory.</p></li>
+<li><p>Run pyprocar.fermi3D</p></li>
+</ol>
+<p><strong>KPOINTS</strong></p>
+<p>The kpoints for a lobster calculation must be listed in a specific format for a particular DFT code. Right now we only support QE, but additional support will be added for VASP and ABINIT.</p>
+<p><strong>QE</strong></p>
 <p>You must have the following settings for lobster:</p>
-<ul class="simple">
+<ul>
 <li><p>wf_collect = .true. in CONTROL</p></li>
-<li><p>nosym = .TRUE., noinv = .TRUE. in SYSTEM</p></li>
-</ul>
-<p>The kpoints for a lobster file must be listed in the scf.in file as the following:</p>
+<li><p>nosym = .TRUE., noinv = .TRUE. in SYSTEM:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>K_POINTS crystal
 520
 0.0000000   0.0000000   0.0000000   1.0
@@ -362,20 +392,21 @@ plot1d
 .
 </pre></div>
 </div>
-<ul class="simple">
+</li>
 <li><p>The k meth and kpath must be listed explicitly. kmesh gets a weight of 1, and the path gets a weight of 0.</p></li>
 <li><p>Explicitly listing kpoints as ‘’!kpoint” on the k path is important for labels</p></li>
 </ul>
-<p>To perform spincalcs set nspin = 2 and starting_magnetization(1)= 0.7</p>
 <p>lobster_input_file must include explicit bands such as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">createFatband</span> <span class="n">F</span> <span class="mi">2</span><span class="n">p_x</span> <span class="mi">2</span><span class="n">p_y</span> <span class="mi">2</span><span class="n">p_z</span> <span class="mi">2</span><span class="n">s</span>
 <span class="n">createFatband</span> <span class="n">Li</span> <span class="mi">1</span><span class="n">s</span> <span class="mi">2</span><span class="n">s</span>
 </pre></div>
 </div>
-<p>Follow instructions on how to perform a Lobster analysis with Quantum Espresso. Also refer to the files in the relevant <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory.</p>
+<p>Refer to Fe/Lobster_QE in the examples directory for example inputs</p>
 </section>
+</section>
+<hr class="docutils" />
 <section id="abinit">
-<h2>5. Abinit<a class="headerlink" href="#abinit" title="Permalink to this headline">¶</a></h2>
+<h1>5. Abinit<a class="headerlink" href="#abinit" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>Required files : PROCAR, &lt;abinitoutput&gt;.out</p></li>
 <li><p>flag           : code=’abinit’</p></li>
@@ -383,7 +414,6 @@ plot1d
 <p>Abinit version <span class="math notranslate nohighlight">\(9.x^*\)</span> generates a PROCAR similar to that of VASP when <code class="docutils literal notranslate"><span class="pre">prtprocar</span></code> is set in the input file.
 To provide the Abinit output file, use the flag <code class="docutils literal notranslate"><span class="pre">abinit_output=&lt;nameofoutputfile&gt;</span></code> in PyProcar functions.</p>
 <p>When running Abinit in parallel the PROCAR is split into multiple files. PyProcar’s <code class="docutils literal notranslate"><span class="pre">cat</span></code> function can merge these files together as explained in the section <a class="reference internal" href="cat.html#labelcat"><span class="std std-ref">Concatenating multiple calculations</span></a>. This also has an option to fix formatting issues in the Abinit PROCAR if needed.</p>
-</section>
 </section>
 
 

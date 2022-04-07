@@ -97,6 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dftprep.html#abinit">5. Abinit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyprocar API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pyprocar.html">pyprocar package</a><ul class="current">
@@ -130,7 +131,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKmesh2D">pyprocar.scriptKmesh2D module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptKpath">pyprocar.scriptKpath module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptRepair">pyprocar.scriptRepair module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#pyprocar-scriptspin-asymmetry-module">pyprocar.scriptSpin_asymmetry module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptSpin_asymmetry">pyprocar.scriptSpin_asymmetry module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptUnfold">pyprocar.scriptUnfold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.scriptVector">pyprocar.scriptVector module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.html#module-pyprocar.splash">pyprocar.splash module</a></li>
@@ -220,104 +221,6 @@
 <span id="pyprocar-elkparser-elkparser-module"></span><h2>pyprocar.elkparser.elkparser module<a class="headerlink" href="#module-pyprocar.elkparser.elkparser" title="Permalink to this headline">¶</a></h2>
 <p>Created on Fri March 2 2020
 &#64;author: Pedram Tavadze</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pyprocar.elkparser.elkparser.</span></span><span class="sig-name descname"><span class="pre">ElkParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elkin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elk.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/elkparser/elkparser.html#ElkParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.composition" title="pyprocar.elkparser.elkparser.ElkParser.composition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">composition</span></code></a></dt><dd><p>Returns the composition of the structure</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.fermi" title="pyprocar.elkparser.elkparser.ElkParser.fermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi</span></code></a></dt><dd><p>Returns the fermi energy read from FERMI.OUT</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points" title="pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">high_symmetry_points</span></code></a></dt><dd><p>Returns the corrdinates of high symmtery points provided in elk.in</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.knames" title="pyprocar.elkparser.elkparser.ElkParser.knames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">knames</span></code></a></dt><dd><p>Returns the names of the high symmetry points(x ticks) provided in elk.in</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.natom" title="pyprocar.elkparser.elkparser.ElkParser.natom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">natom</span></code></a></dt><dd><p>Returns number of atoms in the structure</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.nhigh_sym" title="pyprocar.elkparser.elkparser.ElkParser.nhigh_sym"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nhigh_sym</span></code></a></dt><dd><p>Returns nu,ber of high symmetry points</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.nkpoints" title="pyprocar.elkparser.elkparser.ElkParser.nkpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nkpoints</span></code></a></dt><dd><p>Returns total number of kpoints</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.nspecies" title="pyprocar.elkparser.elkparser.ElkParser.nspecies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nspecies</span></code></a></dt><dd><p>Returns number of species</p>
-</dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.reclat" title="pyprocar.elkparser.elkparser.ElkParser.reclat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reclat</span></code></a></dt><dd><p>Returns the reciprocal lattice read from LATTICE.OUT</p>
-</dd>
-<dt><strong>spd_orb</strong></dt><dd></dd>
-<dt><a class="reference internal" href="#pyprocar.elkparser.elkparser.ElkParser.tasks" title="pyprocar.elkparser.elkparser.ElkParser.tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tasks</span></code></a></dt><dd><p>Returns the tasks calculated by elk</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.composition">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">composition</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.composition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the composition of the structure</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.fermi">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">fermi</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.fermi" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the fermi energy read from FERMI.OUT</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">high_symmetry_points</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.high_symmetry_points" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the corrdinates of high symmtery points provided in elk.in</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.knames">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">knames</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.knames" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the names of the high symmetry points(x ticks) provided in elk.in</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.natom">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">natom</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.natom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of atoms in the structure</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.nhigh_sym">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nhigh_sym</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.nhigh_sym" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns nu,ber of high symmetry points</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.nkpoints">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nkpoints</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.nkpoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns total number of kpoints</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.nspecies">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nspecies</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.nspecies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of species</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.reclat">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">reclat</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.reclat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the reciprocal lattice read from LATTICE.OUT</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.spd_orb">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">spd_orb</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.spd_orb" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pyprocar.elkparser.elkparser.ElkParser.tasks">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">tasks</span></span><a class="headerlink" href="#pyprocar.elkparser.elkparser.ElkParser.tasks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the tasks calculated by elk</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-pyprocar.elkparser">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pyprocar.elkparser" title="Permalink to this headline">¶</a></h2>
