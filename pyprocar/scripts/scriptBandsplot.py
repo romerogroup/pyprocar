@@ -8,6 +8,7 @@ from .. import io
 from ..plotter import EBSPlot
 from ..splash import welcome
 from .scriptBandsplot_old import bandsplot_old
+# from ..io.lobster import LobsterParser
 from ..utils.defaults import settings
 
 
@@ -20,6 +21,7 @@ def bandsplot(
     kpoints=None,
     elkin="elk.in",
     code="vasp",
+    lobster = False,
     mode="plain",
     spins=None,
     atoms=None,
@@ -136,7 +138,7 @@ def bandsplot(
     settings.modify(kwargs)
 
     ebs, kpath, structure, reciprocal_lattice = parse(
-        code, dirname ,outcar, poscar, procar, reciprocal_lattice, kpoints,
+        code, lobster, dirname ,outcar, poscar, procar, reciprocal_lattice, kpoints,
         interpolation_factor, fermi)
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
@@ -275,6 +277,7 @@ def bandsplot(
 
 
 def parse(code='vasp',
+          lobster = False,
           dirname = "",
           outcar=None,
           poscar=None,
@@ -287,7 +290,24 @@ def parse(code='vasp',
     kpath = None
     structure = None
 
-    if code == "vasp":
+
+    if lobster is True:
+        parser = io.lobster.LobsterParser(dirname = dirname, 
+                        code = code,
+                        dos_interpolation_factor = None )
+
+        if fermi is None:
+            fermi = parser.efermi
+        reciprocal_lattice = parser.reciprocal_lattice
+    
+        structure = parser.structure
+        
+        kpoints = parser.kpoints
+        kpath = parser.kpath
+
+        ebs = parser.ebs
+
+    elif code == "vasp":
         if outcar is not None:
             outcar = io.vasp.Outcar(outcar)
             if fermi is None:

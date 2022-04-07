@@ -5,7 +5,7 @@ Created on May 17 2020
 
 from ..splash import welcome
 
-from ..io import vasp, qe 
+from .. import io
 import numpy as np
 import matplotlib.pyplot as plt
 from ..utils.info import orbital_names
@@ -44,6 +44,7 @@ def dosplot(
         plot_total=True,
         projection_mask=None,
         code="vasp",
+        lobster = False,
         labels=None, 
         ax=None,
         verbose=True,
@@ -338,7 +339,7 @@ def dosplot(
     structure = None
     reciprocal_lattice = None
     dos, structure, reciprocal_lattice = parse(
-        code, dirname ,outcar, poscar, procar, reciprocal_lattice,
+        code, lobster, dirname ,outcar, poscar, procar, reciprocal_lattice,
         interpolation_factor, fermi)
 
     if elimit is None:
@@ -445,6 +446,7 @@ def dosplot(
     return edos_plot
 
 def parse(code='vasp',
+          lobster = False,
           dirname = "",
           outcar=None,
           poscar=None,
@@ -457,20 +459,34 @@ def parse(code='vasp',
     kpath = None
     structure = None
 
-    if code == "vasp":
+
+    if lobster is True:
+        if dirname is None:
+            dirname = "dos"
+        parser = io.lobster.LobsterParser(dirname = dirname,code = code, dos_interpolation_factor = None)
+        if fermi is None:
+            fermi = parser.efermi
+        
+        reciprocal_lattice = parser.reciprocal_lattice
+    
+        structure = parser.structure
+        
+        dos = parser.dos
+
+    elif code == "vasp":
         if outcar is not None:
-            outcar = vasp.Outcar(outcar)
+            outcar = io.vasp.Outcar(outcar)
             if fermi is None:
                 fermi = outcar.efermi
             reciprocal_lattice = outcar.reciprocal_lattice
         if poscar is not None:
-            poscar = vasp.Poscar(poscar)
+            poscar = io.vasp.Poscar(poscar)
             structure = poscar.structure
             if reciprocal_lattice is None:
                 reciprocal_lattice = poscar.structure.reciprocal_lattice
 
 
-        vaspxml = vasp.VaspXML(filename="vasprun.xml",
+        vaspxml = io.vasp.VaspXML(filename="vasprun.xml",
                                dos_interpolation_factor=None) 
         
         dos = vaspxml.dos
@@ -479,7 +495,7 @@ def parse(code='vasp',
     elif code == "qe":
         if dirname is None:
             dirname = "dos"
-        parser = qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+        parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
                              pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
                              dos_interpolation_factor = None)
         if fermi is None:

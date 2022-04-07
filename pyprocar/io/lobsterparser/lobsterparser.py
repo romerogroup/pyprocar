@@ -307,8 +307,6 @@ class LobsterParser:
             for i in range(len(self.orbitals)):
                 if self.orbitals[i] == sub("[0-9]", "", current_orbital):
                     orbitalIndex = i + 1
-                    # print(orbitalIndex)
-                    # print(self.orbitals[orbitalIndex])
 
             band_info = []
             for ik in range(len(raw_kpoints)):

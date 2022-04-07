@@ -26,6 +26,7 @@ def bandsdosplot(
     k_limit = None,
     grid=False,
     code="vasp",
+    lobster = False,
     savefig=None,
     title=None,
     title_fontsize = 16,
@@ -47,6 +48,8 @@ def bandsdosplot(
     #inital settings
     bands_settings['code'] = code
     dos_settings['code'] = code
+    bands_settings['lobster'] = lobster
+    dos_settings['lobster'] = lobster
     dos_settings['orientation'] = 'vertical'
     bands_settings['show'] = False
     dos_settings['show'] = False

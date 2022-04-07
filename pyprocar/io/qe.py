@@ -14,7 +14,6 @@ import math
 
 HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class QEParser():
-    
     def __init__(self, scfIn_filename = "scf.in", dirname = "", bandsIn_filename = "bands.in", pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", dos_interpolation_factor = None ):
         if dirname != "":
             dirname = dirname + os.sep
@@ -25,8 +24,6 @@ class QEParser():
         self.scfIn = rf.read()
         rf.close()
 
-        
-        
         xml_filename =  re.findall("prefix\s*=\s*'(.*)'", self.scfIn)[0] + ".xml"
 
         tree = ET.parse(f"{dirname}{xml_filename}")
@@ -111,8 +108,9 @@ class QEParser():
             self.proj_prefix = re.findall("filproj\s*=\s*'(.*)'", self.pdosIn)[0]
             
         #Parsing spd array and spd phase arrays
-        self.parse_projections()
+        
         if os.path.exists(f"{dirname}{atomic_proj_xml}"):
+            self.parse_projections()
             atmProj_tree = ET.parse(f"{dirname}{atomic_proj_xml}" )
             self.atm_proj_root = atmProj_tree.getroot()
             self.parse_atomic_projections()
@@ -635,8 +633,7 @@ class QEParser():
                         ngrids=self.ngrids,
                         has_time_reversal=has_time_reversal,
                     )
-            
-        
+                    
     def parse_projections(self):
 
         rf = open(f"{self.dirname}{self.proj_prefix}.projwfc_up", "r")
@@ -801,10 +798,7 @@ class QEParser():
                             real = float(band_projection.split(",")[0])
                             imag = float(band_projection.split(",")[1])
                             self.spd_phase[ik,iband,ispin,iatm - 1,iorb + 1] = complex(real , imag)
-                
-                    
-
-    
+                               
     def parse_structure(self):
         self.nspecies = len(self.root.findall(".//output/atomic_species")[0])
         
@@ -965,7 +959,7 @@ class QEParser():
         Returns the fermi energy read from .out
         """
         
-        return 2 * float(self.root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
+        return self.nspin * float(self.root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
         
     @property
     def reciprocal_lattice(self):   
