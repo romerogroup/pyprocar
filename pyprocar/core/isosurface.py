@@ -8,6 +8,7 @@ __maintainer__ = "Pedram Tavadze"
 __email__ = "petavazohi@mail.wvu.edu"
 __date__ = "March 31, 2020"
 
+# TODO add python typing to all of the functions
 
 class Isosurface(Surface):
     def __init__(

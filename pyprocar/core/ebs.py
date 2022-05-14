@@ -16,6 +16,7 @@ import networkx as nx
 from matplotlib import pylab as plt
 import pyvista
 
+# TODO add python typing to all functions
 
 class ElectronicBandStructure:
     def __init__(

@@ -7,6 +7,7 @@ Created on Wed Aug 19 20:49:03 2020
 from scipy.interpolate import CubicSpline
 import numpy as np
 
+# TODO add python typing for all of the functions
 
 class DensityOfStates:
     def __init__(

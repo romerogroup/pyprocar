@@ -11,8 +11,11 @@ import matplotlib
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 np.seterr(divide="ignore", invalid="ignore")
 
+# TODO add python typing to all of the functions
+# TODO remove pyprocar.doscarplot module (redundant)
 
-class EDOSPlot:
+
+class DOSPlot:
     def __init__(self, dos=None, structure=None, spins=None, ax=None, **kwargs):
         """
         class to plot an electronic band structure.

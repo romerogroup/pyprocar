@@ -10,6 +10,13 @@ __maintainer__ = "Pedram Tavadze"
 __email__ = "petavazohi@mail.wvu.edu"
 __date__ = "March 31, 2020"
 
+# TODO add python typing to all of the functions
+# TODO add trimesh 
+# TODO what is the point of self.test?
+# TODO uncomment self.polydata and self.mesh
+# TODO add an __str__ method
+# TODO change boolean add method to __add__ method and get rid of try and expect
+
 
 class Surface(object):
     """

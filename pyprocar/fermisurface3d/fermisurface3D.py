@@ -10,8 +10,13 @@ from ..core import Isosurface
 from .brillouin_zone import BrillouinZone
 from matplotlib import colors as mpcolors
 from matplotlib import cm
-
 import math
+
+# TODO add python typing
+# TODO move this module to plotter
+# TODO add default settings
+
+
 HBAR_EV = 6.582119 *10**(-16) #eV*s
 HBAR_J = 1.0545718 *10**(-34) #eV*s
 METER_ANGSTROM = 10**(-10) #m /A

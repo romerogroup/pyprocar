@@ -61,4 +61,8 @@ from . import utils
 from . import plotter
 from .utils.defaults import Settings
 
+# TODO change all n* variables to n_* variable (norbital to n_orbital)
+# TODO remove importing skimage, pyvista, trimesh, matplotlib, numpy, and seekpath. It is not needed here
+# TODO create a function in utils that does ProcarFileFilter
+# TODO create a directory named _old to move all of the old functionalities there. need to pass all of the old tests
 

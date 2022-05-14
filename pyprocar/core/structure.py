@@ -7,6 +7,9 @@ from scipy.spatial import ConvexHull
 # from . import Surface
 from . import elements
 
+# TODO add python typing to all of the functions
+# TODO Change the N_avogadro to all caps
+# TODO add __str__ method
 
 N_avogadro = 6.022140857e23
 

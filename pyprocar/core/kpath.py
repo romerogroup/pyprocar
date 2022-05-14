@@ -5,6 +5,7 @@ import numpy as np
 import pyvista
 from ..utils import mathematics
 
+# TODO add python typing to all of the functions
 
 class KPath:
     def __init__(
