@@ -1,46 +1,54 @@
-import os
-import re
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
 
-# import matplotlib.pyplot as plt
+from typing import List
+
 import numpy as np
+import matplotlib as plt
+
 from ..utils.info import orbital_names
 from .. import io
 from ..plotter import EBSPlot
 from ..splash import welcome
-from .scriptBandsplot_old import bandsplot_old
-# from ..io.lobster import LobsterParser
 from ..utils.defaults import settings
+from .scriptBandsplot_old import bandsplot_old
 
+# TODO What is the type is for projection mask?
+# TODO Needs abinit parsing
+# TODO Needs elk parsing
 
 def bandsplot(
-    procar="PROCAR",
-    abinit_output="abinit.out",
-    dirname = None,
-    poscar=None,
-    outcar=None,
-    kpoints=None,
-    elkin="elk.in",
     code="vasp",
-    lobster = False,
-    mode="plain",
-    spins=None,
-    atoms=None,
-    orbitals=None,
-    items=None,
-    fermi=None,
-    interpolation_factor=1,
-    interpolation_type="cubic",
+    procar:str="PROCAR",
+    poscar:str="POSCAR",
+    outcar:str="OUTCAR",
+    abinit_output:str="abinit.out",
+    elkin:str="elk.in",
+    dirname:str=None,
+    kpoints:np.ndarray=None,
+    lobster:bool=False,
+    mode:str="plain",
+    spins:List[int]=None,
+    atoms:List[int]=None,
+    orbitals:List[int]=None,
+    items:dict={},
+    fermi:float=None,
+    interpolation_factor:int=1,
+    interpolation_type:str="cubic",
     projection_mask=None,
-    vmax=None,
-    vmin=None,
+    vmax:float=0,
+    vmin:float=1,
     kticks=None,
     knames=None,
-    kdirect=True,
-    elimit=None,
-    ax=None,
-    show=True,
-    savefig=None,
-    old=False,
+    kdirect:bool=True,
+    elimit: List[float]=None,
+    ax:plt.Axes=None,
+    title:str=None,
+    show:bool=True,
+    savefig:str=None,
+    old:bool=False,
     **kwargs,
 ):
     """
@@ -129,16 +137,10 @@ def bandsplot(
 
     # Verbose section
 
-    structure = None
-    reciprocal_lattice = None
-    kpath = None
-    ebs = None
-    kpath = None
-
     settings.modify(kwargs)
 
     ebs, kpath, structure, reciprocal_lattice = parse(
-        code, lobster, dirname ,outcar, poscar, procar, reciprocal_lattice, kpoints,
+        code, lobster, dirname ,outcar, poscar, procar, kpoints,
         interpolation_factor, fermi)
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
@@ -265,6 +267,9 @@ def bandsplot(
         linewidth=settings.ebs.fermi_linewidth,
     )
     ebs_plot.set_ylabel()
+
+    if title:
+        ebs_plot.set_title(title=title)
     if settings.ebs.grid:
         ebs_plot.grid()
     if settings.ebs.legend and len(labels) != 0:
@@ -276,16 +281,14 @@ def bandsplot(
     return ebs_plot
 
 
-def parse(code='vasp',
-          lobster = False,
-          dirname = "",
-          outcar=None,
-          poscar=None,
-          procar=None,
-          reciprocal_lattice=None,
-          kpoints=None,
-          interpolation_factor=1,
-          fermi=None):
+def parse(code:str='vasp',
+          lobster:bool=False,
+          dirname:str="",
+          outcar:str='OUTCAR',
+          poscar:str='PORCAR',
+          procar:str='PROCAR',
+          interpolation_factor:int=1,
+          fermi:float=None):
     ebs = None
     kpath = None
     structure = None

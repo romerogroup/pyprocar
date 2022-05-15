@@ -394,6 +394,8 @@ class EBSPlot:
 
     def set_ylabel(self, label=r"E - E$_F$ (eV)"):
         self.ax.set_ylabel(label)
+    def set_title(self, title="Band Structure"):
+        self.ax.set_title(label=title)
 
     def legend(self, labels=None):
         if labels == None:

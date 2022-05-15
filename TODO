@@ -8,8 +8,8 @@ Todo:
     ☐ add `__str__` method @low @Pedram
   ☐ `core.elements`
     ✔ needs to move to utils @high @Pedram @done(22-05-14 10:03)
-  ☐ `core.isosurface`
-    ☐ add python typing to the folowwing functions @low @Pedram
+  ✔ `core.isosurface` @done(22-05-15 14:05)
+    ✔ add python typing to the folowwing functions @low @Logan @done(22-05-15 14:05)
   ☐ `core.kpath`
     ☐ add python typing to the folowwing functions @low @Pedram
     ☐ add `__str__` method @low @Pedram
@@ -17,17 +17,17 @@ Todo:
     ☐ add python typing to all of the functions @low @Pedram
     ✔ Change the `N_avogadro` to all caps @high @Pedram @done(22-05-14 10:04)
     ☐ add `__str__` method @low @Pedram
-  ☐ `core.surface`
-    ☐ add python typing to all of the functions @low
+  ✔ `core.surface` @done(22-05-15 14:06)
+    ✔ add python typing to all of the functions @low @done(22-05-15 14:06)
     ☐ add trimesh @critical @Pedram
-    ☐ what is the point of self.test? @low @Logan
-    ☐ uncomment self.polydata and self.mesh @critical @Pedram
-    ☐ add an __str__ method @low @Pedram
-    ☐ change boolean add method to __add__ method and get rid of try and expect @low @Pedram
+    ✔ what is the point of self.test? @low @Logan @done(22-05-15 14:06)
+    ✔ uncomment self.polydata and self.mesh @critical @Pedram @done(22-05-15 14:06)
+    ✔ add an __str__ method @low @Pedram @done(22-05-15 14:06)
+    ✔ change boolean add method to __add__ method and get rid of try and expect @low @Pedram @done(22-05-15 14:06)
   ☐ `fermisurface3d.brillouin_zone`
-    ☐ add python typing @low @Pedram
+    ✔ add python typing @low @Pedram @done(22-05-15 14:06)
     ☐ move this module to core @critical @Pedram
-    ☐ add python typing @low @Pedram
+    ✔ add python typing @low @Pedram @done(22-05-15 14:07)
     ☐ move this module to plotter @critical @Pedram
     ☐ add default settings @critical @Pedram @Logan
   ☐ `io`
@@ -38,9 +38,9 @@ Todo:
     ☐ remove the directories `lobsterparser` and change it to a `*.py` module @critical @Logan
     ☐ remove the directories `qeparser` and change it to a `*.py` module @critical @Logan
     ☐ remove the directories `vaspxml` @critical @Pedram
-  ☐ `plotter.dos_plot`
-    ☐ add python typing to all of the functions @low @Logan
-    ☐ remove pyprocar.doscarplot module (redundant) @low @Logan
+  ✔ `plotter.dos_plot` @done(22-05-15 14:07)
+    ✔ add python typing to all of the functions @low @Logan @done(22-05-15 14:07)
+    ✔ remove pyprocar.doscarplot module (redundant) @low @Logan @done(22-05-15 14:07)
   ☐ `.`
     ☐ change all n* variables to n_* variable (norbital to n_orbital) @low @Pedram
     ☐ remove importing skimage, pyvista, trimesh, matplotlib, numpy, and seekpath. It is not needed here @low @Pedram

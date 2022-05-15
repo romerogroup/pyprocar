@@ -1,4 +1,10 @@
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
+
 import inspect
+from typing import List
 
 import numpy as np
 import matplotlib as mpl
@@ -17,23 +23,23 @@ bands_settings = {key:value for key,value in zip(inspect.getfullargspec(bandsplo
 dos_settings = {key:value for key,value in zip(inspect.getfullargspec(dosplot).args,inspect.getfullargspec(dosplot).defaults)}
 
 def bandsdosplot(
-    bands_settings = bands_settings,
-    dos_settings = dos_settings,
-    dos_limit=None,
-    elimit=None,
+    bands_settings:dict=bands_settings,
+    dos_settings:dict=dos_settings,
+    dos_limit:List[int]=None,
+    elimit:List[int]=None,
     k_limit = None,
-    grid=False,
-    code="vasp",
-    lobster = False,
-    savefig=None,
-    title=None,
-    title_fontsize = 16,
+    grid:bool=False,
+    code:str="vasp",
+    lobster:bool=False,
+    savefig:str=None,
+    title:str=None,
+    title_fontsize:float=16,
     discontinuities=None,
-    draw_fermi = True,
-    plot_color_bar=True,
-    repair=True,
-    old = False,
-    show=True,
+    draw_fermi:bool=True,
+    plot_color_bar:bool=True,
+    repair:bool=True,
+    old:bool=False,
+    show:bool=True,
     **kwargs
     ):
     """This function creates plots containing both DOS and bands."""

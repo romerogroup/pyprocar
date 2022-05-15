@@ -1,3 +1,8 @@
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
+
 from shutil import which
 
 import pyvista
@@ -6,10 +11,6 @@ import numpy as np
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
-__author__ = "Pedram Tavadze"
-__maintainer__ = "Pedram Tavadze"
-__email__ = "petavazohi@mail.wvu.edu"
-__date__ = "March 31, 2020"
 
 # TODO add python typing to all of the functions
 # TODO add trimesh 

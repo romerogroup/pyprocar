@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
 
 import sys
 from typing import List, Tuple
@@ -121,12 +124,14 @@ def fermi3D(
         If one wants plot more than  brillouin zones in a particular direection, this
         parameter can be used.
         e.g. ``extended_zone_directions=[[1,0,0],[0,1,0],[0,0,1]]``
-    colors : list str, optional
-        List of colors for each band. This argument does not work when
-        a 3d file is saved. The colors for when ``save3d`` is used, we
+    colors : list str or list tuples of size 4, optional
+        List of colors for each band. If you use tuple, it represents rgba values
+        This argument does not work whena 3d file is saved. 
+        The colors for when ``save3d`` is used, we
         recomend using qualitative colormaps, as this function will
         automatically choose colors from the colormaps.
         e.g. ``colors=['red', 'blue', 'green']``
+            ``colors=[(1,0,0,1), (0,1,0,1), (0,0,1,1)]``
     background_color : str, optional (default ``white``)
         Defines the background color.
         e.g. ``background_color='gray'``
@@ -455,6 +460,7 @@ def fermi3D(
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
+                                        colors = colors,
                                         calculate_fermi_speed = calculate_fermi_speed,
                                         calculate_fermi_velocity = calculate_fermi_velocity,
                                         calculate_effective_mass = calculate_effective_mass,

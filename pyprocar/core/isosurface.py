@@ -1,3 +1,8 @@
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
+
 from typing import List
 import numpy as np
 from scipy import interpolate
@@ -5,12 +10,6 @@ from skimage import measure
 import pyvista as pv
 
 from .surface import Surface
-__author__ = "Pedram Tavadze"
-__maintainer__ = "Pedram Tavadze"
-__email__ = "petavazohi@mail.wvu.edu"
-__date__ = "March 31, 2020"
-
-
 
 
 # TODO add python typing to all of the functions

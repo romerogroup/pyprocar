@@ -1,7 +1,8 @@
-"""
-Created on May 17 2020
-@author: Pedram Tavadze
-"""
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
+
 from typing import List, Tuple
 
 import numpy as np
@@ -18,7 +19,6 @@ from ..utils.defaults import settings
 def dosplot(
         filename:str="vasprun.xml",
         dirname:str=None,
-        name:str="dos",
         poscar:str='POSCAR',
         procar:str="PROCAR",
         outcar:str='OUTCAR',
@@ -348,11 +348,17 @@ def dosplot(
     elif orientation[0].lower() == 'v':
         orientation = 'vertical'
 
-    structure = None
-    reciprocal_lattice = None
+
     dos, structure, reciprocal_lattice = parse(
-        code, lobster, dirname ,outcar, poscar, procar, reciprocal_lattice,
-        interpolation_factor, fermi)
+                                        code=code,
+                                        filename=filename,
+                                        lobster=lobster, 
+                                        dirname=dirname, 
+                                        outcar=outcar, 
+                                        poscar=poscar, 
+                                        procar=procar,
+                                        interpolation_factor=interpolation_factor, 
+                                        fermi=fermi)
 
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
@@ -377,8 +383,8 @@ def dosplot(
                         spin_colors=spin_colors,
                         spin_labels=spin_labels,
                         cmap=cmap,
-                        vmin=0,
-                        vmax=1,
+                        vmin=vmin,
+                        vmax=vmax,
                         orientation = orientation,
                         plot_total=plot_total,
                         plot_bar=True)
@@ -446,7 +452,7 @@ def dosplot(
         if dos_limit is not None:
             edos_plot.set_xlim(dos_limit)
 
-    if settings.edos.grid:
+    if settings.edos.grid or grid:
         edos_plot.grid()
     if settings.edos.legend and len(edos_plot.labels) != 0:
         edos_plot.legend(edos_plot.labels)
@@ -456,16 +462,15 @@ def dosplot(
         edos_plot.show()
     return edos_plot
 
-def parse(code='vasp',
-          lobster = False,
-          dirname = "",
-          outcar=None,
-          poscar=None,
-          procar=None,
-          reciprocal_lattice=None,
-          kpoints=None,
-          interpolation_factor=1,
-          fermi=None):
+def parse(code: str='vasp',
+          filename:str='vasprun.xml',
+          lobster: bool=False,
+          dirname: str="",
+          outcar:str='OUTCAR',
+          poscar:str='POSCAR',
+          procar:str='PROCAR',
+          interpolation_factor:int=1,
+          fermi:float=None):
     ebs = None
     kpath = None
     structure = None
@@ -497,7 +502,7 @@ def parse(code='vasp',
                 reciprocal_lattice = poscar.structure.reciprocal_lattice
 
 
-        vaspxml = io.vasp.VaspXML(filename="vasprun.xml",
+        vaspxml = io.vasp.VaspXML(filename=filename,
                                dos_interpolation_factor=None) 
         
         dos = vaspxml.dos
