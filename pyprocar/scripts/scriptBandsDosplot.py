@@ -46,8 +46,6 @@ def bandsdosplot(
 
     welcome()
 
-    if old or code not in ('vasp', "qe"):
-        bandsdosplot_old(**locals())
 
     #inital settings
     bands_settings['code'] = code

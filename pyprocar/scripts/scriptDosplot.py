@@ -332,10 +332,6 @@ def dosplot(
     """
     
     
-    if old or code not in ('vasp', "qe"):
-        procarfile = procar
-        dosplot_old(**locals())
-
     if mode not in [
             'plain', 'parametric_line', 'parametric', 'stack_species',
             'stack_orbitals', 'stack']:

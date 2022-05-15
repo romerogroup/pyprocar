@@ -128,9 +128,7 @@ def bandsplot(
     None.
 
     """
-    if old or code not in ('vasp', "qe"):
-        procarfile = procar
-        bandsplot_old(**locals())
+
 
     # Turn interactive plotting off
     # plt.ioff()
