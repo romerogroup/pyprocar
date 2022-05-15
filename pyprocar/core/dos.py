@@ -1,75 +1,80 @@
-# -*- coding: utf-8 -*-
+"""This module defines an object to handle the density of states in a DFT 
+calculations.
 """
-Created on Wed Aug 19 20:49:03 2020
 
-@author: Pedram Tavadze, Logan Lang
-"""
+__author__ = "Pedram Tavadze, Logan Lang"
+__copyright__ = "Copyright (C) 2007 Free Software Foundation,"
+__credits__ = ["Uthpala Herath"]
+__license__ = "GNU GENERAL PUBLIC LICENSE"
+__version__ = "2.0"
+__maintainer__ = "Logan Lang, Pedram Tavadze"
+__email__ = "petavazohi@spot.colorado.edu"
+__status__ = "Production"
+
 from scipy.interpolate import CubicSpline
 import numpy as np
+import numpy.typing as npt
 
-# TODO add python typing for all of the functions
+# TODO When PEP 646 is introduced in numpy. need to update the python typing.
 
 class DensityOfStates:
     def __init__(
-        self, energies=None, total=None, projected=None, interpolation_factor=None
+        self, 
+        energies: npt.NDArray[np.float64],
+        total: npt.NDArray[np.float64], 
+        projected: npt.NDArray[np.float64] = None, 
+        interpolation_factor: int = 1,
+        interpolation_kind: str = 'cubic',
     ):
-        """
-        A class that contains density of states calcuated by the a density
+        """A class that contains density of states calculated by the a density
         functional theory calculation.
 
         Parameters
         ----------
-        energies : list float, optional
-            List of points on energy spectrum . The default is None.
-        total : list float, optional
-            List of densities at each point. The default is None.
-        projected : list float, optional
-            dictionary by the following order
-            projected[iatom][iprincipal][iorbital][ispin][ienergy].
-
-            ``iprincipal`` works like the principal quantum number n. The last
-            index should be the total. (iprincipal = -1)
-            n = iprincipal => 0, 1, 2, 3, -1 => s, p, d, total
-            ``iorbital`` works similar to angular quantum number l, but not the
-            same. iorbital follows this order
-            (0,1,2,3,4,5,6,7,8) => s,py,pz,px,dxy,dyz,dz2,dxz,dx2-y2.
-            ``ispin`` works as magnetic quantum number.
-            m = 0,1, for spin up and down
-            The default is None.
-
-
+        energies : npt.NDArray[np.float64]
+            Points on energy spectrum. shape = (n_dos, )
+        total : npt.NDArray[np.float64]
+            Densities at each point. shape = (n_dos, )
+        projected : npt.NDArray[np.float64], optional
+            Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
+            ``i_principal`` works like the principal quantum number n. The last
+            index should be the total. (i_principal = -1)
+            n = i_principal => 0, 1, 2, 3, -1 => s, p, d, total
+            ``i_orbital`` works similar to angular quantum number l, but not the
+            same. i_orbital follows this order
+            (0, 1, 2, 3, 4, 5, 6, 7, 8) => s, py, pz, px, dxy, dyz, dz2, dxz, dx2-y2.
+            ``i_spin`` works as magnetic quantum number.
+            m = 0, 1, for spin up and down, by default None.
         interpolation_factor : int, optional
             The number of density of states points will increase by this factor
-            in the interpolation.
-        Returns
-        -------
-        None.
+            in the interpolation, by default 1.
+            
+        """        
 
-        """
 
         self.energies = energies
         self.total = total
         self.projected = projected
 
-        if interpolation_factor is not None:
+        if interpolation_factor not in [1, 0]:
             interpolated = []
-            for ispin in range(len(self.total)):
+            for i_spin in range(len(self.total)):
                 new_energy, new_total = interpolate(
-                    self.energies, self.total[ispin], factor=interpolation_factor
+                    self.energies, self.total[i_spin], factor=interpolation_factor
                 )
                 interpolated.append(new_total)
 
             self.total = interpolated
 
-            for iatom in range(len(projected)):
-                for iprincipal in range(len(projected[iatom])):
-                    for iorbital in range(len(projected[iatom][iprincipal])):
-                        for ispin in range(len(projected[iatom][iprincipal][iorbital])):
+            for i_atom in range(len(projected)):
+                for i_principal in range(len(projected[i_atom])):
+                    for i_orbital in range(len(projected[i_atom][i_principal])):
+                        for i_spin in range(len(projected[i_atom][i_principal][i_orbital])):
                             x = energies
-                            y = projected[iatom][iprincipal][iorbital][ispin]
+                            y = projected[i_atom][iprincipal][i_orbital][i_spin]
                             xs, ys = interpolate(x, y, factor=interpolation_factor)
 
-                            self.projected[iatom][iprincipal][iorbital][ispin] = ys
+                            self.projected[i_atom][i_principal][i_orbital][i_spin] = ys
 
             self.energies = xs
 
@@ -77,16 +82,20 @@ class DensityOfStates:
         self.projected = np.array(self.projected)
 
     @property
-    def ndos(self):
+    def n_dos(self):
         return len(self.energies)
+    
+    @property
+    def n_energies(self):
+        return self.n_dos
 
     @property
-    def nspins(self):
+    def n_spins(self):
         return len(self.total)
     
     @property
     def is_non_collinear(self):
-        if self.nspins == 3:
+        if self.n_spins == 3:
             return True
         else:
             return False
@@ -139,7 +148,7 @@ class DensityOfStates:
             orbitals = np.arange(len(projected[0][0]), dtype=int)
         orbitals = np.array(orbitals)
 
-        ret = np.zeros(shape=(2, self.ndos))
+        ret = np.zeros(shape=(2, self.n_dos))
         for iatom in atoms:
             for iprinc in principal_q_numbers:
                 for ispin in spins:
@@ -153,6 +162,7 @@ class DensityOfStates:
 def interpolate(x, y, factor=2):
     """
     Interplates the function y=f(x) by increasing the x points by the factor.
+    # TODO need to add ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’
 
     Parameters
     ----------

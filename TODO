@@ -7,7 +7,7 @@ Todo:
     ☐ add python typing to the folowing functions @low @Pedram
     ☐ add `__str__` method @low @Pedram
   ☐ `core.elements`
-    ☐ needs to move to utils @high @Pedram
+    ✔ needs to move to utils @high @Pedram @done(22-05-14 10:03)
   ☐ `core.isosurface`
     ☐ add python typing to the folowwing functions @low @Pedram
   ☐ `core.kpath`
@@ -15,7 +15,7 @@ Todo:
     ☐ add `__str__` method @low @Pedram
   ☐ `core.structure`
     ☐ add python typing to all of the functions @low @Pedram
-    ☐ Change the `N_avogadro` to all caps @high @Pedram
+    ✔ Change the `N_avogadro` to all caps @high @Pedram @done(22-05-14 10:04)
     ☐ add `__str__` method @low @Pedram
   ☐ `core.surface`
     ☐ add python typing to all of the functions @low
@@ -46,35 +46,47 @@ Todo:
     ☐ remove importing skimage, pyvista, trimesh, matplotlib, numpy, and seekpath. It is not needed here @low @Pedram
     ☐ create a function in utils that does ProcarFileFilter @critical @Pedram
     ☐ create a directory named _old to move all of the old functionalities there. need to pass all of the old tests @critical @Pedram
-    
+☐ organize the imports with the following order
+  1. builtin 
+  2. external
+  3. internal
 
 Todo testing: 
   ☐ add *pytest* to every functionality @critical 
-  ☐ vasp @Pedram
-    ☐ bands non polarized 
+  ☐ vasp 
+    ☐ bands non polarized @Pedram
       ☐ plain
       ☐ parametric
       ☐ scatter
       ☐ stack orbital
       ☐ stack atoms
-    ☐ bands polarized
+    ☐ bands polarized @Pedram
       ☐ plain
       ☐ parametric
       ☐ scatter
       ☐ stack orbital
       ☐ stack atoms
-    ☐ bands noncollinear
+    ☐ bands noncollinear @Pedram
       ☐ plain
       ☐ parametric
       ☐ scatter
       ☐ stack orbital
       ☐ stack atoms
-    ☐ bands unfolding
+    ☐ bands unfolding @Pedram
       ☐ plain
       ☐ parametric
       ☐ scatter
       ☐ stack orbital
       ☐ stack atoms
+    ☐ dos @Logan 
+      ☐ plain 
+      ☐ parametric
+      ☐ stacked
+    ☐ fermi surface @Pedram @Logan
+      ☐ plain
+      ☐ spin 
+      ☐ parametric
+
   ☐ elk @Pedram
     ☐ bands non polarized 
       ☐ plain

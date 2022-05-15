@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# TODO needs to move to utils
 
 elements = {
     "H": 1,

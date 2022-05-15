@@ -102,7 +102,7 @@ class AbinitParser(collections.abc.Mapping):
         elif nspin == 2:
             # for spin polarized calculations the spin down segments are saved in the
             # second half of the PROCAR's but in reverse k-point order. So we have to
-            # fix the order and merge the second half of the PROCAR's.
+            # FIXME the order and merge the second half of the PROCAR's.
             spinup_list = filenames[: int(len(filenames) / 2)]
             spindown_list = filenames[int(len(filenames) / 2) :]
 

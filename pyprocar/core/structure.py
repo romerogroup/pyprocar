@@ -5,13 +5,12 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 # from . import Surface
-from . import elements
+from ..utils import elements
 
 # TODO add python typing to all of the functions
-# TODO Change the N_avogadro to all caps
-# TODO add __str__ method
+# TODO add __str__ method 
 
-N_avogadro = 6.022140857e23
+N_AVOGADRO = 6.022140857e23
 
 
 class Structure:
@@ -105,7 +104,7 @@ class Structure:
             Density of the cell.
 
         """
-        return np.sum(self.masses) / (self.volume * N_avogadro)
+        return np.sum(self.masses) / (self.volume * N_AVOGADRO)
 
     @property
     def a(self):
