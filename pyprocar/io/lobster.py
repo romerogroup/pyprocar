@@ -1,18 +1,22 @@
-import xml.etree.ElementTree as ET
-import numpy as np
 import re
 import os 
+import math
+
+import numpy as np
+import xml.etree.ElementTree as ET
+
 from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
 from . import qe, vasp
-import math
+
+# Physics Contstnats
+HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 
 def str2bool(v):
   return v.lower() in ("true") 
         
-HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class LobsterParser():
-    def __init__(self, 
-        dirname = "", 
+    def __init__(self,
+        dirname = "",
         code = 'qe',
         lobsterin = 'lobsterin',
         lobsterout = 'lobsterout',
@@ -87,7 +91,7 @@ class LobsterParser():
 
         # For band structures
         
-        if len(self.kticks) != 0 :
+        if len(self.kticks) != 0:
             self._readFileNames()
             self._readFatBands()
             self._createKPath()     
@@ -107,8 +111,6 @@ class LobsterParser():
 
         if os.path.exists(f"{self.dirname}DOSCAR.lobster"):
             self.data = self._parse_doscar(f"{self.dirname}DOSCAR.lobster")
-
-
 
     @property
     def species(self):
@@ -214,7 +216,6 @@ class LobsterParser():
                 temp_atom.append(temp_spin)
             ret.append([temp_atom])
         return ret   
-
 
     def _get_dos_total(self):
         
@@ -650,7 +651,6 @@ class LobsterParser():
             kpoints=None,
             interpolation_factor=1,
             fermi=None):
-
 
         if self.code == "vasp":
             if outcar is not None:

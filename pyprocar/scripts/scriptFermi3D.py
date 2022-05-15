@@ -1,75 +1,82 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
-import pyvista
+import sys
+from typing import List, Tuple
 
+import numpy as np
 from matplotlib import colors as mpcolors
 from matplotlib import cm
-from ..core.surface import boolean_add
+import vtk
+import pyvista
+from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
+
+# from .core.surface import boolean_add
 from ..fermisurface3d import FermiSurface3D
 from ..splash import welcome
 from ..utilsprocar import UtilsProcar
-from ..io import ProcarParser
+from ..io.procarparser import ProcarParser
 from ..procarselect import ProcarSelect
-from ..io import BxsfParser
-from ..io import FrmsfParser
-from ..io import QEFermiParser
-from ..io import LobsterFermiParser
-from ..io import AbinitParser
+from ..io.bxsfparser import BxsfParser
+from ..io.frmsfparser import FrmsfParser
+from ..io.qeparser import QEFermiParser
+from ..io.lobsterparser import LobsterFermiParser
+from ..io.abinitparser import AbinitParser
+from .. import io
 
+np.set_printoptions(threshold=sys.maxsize)
 
+# TODO update the parsing section
+# TODO separate slicing functionality to new function
+# TODO separate iso-slider functionality to new function. isoslider still experimental
 
-import vtk
-from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
 def fermi3D(
-    procar="PROCAR",
-    outcar="OUTCAR",
-    infile="in.bxsf",
-    abinit_output=None,
-    fermi=None,
-    bands=None,
-    interpolation_factor=1,
-    mode="plain",
-    supercell=[1, 1, 1],
-    extended_zone_directions = None,
+    procar:str="PROCAR",
+    outcar:str="OUTCAR",
+    poscar:str="POSCAR",
+    infile:str="in.bxsf",
+    abinit_output:str=None,
+    fermi:float=None,
+    bands:List[int]=None,
+    interpolation_factor:int=1,
+    mode:str="plain",
+    supercell:List[int]=[1, 1, 1],
+    extended_zone_directions:List[List[int]] = None,
     colors=None,
-    background_color="white",
-    save_colors=False,
-    cmap="jet",
-    atoms=None,
-    orbitals=None,
-    fermi_velocity = False,
-    fermi_velocity_vector = False,
-    effective_mass = False,
+    background_color:str="white",
+    save_colors:bool=False,
+    cmap:str="jet",
+    atoms:List[int]=None,
+    orbitals:List[int]=None,
+    calculate_fermi_speed: bool=False,
+    calculate_fermi_velocity: bool=False,
+    calculate_effective_mass: bool=False,
     spin=None,
-    spin_texture=False,
+    spin_texture: bool=False,
     arrow_color=None,
-    arrow_size=0.015,
-    only_spin=False,
-    fermi_shift=0,
-    projection_accuracy="normal",
-    code="vasp",
-    vmin=0,
-    vmax=1,
-    savegif=None,
-    savemp4=None,
-    save3d=None,
-    save_meshio= False,
-    perspective=True,
-    save2d=False,
-    show_curvature = False,
-    curvature_type = 'mean',
-    show_slice = False,
-    slice_normal = (1,0,0),
-    slice_origin = (0,0,0),
-    show_cross_section_area= False,
-    iso_slider = False,
-    iso_range = 2,
-    iso_surfaces = 10,
-    camera_pos=[1, 1, 1],
-    widget=False,
-    show=True,
-    repair=True,
+    arrow_size: float=0.015,
+    only_spin: bool=False,
+    fermi_shift:float=0,
+    projection_accuracy:str="normal",
+    code:str="vasp",
+    vmin:float=0,
+    vmax:float=1,
+    savegif:str=None,
+    savemp4:str=None,
+    save3d:str=None,
+    save_meshio:bool=False,
+    perspective:bool=True,
+    save2d:bool=False,
+    show_slice:bool=False,
+    slice_normal: Tuple[float,float,float]=(1,0,0),
+    slice_origin: Tuple[float,float,float]=(0,0,0),
+    show_cross_section_area: bool=False,
+    iso_slider: bool=False,
+    iso_range: float=2,
+    iso_surfaces: int=10,
+    camera_pos:List[float]=[1, 1, 1],
+    widget:bool=False,
+    show:bool=True,
+    repair:bool=True,
 ):
     """
     Parameters
@@ -178,15 +185,15 @@ def fermi3D(
         while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.
         If nothing is specified pyprocar will select all the present
         orbitals.
-    fermi_velocity_vector : bool, optional (default False)
+    calculate_fermi_velocity : bool, optional (default False)
             Boolean value to calculate fermi velocity vectors on the fermi surface. 
             Must be used with mode= "property_projection".
             e.g. ``fermi_velocity_vector=True``
-    fermi_velocity : bool, optional (default False)
+    calculate_fermi_speed : bool, optional (default False)
         Boolean value to calculate magnitude of the fermi velocity on the fermi surface.
         Must be used with mode= "property_projection".
         e.g. ``fermi_velocity=True``
-    effective_mass : bool, optional (default False)
+    calculate_effective_mass : bool, optional (default False)
         Boolean value to calculate the harmonic mean of the effective mass on the fermi surface.
         Must be used with mode= "property_projection".
         e.g. ``effective_mass=True``
@@ -311,12 +318,14 @@ def fermi3D(
         p = pyvista.Plotter()
 
     if code == "vasp":
-        outcarparser = UtilsProcar()
+        outcar = io.vasp.Outcar(outcar)
         if fermi is None:
-            e_fermi = outcarparser.FermiOutcar(outcar)
+            e_fermi = outcar.efermi
         else:
             e_fermi = fermi
-        reciprocal_lattice = outcarparser.RecLatOutcar(outcar)
+        poscar = io.vasp.Poscar(poscar)
+        reciprocal_lattice = poscar.structure.reciprocal_lattice
+        
         procarFile = ProcarParser()
         procarFile.readFile(procar, False)
         data = ProcarSelect(procarFile, deepCopy=True)
@@ -371,9 +380,9 @@ def fermi3D(
     ##########################################################################
 
 
-    band_numbers = bands
-    if band_numbers is None:
-        band_numbers = np.arange(len(data.bands[0, :]))
+    bands_to_keep = bands
+    if bands_to_keep is None:
+        bands_to_keep = np.arange(len(data.bands[0, :]))
 
 
     spd = []
@@ -384,19 +393,20 @@ def fermi3D(
             atoms = [-1]
         if spin is None:
             spin = [0]
+
         data.selectIspin(spin)
         data.selectAtoms(atoms, fortran=False)
         data.selectOrbital(orbitals)
 
-        for iband in band_numbers:
+        for iband in bands_to_keep:
             spd.append(data.spd[:, iband])
     elif mode == "property_projection":
-        for iband in band_numbers:
+        for iband in bands_to_keep:
             spd.append(None)
     else:
-        for iband in band_numbers:
+        for iband in bands_to_keep:
             spd.append(None)
-
+   
     spd_spin = []
 
     if spin_texture:
@@ -427,14 +437,13 @@ def fermi3D(
         dataX.selectOrbital(orbitals)
         dataY.selectOrbital(orbitals)
         dataZ.selectOrbital(orbitals)
-        for iband in band_numbers:
+        for iband in bands_to_keep:
             spd_spin.append(
                 [dataX.spd[:, iband], dataY.spd[:, iband], dataZ.spd[:, iband]]
             )
     else:
-        for iband in band_numbers:
+        for iband in bands_to_keep:
             spd_spin.append(None)
-
 
     ##########################################################################
     # Initialization of the Fermi Surface
@@ -443,12 +452,12 @@ def fermi3D(
         fermi_surface3D = FermiSurface3D(
                                         kpoints=data.kpoints,
                                         bands=data.bands,
-                                        band_numbers = band_numbers,
+                                        bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
-                                        fermi_velocity = fermi_velocity,
-                                        fermi_velocity_vector = fermi_velocity_vector,
-                                        effective_mass = effective_mass,
+                                        calculate_fermi_speed = calculate_fermi_speed,
+                                        calculate_fermi_velocity = calculate_fermi_velocity,
+                                        calculate_effective_mass = calculate_effective_mass,
                                         fermi=e_fermi,
                                         fermi_shift = fermi_shift,
                                         reciprocal_lattice=reciprocal_lattice,
@@ -459,54 +468,35 @@ def fermi3D(
                                         vmin = vmin,
                                         vmax=vmax,
                                         extended_zone_directions = extended_zone_directions,
-                                        curvature_type = curvature_type,
+                                        # curvature_type = curvature_type,
                                     )
         
-        band_surfaces = fermi_surface3D.band_surfaces
-        fermi_surface = fermi_surface3D.fermi_surface
-        colors = fermi_surface3D.colors
+
         brillouin_zone = fermi_surface3D.brillouin_zone
+
+        # fermi_surface_area = fermi_surface3D.fermi_surface_area
+        # band_surfaces_area = fermi_surface3D.band_surfaces_area
         
-        fermi_surface_area = fermi_surface3D.fermi_surface_area
-        band_surfaces_area = fermi_surface3D.band_surfaces_area
-        
-        fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
-        band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
+        # fermi_surface_curvature = fermi_surface3D.fermi_surface_curvature
+        # band_surfaces_curvature = fermi_surface3D.band_surfaces_curvature
     
-        test = fermi_surface_curvature
-    
-        # coloring variables
-        nsurface = len(band_surfaces)
-        # # norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
-        cmap = cm.get_cmap(cmap)
-        scalars = np.arange(nsurface + 1) / nsurface
-    
-        if save_colors is not False or save3d is not None and len(bands)!=1:
-            for i in range(nsurface):
-                if band_surfaces[i].scalars is None:
-                    band_surfaces[i].set_scalars([scalars[i]] * band_surfaces[i].nfaces)
-    
-    
-    
-        fermi_surfaces = band_surfaces.copy()
         
     elif iso_slider == True:
        
-    
         energy_values = np.linspace(e_fermi-iso_range/2,e_fermi+iso_range/2,iso_surfaces)
         e_surfaces = []
         
-        
+    
         for e_value in energy_values:
             fermi_surface3D = FermiSurface3D(
                                             kpoints=data.kpoints,
+                                            bands_to_keep = bands_to_keep,
                                             bands=data.bands,
-                                            band_numbers = band_numbers,
                                             spd=spd,
                                             spd_spin=spd_spin,
-                                            fermi_velocity = fermi_velocity,
-                                            fermi_velocity_vector = fermi_velocity_vector,
-                                            effective_mass = effective_mass,
+                                            calculate_fermi_speed = calculate_fermi_speed,
+                                            calculate_fermi_velocity = calculate_fermi_velocity,
+                                            calculate_effective_mass = calculate_effective_mass,
                                             fermi=e_value,
                                             fermi_shift = fermi_shift,
                                             reciprocal_lattice=reciprocal_lattice,
@@ -519,7 +509,7 @@ def fermi3D(
                                             extended_zone_directions = extended_zone_directions
                                         )
             brillouin_zone = fermi_surface3D.brillouin_zone
-            e_surfaces.append(fermi_surface3D.fermi_surface)
+            e_surfaces.append(fermi_surface3D)
        
     
     ##########################################################################
@@ -532,7 +522,7 @@ def fermi3D(
 
 
         p.add_mesh(
-            brillouin_zone.pyvista_obj,
+            brillouin_zone,
             style="wireframe",
             line_width=3.5,
             color="black",
@@ -543,7 +533,7 @@ def fermi3D(
             text = mode
             if show_cross_section_area == True and bands != None:
                 if len(bands) == 1:
-                    add_mesh_slice_w_cross_sectional_area(plotter = p, mesh=fermi_surface, normal =slice_normal,origin = slice_origin, cmap=cmap, clim=[vmin, vmax])
+                    add_mesh_slice_w_cross_sectional_area(plotter = p, mesh=fermi_surface3D, normal =slice_normal,origin = slice_origin, scalars = "scalars")
                     p.remove_scalar_bar()
                 else:
                     print('---------------------------------------------')
@@ -552,62 +542,63 @@ def fermi3D(
             else:
                 if mode == "plain":
                     text = "Plain"
-                    add_custom_mesh_slice(plotter = p, mesh=fermi_surface, normal =slice_normal,origin = slice_origin, cmap=cmap, clim=[vmin, vmax])
+                    add_custom_mesh_slice(plotter = p, mesh=fermi_surface3D, normal =slice_normal,origin = slice_origin,  scalars = "scalars")
                     p.remove_scalar_bar()
                 elif mode == "parametric":
                     text = "Projection"
-                    add_custom_mesh_slice(plotter = p, mesh=fermi_surface, normal =slice_normal,origin = slice_origin, cmap=cmap, clim=[vmin, vmax])
+                    add_custom_mesh_slice(plotter = p, mesh=fermi_surface3D, normal =slice_normal,origin = slice_origin,  scalars = "scalars")
+
                     p.remove_scalar_bar()
 
      
-        elif show_curvature == True:
-            text = 'Curvature'
-            class MyCustomRoutine():
-                def __init__(self, actor):
-                    self.actor = actor # Expected PyVista mesh type
-                    # default parameters
-                    self.kwargs = {
-                        'lower_percentile': 10,
-                        'upper_percentile': 90,
-                    }
+        # elif show_curvature == True:
+        #     text = 'Curvature'
+        #     class MyCustomRoutine():
+        #         def __init__(self, actor):
+        #             self.actor = actor # Expected PyVista mesh type
+        #             # default parameters
+        #             self.kwargs = {
+        #                 'lower_percentile': 10,
+        #                 'upper_percentile': 90,
+        #             }
             
-                def __call__(self, param, value):
-                    self.kwargs[param] = value
-                    self.update()
+        #         def __call__(self, param, value):
+        #             self.kwargs[param] = value
+        #             self.update()
             
-                def update(self):
-                    # This is where you call your simulation
-                    p.remove_actor(actor)
+        #         def update(self):
+        #             # This is where you call your simulation
+        #             p.remove_actor(actor)
                     
-                    cmin = np.percentile(fermi_surface_curvature, self.kwargs['lower_percentile'])
-                    cmax = np.percentile(fermi_surface_curvature, self.kwargs['upper_percentile'])
-                    p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
+        #             cmin = np.percentile(fermi_surface_curvature, self.kwargs['lower_percentile'])
+        #             cmax = np.percentile(fermi_surface_curvature, self.kwargs['upper_percentile'])
+        #             p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
                     
-                    return
+        #             return
                 
-            cmin = np.percentile(fermi_surface_curvature, 10)
-            cmax = np.percentile(fermi_surface_curvature, 90)
-            actor = p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
+        #     cmin = np.percentile(fermi_surface_curvature, 10)
+        #     cmax = np.percentile(fermi_surface_curvature, 90)
+        #     actor = p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
 
-            engine = MyCustomRoutine(actor)
-            p.add_slider_widget(
-                            callback=lambda value: engine('lower_percentile', int(value)),
-                            rng=[0, 100],
-                            value=10,
-                            title="Lower Percentile Curvature",
-                            pointa=(.025, .90), pointb=(.31, .90),
-                            style='modern',
-                            color = 'black'
-                        )
-            p.add_slider_widget(
-                            callback=lambda value: engine('upper_percentile', int(value)),
-                            rng=[0, 100],
-                            value=90,
-                            title="Upper Percentile Curvature",
-                            pointa=(.67, 0.90), pointb=(.98, 0.90),
-                            style='modern',
-                            color = 'black'
-                        )
+        #     engine = MyCustomRoutine(actor)
+        #     p.add_slider_widget(
+        #                     callback=lambda value: engine('lower_percentile', int(value)),
+        #                     rng=[0, 100],
+        #                     value=10,
+        #                     title="Lower Percentile Curvature",
+        #                     pointa=(.025, .90), pointb=(.31, .90),
+        #                     style='modern',
+        #                     color = 'black'
+        #                 )
+        #     p.add_slider_widget(
+        #                     callback=lambda value: engine('upper_percentile', int(value)),
+        #                     rng=[0, 100],
+        #                     value=90,
+        #                     title="Upper Percentile Curvature",
+        #                     pointa=(.67, 0.90), pointb=(.98, 0.90),
+        #                     style='modern',
+        #                     color = 'black'
+        #                 )
             
 
             
@@ -616,68 +607,97 @@ def fermi3D(
             def create_mesh(value):
                 res = int(value)
                 closest_idx = find_nearest(energy_values, res)
-                p.add_mesh(e_surfaces[closest_idx], name='iso_surface')
+                if mode == "plain":
+                    scalars = "bands"
+                elif mode == "parametric":
+                    scalars = "scalars"
+                elif mode == "property_projection":
+                    if calculate_fermi_speed == True:
+                        scalars = "Fermi Speed"
+                    elif calculate_fermi_velocity == True:
+                        scalars = "Fermi Velocity Vector"
+                        
+                    elif calculate_effective_mass == True:
+                        scalars = "Geometric Average Effective Mass"
+                else:
+                    text = "Spin Texture"
+                    scalars = "spin"
+                    
+                    
+                p.add_mesh(e_surfaces[closest_idx], name='iso_surface', scalars = scalars)
+                arrows =e_surfaces[closest_idx].glyph(
+                orient=scalars,scale=False ,factor=arrow_size)
                 p.remove_scalar_bar()
+                
+                if arrow_color is None:
+                    p.add_mesh(arrows, scalars = "Fermi Velocity Vector_magnitude" ,cmap=cmap)
+                else:
+                    p.add_mesh(arrows, color=arrow_color)
+                p.remove_scalar_bar()
+                
                 return
             if mode == "plain":
                 text = "Plain"
             elif mode == "parametric":
                 text = "Projection"
             elif mode == "property_projection":
-                if fermi_velocity == True:
+                if calculate_fermi_speed == True:
                     text = "Projection"
             else:
                 text = "Spin Texture"
+                
+                    
             p.add_slider_widget(create_mesh, [np.amin(energy_values), np.amax(energy_values)], title='Energy iso-value',style='modern',color = 'black')
             
             
+            
         else:
-            for isurface in range(nsurface):
-                if not only_spin:
-                    if mode == "plain":
-                        p.add_mesh(band_surfaces[isurface], color=colors[isurface])
-                        text = "Plain"
-                    elif mode == "parametric":
-                        p.add_mesh(
-                            band_surfaces[isurface], cmap=cmap, clim=[vmin, vmax]
-                        )
-                        p.remove_scalar_bar()
-                        text = "Projection"
-                    elif mode == "property_projection":
-                       
+
+            if not only_spin:
+                if mode == "plain":
+                    p.add_mesh(fermi_surface3D, scalars = "bands",cmap = cmap, rgba = True)
+                    text = "Plain"
+                elif mode == "parametric":
+
+                    p.add_mesh(fermi_surface3D, scalars = "scalars", cmap=cmap)
+                    p.remove_scalar_bar()
+                    text = "Projection"
+                elif mode == "property_projection":
+
+                    if calculate_fermi_speed == True:
+                        text = "Fermi Speed"
+                        p.add_mesh(fermi_surface3D,scalars = "Fermi Speed", cmap=cmap)
+                    if calculate_effective_mass == True:
+                        text = "Effective Mass"
+                        p.add_mesh(fermi_surface3D,scalars =  "Geometric Average Effective Mass", cmap=cmap)
                         
-                        if fermi_velocity == True:
-                            text = "Fermi Velocity"
-                            p.add_mesh(band_surfaces[isurface], cmap=cmap)
-                        if effective_mass == True:
-                            text = "Effective Mass"
-                            p.add_mesh(band_surfaces[isurface], cmap=cmap)
-                            
-                        if fermi_velocity_vector == True:
-                            text = "Fermi Velocity"
-                            arrows = band_surfaces[isurface].glyph(
-                            orient="vectors",scale=False ,factor=arrow_size)
-                            p.add_mesh(band_surfaces[isurface], cmap=cmap)
-                            p.remove_scalar_bar()
-                            if arrow_color is None:
-                                p.add_mesh(arrows, cmap=cmap)
-                            else:
-                                p.add_mesh(arrows, color=arrow_color)
+                    if calculate_fermi_velocity == True:
+                        text = "Fermi Velocity"
+
+                        arrows = fermi_surface3D.glyph(
+                        orient="Fermi Velocity Vector",scale=False ,factor=arrow_size)
+                        p.add_mesh(fermi_surface3D, scalars = "Fermi Velocity Vector_magnitude" , cmap=cmap)
                         p.remove_scalar_bar()
+                        
+                        if arrow_color is None:
+                            p.add_mesh(arrows, scalars = "Fermi Velocity Vector_magnitude" ,cmap=cmap)
+                        else:
+                            p.add_mesh(arrows, color=arrow_color)
+                    p.remove_scalar_bar()
+            else:
+                text = "Spin Texture"
+
+            if spin_texture:
+                # Example dataset with normals
+                # create a subset of arrows using the glyph filter
+                arrows = fermi_surface3D.glyph(
+                orient="spin",scale=False ,factor=arrow_size)
+
+                if arrow_color is None:
+                    p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
+                    p.remove_scalar_bar()
                 else:
-                    text = "Spin Texture"
-
-                if spin_texture:
-                    # Example dataset with normals
-                    # create a subset of arrows using the glyph filter
-                    arrows = band_surfaces[isurface].glyph(
-                    orient="vectors",scale=False ,factor=arrow_size)
-
-                    if arrow_color is None:
-                        p.add_mesh(arrows, cmap=cmap, clim=[vmin, vmax])
-                        p.remove_scalar_bar()
-                    else:
-                        p.add_mesh(arrows, color=arrow_color)
+                    p.add_mesh(arrows, color=arrow_color)
 
         
         if mode != "plain" or spin_texture:
@@ -716,20 +736,20 @@ def fermi3D(
             p.orbit_on_path(path)  # ,viewup=camera_pos)
             # p.close()
     # p.show()
-    if iso_slider == False:
-        s = boolean_add(band_surfaces)
+    # if iso_slider == False:
+    #     s = boolean_add(fermi_surface3D)
     # s.set_color_with_cmap(cmap=cmap, vmin=vmin, vmax=vmax)
     # s.pyvista_obj.plot()
     # s.trimesh_obj.show()
 
     if save3d is not None:
         if save_meshio == True:
-            pyvista.save_meshio(save3d,  fermi_surface)
+            pyvista.save_meshio(save3d,  fermi_surface3D)
         else:
             extention = save3d.split(".")[-1]
-            s.export(save3d, extention)
-    if iso_slider == False:
-        return s, fermi_surfaces, fermi_surface
+    #         s.export(save3d, extention)
+    # if iso_slider == False:
+    #     return s, fermi_surface3D
     
 
 def add_mesh_slice_w_cross_sectional_area(plotter, mesh, normal='x', generate_triangles=False,
@@ -846,3 +866,4 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+

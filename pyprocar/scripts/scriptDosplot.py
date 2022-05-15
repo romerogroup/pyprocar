@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ..utils.info import orbital_names
 from .scriptDosplot_old import dosplot_old
-from ..plotter import EDOSPlot
+from ..plotter import DOSPlot
 from ..utils.defaults import settings
 
 

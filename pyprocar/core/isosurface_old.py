@@ -1,31 +1,26 @@
-from typing import List
+from .surface import Surface
 import numpy as np
 from scipy import interpolate
 from skimage import measure
-import pyvista as pv
 
-from .surface import Surface
 __author__ = "Pedram Tavadze"
 __maintainer__ = "Pedram Tavadze"
 __email__ = "petavazohi@mail.wvu.edu"
 __date__ = "March 31, 2020"
-
-
-
 
 # TODO add python typing to all of the functions
 
 class Isosurface(Surface):
     def __init__(
             self,
-            XYZ:np.ndarray,
-            V:np.ndarray,
-            isovalue:float,
+            XYZ=None,
+            V=None,
+            isovalue=None,
             V_matrix=None,
-            algorithm:str='lewiner',
-            interpolation_factor:int=1,
-            padding:List[int]=None,
-            transform_matrix:np.ndarray=None,
+            algorithm='lewiner',
+            interpolation_factor=1,
+            padding=None,
+            transform_matrix=None,
             boundaries=None,
     ):
         """
@@ -110,12 +105,9 @@ class Isosurface(Surface):
 
         verts, faces, normals, values = self._get_isosurface(interpolation_factor)
 
-        
         if verts is not None and faces is not None:
             if transform_matrix is not None:
                 verts = np.dot(verts,  transform_matrix)
-                column_of_verts_of_triangles = [3 for _ in range(len(faces[:,0])) ]
-                faces = np.insert(arr = faces,obj=0, values = column_of_verts_of_triangles, axis = 1)
             """
             Python, unlike statically typed languages such as Java, allows complete
             freedom when calling methods during object initialization. However, 
@@ -128,23 +120,53 @@ class Isosurface(Surface):
             """
 
             if boundaries is not None:
-                supercell_surface = pv.PolyData(
-                    verts, faces)
-                
-                for iface in range(len(boundaries.faces_array)):
-                    normal = boundaries.face_normals[iface]
-                    center = boundaries.centers[iface,:]
+                suprecell_surface = Surface(
+                    verts=verts, faces=faces, face_normals=normals
+                )
+                if not np.isnan(suprecell_surface.pyvista_obj.points[0, 0]):
+                    verts, faces = self.clip(suprecell_surface, boundaries)
+                # verts, faces = self.clip(suprecell_surface, boundaries)
 
-                    supercell_surface.clip(origin=center, normal=normal, inplace=True)
-    
-                
-                verts = supercell_surface.points
-                faces = supercell_surface.faces
-
- 
-        super().__init__(verts=verts, faces=faces)
         
-     
+   
+        Surface.__init__(self, verts=verts, faces=faces, face_normals=normals)
+
+    def clip(self, S1, S2):
+        """
+        This function clips S1 using the boundaries of S2 and returns
+
+        Parameters
+        ----------
+        S1 : TYPE pyprocar surface
+            DESCRIPTION.
+        S2 : TYPE pyprocar surface
+            DESCRIPTION.
+
+        Returns
+        -------
+        verts,faces
+
+        """
+
+        for iface in range(len(S2.faces)):
+            normal = S2.face_normals[iface]
+
+            center = np.average(S2.verts[S2.faces[iface]], axis=0)
+
+            S1.pyvista_obj.clip(origin=center, normal=normal, inplace=True)
+
+        faces = []
+        courser = 0
+        for i in range(S1.pyvista_obj.n_faces):
+            npoints = S1.pyvista_obj.faces[courser]
+            face = []
+            courser += 1
+            for ipoint in range(npoints):
+                face.append(S1.pyvista_obj.faces[courser])
+                courser += 1
+            faces.append(face)
+
+        return S1.pyvista_obj.points, faces
 
     @property
     def X(self):
@@ -263,7 +285,7 @@ class Isosurface(Surface):
             "wrap",
         )
         try:
-            verts, faces, normals, values = measure.marching_cubes(
+            verts, faces, normals, values = measure.marching_cubes_lewiner(
                 eigen_matrix, self.isovalue
             )
             for ix in range(3):
@@ -276,8 +298,7 @@ class Isosurface(Surface):
             maxs = verts.max(axis=0)
 
             return [(mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2])]
-        except Exception as e:
-            print(e)
+        except:
             return None
 
     def _get_isosurface(self, interp_factor=1):
@@ -328,19 +349,18 @@ class Isosurface(Surface):
 
         try:
 
-            verts, faces, normals, values = measure.marching_cubes(
+            verts, faces, normals, values = measure.marching_cubes_lewiner(
                 eigen_matrix, self.isovalue
             )
 
-        except Exception as e:
-            print(e)
+        except BaseException:
             print("No isosurface for this band")
             return None, None, None, None
         # recenter
 
         for ix in range(3):
             
-            if np.any(self.XYZ >= 0.5):
+            if np.any(self.XYZ > 0.5):
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
                 verts[:, ix] -= 1*self.supercell[ix]
                 # verts[:, ix] -= 1*self.padding[ix]
@@ -386,7 +406,6 @@ class Isosurface(Surface):
         return verts, faces, normals, values
 
 
-    
 def map2matrix(XYZ, V):
     """
     mapps an Irregular grid to a regular grid

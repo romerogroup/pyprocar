@@ -1,8 +1,11 @@
+from typing import List
+
 import numpy as np
-from scipy.spatial import Voronoi
-from ..core import Surface
 import pyvista as pv
 import trimesh
+from scipy.spatial import Voronoi
+
+from ..core import Surface
 
 __author__ = "Pedram Tavadze"
 __maintainer__ = "Pedram Tavadze"
@@ -12,9 +15,10 @@ __date__ = "March 31, 2020"
 # TODO add python typing
 # TODO move this module to core
 
-
 class Lines:
-    def __init__(self, verts=None, faces=None):
+    def __init__(self, 
+                verts:np.ndarray=None, 
+                faces:np.ndarray=None):
 
         self.verts = verts
         self.faces = faces
@@ -22,15 +26,17 @@ class Lines:
         self.pyvista_line = pv.PolyData()
         self.trimesh_line = None
         self.connectivity = []
-
+        
+        
         self._get_connectivity()
+        
 
     @property
     def nface(self):
         return len(self.faces)
 
     def _get_connectivity(self):
-        for iface in range(self.nface):
+        for iface in range(len(self.faces)):
             self.connectivity.append(
                 [self.faces[iface][0], self.faces[iface][-1]]
             )  # to connect the 1st and last point
@@ -38,14 +44,16 @@ class Lines:
                 point_1 = self.faces[ipoint]
                 point_2 = self.faces[ipoint + 1]
                 self.connectivity.append([point_1, point_2])
+                print("Right here")
 
-    def _create_pyvista(self):
-        cell = []
-        for iline in self.connectivity:
-            cell.append([2, iline[0], iline[1]])
-        self.pyvista_line.lines = cell
+    # def _create_pyvista(self):
+    #     cell = []
+    #     for iline in self.connectivity:
+    #         cell.append([2, iline[0], iline[1]])
+    #     self.pyvista_line.lines = cell
 
     def _create_trimesh(self):
+        
         entries = []
         for iline in self.connectivity:
             entries.append(trimesh.path.entries.Line(iline))
@@ -61,10 +69,10 @@ class BrillouinZone(Surface):
     the BrillouinZone
     """
 
-    def __init__(self, reciprocal_lattice, transformation_matrix=None):
+    def __init__(self, 
+            reciprocal_lattice:np.ndarray, 
+            transformation_matrix:List[int]=None):
         """
-
-
         Parameters
         ----------
         reciprocal_lattice : (3,3) float
@@ -88,17 +96,23 @@ class BrillouinZone(Surface):
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
         verts, faces = self.wigner_seitz()
-
-        Surface.__init__(self, verts=verts, faces=faces)
-
-        self._fix_normals_direction()
+        new_faces = []
+        for iface in faces:
+            new_faces.append(len(iface))
+            for ivert in iface:
+                new_faces.append(ivert)
+        super().__init__(verts=verts, faces = new_faces )
+        
+        
+        
+        self._fix_normals_direction(n_faces = len(faces))
 
         # self.pyvista_obj.face_normals*=-1
         # self.pyvista_obj['scalars'] = [0]*len(faces)
         # self.pyvista_obj.set_active_scalars('scalars')
-
-        self.lines = Lines(verts, faces)
-
+        
+        # self.lines = Lines(verts, faces)
+        
     def wigner_seitz(self):
         """
 
@@ -127,18 +141,20 @@ class BrillouinZone(Surface):
                 faces.append(brill.ridge_dict[idict])
 
         verts = brill.vertices
-        return np.array(verts), np.array(faces)
 
-    def _fix_normals_direction(self):
+        return np.array(verts,dtype = float), faces
+
+    def _fix_normals_direction(self,n_faces):
         # directions = np.zeros_like(self.centers)
-        for iface in range(self.nfaces):
+        
+        for iface in range(n_faces):
             center = self.centers[iface]
             n1 = center / np.linalg.norm(center)
             n2 = self.face_normals[iface]
 
             correction = np.sign(np.dot(n1, n2))
             self.face_normals[iface] = self.face_normals[iface] * correction
-            self.pyvista_obj.face_normals[iface] = (
-                self.pyvista_obj.face_normals[iface] * correction
+            self.face_normals[iface] = (
+                self.face_normals[iface] * correction
             )
             # self.trimesh_obj.face_normals[iface]*=correction

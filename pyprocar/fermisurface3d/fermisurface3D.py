@@ -3,48 +3,58 @@ Created on Fri March 31 2020
 @author: Pedram Tavadze
 
 """
+import random
+import math
+import sys
+import copy
+from typing import List
+
 import numpy as np
 import itertools
 import scipy.interpolate as interpolate
-from ..core import Isosurface
+from ..core import Isosurface, Surface
 from .brillouin_zone import BrillouinZone
 from matplotlib import colors as mpcolors
 from matplotlib import cm
-import math
+
+np.set_printoptions(threshold=sys.maxsize)
 
 # TODO add python typing
 # TODO move this module to plotter
 # TODO add default settings
-
 
 HBAR_EV = 6.582119 *10**(-16) #eV*s
 HBAR_J = 1.0545718 *10**(-34) #eV*s
 METER_ANGSTROM = 10**(-10) #m /A
 EV_TO_J = 1.602*10**(-19)
 FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
-class FermiSurfaceBand3D(Isosurface):
+
+class FermiSurface3D(Surface):
 
     def __init__(
         self,
-        kpoints=None,
-        band=None,
-        spd=None,
-        spd_spin=None,
-        fermi_velocity_vector = False,
-        fermi_velocity =False,
-        effective_mass = False,
-        fermi=None,
-        reciprocal_lattice=None,
-        interpolation_factor=1,
-        spin_texture=False,
-        color=None,
-        projection_accuracy="Normal",
-        cmap="viridis",
-        vmin=0,
-        vmax=1,
-        supercell=[1, 1, 1],
-        sym =False
-    ):
+        kpoints: np.ndarray,
+        bands: np.ndarray,
+        fermi: float,
+        reciprocal_lattice: np.ndarray,
+        bands_to_keep: List[int]=None,
+        spd: np.ndarray=None,
+        spd_spin:np.ndarray=None,
+        calculate_fermi_velocity: bool=False,
+        calculate_fermi_speed: bool=False,
+        calculate_effective_mass: bool=False,
+        fermi_shift: float=0.0,
+        interpolation_factor: int=1,
+        spin_texture: bool=False,
+        extended_zone_directions: List[List[int]]=None,
+        color: str=None,
+        projection_accuracy: str="Normal",
+        cmap: str="viridis",
+        vmin: float=0,
+        vmax: float=1,
+        supercell: List[int]=[1, 1, 1],
+        sym: bool=False
+        ):
 
         """
 
@@ -60,13 +70,13 @@ class FermiSurfaceBand3D(Isosurface):
         spd :
             numpy array containing the information about ptojection of atoms,
             orbitals and spin on each band (check procarparser)  
-        fermi_velocity_vector : bool, optional (default False)
+        calculate_fermi_velocity : bool, optional (default False)
             Boolean value to calculate fermi velocity vectors on the band surface
             e.g. ``fermi_velocity_vector=True``
-        fermi_velocity : bool, optional (default False)
+        fermi_speed : bool, optional (default False)
             Boolean value to calculate magnitude of the fermi velocity on the band surface
             e.g. ``fermi_velocity=True``
-        effective_mass : bool, optional (default False)
+        calculate_effective_mass : bool, optional (default False)
             Boolean value to calculate the harmonic mean of the effective mass on the band surface
             e.g. ``effective_mass=True``
         fermi : float
@@ -91,193 +101,323 @@ class FermiSurfaceBand3D(Isosurface):
         """
 
         self.kpoints = kpoints
-        self.band = band
-        self.spd = spd
+        self.XYZ = np.array(self.kpoints)
+        self.bands = bands
+        if bands_to_keep is None:
+            bands_to_keep = len(self.bands[0,:])
+        elif len(bands_to_keep) < len(self.bands[0,:]) :
+            print("Only considering bands : " , bands_to_keep)
+            self.bands = self.bands[:,bands_to_keep]
+
         self.reciprocal_lattice = reciprocal_lattice
         self.supercell = np.array(supercell)
-        self.fermi = fermi
+        self.fermi = fermi + fermi_shift
         self.interpolation_factor = interpolation_factor
         self.projection_accuracy = projection_accuracy
         self.spin_texture = spin_texture
         self.spd_spin = spd_spin
         self.sym = sym
         
-        self.fermi_velocity_vector = fermi_velocity_vector
-        self.fermi_velocity = fermi_velocity
-        self.effective_mass = effective_mass
+        self.calculate_fermi_velocity = calculate_fermi_velocity
+        self.calculate_fermi_speed = calculate_fermi_speed
+        self.calculate_effective_mass = calculate_effective_mass
         self.brillouin_zone = self._get_brilloin_zone(self.supercell)
-
-
-        if np.any(self.kpoints > 0.5):
-
-            Isosurface.__init__(
-                self,
-                XYZ=self.kpoints,
-                V=self.band,
-                isovalue=self.fermi,
-                algorithm="lewiner",
-                interpolation_factor=interpolation_factor,
-                padding=self.supercell * 2,
-                transform_matrix=self.reciprocal_lattice,
-                boundaries=self.brillouin_zone,
-
-            )
-        else:
-            Isosurface.__init__(
-                self,
-                XYZ=self.kpoints,
-                V=self.band,
-                isovalue=self.fermi,
-                algorithm="lewiner",
-                interpolation_factor=interpolation_factor,
-                padding=self.supercell,
-                transform_matrix=self.reciprocal_lattice,
-                boundaries=self.brillouin_zone,
-            )
-            
         
-        if self.spd is not None and self.verts is not None:
-            self.project_color(cmap, vmin, vmax, scalars = self.spd)
-        if self.spd_spin is not None and self.verts is not None:
-            self.create_spin_texture( vectors = self.spd_spin)
-            
-        if self.fermi_velocity_vector is not None and self.verts is not None:
-            self.calculate_first_and_second_derivative_energy()
-            self.create_vector_texture( vectors = self.group_velocity_vector)
-            
-        if self.fermi_velocity == True and self.verts is not None:
-            self.calculate_first_and_second_derivative_energy()
-            self.project_color(cmap, vmin, vmax, scalars = self.group_velocity_magnitude)
-        if self.effective_mass == True and self.verts is not None:
-            self.calculate_first_and_second_derivative_energy()
-            self.project_color(cmap, vmin, vmax, scalars = self.effective_mass_list)
+        # Finding bands with a fermi iso-surface. This reduces searching
+        fullBandIndex = []
+        reducedBandIndex = []
+        for iband in range(len(self.bands[0,:])):
+            fermi_tolerance = 0.1
+            fermi_surface_test = len(np.where(np.logical_and(self.bands[:,iband]>=self.fermi-fermi_tolerance, self.bands[:,iband]<=self.fermi+fermi_tolerance))[0])
+            if fermi_surface_test != 0:
+                fullBandIndex.append(iband)
+        self.bands = self.bands[:,fullBandIndex]
+        # re-index and creates a mapping to the original bandindex
+        reducedBandIndex = np.arange(len(self.bands[0,:]))
+        self.reducedBandIndex_to_fullBandIndex = {f"{key}":value for key,value in zip(reducedBandIndex,fullBandIndex)}
+        self.fullBandIndex_to_reducedBandIndex = {f"{key}":value for key,value in zip(fullBandIndex,reducedBandIndex)}
+        reduced_bands_to_keep_index = [iband for iband in range(len(bands_to_keep))]
 
-        if self.sym == True:
+        # Reduces the spd array to the reduces band index scheme
+        self.spd = np.array(spd).T
+        self.spd_spin = np.array(spd_spin).T
+        if self.spd[0] is not None:
+            self.spd = self.spd[:,fullBandIndex]
+        if self.spd_spin[0] is not None:
+            self.spd_spin = self.spd_spin[:,fullBandIndex]
+
+        # Generate unique rgba values for the bands
+        nsurface = len(self.bands[0,:])
+        norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
+        cmap = cm.get_cmap(cmap)
+        solid_color_surface = np.arange(nsurface ) / nsurface
+        band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:3]]).reshape(-1, 4)
+
+        # The following loop generates iso surfaces for each band and then stores them in a list
+        color_band_dict = {}
+        self.isosurfaces = []
+        full_isosurface = None
+        for iband, bands in enumerate(self.bands[0,:]):
+            
+            if np.any(self.kpoints >= 0.5):
+                isosurface_band = Isosurface(
+                                        XYZ=self.kpoints,
+                                        V=self.bands[:,iband],
+                                        isovalue=self.fermi,
+                                        algorithm="lewiner",
+                                        interpolation_factor=interpolation_factor,
+                                        padding=self.supercell * 2,
+                                        transform_matrix=self.reciprocal_lattice,
+                                        boundaries=self.brillouin_zone,
+                        
+                                    )
+            else:
+                isosurface_band = Isosurface(
+                                    XYZ=self.kpoints,
+                                    V=self.bands[:,iband],
+                                    isovalue=self.fermi,
+                                    algorithm="lewiner",
+                                    interpolation_factor=interpolation_factor,
+                                    padding=self.supercell,
+                                    transform_matrix=self.reciprocal_lattice,
+                                    boundaries=self.brillouin_zone,
+                                )
+            isosurface_band_copy = copy.deepcopy(isosurface_band)
+            if iband == 0:
+                full_isosurface = isosurface_band_copy
+            else:
+                full_isosurface += isosurface_band_copy
+
+            color_band_dict.update({f"band_{iband}": {"color" : band_colors[iband,:]}
+                                  })
+
+            band_color = np.array([band_colors[iband,:]]*len(isosurface_band.points[:,0]))
+            isosurface_band.point_data[f"band_{iband}"] = band_color
+            self.isosurfaces.append(isosurface_band)
+            
+            
+        # Initialize the Fermi Surface which is the combination of all the 
+        # isosurface for each band
+        super().__init__(verts=full_isosurface.points, faces=full_isosurface.faces)
+        self.fermi_surface_area = self.area
+        
+        # Remapping of the scalar arrays into the combind mesh
+        count = 0
+        combined_band_color_array = []
+        for iband,isosurface_band in enumerate(self.isosurfaces):
+            new_color_array = []
+            color_array_name = isosurface_band.point_data.keys()[0]
+            for points in self.points:
+                if points in isosurface_band.points:
+                    new_color_array.append(color_band_dict[color_array_name]['color'])    
+                else:
+                    new_color_array.append(np.array([0,0,0,1]))
+            for ipoints in range(len(isosurface_band.points)):
+                combined_band_color_array.append(color_band_dict[color_array_name]['color'])
+            self.point_data[ "band_"+ str(self.reducedBandIndex_to_fullBandIndex[str(iband)])] = np.array(new_color_array)
+        self.point_data["bands"] = np.array(combined_band_color_array ) 
+        
+        # Interpolation of scalars to the surface
+        if self.spd[0] is not None and self.points is not None:
+            scalars_array = []
+            count = 0
+            for iband in range(len(self.isosurfaces)):
+                count+=1
+                scalars_array.append(self.spd[:,iband])
+            scalars_array = np.vstack(scalars_array).T 
+            self.project_color(scalars_array = scalars_array, cmap=cmap, vmin=vmin, vmax=vmax, scalar_name = "scalars")
+            
+        # Interpolation of spd vectorsto the surface
+        if self.spd_spin[0] is not None and self.points is not None:
+            
+            vectors_array = []
+            for iband in range(len(self.bands[0,:])):
+                vectors_array.append(self.spd_spin[:,iband])
+            vectors_array = np.array(vectors_array).T
+            vectors_array = np.swapaxes(vectors_array,axis1 = 1,axis2 = 2)
+            
+            self.create_vector_texture(vectors_array = vectors_array, vectors_name = "spin" )
+
+        # Interpolation of vectors to the surface
+        if self.calculate_fermi_velocity== True or self.calculate_fermi_speed == True or self.calculate_effective_mass == True:
+            self.calculate_first_and_second_derivative_energy()
+            
+            if self.calculate_fermi_velocity == True and self.points is not None:
+              
+                vectors_array = []
+                for band_name in self.first_and_second_derivative_energy_property_dict.keys():
+                    vectors_array.append(self.first_and_second_derivative_energy_property_dict[band_name]["group_velocity_vector"])
+                    
+                vectors_array = np.array(vectors_array).T
+                vectors_array = np.swapaxes(vectors_array,axis1 = 1,axis2 = 2)
+    
+                self.create_vector_texture( vectors_array = vectors_array, vectors_name = "Fermi Velocity Vector"  )
+
+            if self.calculate_fermi_speed == True and self.points is not None:
+
+                scalars_array = []
+                for band_name in self.first_and_second_derivative_energy_property_dict.keys():
+                    scalars_array.append(self.first_and_second_derivative_energy_property_dict[band_name]["group_velocity_magnitude"])
+                    
+                scalars_array = np.vstack(scalars_array).T 
+                
+                self.project_color(scalars_array = scalars_array, cmap=cmap, vmin=vmin, vmax=vmax,  scalar_name = "Fermi Speed")
+    
+            if self.calculate_effective_mass == True and self.points is not None:
+
+                scalars_array = []
+                for band_name in self.first_and_second_derivative_energy_property_dict.keys():
+                    scalars_array.append(self.first_and_second_derivative_energy_property_dict[band_name]["effective_mass_list"])
+                scalars_array = np.vstack(scalars_array).T 
+                
+                self.project_color(scalars_array = scalars_array, cmap=cmap, vmin=vmin, vmax=vmax, scalar_name="Geometric Average Effective Mass")
+        
+        # The following code  creates exteneded surfaces in a given direction
+        extended_surfaces = []
+        if extended_zone_directions is not None:
+            original_surface = copy.deepcopy(self) 
+            for direction in extended_zone_directions:
+                surface = copy.deepcopy(original_surface)
+                self += surface.translate(np.dot(direction, reciprocal_lattice))
+            #Clearing unneeded surface from memory
+            del original_surface
+            del surface
+
+        if sym == True:
             self.ibz2fbz()
+            
+            
+    def create_vector_texture(self,
+                            vectors_array: np.ndarray, 
+                            vectors_name: str="vector" ):
 
-    def create_vector_texture(self,vectors):
+        final_vectors_X = []
+        final_vectors_Y = []
+        final_vectors_Z = []
 
+        for iband, isosurface in enumerate(self.isosurfaces):
+            XYZ_extended = self.XYZ.copy()
+            vectors_extended_X = vectors_array[:,iband,0].copy()
+            vectors_extended_Y = vectors_array[:,iband,1].copy()
+            vectors_extended_Z = vectors_array[:,iband,2].copy()
+    
+            for ix in range(3):
+                for iy in range(self.supercell[ix]):
+                    temp = self.XYZ.copy()
+                    temp[:, ix] += 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(
+                        vectors_extended_X, vectors_array[:,iband,0], axis=0
+                    )
+                    vectors_extended_Y = np.append(
+                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
+                    )
+                    vectors_extended_Z = np.append(
+                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
+                    )
+                    temp = self.XYZ.copy()
+                    temp[:, ix] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(
+                        vectors_extended_X, vectors_array[:,iband,0], axis=0
+                    )
+                    vectors_extended_Y = np.append(
+                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
+                    )
+                    vectors_extended_Z = np.append(
+                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
+                    )
+    
+            if np.any(self.XYZ >= 0.5): # @logan : I think this should be before the above loop with another else statment
+                for iy in range(self.supercell[ix]):
+                    temp = self.XYZ.copy()
+                    temp[:, 0] -= 1 * (iy + 1)
+                    temp[:, 1] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(
+                        vectors_extended_X, vectors_array[:,iband,0], axis=0
+                    )
+                    vectors_extended_Y = np.append(
+                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
+                    )
+                    vectors_extended_Z = np.append(
+                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
+                    )
+                    temp = self.XYZ.copy()
+                    temp[:, 0] -= 1 * (iy + 1)
+                    temp[:, 2] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(
+                        vectors_extended_X, vectors_array[:,iband,0], axis=0
+                    )
+                    vectors_extended_Y = np.append(
+                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
+                    )
+                    vectors_extended_Z = np.append(
+                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
+                    )
+                    temp = self.XYZ.copy()
+                    temp[:, 1] -= 1 * (iy + 1)
+                    temp[:, 2] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(
+                        vectors_extended_X, vectors_array[:,iband,0], axis=0
+                    )
+                    vectors_extended_Y = np.append(
+                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
+                    )
+                    vectors_extended_Z = np.append(
+                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
+                    )
+    
+                    temp = self.XYZ.copy()
+                    temp[:, 0] -= 1 * (iy + 1)
+                    temp[:, 1] -= 1 * (iy + 1)
+                    temp[:, 2] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    vectors_extended_X = np.append(
+                        vectors_extended_X, vectors_array[:,iband,0], axis=0
+                    )
+                    vectors_extended_Y = np.append(
+                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
+                    )
+                    vectors_extended_Z = np.append(
+                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
+                    )
+    
+    
+            XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
+    
+    
+            if self.projection_accuracy.lower()[0] == "n":
+               
+                vectors_X = interpolate.griddata(
+                    XYZ_transformed, vectors_extended_X, isosurface.points, method="nearest"
+                )
+                vectors_Y = interpolate.griddata(
+                    XYZ_transformed, vectors_extended_Y, isosurface.points, method="nearest"
+                )
+                vectors_Z = interpolate.griddata(
+                    XYZ_transformed, vectors_extended_Z, isosurface.points, method="nearest"
+                )
+    
+            elif self.projection_accuracy.lower()[0] == "h":
+    
+                vectors_X = interpolate.griddata(
+                    XYZ_transformed, vectors_extended_X, isosurface.points, method="linear"
+                )
+                vectors_Y = interpolate.griddata(
+                    XYZ_transformed, vectors_extended_Y, isosurface.points, method="linear"
+                )
+                vectors_Z = interpolate.griddata(
+                    XYZ_transformed, vectors_extended_Z, isosurface.points, method="linear"
+                )
 
-        XYZ_extended = self.XYZ.copy()
-        vectors_extended_X = vectors[0].copy()
-        vectors_extended_Y = vectors[1].copy()
-        vectors_extended_Z = vectors[2].copy()
-
-        for ix in range(3):
-            for iy in range(self.supercell[ix]):
-                temp = self.XYZ.copy()
-                temp[:, ix] += 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                vectors_extended_X = np.append(
-                    vectors_extended_X, vectors[0], axis=0
-                )
-                vectors_extended_Y = np.append(
-                    vectors_extended_Y, vectors[1], axis=0
-                )
-                vectors_extended_Z = np.append(
-                    vectors_extended_Z, vectors[2], axis=0
-                )
-                temp = self.XYZ.copy()
-                temp[:, ix] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                vectors_extended_X = np.append(
-                    vectors_extended_X, vectors[0], axis=0
-                )
-                vectors_extended_Y = np.append(
-                    vectors_extended_Y, vectors[1], axis=0
-                )
-                vectors_extended_Z = np.append(
-                    vectors_extended_Z, vectors[2], axis=0
-                )
-
-        if np.any(self.XYZ > 0.5): # @logan : I think this should be before the above loop with another else statment
-            for iy in range(self.supercell[ix]):
-                temp = self.XYZ.copy()
-                temp[:, 0] -= 1 * (iy + 1)
-                temp[:, 1] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                vectors_extended_X = np.append(
-                    vectors_extended_X, vectors[0], axis=0
-                )
-                vectors_extended_Y = np.append(
-                    vectors_extended_Y, vectors[1], axis=0
-                )
-                vectors_extended_Z = np.append(
-                    vectors_extended_Z, vectors[2], axis=0
-                )
-                temp = self.XYZ.copy()
-                temp[:, 0] -= 1 * (iy + 1)
-                temp[:, 2] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                vectors_extended_X = np.append(
-                    vectors_extended_X, vectors[0], axis=0
-                )
-                vectors_extended_Y = np.append(
-                    vectors_extended_Y, vectors[1], axis=0
-                )
-                vectors_extended_Z = np.append(
-                    vectors_extended_Z, vectors[2], axis=0
-                )
-                temp = self.XYZ.copy()
-                temp[:, 1] -= 1 * (iy + 1)
-                temp[:, 2] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                vectors_extended_X = np.append(
-                    vectors_extended_X, vectors[0], axis=0
-                )
-                vectors_extended_Y = np.append(
-                    vectors_extended_Y, vectors[1], axis=0
-                )
-                vectors_extended_Z = np.append(
-                    vectors_extended_Z, vectors[2], axis=0
-                )
-
-                temp = self.XYZ.copy()
-                temp[:, 0] -= 1 * (iy + 1)
-                temp[:, 1] -= 1 * (iy + 1)
-                temp[:, 2] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                vectors_extended_X = np.append(
-                    vectors_extended_X, vectors[0], axis=0
-                )
-                vectors_extended_Y = np.append(
-                    vectors_extended_Y, vectors[1], axis=0
-                )
-                vectors_extended_Z = np.append(
-                    vectors_extended_Z, vectors[2], axis=0
-                )
-
-        # XYZ_extended = self.XYZ.copy()
-        # scalars_extended = self.spd.copy()
-
-        XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
-        # XYZ_transformed = XYZ_extended
-
-        if self.projection_accuracy.lower()[0] == "n":
-
-            vectors_X = interpolate.griddata(
-                XYZ_transformed, vectors_extended_X, self.verts, method="nearest"
-            )
-            vectors_Y = interpolate.griddata(
-                XYZ_transformed, vectors_extended_Y, self.verts, method="nearest"
-            )
-            vectors_Z = interpolate.griddata(
-                XYZ_transformed, vectors_extended_Z, self.verts, method="nearest"
-            )
-
-        elif self.projection_accuracy.lower()[0] == "h":
-
-            vectors_X = interpolate.griddata(
-                XYZ_transformed, vectors_extended_X, self.verts, method="linear"
-            )
-            vectors_Y = interpolate.griddata(
-                XYZ_transformed, vectors_extended_Y, self.verts, method="linear"
-            )
-            vectors_Z = interpolate.griddata(
-                XYZ_transformed, vectors_extended_Z, self.verts, method="linear"
-            )
-
-        self.set_vectors(vectors_X, vectors_Y, vectors_Z)
+            final_vectors_X.extend( vectors_X)
+            final_vectors_Y.extend( vectors_Y)
+            final_vectors_Z.extend( vectors_Z)
+                
+        self.set_vectors(final_vectors_X, final_vectors_Y, final_vectors_Z,vectors_name = vectors_name)  
             
     def create_spin_texture(self):
 
@@ -314,7 +454,7 @@ class FermiSurfaceBand3D(Isosurface):
                         vectors_extended_Z, self.spd_spin[2], axis=0
                     )
 
-            if np.any(self.XYZ > 0.5): # @logan : I think this should be before the above loop with another else statment
+            if np.any(self.XYZ >= 0.5): # @logan : I think this should be before the above loop with another else statment
                 for iy in range(self.supercell[ix]):
                     temp = self.XYZ.copy()
                     temp[:, 0] -= 1 * (iy + 1)
@@ -380,30 +520,35 @@ class FermiSurfaceBand3D(Isosurface):
             if self.projection_accuracy.lower()[0] == "n":
 
                 spin_X = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_X, self.verts, method="nearest"
+                    XYZ_transformed, vectors_extended_X, self.points, method="nearest"
                 )
                 spin_Y = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Y, self.verts, method="nearest"
+                    XYZ_transformed, vectors_extended_Y, self.points, method="nearest"
                 )
                 spin_Z = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Z, self.verts, method="nearest"
+                    XYZ_transformed, vectors_extended_Z, self.points, method="nearest"
                 )
 
             elif self.projection_accuracy.lower()[0] == "h":
 
                 spin_X = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_X, self.verts, method="linear"
+                    XYZ_transformed, vectors_extended_X, self.points, method="linear"
                 )
                 spin_Y = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Y, self.verts, method="linear"
+                    XYZ_transformed, vectors_extended_Y, self.points, method="linear"
                 )
                 spin_Z = interpolate.griddata(
-                    XYZ_transformed, vectors_extended_Z, self.verts, method="linear"
+                    XYZ_transformed, vectors_extended_Z, self.points, method="linear"
                 )
 
             self.set_vectors(spin_X, spin_Y, spin_Z)
    
-    def project_color(self, cmap, vmin, vmax, scalars ):
+    def project_color(self, 
+                    scalars_array:np.ndarray,
+                    cmap: str="viridis", 
+                    vmin: float=0.0, 
+                    vmax: float=1.0, 
+                    scalar_name:str="scalars"):
         """
         Projects the scalars to the surface.
         Parameters
@@ -414,74 +559,80 @@ class FermiSurfaceBand3D(Isosurface):
             DESCRIPTION.
         vmax : TYPE
             DESCRIPTION.
+        scalars_array : np.array size[len(kpoints),len(self.bands)]   
+            the length of the self.bands is the number of bands with a fermi iso surface
+        
         Returns
         -------
         None.
         """
+        final_scalars = []
+        for iband, isosurface in enumerate(self.isosurfaces):
+            XYZ_extended = self.XYZ.copy()
+            scalars_extended =  scalars_array[:,iband].copy()
+    
+    
+            for ix in range(3):
+                for iy in range(self.supercell[ix]):
+                    temp = self.XYZ.copy()
+                    temp[:, ix] += 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
+                    temp = self.XYZ.copy()
+                    temp[:, ix] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
+            if np.any(self.XYZ >= 0.5): # @logan same here
+                for iy in range(self.supercell[ix]):
+                    temp = self.XYZ.copy()
+                    temp[:, 0] -= 1 * (iy + 1)
+                    temp[:, 1] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
+                    temp = self.XYZ.copy()
+                    temp[:, 0] -= 1 * (iy + 1)
+                    temp[:, 2] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
+                    temp = self.XYZ.copy()
+                    temp[:, 1] -= 1 * (iy + 1)
+                    temp[:, 2] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
+    
+                    temp = self.XYZ.copy()
+                    temp[:, 0] -= 1 * (iy + 1)
+                    temp[:, 1] -= 1 * (iy + 1)
+                    temp[:, 2] -= 1 * (iy + 1)
+                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
+                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
+    
+            XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
+    
+    
+            # XYZ_transformed = XYZ_extended
+    
+            if self.projection_accuracy.lower()[0] == "n":
+                colors = interpolate.griddata(
+                    XYZ_transformed, scalars_extended, isosurface.centers, method="nearest"
+                )
+            elif self.projection_accuracy.lower()[0] == "h":
+                colors = interpolate.griddata(
+                    XYZ_transformed, scalars_extended, isosurface.centers, method="linear"
+                )
+                
+            final_scalars.extend(colors)
 
-        XYZ_extended = self.XYZ.copy()
-        scalars_extended =  scalars.copy()
-
-
-        for ix in range(3):
-            for iy in range(self.supercell[ix]):
-                temp = self.XYZ.copy()
-                temp[:, ix] += 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-                temp = self.XYZ.copy()
-                temp[:, ix] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-        if np.any(self.XYZ > 0.5): # @logan same here
-            for iy in range(self.supercell[ix]):
-                temp = self.XYZ.copy()
-                temp[:, 0] -= 1 * (iy + 1)
-                temp[:, 1] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-                temp = self.XYZ.copy()
-                temp[:, 0] -= 1 * (iy + 1)
-                temp[:, 2] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-                temp = self.XYZ.copy()
-                temp[:, 1] -= 1 * (iy + 1)
-                temp[:, 2] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-
-                temp = self.XYZ.copy()
-                temp[:, 0] -= 1 * (iy + 1)
-                temp[:, 1] -= 1 * (iy + 1)
-                temp[:, 2] -= 1 * (iy + 1)
-                XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                scalars_extended = np.append(scalars_extended,  scalars, axis=0)
-
-        XYZ_transformed = np.dot(XYZ_extended, self.reciprocal_lattice)
-
-
-        # XYZ_transformed = XYZ_extended
-
-        if self.projection_accuracy.lower()[0] == "n":
-            colors = interpolate.griddata(
-                XYZ_transformed, scalars_extended, self.centers, method="nearest"
-            )
-        elif self.projection_accuracy.lower()[0] == "h":
-            colors = interpolate.griddata(
-                XYZ_transformed, scalars_extended, self.centers, method="linear"
-            )
-
-        self.set_scalars(colors)
-        self.set_color_with_cmap(cmap, vmin, vmax)
+        self.set_scalars(final_scalars, scalar_name = scalar_name)
+        # self.set_color_with_cmap(cmap, vmin, vmax)
               
-    def calculate_first_and_second_derivative_energy(self):
-        def get_energy(kp_reduced):
+    def calculate_first_and_second_derivative_energy_band(self, 
+                                                        iband: int):
+        def get_energy(kp_reduced: np.ndarray):
             return kp_reduced_to_energy[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
-        def get_cartesian_kp(kp_reduced):
+        def get_cartesian_kp(kp_reduced: np.ndarray):
             return kp_reduced_to_kp_cart[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
         def energy_meshgrid_mapping(mesh_list):
-            import copy 
             mesh_list_cart = copy.deepcopy(mesh_list)
             F = np.zeros(shape = mesh_list[0].shape)
             for k in range(mesh_list[0].shape[2]):
@@ -521,7 +672,7 @@ class FermiSurfaceBand3D(Isosurface):
                                 np.unique(self.XYZ[:,2]), indexing = 'ij')
         
         
-        kp_reduced_to_energy = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,self.band)}
+        kp_reduced_to_energy = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,self.bands[:,iband])}
         kp_reduced_to_kp_cart = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,kpoints_cart)}
         kp_reduced_to_mesh_index = {f'({kp[0]},{kp[1]},{kp[2]})': np.argwhere((mesh_list[0]==kp[0]) & 
                                                                               (mesh_list[1]==kp[1]) & 
@@ -567,311 +718,107 @@ class FermiSurfaceBand3D(Isosurface):
         # kp_reduced_to_grad_y = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,grad_y_list)}
         # kp_reduced_to_grad_z = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,grad_z_list)}
         
-        self.group_velocity_x = gradient_list_cart[:,0]/HBAR_EV
-        self.group_velocity_y = gradient_list_cart[:,1]/HBAR_EV
-        self.group_velocity_z = gradient_list_cart[:,2]/HBAR_EV
+        group_velocity_x = gradient_list_cart[:,0]/HBAR_EV
+        group_velocity_y = gradient_list_cart[:,1]/HBAR_EV
+        group_velocity_z = gradient_list_cart[:,2]/HBAR_EV
         
-        self.group_velocity_vector = [self.group_velocity_x,self.group_velocity_y,self.group_velocity_z]
+        group_velocity_vector = [group_velocity_x,group_velocity_y,group_velocity_z]
         
-        self.group_velocity_magnitude = (self.group_velocity_x**2 + 
-                                         self.group_velocity_y**2 + 
-                                         self.group_velocity_z**2)**0.5
+        group_velocity_magnitude = (group_velocity_x**2 + 
+                                    group_velocity_y**2 + 
+                                    group_velocity_z**2)**0.5
+
+        # if self.effective_mass == True:
+        kp_reduced_to_gradient = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,gradient_list_cart)}
+        def get_gradient(kp_reduced):
+            return kp_reduced_to_gradient[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
         
-        if self.effective_mass == True:
-            kp_reduced_to_gradient = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,gradient_list_cart)}
-            def get_gradient(kp_reduced):
-                return kp_reduced_to_gradient[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
+        gradient_mesh = list(fermi_velocity_meshgrid_mapping(mesh_list))
+        change_in_energy_gradient = list(map(np.gradient,gradient_mesh))
+        
+        
+        
+        grad_xx_list = [change_in_energy_gradient[0][0][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        grad_xy_list = [change_in_energy_gradient[0][1][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        grad_xz_list = [change_in_energy_gradient[0][2][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        
+        grad_yx_list = [change_in_energy_gradient[1][0][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        grad_yy_list = [change_in_energy_gradient[1][1][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        grad_yz_list = [change_in_energy_gradient[1][2][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        
+        grad_zx_list = [change_in_energy_gradient[2][0][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        grad_zy_list = [change_in_energy_gradient[2][1][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        grad_zz_list = [change_in_energy_gradient[2][2][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
+                                                        kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
+                                                        ]
+                        for kp in self.XYZ]
+        
+        energy_second_derivative_list = np.array([[grad_xx_list,grad_xy_list,grad_xz_list],
+                                         [grad_yx_list,grad_yy_list,grad_yz_list],
+                                         [grad_zx_list,grad_zy_list,grad_zz_list],
+                                         ])
+        
+        energy_second_derivative_list = np.swapaxes(energy_second_derivative_list,axis1=0,axis2=2)
+        energy_second_derivative_list = np.swapaxes(energy_second_derivative_list,axis1=1,axis2=2)
+        energy_second_derivative_list = energy_second_derivative_list/(2*math.pi)
+        energy_second_derivative_list = np.multiply(energy_second_derivative_list, np.array([np.linalg.norm(lattice[:,0])*METER_ANGSTROM * len(np.unique(self.XYZ[:,0])),
+                                                                                                       np.linalg.norm(lattice[:,1])*METER_ANGSTROM * len(np.unique(self.XYZ[:,1])),
+                                                                                                       np.linalg.norm(lattice[:,2])*METER_ANGSTROM * len(np.unique(self.XYZ[:,2]))])
+                                                    )
+        energy_second_derivative_list_cart = energy_second_derivative_list_cart = np.array([ [ np.matmul(lattice,gradient) for gradient in gradient_tensor ] for gradient_tensor in energy_second_derivative_list ])
+        
+        inverse_effective_mass_tensor_list = energy_second_derivative_list_cart * EV_TO_J/ HBAR_J**2
+        effective_mass_tensor_list = np.array([ np.linalg.inv(inverse_effective_mass_tensor) for inverse_effective_mass_tensor in inverse_effective_mass_tensor_list])
+        effective_mass_list = np.array([ (3*(1/effective_mass_tensor_list[ikp,0,0] + 
+                                                  1/effective_mass_tensor_list[ikp,1,1] +
+                                                  1/effective_mass_tensor_list[ikp,2,2])**-1)/FREE_ELECTRON_MASS for ikp in range(len(self.XYZ))])
+        return (group_velocity_vector,group_velocity_magnitude,effective_mass_tensor_list,effective_mass_list)
+    
+    def calculate_first_and_second_derivative_energy(self):
+        
+        self.first_and_second_derivative_energy_property_dict = {}
+        for iband in range(len(self.bands[0,:])):
+            group_velocity_vector,group_velocity_magnitude,effective_mass_tensor_list,effective_mass_list = self.calculate_first_and_second_derivative_energy_band(iband)
+            self.first_and_second_derivative_energy_property_dict.update({f"band_{iband}" : {"group_velocity_vector" : group_velocity_vector,
+                                                                                        "group_velocity_magnitude": group_velocity_magnitude,
+                                                                                        "effective_mass_tensor_list":effective_mass_tensor_list,
+                                                                                        "effective_mass_list":effective_mass_list}
+                                                                })
             
-            gradient_mesh = list(fermi_velocity_meshgrid_mapping(mesh_list))
-            change_in_energy_gradient = list(map(np.gradient,gradient_mesh))
-            
-            
-            
-            grad_xx_list = [change_in_energy_gradient[0][0][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            grad_xy_list = [change_in_energy_gradient[0][1][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            grad_xz_list = [change_in_energy_gradient[0][2][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            
-            grad_yx_list = [change_in_energy_gradient[1][0][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            grad_yy_list = [change_in_energy_gradient[1][1][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            grad_yz_list = [change_in_energy_gradient[1][2][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            
-            grad_zx_list = [change_in_energy_gradient[2][0][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            grad_zy_list = [change_in_energy_gradient[2][1][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            grad_zz_list = [change_in_energy_gradient[2][2][kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][0],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][1],
-                                                            kp_reduced_to_mesh_index[f'({kp[0]},{kp[1]},{kp[2]})'][2]
-                                                            ]
-                            for kp in self.XYZ]
-            
-            energy_second_derivative_list = np.array([[grad_xx_list,grad_xy_list,grad_xz_list],
-                                             [grad_yx_list,grad_yy_list,grad_yz_list],
-                                             [grad_zx_list,grad_zy_list,grad_zz_list],
-                                             ])
-            
-            energy_second_derivative_list = np.swapaxes(energy_second_derivative_list,axis1=0,axis2=2)
-            energy_second_derivative_list = np.swapaxes(energy_second_derivative_list,axis1=1,axis2=2)
-            energy_second_derivative_list = energy_second_derivative_list/(2*math.pi)
-            energy_second_derivative_list = np.multiply(energy_second_derivative_list, np.array([np.linalg.norm(lattice[:,0])*METER_ANGSTROM * len(np.unique(self.XYZ[:,0])),
-                                                                                                           np.linalg.norm(lattice[:,1])*METER_ANGSTROM * len(np.unique(self.XYZ[:,1])),
-                                                                                                           np.linalg.norm(lattice[:,2])*METER_ANGSTROM * len(np.unique(self.XYZ[:,2]))])
-                                                        )
-            self.energy_second_derivative_list_cart = energy_second_derivative_list_cart = np.array([ [ np.matmul(lattice,gradient) for gradient in gradient_tensor ] for gradient_tensor in energy_second_derivative_list ])
-            
-            self.inverse_effective_mass_tensor_list = self.energy_second_derivative_list_cart * EV_TO_J/ HBAR_J**2
-            self.effective_mass_tensor_list = effective_mass_tensor_list = np.array([ np.linalg.inv(inverse_effective_mass_tensor) for inverse_effective_mass_tensor in self.inverse_effective_mass_tensor_list])
-            self.effective_mass_list = np.array([ (3*(1/effective_mass_tensor_list[ikp,0,0] + 
-                                                      1/effective_mass_tensor_list[ikp,1,1] +
-                                                      1/effective_mass_tensor_list[ikp,2,2])**-1)/FREE_ELECTRON_MASS for ikp in range(len(self.XYZ))])
-            
-    def _get_brilloin_zone(self, supercell):
+    def _get_brilloin_zone(self, 
+                        supercell: List[int]):
         return BrillouinZone(self.reciprocal_lattice, supercell)
 
-
-
-class FermiSurface3D:
-    def __init__(
-        self,
-        kpoints=None,
-        bands=None,
-        band_numbers=None,
-        spd=None,
-        spd_spin=None,
-        fermi_velocity = False,
-        fermi_velocity_vector = False,
-        effective_mass = False,
-        fermi=None,
-        fermi_shift=None,
-        reciprocal_lattice=None,
-        extended_zone_directions=None,
-        interpolation_factor=1,
-        spin_texture=False,
-        colors=None,
-        projection_accuracy="Normal",
-        curvature_type = 'mean',
-        cmap="viridis",
-        vmin=0,
-        vmax=1,
-        supercell=[1, 1, 1],
-    ):
-        """
-
-
-        Parameters
-        ----------
-        kpoints : (n,3) float
-            A list of kpoints used in the DFT calculation, this list
-            has to be (n,3), n being number of kpoints and 3 being the
-            3 different cartesian coordinates.
-
-        bands : (n,i) float
-            An array of energies cooresponding to the
-            kpoints and bands.
-
-        spd :
-            numpy array containing the information about ptojection of atoms,
-            orbitals and spin on each band (check procarparser)
-            
-        fermi_velocity_vector : bool, optional (default False)
-            Boolean value to calculate fermi velocity vectors on the fermi surface
-            e.g. ``fermi_velocity_vector=True``
-        fermi_velocity : bool, optional (default False)
-            Boolean value to calculate magnitude of the fermi velocity on the fermi surface
-            e.g. ``fermi_velocity=True``
-        effective_mass : bool, optional (default False)
-            Boolean value to calculate the harmonic mean of the effective mass on the fermi surface
-            e.g. ``effective_mass=True``
-            
-        fermi : float
-            Value of the fermi energy or any energy that one wants to
-            find the isosurface with.
-
-        reciprocal_lattice : (3,3) float
-            Reciprocal lattice of the structure.
-
-        interpolation_factor : int
-            The default is 1. number of kpoints in every direction
-            will increase by this factor.
-
-        color : TYPE, optional
-            DESCRIPTION. The default is None.
-
-        projection_accuracy : TYPE, optional
-            DESCRIPTION. The default is 'Normal'.
-
-        cmap : str
-            The default is 'viridis'. Color map used in projecting the
-            colors on the surface
-
-        vmin : TYPE, float
-            DESCRIPTION. The default is 0.
-
-        vmax : TYPE, float
-            DESCRIPTION. The default is 1.
-
-        """
-
-        self.kpoints = kpoints
-        self.bands = bands
-
-        self.band_numbers = band_numbers
-        self.spd = spd
-        self.reciprocal_lattice = reciprocal_lattice
-        self.supercell = np.array(supercell)
-        self.fermi = fermi
-        self.fermi_shift = fermi_shift
-        
-        self.fermi_velocity = fermi_velocity
-        self.fermi_velocity_vector = fermi_velocity_vector
-        self.effective_mass = effective_mass
-        
-        self.interpolation_factor = interpolation_factor
-        self.projection_accuracy = projection_accuracy
-        self.spin_texture = spin_texture
-        self.spd_spin = spd_spin
-        self.brillouin_zone = self._get_brilloin_zone(self.supercell)
-
-        self.colors = colors
-
-        self.band_surfaces_obj = []
-        self.band_surfaces = []
-        self.band_surfaces_area = []
-        self.band_surfaces_curvature = [[None]]
-
-        self.fermi_surface = None
-        self.fermi_surface_area = None
-
-        self.fermi_surface_curvature = None
-
-        counter = 0
-        for iband in self.band_numbers:
-            print("Trying to extract isosurface for band %d" % iband)
-
-            surface = FermiSurfaceBand3D(
-                kpoints=self.kpoints,
-                band=self.bands[:, iband],
-                spd=self.spd[counter],
-                fermi_velocity = self.fermi_velocity,
-                fermi_velocity_vector=self.fermi_velocity_vector,
-                effective_mass = self.effective_mass,
-                spd_spin=self.spd_spin[counter],
-                fermi=self.fermi + self.fermi_shift,
-                reciprocal_lattice=self.reciprocal_lattice,
-                interpolation_factor=self.interpolation_factor,
-                projection_accuracy=self.projection_accuracy,
-                supercell=self.supercell,
-            )
-
-            # if surface.verts is not None:
-            #     self.band_surfaces.append(surface)
-            if surface.verts is not None:
-                self.band_surfaces_obj.append(surface)
-                self.band_surfaces_area.append(surface.pyvista_obj.area)
-                self.band_surfaces.append(surface.pyvista_obj)
-                self.band_surfaces_curvature.append(surface.pyvista_obj.curvature(curv_type=curvature_type))
-            counter += 1
-
-        nsurface = len(self.band_surfaces)
-        norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
-
-        cmap = cm.get_cmap(cmap)
-        scalars = np.arange(nsurface + 1) / nsurface
-
-        if self.colors is None:
-
-            self.colors = np.array([cmap(norm(x)) for x in (scalars)]).reshape(-1, 4)
-
-        extended_surfaces = []
-        extended_colors = []
-        if extended_zone_directions is not None:
-            for isurface in range(len(self.band_surfaces)):
-                # extended_surfaces.append(self.band_surfaces[isurface].pyvista_obj)
-                extended_surfaces.append(self.band_surfaces[isurface])
-                extended_colors.append(self.colors[isurface])
-            for direction in extended_zone_directions:
-                for isurface in range(len(self.band_surfaces)):
-                    # surface = self.band_surfaces[isurface].pyvista_obj.copy()
-                    surface = self.band_surfaces[isurface].copy()
-                    surface.translate(np.dot(direction, reciprocal_lattice))
-                    extended_surfaces.append(surface)
-                    extended_colors.append(self.colors[isurface])
-            extended_colors.append(self.colors[-1])
-            self.band_surfaces = extended_surfaces
-            nsurface = len(extended_surfaces)
-            self.colors = extended_colors
-
-        self.fermi_surface = self.band_surfaces[0]
-        for isurface in range(1, nsurface):
-            self.fermi_surface = self.fermi_surface + self.band_surfaces[isurface]
-
-        self.fermi_surface_area = self.fermi_surface.area
-        self.fermi_surface_curvature = self.fermi_surface.curvature(curv_type=curvature_type)
-
-    def _get_brilloin_zone(self, supercell):
-        return BrillouinZone(self.reciprocal_lattice, supercell)
-
-    # def ibz2fbz(self):
-    #     """
-    #     Converts the irreducible Brilluoin zone to the full Brillouin zone.
-
-    #     Parameters:
-    #     """
-    #     klist = []
-    #     bandlist = []
-    #     spdlist = []
-
-    #     for i, _ in enumerate(self.rotations):
-    #         # for each point
-    #         for j, _ in enumerate(self.kpoints):
-    #             # apply symmetry operation to kpoint
-    #             sympoint_vector = np.dot(self.rotations[i], self.kpoints[j])
-    #             # apply boundary conditions
-    #             # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
-    #             # sympoint_vector += bound_ops
-
-    #             sympoint = sympoint_vector.tolist()
-
-    #             if sympoint not in klist:
-    #                 klist.append(sympoint)
-
-    #                 if self.band is not None:
-    #                     band = self.band[j].tolist()
-    #                     bandlist.append(band)
-    #                 if self.spd is not None:
-    #                     spd = self.spd[j].tolist()
-    #                     spdlist.append(spd)
-
-    #     self.kpoints = np.array(klist)
-    #     self.band = np.array(bandlist)
-    #     self.spd = np.array(spdlist)
