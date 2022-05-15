@@ -2,54 +2,55 @@
 Created on May 17 2020
 @author: Pedram Tavadze
 """
+from typing import List, Tuple
 
-from ..splash import welcome
-
-from .. import io
 import numpy as np
 import matplotlib.pyplot as plt
-from ..utils.info import orbital_names
+
 from .scriptDosplot_old import dosplot_old
+from ..splash import welcome
+from .. import io
+from ..utils.info import orbital_names
 from ..plotter import DOSPlot
 from ..utils.defaults import settings
 
 
 def dosplot(
-        filename="vasprun.xml",
-        dirname = None,
-        name = "dos",
-        poscar=None,
-        procar="PROCAR",
-        outcar=None,
-        mode="plain",
-        interpolation_factor=None,
-        orientation="horizontal",
-        spin_colors=None,
-        spin_labels=None,
-        colors=None,
-        spins=None,
-        atoms=None,
-        orbitals=None,
-        items={},
-        fermi=None,
-        elimit=None,
-        dos_limit=None,
-        cmap="jet",
-        linewidth=1,
-        vmax=None,
-        vmin=None,
-        grid=False,
-        savefig=None,
-        title=None,
-        plot_total=True,
+        filename:str="vasprun.xml",
+        dirname:str=None,
+        name:str="dos",
+        poscar:str='POSCAR',
+        procar:str="PROCAR",
+        outcar:str='OUTCAR',
+        mode:str="plain",
+        interpolation_factor:int=1,
+        orientation:str="horizontal",
+        spin_colors:List[str] or List[Tuple[int,int,int]]=None,
+        spin_labels:List[str]=None,
+        colors:List[str] or List[Tuple[int,int,int]]=None,
+        spins:List[int]=None,
+        atoms:List[int]=None,
+        orbitals:List[int]=None,
+        items:dict={},
+        fermi:float=None,
+        elimit:List[float]=None,
+        dos_limit:List[float]=None,
+        cmap:str="jet",
+        linewidth:float=1,
+        vmax:float=None,
+        vmin:float=None,
+        grid:bool=False,
+        savefig:str=None,
+        title:str=None,
+        plot_total:bool=True,
         projection_mask=None,
-        code="vasp",
-        lobster = False,
-        labels=None, 
-        ax=None,
-        verbose=True,
-        old=False,
-        show = True
+        code:str="vasp",
+        lobster:bool=False,
+        labels:List[str]=None, 
+        ax:plt.Axes=None,
+        verbose:bool=True,
+        old:bool=False,
+        show:bool=True
 ):
     """
     This function plots the density of states in different formats
@@ -65,6 +66,12 @@ def dosplot(
         need to specify this argument.
 
         e.g. ``filename='~/SrVO3/DOS/vasprun.xml'``
+
+    dirname : str, optional (default ``'vasprun.xml'``)
+        This is used for qe and lobster codes. It specifies the directory the dosplot
+        calculation was performed.
+        
+        e.g. ``dirname='~/SrVO3/dos'``
 
     mode : str, optional (default ``'plain'``)
         **mode** defines the mode of the plot. This parameter will be
@@ -122,6 +129,11 @@ def dosplot(
         or 1 or both.
 
         e.g. ``spins=[0, 1]``
+
+    spin_labels : list str, optional
+        ``spin_labels`` defines labels to use to represent spin 
+        in the legend of the plot.
+        e.g. ``spin_labels=['$\uparrow$','$\downarrow$']``
 
     atoms : list int, optional
         ``atoms`` define the projection of the atoms in the Density of
@@ -199,7 +211,7 @@ def dosplot(
 
         e.g. ``cmap='plasma'``
 
-    linewidth : str, optional (default 1)
+    linewidth : float, optional (default 1)
         The line width with which the total DOS is ploted
 
         e.g. linewidth=2
@@ -345,9 +357,8 @@ def dosplot(
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
     
-    edos_plot = EDOSPlot(dos = dos, structure = structure, spins = spins, orientation = orientation)
+    edos_plot = DOSPlot(dos = dos, structure = structure, spins = spins, orientation = orientation)
     
-    labels = []
     if mode == "plain":
         edos_plot.plot_dos(orientation = orientation)
 
