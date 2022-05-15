@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
@@ -8,7 +9,6 @@ from typing import List, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .scriptDosplot_old import dosplot_old
 from ..splash import welcome
 from .. import io
 from ..utils.info import orbital_names
@@ -51,7 +51,8 @@ def dosplot(
         verbose:bool=True,
         old:bool=False,
         show:bool=True
-):
+    ):
+
     """
     This function plots the density of states in different formats
 
@@ -133,7 +134,7 @@ def dosplot(
     spin_labels : list str, optional
         ``spin_labels`` defines labels to use to represent spin 
         in the legend of the plot.
-        e.g. ``spin_labels=['$\uparrow$','$\downarrow$']``
+        e.g. ``spin_labels=['up','down']``
 
     atoms : list int, optional
         ``atoms`` define the projection of the atoms in the Density of

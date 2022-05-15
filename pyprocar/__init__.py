@@ -37,9 +37,6 @@ import skimage
 import pyvista
 import trimesh
 
-# from pyprocar.fermisurface import FermiSurface
-# from pyprocar.fermisurface3d import FermiSurface3D, BrillouinZone
-
 
 from pyprocar.procarfilefilter import ProcarFileFilter
 from pyprocar.procarplot import ProcarPlot
@@ -47,8 +44,6 @@ from pyprocar.procarselect import ProcarSelect
 from pyprocar.procarsymmetry import ProcarSymmetry
 from pyprocar.utilsprocar import UtilsProcar
 from pyprocar.procarunfold import ProcarUnfolder
-from pyprocar import doscarplot
-
 
 from .splash import welcome
 

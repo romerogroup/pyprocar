@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-
 import spglib
 import numpy as np
 from scipy.spatial import ConvexHull
 
-# from . import Surface
 from ..utils import elements
+from .surface import Surface
 
 # TODO add python typing to all of the functions
 # TODO add __str__ method 
 
 N_AVOGADRO = 6.022140857e23
-
 
 class Structure:
     def __init__(

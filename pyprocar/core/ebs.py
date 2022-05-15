@@ -6,7 +6,7 @@ Created on Sat Jan 16 2021
 @author: Freddy Farah
 """
 
-from . import Structure
+# from . import Structure
 from ..fermisurface3d import BrillouinZone
 from ..utils import Unfolder, mathematics
 from scipy.interpolate import CubicSpline

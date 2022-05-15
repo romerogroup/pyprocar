@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
-import numpy as np
-from numpy import array
 import os
 import re
 import xml.etree.ElementTree as ET
 import collections
 import gzip
+
+import numpy as np
+from numpy import array
+
+from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
 
 
 class Outcar(collections.abc.Mapping):

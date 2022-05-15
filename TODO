@@ -21,9 +21,9 @@ Todo:
     ✔ add python typing to all of the functions @low @done(22-05-15 14:06)
     ☐ add trimesh @critical @Pedram
     ✔ what is the point of self.test? @low @Logan @done(22-05-15 14:06)
-    ✔ uncomment self.polydata and self.mesh @critical @Pedram @done(22-05-15 14:06)
-    ✔ add an __str__ method @low @Pedram @done(22-05-15 14:06)
-    ✔ change boolean add method to __add__ method and get rid of try and expect @low @Pedram @done(22-05-15 14:06)
+    ✔ uncomment self.polydata and self.mesh @critical @Logan @done(22-05-15 14:06)
+    ✔ add an __str__ method @low @Logan @done(22-05-15 14:06)
+    ✔ change boolean add method to __add__ method and get rid of try and expect @low @Logan @done(22-05-15 14:06)
   ☐ `fermisurface3d.brillouin_zone`
     ✔ add python typing @low @Pedram @done(22-05-15 14:06)
     ☐ move this module to core @critical @Pedram
@@ -32,9 +32,9 @@ Todo:
     ☐ add default settings @critical @Pedram @Logan
   ☐ `io`
     ☐ remove the directories `abinitparser` @critical @Uthpala
-    ☐ remove the directories `bxsfparser` and change it to a `*.py` module @critical @Logan
+    ✔ remove the directories `bxsfparser` and change it to a `*.py` module @critical @Logan @done(22-05-15 15:52)
     ☐ remove the directories `elkparser` and change it to a `*.py` module @critical @Pedram
-    ☐ remove the directories `frmsfparser` and change it to a `*.py` module @critical @Logan
+    ✔ remove the directories `frmsfparser` and change it to a `*.py` module @critical @Logan @done(22-05-15 15:52)
     ☐ remove the directories `lobsterparser` and change it to a `*.py` module @critical @Logan
     ☐ remove the directories `qeparser` and change it to a `*.py` module @critical @Logan
     ☐ remove the directories `vaspxml` @critical @Pedram

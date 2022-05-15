@@ -58,7 +58,6 @@ class FermiSurface3D(Surface):
         ):
 
         """
-
         Parameters
         ----------
         kpoints : (n,3) float

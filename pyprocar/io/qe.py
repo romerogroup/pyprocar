@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 10 12:24:24 2021
+__author__ = "Logan Lang"
+__maintainer__ = "Logan Lang"
+__email__ = "lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
 
-@author: lllang
-"""
-
-import xml.etree.ElementTree as ET
-import numpy as np
 import re
 import os 
-from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
 import math
+import xml.etree.ElementTree as ET
+
+import numpy as np
+from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
+
 
 HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class QEParser():

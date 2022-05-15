@@ -6,14 +6,14 @@ __date__ = "March 31, 2020"
 from typing import List
 
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 from ..utils.info import orbital_names
 from .. import io
 from ..plotter import EBSPlot
 from ..splash import welcome
 from ..utils.defaults import settings
-from .scriptBandsplot_old import bandsplot_old
+
 
 # TODO What is the type is for projection mask?
 # TODO Needs abinit parsing

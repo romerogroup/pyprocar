@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from .scriptBandsDosplot_old import bandsdosplot_old
 from .scriptDosplot import dosplot
 from .scriptBandsplot import bandsplot
 from ..splash import welcome

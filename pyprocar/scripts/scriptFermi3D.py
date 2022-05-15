@@ -19,8 +19,8 @@ from ..splash import welcome
 from ..utilsprocar import UtilsProcar
 from ..io.procarparser import ProcarParser
 from ..procarselect import ProcarSelect
-from ..io.bxsfparser import BxsfParser
-from ..io.frmsfparser import FrmsfParser
+from ..io.bxsf import BxsfParser
+from ..io.frmsf import FrmsfParser
 from ..io.qeparser import QEFermiParser
 from ..io.lobsterparser import LobsterFermiParser
 from ..io.abinitparser import AbinitParser
@@ -36,6 +36,7 @@ def fermi3D(
     procar:str="PROCAR",
     outcar:str="OUTCAR",
     poscar:str="POSCAR",
+    dirname:str="",
     infile:str="in.bxsf",
     abinit_output:str=None,
     fermi:float=None,
@@ -319,9 +320,6 @@ def fermi3D(
             repairhandle.ProcarRepair(procar, procar)
             print("PROCAR repaired. Run with repair=False next time.")
 
-    if show:
-        p = pyvista.Plotter()
-
     if code == "vasp":
         outcar = io.vasp.Outcar(outcar)
         if fermi is None:
@@ -350,11 +348,19 @@ def fermi3D(
         data.bands = 27.211396641308 * data.bands
 
     elif code == "qe":
+        # procarFile = parser
+        # if dirname is None:
+        #     dirname = "bands"
+        # procarFile = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+        #                      pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+        #                      dos_interpolation_factor = None)
+        reciprocal_lattice = procarFile.reciprocal_lattice
+
         procarFile = QEFermiParser()
         reciprocal_lattice = procarFile.reclat
         data = ProcarSelect(procarFile, deepCopy=True)
         if fermi is None:
-            e_fermi = procarFile.fermi
+            e_fermi = procarFile.efermi
         else:
             e_fermi = fermi
 
@@ -450,6 +456,8 @@ def fermi3D(
         for iband in bands_to_keep:
             spd_spin.append(None)
 
+
+
     ##########################################################################
     # Initialization of the Fermi Surface
     ##########################################################################
@@ -521,9 +529,11 @@ def fermi3D(
     ##########################################################################
     # Plotting the surface
     ##########################################################################
-
+    if show:
+        p = pyvista.Plotter()
 
     if show or save2d:
+
         # sargs = dict(interactive=True)
 
 

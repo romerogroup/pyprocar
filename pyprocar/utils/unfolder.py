@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
-from ..core import Structure
 
+# from ..core import Structure
 
 class Unfolder:
     def __init__(
