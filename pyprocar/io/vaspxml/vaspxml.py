@@ -36,8 +36,8 @@ class VaspXML(collections.abc.Mapping):
         """
         repairs the wrong syntaxes in vasprun.xml
         """
-        
-        
+
+
 
     def read(self):
         """
@@ -509,7 +509,15 @@ def get_general(xml_tree, ret):
 
 
 def parse_vasprun(vasprun):
-    tree = ET.parse(vasprun)
+    import gzip
+    import bz2
+    if vasprun[-2:] == "gz":
+        input_xml = gzip.open(vasprun, mode="r")
+    elif vasprun[-3:] == "bz2":
+        input_xml = gzip.open(vasprun, "r")
+    else:
+        input_xml = open(vasprun,"r")
+    tree = ET.parse(input_xml)
     root = tree.getroot()
 
     calculation = []
