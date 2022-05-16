@@ -528,6 +528,7 @@ def parse_vasprun(vasprun):
     else:
         input_xml = open(vasprun, "r")
     tree = ET.parse(input_xml)
+    input_xml.close()
     root = tree.getroot()
 
     calculation = []
