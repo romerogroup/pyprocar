@@ -15,7 +15,6 @@ class Outcar(collections.abc.Mapping):
         self.variables = {}
         self.filename = filename
 
-        
         with open(self.filename, "r") as rf:
             self.file_str = rf.read()
 
@@ -374,6 +373,7 @@ class Procar(collections.abc.Mapping):
         structure=None,
         reciprocal_lattice=None,
         kpath=None,
+        kpoints=None,
         efermi=None,
         interpolation_factor=1,
     ):

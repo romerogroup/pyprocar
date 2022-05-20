@@ -45,7 +45,7 @@ def fermi3D(
     mode:str="plain",
     supercell:List[int]=[1, 1, 1],
     extended_zone_directions:List[List[int]] = None,
-    colors=None,
+    colors: List[str] or List[Tuple[float,float,float]]=None,
     background_color:str="white",
     save_colors:bool=False,
     cmap:str="jet",
@@ -54,7 +54,7 @@ def fermi3D(
     calculate_fermi_speed: bool=False,
     calculate_fermi_velocity: bool=False,
     calculate_effective_mass: bool=False,
-    spin=None,
+    spins:List[int]=None,
     spin_texture: bool=False,
     arrow_color=None,
     arrow_size: float=0.015,
@@ -203,8 +203,8 @@ def fermi3D(
         Boolean value to calculate the harmonic mean of the effective mass on the fermi surface.
         Must be used with mode= "property_projection".
         e.g. ``effective_mass=True``
-    spin : list int, optional
-        e.g. ``spin=[0]``
+    spins : list int, optional
+        e.g. ``spins=[0]``
     spin_texture : bool, optional (default False)
         In non collinear calculation one can choose to plot the spin
         texture on the fermi surface.
@@ -349,20 +349,25 @@ def fermi3D(
 
     elif code == "qe":
         # procarFile = parser
-        # if dirname is None:
-        #     dirname = "bands"
-        # procarFile = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
-        #                      pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
-        #                      dos_interpolation_factor = None)
+        if dirname is None:
+            dirname = "bands"
+        procarFile = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+                             dos_interpolation_factor = None)
         reciprocal_lattice = procarFile.reciprocal_lattice
-
-        procarFile = QEFermiParser()
-        reciprocal_lattice = procarFile.reclat
         data = ProcarSelect(procarFile, deepCopy=True)
         if fermi is None:
             e_fermi = procarFile.efermi
         else:
             e_fermi = fermi
+
+        # procarFile = QEFermiParser()
+        # reciprocal_lattice = procarFile.reclat
+        # data = ProcarSelect(procarFile, deepCopy=True)
+        # if fermi is None:
+        #     e_fermi = procarFile.efermi
+        # else:
+        #     e_fermi = fermi
 
     elif code == "lobster":
         procarFile = LobsterFermiParser()
@@ -402,10 +407,10 @@ def fermi3D(
             orbitals = [-1]
         if atoms is None:
             atoms = [-1]
-        if spin is None:
-            spin = [0]
+        if spins is None:
+            spins = [0]
 
-        data.selectIspin(spin)
+        data.selectIspin(spins)
         data.selectAtoms(atoms, fortran=False)
         data.selectOrbital(orbitals)
 
@@ -565,60 +570,7 @@ def fermi3D(
                     add_custom_mesh_slice(plotter = p, mesh=fermi_surface3D, normal =slice_normal,origin = slice_origin,  scalars = "scalars")
 
                     p.remove_scalar_bar()
-
-     
-        # elif show_curvature == True:
-        #     text = 'Curvature'
-        #     class MyCustomRoutine():
-        #         def __init__(self, actor):
-        #             self.actor = actor # Expected PyVista mesh type
-        #             # default parameters
-        #             self.kwargs = {
-        #                 'lower_percentile': 10,
-        #                 'upper_percentile': 90,
-        #             }
-            
-        #         def __call__(self, param, value):
-        #             self.kwargs[param] = value
-        #             self.update()
-            
-        #         def update(self):
-        #             # This is where you call your simulation
-        #             p.remove_actor(actor)
                     
-        #             cmin = np.percentile(fermi_surface_curvature, self.kwargs['lower_percentile'])
-        #             cmax = np.percentile(fermi_surface_curvature, self.kwargs['upper_percentile'])
-        #             p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
-                    
-        #             return
-                
-        #     cmin = np.percentile(fermi_surface_curvature, 10)
-        #     cmax = np.percentile(fermi_surface_curvature, 90)
-        #     actor = p.add_mesh(fermi_surface, scalars = fermi_surface_curvature,  cmap=cmap, clim=[cmin,  cmax])
-
-        #     engine = MyCustomRoutine(actor)
-        #     p.add_slider_widget(
-        #                     callback=lambda value: engine('lower_percentile', int(value)),
-        #                     rng=[0, 100],
-        #                     value=10,
-        #                     title="Lower Percentile Curvature",
-        #                     pointa=(.025, .90), pointb=(.31, .90),
-        #                     style='modern',
-        #                     color = 'black'
-        #                 )
-        #     p.add_slider_widget(
-        #                     callback=lambda value: engine('upper_percentile', int(value)),
-        #                     rng=[0, 100],
-        #                     value=90,
-        #                     title="Upper Percentile Curvature",
-        #                     pointa=(.67, 0.90), pointb=(.98, 0.90),
-        #                     style='modern',
-        #                     color = 'black'
-        #                 )
-            
-
-            
-            
         elif iso_slider == True:
             def create_mesh(value):
                 res = int(value)
@@ -669,17 +621,15 @@ def fermi3D(
             
         else:
 
-            if not only_spin:
+            if not spin_texture:
                 if mode == "plain":
                     p.add_mesh(fermi_surface3D, scalars = "bands",cmap = cmap, rgba = True)
                     text = "Plain"
                 elif mode == "parametric":
-
                     p.add_mesh(fermi_surface3D, scalars = "scalars", cmap=cmap)
                     p.remove_scalar_bar()
                     text = "Projection"
                 elif mode == "property_projection":
-
                     if calculate_fermi_speed == True:
                         text = "Fermi Speed"
                         p.add_mesh(fermi_surface3D,scalars = "Fermi Speed", cmap=cmap)
@@ -694,7 +644,6 @@ def fermi3D(
                         orient="Fermi Velocity Vector",scale=False ,factor=arrow_size)
                         p.add_mesh(fermi_surface3D, scalars = "Fermi Velocity Vector_magnitude" , cmap=cmap)
                         p.remove_scalar_bar()
-                        
                         if arrow_color is None:
                             p.add_mesh(arrows, scalars = "Fermi Velocity Vector_magnitude" ,cmap=cmap)
                         else:
@@ -702,8 +651,6 @@ def fermi3D(
                     p.remove_scalar_bar()
             else:
                 text = "Spin Texture"
-
-            if spin_texture:
                 # Example dataset with normals
                 # create a subset of arrows using the glyph filter
                 arrows = fermi_surface3D.glyph(
@@ -737,19 +684,16 @@ def fermi3D(
             p.enable_parallel_projection()
 
         p.set_background(background_color)
-        # p.set_position(camera_pos)
         if not widget:
             p.show(cpos=camera_pos, screenshot=save2d)
-        # p.screenshot('1.png')
-        # p.save_graphic('1.pdf')
         if savegif is not None:
             path = p.generate_orbital_path(n_points=36)
             p.open_gif(savegif)
-            p.orbit_on_path(path)  # ,viewup=camera_pos)
+            p.orbit_on_path(path) 
         if savemp4:
             path = p.generate_orbital_path(n_points=36)
             p.open_movie(savemp4)
-            p.orbit_on_path(path)  # ,viewup=camera_pos)
+            p.orbit_on_path(path) 
             # p.close()
     # p.show()
     # if iso_slider == False:
@@ -769,10 +713,10 @@ def fermi3D(
     
 
 def add_mesh_slice_w_cross_sectional_area(plotter, mesh, normal='x', generate_triangles=False,
-                       widget_color=None, assign_to_axis=None,
-                       tubing=False, origin_translation=True,origin = (0,0,0),
-                       outline_translation=False, implicit=True,
-                       normal_rotation=True, **kwargs):
+                                        widget_color=None, assign_to_axis=None,
+                                        tubing=False, origin_translation=True,origin = (0,0,0),
+                                        outline_translation=False, implicit=True,
+                                        normal_rotation=True, **kwargs):
 
         name = kwargs.get('name', mesh.memory_address)
         rng = mesh.get_data_range(kwargs.get('scalars', None))

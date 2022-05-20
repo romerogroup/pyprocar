@@ -48,7 +48,6 @@ def bandsplot(
     title:str=None,
     show:bool=True,
     savefig:str=None,
-    old:bool=False,
     **kwargs,
 ):
     """

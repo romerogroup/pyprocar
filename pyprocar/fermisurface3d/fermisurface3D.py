@@ -48,7 +48,7 @@ class FermiSurface3D(Surface):
         fermi_shift: float=0.0,
         interpolation_factor: int=1,
         extended_zone_directions: List[List[int]]=None,
-        colors: List[str] or List[Tuple[int,int,int]]=None,
+        colors: List[str] or List[Tuple[float,float,float]]=None,
         projection_accuracy: str="Normal",
         cmap: str="viridis",
         vmin: float=0,
@@ -121,7 +121,7 @@ class FermiSurface3D(Surface):
         if bands_to_keep is None:
             bands_to_keep = len(self.bands[0,:])
         elif len(bands_to_keep) < len(self.bands[0,:]) :
-            print("Only considering bands : " , bands_to_keep)
+            # print("Only considering bands : " , bands_to_keep)
             self.bands = self.bands[:,bands_to_keep]
 
         self.reciprocal_lattice = reciprocal_lattice
@@ -141,11 +141,14 @@ class FermiSurface3D(Surface):
         for iband in range(len(self.bands[0,:])):
             fermi_tolerance = 0.1
             fermi_surface_test = len(np.where(np.logical_and(self.bands[:,iband]>=self.fermi-fermi_tolerance, self.bands[:,iband]<=self.fermi+fermi_tolerance))[0])
+            
             if fermi_surface_test != 0:
                 fullBandIndex.append(iband)
         self.bands = self.bands[:,fullBandIndex]
         # re-index and creates a mapping to the original bandindex
         reducedBandIndex = np.arange(len(self.bands[0,:]))
+        self.fullBandIndex = fullBandIndex
+        self.reducedBandIndex = reducedBandIndex
         self.reducedBandIndex_to_fullBandIndex = {f"{key}":value for key,value in zip(reducedBandIndex,fullBandIndex)}
         self.fullBandIndex_to_reducedBandIndex = {f"{key}":value for key,value in zip(fullBandIndex,reducedBandIndex)}
         reduced_bands_to_keep_index = [iband for iband in range(len(bands_to_keep))]

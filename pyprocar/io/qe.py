@@ -814,7 +814,7 @@ class QEParser():
             self.composition[ ion.attrib['name']] += 1
             
         self.atomic_positions = np.array([ ion.text.split() for ion in self.root.findall(".//output/atomic_structure/atomic_positions")[0]],dtype = float)
-        
+        # in a.u
         self.direct_lattice = np.array([ acell.text.split() for acell  in self.root.findall(".//output/atomic_structure/cell")[0] ],dtype = float)
 
     def parse_symmetries(self):
@@ -895,16 +895,12 @@ class QEParser():
                 self.occupations[ikpoint, : ,1]  = np.array(kpoint_element.findall(".//occupations")[0].text.split(), dtype = float)[self.nbnd_down:]
 
         # Converting back to cartesian coordiantes in units of 2pi/alat
-        self.kpoints = np.matmul(np.linalg.inv(self.reciprocal_lattice.T / (2*math.pi / self.alat)),  self.kpoints.T).T
+        self.raw_kpoints = self.kpoints
+        self.kpoints = np.around(np.linalg.inv(self.reciprocal_lattice.T / (2*math.pi / self.alat)).dot(self.kpoints.T).T,decimals=8)
+
         self.kpointsCount = len(self.kpoints)
         self.bandsCount = self.nbnd
 
-            
-        # Shifting fermi to 0 eV
-        
-
-        # self.bands -= self.efermi 
-        
     def _spd2projected(self, spd, nprinciples=1):
         # This function is for VASP
         # non-pol and colinear
