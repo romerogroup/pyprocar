@@ -79,7 +79,7 @@ def bandsdosplot(
     if grid:
         ax_ebs.grid()
         ax_dos.grid()
-    if draw_fermi is True:
+    if draw_fermi:
         ax_ebs.axhline(y=0, color=settings.edos.fermi_color, linestyle=settings.edos.fermi_linestyle, linewidth=settings.edos.fermi_linewidth)
         ax_dos.axhline(y=0, color=settings.edos.fermi_color, linestyle=settings.edos.fermi_linestyle, linewidth=settings.edos.fermi_linewidth)
     
@@ -144,32 +144,32 @@ def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
 
 def parse_kwargs(kwargs,bands_settings, dos_settings):
     for key, value in kwargs.items():
-        if key is "dos_file":
+        if key == "dos_file":
             dos_settings["filename"] = value
-        if key is "dos_dirname":
+        if key == "dos_dirname":
             dos_settings["dirname"] = value
-        if key is "bands_dirname":
+        if key == "bands_dirname":
             bands_settings["dirname"] = value
-        if key is "procar":
+        if key == "procar":
             bands_settings["procar"] = value
             dos_settings["procar"] = value
-        if key is "outcar":
+        if key == "outcar":
             bands_settings["outcar"] = value
             dos_settings["outcar"] = value
-        if key is "poscar":
+        if key == "poscar":
             bands_settings["poscar"] = value
             dos_settings["poscar"] = value
-        if key is "kpoints":
+        if key == "kpoints":
             bands_settings["kpoints"] = value
-        if key is "abinit_output":
+        if key == "abinit_output":
             bands_settings["abinit_output"] = value
-        if key is "bands_mode":
+        if key == "bands_mode":
             bands_settings["mode"] = value
-        if key is "dos_mode":
+        if key == "dos_mode":
             dos_settings["mode"] = value
-        if key is "dos_plot_total":
+        if key == "dos_plot_total":
             dos_settings["plot_total"] = value
-        if key is "fermi":
+        if key == "fermi":
             bands_settings["fermi"] = value
 
         # if key is "mask":
@@ -179,42 +179,42 @@ def parse_kwargs(kwargs,bands_settings, dos_settings):
         # if key is "marker":
         #     bands_settings["marker"] = value
 
-        if key is "atoms":
+        if key == "atoms":
             bands_settings["atoms"] = value
             dos_settings["atoms"] = value
-        if key is "orbitals":
+        if key == "orbitals":
             bands_settings["orbitals"] = value
             dos_settings["orbitals"] = value
 
-        if key is "bands_spin":
+        if key == "bands_spin":
            dos_settings["spins"] = value
-        if key is "dos_spin":
+        if key == "dos_spin":
             dos_settings["spins"] = value
-        if key is "dos_labels":
+        if key == "dos_labels":
             dos_settings["spin_labels"] = value
-        if key is "dos_spin_colors":
+        if key == "dos_spin_colors":
             dos_settings["spin_colors"] = value
-        if key is "dos_colors":
+        if key == "dos_colors":
             dos_settings["colors"] = value
-        if key is "dos_title":
+        if key == "dos_title":
             dos_settings["title"] = value
-        if key is "items":
+        if key == "items":
             bands_settings["items"] = value
             dos_settings["items"] = value
-        if key is "dos_interpolation_factor":
+        if key == "dos_interpolation_factor":
             dos_settings["interpolation_factor"] = value
 
-        if key is "vmin":
+        if key == "vmin":
             bands_settings["vmin"] = value
             dos_settings["vmin"] = value
-        if key is "vmax":
+        if key == "vmax":
             bands_settings["vmax"] = value
             dos_settings["vmax"] = value
-        if key is "cmap":
+        if key == "cmap":
 
             dos_settings["cmap"] = value
 
-        if key is "kdirect":
+        if key == "kdirect":
             bands_settings["kdirect"] = value
 
 
