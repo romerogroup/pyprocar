@@ -179,3 +179,18 @@ class KPath:
                 )
                 wf.write("\n")
         wf.close()
+
+    def __str__(self):
+        ret = "K-Path\n"
+        ret += "------\n"
+        for isegment in range(self.nsegments):
+            ret += "{:>2}. {:<9}: ({:>.2f} {:>.2f} {:>.2f}) -> {:<9}: ({:>.2f} {:>.2f} {:>.2f})\n".format(isegment+1,
+                                                                                                          self.knames[isegment][0],
+                                                                                                          self.special_kpoints[isegment][0][0],
+                                                                                                          self.special_kpoints[isegment][0][1],
+                                                                                                          self.special_kpoints[isegment][0][2],
+                                                                                                          self.knames[isegment][1],
+                                                                                                          self.special_kpoints[isegment][1][0],
+                                                                                                          self.special_kpoints[isegment][1][1],
+                                                                                                          self.special_kpoints[isegment][1][2])
+        return ret

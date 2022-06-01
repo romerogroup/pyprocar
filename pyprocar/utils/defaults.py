@@ -45,13 +45,12 @@ class Settings:
 
     def modify(self, changes):
         """Maybe needs modification to specify section to change"""
-        changes = {item.lower(): changes[item] for item in changes}
+        changes = {item: changes[item] for item in changes }
         for item in changes:
             if item in self.config:
                 self.__setattr__(item, changes[item])
             # else:
             #     for key in self.config:
-            #         print(key, self.config[key])
             #         if item in self.config[key]:
             #             eval(
             #                 "self.{}.__setattr__(item, changes[item])".format(key))
@@ -80,6 +79,7 @@ class Settings:
         return self.config.__iter__()
 
     def __len__(self):
+        
         return self.config.__len__()
 
 def type_convert(inp):
