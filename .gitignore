@@ -141,3 +141,6 @@ _build/
 '#*
 *~
 .gitignore
+
+# vim
+*.swp
