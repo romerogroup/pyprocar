@@ -8,7 +8,7 @@ from .scriptCat import cat
 from .scriptFermi2D import fermi2D
 from .scriptFermi3D import fermi3D
 from .scriptFermiHandler import FermiHandler
-
+from. scriptPropertyCalculator import PropertyCalculator
 
 from .scriptSpin_asymmetry import spin_asymmetry
 from .scriptFilter import filter

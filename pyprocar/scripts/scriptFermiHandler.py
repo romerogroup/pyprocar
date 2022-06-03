@@ -58,7 +58,6 @@ class FermiHandler:
 
         self.data, self.reciprocal_lattice, self.procarFile, self.e_fermi = self.__parse_code()
 
-        
     def plot_fermi_surface(self, 
                         mode:str,
                         bands:List[int]=None, 
@@ -104,7 +103,10 @@ class FermiHandler:
         if fermi is not None:
             self.e_fermi = None
 
-        if mode == 'property_projection' and calculate_effective_mass== False and calculate_fermi_speed==False and calculate_fermi_velocity==False: 
+        if (mode == 'property_projection' and 
+            calculate_effective_mass== False and 
+            calculate_fermi_speed==False and 
+            calculate_fermi_velocity==False): 
             raise Exception("Turn one property (calculate_fermi_speed,calculate_fermi_velocity,calculate_effective_mass) to True")
 
         spd, spd_spin, bands_to_keep = self.__format_data(
@@ -886,6 +888,8 @@ class FermiHandler:
                 spins = [0]
 
             self.data.selectIspin(spins)
+
+            # self.ebs.ebs_sum(spins= spins , atoms=atoms)
             self.data.selectAtoms(atoms, fortran=False)
             self.data.selectOrbital(orbitals)
 

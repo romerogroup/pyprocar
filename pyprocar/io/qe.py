@@ -806,6 +806,7 @@ class QEParser():
         self.species_list = list(self.composition.keys())
         self.ionsCount = int(self.root.findall(".//output/atomic_structure")[0].attrib['nat'])
         self.alat =  float(self.root.findall(".//output/atomic_structure")[0].attrib['alat'])
+
         # self.bravais_index =  int(self.root.findall(".//output/atomic_structure")[0].attrib['bravais_index'])
         
         self.ions = []
@@ -827,7 +828,7 @@ class QEParser():
         
         for isymmetry,symmetry_operation in enumerate(self.root.findall(".//output/symmetries/symmetry")):
 
-            symmetry_matrix = np.array(symmetry_operation.findall(".//rotation")[0].text.split(),dtype = float).reshape(3,3)
+            symmetry_matrix = np.array(symmetry_operation.findall(".//rotation")[0].text.split(),dtype = float).reshape(3,3).T
 
             self.rotation_matricies[isymmetry,:,:] = symmetry_matrix
             
@@ -883,7 +884,7 @@ class QEParser():
 
             for ikpoint, kpoint_element in enumerate(self.root.findall(".//output/band_structure/ks_energies")):
                  
-                self.kpoints[ikpoint,:] = np.array(kpoint_element.findall(".//k_point")[0].text.split(),dtype = float)
+                self.kpoints[ikpoint,:] =  np.array(kpoint_element.findall(".//k_point")[0].text.split(),dtype = float)
                 self.weights[ikpoint] = np.array(kpoint_element.findall(".//k_point")[0].attrib["weight"], dtype = float)
                 
                 
@@ -893,10 +894,10 @@ class QEParser():
                 
                 self.bands[ikpoint, : ,1]  = HARTREE_TO_EV  * np.array(kpoint_element.findall(".//eigenvalues")[0].text.split(),dtype = float)[self.nbnd_down:]
                 self.occupations[ikpoint, : ,1]  = np.array(kpoint_element.findall(".//occupations")[0].text.split(), dtype = float)[self.nbnd_down:]
-
-        # Converting back to cartesian coordiantes in units of 2pi/alat
-        self.raw_kpoints = self.kpoints
-        self.kpoints = np.around(np.linalg.inv(self.reciprocal_lattice.T / (2*math.pi / self.alat)).dot(self.kpoints.T).T,decimals=8)
+        # Multiply in 2pi/alat
+        self.kpoints = self.kpoints*(2*np.pi /self.alat)
+        # Converting back to crystal basis
+        self.kpoints = np.around(self.kpoints.dot(np.linalg.inv(self.reciprocal_lattice)),decimals=8)
 
         self.kpointsCount = len(self.kpoints)
         self.bandsCount = self.nbnd

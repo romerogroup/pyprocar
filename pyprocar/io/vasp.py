@@ -110,11 +110,9 @@ class Outcar(collections.abc.Mapping):
                 * det_A
             )
 
-            reciprocal_lattice = np.transpose(self.reciprocal_lattice)
-            R = np.dot(
-                np.dot(np.linalg.inv(reciprocal_lattice), R),
-                reciprocal_lattice
-            )
+            # R = self.reciprocal_lattice.dot(R).dot(np.linalg.inv(self.reciprocal_lattice))
+            R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
+
             R = np.round_(R, decimals=3)
             rotations.append(R)
 
@@ -1044,10 +1042,9 @@ class Procar(collections.abc.Mapping):
                     * det_A
                 )
 
-                R = np.dot(
-                    np.dot(np.linalg.inv(structure.reciprocal_lattice), R),
-                    structure.reciprocal_lattice,
-                )
+
+                # R = structure.reciprocal_lattice.dot(R).dot(np.linalg.inv(structure.reciprocal_lattice))
+                R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
                 R = np.round_(R, decimals=3)
                 rotations.append(R)
         elif structure is not None:
@@ -1062,7 +1059,7 @@ class Procar(collections.abc.Mapping):
             # for each point
             for j, _ in enumerate(self.kpoints):
                 # apply symmetry operation to kpoint
-                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
+                sympoint_vector = rotations[i].dot(self.kpoints[j])
                 sympoint = sympoint_vector.tolist()
 
                 if sympoint not in klist:
