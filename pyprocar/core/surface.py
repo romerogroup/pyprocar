@@ -76,8 +76,8 @@ class Surface(pyvista.PolyData):
 
         self.trimesh_obj = None
 
-        if self.verts is not None and self.faces is not None:
-            self._create_trimesh()
+        # if self.verts is not None and self.faces is not None:
+        #     self._create_trimesh()
             # if self.face_normals is None:
             #     if self.pyvista_obj.face_normals is not None:
             #         self.face_normals = self.pyvista_obj.face_normals
