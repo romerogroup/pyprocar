@@ -326,7 +326,6 @@ class Isosurface(Surface):
             #     axis=[0, 1, 2])
 
         try:
-
             verts, faces, normals, values = measure.marching_cubes(
                 eigen_matrix, self.isovalue
             )
@@ -339,7 +338,7 @@ class Isosurface(Surface):
 
         for ix in range(3):
             
-            if np.any(self.XYZ >= 0.5):
+            if np.any(self.XYZ > 0.5):
                 verts[:, ix] *= self.dxyz[ix] / interp_factor
                 verts[:, ix] -= 1*self.supercell[ix]
                 # verts[:, ix] -= 1*self.padding[ix]

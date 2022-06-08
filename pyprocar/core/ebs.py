@@ -7,14 +7,18 @@ Created on Sat Jan 16 2021
 """
 
 # from . import Structure
-from ..fermisurface3d import BrillouinZone
-from ..utils import Unfolder, mathematics
-from scipy.interpolate import CubicSpline
+from typing import List
 import itertools
+
+from scipy.interpolate import CubicSpline
+
 import numpy as np
 import networkx as nx
 from matplotlib import pylab as plt
 import pyvista
+
+from ..fermisurface3d import BrillouinZone
+from ..utils import Unfolder, mathematics
 
 # TODO add python typing to all functions
 
@@ -128,7 +132,12 @@ class ElectronicBandStructure:
     def kpoints_reduced(self):
         return self.kpoints
 
-    def ebs_sum(self, atoms=None, principal_q_numbers=[-1], orbitals=None, spins=None):
+    def ebs_sum(self, 
+                atoms:List[int]=None, 
+                principal_q_numbers:List[int]=[-1], 
+                orbitals:List[int]=None, 
+                spins:List[int]=None, 
+                sum_noncolinear:bool=True):
 
         principal_q_numbers = np.array(principal_q_numbers)
         if atoms is None:
@@ -137,15 +146,17 @@ class ElectronicBandStructure:
             spins = np.arange(self.nspins, dtype=int)
         if orbitals is None:
             orbitals = np.arange(self.norbitals, dtype=int)
+
         # sum over orbitals
         ret = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
         # sum over principle quantum number
         ret = np.sum(ret[:, :, :, principal_q_numbers, :], axis=-2)
         # sum over atoms
         ret = np.sum(ret[:, :, atoms, :], axis=-2)
+
         # sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)
         # in non-mag, non-colin nspin=1, in colin nspin=2
-        if self.is_non_collinear:
+        if self.is_non_collinear and sum_noncolinear:
             ret = np.sum(ret[:, :, spins], axis=-1).reshape(
                 self.nkpoints, self.nbands, 1
             )
@@ -226,40 +237,6 @@ class ElectronicBandStructure:
 
         p.show()
 
-    def ibz2fbz(self, rotations):
-        """Generates the full Brillouin zone from the irreducible Brillouin
-        zone using point symmetries.
-
-        Parameters:
-            - self.kpoints: the kpoints used to sample the Brillouin zone
-            - self.projected: the projected band structure at each kpoint
-            - rotations: the point symmetry operations of the lattice
-        """
-        klist = []
-        plist = []
-        # for each symmetry operation
-
-        for i, _ in enumerate(rotations):
-            # for each point
-            for j, _ in enumerate(self.kpoints):
-                # apply symmetry operation to kpoint
-                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
-                # apply boundary conditions
-                # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
-                # sympoint_vector += bound_ops
-
-                sympoint = sympoint_vector.tolist()
-
-                if sympoint not in klist:
-                    klist.append(sympoint)
-
-                    projection = self.projected[j].tolist()
-                    plist.append(projection)
-
-        self.kpoints = np.array(klist)
-        self.projected = np.array(plist)
-
-
     def apply_symmetries(self, operations=None, structure=None):
         return
 
@@ -345,27 +322,34 @@ class ElectronicBandStructure:
         """
         klist = []
         plist = []
+        bandslist = []
         # for each symmetry operation
 
-        for i, _ in enumerate(rotations):
+        for i, rotation in enumerate(rotations):
             # for each point
-            for j, _ in enumerate(self.kpoints):
+            for j, kpoint in enumerate(self.kpoints):
                 # apply symmetry operation to kpoint
-                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
+                sympoint_vector = rotation.dot(kpoint)
                 # apply boundary conditions
-                # bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector < -0.5)
-                # sympoint_vector += bound_ops
+                bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector <= -0.5)
+                sympoint_vector += bound_ops
 
+                sympoint_vector=np.around(sympoint_vector,decimals=6)
                 sympoint = sympoint_vector.tolist()
 
                 if sympoint not in klist:
                     klist.append(sympoint)
 
-                    projection = self.projected[j].tolist()
-                    plist.append(projection)
+                    if self.bands is not None:
+                        band = self.bands[j].tolist()
+                        bandslist.append(band)
+                    if self.projected is not None:
+                        projection = self.projected[j].tolist()
+                        plist.append(projection)
 
         self.kpoints = np.array(klist)
         self.projected = np.array(plist)
+        self.bands = np.array(bandslist)
 
     def __str__(self):
         ret = 'Enectronic Band Structure     \n'

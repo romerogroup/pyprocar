@@ -46,8 +46,9 @@ class FermiSurface3D(Surface):
         calculate_fermi_speed: bool=False,
         calculate_effective_mass: bool=False,
         fermi_shift: float=0.0,
+        fermi_tolerance:float=0.1,
         interpolation_factor: int=1,
-        extended_zone_directions: List[List[int]]=None,
+        extended_zone_directions: List[List[int] or Tuple[int,int,int]]=None,
         colors: List[str] or List[Tuple[float,float,float]]=None,
         projection_accuracy: str="Normal",
         cmap: str="viridis",
@@ -88,6 +89,8 @@ class FermiSurface3D(Surface):
             e.g. ``effective_mass=True``
         fermi_shift : float
             Value to shift fermi energy.
+        fermi_tolerance : float = 0.1
+            This is used to improve search effiency by doing a prior search selecting band within a tolerance of the fermi energy
         interpolation_factor : int
             The default is 1. number of kpoints in every direction
             will increase by this factor.
@@ -119,10 +122,10 @@ class FermiSurface3D(Surface):
         self.XYZ = np.array(self.kpoints)
         self.bands = bands
         if bands_to_keep is None:
-            bands_to_keep = len(self.bands[0,:])
-        elif len(bands_to_keep) < len(self.bands[0,:]) :
+            bands_to_keep = len(self.bands[0,:,0])
+        elif len(bands_to_keep) < len(self.bands[0,:,0]) :
             # print("Only considering bands : " , bands_to_keep)
-            self.bands = self.bands[:,bands_to_keep]
+            self.bands = self.bands[:,bands_to_keep,0]
 
         self.reciprocal_lattice = reciprocal_lattice
         self.supercell = np.array(supercell)
@@ -138,14 +141,16 @@ class FermiSurface3D(Surface):
         # Finding bands with a fermi iso-surface. This reduces searching
         fullBandIndex = []
         reducedBandIndex = []
-        for iband in range(len(self.bands[0,:])):
-            fermi_tolerance = 0.1
-            fermi_surface_test = len(np.where(np.logical_and(self.bands[:,iband]>=self.fermi-fermi_tolerance, self.bands[:,iband]<=self.fermi+fermi_tolerance))[0])
-            
+        for iband in range(len(self.bands[0,:,0])):
+            fermi_surface_test = len(np.where(np.logical_and(self.bands[:,iband,0]>=self.fermi-fermi_tolerance, self.bands[:,iband,0]<=self.fermi+fermi_tolerance))[0])
             if fermi_surface_test != 0:
                 fullBandIndex.append(iband)
+        if len(fullBandIndex)==0:
+            raise Exception("No bands within tolerance. Increase tolerance to increase search space.")
+        self.bands = self.bands[:,fullBandIndex,0]
 
-        self.bands = self.bands[:,fullBandIndex]
+ 
+
         # re-index and creates a mapping to the original bandindex
         reducedBandIndex = np.arange(len(self.bands[0,:]))
         self.fullBandIndex = fullBandIndex
@@ -169,17 +174,18 @@ class FermiSurface3D(Surface):
             norm = mpcolors.Normalize(vmin=vmin, vmax=vmax)
             cmap = cm.get_cmap(cmap)
             solid_color_surface = np.arange(nsurface ) / nsurface
-            band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:3]]).reshape(-1, 4)
-
+            band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(-1, 4)
 
         # The following loop generates iso surfaces for each band and then stores them in a list
         color_band_dict = {}
         self.isosurfaces = []
         full_isosurface = None
+        
+        iband_with_surface=0
         for iband, bands in enumerate(self.bands[0,:]):
             # Conditional for shifting values between [-0.5,0.5]
             # Must be done for isosurface algorithm to produce consistent results
-            if np.any(self.kpoints >= 0.5):
+            if np.any(self.kpoints > 0.5):
                 isosurface_band = Isosurface(
                                         XYZ=self.kpoints,
                                         V=self.bands[:,iband],
@@ -189,8 +195,8 @@ class FermiSurface3D(Surface):
                                         padding=self.supercell * 2,
                                         transform_matrix=self.reciprocal_lattice,
                                         boundaries=self.brillouin_zone,
-                        
                                     )
+                                    
             else:
                 isosurface_band = Isosurface(
                                     XYZ=self.kpoints,
@@ -203,17 +209,23 @@ class FermiSurface3D(Surface):
                                     boundaries=self.brillouin_zone,
                                 )
             isosurface_band_copy = copy.deepcopy(isosurface_band)
-            if iband == 0:
+            if full_isosurface is None and len(isosurface_band_copy.points)!=0:
                 full_isosurface = isosurface_band_copy
+            elif len(isosurface_band_copy.points)==0:
+                if full_isosurface is None and iband == len(self.bands[0,:])-1:
+                    raise Exception("Could not find any fermi surfaces")
+                continue
             else:
                 full_isosurface += isosurface_band_copy
 
-            color_band_dict.update({f"band_{iband}": {"color" : band_colors[iband,:]}
+            color_band_dict.update({f"band_{iband_with_surface}": {"color" : band_colors[iband_with_surface,:]}
                                   })
 
-            band_color = np.array([band_colors[iband,:]]*len(isosurface_band.points[:,0]))
-            isosurface_band.point_data[f"band_{iband}"] = band_color
+            band_color = np.array([band_colors[iband_with_surface,:]]*len(isosurface_band.points[:,0]))
+            isosurface_band.point_data[f"band_{iband_with_surface}"] = band_color
             self.isosurfaces.append(isosurface_band)
+
+            iband_with_surface +=1
             
             
         # Initialize the Fermi Surface which is the combination of all the 

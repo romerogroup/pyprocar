@@ -45,7 +45,8 @@ class FermiHandler:
             dirname:str="",
             infile:str="in.bxsf",
             abinit_output:str=None,
-            repair:bool=False
+            repair:bool=False,
+            apply_symmetry:bool=True,
         ):
         self.code = code
         self.procar=procar
@@ -55,8 +56,9 @@ class FermiHandler:
         self.infile=infile
         self.abinit_output=abinit_output
         self.repair = repair
+        self.apply_symmetry = apply_symmetry
 
-        self.data, self.reciprocal_lattice, self.procarFile, self.e_fermi = self.__parse_code()
+        self.parser, self.reciprocal_lattice, self.e_fermi = self.__parse_code()
 
     def plot_fermi_surface(self, 
                         mode:str,
@@ -67,6 +69,7 @@ class FermiHandler:
 
                         fermi:float=None,
                         fermi_shift:float=0,
+                        fermi_tolerance:float=0.1,
                         
                         spin_texture: bool=False,
                         calculate_fermi_speed: bool=False,
@@ -74,7 +77,7 @@ class FermiHandler:
                         calculate_effective_mass: bool=False,
 
                         supercell:List[int]=[1, 1, 1],
-                        extended_zone_directions:List[List[int]]=None,
+                        extended_zone_directions:List[List[int] or Tuple[int,int,int]]=None,
                         interpolation_factor:int=1,
                         projection_accuracy:str="normal",
 
@@ -115,11 +118,11 @@ class FermiHandler:
                                                         atoms=atoms,
                                                         orbitals=orbitals,
                                                         spins=spins,
-                                                        spin_texture=spin_texture)
-
+                                                        spin_texture=spin_texture,
+                                                        fermi_tolerance=fermi_tolerance)
         fermi_surface3D = FermiSurface3D(
-                                        kpoints=self.data.kpoints,
-                                        bands=self.data.bands,
+                                        kpoints=self.parser.ebs.kpoints,
+                                        bands=self.parser.ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -129,6 +132,7 @@ class FermiHandler:
                                         calculate_effective_mass = calculate_effective_mass,
                                         fermi=self.e_fermi,
                                         fermi_shift = fermi_shift,
+                                        fermi_tolerance=fermi_tolerance,
                                         reciprocal_lattice=self.reciprocal_lattice,
                                         interpolation_factor=interpolation_factor,
                                         projection_accuracy=projection_accuracy,
@@ -227,6 +231,7 @@ class FermiHandler:
 
                         fermi:float=None,
                         fermi_shift:float=0,
+                        fermi_tolerance:float=0.1,
                         
                         spin_texture: bool=False,
                         calculate_fermi_speed: bool=False,
@@ -321,15 +326,16 @@ class FermiHandler:
                                                         atoms=atoms,
                                                         orbitals=orbitals,
                                                         spins=spins,
-                                                        spin_texture=spin_texture)
+                                                        spin_texture=spin_texture,
+                                                        fermi_tolerance=fermi_tolerance)
 
         energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
         e_surfaces = []
         
         for e_value in energy_values:
             fermi_surface3D = FermiSurface3D(
-                                        kpoints=self.data.kpoints,
-                                        bands=self.data.bands,
+                                        kpoints=self.parser.ebs.kpoints,
+                                        bands=self.parser.ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -339,6 +345,7 @@ class FermiHandler:
                                         calculate_effective_mass = calculate_effective_mass,
                                         fermi=e_value,
                                         fermi_shift = fermi_shift,
+                                        fermi_tolerance=fermi_tolerance,
                                         reciprocal_lattice=self.reciprocal_lattice,
                                         interpolation_factor=interpolation_factor,
                                         projection_accuracy=projection_accuracy,
@@ -398,6 +405,7 @@ class FermiHandler:
 
                         fermi:float=None,
                         fermi_shift:float=0,
+                        fermi_tolerance:float=0.1,
                         
                         spin_texture: bool=False,
                         calculate_fermi_speed: bool=False,
@@ -436,7 +444,8 @@ class FermiHandler:
                                                         atoms=atoms,
                                                         orbitals=orbitals,
                                                         spins=spins,
-                                                        spin_texture=spin_texture)
+                                                        spin_texture=spin_texture,
+                                                        fermi_tolerance=fermi_tolerance)
         
         energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
         if iso_values:
@@ -446,8 +455,8 @@ class FermiHandler:
         
         for e_value in energy_values:
             fermi_surface3D = FermiSurface3D(
-                                        kpoints=self.data.kpoints,
-                                        bands=self.data.bands,
+                                        kpoints=self.parser.ebs.kpoints,
+                                        bands=self.parser.ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -457,6 +466,7 @@ class FermiHandler:
                                         calculate_effective_mass = calculate_effective_mass,
                                         fermi=e_value,
                                         fermi_shift = fermi_shift,
+                                        fermi_tolerance=fermi_tolerance,
                                         reciprocal_lattice=self.reciprocal_lattice,
                                         interpolation_factor=interpolation_factor,
                                         projection_accuracy=projection_accuracy,
@@ -565,6 +575,7 @@ class FermiHandler:
 
                                 fermi:float=None,
                                 fermi_shift:float=0,
+                                fermi_tolerance:float=0.1,
                                 
                                 spin_texture: bool=False,
                                 calculate_fermi_speed: bool=False,
@@ -611,11 +622,12 @@ class FermiHandler:
                                                         atoms=atoms,
                                                         orbitals=orbitals,
                                                         spins=spins,
-                                                        spin_texture=spin_texture)
+                                                        spin_texture=spin_texture,
+                                                        fermi_tolerance=fermi_tolerance)
 
         fermi_surface3D = FermiSurface3D(
-                                        kpoints=self.data.kpoints,
-                                        bands=self.data.bands,
+                                        kpoints=self.parser.ebs.kpoints,
+                                        bands=self.parser.ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -625,6 +637,7 @@ class FermiHandler:
                                         calculate_effective_mass = calculate_effective_mass,
                                         fermi=self.e_fermi,
                                         fermi_shift = fermi_shift,
+                                        fermi_tolerance=fermi_tolerance,
                                         reciprocal_lattice=self.reciprocal_lattice,
                                         interpolation_factor=interpolation_factor,
                                         projection_accuracy=projection_accuracy,
@@ -713,6 +726,7 @@ class FermiHandler:
                         iso_values: List[float]=None,
                         fermi:float=None,
                         fermi_shift:float=0,
+                        fermi_tolerance:float=0.1,
                         supercell:List[int]=[1, 1, 1],
                         extended_zone_directions:List[List[int]]=None,
                         interpolation_factor:int=1,
@@ -733,7 +747,8 @@ class FermiHandler:
                                                         atoms=None,
                                                         orbitals=None,
                                                         spins=None,
-                                                        spin_texture=False)
+                                                        spin_texture=False,
+                                                        fermi_tolerance=fermi_tolerance)
         
         energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
         if iso_values:
@@ -744,8 +759,8 @@ class FermiHandler:
         
         for e_value in energy_values:
             fermi_surface3D = FermiSurface3D(
-                                        kpoints=self.data.kpoints,
-                                        bands=self.data.bands,
+                                        kpoints=self.parser.ebs.kpoints,
+                                        bands=self.parser.ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -755,6 +770,7 @@ class FermiHandler:
                                         calculate_effective_mass = False,
                                         fermi=e_value,
                                         fermi_shift = fermi_shift,
+                                        fermi_tolerance=fermi_tolerance,
                                         reciprocal_lattice=self.reciprocal_lattice,
                                         interpolation_factor=interpolation_factor,
                                         projection_accuracy="normal",
@@ -797,12 +813,14 @@ class FermiHandler:
             structure = poscar.structure
             reciprocal_lattice = poscar.structure.reciprocal_lattice
 
-            procarFile = io.vasp.Procar(filename=self.procar,
+            parser = io.vasp.Procar(filename=self.procar,
                                     structure=structure,
                                     reciprocal_lattice=reciprocal_lattice,
                                     efermi=e_fermi,
                                     )
-            data = ProcarSelect(procarFile, deepCopy=True)
+            if self.apply_symmetry:
+                parser.ebs.ibz2fbz(outcar.rotations)
+            # data = ProcarSelect(procarFile, deepCopy=True)
 
         elif self.code == "abinit":
             procarFile = ProcarParser()
@@ -812,22 +830,25 @@ class FermiHandler:
             e_fermi = abinitFile.fermi
         
             reciprocal_lattice = abinitFile.reclat
-            data = ProcarSelect(procarFile, deepCopy=True)
+            parser = ProcarSelect(procarFile, deepCopy=True)
 
             # Converting Ha to eV
-            data.bands = 27.211396641308 * data.bands
+            parser.bands = 27.211396641308 * parser.bands
 
         elif self.code == "qe":
             # procarFile = parser
-            if dirname is None:
-                dirname = "bands"
-            procarFile = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+            if self.dirname is None:
+                self.dirname = "bands"
+            parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = self.dirname, bandsIn_filename = "bands.in", 
                                 pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
                                 dos_interpolation_factor = None)
-            reciprocal_lattice = procarFile.reciprocal_lattice
-            data = ProcarSelect(procarFile, deepCopy=True)
+            reciprocal_lattice = parser.reciprocal_lattice
+            # data = ProcarSelect(procarFile, deepCopy=True)
 
-            e_fermi = procarFile.efermi
+            e_fermi = parser.efermi
+
+            if self.apply_symmetry:
+                parser.ebs.ibz2fbz(parser.rotations)
 
             # procarFile = QEFermiParser()
             # reciprocal_lattice = procarFile.reclat
@@ -840,23 +861,24 @@ class FermiHandler:
         elif self.code == "lobster":
             procarFile = LobsterFermiParser()
             reciprocal_lattice = procarFile.reclat
-            data = ProcarSelect(procarFile, deepCopy=True)
+            parser = ProcarSelect(procarFile, deepCopy=True)
             e_fermi = 0
 
         elif self.code == "bxsf":
             e_fermi = 0
-            data = BxsfParser(infile= self.infile)
-            reciprocal_lattice = data.reclat
+            parser = BxsfParser(infile= self.infile)
+            reciprocal_lattice = parser.reclat
             procarFile = None
 
         elif self.code == "frmsf":
             e_fermi = 0
-            data = FrmsfParser(infile=self.infile)
-            reciprocal_lattice = data.rec_lattice
-            bands = np.arange(len(data.bands[0, :]))
+            parser = FrmsfParser(infile=self.infile)
+            reciprocal_lattice = parser.rec_lattice
+            bands = np.arange(len(parser.bands[0, :]))
             procarFile = None
 
-        return data, reciprocal_lattice, procarFile, e_fermi
+        parser.ebs.bands += e_fermi
+        return parser, reciprocal_lattice, e_fermi
 
     def __format_data(self, 
                     mode:str,
@@ -864,37 +886,39 @@ class FermiHandler:
                     atoms:List[int]=None,
                     orbitals:List[int]=None,
                     spins:List[int]=None, 
-                    spin_texture: bool=False,):
+                    spin_texture: bool=False,
+                    fermi_tolerance:float=0.1,):
 
         bands_to_keep = bands
         if bands_to_keep is None:
-            bands_to_keep = np.arange(len(self.data.bands[0, :]))
+            bands_to_keep = np.arange(len(self.parser.ebs.bands[0, :,0]))
 
         self.band_near_fermi = []
-        for iband in range(len(self.data.bands[0,:])):
-            fermi_tolerance = 0.1
-            fermi_surface_test = len(np.where(np.logical_and(self.data.bands[:,iband]>=self.e_fermi-fermi_tolerance, self.data.bands[:,iband]<=self.e_fermi+fermi_tolerance))[0])
+        for iband in range(len(self.parser.ebs.bands[0,:,0])):
+            fermi_surface_test = len(np.where(np.logical_and(self.parser.ebs.bands[:,iband,0]>=self.e_fermi-fermi_tolerance, self.parser.ebs.bands[:,iband,0]<=self.e_fermi+fermi_tolerance))[0])
             if fermi_surface_test != 0:
                 self.band_near_fermi.append(iband)
-        # print(f"Bands near the fermi energy : {self.band_near_fermi}")
+
+        print(self.e_fermi)
+        print(f"Bands near the fermi energy : {self.band_near_fermi}")
 
         spd = []
         if mode == "parametric":
             if orbitals is None:
-                orbitals = [-1]
+                orbitals = np.arange(self.parser.ebs.norbitals, dtype=int)
             if atoms is None:
-                atoms = [-1]
+                atoms = np.arange(self.parser.ebs.natoms, dtype=int)
             if spins is None:
                 spins = [0]
 
-            self.data.selectIspin(spins)
-
-            # self.ebs.ebs_sum(spins= spins , atoms=atoms)
-            self.data.selectAtoms(atoms, fortran=False)
-            self.data.selectOrbital(orbitals)
+            # self.data.selectIspin(spins)
+            # self.data.selectOrbital(orbitals)
+            # self.data.selectAtoms(atoms, fortran=False)
+            projected = self.parser.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+            projected = projected[:,:,spins[0]]
 
             for iband in bands_to_keep:
-                spd.append(self.data.spd[:, iband])
+                spd.append(projected[:,iband] )
         elif mode == "property_projection":
             for iband in bands_to_keep:
                 spd.append(None)
@@ -905,36 +929,21 @@ class FermiHandler:
         spd_spin = []
 
         if spin_texture:
-            dataX = ProcarSelect(self.procarFile, deepCopy=True)
-            dataY = ProcarSelect(self.procarFile, deepCopy=True)
-            dataZ = ProcarSelect(self.procarFile, deepCopy=True)
+            ebsX = copy.deepcopy(self.parser.ebs)
+            ebsY = copy.deepcopy(self.parser.ebs)
+            ebsZ = copy.deepcopy(self.parser.ebs)
 
-            dataX.kpoints = self.data.kpoints
-            dataY.kpoints = self.data.kpoints
-            dataZ.kpoints = self.data.kpoints
+            ebsX.projected = ebsX.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+            ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+            ebsZ.projected = ebsZ.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
 
-            dataX.spd = self.data.spd
-            dataY.spd = self.data.spd
-            dataZ.spd = self.data.spd
+            ebsX.projected = ebsX.projected[:,:,[0]]
+            ebsY.projected = ebsY.projected[:,:,[1]]
+            ebsZ.projected = ebsZ.projected[:,:,[2]]
 
-            dataX.bands = self.data.bands
-            dataY.bands = self.data.bands
-            dataZ.bands = self.data.bands
-
-            dataX.selectIspin([1])
-            dataY.selectIspin([2])
-            dataZ.selectIspin([3])
-
-            dataX.selectAtoms(atoms, fortran=False)
-            dataY.selectAtoms(atoms, fortran=False)
-            dataZ.selectAtoms(atoms, fortran=False)
-
-            dataX.selectOrbital(orbitals)
-            dataY.selectOrbital(orbitals)
-            dataZ.selectOrbital(orbitals)
             for iband in bands_to_keep:
                 spd_spin.append(
-                    [dataX.spd[:, iband], dataY.spd[:, iband], dataZ.spd[:, iband]]
+                    [ebsX.projected[:, iband], ebsY.projected[:, iband], ebsZ.projected[:, iband]]
                 )
         else:
             for iband in bands_to_keep:

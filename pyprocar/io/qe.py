@@ -108,9 +108,8 @@ class QEParser():
             self.proj_prefix = re.findall("filproj\s*=\s*'(.*)'", self.pdosIn)[0]
             
         #Parsing spd array and spd phase arrays
-        
+        self.parse_projections()
         if os.path.exists(f"{dirname}{atomic_proj_xml}"):
-            self.parse_projections()
             atmProj_tree = ET.parse(f"{dirname}{atomic_proj_xml}" )
             self.atm_proj_root = atmProj_tree.getroot()
             self.parse_atomic_projections()
@@ -119,7 +118,9 @@ class QEParser():
             self.parse_pdos()
             self.data = self.read()
         
-        
+        self.kticks = None
+        self.knames = None
+        self.kpath = None
         if self.root.findall(".//input/control_variables/calculation")[0].text == "bands":
             # print("This xml is a bands calculation")
             self.isBandsCalc = True
@@ -128,27 +129,27 @@ class QEParser():
             rf.close()
             self.getKpointLabels()
 
-            self.ebs = ElectronicBandStructure(
-                                    kpoints=self.kpoints,
-                                    bands=self.bands,
-                                    projected=self._spd2projected(self.spd),
-                                    efermi=self.efermi,
-                                    kpath=self.kpath,
-                                    projected_phase=self._spd2projected(self.spd_phase),
-                                    labels=self.orbitalNames[:-1],
-                                    reciprocal_lattice=self.reciprocal_lattice,
-                                    interpolation_factor=dos_interpolation_factor,
-                                    # shifted_to_efermi=True,
-                                    # shifted_to_efermi=False,
-                                )
 
-        else:
-            self.kticks = None
-            self.knames = None
-       
         if self.root.findall(".//input/control_variables/calculation")[0].text == "nscf":
             # print("This xml is a nscf calculation")
             self.isDosFermiCalc = True
+
+        self.ebs = ElectronicBandStructure(
+                                kpoints=self.kpoints,
+                                bands=self.bands,
+                                projected=self._spd2projected(self.spd),
+                                efermi=self.efermi,
+                                kpath=self.kpath,
+                                projected_phase=self._spd2projected(self.spd_phase),
+                                labels=self.orbitalNames[:-1],
+                                reciprocal_lattice=self.reciprocal_lattice,
+                                interpolation_factor=dos_interpolation_factor,
+
+                            )
+
+        
+       
+        
         
         
         
@@ -824,13 +825,13 @@ class QEParser():
         self.spg = int(self.root.findall(".//output/symmetries/space_group")[0].text)
         self.nsymmetry = len(self.root.findall(".//output/symmetries/symmetry"))
         
-        self.rotation_matricies = np.zeros(shape = (self.nsymmetry ,3,3))
+        self.rotations = np.zeros(shape = (self.nsymmetry ,3,3))
         
         for isymmetry,symmetry_operation in enumerate(self.root.findall(".//output/symmetries/symmetry")):
 
             symmetry_matrix = np.array(symmetry_operation.findall(".//rotation")[0].text.split(),dtype = float).reshape(3,3).T
 
-            self.rotation_matricies[isymmetry,:,:] = symmetry_matrix
+            self.rotations[isymmetry,:,:] = symmetry_matrix
             
     def parse_magnetization(self):
         self.non_colinear = str2bool(self.root.findall(".//output/magnetization/noncolin")[0].text)
@@ -956,7 +957,7 @@ class QEParser():
         Returns the fermi energy read from .out
         """
         
-        return self.nspin * float(self.root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
+        return  float(self.root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
         
     @property
     def reciprocal_lattice(self):   
