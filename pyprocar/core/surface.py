@@ -6,7 +6,7 @@ __date__ = "March 31, 2020"
 from shutil import which
 
 import pyvista
-import trimesh
+# import trimesh
 import numpy as np
 from matplotlib import cm
 from matplotlib import colors as mpcolors
@@ -76,8 +76,8 @@ class Surface(pyvista.PolyData):
 
         self.trimesh_obj = None
 
-        if self.verts is not None and self.faces is not None:
-            self._create_trimesh()
+        # if self.verts is not None and self.faces is not None:
+        #     self._create_trimesh()
             # if self.face_normals is None:
             #     if self.pyvista_obj.face_normals is not None:
             #         self.face_normals = self.pyvista_obj.face_normals
@@ -135,21 +135,21 @@ class Surface(pyvista.PolyData):
         return new_faces 
     
 
-    def _create_trimesh(self):
-        """
-        creates a trimesh object
-        """
-        # if np.any(np.array([len(x) for x in self.faces]) > 3):
-        #     faces = []
-        #     for i in range(0, len(self.pyvista_obj.triangulate().faces), 4):
-        #         point_1 = self.pyvista_obj.triangulate().faces[i + 1]
-        #         point_2 = self.pyvista_obj.triangulate().faces[i + 2]
-        #         point_3 = self.pyvista_obj.triangulate().faces[i + 3]
-        #         faces.append([point_1, point_2, point_3])
-        #     self.trimesh_obj = trimesh.Trimesh(vertices=self.verts, faces=faces)
+    # def _create_trimesh(self):
+    #     """
+    #     creates a trimesh object
+    #     """
+    #     # if np.any(np.array([len(x) for x in self.faces]) > 3):
+    #     #     faces = []
+    #     #     for i in range(0, len(self.pyvista_obj.triangulate().faces), 4):
+    #     #         point_1 = self.pyvista_obj.triangulate().faces[i + 1]
+    #     #         point_2 = self.pyvista_obj.triangulate().faces[i + 2]
+    #     #         point_3 = self.pyvista_obj.triangulate().faces[i + 3]
+    #     #         faces.append([point_1, point_2, point_3])
+    #     #     self.trimesh_obj = trimesh.Trimesh(vertices=self.verts, faces=faces)
 
-        # else:
-        self.trimesh_obj = trimesh.Trimesh(vertices=self.points, faces=self.faces)
+    #     # else:
+    #     self.trimesh_obj = trimesh.Trimesh(vertices=self.points, faces=self.faces)
 
     def set_scalars(
         self,

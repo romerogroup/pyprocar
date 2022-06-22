@@ -806,6 +806,7 @@ class QEParser():
         self.species_list = list(self.composition.keys())
         self.ionsCount = int(self.root.findall(".//output/atomic_structure")[0].attrib['nat'])
         self.alat =  float(self.root.findall(".//output/atomic_structure")[0].attrib['alat'])
+
         # self.bravais_index =  int(self.root.findall(".//output/atomic_structure")[0].attrib['bravais_index'])
         
         self.ions = []
@@ -814,7 +815,7 @@ class QEParser():
             self.composition[ ion.attrib['name']] += 1
             
         self.atomic_positions = np.array([ ion.text.split() for ion in self.root.findall(".//output/atomic_structure/atomic_positions")[0]],dtype = float)
-        
+        # in a.u
         self.direct_lattice = np.array([ acell.text.split() for acell  in self.root.findall(".//output/atomic_structure/cell")[0] ],dtype = float)
 
     def parse_symmetries(self):
@@ -827,7 +828,7 @@ class QEParser():
         
         for isymmetry,symmetry_operation in enumerate(self.root.findall(".//output/symmetries/symmetry")):
 
-            symmetry_matrix = np.array(symmetry_operation.findall(".//rotation")[0].text.split(),dtype = float).reshape(3,3)
+            symmetry_matrix = np.array(symmetry_operation.findall(".//rotation")[0].text.split(),dtype = float).reshape(3,3).T
 
             self.rotation_matricies[isymmetry,:,:] = symmetry_matrix
             
@@ -883,7 +884,7 @@ class QEParser():
 
             for ikpoint, kpoint_element in enumerate(self.root.findall(".//output/band_structure/ks_energies")):
                  
-                self.kpoints[ikpoint,:] = np.array(kpoint_element.findall(".//k_point")[0].text.split(),dtype = float)
+                self.kpoints[ikpoint,:] =  np.array(kpoint_element.findall(".//k_point")[0].text.split(),dtype = float)
                 self.weights[ikpoint] = np.array(kpoint_element.findall(".//k_point")[0].attrib["weight"], dtype = float)
                 
                 
@@ -893,18 +894,14 @@ class QEParser():
                 
                 self.bands[ikpoint, : ,1]  = HARTREE_TO_EV  * np.array(kpoint_element.findall(".//eigenvalues")[0].text.split(),dtype = float)[self.nbnd_down:]
                 self.occupations[ikpoint, : ,1]  = np.array(kpoint_element.findall(".//occupations")[0].text.split(), dtype = float)[self.nbnd_down:]
+        # Multiply in 2pi/alat
+        self.kpoints = self.kpoints*(2*np.pi /self.alat)
+        # Converting back to crystal basis
+        self.kpoints = np.around(self.kpoints.dot(np.linalg.inv(self.reciprocal_lattice)),decimals=8)
 
-        # Converting back to cartesian coordiantes in units of 2pi/alat
-        self.kpoints = np.matmul(np.linalg.inv(self.reciprocal_lattice.T / (2*math.pi / self.alat)),  self.kpoints.T).T
         self.kpointsCount = len(self.kpoints)
         self.bandsCount = self.nbnd
 
-            
-        # Shifting fermi to 0 eV
-        
-
-        # self.bands -= self.efermi 
-        
     def _spd2projected(self, spd, nprinciples=1):
         # This function is for VASP
         # non-pol and colinear

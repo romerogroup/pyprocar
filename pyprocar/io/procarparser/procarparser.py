@@ -307,7 +307,7 @@ class ProcarParser:
     """
         self.log.debug("readOrbital")
         if not self.fileStr:
-            log.warning("You should invoke `procar.readFile()` instead. Returning")
+            self.log.warning("You should invoke `procar.readFile()` instead. Returning")
             return
 
         # finding all orbital headers

@@ -3,7 +3,6 @@ import re
 import xml.etree.ElementTree as ET
 import collections
 import gzip
-import bz2
 
 import numpy as np
 from numpy import array
@@ -18,6 +17,7 @@ class Outcar(collections.abc.Mapping):
 
         with open(self.filename, "r") as rf:
             self.file_str = rf.read()
+
 
     @property
     def efermi(self):
@@ -64,12 +64,12 @@ class Outcar(collections.abc.Mapping):
             txt = f.readlines()
 
         for i, line in enumerate(txt):
-            if "irot" in line:
-                begin_table = i + 1
-            if "Subroutine" in line:
-                end_table = i - 1
+            if 'irot' in line:
+                begin_table = i+1
+            if 'Subroutine' in line:
+                end_table = i-1
 
-        operators = np.zeros((end_table - begin_table, 9))
+        operators = np.zeros((end_table-begin_table, 9))
         for i, line in enumerate(txt[begin_table:end_table]):
             str_list = line.split()
             num_list = [float(s) for s in str_list]
@@ -91,27 +91,28 @@ class Outcar(collections.abc.Mapping):
                 np.array(
                     [
                         [
-                            np.cos(alpha) + x**2 * (1 - np.cos(alpha)),
+                            np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
                             x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
                             x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
                         ],
                         [
                             y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
-                            np.cos(alpha) + y**2 * (1 - np.cos(alpha)),
+                            np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
                             y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
                         ],
                         [
                             z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
                             z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
-                            np.cos(alpha) + z**2 * (1 - np.cos(alpha)),
+                            np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
                         ],
                     ]
                 )
                 * det_A
             )
 
-            reciprocal_lattice = np.transpose(self.reciprocal_lattice)
-            R = np.dot(np.dot(np.linalg.inv(reciprocal_lattice), R), reciprocal_lattice)
+            # R = self.reciprocal_lattice.dot(R).dot(np.linalg.inv(self.reciprocal_lattice))
+            R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
+
             R = np.round_(R, decimals=3)
             rotations.append(R)
 
@@ -169,10 +170,11 @@ class Poscar(collections.abc.Mapping):
         else:
             shift = 0
             if os.path.exists("POTCAR"):
-                base_dir = self.filename.replace(self.filename.split(os.sep)[-1], "")
+                base_dir = self.filename.replace(
+                    self.filename.split(os.sep)[-1], "")
                 if base_dir == "":
                     base_dir = "."
-
+                
                 with open(base_dir + os.sep + "POTCAR", "r") as rf:
                     potcar = rf.read()
 
@@ -195,7 +197,8 @@ class Poscar(collections.abc.Mapping):
             direct = False
         coordinates = np.zeros(shape=(natom, 3))
         for i in range(natom):
-            coordinates[i, :] = [float(x) for x in lines[i + 7 + shift].split()[:3]]
+            coordinates[i, :] = [float(x)
+                                 for x in lines[i + 7 + shift].split()[:3]]
 
         if direct:
             return atoms, coordinates, lattice
@@ -267,8 +270,7 @@ class Kpoints(collections.abc.Mapping):
 
                 temp = np.array(
                     re.findall(
-                        "([0-9.-]+)\s*([0-9.-]+)\s*([0-9.-]+)(.*)", self.file_str
-                    )
+                        "([0-9.-]+)\s*([0-9.-]+)\s*([0-9.-]+)(.*)", self.file_str)
                 )
                 temp_special_kp = temp[:, :3].astype(float)
                 temp_knames = temp[:, -1]
@@ -276,7 +278,8 @@ class Kpoints(collections.abc.Mapping):
                 if len(self.ngrids) == 1:
                     self.ngrids = [self.ngrids[0]] * nsegments
                 self.knames = np.reshape(
-                    [x.replace("!", "").strip() for x in temp_knames], (nsegments, 2)
+                    [x.replace("!", "").strip()
+                     for x in temp_knames], (nsegments, 2)
                 )
                 self.special_kpoints = temp_special_kp.reshape(nsegments, 2, 3)
 
@@ -368,6 +371,7 @@ class Procar(collections.abc.Mapping):
         structure=None,
         reciprocal_lattice=None,
         kpath=None,
+        kpoints=None,
         efermi=None,
         interpolation_factor=1,
     ):
@@ -478,7 +482,7 @@ class Procar(collections.abc.Mapping):
     def _open_file(self):
         """
         Tries to open a File, it has suitable values for PROCAR and can
-        handle gzipped and bz2 files
+        handle gzipped files
 
         Example:
 
@@ -507,8 +511,6 @@ class Procar(collections.abc.Mapping):
             # Checking if compressed
             if self.filename[-2:] == "gz":
                 in_file = gzip.open(self.filename, mode="rt")
-            elif self.filename[-3:] = "bz2":
-                in_file = gzip.open(self.filename, mode="rt")
             else:
                 in_file = open(self.filename, "r")
             return in_file
@@ -516,8 +518,7 @@ class Procar(collections.abc.Mapping):
         # otherwise a gzipped version may exist
         elif os.path.isfile(self.filename + ".gz"):
             in_file = gzip.open(self.filename + ".gz", mode="rt")
-        elif os.path.isfile(self.filename + ".bz2"):
-            in_file = bz2.open(self.filename + ".gz", mode="rt")
+
         else:
             raise IOError("File not found")
 
@@ -574,7 +575,8 @@ class Procar(collections.abc.Mapping):
             return
 
         # finding all the K-points headers
-        self.kpoints = re.findall(r"k-point\s+\d+\s*:\s+([-.\d\s]+)", self.file_str)
+        self.kpoints = re.findall(
+            r"k-point\s+\d+\s*:\s+([-.\d\s]+)", self.file_str)
 
         # trying to build an array
         self.kpoints = [x.split() for x in self.kpoints]
@@ -595,7 +597,8 @@ class Procar(collections.abc.Mapping):
                 return
             else:
 
-                raise ValueError("Badly formated Kpoints headers, try `--permissive`")
+                raise ValueError(
+                    "Badly formated Kpoints headers, try `--permissive`")
         # if successful, go on
 
         # trying to identify an non-polarized or non-collinear case, a
@@ -662,7 +665,7 @@ class Procar(collections.abc.Mapping):
             raise RuntimeError("Number of bands don't match")
 
         # casting to array to manipulate the bands
-        self.bands = np.array(self.bands, dtype=float)[:, 1]
+        self.bands = np.array(self.bands, dtype=float)[:,1]
 
         # Now I will deal with the spin polarized case. The goal is join
         # them like for a non-magnetic case
@@ -670,7 +673,7 @@ class Procar(collections.abc.Mapping):
         if self.ispin == 2:
             # up and down are along the first axis
 
-            up, down = np.split(self.bands, 2)
+            up, down = np.split(self.bands,2)
 
             # reshapping (the 2  means both band index and energy)
             up = up.reshape(self.kpointsCount, self.bandsCount)
@@ -681,8 +684,9 @@ class Procar(collections.abc.Mapping):
 
             # and joining along the second axis (axis=1), ie: bands-like
             # self.bands = np.concatenate((up, down), axis=1)
-            self.bands = np.stack((up, down), axis=-1)
-        else:
+            self.bands = np.stack(
+                (up, down), axis=-1)
+        else :
             self.bands = self.bands.reshape(self.kpointsCount, self.bandsCount, 1)
 
         # otherwise just reshaping is needed
@@ -729,8 +733,10 @@ class Procar(collections.abc.Mapping):
         size = len(FoundOrbs)
         # only the first 'size' orbital
         StdOrbs = self.orbitalName[: size - 1] + self.orbitalName[-1:]
-        StdOrbs_short = self.orbitalName_short[: size - 1] + self.orbitalName_short[-1:]
-        StdOrbs_old = self.orbitalName_old[: size - 1] + self.orbitalName_old[-1:]
+        StdOrbs_short = self.orbitalName_short[: size -
+                                               1] + self.orbitalName_short[-1:]
+        StdOrbs_old = self.orbitalName_old[: size -
+                                           1] + self.orbitalName_old[-1:]
         if (
             FoundOrbs != (StdOrbs)
             and FoundOrbs != (StdOrbs_short)
@@ -747,7 +753,8 @@ class Procar(collections.abc.Mapping):
         # The case of just one atom is handled differently since the VASP
         # output is a little different
         if self.ionsCount == 1:
-            self.spd = re.findall(r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
+            self.spd = re.findall(
+                r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
         else:
             # Added by Francisco to speed up filtering on June 4th, 2019
             # get rid of phase factors
@@ -764,7 +771,7 @@ class Procar(collections.abc.Mapping):
         # "2" it has to macth with the number of entries of spd data.
 
         expected = self.bandsCount * self.kpointsCount * self.ispin
-
+        
         if expected == len(self.spd):
             pass
         # catching a non-collinear calc.
@@ -772,7 +779,8 @@ class Procar(collections.abc.Mapping):
             # testing if previous ispin value is ok
             if self.ispin != 1:
                 print(
-                    "Incompatible data: self.ispin= " + str(self.ispin) + ". Now is 4"
+                    "Incompatible data: self.ispin= " +
+                    str(self.ispin) + ". Now is 4"
                 )
             self.ispin = 4
         else:
@@ -798,14 +806,14 @@ class Procar(collections.abc.Mapping):
             # ispin = 1 for a while, we will made the distinction
             up = up.reshape(
                 self.kpointsCount,
-                self.bandsCount,
+                self.bandsCount ,
                 1,
                 self.ionsCount,
                 self.orbitalCount + 1,
             )
             down = down.reshape(
                 self.kpointsCount,
-                self.bandsCount,
+                self.bandsCount ,
                 1,
                 self.ionsCount,
                 self.orbitalCount + 1,
@@ -833,7 +841,8 @@ class Procar(collections.abc.Mapping):
     def _read_phases(self):
 
         if self.ionsCount == 1:
-            self.spd_phase = re.findall(r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
+            self.spd_phase = re.findall(
+                r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
         else:
             # Added by Francisco to speed up filtering on June 4th, 2019
             # get rid of phase factors
@@ -841,7 +850,8 @@ class Procar(collections.abc.Mapping):
                 r"ion.+\n([-.\d\se]+charge[-.\d\se]+)", self.file_str
             )
             self.spd_phase = "".join(self.spd_phase)
-            self.spd_phase = re.findall(r"([-.\d\se]+charge.+)\n", self.spd_phase)
+            self.spd_phase = re.findall(
+                r"([-.\d\se]+charge.+)\n", self.spd_phase)
         # free the memory (could be a lot)
         self.file_str = None
 
@@ -923,7 +933,8 @@ class Procar(collections.abc.Mapping):
 
         for i in range(1, (self.orbitalCount) * 2 - 2, 2):
             temp[:, :, :, :, (i + 1) // 2].real = self.spd_phase[:, :, :, :, i]
-            temp[:, :, :, :, (i + 1) // 2].imag = self.spd_phase[:, :, :, :, i + 1]
+            temp[:, :, :, :, (i + 1) //
+                 2].imag = self.spd_phase[:, :, :, :, i + 1]
         temp[:, :, :, :, 0].real = self.spd_phase[:, :, :, :, 0]
         temp[:, :, :, :, -1].real = self.spd_phase[:, :, :, :, -1]
         self.spd_phase = temp
@@ -1006,29 +1017,34 @@ class Procar(collections.abc.Mapping):
                     np.array(
                         [
                             [
-                                np.cos(alpha) + x**2 * (1 - np.cos(alpha)),
-                                x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
-                                x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
+                                np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
+                                x * y * (1 - np.cos(alpha)) -
+                                z * np.sin(alpha),
+                                x * z * (1 - np.cos(alpha)) +
+                                y * np.sin(alpha),
                             ],
                             [
-                                y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
-                                np.cos(alpha) + y**2 * (1 - np.cos(alpha)),
-                                y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
+                                y * x * (1 - np.cos(alpha)) +
+                                z * np.sin(alpha),
+                                np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
+                                y * z * (1 - np.cos(alpha)) -
+                                x * np.sin(alpha),
                             ],
                             [
-                                z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
-                                z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
-                                np.cos(alpha) + z**2 * (1 - np.cos(alpha)),
+                                z * x * (1 - np.cos(alpha)) -
+                                y * np.sin(alpha),
+                                z * y * (1 - np.cos(alpha)) +
+                                x * np.sin(alpha),
+                                np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
                             ],
                         ]
                     )
                     * det_A
                 )
 
-                R = np.dot(
-                    np.dot(np.linalg.inv(structure.reciprocal_lattice), R),
-                    structure.reciprocal_lattice,
-                )
+
+                # R = structure.reciprocal_lattice.dot(R).dot(np.linalg.inv(structure.reciprocal_lattice))
+                R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
                 R = np.round_(R, decimals=3)
                 rotations.append(R)
         elif structure is not None:
@@ -1043,7 +1059,7 @@ class Procar(collections.abc.Mapping):
             # for each point
             for j, _ in enumerate(self.kpoints):
                 # apply symmetry operation to kpoint
-                sympoint_vector = np.dot(rotations[i], self.kpoints[j])
+                sympoint_vector = rotations[i].dot(self.kpoints[j])
                 sympoint = sympoint_vector.tolist()
 
                 if sympoint not in klist:
@@ -1105,7 +1121,8 @@ class VaspXML(collections.abc.Mapping):
 
     @property
     def bands(self):
-        spins = list(self.data["general"]["eigenvalues"]["array"]["data"].keys())
+        spins = list(self.data["general"]["eigenvalues"]
+                     ["array"]["data"].keys())
         kpoints_list = list(
             self.data["general"]["eigenvalues"]["array"]["data"]["spin 1"].keys()
         )
@@ -1118,8 +1135,10 @@ class VaspXML(collections.abc.Mapping):
         nkpoints = len(kpoints_list)
         for ispin in spins:
             eigen_values[ispin] = {}
-            eigen_values[ispin]["eigen_values"] = np.zeros(shape=(nbands, nkpoints))
-            eigen_values[ispin]["occupancies"] = np.zeros(shape=(nbands, nkpoints))
+            eigen_values[ispin]["eigen_values"] = np.zeros(
+                shape=(nbands, nkpoints))
+            eigen_values[ispin]["occupancies"] = np.zeros(
+                shape=(nbands, nkpoints))
             for ikpoint, kpt in enumerate(kpoints_list):
                 temp = np.array(
                     self.data["general"]["eigenvalues"]["array"]["data"][ispin][kpt][
@@ -1166,9 +1185,11 @@ class VaspXML(collections.abc.Mapping):
                         ][bnd][bnd]
                     )
         # ispin, ikpoint, iband, iatom, iorbital
-        bands_projected["projection"] = np.swapaxes(bands_projected["projection"], 0, 3)
+        bands_projected["projection"] = np.swapaxes(
+            bands_projected["projection"], 0, 3)
         # iatom, ikpoint, iband, ispin, iorbital
-        bands_projected["projection"] = np.swapaxes(bands_projected["projection"], 3, 4)
+        bands_projected["projection"] = np.swapaxes(
+            bands_projected["projection"], 3, 4)
         # iatom, ikpoint, iband, iorbital, ispin
         bands_projected["projection"] = bands_projected["projection"].reshape(
             natoms, nkpoints, nbands, 1, norbitals, nspins
@@ -1178,7 +1199,8 @@ class VaspXML(collections.abc.Mapping):
 
     def _get_dos_total(self):
 
-        spins = list(self.data["general"]["dos"]["total"]["array"]["data"].keys())
+        spins = list(self.data["general"]["dos"]
+                     ["total"]["array"]["data"].keys())
         energies = np.array(
             self.data["general"]["dos"]["total"]["array"]["data"][spins[0]]
         )[:, 0]
@@ -1472,7 +1494,8 @@ class VaspXML(collections.abc.Mapping):
                 last_forces_abs = np.abs(np.array(self.forces[-1]))
                 return not (np.any(last_forces_abs > abs(ediffg)))
             else:
-                last_ionic_energy = energies[(energies[:, 0] == nsteps)][-1][-1]
+                last_ionic_energy = energies[(
+                    energies[:, 0] == nsteps)][-1][-1]
                 penultimate_ionic_energy = energies[(energies[:, 0] == (nsteps - 1))][
                     -1
                 ][-1]
@@ -1499,7 +1522,7 @@ class VaspXML(collections.abc.Mapping):
         return True
 
     def text_to_bool(self, text):
-        """boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians"""
+        """boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians """
         text = text.strip(" ")
         if text == "T" or text == ".True." or text == ".TRUE.":
             return True
@@ -1507,7 +1530,7 @@ class VaspXML(collections.abc.Mapping):
             return False
 
     def conv(self, ele, _type):
-        """This function converts the xml text to the type specified in the attrib of xml tree"""
+        """This function converts the xml text to the type specified in the attrib of xml tree """
 
         if _type == "string":
             return ele.strip()
@@ -1522,7 +1545,7 @@ class VaspXML(collections.abc.Mapping):
                 return float(ele)
 
     def get_varray(self, xml_tree):
-        """Returns an array for each varray tag in vaspxml"""
+        """Returns an array for each varray tag in vaspxml """
         ret = []
         for ielement in xml_tree:
             ret.append([float(x) for x in ielement.text.split()])
@@ -1557,7 +1580,7 @@ class VaspXML(collections.abc.Mapping):
         return dest
 
     def get_structure(self, xml_tree):
-        """Returns a dictionary of the structure"""
+        """Returns a dictionary of the structure """
         ret = {}
         for ielement in xml_tree:
             if ielement.tag == "crystal":
@@ -1574,7 +1597,7 @@ class VaspXML(collections.abc.Mapping):
         return ret
 
     def get_scstep(self, xml_tree):
-        """This function extracts the self-consistent step information"""
+        """This function extracts the self-consistent step information """
         scstep = {"time": {}, "energy": {}}
         for isub in xml_tree:
             if isub.tag == "time":
@@ -1583,11 +1606,12 @@ class VaspXML(collections.abc.Mapping):
                 ]
             elif isub.tag == "energy":
                 for ienergy in isub:
-                    scstep["energy"][ienergy.attrib["name"]] = float(ienergy.text)
+                    scstep["energy"][ienergy.attrib["name"]
+                                     ] = float(ienergy.text)
         return scstep
 
     def get_set(self, xml_tree, ret):
-        """This function will extract any element taged set recurcively"""
+        """ This function will extract any element taged set recurcively"""
         if xml_tree[0].tag == "r":
             ret[xml_tree.attrib["comment"]] = self.get_varray(xml_tree)
             return ret
@@ -1596,17 +1620,19 @@ class VaspXML(collections.abc.Mapping):
             for ielement in xml_tree:
 
                 if ielement.tag == "set":
-                    ret[xml_tree.attrib["comment"]][ielement.attrib["comment"]] = {}
+                    ret[xml_tree.attrib["comment"]
+                        ][ielement.attrib["comment"]] = {}
                     ret[xml_tree.attrib["comment"]][
                         ielement.attrib["comment"]
                     ] = self.get_set(
                         ielement,
-                        ret[xml_tree.attrib["comment"]][ielement.attrib["comment"]],
+                        ret[xml_tree.attrib["comment"]
+                            ][ielement.attrib["comment"]],
                     )
             return ret
 
     def get_general(self, xml_tree, ret):
-        """This function will parse any element in calculatio other than the structures, scsteps"""
+        """ This function will parse any element in calculatio other than the structures, scsteps"""
         if "dimension" in [x.tag for x in xml_tree]:
             ret["info"] = []
             ret["data"] = {}
@@ -1625,7 +1651,8 @@ class VaspXML(collections.abc.Mapping):
                             ret["efermi"] = float(ielement.text)
                     continue
                 ret[ielement.tag] = {}
-                ret[ielement.tag] = self.get_general(ielement, ret[ielement.tag])
+                ret[ielement.tag] = self.get_general(
+                    ielement, ret[ielement.tag])
             return ret
 
     def parse_vasprun(self, vasprun):
@@ -1701,7 +1728,8 @@ class VaspXML(collections.abc.Mapping):
 
                     elif ielement.items()[0][1] == "kpointlist":
                         for ik in ielement:
-                            kpoints_list.append([float(x) for x in ik.text.split()])
+                            kpoints_list.append([float(x)
+                                                 for x in ik.text.split()])
                         kpoints_list = array(kpoints_list)
                     elif ielement.items()[0][1] == "weights":
                         for ik in ielement:
@@ -1726,7 +1754,8 @@ class VaspXML(collections.abc.Mapping):
                                 if isub.tag == "set":
                                     atom_info["symbols"] = []
                                     for isym in isub:
-                                        atom_info["symbols"].append(isym[0].text)
+                                        atom_info["symbols"].append(
+                                            isym[0].text)
                         elif ielement.attrib["name"] == "atomtypes":
                             atom_info["atom_types"] = {}
                             for isub in ielement:

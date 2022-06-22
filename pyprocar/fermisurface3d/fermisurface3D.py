@@ -48,7 +48,7 @@ class FermiSurface3D(Surface):
         fermi_shift: float=0.0,
         interpolation_factor: int=1,
         extended_zone_directions: List[List[int]]=None,
-        colors: List[str] or List[Tuple[int,int,int]]=None,
+        colors: List[str] or List[Tuple[float,float,float]]=None,
         projection_accuracy: str="Normal",
         cmap: str="viridis",
         vmin: float=0,
@@ -121,7 +121,7 @@ class FermiSurface3D(Surface):
         if bands_to_keep is None:
             bands_to_keep = len(self.bands[0,:])
         elif len(bands_to_keep) < len(self.bands[0,:]) :
-            print("Only considering bands : " , bands_to_keep)
+            # print("Only considering bands : " , bands_to_keep)
             self.bands = self.bands[:,bands_to_keep]
 
         self.reciprocal_lattice = reciprocal_lattice
@@ -141,11 +141,15 @@ class FermiSurface3D(Surface):
         for iband in range(len(self.bands[0,:])):
             fermi_tolerance = 0.1
             fermi_surface_test = len(np.where(np.logical_and(self.bands[:,iband]>=self.fermi-fermi_tolerance, self.bands[:,iband]<=self.fermi+fermi_tolerance))[0])
+            
             if fermi_surface_test != 0:
                 fullBandIndex.append(iband)
+
         self.bands = self.bands[:,fullBandIndex]
         # re-index and creates a mapping to the original bandindex
         reducedBandIndex = np.arange(len(self.bands[0,:]))
+        self.fullBandIndex = fullBandIndex
+        self.reducedBandIndex = reducedBandIndex
         self.reducedBandIndex_to_fullBandIndex = {f"{key}":value for key,value in zip(reducedBandIndex,fullBandIndex)}
         self.fullBandIndex_to_reducedBandIndex = {f"{key}":value for key,value in zip(fullBandIndex,reducedBandIndex)}
         reduced_bands_to_keep_index = [iband for iband in range(len(bands_to_keep))]
@@ -288,6 +292,7 @@ class FermiSurface3D(Surface):
                 
                 self.project_color(scalars_array = scalars_array, cmap=cmap, vmin=vmin, vmax=vmax, scalar_name="Geometric Average Effective Mass")
         
+
         # The following code  creates exteneded surfaces in a given direction
         extended_surfaces = []
         if extended_zone_directions is not None:
@@ -715,6 +720,7 @@ class FermiSurface3D(Surface):
                               ]
                   for kp in self.XYZ]
         
+        
         gradient_list = np.array([grad_x_list,grad_y_list,grad_z_list]).T
 
         lattice = np.linalg.inv(self.reciprocal_lattice.T).T
@@ -744,7 +750,6 @@ class FermiSurface3D(Surface):
                                     group_velocity_y**2 + 
                                     group_velocity_z**2)**0.5
 
-        # if self.effective_mass == True:
         kp_reduced_to_gradient = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,gradient_list_cart)}
         def get_gradient(kp_reduced):
             return kp_reduced_to_gradient[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
@@ -821,19 +826,22 @@ class FermiSurface3D(Surface):
         effective_mass_list = np.array([ (3*(1/effective_mass_tensor_list[ikp,0,0] + 
                                                   1/effective_mass_tensor_list[ikp,1,1] +
                                                   1/effective_mass_tensor_list[ikp,2,2])**-1)/FREE_ELECTRON_MASS for ikp in range(len(self.XYZ))])
-        return (group_velocity_vector,group_velocity_magnitude,effective_mass_tensor_list,effective_mass_list)
+        return (group_velocity_vector, group_velocity_magnitude, effective_mass_tensor_list,
+                effective_mass_list, gradient_list, gradient_list_cart)
     
     def calculate_first_and_second_derivative_energy(self):
         
         self.first_and_second_derivative_energy_property_dict = {}
         for iband in range(len(self.bands[0,:])):
-            group_velocity_vector,group_velocity_magnitude,effective_mass_tensor_list,effective_mass_list = self.calculate_first_and_second_derivative_energy_band(iband)
+            group_velocity_vector,group_velocity_magnitude,effective_mass_tensor_list,effective_mass_list,gradient_list, gradient_list_cart = self.calculate_first_and_second_derivative_energy_band(iband)
             self.first_and_second_derivative_energy_property_dict.update({f"band_{iband}" : {"group_velocity_vector" : group_velocity_vector,
                                                                                         "group_velocity_magnitude": group_velocity_magnitude,
                                                                                         "effective_mass_tensor_list":effective_mass_tensor_list,
                                                                                         "effective_mass_list":effective_mass_list}
                                                                 })
             
+
+
     def _get_brilloin_zone(self, 
                         supercell: List[int]):
         return BrillouinZone(self.reciprocal_lattice, supercell)

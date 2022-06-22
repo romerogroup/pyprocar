@@ -48,11 +48,9 @@ def bandsplot(
     title:str=None,
     show:bool=True,
     savefig:str=None,
-    old:bool=False,
     **kwargs,
 ):
     """
-
 
     Parameters
     ----------
@@ -140,6 +138,32 @@ def bandsplot(
     ebs, kpath, structure, reciprocal_lattice = parse(
         code, lobster, dirname ,outcar, poscar, procar, kpoints,
         interpolation_factor, fermi)
+    
+    if code == "vasp":
+        if outcar is not None:
+            outcar = io.vasp.Outcar(outcar)
+            if fermi is None:
+                fermi = outcar.efermi
+            reciprocal_lattice = outcar.reciprocal_lattice
+        if poscar is not None:
+            poscar = io.vasp.Poscar(poscar)
+            structure = poscar.structure
+            if reciprocal_lattice is None:
+                reciprocal_lattice = poscar.structure.reciprocal_lattice
+
+        if kpoints is not None:
+            kpoints = io.vasp.Kpoints(kpoints)
+            kpath = kpoints.kpath
+
+        procar = io.vasp.Procar(
+            procar,
+            structure,
+            reciprocal_lattice,
+            kpath,
+            fermi,
+            interpolation_factor=interpolation_factor,
+        )
+        ebs = procar.ebs
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
 
@@ -241,7 +265,7 @@ def bandsplot(
                 width_mask=width_mask,
                 vmin=vmin,
                 vmax=vmax,
-            )
+)
         elif mode == "scatter":
             ebs_plot.plot_scatter(
                 color_weights=color_weights,
@@ -254,7 +278,7 @@ def bandsplot(
 
         else:
             print("Selected mode %s not valid. Please check the spelling " % mode)
-
+            
     ebs_plot.set_xticks(kticks, knames)
     ebs_plot.set_yticks(interval=elimit)
     ebs_plot.set_xlim()

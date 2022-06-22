@@ -46,7 +46,8 @@ wheels/
 temp/
 
 #examples
-examples/
+examples*/
+examples*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -114,6 +115,13 @@ ENV/
 .spyderproject
 .spyproject
 
+# VS code
+.vscode/
+.vs/
+
+# Visual Studio 
+*.pyproj
+
 # Rope project settings
 .ropeproject
 
@@ -131,3 +139,8 @@ _build/
 
 # emacs
 '#*
+*~
+.gitignore
+
+# vim
+*.swp

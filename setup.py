@@ -76,6 +76,7 @@ setup(
         "pychemia",
         "pyvista",
         "trimesh",
+        "gdown"
     ],
     data_files=[("", ["LICENSE.txt"])],
     package_data={"": ["setup.json", '*.ini'] },
