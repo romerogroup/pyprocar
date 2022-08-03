@@ -37,36 +37,36 @@ import pyvista
 import trimesh
 
 # Frmsf
-from pyprocar.frmsfparser import FrmsfParser
+from .frmsfparser import FrmsfParser
 
 # Bxsf
-from pyprocar.bxsfparser import BxsfParser
+from .bxsfparser import BxsfParser
 
 # Abinit
-from pyprocar.abinitparser import AbinitParser
+from .abinitparser import AbinitParser
 
 # Elk
-from pyprocar.elkparser import ElkParser
+from .elkparser import ElkParser
 
 # Quantum Espresso
-from pyprocar.qeparser import QEParser, QEDOSParser, QEFermiParser
+from .qeparser import QEParser, QEDOSParser, QEFermiParser
 
 # Lobster
-from pyprocar.lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
+from .lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
 
-from pyprocar.fermisurface import FermiSurface
-from pyprocar.fermisurface3d import FermiSurface3D, BrillouinZone
+from .fermisurface import FermiSurface
+from .fermisurface3d import FermiSurface3D, BrillouinZone
 
 # from . import fermisurface3d
-from pyprocar.procarfilefilter import ProcarFileFilter
-from pyprocar.procarparser import ProcarParser
-from pyprocar.procarplot import ProcarPlot
-from pyprocar.procarselect import ProcarSelect
-from pyprocar.procarsymmetry import ProcarSymmetry
-from pyprocar.utilsprocar import UtilsProcar
-from pyprocar import doscarplot
-from pyprocar import vaspxml
-from pyprocar import core
+from .procarfilefilter import ProcarFileFilter
+from .procarparser import ProcarParser
+from .procarplot import ProcarPlot
+from .procarselect import ProcarSelect
+from .procarsymmetry import ProcarSymmetry
+from .utilsprocar import UtilsProcar
+from . import doscarplot
+from . import vaspxml
+
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot

@@ -1,10 +1,9 @@
-scipy
-numpy>=1.21
+gdown
 matplotlib
-seekpath
-ase
-scikit-image
-pychemia
+numpy
 pyvista
-trimesh
+scikit-image
+scipy
+seekpath
 spglib
+trimesh

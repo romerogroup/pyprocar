@@ -20,9 +20,9 @@ import numpy.typing as npt
 class DensityOfStates:
     def __init__(
         self, 
-        energies: npt.NDArray[np.float64],
-        total: npt.NDArray[np.float64], 
-        projected: npt.NDArray[np.float64] = None, 
+        energies: np.ndarray,
+        total: np.ndarray, 
+        projected: np.ndarray = None, 
         interpolation_factor: int = 1,
         interpolation_kind: str = 'cubic',
     ):

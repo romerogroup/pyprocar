@@ -22,38 +22,54 @@ from .version import email as __email__
 from .version import status as __status__
 from .version import date as __date__
 
+import importlib.util
+import sys
+def has_package(name):
+    spec = importlib.util.find_spec(name)
+    if name in sys.modules:
+        ret = True
+    elif spec is not None:
+        ret = True
+    else:
+        ret = False
+    return ret
+
+HAS_NUMPY_TYPING = has_package("numpy.typing")
+
 
 import logging
 import re
 import sys
 import os
 
-# import ase
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seekpath
 import skimage
-# import pychemia
 import pyvista
 import trimesh
 
 
-from pyprocar.procarfilefilter import ProcarFileFilter
-from pyprocar.procarplot import ProcarPlot
-from pyprocar.procarselect import ProcarSelect
-from pyprocar.procarsymmetry import ProcarSymmetry
-from pyprocar.utilsprocar import UtilsProcar
-from pyprocar.procarunfold import ProcarUnfolder
+# from pyprocar.procarfilefilter import ProcarFileFilter
+# from pyprocar.procarplot import ProcarPlot
+# from pyprocar.procarselect import ProcarSelect
+# from pyprocar.procarsymmetry import ProcarSymmetry
+# from pyprocar.utilsprocar import UtilsProcar
+# from pyprocar.procarunfold import ProcarUnfolder
 
 from .splash import welcome
 
-from .scripts import *
-from .io import *
-from .fermisurface3d import *
+# from .scripts import *
+# from .io import *
+# from .fermisurface3d import *
+# from . import v1
 from . import io
 from . import core
 from . import utils
 from . import plotter
+
 from .download_examples import download_examples
 from .utils.defaults import Settings
 
