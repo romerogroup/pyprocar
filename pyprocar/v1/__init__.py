@@ -66,7 +66,7 @@ from .procarsymmetry import ProcarSymmetry
 from .utilsprocar import UtilsProcar
 from . import doscarplot
 from . import vaspxml
-
+from . import core
 
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
