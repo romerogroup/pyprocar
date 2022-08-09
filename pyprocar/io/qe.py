@@ -812,7 +812,7 @@ class QEParser():
         
         self.ions = []
         for ion in self.root.findall(".//output/atomic_structure/atomic_positions")[0]:
-            self.ions.append(ion.attrib['name'])
+            self.ions.append(ion.attrib['name'][:2])
             self.composition[ ion.attrib['name']] += 1
             
         self.atomic_positions = np.array([ ion.text.split() for ion in self.root.findall(".//output/atomic_structure/atomic_positions")[0]],dtype = float)

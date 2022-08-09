@@ -309,6 +309,7 @@ def parse(code:str='vasp',
           outcar:str='OUTCAR',
           poscar:str='PORCAR',
           procar:str='PROCAR',
+          kpoints:np.ndarray=None,
           interpolation_factor:int=1,
           fermi:float=None):
     ebs = None
