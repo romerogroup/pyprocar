@@ -4,13 +4,13 @@ from . import lobster
 # from . import bsxf
 # from . import frmsf
 
-# from .procarparser import ProcarParser
-# from .abinitparser import AbinitParser
-# from .elkparser import ElkParser
-# from .qeparser import QEParser, QEDOSParser, QEFermiParser
-# from .lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
-# from .vaspxml import VaspXML
-# # from . import vaspxml
+from .procarparser import ProcarParser
+from .abinitparser import AbinitParser
+from .elkparser import ElkParser
+from .qeparser import QEParser, QEDOSParser, QEFermiParser
+from .lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
+from .vaspxml import VaspXML
+# from . import vaspxml
 
 # TODO remove the directories abinitparser
 # TODO remove the directories bxsfparser and change it to a *.py module

@@ -54,8 +54,8 @@ from .qeparser import QEParser, QEDOSParser, QEFermiParser
 # Lobster
 from .lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
 
-from .fermisurface import FermiSurface
-from .fermisurface3d import FermiSurface3D, BrillouinZone
+from pyprocar.fermisurface import FermiSurface
+from pyprocar.fermisurface3d import FermiSurface3D, BrillouinZone
 
 # from . import fermisurface3d
 from .procarfilefilter import ProcarFileFilter
