@@ -102,9 +102,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#elk">2. Elk</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#quantum-espresso">3. Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lobster">4. Lobster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#abinit">5. Abinit</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#abinit">5. Abinit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">pyprocar API</a></li>
 </ul>
@@ -403,10 +403,8 @@ plot1d
 </div>
 <p>Refer to Fe/Lobster_QE in the examples directory for example inputs</p>
 </section>
-</section>
-<hr class="docutils" />
 <section id="abinit">
-<h1>5. Abinit<a class="headerlink" href="#abinit" title="Permalink to this headline">¶</a></h1>
+<h2>5. Abinit<a class="headerlink" href="#abinit" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Required files : PROCAR, &lt;abinitoutput&gt;.out</p></li>
 <li><p>flag           : code=’abinit’</p></li>
@@ -414,6 +412,7 @@ plot1d
 <p>Abinit version <span class="math notranslate nohighlight">\(9.x^*\)</span> generates a PROCAR similar to that of VASP when <code class="docutils literal notranslate"><span class="pre">prtprocar</span></code> is set in the input file.
 To provide the Abinit output file, use the flag <code class="docutils literal notranslate"><span class="pre">abinit_output=&lt;nameofoutputfile&gt;</span></code> in PyProcar functions.</p>
 <p>When running Abinit in parallel the PROCAR is split into multiple files. PyProcar’s <code class="docutils literal notranslate"><span class="pre">cat</span></code> function can merge these files together as explained in the section <a class="reference internal" href="cat.html#labelcat"><span class="std std-ref">Concatenating multiple calculations</span></a>. This also has an option to fix formatting issues in the Abinit PROCAR if needed.</p>
+</section>
 </section>
 
 

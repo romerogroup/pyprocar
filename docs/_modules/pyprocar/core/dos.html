@@ -94,7 +94,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html">DFT Preparation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dftprep.html#abinit">5. Abinit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pyprocar API</a></li>
 </ul>
@@ -163,77 +162,83 @@
            <div itemprop="articleBody">
             
   <h1>Source code for pyprocar.core.dos</h1><div class="highlight"><pre>
-<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span></span><span class="sd">&quot;&quot;&quot;This module defines an object to handle the density of states in a DFT </span>
+<span class="sd">calculations.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Wed Aug 19 20:49:03 2020</span>
 
-<span class="sd">@author: Pedram Tavadze, Logan Lang</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze, Logan Lang&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) 2007 Free Software Foundation,&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Uthpala Herath&quot;</span><span class="p">]</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GNU GENERAL PUBLIC LICENSE&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;2.0&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Logan Lang, Pedram Tavadze&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;petavazohi@spot.colorado.edu&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Production&quot;</span>
+
+<span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">print_tb</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 
+<span class="c1"># TODO When PEP 646 is introduced in numpy. need to update the python typing.</span>
 
 <div class="viewcode-block" id="DensityOfStates"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.dos.DensityOfStates">[docs]</a><span class="k">class</span> <span class="nc">DensityOfStates</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">energies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">projected</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interpolation_factor</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">energies</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span>
+        <span class="n">total</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> 
+        <span class="n">projected</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+        <span class="n">interpolation_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">interpolation_kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cubic&#39;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A class that contains density of states calcuated by the a density</span>
+        <span class="sd">&quot;&quot;&quot;A class that contains density of states calculated by the a density</span>
 <span class="sd">        functional theory calculation.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        energies : list float, optional</span>
-<span class="sd">            List of points on energy spectrum . The default is None.</span>
-<span class="sd">        total : list float, optional</span>
-<span class="sd">            List of densities at each point. The default is None.</span>
-<span class="sd">        projected : list float, optional</span>
-<span class="sd">            dictionary by the following order</span>
-<span class="sd">            projected[iatom][iprincipal][iorbital][ispin][ienergy].</span>
-
-<span class="sd">            ``iprincipal`` works like the principal quantum number n. The last</span>
-<span class="sd">            index should be the total. (iprincipal = -1)</span>
-<span class="sd">            n = iprincipal =&gt; 0, 1, 2, 3, -1 =&gt; s, p, d, total</span>
-<span class="sd">            ``iorbital`` works similar to angular quantum number l, but not the</span>
-<span class="sd">            same. iorbital follows this order</span>
-<span class="sd">            (0,1,2,3,4,5,6,7,8) =&gt; s,py,pz,px,dxy,dyz,dz2,dxz,dx2-y2.</span>
-<span class="sd">            ``ispin`` works as magnetic quantum number.</span>
-<span class="sd">            m = 0,1, for spin up and down</span>
-<span class="sd">            The default is None.</span>
-
-
+<span class="sd">        energies : npt.NDArray[np.float64]</span>
+<span class="sd">            Points on energy spectrum. shape = (n_dos, )</span>
+<span class="sd">        total : npt.NDArray[np.float64]</span>
+<span class="sd">            Densities at each point. shape = (n_dos, )</span>
+<span class="sd">        projected : npt.NDArray[np.float64], optional</span>
+<span class="sd">            Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)</span>
+<span class="sd">            ``i_principal`` works like the principal quantum number n. The last</span>
+<span class="sd">            index should be the total. (i_principal = -1)</span>
+<span class="sd">            n = i_principal =&gt; 0, 1, 2, 3, -1 =&gt; s, p, d, total</span>
+<span class="sd">            ``i_orbital`` works similar to angular quantum number l, but not the</span>
+<span class="sd">            same. i_orbital follows this order</span>
+<span class="sd">            (0, 1, 2, 3, 4, 5, 6, 7, 8) =&gt; s, py, pz, px, dxy, dyz, dz2, dxz, dx2-y2.</span>
+<span class="sd">            ``i_spin`` works as magnetic quantum number.</span>
+<span class="sd">            m = 0, 1, for spin up and down, by default None.</span>
 <span class="sd">        interpolation_factor : int, optional</span>
 <span class="sd">            The number of density of states points will increase by this factor</span>
-<span class="sd">            in the interpolation.</span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        None.</span>
+<span class="sd">            in the interpolation, by default 1.</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>        
 
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">energies</span> <span class="o">=</span> <span class="n">energies</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">total</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span>
-
-        <span class="k">if</span> <span class="n">interpolation_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">interpolation_factor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]:</span>
             <span class="n">interpolated</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">i_spin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)):</span>
                 <span class="n">new_energy</span><span class="p">,</span> <span class="n">new_total</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ispin</span><span class="p">],</span> <span class="n">factor</span><span class="o">=</span><span class="n">interpolation_factor</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">i_spin</span><span class="p">],</span> <span class="n">factor</span><span class="o">=</span><span class="n">interpolation_factor</span>
                 <span class="p">)</span>
                 <span class="n">interpolated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_total</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">interpolated</span>
 
-            <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">iprincipal</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">])):</span>
-                    <span class="k">for</span> <span class="n">iorbital</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">])):</span>
-                        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">][</span><span class="n">iorbital</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">i_atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">i_principal</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">i_atom</span><span class="p">])):</span>
+                    <span class="k">for</span> <span class="n">i_orbital</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">i_atom</span><span class="p">][</span><span class="n">i_principal</span><span class="p">])):</span>
+                        <span class="k">for</span> <span class="n">i_spin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="n">i_atom</span><span class="p">][</span><span class="n">i_principal</span><span class="p">][</span><span class="n">i_orbital</span><span class="p">])):</span>
                             <span class="n">x</span> <span class="o">=</span> <span class="n">energies</span>
-                            <span class="n">y</span> <span class="o">=</span> <span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">][</span><span class="n">iorbital</span><span class="p">][</span><span class="n">ispin</span><span class="p">]</span>
+                            <span class="n">y</span> <span class="o">=</span> <span class="n">projected</span><span class="p">[</span><span class="n">i_atom</span><span class="p">][</span><span class="n">i_principal</span><span class="p">][</span><span class="n">i_orbital</span><span class="p">][</span><span class="n">i_spin</span><span class="p">]</span>
                             <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">)</span>
 
-                            <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">iatom</span><span class="p">][</span><span class="n">iprincipal</span><span class="p">][</span><span class="n">iorbital</span><span class="p">][</span><span class="n">ispin</span><span class="p">]</span> <span class="o">=</span> <span class="n">ys</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">i_atom</span><span class="p">][</span><span class="n">i_principal</span><span class="p">][</span><span class="n">i_orbital</span><span class="p">][</span><span class="n">i_spin</span><span class="p">]</span> <span class="o">=</span> <span class="n">ys</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">energies</span> <span class="o">=</span> <span class="n">xs</span>
 
@@ -241,16 +246,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ndos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">n_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dos</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nspins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">n_spins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_non_collinear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspins</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_spins</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -303,7 +312,7 @@
             <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orbitals</span><span class="p">)</span>
 
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndos</span><span class="p">))</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dos</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">iprinc</span> <span class="ow">in</span> <span class="n">principal_q_numbers</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
@@ -317,6 +326,7 @@
 <div class="viewcode-block" id="interpolate"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.dos.interpolate">[docs]</a><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interplates the function y=f(x) by increasing the x points by the factor.</span>
+<span class="sd">    # TODO need to add ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, or ‘next’</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

@@ -252,7 +252,6 @@ lobster_input_file must include explicit bands such as::
 Refer to Fe/Lobster_QE in the examples directory for example inputs
 
 =========
-
 5. Abinit
 =========
 

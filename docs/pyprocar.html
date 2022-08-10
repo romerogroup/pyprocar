@@ -97,7 +97,6 @@
 <li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dftprep.html">DFT Preparation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dftprep.html#abinit">5. Abinit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">pyprocar API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">pyprocar package</a><ul>
@@ -225,7 +224,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pyprocar.core.html">pyprocar.core package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#module-pyprocar.core.dos">pyprocar.core.dos module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#module-pyprocar.core.elements">pyprocar.core.elements module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#pyprocar-core-elements-module">pyprocar.core.elements module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#module-pyprocar.core.isosurface">pyprocar.core.isosurface module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#module-pyprocar.core.structure">pyprocar.core.structure module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pyprocar.core.html#module-pyprocar.core.surface">pyprocar.core.surface module</a></li>
@@ -234,8 +233,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pyprocar.doscarplot.html">pyprocar.doscarplot package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pyprocar.doscarplot.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyprocar.doscarplot.html#module-pyprocar.doscarplot.dosplot">pyprocar.doscarplot.dosplot module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pyprocar.doscarplot.html#module-pyprocar.doscarplot">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyprocar.doscarplot.html#pyprocar-doscarplot-dosplot-module">pyprocar.doscarplot.dosplot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyprocar.doscarplot.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pyprocar.elkparser.html">pyprocar.elkparser package</a><ul>
@@ -334,8 +333,6 @@
 </section>
 <section id="module-pyprocar.scriptDosplot">
 <span id="pyprocar-scriptdosplot-module"></span><h2>pyprocar.scriptDosplot module<a class="headerlink" href="#module-pyprocar.scriptDosplot" title="Permalink to this headline">¶</a></h2>
-<p>Created on May 17 2020
-&#64;author: Pedram Tavadze</p>
 </section>
 <section id="module-pyprocar.scriptFermi2D">
 <span id="pyprocar-scriptfermi2d-module"></span><h2>pyprocar.scriptFermi2D module<a class="headerlink" href="#module-pyprocar.scriptFermi2D" title="Permalink to this headline">¶</a></h2>
@@ -363,6 +360,33 @@
 </section>
 <section id="module-pyprocar.scriptUnfold">
 <span id="pyprocar-scriptunfold-module"></span><h2>pyprocar.scriptUnfold module<a class="headerlink" href="#module-pyprocar.scriptUnfold" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyprocar.scriptUnfold.unfold">
+<span class="sig-prename descclassname"><span class="pre">pyprocar.scriptUnfold.</span></span><span class="sig-name descname"><span class="pre">unfold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PROCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POSCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OUTCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abinit_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'abinit.out'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[2,</span> <span class="pre">0,</span> <span class="pre">0],</span> <span class="pre">[0,</span> <span class="pre">2,</span> <span class="pre">0],</span> <span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">2]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elkin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elk.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vasp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unfold_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbitals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unfold_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cubic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kdirect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savetab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unfold_result.csv'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyprocar/scriptUnfold.html#unfold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scriptUnfold.unfold" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>PROCAR filename.</em>) – </p></li>
+<li><p><strong>poscar</strong> (<em>POSCAR filename</em>) – </p></li>
+<li><p><strong>outcar</strong> (<em>OUTCAR filename</em><em>, </em><em>for reading fermi energy. You can also use efermi and set outcar=None</em>) – </p></li>
+<li><p><strong>supercell_matrix</strong> (<em>supercell matrix from primitive cell to supercell</em>) – </p></li>
+<li><p><strong>ispin</strong> (<em>For non-spin polarized system</em><em>, </em><em>ispin=None.</em>) – For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</p></li>
+<li><p><strong>efermi</strong> (<em>Fermi energy</em>) – </p></li>
+<li><p><strong>elimit</strong> (<em>range of energy to be plotted.</em>) – </p></li>
+<li><p><strong>kticks</strong> (<em>the indices of K points which has labels given in knames.</em>) – </p></li>
+<li><p><strong>knames</strong> (<em>see kticks</em>) – </p></li>
+<li><p><strong>print_kpts</strong> (<em>print all the kpoints to screen. This is to help find the kticks and knames.</em>) – </p></li>
+<li><p><strong>show_band</strong> (<em>whether to plot the bands before unfolding.</em>) – </p></li>
+<li><p><strong>width</strong> (<em>the width of the unfolded band.</em>) – </p></li>
+<li><p><strong>color</strong> (<em>color of the unfoled band.</em>) – </p></li>
+<li><p><strong>savetab</strong> (<em>the csv file name of which  the table of unfolding result will be written into.</em>) – </p></li>
+<li><p><strong>savefig</strong> (<em>the file name of which the figure will be saved.</em>) – </p></li>
+<li><p><strong>exportplt</strong> (<em>flag to export plot as matplotlib.pyplot object.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-pyprocar.scriptVector">
 <span id="pyprocar-scriptvector-module"></span><h2>pyprocar.scriptVector module<a class="headerlink" href="#module-pyprocar.scriptVector" title="Permalink to this headline">¶</a></h2>
