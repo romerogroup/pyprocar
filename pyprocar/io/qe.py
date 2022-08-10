@@ -14,7 +14,13 @@ from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, K
 
 HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class QEParser():
-    def __init__(self, scfIn_filename = "scf.in", dirname = "", bandsIn_filename = "bands.in", pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", dos_interpolation_factor = None ):
+    def __init__(self, scfIn_filename:str = "scf.in", 
+                        dirname:str = "", 
+                        bandsIn_filename:str = "bands.in", 
+                        pdosIn_filename:str = "pdos.in", 
+                        kpdosIn_filename:str = "kpdos.in", 
+                        atomic_proj_xml:str = "atomic_proj.xml", 
+                        dos_interpolation_factor:int  = 1):
         if dirname != "":
             dirname = dirname + os.sep
         else:
@@ -76,13 +82,10 @@ class QEParser():
             "dx2",
             "tot",
         ]
-        
+
         self.dos_interpolation_factor = dos_interpolation_factor
         
-        
         # Parsing structual information 
-               
-        
         self.parse_magnetization()
         self.parse_structure()
         self.parse_band_structure_tag()
@@ -341,7 +344,7 @@ class QEParser():
                 continue
 
             total.append(self.dos_total[ispin])
-        # total = np.array(total).T
+
         return DensityOfStates(
             energies=energies,
             total=total,
@@ -449,13 +452,18 @@ class QEParser():
         
         atms_wfc_num = []
         for file in os.listdir(f"{self.dirname}"):
-            if file.startswith(self.pdos_prefix) and not file.endswith(".pdos_tot"):
+            if (file.startswith(self.pdos_prefix) and not 
+                file.endswith(".pdos_tot") and not 
+                file.endswith(".lowdin") and not 
+                file.endswith(".projwfc_down") and not 
+                file.endswith(".projwfc_up")):
                 filename = f"{self.dirname}/{file}"
                 wfc_filenames.append(filename )
+
                 atm_num = int(re.findall("_atm#([0-9]*)\(.*",filename)[0])
                 wfc_num = int(re.findall("_wfc#([0-9]*)\(.*",filename)[0])
                 wfc = re.findall("_wfc#[0-9]*\(([A-Za-z]*)\).*",filename)[0]
-                atm = re.findall("_atm#[0-9]*\(([A-Za-z]*)\).*",filename)[0]
+                atm = re.findall("_atm#[0-9]*\(([A-Za-z]*[0-9]*)\).*",filename)[0]
  
                 atms_wfc_num.append((atm_num,atm,wfc_num,wfc))
                 

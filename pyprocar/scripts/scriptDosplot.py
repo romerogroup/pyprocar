@@ -434,9 +434,9 @@ def dosplot(
 
     edos_plot.draw_fermi(
             orientation = orientation,
-            color=settings.edos.fermi_color,
-            linestyle=settings.edos.fermi_linestyle,
-            linewidth=settings.edos.fermi_linewidth,
+            color=settings.dos.fermi_color,
+            linestyle=settings.dos.fermi_linestyle,
+            linewidth=settings.dos.fermi_linewidth,
         )
     if orientation == 'horizontal':
         if elimit is not None:
@@ -449,9 +449,9 @@ def dosplot(
         if dos_limit is not None:
             edos_plot.set_xlim(dos_limit)
 
-    if settings.edos.grid or grid:
+    if settings.dos.grid or grid:
         edos_plot.grid()
-    if settings.edos.legend and len(edos_plot.labels) != 0:
+    if settings.dos.legend and len(edos_plot.labels) != 0:
         edos_plot.legend(edos_plot.labels)
     if savefig is not None:
         edos_plot.save(savefig)
@@ -476,7 +476,7 @@ def parse(code: str='vasp',
     if lobster is True:
         if dirname is None:
             dirname = "dos"
-        parser = io.lobster.LobsterParser(dirname = dirname,code = code, dos_interpolation_factor = None)
+        parser = io.lobster.LobsterParser(dirname = dirname,code = code, dos_interpolation_factor =interpolation_factor)
         if fermi is None:
             fermi = parser.efermi
         
@@ -510,7 +510,7 @@ def parse(code: str='vasp',
             dirname = "dos"
         parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
                              pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
-                             dos_interpolation_factor = None)
+                             dos_interpolation_factor =interpolation_factor)
         if fermi is None:
             fermi = parser.efermi
         

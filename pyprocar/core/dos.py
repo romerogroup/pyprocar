@@ -11,6 +11,7 @@ __maintainer__ = "Logan Lang, Pedram Tavadze"
 __email__ = "petavazohi@spot.colorado.edu"
 __status__ = "Production"
 
+from traceback import print_tb
 from scipy.interpolate import CubicSpline
 import numpy as np
 import numpy.typing as npt
@@ -55,7 +56,6 @@ class DensityOfStates:
         self.energies = energies
         self.total = total
         self.projected = projected
-
         if interpolation_factor not in [1, 0]:
             interpolated = []
             for i_spin in range(len(self.total)):
@@ -71,7 +71,7 @@ class DensityOfStates:
                     for i_orbital in range(len(projected[i_atom][i_principal])):
                         for i_spin in range(len(projected[i_atom][i_principal][i_orbital])):
                             x = energies
-                            y = projected[i_atom][iprincipal][i_orbital][i_spin]
+                            y = projected[i_atom][i_principal][i_orbital][i_spin]
                             xs, ys = interpolate(x, y, factor=interpolation_factor)
 
                             self.projected[i_atom][i_principal][i_orbital][i_spin] = ys

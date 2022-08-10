@@ -80,8 +80,8 @@ def bandsdosplot(
         ax_ebs.grid()
         ax_dos.grid()
     if draw_fermi:
-        ax_ebs.axhline(y=0, color=settings.edos.fermi_color, linestyle=settings.edos.fermi_linestyle, linewidth=settings.edos.fermi_linewidth)
-        ax_dos.axhline(y=0, color=settings.edos.fermi_color, linestyle=settings.edos.fermi_linestyle, linewidth=settings.edos.fermi_linewidth)
+        ax_ebs.axhline(y=0, color=settings.dos.fermi_color, linestyle=settings.dos.fermi_linestyle, linewidth=settings.dos.fermi_linewidth)
+        ax_dos.axhline(y=0, color=settings.dos.fermi_color, linestyle=settings.dos.fermi_linestyle, linewidth=settings.dos.fermi_linewidth)
     
     if title is not None:
         fig.suptitle(title, title_fontsize=title_fontsize)
