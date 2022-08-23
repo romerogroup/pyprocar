@@ -500,7 +500,7 @@ def parse(code: str='vasp',
 
 
         vaspxml = io.vasp.VaspXML(filename=filename,
-                               dos_interpolation_factor=None) 
+                               dos_interpolation_factor=interpolation_factor) 
         
         dos = vaspxml.dos
         
