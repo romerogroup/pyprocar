@@ -463,7 +463,7 @@ def fermi3D(
     if iso_slider == False:
         fermi_surface3D = FermiSurface3D(
                                         kpoints=parser.ebs.kpoints,
-                                        bands=parser.ebs.kpoints,
+                                        bands=parser.ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -505,7 +505,7 @@ def fermi3D(
             fermi_surface3D = FermiSurface3D(
                                             kpoints=parser.ebs.kpoints,
                                             bands_to_keep = bands_to_keep,
-                                            bands=parser.ebs.kpoints,
+                                            bands=parser.ebs.bands,
                                             spd=spd,
                                             spd_spin=spd_spin,
                                             calculate_fermi_speed = calculate_fermi_speed,
