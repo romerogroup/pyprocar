@@ -155,14 +155,12 @@ def bandsplot(
             kpoints = io.vasp.Kpoints(kpoints)
             kpath = kpoints.kpath
 
-        procar = io.vasp.Procar(
-            procar,
-            structure,
-            reciprocal_lattice,
-            kpath,
-            fermi,
-            interpolation_factor=interpolation_factor,
-        )
+        procar = io.vasp.Procar(filename=procar,
+                             structure=structure,
+                             reciprocal_lattice=reciprocal_lattice,
+                             kpath=kpath,
+                             efermi=fermi,
+                             interpolation_factor=interpolation_factor)
         ebs = procar.ebs
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
@@ -349,11 +347,11 @@ def parse(code:str='vasp',
             kpoints = io.vasp.Kpoints(kpoints)
             kpath = kpoints.kpath
 
-        procar = io.vasp.Procar(procar,
-                             structure,
-                             reciprocal_lattice,
-                             kpath,
-                             fermi,
+        procar = io.vasp.Procar(filename=procar,
+                             structure=structure,
+                             reciprocal_lattice=reciprocal_lattice,
+                             kpath=kpath,
+                             efermi=fermi,
                              interpolation_factor=interpolation_factor)
         ebs = procar.ebs
         
