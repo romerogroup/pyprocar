@@ -14,8 +14,8 @@ import vtk
 import pyvista
 from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
 
-# from .core.surface import boolean_add
-from ..fermisurface3d import FermiSurface3D
+
+from ..core import FermiSurface3D
 from ..splash import welcome
 from ..utilsprocar import UtilsProcar
 from ..io.procarparser import ProcarParser

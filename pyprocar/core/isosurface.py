@@ -29,13 +29,13 @@ class Isosurface(Surface):
     ):
         """
         This class contains a surface that finds all the poins correcponding
-        to the following equation
+        to the following equation. 
         V(X,Y,Z) = f
 
         Parameters
         ----------
         XYZ : TYPE, list of lists of floats, (n,3)
-            DESCRIPTION. a list of coordinates [[x1,y1,z1],[x2,y2,z2],...]
+            XYZ must be between (0.5,0.5]. a list of coordinates [[x1,y1,z1],[x2,y2,z2],...]
             corresponding V
         V : TYPE, list of floats, (n,)
             DESCRIPTION. a list of values [V1,V2,...] corresponding to XYZ
@@ -81,6 +81,7 @@ class Isosurface(Surface):
         self.V_matrix = V_matrix
         self.algorithm = algorithm
         self.padding = padding
+        self.supercell = padding 
         self.interpolation_factor = interpolation_factor
         self.transform_matrix = transform_matrix
         self.boundaries = boundaries
@@ -106,8 +107,9 @@ class Isosurface(Surface):
                 self.nY // 2 * padding[1],
                 self.nZ // 2 * padding[2],
             ]
-
+        
         verts, faces, normals, values = self._get_isosurface(interpolation_factor)
+        
 
         
         if verts is not None and faces is not None:
@@ -127,16 +129,13 @@ class Isosurface(Surface):
             """
 
             if boundaries is not None:
-                supercell_surface = pv.PolyData(
-                    verts, faces)
-                
-                for iface in range(len(boundaries.faces_array)):
-                    normal = boundaries.face_normals[iface]
-                    center = boundaries.centers[iface,:]
-
+                supercell_surface = pv.PolyData(var_inp=verts, faces=faces)
+                for normal,center in zip(boundaries.face_normals, boundaries.centers):
                     supercell_surface.clip(origin=center, normal=normal, inplace=True)
+
+                if len(supercell_surface.points) == 0:
+                    raise Exception("Clippping destroyed mesh.")
     
-                
                 verts = supercell_surface.points
                 faces = supercell_surface.faces
 
@@ -276,7 +275,8 @@ class Isosurface(Surface):
 
             return [(mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2])]
         except Exception as e:
-            print(e)
+            # print(e)
+            print("No isosurface for this band")
             return None
 
     def _get_isosurface(self, interp_factor=1):
@@ -331,56 +331,21 @@ class Isosurface(Surface):
             )
 
         except Exception as e:
-            print(e)
+            # print(e)
             print("No isosurface for this band")
             return None, None, None, None
-        # recenter
-
-        for ix in range(3):
             
-            if np.any(self.XYZ > 0.5):
-                verts[:, ix] *= self.dxyz[ix] / interp_factor
-                verts[:, ix] -= 1*self.supercell[ix]
-                # verts[:, ix] -= 1*self.padding[ix]
- 
-                   
-            else:
-                verts[:, ix] -= verts[:, ix].min()
-                verts[:, ix] -= (verts[:, ix].max() -
-                                  verts[:, ix].min()) / 2
-                
-                verts[:, ix] *= self.dxyz[ix] / interp_factor
+        # recenter
+        for ix in range(3):
+            verts[:, ix] -= verts[:, ix].min()
+            verts[:, ix] -= (verts[:, ix].max() -
+                                verts[:, ix].min()) / 2
+            
+            verts[:, ix] *= self.dxyz[ix] / interp_factor
 
-                if bnd is not None and interp_factor != 1:
-                    verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
+            if bnd is not None and interp_factor != 1:
+                verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
                     
-                    
-                    
-                    
-                    
-
-            # verts[:, ix] *= self.dxyz[ix] / interp_factor
-
-            # print(self.dxyz)
-
-            # if self.file == "bxsf":
-            #     verts[:, ix] -= 0.5
-            # if bnd is not None and interp_factor != 1:
-            #     print((verts[:, ix].min() - bnd[ix][0]))
-            #     verts[:, ix] -= (verts[:, ix].min() - bnd[ix][0])
-            #     if self.file == "bxsf":
-            #         verts[:, ix] -= 0.50
-
-            #     x_shift = verts[:,0].min() - bnd[0]
-            # y_shift = verts[:,1].min() - bnd[1]
-            # z_shift = verts[:,2].min() - bnd[2]
-
-        # transfare from fraction to cartesian
-        # verts = np.dot(verts, self.reciprocal_)
-        # new_faces = np.zeros(shape=(len(faces), 4))
-        # new_faces[:, 0] = 3
-        # new_faces[:, 1:] = faces
-        # faces = new_faces
         return verts, faces, normals, values
 
 

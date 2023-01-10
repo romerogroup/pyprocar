@@ -38,9 +38,11 @@ class PropertyCalculator:
             dirname:str="",
             infile:str="in.bxsf",
             abinit_output:str=None,
+            apply_symmetry:bool=True,
             repair:bool=False
         ):
         self.code = code
+        self.apply_symmetry=apply_symmetry
         self.procar=procar
         self.poscar=poscar
         self.outcar=outcar
@@ -49,14 +51,55 @@ class PropertyCalculator:
         self.abinit_output=abinit_output
         self.repair = repair
 
-        self.data, self.reciprocal_lattice, self.procarFile, self.e_fermi = self.__parse_code()
+        self.ebs, self.reciprocal_lattice, self.e_fermi = self.__parse_code()
 
-        self.bands= self.data.bands
-        self.kpoints= self.data.kpoints
+        self.bands= self.ebs.bands
+        self.kpoints= self.ebs.kpoints
         
         print("This is experimental")
 
+    def calculate_derivative(self):
+        """
+        Computes the derivative of a scalar array at an unordered list of 3D points.
+        
+        Parameters:
+        - f: a 1D array of shape (n,)
+        - X: an unordered list of 3D points at which to evaluate the derivative of f. 
+            Each point is a 1D array of shape (3,)
+        
+        Returns:
+        - A list of derivatives, one for each point in X. Each derivative is a 1D array of shape (3,)
+        """
+        band_dx = []
+        print(self.bands.shape)
+        print(self.kpoints.shape)
+        for iband in range(11,self.bands.shape[1]):
+            val = self.calc_gradients_unstructured(scalar_field=self.bands[:,iband,0],points = self.kpoints)
+            band_dx.append(val)
+        return np.array(band_dx)
+
+    def calc_gradients_unstructured(self, scalar_field, points):
+        points = points.copy()
+
+
+        print(scalar_field.shape)
+        xx, yy, zz  = np.meshgrid (scalar_field[:,0] , scalar_field[:,1] , scalar_field[:,2] )
+
+        print(xx.shape)
+        # for x in points_crystal:
+        #     grad_x =  np.gradient(scalar_field, dx = np.linalg.norm(points_crystal[0,0,0] - points_crystal[1,0,0]))
+            # grad_y =  np.gradient(scalar_field, dx = np.linalg.norm(points_crystal[0,0,0] - points_crystal[0,1,0]))
+            # grad_z =  np.gradient(scalar_field, dx = np.linalg.norm(points_crystal[0,0,0] - points_crystal[0,0,1]))
+        # grad_x, grad_y, grad_z = np.gradient(scalar_field, points[:,0], points[:,1], points[:,2])
+        # print(gradient_crystal.shape)
+        # gradient_cart = gradient_crystal.dot(self.reciprocal_lattice)
+
+        # return grad_x, grad_y, grad_z
+    
+
+
     def calculate_first_and_second_derivative_energy_band(self, 
+
                                                         iband: int):
         def get_energy(kp_reduced: np.ndarray):
             return kp_reduced_to_energy[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
@@ -71,7 +114,8 @@ class PropertyCalculator:
                         kx = mesh_list[0][i,j,k]
                         ky = mesh_list[1][i,j,k]
                         kz = mesh_list[2][i,j,k]
-        
+
+                        
                         mesh_list_cart[0][i,j,k] = get_cartesian_kp([kx,ky,kz])[0]
                         mesh_list_cart[1][i,j,k] = get_cartesian_kp([kx,ky,kz])[1]
                         mesh_list_cart[2][i,j,k] = get_cartesian_kp([kx,ky,kz])[2]
@@ -287,16 +331,18 @@ class PropertyCalculator:
 
         elif self.code == "qe":
             # procarFile = parser
-            if dirname is None:
-                dirname = "bands"
-            procarFile = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
+            if self.dirname is None:
+                self.dirname = "bands"
+            parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = self.dirname, bandsIn_filename = "bands.in", 
                                 pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
                                 dos_interpolation_factor = None)
-            reciprocal_lattice = procarFile.reciprocal_lattice
-            data = ProcarSelect(procarFile, deepCopy=True)
+            reciprocal_lattice = parser.ebs.reciprocal_lattice
+    
+            e_fermi = parser.ebs.efermi
+            ebs = parser.ebs
 
-            e_fermi = procarFile.efermi
-
+            if self.apply_symmetry:
+                ebs.ibz2fbz(parser.rotations)
             # procarFile = QEFermiParser()
             # reciprocal_lattice = procarFile.reclat
             # data = ProcarSelect(procarFile, deepCopy=True)
@@ -305,7 +351,7 @@ class PropertyCalculator:
             # else:
             #     e_fermi = fermi
 
-        return data, reciprocal_lattice, procarFile, e_fermi
+        return parser.ebs, reciprocal_lattice, e_fermi
 
     def __format_data(self, 
                     mode:str,
@@ -315,17 +361,9 @@ class PropertyCalculator:
                     spins:List[int]=None, 
                     spin_texture: bool=False,):
 
-        # bands_to_keep = bands
-        # if bands_to_keep is None:
-        #     bands_to_keep = np.arange(len(self.data.bands[0, :]))
-
-        # self.band_near_fermi = []
-        # for iband in range(len(self.data.bands[0,:])):
-        #     fermi_tolerance = 0.1
-        #     fermi_surface_test = len(np.where(np.logical_and(self.data.bands[:,iband]>=self.e_fermi-fermi_tolerance, self.data.bands[:,iband]<=self.e_fermi+fermi_tolerance))[0])
-        #     if fermi_surface_test != 0:
-        #         self.band_near_fermi.append(iband)
-        # print(f"Bands near the fermi energy : {self.band_near_fermi}")
+        bands_to_keep = bands
+        if bands_to_keep is None:
+            bands_to_keep = np.arange(len(self.data.bands[0, :]))
 
         spd = []
         if mode == "parametric":

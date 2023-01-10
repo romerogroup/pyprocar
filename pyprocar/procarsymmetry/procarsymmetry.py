@@ -65,7 +65,7 @@ class ProcarSymmetry:
         z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
         return np.array((w, x, y, z))
 
-    def GeneralRotation(self, angle, rotAxis=[0, 0, 1], store=True):
+    def general_rotation(self, angle, rotAxis=[0, 0, 1], store=True):
         """Apply a rotation defined by an angle and an axis.
     
     Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin
@@ -137,7 +137,7 @@ class ProcarSymmetry:
         self.log.debug("GeneralRotation: ...Done")
         return (kpoints, sx, sy, sz)
 
-    def RotSymmetryZ(self, order):
+    def rot_symmetry_z(self, order):
         """Applies the given rotational crystal symmetry to the current
     system. ie: to unfold the irreductible BZ to the full BZ.
 
@@ -150,7 +150,7 @@ class ProcarSymmetry:
     """
         self.log.debug("RotSymmetryZ:...")
         rotations = [
-            self.GeneralRotation(360 * i / order, store=False) for i in range(order)
+            self.general_rotation(360 * i / order, store=False) for i in range(order)
         ]
         rotations = list(zip(*rotations))
         self.log.debug(
@@ -170,7 +170,7 @@ class ProcarSymmetry:
 
         return
 
-    def MirrorX(self):
+    def mirror_x(self):
         """Applies the given rotational crystal symmetry to the current
     system. ie: to unfold the irreductible BZ to the full BZ.
 
@@ -197,7 +197,7 @@ class ProcarSymmetry:
 
         return
 
-    def Translate(self, newOrigin):
+    def translate(self, newOrigin):
         """Centers the Kpoints at newOrigin, newOrigin is either and index (of
    some Kpoint) or the cartesian coordinates of one point in the
    reciprocal space.

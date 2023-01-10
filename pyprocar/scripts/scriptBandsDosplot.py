@@ -128,9 +128,13 @@ def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
     fig.axes[1].set_position(dos_position)
 
     #Formating dos plot to be comatible with band structure plot
-    fig.axes[1].sharey(fig.axes[0])
     fig.axes[1].axes.set_ylabel("")
     fig.axes[1].axes.set_yticklabels([])
+    fig.axes[1].sharey(fig.axes[0])
+
+    fig.axes[1].axes.get_yaxis().set_visible(False)
+
+    
 
     #Handles existing colorbars
     if ax_color_bar is not None:

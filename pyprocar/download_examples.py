@@ -1,7 +1,8 @@
 import os
 import gdown
 
-
+# TODO Zip file in google drive then download
+# TODO Save dir path to temp
 def download_examples(save_dir=''):
     if save_dir != '':
         output = f"{save_dir}{os.sep}examples.zip"

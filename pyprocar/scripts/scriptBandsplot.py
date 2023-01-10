@@ -4,6 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 from typing import List
+import os
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -139,30 +140,6 @@ def bandsplot(
         code, lobster, dirname ,outcar, poscar, procar, kpoints,
         interpolation_factor, fermi)
     
-    if code == "vasp":
-        if outcar is not None:
-            outcar = io.vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        if poscar is not None:
-            poscar = io.vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-        if kpoints is not None:
-            kpoints = io.vasp.Kpoints(kpoints)
-            kpath = kpoints.kpath
-
-        procar = io.vasp.Procar(filename=procar,
-                             structure=structure,
-                             reciprocal_lattice=reciprocal_lattice,
-                             kpath=kpath,
-                             efermi=fermi,
-                             interpolation_factor=interpolation_factor)
-        ebs = procar.ebs
-
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
 
  
@@ -185,8 +162,8 @@ def bandsplot(
                 )
                 weights.append(w)
         if mode == "overlay_orbitals":
-            for iorb in ["s", "p", "d", "f"]:
-                if iorb == "f" and not ebs_plot.ebs.norbitals > 9:
+            for orb in ["s", "p", "d", "f"]:
+                if orb == "f" and not ebs_plot.ebs.norbitals > 9:
                     continue
                 labels.append(iorb)
                 orbitals = orbital_names[iorb]
@@ -241,10 +218,10 @@ def bandsplot(
             orbitals = []
             for iorb in orbital_str:
                 orbitals = np.append(orbitals, orbital_names[iorb]).astype(np.int)
-        weights = ebs_plot.ebs.ebs_sum(
-            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
-        )
-        
+
+
+        weights = ebs_plot.ebs.ebs_sum(atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
+            
         if settings.ebs.weighted_color:
             color_weights = weights
         else:
@@ -263,6 +240,7 @@ def bandsplot(
                 width_mask=width_mask,
                 vmin=vmin,
                 vmax=vmax,
+                spins=spins
 )
         elif mode == "scatter":
             ebs_plot.plot_scatter(
@@ -359,8 +337,8 @@ def parse(code:str='vasp',
     elif code == "qe":
         if dirname is None:
             dirname = "bands"
-        parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
-                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+        parser = io.qe.QEParser(dirname = dirname,scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
+                             pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
                              dos_interpolation_factor = None)
         if fermi is None:
             fermi = parser.efermi
@@ -373,6 +351,40 @@ def parse(code:str='vasp',
 
         ebs = parser.ebs
         
+    elif code == "abinit":
+        if dirname is None:
+            dirname = "fermi"
+        outfile = f"{dirname}{os.sep}abinit.out"
+        kpointsfile = f"{dirname}{os.sep}KPOINTS"
+        # e_fermi = 0
+
+        output = io.abinit.Output(abinit_output=outfile)
+        # e_fermi = 0
+        e_fermi = output.fermi
+        
+        # poscar = io.vasp.Poscar(filename=poscar_file)
+        structure = output.structure
+        reciprocal_lattice = output.structure.reciprocal_lattice
+        ab_kpoints = io.abinit.Kpoints(filename=kpointsfile)
+
+        parser = io.abinit.Procar(
+                            filename=dirname,
+                            abinit_output=outfile,
+                            structure=output.structure,
+                            reciprocal_lattice=output.reclat,
+                            kpath=ab_kpoints,
+                            efermi=output.fermi,
+                        )
+
+
+        structure = parser.structure
+        kpoints = parser.kpoints
+        kpath = ab_kpoints.kpath
+        ebs = parser.ebs
+
+        ebs.bands +=  e_fermi
+
+
         
 
     return ebs, kpath, structure, reciprocal_lattice

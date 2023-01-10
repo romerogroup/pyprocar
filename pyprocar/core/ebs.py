@@ -17,10 +17,8 @@ import networkx as nx
 from matplotlib import pylab as plt
 import pyvista
 
-from ..fermisurface3d import BrillouinZone
+from .brillouin_zone import BrillouinZone
 from ..utils import Unfolder, mathematics
-
-# TODO add python typing to all functions
 
 class ElectronicBandStructure:
     def __init__(
@@ -132,6 +130,7 @@ class ElectronicBandStructure:
     def kpoints_reduced(self):
         return self.kpoints
 
+    
     def ebs_sum(self, 
                 atoms:List[int]=None, 
                 principal_q_numbers:List[int]=[-1], 
@@ -146,14 +145,12 @@ class ElectronicBandStructure:
             spins = np.arange(self.nspins, dtype=int)
         if orbitals is None:
             orbitals = np.arange(self.norbitals, dtype=int)
-
         # sum over orbitals
         ret = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
         # sum over principle quantum number
         ret = np.sum(ret[:, :, :, principal_q_numbers, :], axis=-2)
         # sum over atoms
         ret = np.sum(ret[:, :, atoms, :], axis=-2)
-
         # sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)
         # in non-mag, non-colin nspin=1, in colin nspin=2
         if self.is_non_collinear and sum_noncolinear:
@@ -339,7 +336,6 @@ class ElectronicBandStructure:
 
                 if sympoint not in klist:
                     klist.append(sympoint)
-
                     if self.bands is not None:
                         band = self.bands[j].tolist()
                         bandslist.append(band)

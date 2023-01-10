@@ -19,6 +19,7 @@ class Outcar(collections.abc.Mapping):
             self.file_str = rf.read()
 
 
+
     @property
     def efermi(self):
         """Just finds all E-fermi fields in the outcar file and keeps the
@@ -63,59 +64,79 @@ class Outcar(collections.abc.Mapping):
         with open(self.filename) as f:
             txt = f.readlines()
 
+        has_new_rotation_format = False
+        i_rotation_lines=[]
         for i, line in enumerate(txt):
+            if 'isymop' in line:
+                has_new_rotation_format = True
+                i_rotation_lines.append(i)
             if 'irot' in line:
                 begin_table = i+1
             if 'Subroutine' in line:
                 end_table = i-1
 
-        operators = np.zeros((end_table-begin_table, 9))
-        for i, line in enumerate(txt[begin_table:end_table]):
-            str_list = line.split()
-            num_list = [float(s) for s in str_list]
-            operator = np.array(num_list)
-            operators[i, :] = operator
 
         rotations = []
+        if has_new_rotation_format:
+            for i_rotation_line in i_rotation_lines:
+                raw_rotation_lines = txt[i_rotation_line:i_rotation_line+3]
+                rotation=[]
+                for i,raw_rotation_line in enumerate(raw_rotation_lines):
+                    if i ==0:
+                        r_ij = [float(value) for value in raw_rotation_line.split(':')[-1].split()]
+                
+                    else:
+                        r_ij = [float(value) for value in raw_rotation_line.split()]
+                
+                    rotation.append(r_ij)
+                rotation = np.array(rotation)
+                rotations.append(rotation.T)
+        else:
+            operators = np.zeros((end_table-begin_table, 9))
+            for i, line in enumerate(txt[begin_table:end_table]):
+                str_list = line.split()
+                num_list = [float(s) for s in str_list]
+                operator = np.array(num_list)
+                operators[i, :] = operator
 
-        for operator in operators:
-            det_A = operator[1]
-            # convert alpha to radians
-            alpha = np.pi * operator[2] / 180.0
-            # get rotation axis
-            x = operator[3]
-            y = operator[4]
-            z = operator[5]
 
-            R = (
-                np.array(
-                    [
+            for operator in operators:
+                det_A = operator[1]
+                # convert alpha to radians
+                alpha = np.pi * operator[2] / 180.0
+                # get rotation axis
+                x = operator[3]
+                y = operator[4]
+                z = operator[5]
+
+                R = (
+                    np.array(
                         [
-                            np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
-                            x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
-                            x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
-                        ],
-                        [
-                            y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
-                            np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
-                            y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
-                        ],
-                        [
-                            z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
-                            z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
-                            np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
-                        ],
-                    ]
+                            [
+                                np.cos(alpha) + x ** 2 * (1 - np.cos(alpha)),
+                                x * y * (1 - np.cos(alpha)) - z * np.sin(alpha),
+                                x * z * (1 - np.cos(alpha)) + y * np.sin(alpha),
+                            ],
+                            [
+                                y * x * (1 - np.cos(alpha)) + z * np.sin(alpha),
+                                np.cos(alpha) + y ** 2 * (1 - np.cos(alpha)),
+                                y * z * (1 - np.cos(alpha)) - x * np.sin(alpha),
+                            ],
+                            [
+                                z * x * (1 - np.cos(alpha)) - y * np.sin(alpha),
+                                z * y * (1 - np.cos(alpha)) + x * np.sin(alpha),
+                                np.cos(alpha) + z ** 2 * (1 - np.cos(alpha)),
+                            ],
+                        ]
+                    )
+                    * det_A
                 )
-                * det_A
-            )
-
-            # R = self.reciprocal_lattice.dot(R).dot(np.linalg.inv(self.reciprocal_lattice))
-            R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
-
-            R = np.round_(R, decimals=3)
-            rotations.append(R)
-
+                
+                # R = self.reciprocal_lattice.dot(R).dot(np.linalg.inv(self.reciprocal_lattice))
+                R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
+                R = np.round_(R, decimals=3)
+                rotations.append(R)
+        
         return np.array(rotations)
 
     def __contains__(self, x):
@@ -427,7 +448,7 @@ class Procar(collections.abc.Mapping):
         self.orbitalName_short = ["s", "p", "d", "f", "tot"]
         self.labels = self.orbitalName_old[:-1]
 
-        self._read()
+        self._read()   
         if self.has_phase:
             self.carray = self.spd_phase[:, :, :, :-1, 1:-1]
         self.ebs = ElectronicBandStructure(
@@ -538,12 +559,13 @@ class Procar(collections.abc.Mapping):
         self.kpointsCount, self.bandsCount, self.ionsCount = map(
             int, re.findall(r"#[^:]+:([^#]+)", self.meta_lines[-1])
         )
-        if self.ionsCount == 1:
-            print(
-                "Special case: only one atom found. The program may not work as expected"
-            )
-        else:
-            self.ionsCount = self.ionsCount + 1
+        # if self.ionsCount == 1:
+        #     print(
+        #         "Special case: only one atom found. The program may not work as expected"
+        #     )
+
+        # else:
+        #     self.ionsCount = self.ionsCount + 1
 
         # reading all the rest of the file to be parsed below
 
@@ -741,7 +763,7 @@ class Procar(collections.abc.Mapping):
             FoundOrbs != (StdOrbs)
             and FoundOrbs != (StdOrbs_short)
             and FoundOrbs != (StdOrbs_old)
-        ):
+            ):
             print(
                 str(size) + " orbitals. (Some of) They are unknow (if "
                 "you did 'filter' them it is OK)."
@@ -755,16 +777,19 @@ class Procar(collections.abc.Mapping):
         if self.ionsCount == 1:
             self.spd = re.findall(
                 r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
+
+            raw_spd_natom_axis = self.ionsCount
         else:
             # Added by Francisco to speed up filtering on June 4th, 2019
             # get rid of phase factors
             self.spd = re.findall(r"ion.+tot\n([-.\d\seto]+)", self.file_str)
             self.spd = "".join(self.spd)
             self.spd = re.findall(r"([-.\d\se]+tot.+)\n", self.spd)
+            raw_spd_natom_axis = self.ionsCount +1
         # free the memory (could be a lot)
         if not self.has_phase:
             self.file_str = None
-
+        
         # Now the method will try to find the value of self.ispin,
         # previously it was set to either 1 or 2. If "1", it could be 1 or
         # 4, but previously it was impossible to find the rigth value. If
@@ -788,15 +813,15 @@ class Procar(collections.abc.Mapping):
 
         # checking for consistency
         for line in self.spd:
-            if len(line.split()) != (self.ionsCount) * (self.orbitalCount + 1):
-                raise RuntimeError("Flats happens")
-
+            if self.ionsCount!=1:
+                if len(line.split()) != (self.ionsCount + 1) * (self.orbitalCount + 1):
+                    raise RuntimeError("Flats happens")
         # replacing the "tot" string by a number, to allows a conversion
         # to numpy
         self.spd = [x.replace("tot", "0").split() for x in self.spd]
         # self.spd = [x.split() for x in self.spd]
         self.spd = np.array(self.spd, dtype=float)
-
+    
         # handling collinear polarized case
         if self.ispin == 2:
             # splitting both spin components, now they are along k-points
@@ -808,14 +833,14 @@ class Procar(collections.abc.Mapping):
                 self.kpointsCount,
                 self.bandsCount ,
                 1,
-                self.ionsCount,
+                raw_spd_natom_axis,
                 self.orbitalCount + 1,
             )
             down = down.reshape(
                 self.kpointsCount,
                 self.bandsCount ,
                 1,
-                self.ionsCount,
+                raw_spd_natom_axis,
                 self.orbitalCount + 1,
             )
             # concatenating bandwise. Density and magntization, their
@@ -833,9 +858,15 @@ class Procar(collections.abc.Mapping):
                 self.kpointsCount,
                 self.bandsCount,
                 self.ispin,
-                self.ionsCount,
+                raw_spd_natom_axis,
                 self.orbitalCount + 1,
             )
+
+
+        if self.ionsCount == 1:
+            self.spd = np.pad(self.spd,((0,0),(0,0),(0,0),(0,1),(0,0)) , 'constant',constant_values=(0))
+            self.spd[:,:,:,1,:] = self.spd[:,:,:,0,:]
+
         return
 
     def _read_phases(self):
@@ -843,6 +874,7 @@ class Procar(collections.abc.Mapping):
         if self.ionsCount == 1:
             self.spd_phase = re.findall(
                 r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
+            raw_spd_natom_axis = self.ionsCount
         else:
             # Added by Francisco to speed up filtering on June 4th, 2019
             # get rid of phase factors
@@ -852,6 +884,7 @@ class Procar(collections.abc.Mapping):
             self.spd_phase = "".join(self.spd_phase)
             self.spd_phase = re.findall(
                 r"([-.\d\se]+charge.+)\n", self.spd_phase)
+            raw_spd_natom_axis = self.ionsCount +1
         # free the memory (could be a lot)
         self.file_str = None
 
@@ -884,14 +917,14 @@ class Procar(collections.abc.Mapping):
                 self.kpointsCount,
                 int(self.bandsCount / 2),
                 1,
-                self.ionsCount,
+                self.ionsCount+1,
                 self.orbitalCount * 2,
             )
             down = down.reshape(
                 self.kpointsCount,
                 int(self.bandsCount / 2),
                 1,
-                self.ionsCount,
+                self.ionsCount+1,
                 self.orbitalCount * 2,
             )
             # concatenating bandwise. Density and magntization, their
@@ -909,7 +942,7 @@ class Procar(collections.abc.Mapping):
                 self.kpointsCount,
                 self.bandsCount,
                 1,
-                self.ionsCount,
+                self.ionsCount+1,
                 self.orbitalCount * 2,
             )
         else:
@@ -917,7 +950,7 @@ class Procar(collections.abc.Mapping):
                 self.kpointsCount,
                 self.bandsCount,
                 self.ispin,
-                self.ionsCount,
+                self.ionsCount+1,
                 self.orbitalCount * 2,
             )
         temp = np.zeros(
@@ -938,6 +971,11 @@ class Procar(collections.abc.Mapping):
         temp[:, :, :, :, 0].real = self.spd_phase[:, :, :, :, 0]
         temp[:, :, :, :, -1].real = self.spd_phase[:, :, :, :, -1]
         self.spd_phase = temp
+
+        if self.ionsCount == 1:
+            self.spd_phase = np.pad(self.spd_phase,((0,0),(0,0),(0,0),(0,1),(0,0)) , 'constant',constant_values=(0))
+            self.spd_phase[:,:,:,1,:] = self.spd_phase[:,:,:,0,:]
+
         return
 
     def _spd2projected(self, spd, nprinciples=1):
@@ -954,6 +992,7 @@ class Procar(collections.abc.Mapping):
         if spd is None:
             return None
         natoms = spd.shape[3] - 1
+        
         nkpoints = spd.shape[0]
 
         nbands = spd.shape[1]
@@ -970,6 +1009,7 @@ class Procar(collections.abc.Mapping):
             shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
             dtype=spd.dtype,
         )
+
         temp_spd = spd.copy()
         # (nkpoints,nbands, nspin, natom, norbital)
         temp_spd = np.swapaxes(temp_spd, 2, 4)
@@ -984,6 +1024,7 @@ class Procar(collections.abc.Mapping):
             projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
         else:
             projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+
         return projected
 
     def symmetrize(self, symprec=1e-5, outcar=None, structure=None, spglib=True):
@@ -1101,11 +1142,26 @@ class VaspXML(collections.abc.Mapping):
         else:
             self.filename = filename
 
-        self.spins_dict = {"spin 1": "Spin-up", "spin 2": "Spin-down"}
+        
         # self.positions = None
         # self.stress = None
         # self.array_sizes = {}
         self.data = self.read()
+
+        spins = list(self.data["general"]["dos"]["total"]["array"]["data"].keys())
+        if len(spins)==4:
+            self.is_noncolinear = True
+            self.spins_dict = {"spin 1": "Spin-Total", 
+                                "spin 2": "Spin-x",
+                                "spin 3": "Spin-y", 
+                                "spin 4": "Spin-z"}
+            # self.spins_dict = {"spin 4": "Spin-Total", 
+            #                     "spin 1": "Spin-x",
+            #                     "spin 2": "Spin-y", 
+            #                     "spin 3": "Spin-z"}
+        else:
+            self.is_noncolinear = False
+            self.spins_dict = {"spin 1": "Spin-up", "spin 2": "Spin-down"}
 
     def read(self):
         """
@@ -1205,9 +1261,10 @@ class VaspXML(collections.abc.Mapping):
             self.data["general"]["dos"]["total"]["array"]["data"][spins[0]]
         )[:, 0]
         dos_total = {"energies": energies}
-        for ispin in spins:
-            dos_total[self.spins_dict[ispin]] = np.array(
-                self.data["general"]["dos"]["total"]["array"]["data"][ispin]
+
+        for spin_name in spins:
+            dos_total[self.spins_dict[spin_name]] = np.array(
+                self.data["general"]["dos"]["total"]["array"]["data"][spin_name]
             )[:, 1]
 
         return dos_total, list(dos_total.keys())
@@ -1242,6 +1299,8 @@ class VaspXML(collections.abc.Mapping):
                             ispin
                         ][ispin]
                     )[:, 1:]
+                if 'Spin-Total' in list(dos_projected[name].keys()):
+                    del dos_projected[name]['Spin-Total']
             return (
                 dos_projected,
                 self.data["general"]["dos"]["partial"]["array"]["info"],
