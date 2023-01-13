@@ -20,7 +20,7 @@ PyProcar
 .. raw:: html
 
     <div class="banner">
-		<h3>Pre- and Post-processing of Density Functional Theory Codes</h2>
+		<h3>Pre- and Post- processing of Density Functional Theory Codes</h2>
 	 	<a href="./examples/index.html"><center><img src="_static/images/welcome.png" alt="pyprocar" width="75%"/></a>
     </div>
 

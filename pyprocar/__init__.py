@@ -53,7 +53,7 @@ from . import io
 from . import core
 from . import utils
 from . import plotter
-from .download_examples import download_examples
+from .download_examples import download_examples, download_example
 from .utils.defaults import Settings
 
 # TODO change all n* variables to n_* variable (norbital to n_orbital)

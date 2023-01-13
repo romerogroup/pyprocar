@@ -44,6 +44,7 @@ extensions = [
     "sphinx.ext.napoleon", 
     'sphinx.ext.viewcode', 
     'sphinx_copybutton',
+    'sphinx_design',
     'sphinx_gallery.gen_gallery',
     'numpydoc'
 ]

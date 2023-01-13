@@ -223,7 +223,7 @@ class Structure:
         wyckoffs_temp = np.array(
             spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
         )
-        group = np.zeros(shape=(self.natoms), dtype=np.int)
+        group = np.zeros(shape=(self.natoms), dtype=int)
         counter = 0
         for iwyckoff in np.unique(wyckoffs_temp):
             idx = np.where(wyckoffs_temp == iwyckoff)[0]

@@ -16,31 +16,30 @@ The only prerequisite for installing PyProcar is Python itself. If you don’t
 have Python yet and want the simplest way to get started, we recommend you use
 the `Anaconda Distribution <https://www.anaconda.com/>`_.
 
+
 .. grid:: 2
-   :grid-rows: 1
-   :grid-columns: 2
 
     .. grid-item-card:: Working with conda?
-      :class-title: pyprocar-card-title
+       :class-title: pyprocar-card-title
 
-      PyProcar is available on `conda-forge
-      <https://anaconda.org/conda-forge/pyprocar>`_.
+       PyProcar is available on `conda-forge
+       <https://anaconda.org/conda-forge/pyprocar>`_.
 
-      .. code-block:: bash
+       .. code-block:: bash
 
-         conda install -c conda-forge pyprocar
+          conda install -c conda-forge pyprocar
 
 
     .. grid-item-card:: Prefer pip?
-      :columns: auto
-      :class-title: pyprocar-card-title
+       :columns: auto
+       :class-title: pyprocar-card-title
 
-      PyVista can be installed via pip from `PyPI
-      <https://pypi.org/project/pyprocar>`__.
+       PyProcar can be installed via pip from `PyPI
+       <https://pypi.org/project/pyprocar>`__.
 
-      .. code-block:: bash
+       .. code-block:: bash
 
-         pip install pyprocar
+          pip install pyprocar
 
 .. grid::
 
@@ -51,6 +50,42 @@ the `Anaconda Distribution <https://www.anaconda.com/>`_.
 
       Installing a specific version? Installing from source? Check the
       :ref:`install_ref` page.
+
+First Steps
+===========
+We've provided a variety of resources for you to get used to PyProcar's API
+through a range of examples and tutorials.
+
+
+
+.. grid:: 2
+
+   .. grid-item-card:: Why PyProcar?
+      :link: why_pyprocar
+      :link-type: ref
+      :class-title: pyprocar-card-title
+
+      Learn more about why we created PyProcar
+
+      To be added...
+
+
+
+   .. grid-item-card:: Authors & Citation
+      :link: authors_ref
+      :link-type: ref
+      :class-title: pyprocar-card-title
+
+      Using PyProcar in your research? Please consider citing or acknowledging
+      us.  We have a `Elsevier Publication`_!
+
+      .. image:: ../images/1st_publication.png
+         :target: https://www.sciencedirect.com/science/article/abs/pii/S0010465519303935?via%3Dihub
+
+Support
+=======
+
+To be added...
 
 Citing PyProcar
 ==============
