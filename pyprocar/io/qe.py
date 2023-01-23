@@ -430,10 +430,8 @@ class QEParser():
         return wfc_filenames
 
     def _parse_wfc_mapping(self, proj_out_filename):
-
         with open(proj_out_filename) as f:
             proj_out =  f.read()
-
         raw_wfc  =  re.findall('(?<=read\sfrom\spseudopotential\sfiles).*\n\n([\S\s]*?)\n\n(?=\sk\s=)', proj_out)[0]
         wfc_list = raw_wfc.split('\n')
 

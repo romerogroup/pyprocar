@@ -2,7 +2,7 @@ __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "December 01, 2020"
-
+import os
 from typing import List
 
 import numpy as np
@@ -153,7 +153,7 @@ def fermi2D(
                                             procar=procar)
     ### End of parsing ###
 
-    # Selecting kpoints in a connstant k_z plane
+    # Selecting kpoints in a constant k_z plane
     i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2]< k_z_plane + 0.01, kpoints[:,2] > k_z_plane - 0.01) )
     kpoints = kpoints[i_kpoints_near_z_0,:][0,:,:]
     parser.ebs.bands = parser.ebs.bands[i_kpoints_near_z_0,:][0,:,:]
@@ -245,6 +245,11 @@ def parse(code:str='vasp',
                 print("PROCAR repaired. Run with repair=False next time.")
 
         if code == "vasp":
+            outcar = f"{dirname}{os.sep}OUTCAR"
+            poscar = f"{dirname}{os.sep}POSCAR"
+            procar = f"{dirname}{os.sep}PROCAR"
+            kpoints = f"{dirname}{os.sep}KPOINTS"
+            filename = f"{dirname}{os.sep}{filename}"
             outcar = io.vasp.Outcar(filename=outcar)
         
             e_fermi = outcar.efermi
@@ -269,9 +274,9 @@ def parse(code:str='vasp',
 
             if dirname is None:
                 dirname = "bands"
-            parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
-                                pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
-                                dos_interpolation_factor = None)
+            parser = io.qe.QEParser(dirname = dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
+                                    pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+                                    dos_interpolation_factor = None)
             reciprocal_lattice = parser.reciprocal_lattice
 
             e_fermi = parser.efermi

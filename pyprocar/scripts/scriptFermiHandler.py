@@ -217,6 +217,7 @@ class FermiHandler:
                 position_y=0.01,
                 color="black",)
 
+
         # Other plotting options
         if plot_directional_arrows:
             plotter.add_axes(
@@ -972,8 +973,8 @@ class FermiHandler:
         elif self.code == "qe":
             if self.dirname is None:
                 self.dirname = "fermi"
-            parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = self.dirname, bandsIn_filename = "bands.in", 
-                                pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
+            parser = io.qe.QEParser( dirname = self.dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
+                                pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
                                 dos_interpolation_factor = None)
             reciprocal_lattice = parser.reciprocal_lattice
 

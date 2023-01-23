@@ -139,10 +139,15 @@ class EBSPlot:
                      color_mask=None,
                      vmin=None,
                      vmax=None,
+                     spins=None,
                      width_weights=None,
                      color_weights=None,
                      ):
-
+        if spins is None:
+            spins = range(self.ebs.nspins)
+        if self.ebs.is_non_collinear:
+            spins = [0]
+        
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
             markersize = settings.ebs.markersize
@@ -167,8 +172,11 @@ class EBSPlot:
                 vmin = color_weights.min()
             if vmax is None:
                 vmax = color_weights.max()
+
+            print(color_weights.min())
             print("normalizing to : ", (vmin, vmax))
-        for ispin in self.spins:
+
+        for ispin in spins:
             for iband in range(self.ebs.nbands):
                 if color_weights is None:
                     sc = self.ax.scatter(
@@ -177,8 +185,8 @@ class EBSPlot:
                         c=settings.ebs.color[ispin],
                         s=width_weights[:, iband, ispin].round(
                             2)*markersize[ispin],
-                        edgecolors="none",
-                        linewidths=0,
+                        # edgecolors="none",
+                        linewidths=settings.ebs.linewidth[ispin],
                         cmap=settings.ebs.color_map,
                         vmin=vmin,
                         vmax=vmax,
@@ -190,10 +198,9 @@ class EBSPlot:
                         self.x,
                         mbands[:, iband, ispin],
                         c=color_weights[:, iband, ispin].round(2),
-                        s=width_weights[:, iband, ispin].round(
-                            2)*markersize[ispin],
-                        edgecolors="none",
-                        linewidths=0,
+                        s=width_weights[:, iband, ispin].round(2)*markersize[ispin],
+                        # edgecolors="none",
+                        linewidths=settings.ebs.linewidth[ispin],
                         cmap=settings.ebs.color_map,
                         vmin=vmin,
                         vmax=vmax,

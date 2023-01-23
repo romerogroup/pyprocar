@@ -800,7 +800,7 @@ class DOSPlot:
                     x = self.dos.energies
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
 
-                    if ispin > 0 and len(self.spins) > 1:
+                    if ispin > 0 and len(spins) > 1:
                         y *= -1
                         handle = self.ax.fill_between(x,
                                         bottom + y,
@@ -883,7 +883,7 @@ class DOSPlot:
                     x = self.dos.energies
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
 
-                    if ispin > 0 and len(self.spins) > 1:
+                    if ispin > 0 and len(spins) > 1:
                         y *= -1
                         handle = self.ax.fill_betweenx(x,
                                         bottom + y,

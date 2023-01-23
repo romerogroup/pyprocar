@@ -4,6 +4,7 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
+import os
 from typing import List, Tuple
 
 import numpy as np
@@ -487,6 +488,11 @@ def parse(code: str='vasp',
         dos = parser.dos
 
     elif code == "vasp":
+        outcar = f"{dirname}{os.sep}OUTCAR"
+        poscar = f"{dirname}{os.sep}POSCAR"
+        procar = f"{dirname}{os.sep}PROCAR"
+        kpoints = f"{dirname}{os.sep}KPOINTS"
+        filename = f"{dirname}{os.sep}{filename}"
         if outcar is not None:
             outcar = io.vasp.Outcar(outcar)
             if fermi is None:

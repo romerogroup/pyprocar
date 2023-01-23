@@ -39,8 +39,8 @@ def bandsplot(
     interpolation_factor:int=1,
     interpolation_type:str="cubic",
     projection_mask=None,
-    vmax:float=0,
-    vmin:float=1,
+    vmax:float=None,
+    vmin:float=None,
     kticks=None,
     knames=None,
     kdirect:bool=True,
@@ -162,11 +162,11 @@ def bandsplot(
                 )
                 weights.append(w)
         if mode == "overlay_orbitals":
-            for orb in ["s", "p", "d", "f"]:
+            for iorb,orb in enumerate(["s", "p", "d", "f"]):
                 if orb == "f" and not ebs_plot.ebs.norbitals > 9:
                     continue
-                labels.append(iorb)
-                orbitals = orbital_names[iorb]
+                orbitals = orbital_names[orb]
+                labels.append(orb)
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
                     principal_q_numbers=[-1],
@@ -186,13 +186,11 @@ def bandsplot(
                         if isinstance(it[ispc][0], str):
                             orbitals = []
                             for iorb in it[ispc]:
-                                orbitals = np.append(
-                                    orbitals, orbital_names[iorb]
-                                ).astype(np.int)
+                                orbitals = np.append(orbitals, orbital_names[iorb]).astype(int)
                             labels.append(ispc + "-" + "".join(it[ispc]))
                         else:
                             orbitals = it[ispc]
-                            labels.append(ispc + "-" + "_".join(it[ispc]))
+                            labels.append(ispc + "-" + "_".join(str(x) for x in it[ispc]))
                         w = ebs_plot.ebs.ebs_sum(
                             atoms=atoms,
                             principal_q_numbers=[-1],
@@ -248,6 +246,7 @@ def bandsplot(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
+                spins=spins,
                 vmin=vmin,
                 vmax=vmax,
             )
@@ -310,6 +309,12 @@ def parse(code:str='vasp',
         ebs = parser.ebs
 
     elif code == "vasp":
+        if dirname is None:
+            dirname = "bands"
+        outcar = f"{dirname}{os.sep}OUTCAR"
+        poscar = f"{dirname}{os.sep}POSCAR"
+        procar = f"{dirname}{os.sep}PROCAR"
+        kpoints = f"{dirname}{os.sep}KPOINTS"
         if outcar is not None:
             outcar = io.vasp.Outcar(outcar)
             if fermi is None:
