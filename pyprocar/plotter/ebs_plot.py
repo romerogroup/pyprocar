@@ -78,6 +78,9 @@ class EBSPlot:
 
         """
         pos = 0
+        print(len(self.kpath.ngrids))
+        print(self.kpath.nsegments)
+        print(self.kpath)
         if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
@@ -95,6 +98,7 @@ class EBSPlot:
                 pos += distance
         else :
             x = np.arange(0, self.ebs.nkpoints)
+
         return np.array(x).reshape(-1,)
 
     def plot_bands(self):

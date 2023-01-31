@@ -5,7 +5,7 @@
 Plotting fermi2d noncolinear
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Plotting fermi2d noncolinear example.
+Plotting fermi2d noncolinear example. For more information about fermi2d refer to :ref:`fermi2d`
 
 First download the example files with the code below. Then replace data_dir below.
 

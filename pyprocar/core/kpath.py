@@ -16,6 +16,7 @@ class KPath:
             if "$" in x[0] or "$" in x[1]:
                 latex = ""
         self.knames = [[latex + x[0] + latex, latex + x[1] + latex] for x in knames]
+
         self.special_kpoints = special_kpoints
         self.ngrids = ngrids
         self.kticks = kticks

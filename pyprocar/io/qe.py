@@ -69,7 +69,6 @@ class QEParser():
                                 labels=self.orbital_names[:-1],
                                 reciprocal_lattice=self.reciprocal_lattice,
                                 interpolation_factor=dos_interpolation_factor,
-
                             )
 
     def kpoints_cart(self):
@@ -317,7 +316,10 @@ class QEParser():
             tick_Count = 1
             for ihs in range(self.nhigh_sym):
                 self.kticks.append(tick_Count - 1)
-                self.ngrids.append(int(raw_khigh_sym[ihs].split()[3]))
+                if ihs != self.nhigh_sym - 1:
+                    self.ngrids.append(int(raw_khigh_sym[ihs].split()[3]))
+                else:
+                    self.ngrids.append(1)
                 tick_Count += int(raw_khigh_sym[ihs].split()[3])
                 
                 
