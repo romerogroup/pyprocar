@@ -3,7 +3,7 @@
 .. _ref_plotting_noncolinear_dos_qe:
 
 Plotting non colinear dos in Quantum Espresso
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting non colinear dos in Quantum Espresso.
 
@@ -31,7 +31,7 @@ data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}dos{os.sep}noncolinear{os
 
 ###############################################################################
 # Parametric mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 # Quantum Espresso expresses the projections in the coupled basis, 
 # therefore orbitals takes different meanings.
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'

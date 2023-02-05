@@ -3,7 +3,7 @@
 .. _ref_plotting_fermi3d_isoslider:
 
 Plotting fermi3d isoslider
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d isoslider example.
 
@@ -43,7 +43,7 @@ fermiHandler = pyprocar.FermiHandler(
 
 ###############################################################################
 # Plain mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 # 
 #
 

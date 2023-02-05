@@ -3,7 +3,7 @@
 .. _ref_example_kpath_generator:
 
 Example of kpath_generator 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to plot a band structure, one must define a set of :math:`k`-points following a desired :math:`k`-path in momentum space. 
 PyProcar's :math:`k`-path generation utility enables a the user to automatically generate 
@@ -40,7 +40,7 @@ The :math:`k`-path generation utility within PyProcar is based on the Python lib
 
 ###############################################################################
 # Plotting K Path
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 import pyvista
 # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
 pyvista.OFF_SCREEN = True

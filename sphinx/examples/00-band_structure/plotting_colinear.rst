@@ -61,7 +61,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-35
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 .. GENERATED FROM PYTHON SOURCE LINES 35-41
 
@@ -87,14 +87,14 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEE6C08400>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0C0E8040>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 42-49
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -134,14 +134,14 @@ For details on the meaning of the indices of the atomic projection please refer 
 
     normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB0350E50>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0B9B3A60>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 64-71
 
 parametric_linemode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -183,14 +183,14 @@ For details on the meaning of the indices of the atomic projection please refer 
 
     normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB1008D30>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0B9B3070>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 88-93
 
 Scatter mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -230,14 +230,14 @@ Scatter mode
     8.145362043680577e-25
     normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB1571B20>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BD62970>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 109-114
 
 overlay_species mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -270,14 +270,14 @@ overlay_species mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB1562DF0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BD4AC70>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 125-130
 
 overlay_orbtials mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -310,14 +310,14 @@ overlay_orbtials mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB18E6640>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0C35EA60>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 141-146
 
 overlay mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -348,7 +348,7 @@ overlay mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB19031F0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0CDE3220>
 
 
 
@@ -384,14 +384,14 @@ overlay mode by orbital names
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DEB0742430>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BD617F0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.053 seconds)
+   **Total running time of the script:** ( 0 minutes  2.343 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_colinear.py:

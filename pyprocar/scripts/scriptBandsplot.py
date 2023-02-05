@@ -275,7 +275,8 @@ def bandsplot(
         ebs_plot.save(savefig)
     if show:
         ebs_plot.show()
-    return ebs_plot.fig,ebs_plot.ax
+        
+    return ebs_plot
 
 
 def parse(code:str='vasp',

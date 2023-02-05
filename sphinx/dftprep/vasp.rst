@@ -1,5 +1,7 @@
+.. _vasp: 
+
 VASP Preparation
-======================
+==============================================
 
 This guide is here to help you prepare VASP Calculations to be used with pyprocar.
 
@@ -11,4 +13,4 @@ An OUTCAR file is required to extract the Fermi-energy and reciprocal lattice ve
 To perform spin colinear calculations set ``ISPIN = 2`` in the ``INCAR``.
 To perform spin non-colinear calculations set ``ISPIN = 2`` and ``LNONCOLLINEAR = .TRUE.``.
 
-First perform a self-consistent calculation with a :math:`k`-mesh grid. Then set ``ICHARG=11`` in the INCAR and create a KPOINTS file containing the :math:-`k`-path. This can be done with the :ref:`labelkpath` feature in PyProcar. 
+First perform a self-consistent calculation with a :math:`k`-mesh grid. Then set ``ICHARG=11`` in the INCAR and create a KPOINTS file containing the :math:-`k`-path. This can be done with the :ref:`kpath` feature in PyProcar. 

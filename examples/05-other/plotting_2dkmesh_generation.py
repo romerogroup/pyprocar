@@ -1,9 +1,9 @@
 """
 
-.. _ref_example_kmesh_generator:
+.. _example_kmesh_generator:
 
 Example of kmesh_generator 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This utility can be used to generate a 2D :math:`k`-mesh centered at a given :math:`k`-point and in a given :math:`k`-plane. 
 This is particularly useful in computing 2D spin-textures and plotting 2D Fermi-surfaces. 
@@ -21,7 +21,7 @@ This information is automatically written to a KPOINTS file.
 
 ###############################################################################
 # Plotting Kmesh
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 import pyvista
 # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
 pyvista.OFF_SCREEN = True

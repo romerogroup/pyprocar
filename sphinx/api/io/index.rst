@@ -1,7 +1,7 @@
 .. _io-api-index:
 
 IO API
-========
+===================================
 
 This section decribes the input and output of PyProcar. This handles the parsing of the density functional codes
 

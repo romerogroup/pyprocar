@@ -3,7 +3,7 @@
 .. _ref_examples:
 
 Examples
-========
+===================================
 
 Here is a gallery of several examples demonstrating what PyProcar can
 do!
@@ -21,7 +21,7 @@ do!
     </div>
 
 Band Structure
--------------
+-------------------------------
 
 These examples demonstrate the band structure plotting capabilities.
 
@@ -104,7 +104,7 @@ These examples demonstrate the band structure plotting capabilities.
     </div>
 
 Density of States
--------------
+-------------------------------
 
 These examples demonstrate the density of states plotting capabilities.
 
@@ -187,7 +187,7 @@ These examples demonstrate the density of states plotting capabilities.
     </div>
 
 Bands and Dos plot
--------------
+-------------------------------
 
 These examples demonstrate the bandsdosplot plotting capabilities.
 
@@ -219,7 +219,7 @@ These examples demonstrate the bandsdosplot plotting capabilities.
     </div>
 
 Fermi 2D
--------------
+-------------------------------
 
 These examples demonstrate the Fermi2D plotting capabilities.
 
@@ -268,7 +268,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
     </div>
 
 Fermi 3D
--------------
+-------------------------------
 
 These examples demonstrate the Fermi3D plotting capabilities.
 
@@ -385,7 +385,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
     </div>
 
 Other
--------------
+-------------------------------
 
 These examples demonstrate other capabilities.
 

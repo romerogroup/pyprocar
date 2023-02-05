@@ -1,7 +1,7 @@
 .. _install_ref:
 
 Installation
-============
+==================================
 PyProcar is supported by Python 3.x. 
 Please install the following dependencies prior to installing PyProcar. 
 

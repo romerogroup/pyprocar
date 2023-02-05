@@ -3,7 +3,7 @@
 .. _ref_plotting_fermi3d_spin_texture:
 
 Plotting fermi3d spin_texture
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d spin_texture example.
 
@@ -46,7 +46,7 @@ fermiHandler = pyprocar.FermiHandler(
 
 ###############################################################################
 # Spin Texture mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 # 
 #
 fermiHandler.plot_fermi_surface(mode="spin_texture",

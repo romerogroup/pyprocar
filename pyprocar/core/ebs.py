@@ -17,56 +17,49 @@ import networkx as nx
 from matplotlib import pylab as plt
 import pyvista
 
+from .kpath import KPath
 from .brillouin_zone import BrillouinZone
 from ..utils import Unfolder, mathematics
 
 class ElectronicBandStructure:
     def __init__(
         self,
-        kpoints=None,
-        bands=None,
-        efermi=None,
-        projected=None,
-        projected_phase=None,
-        spd=None,
-        kpath=None,
-        weights=None,
-        labels=None,
-        reciprocal_lattice=None,
-        interpolation_factor=None,
-        shifted_to_efermi=False,
-    ):
+        kpoints:np.ndarray,
+        bands:np.ndarray,
+        efermi:float,
+        projected:np.ndarray = None,
+        projected_phase:np.ndarray =None,
+        kpath:KPath=None,
+        weights:np.ndarray=None,
+        labels:List=None,
+        reciprocal_lattice:np.ndarray=None,
+        shifted_to_efermi:bool=False,
+        ):
         """
+        
+        This object stores electronic band structure informomration
 
-        Parameters
-        ----------
-        kpoints : TYPE, optional
-            DESCRIPTION. The default is None.
-        bands : TYPE, optional
-            bands[ikpoint, iband, ispin]. The default is None.
-        projected : list float, optional
-            dictionary by the following order
-            projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin].
-            ``iprincipal`` works like the principal quantum number n. The last
-            index should be the total. (iprincipal = -1)
-            n = iprincipal => 0, 1, 2, 3, -1 => s, p, d, total
-            ``iorbital`` works similar to angular quantum number l, but not the
-            same. iorbital follows this order
-            (0,1,2,3,4,5,6,7,8) => s,py,pz,px,dxy,dyz,dz2,dxz,dx2-y2.
-            ``ispin`` works as magnetic quantum number.
-            m = 0,1, for spin up and down
-            The default is None.
+        :param kpoints: The kpoints array. Will have the shape (n_kpoints, 3)
+        :type kpoints: np.ndarray
+        :param bands: The bands array. Will have the shape (n_kpoints, n_bands)
+        :type bands: np.ndarray, optional
+        :param efermi: _description_, defaults to None
+        :type efermi: float, optional
+        :param projected: The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+        :type projected: np.ndarray, optional
+        :param projected_phase: The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+        :type projected_phase: np.ndarray, optional
 
-
-        structure : TYPE, optional
-            DESCRIPTION. The default is None.
-        interpolation_factor : TYPE, optional
-            DESCRIPTION. The default is None.
-
-        Returns
-        -------
-        None.
-
+        :param kpath: The kpath for band structure claculation, defaults to None
+        :type kpath: KPath, optional
+        :param weights: The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
+        :type weights: np.ndarray, optional
+        :param labels: A list of orbital names, defaults to None
+        :type labels: List, optional
+        :param reciprocal_lattice: The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
+        :type reciprocal_lattice: np.ndarray, optional
+        :param shifted_to_efermi: Boolean to determine if the fermi energy is shifted, defaults to False
+        :type shifted_to_efermi: bool, optional
         """
 
         self.kpoints = kpoints
@@ -175,64 +168,7 @@ class ElectronicBandStructure:
 
         return
 
-    def plot_kpoints(
-        self,
-        reduced=False,
-        show_brillouin_zone=True,
-        color="r",
-        point_size=4.0,
-        render_points_as_spheres=True,
-        transformation_matrix=None,
-    ):
-        """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
-        """
-        p = pyvista.Plotter()
-        if show_brillouin_zone:
-            if reduced:
-                brillouin_zone = BrillouinZone(
-                    np.diag([1, 1, 1]), transformation_matrix,
-                )
-                brillouin_zone_non = BrillouinZone(np.diag([1, 1, 1]),)
-            else:
-                brillouin_zone = BrillouinZone(
-                    self.reciprocal_lattice, transformation_matrix
-                )
-                brillouin_zone_non = BrillouinZone(self.reciprocal_lattice,)
 
-            p.add_mesh(
-                brillouin_zone.pyvista_obj,
-                style="wireframe",
-                line_width=3.5,
-                color="black",
-            )
-            p.add_mesh(
-                brillouin_zone_non.pyvista_obj,
-                style="wireframe",
-                line_width=3.5,
-                color="white",
-            )
-        if reduced:
-            kpoints = self.kpoints_reduced
-        else:
-            kpoints = self.kpoints_cartesian
-        p.add_mesh(
-            kpoints,
-            color=color,
-            point_size=point_size,
-            render_points_as_spheres=render_points_as_spheres,
-        )
-        if transformation_matrix is not None:
-            p.add_mesh(
-                np.dot(kpoints, transformation_matrix),
-                color="blue",
-                point_size=point_size,
-                render_points_as_spheres=render_points_as_spheres,
-            )
-        p.add_axes(
-            xlabel="Kx", ylabel="Ky", zlabel="Kz", line_width=6, labels_off=False
-        )
-
-        p.show()
 
     def apply_symmetries(self, operations=None, structure=None):
         return
@@ -257,9 +193,31 @@ class ElectronicBandStructure:
         point_size=4.0,
         render_points_as_spheres=True,
         transformation_matrix=None,
-    ):
-        """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
+        ):
         """
+        
+        This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
+
+        This method will plot the K points in pyvista
+
+        :param reduced: NEEDS TO BE EXPLAINed, defaults to False
+        :type reduced: bool, optional
+        :param show_brillouin_zone: Boolean to show the Brillouin zone, defaults to True
+        :type show_brillouin_zone: bool, optional
+        :param color: Color of the points, defaults to "r"
+        :type color: str, optional
+        :param point_size: Size of points, defaults to 4.0
+        :type point_size: float, optional
+        :param render_points_as_spheres: Boolean for how points are rendered, defaults to True
+        :type render_points_as_spheres: bool, optional
+        :param transformation_matrix: Reciprocal Lattice Matrix, defaults to None
+        :type transformation_matrix: np.ndarray, optional
+        :return: None
+        :rtype: None
+
+
+        """
+        
         p = pyvista.Plotter()
         if show_brillouin_zone:
             if reduced:
@@ -308,15 +266,18 @@ class ElectronicBandStructure:
 
         p.show()
 
+        return None
+
     def ibz2fbz(self, rotations):
-        """Generates the full Brillouin zone from the irreducible Brillouin
+        """
+        
+        Generates the full Brillouin zone from the irreducible Brillouin
         zone using point symmetries.
 
-        Parameters:
-            - self.kpoints: the kpoints used to sample the Brillouin zone
-            - self.projected: the projected band structure at each kpoint
-            - rotations: the point symmetry operations of the lattice
+        :param rotations: the point symmetry operations of the lattice
+        :type rotations: np.ndarray
         """
+        
         klist = []
         plist = []
         bandslist = []

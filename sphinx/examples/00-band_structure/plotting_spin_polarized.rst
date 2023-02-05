@@ -21,7 +21,7 @@
 .. _ref_plotting_spin_polarized:
 
 Plotting spin polarized band structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting spin polarized band structures.
 
@@ -63,7 +63,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 36-41
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do. 
 The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.
@@ -91,7 +91,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002873DC874F0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0B888820>
 
 
 
@@ -126,14 +126,14 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000287676B3130>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BF758B0>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 58-63
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -172,14 +172,14 @@ For details on the meaning of the indices of the atomic projection please refer 
 
     normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000287673E5160>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0B9D1880>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 79-84
 
 Scatter mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -218,14 +218,14 @@ Scatter mode
     2.7540042621116334e-26
     normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002873DC87550>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BC7B1C0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.412 seconds)
+   **Total running time of the script:** ( 0 minutes  1.567 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_spin_polarized.py:

@@ -3,7 +3,7 @@
 .. _ref_plotting_bandsdosplot:
 
 Plotting bandsdosplot
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting bandsdosplot example.
 
@@ -37,7 +37,7 @@ bands_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}bands{os.sep}colinear{os
 dos_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}dos{os.sep}colinear{os.sep}Fe"
 ###############################################################################
 # Plain mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 # The keywords that works for bandsplot and dosplot will work in bandsdosplot. 
 # These keyword arguments can be set in bands_settings and dos_settings as done below.
 #

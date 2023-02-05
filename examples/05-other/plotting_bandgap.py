@@ -3,7 +3,7 @@
 .. _ref_example_bandgap:
 
 Example of finding the bandgap
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The bandgap of a calculation can be found by:
 

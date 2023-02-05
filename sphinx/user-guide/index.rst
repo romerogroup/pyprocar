@@ -66,4 +66,14 @@ Further Details
    :maxdepth: 2
 
    atomic_projections
+   bands
+   cat
+   comparebands
+   dos
+   ebs
    fermi2d
+   fermi3D
+   filter
+   kpath
+   repair
+   unfold

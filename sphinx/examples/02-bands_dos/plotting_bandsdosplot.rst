@@ -21,7 +21,7 @@
 .. _ref_plotting_bandsdosplot:
 
 Plotting bandsdosplot
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting bandsdosplot example.
 
@@ -67,7 +67,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 39-44
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 The keywords that works for bandsplot and dosplot will work in bandsdosplot. 
 These keyword arguments can be set in bands_settings and dos_settings as done below.
 
@@ -137,7 +137,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.149 seconds)
+   **Total running time of the script:** ( 0 minutes  1.097 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plotting_bandsdosplot.py:

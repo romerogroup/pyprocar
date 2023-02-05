@@ -1,4 +1,4 @@
-.. _labelcat:
+.. _cat:
 
 Concatenating multiple calculations
 ===================================

@@ -64,11 +64,16 @@ os.environ['PYVISTA_BUILDING_GALLERY'] = 'true'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.autodoc", 
-    "sphinx.ext.mathjax", 
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
     "sphinx.ext.githubpages",
+    'sphinx.ext.intersphinx',
+    "sphinx.ext.mathjax", 
     "sphinx.ext.napoleon", 
-    'sphinx.ext.viewcode', 
+    'sphinx.ext.viewcode',
+    
     'sphinx_copybutton',
     'sphinx_design',
     'sphinx_gallery.gen_gallery',
@@ -83,10 +88,14 @@ sphinx_gallery_conf = {
     "examples_dirs": ["../examples/"],
     # path where to save gallery generated examples
     "gallery_dirs": ["examples"],
-    "doc_module": "pyvista",
+    "doc_module": "pyprocar",
     "image_scrapers": ("pyvista", "matplotlib"),
 }
 
+# See https://numpydoc.readthedocs.io/en/latest/install.html
+numpydoc_use_plots = True
+numpydoc_show_class_members = False
+numpydoc_xref_param_type = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

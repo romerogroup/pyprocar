@@ -21,7 +21,7 @@
 .. _ref_plotting_fermi2d_noncolinear:
 
 Plotting fermi2d noncolinear
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi2d noncolinear example. For more information about fermi2d refer to :ref:`fermi2d`
 
@@ -61,7 +61,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-37
 
 Spin Texture
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -138,7 +138,7 @@ Spin Texture
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.128 seconds)
+   **Total running time of the script:** ( 0 minutes  5.475 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

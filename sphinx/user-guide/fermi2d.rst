@@ -3,7 +3,7 @@
 2D spin-texture
 ===============
 
-This module can be utilized to visualize the constant energy surface spin textures in a given system. This feature is particularly useful in identifying Rashba and Dresselhaus type spin-splitting effects, analyzing the topology of Fermi-surface, and examining Lifshitz transitions. To plot 2D spin texture, we require a 2D :math:`k`-grid centered a certain special :math:`k`-point in Brillouin zone near which we want to examine the spin-texture in :math:`k`-space (see section :ref:`labelkmesh` regarding generation of 2D :math:`k`-mesh). 
+This module can be utilized to visualize the constant energy surface spin textures in a given system. This feature is particularly useful in identifying Rashba and Dresselhaus type spin-splitting effects, analyzing the topology of Fermi-surface, and examining Lifshitz transitions. To plot 2D spin texture, we require a 2D :math:`k`-grid centered a certain special :math:`k`-point in Brillouin zone near which we want to examine the spin-texture in :math:`k`-space (see section :ref:`example_kmesh_generator` regarding generation of 2D :math:`k`-mesh). 
 
 Usage: To plot :math:`S_x` spin component at a constant energy surface :math:`E = E_{F} + 0.60\,eV` (spin=1, 2, 3 for :math:`S_x`, :math:`S_y`, :math:`S_z`, respectively)::
 

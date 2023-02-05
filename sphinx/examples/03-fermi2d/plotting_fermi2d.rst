@@ -21,7 +21,7 @@
 .. _ref_plotting_fermi2d:
 
 Plotting fermi2d
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi2d example.
 
@@ -61,7 +61,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-37
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -138,7 +138,7 @@ Plain mode
 .. GENERATED FROM PYTHON SOURCE LINES 43-48
 
 Projection
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 Does not work. Contact developers
 
@@ -221,7 +221,7 @@ Does not work. Contact developers
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.887 seconds)
+   **Total running time of the script:** ( 0 minutes  16.145 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

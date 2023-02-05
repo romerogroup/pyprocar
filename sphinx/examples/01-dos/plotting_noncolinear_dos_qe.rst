@@ -21,7 +21,7 @@
 .. _ref_plotting_noncolinear_dos_qe:
 
 Plotting non colinear dos in Quantum Espresso
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting non colinear dos in Quantum Espresso.
 
@@ -62,7 +62,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-41
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 Quantum Espresso expresses the projections in the coupled basis, 
 therefore orbitals takes different meanings.
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
@@ -100,14 +100,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E9BE11CB80>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0BEAF940>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.134 seconds)
+   **Total running time of the script:** ( 0 minutes  20.461 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_noncolinear_dos_qe.py:

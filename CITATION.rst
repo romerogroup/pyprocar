@@ -1,7 +1,7 @@
 .. _citation_ref:
 
 Citing PyProcar
---------------
+-----------------------------------
 
 There is a `paper about PyProcar <https://doi.org/10.1016/j.cpc.2019.107080>`_!
 

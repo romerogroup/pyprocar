@@ -21,7 +21,7 @@
 .. _ref_plotting_spin_polarized_dos:
 
 Plotting spin-polarized density of states
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting spin-polarized density of states example.
 
@@ -61,7 +61,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-38
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do. 
 The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.
@@ -89,7 +89,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BA0DA2FA0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0CA6A6D0>
 
 
 
@@ -124,14 +124,14 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BA0CA8040>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0C30C0D0>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 55-62
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -170,14 +170,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BA100C700>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0C36BE50>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 77-84
 
 parametric_line mode
-++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -218,14 +218,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BA1059640>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A2F196880>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 101-106
 
 stack_species mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -259,14 +259,14 @@ stack_species mode
 
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BC53EF880>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A31451AF0>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 117-122
 
 stack_orbtials mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -301,14 +301,14 @@ stack_orbtials mode
 
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BC5797E80>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A31853FA0>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 134-139
 
 stack mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -340,14 +340,14 @@ stack mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000020BC56799A0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A3173EFA0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  43.094 seconds)
+   **Total running time of the script:** ( 0 minutes  46.800 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_spin_polarized_dos.py:

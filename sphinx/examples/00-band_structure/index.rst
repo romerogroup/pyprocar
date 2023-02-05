@@ -3,7 +3,7 @@
 .. _sphx_glr_examples_00-band_structure:
 
 Band Structure
--------------
+-------------------------------
 
 These examples demonstrate the band structure plotting capabilities.
 

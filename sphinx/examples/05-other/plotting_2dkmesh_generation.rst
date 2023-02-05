@@ -18,10 +18,10 @@
 .. _sphx_glr_examples_05-other_plotting_2dkmesh_generation.py:
 
 
-.. _ref_example_kmesh_generator:
+.. _example_kmesh_generator:
 
 Example of kmesh_generator 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This utility can be used to generate a 2D :math:`k`-mesh centered at a given :math:`k`-point and in a given :math:`k`-plane. 
 This is particularly useful in computing 2D spin-textures and plotting 2D Fermi-surfaces. 
@@ -51,7 +51,7 @@ This information is automatically written to a KPOINTS file.
 .. GENERATED FROM PYTHON SOURCE LINES 23-25
 
 Plotting Kmesh
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-29
 
@@ -135,7 +135,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.721 seconds)
+   **Total running time of the script:** ( 0 minutes  0.405 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plotting_2dkmesh_generation.py:

@@ -21,7 +21,7 @@
 .. _ref_plotting_noncolinear_dos_vasp:
 
 Plotting non colinear dos in VASP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting non colinear dos in VASP.
 
@@ -62,7 +62,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-40
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -99,14 +99,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001EB8F581EB0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0BCC88B0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.630 seconds)
+   **Total running time of the script:** ( 0 minutes  3.056 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_noncolinear_dos_vasp.py:

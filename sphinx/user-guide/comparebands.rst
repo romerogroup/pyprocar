@@ -1,4 +1,4 @@
-.. _labelbandscompare:
+.. _comparebands:
 
 Compare bands
 =============
@@ -13,4 +13,4 @@ Usage::
 
 The above command plots the figure displayed below. The black bands are plain bands of :math:`SrVO_3` calculated from VASP and the jet colormap is d orbital projected bands of the same material calculated from Elk.
 
-.. image:: images/ElkvsVASP.png     
+.. image:: ../images/ElkvsVASP.png     

@@ -21,7 +21,7 @@
 .. _ref_plotting_fermi3d_spin-polarized:
 
 Plotting fermi3d spin-polarized
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d spin-polarized example.
 
@@ -96,7 +96,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 45-49
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -138,7 +138,7 @@ Plain mode
 .. GENERATED FROM PYTHON SOURCE LINES 62-66
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -203,7 +203,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.408 seconds)
+   **Total running time of the script:** ( 0 minutes  14.211 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin-polarized.py:

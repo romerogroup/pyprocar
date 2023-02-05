@@ -3,7 +3,7 @@
 .. _sphx_glr_examples_01-dos:
 
 Density of States
--------------
+-------------------------------
 
 These examples demonstrate the density of states plotting capabilities.
 

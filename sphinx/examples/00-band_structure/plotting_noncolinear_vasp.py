@@ -3,7 +3,7 @@
 .. _ref_plotting_noncolinear_vasp:
 
 Plotting non colinear band structures in VASP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting non colinear band structures in VASP.
 
@@ -33,7 +33,7 @@ data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-colinear{os.sep}ban
 
 ###############################################################################
 # Plain mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 #
 pyprocar.bandsplot(
@@ -43,7 +43,7 @@ pyprocar.bandsplot(
 
 ###############################################################################
 # Parametric mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 # 

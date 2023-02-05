@@ -83,7 +83,7 @@ The reason for this format which includes the "total" atomic contribution as the
 
 The projection of atomic orbitals onto bands is also useful to identify the contribution of orbitals to bands. For instance, to identify correlated :math:`d` or :math:`f` orbitals in a strongly correlated material near the Fermi level. It is possible to include more than one type of orbital projection. The mapping of the index of orbitals to be used in ``orbitals`` is as follows (this is the same order from the PROCAR file). Quantum Espresso, VASP and Abinit follows this order. 
 
-.. image:: images/orbitals.png
+.. image:: ../images/orbitals.png
 
 In Elk, the :math:`Y_{lm}` projections of the atomic site resolved DOS are arranged in logical order in the BAND_S*A* files, namely: (l,m) = (0,0), (1,-1), (1,0), (1,1), (2,-2), (2,-1), (2,0), (2,1), (2,2), etc., 
 
@@ -122,7 +122,7 @@ PyProcar allows the plotting of band structures with a discontinuous :math:`k`-p
 	kticks = [0, 39, 79, 119, 159, 199, 239, 279, 319]
 	discontinuities = [199, 239]
 
-.. image:: images/continuousbands.png
+.. image:: ../images/continuousbands.png
 
 
 .. automodule:: pyprocar.scriptBandsplot

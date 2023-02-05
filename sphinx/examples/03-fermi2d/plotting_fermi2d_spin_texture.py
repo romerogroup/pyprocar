@@ -3,7 +3,7 @@
 .. _ref_plotting_fermi2d_noncolinear:
 
 Plotting fermi2d noncolinear
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi2d noncolinear example. For more information about fermi2d refer to :ref:`fermi2d`
 
@@ -31,7 +31,7 @@ data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}noncolinear{
 
 ###############################################################################
 # Spin Texture
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 #
 

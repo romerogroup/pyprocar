@@ -1,5 +1,5 @@
 Getting started
-======================
+==============================
 
 This guide is here to help you start using PyProcar with the help of our examples and tutorials.
 
@@ -9,9 +9,10 @@ This guide is here to help you start using PyProcar with the help of our example
 
    installation
    authors
+   why
 
 Installation
-============
+-------------------------------
 The only prerequisite for installing PyProcar is Python itself. If you don’t
 have Python yet and want the simplest way to get started, we recommend you use
 the `Anaconda Distribution <https://www.anaconda.com/>`_.
@@ -52,7 +53,7 @@ the `Anaconda Distribution <https://www.anaconda.com/>`_.
       :ref:`install_ref` page.
 
 First Steps
-===========
+-------------------------------
 We've provided a variety of resources for you to get used to PyProcar's API
 through a range of examples and tutorials.
 
@@ -77,18 +78,19 @@ through a range of examples and tutorials.
       :class-title: pyprocar-card-title
 
       Using PyProcar in your research? Please consider citing or acknowledging
-      us.  We have a `Elsevier Publication`_!
+      us.  We have a Elsevier Publication!
 
       .. image:: ../images/1st_publication.png
          :target: https://www.sciencedirect.com/science/article/abs/pii/S0010465519303935?via%3Dihub
 
+
 Support
-=======
+-------------------------------
 
 To be added...
 
 Citing PyProcar
-==============
+-------------------------------
 
 There is a `paper about PyProcar <https://doi.org/10.1016/j.cpc.2019.107080>`_!
 

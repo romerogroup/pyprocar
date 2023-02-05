@@ -3,7 +3,7 @@
 .. _sphx_glr_examples_02-bands_dos:
 
 Bands and Dos plot
--------------
+-------------------------------
 
 These examples demonstrate the bandsdosplot plotting capabilities.
 
