@@ -24,24 +24,16 @@ from sympy.physics.quantum.cg import CG
 # TODO When PEP 646 is introduced in numpy. need to update the python typing.
 
 class DensityOfStates:
-    def __init__(
-        self, 
-        energies: npt.NDArray[np.float64],
-        total: npt.NDArray[np.float64], 
-        projected: npt.NDArray[np.float64] = None, 
-        interpolation_factor: int = 1,
-        interpolation_kind: str = 'cubic',
-    ):
-        """A class that contains density of states calculated by the a density
+    """A class that contains density of states calculated by the a density
         functional theory calculation.
 
         Parameters
         ----------
-        energies : npt.NDArray[np.float64]
+        energies : np.ndarray, 
             Points on energy spectrum. shape = (n_dos, )
-        total : npt.NDArray[np.float64]
+        total : np.ndarray
             Densities at each point. shape = (n_dos, )
-        projected : npt.NDArray[np.float64], optional
+        projected : np.ndarray, optional
             Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
             ``i_principal`` works like the principal quantum number n. The last
             index should be the total. (i_principal = -1)
@@ -55,7 +47,16 @@ class DensityOfStates:
             The number of density of states points will increase by this factor
             in the interpolation, by default 1.
             
-        """        
+    """
+    def __init__(
+        self, 
+        energies: npt.NDArray[np.float64],
+        total: npt.NDArray[np.float64], 
+        projected: npt.NDArray[np.float64] = None, 
+        interpolation_factor: int = 1,
+        # interpolation_kind: str = 'cubic',
+        ):
+                
 
 
         self.energies = energies
@@ -88,18 +89,46 @@ class DensityOfStates:
 
     @property
     def n_dos(self):
+        """The number of dos values
+
+        Returns
+        -------
+        int
+            The number of dos values
+        """
         return len(self.energies)
     
     @property
     def n_energies(self):
+        """The number of energy values
+
+        Returns
+        -------
+        int
+            The number of energy values
+        """
         return self.n_dos
 
     @property
     def n_spins(self):
+        """The number of spin channels
+
+        Returns
+        -------
+        int
+            The number of spin channels
+        """
         return len(self.total)
     
     @property
     def is_non_collinear(self):
+        """Boolean for if this is non-colinear calc
+
+        Returns
+        -------
+        bool
+            Boolean for if this is non-colinear calc
+        """
         if self.n_spins == 3 or self.n_spins==4:
             return True
         else:
@@ -112,38 +141,45 @@ class DensityOfStates:
                 spins:List[int]=None,
                 sum_noncolinear:bool=True):
         """
-        +-------+-----+------+------+------+------+------+------+------+------+
-        |n-lm   |  0  |   1  |  2   |   3  |   4  |   5  |   6  |   7  |   8  |
-        +=======+=====+======+======+======+======+======+======+======+======+
-        |-1(tot)|  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |
-        +=======+=====+======+======+======+======+======+======+======+======+
-        |   0   |  s  |      |      |      |      |      |      |      |      |
-        +=======+=====+======+======+======+======+======+======+======+======+
-        |   1   |  s  |  py  |  pz  |  px  |      |      |      |      |      |
-        +=======+=====+======+======+======+======+======+======+======+======+
-        |   2   |  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |
-        +=======+=====+======+======+======+======+======+======+======+======+
-        |  ...  | ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |
-        +=======+=====+======+======+======+======+======+======+======+======+
+        
+        .. code-block::
+            :linenos:
+
+            Orbital table
+            
+            +-------+-----+------+------+------+------+------+------+------+------+
+            |n-lm   |  0  |   1  |  2   |   3  |   4  |   5  |   6  |   7  |   8  |
+            +=======+=====+======+======+======+======+======+======+======+======+
+            |-1(tot)|  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |
+            +=======+=====+======+======+======+======+======+======+======+======+
+            |   0   |  s  |      |      |      |      |      |      |      |      |
+            +=======+=====+======+======+======+======+======+======+======+======+
+            |   1   |  s  |  py  |  pz  |  px  |      |      |      |      |      |
+            +=======+=====+======+======+======+======+======+======+======+======+
+            |   2   |  s  |  py  |  pz  |  px  | dxy  | dyz  | dz2  | dxz  |x2-y2 |
+            +=======+=====+======+======+======+======+======+======+======+======+
+            |  ...  | ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |
+            +=======+=====+======+======+======+======+======+======+======+======+
+        
 
 
         Parameters
         ----------
-        atoms : list int, optional
+        atoms : List[int], optional
              list of atom index needed to be sumed over.
              count from zero with the same
              order as input. The default is None.
-        principal_q_numbers : list int, optional
-            list of . The default is [-1].
-        orbitals : TYPE, optional
-            DESCRIPTION. The default is None.
-        spins : TYPE, optional
-            DESCRIPTION. The default is None.
+        principal_q_numbers :List[int], optional
+            List of n quantum numbers to be summed over. The default is [-1].
+        orbitals : List[int], optional
+            List of orbitals to be summed over. The default is None.
+        spins : List[int], optional
+            List of spins to be summed over. The default is None.
 
         Returns
         -------
         ret : list float
-            .
+            The summed density of states.
 
         """
 
@@ -177,6 +213,13 @@ class DensityOfStates:
         return ret
 
     def get_current_basis(self):
+        """Returns a string of current orbital basis
+
+        Returns
+        -------
+        str
+            Returns a string of current orbital basis
+        """
 
         n_orbitals = self.projected.shape[2]
 
@@ -191,44 +234,51 @@ class DensityOfStates:
         return basis
 
     def coupled_to_uncoupled_basis(self):
-        """Converts coupled projections to uncoupled projections. This assumes the orbitals are order by:
-        coupled_orbitals = [
-                        {"l": 's', "j": 0.5, "m": -0.5},
-                        {"l": 's', "j": 0.5, "m": 0.5},
+        """Converts coupled projections to uncoupled projections. This assumes the orbitals are order by
+        .. code-block::
+            :linenos:
 
-                        {"l": 'p', "j": 0.5, "m": -0.5},
-                        {"l": 'p', "j": 0.5, "m": 0.5},
+            coupled_orbitals = [
+                            {"l": 's', "j": 0.5, "m": -0.5},
+                            {"l": 's', "j": 0.5, "m": 0.5},
 
-                        {"l": 'p', "j": 1.5, "m": -1.5},
-                        {"l": 'p', "j": 1.5, "m": -0.5},
-                        {"l": 'p', "j": 1.5, "m": -0.5},
-                        {"l": 'p', "j": 1.5, "m": 1.5},
+                            {"l": 'p', "j": 0.5, "m": -0.5},
+                            {"l": 'p', "j": 0.5, "m": 0.5},
 
-                        {"l": 'd', "j": 1.5, "m": -1.5},
-                        {"l": 'd', "j": 1.5, "m": -0.5},
-                        {"l": 'd', "j": 1.5, "m": -0.5},
-                        {"l": 'd', "j": 1.5, "m": 1.5},
+                            {"l": 'p', "j": 1.5, "m": -1.5},
+                            {"l": 'p', "j": 1.5, "m": -0.5},
+                            {"l": 'p', "j": 1.5, "m": -0.5},
+                            {"l": 'p', "j": 1.5, "m": 1.5},
 
-                        {"l": 'd', "j": 2.5, "m": -2.5},
-                        {"l": 'd', "j": 2.5, "m": -1.5},
-                        {"l": 'd', "j": 2.5, "m": -0.5},
-                        {"l": 'd', "j": 2.5, "m": 0.5},
-                        {"l": 'd', "j": 2.5, "m": 1.5},
-                        {"l": 'd', "j": 2.5, "m": 2.5},
+                            {"l": 'd', "j": 1.5, "m": -1.5},
+                            {"l": 'd', "j": 1.5, "m": -0.5},
+                            {"l": 'd', "j": 1.5, "m": -0.5},
+                            {"l": 'd', "j": 1.5, "m": 1.5},
+
+                            {"l": 'd', "j": 2.5, "m": -2.5},
+                            {"l": 'd', "j": 2.5, "m": -1.5},
+                            {"l": 'd', "j": 2.5, "m": -0.5},
+                            {"l": 'd', "j": 2.5, "m": 0.5},
+                            {"l": 'd', "j": 2.5, "m": 1.5},
+                            {"l": 'd', "j": 2.5, "m": 2.5},
+                        ]
+            uncoupled_orbitals = [
+                        {"l": 0, "m": 1},
+                        {"l": 1, "m": 3},
+                        {"l": 1, "m": 1},
+                        {"l": 1, "m": 2},
+                        {"l": 2, "m": 5},
+                        {"l": 2, "m": 3},
+                        {"l": 2, "m": 1},
+                        {"l": 2, "m": 2},
+                        {"l": 2, "m": 4},
                     ]
-        uncoupled_orbitals = [
-                    {"l": 0, "m": 1},
-                    {"l": 1, "m": 3},
-                    {"l": 1, "m": 1},
-                    {"l": 1, "m": 2},
-                    {"l": 2, "m": 5},
-                    {"l": 2, "m": 3},
-                    {"l": 2, "m": 1},
-                    {"l": 2, "m": 2},
-                    {"l": 2, "m": 4},
-                ]
-        :return: None
-        :rtype: None
+
+        Returns
+        -------
+        ret :  None
+            None
+        
         """
         n_atoms = self.projected.shape[0]
         n_principle = self.projected.shape[1]

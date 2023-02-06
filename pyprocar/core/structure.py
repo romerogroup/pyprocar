@@ -1,3 +1,9 @@
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
+
+
 import spglib
 import numpy as np
 from scipy.spatial import ConvexHull
@@ -5,20 +11,13 @@ from scipy.spatial import ConvexHull
 from ..utils import elements
 from .surface import Surface
 
-# TODO add python typing to all of the functions
 # TODO add __str__ method 
 
 N_AVOGADRO = 6.022140857e23
 
 class Structure:
-    def __init__(
-        self,
-        atoms=None,
-        cartesian_coordinates=None,
-        fractional_coordinates=None,
-        lattice=None,
-    ):
-        """
+
+    """
         Class to define a peridic crystal structure.
 
         Parameters
@@ -35,7 +34,15 @@ class Structure:
         -------
         None.
 
-        """
+    """
+    def __init__(
+        self,
+        atoms=None,
+        cartesian_coordinates=None,
+        fractional_coordinates=None,
+        lattice=None,
+    ):
+        
         if fractional_coordinates is not None:
             self.fractional_coordinates = np.array(fractional_coordinates)
             self.cartesian_coordinates = np.dot(fractional_coordinates, lattice)
@@ -63,6 +70,8 @@ class Structure:
 
         if self.has_complete_data:
             self.get_wyckoff_positions()
+
+        return None
 
     @property
     def volume(self):
@@ -105,18 +114,54 @@ class Structure:
 
     @property
     def a(self):
+        """
+        The magnitude of the first crystal lattice vector
+
+        Returns
+        -------
+        float
+            The magnitude of the first crystal lattice vector
+
+        """
         return np.linalg.norm(self.lattice[0, :])
 
     @property
     def b(self):
+        """
+        The magnitude of the second crystal lattice vector
+
+        Returns
+        -------
+        float
+            The magnitude of the second crystal lattice vector
+
+        """
         return np.linalg.norm(self.lattice[1, :])
 
     @property
     def c(self):
+        """
+        The magnitude of the third crystal lattice vector
+
+        Returns
+        -------
+        float
+            The magnitude of the third crystal lattice vector
+
+        """
         return np.linalg.norm(self.lattice[2, :])
 
     @property
     def alpha(self):
+        """
+        The angle between the of the second and third crystal lattice vectors
+
+        Returns
+        -------
+        float
+            The angle between the of the second and third crystal lattice vectors
+
+        """
         return np.rad2deg(
             np.arccos(
                 np.dot(self.lattice[1, :], self.lattice[2, :]) / (self.b * self.c)
@@ -125,6 +170,15 @@ class Structure:
 
     @property
     def beta(self):
+        """
+        The angle between the of the first and third crystal lattice vectors
+
+        Returns
+        -------
+        float
+            The angle between the of the first and third crystal lattice vectors
+
+        """
         return np.rad2deg(
             np.arccos(
                 np.dot(self.lattice[0, :], self.lattice[2, :]) / (self.a * self.c)
@@ -133,6 +187,15 @@ class Structure:
 
     @property
     def gamma(self):
+        """
+        The angle between the of the first and second crystal lattice vectors
+
+        Returns
+        -------
+        float
+            The angle between the of the first and second crystal lattice vectors
+
+        """
         return np.rad2deg(
             np.arccos(
                 np.dot(self.lattice[0, :], self.lattice[1, :]) / (self.a * self.b)
@@ -193,6 +256,13 @@ class Structure:
 
     @property
     def reciprocal_lattice(self):
+        """The reciprocal lattice matrix corresponding the the crystal lattice
+
+        Returns
+        -------
+        np.ndarray
+            The reciprocal lattice matrix corresponding the the crystal lattice
+        """
         reciprocal_lattice = np.zeros_like(self.lattice)
         a = self.lattice[0, :]
         b = self.lattice[1, :]
@@ -210,15 +280,58 @@ class Structure:
 
     @property
     def _spglib_cell(self):
+        """Return the structure in spglib format
+
+        Returns
+        -------
+        Tuple
+            Return the structure in spglib format (lattice, frac_coords, atomic_numbers)
+        """
         return (self.lattice, self.fractional_coordinates, self.atomic_numbers)
 
     def get_space_group_number(self, symprec=1e-5):
+        """Returns the Space Group Number of the material
+
+        Parameters
+        ----------
+        symprec : float, optional
+            tolerence for symmetry, by default 1e-5
+
+        Returns
+        -------
+        int
+            The Space Group Number
+        """
         return spglib.get_symmetry_dataset(self._spglib_cell, symprec)["number"]
 
     def get_space_group_international(self, symprec=1e-5):
+        """Returns the international Space Group Number of the material
+
+        Parameters
+        ----------
+        symprec : float, optional
+            tolerence for symmetry, by default 1e-5
+
+        Returns
+        -------
+        str
+            The international Space Group Number
+        """
         return spglib.get_symmetry_dataset(self._spglib_cell, symprec)["international"]
 
     def get_wyckoff_positions(self, symprec=1e-5):
+        """Returns the wyckoff positions
+
+        Parameters
+        ----------
+        symprec : float, optional
+            tolerence for symmetry, by default 1e-5
+
+        Returns
+        -------
+        np.ndarray
+            The wyckoff positions
+        """
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
         wyckoffs_temp = np.array(
             spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
@@ -240,6 +353,18 @@ class Structure:
         return wyckoff_positions
 
     def _get_lattice_corners(self, lattice):
+        """Returns the corners of the crystal lattice
+
+        Parameters
+        ----------
+        lattice : np.ndarray
+            The crystal lattice
+
+        Returns
+        -------
+        np.ndarray
+            Returns the corners of the crystal lattice
+        """
         origin = np.array([0, 0, 0])
         edges = []
         for x in range(2):
@@ -256,27 +381,74 @@ class Structure:
 
     @property
     def lattice_corners(self):
+        """Returns the corners of the crystal lattice
+
+        Returns
+        -------
+        np.ndarray
+            Returns the corners of the crystal lattice
+        """
         return self._get_lattice_corners(self.lattice)
 
     @property
     def cell_convex_hull(self):
+        """Returns the cell convex hull
+
+        Returns
+        -------
+        scipy.spatial.ConvexHull
+            Returns the cell convex hull
+        """
         return ConvexHull(self.lattice_corners)
 
     def plot_cell_convex_hull(self):
+        """
+        A method to plot the the convex hull
+        """
         surface = Surface(
             verts=self.cell_convex_hull.points, faces=self.cell_convex_hull.simplices
         )
         surface.pyvista_obj.plot()
+        return None
 
     def get_spglib_symmetry_dataset(self, symprec=1e-5):
+        """Returns the spglib symmetry dataset
+
+        Parameters
+        ----------
+        symprec : float, optional
+            tolerence for symmetry, by default 1e-5
+
+        Returns
+        -------
+        dict
+            spglib symmetry dataset
+        """
         return spglib.get_symmetry_dataset(self._spglib_cell, symprec)
 
     def transform(
         self, transformation_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-    ):
+        ):
+        """Transform the crystla lattice by a transformation matrix
+
+        Parameters
+        ----------
+        transformation_matrix : np.ndarray, optional
+            The transformation matrix, by default np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            The transformed structure
+
+        Raises
+        ------
+        ValueError
+            Raise error if the transform is not proper
+        """
         scale = np.linalg.det(transformation_matrix).round(2)
         if not scale.is_integer() or (1 / scale).is_integer():
-            raise ValueError("This transfare with is not proper.")
+            raise ValueError("This transform is not proper.")
             return None
         scale = int(scale)
         new_lattice = np.dot(self.lattice, transformation_matrix)
@@ -312,6 +484,20 @@ class Structure:
         )
 
     def is_point_inside(self, point, lattice=None):
+        """A method to determine if a point is inside the unitcell
+
+        Parameters
+        ----------
+        point : np.ndarray
+            The point in question
+        lattice : np.ndarray, optional
+            The crystal lattice matrix, by default None
+
+        Returns
+        -------
+        bool
+            Boolean if a point is inside the unitcell
+        """
         if lattice is None:
             lattic = self.lattice
         edges = self._get_lattice_corners(lattic).tolist()
@@ -323,4 +509,16 @@ class Structure:
             return False
 
     def supercell(self, matrix):
+        """A method to transform the Structure to a supercell
+
+        Parameters
+        ----------
+        matrix : np.ndarray
+            The matrix to transform the Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            The transformed structure
+        """
         return self.transform(matrix)

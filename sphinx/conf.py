@@ -92,6 +92,7 @@ sphinx_gallery_conf = {
     "image_scrapers": ("pyvista", "matplotlib"),
 }
 
+
 # See https://numpydoc.readthedocs.io/en/latest/install.html
 numpydoc_use_plots = True
 numpydoc_show_class_members = False

@@ -22,6 +22,32 @@ from .brillouin_zone import BrillouinZone
 from ..utils import Unfolder, mathematics
 
 class ElectronicBandStructure:
+    """This object stores electronic band structure informomration.
+
+        Parameters
+        ----------
+        kpoints : np.ndarray
+            The kpoints array. Will have the shape (n_kpoints, 3)
+        bands : np.ndarray
+            The bands array. Will have the shape (n_kpoints, n_bands)
+        efermi : float
+            The fermi energy
+        projected : np.ndarray, optional
+            The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+        projected_phase : np.ndarray, optional
+            The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+        kpath : KPath, optional
+            The kpath for band structure claculation, defaults to None
+        weights : np.ndarray, optional
+            The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
+        labels : List, optional
+            A list of orbital names, defaults to None
+        reciprocal_lattice : np.ndarray, optional
+            The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
+        shifted_to_efermi : bool, optional
+             Boolean to determine if the fermi energy is shifted, defaults to False
+    """
+
     def __init__(
         self,
         kpoints:np.ndarray,
@@ -35,32 +61,7 @@ class ElectronicBandStructure:
         reciprocal_lattice:np.ndarray=None,
         shifted_to_efermi:bool=False,
         ):
-        """
         
-        This object stores electronic band structure informomration
-
-        :param kpoints: The kpoints array. Will have the shape (n_kpoints, 3)
-        :type kpoints: np.ndarray
-        :param bands: The bands array. Will have the shape (n_kpoints, n_bands)
-        :type bands: np.ndarray, optional
-        :param efermi: _description_, defaults to None
-        :type efermi: float, optional
-        :param projected: The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
-        :type projected: np.ndarray, optional
-        :param projected_phase: The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
-        :type projected_phase: np.ndarray, optional
-
-        :param kpath: The kpath for band structure claculation, defaults to None
-        :type kpath: KPath, optional
-        :param weights: The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
-        :type weights: np.ndarray, optional
-        :param labels: A list of orbital names, defaults to None
-        :type labels: List, optional
-        :param reciprocal_lattice: The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
-        :type reciprocal_lattice: np.ndarray, optional
-        :param shifted_to_efermi: Boolean to determine if the fermi energy is shifted, defaults to False
-        :type shifted_to_efermi: bool, optional
-        """
 
         self.kpoints = kpoints
         self.bands = bands - efermi
@@ -80,30 +81,79 @@ class ElectronicBandStructure:
 
     @property
     def nkpoints(self):
+        """The number of k points
+
+        Returns
+        -------
+        int
+            The number of k points
+        """
         return self.kpoints.shape[0]
 
     @property
     def nbands(self):
+        """The number of bands
+
+        Returns
+        -------
+        int
+            The number of bands
+        """
         return self.bands.shape[1]
 
     @property
     def natoms(self):
+        """The number of atoms
+
+        Returns
+        -------
+        int
+            The number of atoms
+        """
         return self.projected.shape[2]
 
     @property
     def nprincipals(self):
+        """The number of principal quantum numbers
+
+        Returns
+        -------
+        int
+            The number of principal quantum numbersk points
+        """
         return self.projected.shape[3]
 
     @property
     def norbitals(self):
+        """The number of orbitals
+
+        Returns
+        -------
+        int
+            The number of orbitals
+        """
         return self.projected.shape[4]
 
     @property
     def nspins(self):
+        """The number of spin channels
+
+        Returns
+        -------
+        int
+            The number of spin channels
+        """
         return self.projected.shape[5]
 
     @property
     def is_non_collinear(self):
+        """Boolean to determine if this is a non-colinear calculation
+
+        Returns
+        -------
+        bool
+            Boolean to determine if this is a non-colinear calculation
+        """
         if self.nspins == 3:
             return True
         else:
@@ -111,6 +161,13 @@ class ElectronicBandStructure:
 
     @property
     def kpoints_cartesian(self):
+        """Returns the kpoints in cartesian basis
+
+        Returns
+        -------
+        np.ndarray
+            Returns the kpoints in cartesian basis
+        """
         if self.reciprocal_lattice is not None:
             return np.dot(self.kpoints, self.reciprocal_lattice)
         else:
@@ -121,6 +178,13 @@ class ElectronicBandStructure:
 
     @property
     def kpoints_reduced(self):
+        """Returns the kpoints in fractional basis
+
+        Returns
+        -------
+        np.ndarray
+            Returns the kpoints in fractional basis
+        """
         return self.kpoints
 
     
@@ -130,6 +194,26 @@ class ElectronicBandStructure:
                 orbitals:List[int]=None, 
                 spins:List[int]=None, 
                 sum_noncolinear:bool=True):
+        """_summary_
+
+        Parameters
+        ----------
+        atoms : List[int], optional
+            List of atoms to be summed over, by default None
+        principal_q_numbers : List[int], optional
+            List of principal quantum numbers to be summed over, by default [-1]
+        orbitals : List[int], optional
+            List of orbitals to be summed over, by default None
+        spins : List[int], optional
+            List of spins to be summed over, by default None
+        sum_noncolinear : bool, optional
+            Determines if the projection should be summed in a non-colinear calculation, by default True
+
+        Returns
+        -------
+        ret : list float
+            The summed projections
+        """
 
         principal_q_numbers = np.array(principal_q_numbers)
         if atoms is None:
@@ -152,38 +236,44 @@ class ElectronicBandStructure:
             )
         return ret
 
-    def apply_symmetries(self, operations=None, structure=None):
-        return
-
     def update_weights(self, weights):
+        """Updates the weights corresponding to the kpoints
+
+        Parameters
+        ----------
+        weights : List[float]
+            A list of weights corresponding to the kpoints
+
+        Returns
+        -------
+        None
+            None
+        """
         self.weights = weights
-        return
+        return None
 
     def unfold(self, transformation_matrix=None, structure=None):
+        """The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.
+        The current weights are then updated
 
+        Parameters
+        ----------
+        transformation_matrix : np.ndarray, optional
+            The transformation matrix to transform the basis. Expected size is (3,3), by default None
+        structure : pyprocar.core.Structure, optional
+            The structure of a material, by default None
+
+        Returns
+        -------
+        None
+            None
+        """
         uf = Unfolder(
             ebs=self, transformation_matrix=transformation_matrix, structure=structure,
         )
         self.update_weights(uf.weights)
 
-        return
-
-
-
-    def apply_symmetries(self, operations=None, structure=None):
-        return
-
-    def update_weights(self, weights):
-        self.weights = weights
-        return
-
-    def unfold(self, transformation_matrix=None, structure=None):
-        uf = Unfolder(
-            ebs=self, transformation_matrix=transformation_matrix, structure=structure,
-        )
-        self.update_weights(uf.weights)
-
-        return
+        return None
 
     def plot_kpoints(
         self,
@@ -194,28 +284,29 @@ class ElectronicBandStructure:
         render_points_as_spheres=True,
         transformation_matrix=None,
         ):
-        """
-        
-        This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
+        """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
 
         This method will plot the K points in pyvista
 
-        :param reduced: NEEDS TO BE EXPLAINed, defaults to False
-        :type reduced: bool, optional
-        :param show_brillouin_zone: Boolean to show the Brillouin zone, defaults to True
-        :type show_brillouin_zone: bool, optional
-        :param color: Color of the points, defaults to "r"
-        :type color: str, optional
-        :param point_size: Size of points, defaults to 4.0
-        :type point_size: float, optional
-        :param render_points_as_spheres: Boolean for how points are rendered, defaults to True
-        :type render_points_as_spheres: bool, optional
-        :param transformation_matrix: Reciprocal Lattice Matrix, defaults to None
-        :type transformation_matrix: np.ndarray, optional
-        :return: None
-        :rtype: None
+        Parameters
+        ----------
+        reduced : bool, optional
+            Determines wether to plot the kpoints in the reduced or cartesian basis, defaults to False
+        show_brillouin_zone : bool, optional
+            Boolean to show the Brillouin zone, defaults to True
+        color : str, optional
+            Color of the points, defaults to "r"
+        point_size : float, optional
+            Size of points, defaults to 4.0
+        render_points_as_spheres : bool, optional
+            Boolean for how points are rendered, defaults to True
+        transformation_matrix : np.ndarray, optional, optional
+            Reciprocal Lattice Matrix, defaults to None
 
-
+        Returns
+        -------
+        None
+            None
         """
         
         p = pyvista.Plotter()
@@ -269,13 +360,12 @@ class ElectronicBandStructure:
         return None
 
     def ibz2fbz(self, rotations):
-        """
-        
-        Generates the full Brillouin zone from the irreducible Brillouin
-        zone using point symmetries.
+        """Applys symmetry operations to the kpoints, bands, and projections
 
-        :param rotations: the point symmetry operations of the lattice
-        :type rotations: np.ndarray
+        Parameters
+        ----------
+        rotations : np.ndarray
+            The point symmetry operations of the lattice
         """
         
         klist = []

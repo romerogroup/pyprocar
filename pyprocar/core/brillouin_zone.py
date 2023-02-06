@@ -71,25 +71,15 @@ class BrillouinZone(Surface):
             reciprocal_lattice:np.ndarray, 
             transformation_matrix:List[int]=None):
         """
-        Parameters
-        ----------
-        reciprocal_lattice : (3,3) float
-            Reciprocal lattice used to generate Brillouin zone usgin Wigner Seitz.
-        transformation_matrix : (3,3) float, optional
-            Any transformation to be applied to the unit cell such as rotation
-            or supercell. The default is None.
+        This class will calculate the BrillouinZone corresponding to a reciprocal lattice.
 
-        Returns
-        -------
-        None.
-
+        :param reciprocal_lattice: Reciprocal lattice used to generate Brillouin zone usgin Wigner Seitz. (3,3) float
+        :type reciprocal_lattice: np.ndarray
+        :param transformation_matrix: Any transformation to be applied to the unit cell such as rotation
+#             or supercell. (3,3) float. defaults to None
+        :type transformation_matrix: List[int], optional
         """
-        """
-        if transformation_matrix is not None:
-            self.reciprocal = np.dot(reciprocal_lattice, transformation_matrix)
-        else:
-            self.reciprocal = reciprocal_lattice
-        """
+        
         self.reciprocal = reciprocal_lattice
         # for ix in range(3):
         # self.reciprocal[:,ix]*=supercell[ix]
@@ -115,15 +105,20 @@ class BrillouinZone(Surface):
         # self.pyvista_obj.set_active_scalars('scalars')
         
         # self.lines = Lines(verts, faces)
-        
-    def wigner_seitz(self):
-        """
+        #         """
 
-        Returns
-        -------
-        TYPE
-            Using the Wigner-Seitz Method, this function finds the 1st
-            Brillouin Zone in terms of vertices and faces
+        # Returns
+        # -------
+        # TYPE
+        #     Using the Wigner-Seitz Method, this function finds the 1st
+        #     Brillouin Zone in terms of vertices and faces
+        # """
+
+    def wigner_seitz(self):
+        """Calculates the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
+
+        :return: Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
+        :rtype: Tuple(n_verts,n_faces)
         """
 
         kpoints = []
@@ -147,7 +142,10 @@ class BrillouinZone(Surface):
 
         return np.array(verts,dtype = float), faces
 
-    def _fix_normals_direction(self,n_faces):
+    def _fix_normals_direction(self,):
+        """
+        Helper method that calculates the normals of the Wigner seits cell
+        """
         center = self.centers[0]
         n1 = center / np.linalg.norm(center)
         n2 = self.face_normals[0]

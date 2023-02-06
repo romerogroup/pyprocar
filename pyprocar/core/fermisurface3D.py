@@ -20,9 +20,6 @@ from . import Isosurface, Surface, BrillouinZone
 
 np.set_printoptions(threshold=sys.maxsize)
 
-# TODO add python typing
-# TODO move this module to plotter
-# TODO add default settings
 
 HBAR_EV = 6.582119 *10**(-16) #eV*s
 HBAR_J = 1.0545718 *10**(-34) #eV*s
@@ -31,31 +28,9 @@ EV_TO_J = 1.602*10**(-19)
 FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
 
 class FermiSurface3D(Surface):
+    """
+        The object is used to store and manapulate a 3d fermi surface.
 
-    def __init__(
-        self,
-        kpoints: np.ndarray,
-        bands: np.ndarray,
-        fermi: float,
-        reciprocal_lattice: np.ndarray,
-        bands_to_keep: List[int]=None,
-        spd: np.ndarray=None,
-        spd_spin:np.ndarray=None,
-
-        fermi_shift: float=0.0,
-        fermi_tolerance:float=0.1,
-        interpolation_factor: int=1,
-        colors: List[str] or List[Tuple[float,float,float]]=None,
-        surface_color: str or Tuple[float,float,float, float]=None,
-        projection_accuracy: str="Normal",
-        cmap: str="viridis",
-        vmin: float=0,
-        vmax: float=1,
-        supercell: List[int]=[1, 1, 1],
-        # sym: bool=False
-        ):
-
-        """
         Parameters
         ----------
         kpoints : (n,3) float
@@ -104,7 +79,32 @@ class FermiSurface3D(Surface):
             This is used to add padding to the array 
             to assist in the calculation of the isosurface.
 
-        """
+    """
+
+    def __init__(
+        self,
+        kpoints: np.ndarray,
+        bands: np.ndarray,
+        fermi: float,
+        reciprocal_lattice: np.ndarray,
+        bands_to_keep: List[int]=None,
+        spd: np.ndarray=None,
+        spd_spin:np.ndarray=None,
+
+        fermi_shift: float=0.0,
+        fermi_tolerance:float=0.1,
+        interpolation_factor: int=1,
+        colors: List[str] or List[Tuple[float,float,float]]=None,
+        surface_color: str or Tuple[float,float,float, float]=None,
+        projection_accuracy: str="Normal",
+        cmap: str="viridis",
+        vmin: float=0,
+        vmax: float=1,
+        supercell: List[int]=[1, 1, 1],
+        # sym: bool=False
+        ):
+
+        
 
         self.kpoints = kpoints
         
@@ -232,18 +232,23 @@ class FermiSurface3D(Surface):
 
             self.point_data[ "band_"+ str(self.reducedBandIndex_to_fullBandIndex[str(i_reduced_band)])] = np.array(new_color_array)
         self.point_data["bands"] = np.array(combined_band_color_array ) 
+        return None
         
 
-         
     def create_vector_texture(self,
                             vectors_array: np.ndarray, 
                             vectors_name: str="vector" ):
-        """_summary_
-        Method to map vector properties to the fermi surface.
-        Args:
-            vectors_array (np.ndarray): The vector array to map to the surface (nk, 3)
-            vectors_name (str, optional): The name to give the vector. Defaults to "vector".
         """
+        This method will map a list of vector to the 3d fermi surface mesh
+
+        Parameters
+        ----------
+        vectors_array : np.ndarray
+            The vector array corresponding to the kpoints
+        vectors_name : str, optional
+            The name of the vectors, by default "vector"
+        """
+        
         final_vectors_X = []
         final_vectors_Y = []
         final_vectors_Z = []
@@ -310,11 +315,12 @@ class FermiSurface3D(Surface):
             final_vectors_Y.extend( vectors_Y)
             final_vectors_Z.extend( vectors_Z)
                 
-        self.set_vectors(final_vectors_X, final_vectors_Y, final_vectors_Z,vectors_name = vectors_name)  
+        self.set_vectors(final_vectors_X, final_vectors_Y, final_vectors_Z,vectors_name = vectors_name)
+        return None
             
     def create_spin_texture(self):
-        """_summary_
-        Method to maap spin textures to the surface.
+        """
+        This method will create the spin textures for the 3d fermi surface in the case of a non-colinear calculation
         """
         if self.spd_spin is not None:
             XYZ_extended = self.XYZ.copy()
@@ -377,25 +383,20 @@ class FermiSurface3D(Surface):
                 )
 
             self.set_vectors(spin_X, spin_Y, spin_Z)
+            return None
    
     def project_color(self, 
                     scalars_array:np.ndarray,
-                    cmap: str="viridis", 
-                    vmin: float=0.0, 
-                    vmax: float=1.0, 
                     scalar_name:str="scalars"):
         """
-        Projects the scalars to the surface.
+        Projects the scalars to the 3d fermi surface.
+
         Parameters
         ----------
-        cmap : TYPE string
-            DESCRIPTION. Colormaps for the projection.
-        vmin : TYPE
-            DESCRIPTION.
-        vmax : TYPE
-            DESCRIPTION.
         scalars_array : np.array size[len(kpoints),len(self.bands)]   
             the length of the self.bands is the number of bands with a fermi iso surface
+        scalar_name :str, optional
+            The name of the scalars, by default "scalars"
         
         Returns
         -------
@@ -432,14 +433,20 @@ class FermiSurface3D(Surface):
             final_scalars.extend(colors)
 
         self.set_scalars(final_scalars, scalar_name = scalar_name)
+        return None
         # self.set_color_with_cmap(cmap, vmin, vmax)
-              
+  
     def calculate_first_and_second_derivative_energy_band(self, 
                                                         iband: int):
+        """Helper method to calculate the first and second derivative of a band
 
-        """_summary_
-        Helpper method to calculate the first and second derivative of a band
+        Parameters
+        ----------
+        iband : int
+            The band index
         """
+
+        
         def get_energy(kp_reduced: np.ndarray):
             return kp_reduced_to_energy[f'({kp_reduced[0]},{kp_reduced[1]},{kp_reduced[2]})']
         def get_cartesian_kp(kp_reduced: np.ndarray):
@@ -619,9 +626,9 @@ class FermiSurface3D(Surface):
                                                   1/effective_mass_tensor_list[ikp,2,2])**-1)/FREE_ELECTRON_MASS for ikp in range(len(self.XYZ))])
         return (group_velocity_vector, group_velocity_magnitude, effective_mass_tensor_list,
                 effective_mass_list, gradient_list, gradient_list_cart)
-    
+
     def calculate_first_and_second_derivative_energy(self):
-        """_summary_
+        """
         Helper method which calculates the first and secoond derivative of all bands.
         """
         
@@ -635,7 +642,7 @@ class FermiSurface3D(Surface):
                                                                 })
 
     def calculate_fermi_velocity(self):
-        """_summary_
+        """
         Method to calculate the fermi velocity of the surface.
         """
         self.calculate_first_and_second_derivative_energy()
@@ -650,7 +657,7 @@ class FermiSurface3D(Surface):
         self.create_vector_texture( vectors_array = vectors_array, vectors_name = "Fermi Velocity Vector"  )  
 
     def calculate_fermi_speed(self):
-        """_summary_
+        """
         Method to calculate the fermi speed of the surface.
         """
         self.calculate_first_and_second_derivative_energy()
@@ -664,7 +671,7 @@ class FermiSurface3D(Surface):
         self.project_color(scalars_array = scalars_array, cmap=self.cmap, vmin=self.vmin, vmax=self.vmax,  scalar_name = "Fermi Speed")
 
     def calculate_effective_mass(self):
-        """_summary_
+        """
         Method to calculate the effective mass of the surface.
         """
         self.calculate_first_and_second_derivative_energy()
@@ -677,8 +684,8 @@ class FermiSurface3D(Surface):
         self.project_color(scalars_array = scalars_array, cmap=self.cmap, vmin=self.vmin, vmax=self.vmax, scalar_name="Geometric Average Effective Mass")
 
     def project_atomic_projections(self):
-        """_summary_
-        Method to calculate the effective of the surface.
+        """
+        Method to calculate the atomic projections of the surface.
         """
 
         
@@ -693,27 +700,29 @@ class FermiSurface3D(Surface):
         self.project_color(scalars_array = scalars_array, cmap=self.cmap, vmin=self.vmin, vmax=self.vmax, scalar_name = "scalars")
 
     def project_spin_texture_atomic_projections(self):
-        """_summary_
-        Method to calculate spin texture effective of the surface.
+        """
+        Method to calculate atomic spin texture projections of the surface.
         """
         if self.spd_spin[0] is not None:
             self.spd_spin = self.spd_spin[:,self.fullBandIndex,:]
         vectors_array = self.spd_spin
-        # print(vectors_array.shape)
-        # vectors_array = []
-        # for iband in range(len(self.bands[0,:])):
-        #     vectors_array.append(self.spd_spin[:,iband])
-        # vectors_array = np.array(vectors_array).T
-        # vectors_array = np.swapaxes(vectors_array,axis1 = 1,axis2 = 2)
-        # print(vectors_array.shape)
+
         self.create_vector_texture(vectors_array = vectors_array, vectors_name = "spin" )
-   
-    def extend_surface(self,  extended_zone_directions: List[List[int] or Tuple[int,int,int]]=None,):
-        """_summary_
+    """
         Method to extend the surface in reciprocal lattice vecctor
         Args:
             extended_zone_directions (List[List[int] or Tuple[int,int,int]], optional): List of directions to extend the surface. Defaults to None.
         """
+    def extend_surface(self,  extended_zone_directions: List[List[int] or Tuple[int,int,int]]=None,):
+        """
+        Method to extend the surface in the direction of a reciprocal lattice vecctor
+
+        Parameters
+        ----------
+        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            List of directions to expand to, by default None
+        """
+        
         # The following code  creates exteneded surfaces in a given direction
         extended_surfaces = []
         if extended_zone_directions is not None:
@@ -727,6 +736,14 @@ class FermiSurface3D(Surface):
 
     def _get_brilloin_zone(self, 
                         supercell: List[int]):
+
+        """Returns the BrillouinZone of the material
+
+        Returns
+        -------
+        pyprocar.core.BrillouinZone
+            The BrillouinZone of the material
+        """
 
         return BrillouinZone(self.reciprocal_lattice, supercell)
 

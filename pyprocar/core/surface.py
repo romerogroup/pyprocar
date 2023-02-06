@@ -21,7 +21,8 @@ from matplotlib import colors as mpcolors
 
 class Surface(pyvista.PolyData):
     """
-    Surface is a class that holds information about a surface
+    Surface is a class that holds information about a surface. 
+    This class inherits from the pyvista.PolyData class.
     To create a surface the minimum requirements are verts and faces
 
     Parameters
@@ -84,12 +85,15 @@ class Surface(pyvista.PolyData):
             # if self.vert_normals is None:
             #     self.vert_normals=self.pyvista_obj.point_normals
 
+        return None
+
 
 
     @property
     def centers(self):
         """
         Centers of faces
+
         Returns
         -------
         centers : list of floats (n,3)
@@ -106,7 +110,8 @@ class Surface(pyvista.PolyData):
         
         Returns
         -------
-
+        new_faces : list
+            A list of faces
 
         """
         new_faces = [] 
@@ -164,6 +169,8 @@ class Surface(pyvista.PolyData):
         ----------
         scalars : list
             Scalars should be the same size as the number of faces.
+        scalar_name : str
+            The name of the scalar
 
 
         """
@@ -177,6 +184,20 @@ class Surface(pyvista.PolyData):
                     vectors_Y:np.ndarray, 
                     vectors_Z:np.ndarray,
                     vectors_name: str="vectors"):
+        """Sets/Updates the vectors of the surface.
+
+        Parameters
+        ----------
+        vectors_X : np.ndarray
+            The x values of the vector
+        vectors_Y : np.ndarray
+            The y values of the vector
+        vectors_Z : np.ndarray
+            The z values of the vector
+        vectors_name : str, optional
+            The name of the vector, by default "vectors"
+        """
+
         def mag(vectors):
             return np.array([(vector[0]**2 + vector[1]**2 + vector[2]**2)**0.5 for vector in vectors])
         vectors = np.vstack([vectors_X, vectors_Y, vectors_Z]).T
@@ -186,6 +207,7 @@ class Surface(pyvista.PolyData):
         
         self[vectors_name + "_magnitude"] = mag(vectors)
         # self.set_active_scalars('vectors')
+        return None
 
     def set_color_with_cmap(self, 
                             cmap:str="viridis", 
@@ -196,12 +218,12 @@ class Surface(pyvista.PolyData):
 
         Parameters
         ----------
-        cmap : TYPE, string
-            DESCRIPTION. The default is 'viridis'.
-        vmin : TYPE, float
-            DESCRIPTION. The default is None.
-        vmax : TYPE, optional
-            DESCRIPTION. The default is None.
+        cmap : string
+            The colormap. The default is 'viridis'.
+        vmin : float, optional
+            The minimum normalizing value. The default is None.
+        vmax : float, optional
+            The maximum normalizing value. The default is None.
 
 
         """
@@ -227,6 +249,8 @@ class Surface(pyvista.PolyData):
         else:
             self.trimesh_obj.visual.face_colors = np.append(colors, colors, axis=0)
 
+        return None
+
     def export(self, 
                 file_obj:str="output.glb", 
                 file_type:str="glb"):
@@ -235,17 +259,19 @@ class Surface(pyvista.PolyData):
 
         Parameters
         ----------
-        file_obj : TYPE, optional
-            DESCRIPTION. The default is 'output.glb'.
-        file_type : TYPE, optional
-            DESCRIPTION. The default is 'glb'.
+        file_obj : str, optional
+            The default is 'output.glb'.
+        file_type : str, optional
+            The default is 'glb'.
 
         Returns
         -------
-        None.
+        None
 
         """
         self.trimesh_obj.export(file_obj, file_type)
+
+        return None
 
 
 def convert_from_pyvista_faces(pyvista_obj):
@@ -256,13 +282,13 @@ def convert_from_pyvista_faces(pyvista_obj):
 
     Parameters
     ----------
-    pyvista_obj : TYPE PyVista mesh
-        DESCRIPTION.
+    pyvista_obj : PyVista mesh
+        The pyvista mesh.
 
     Returns
     -------
-    new_faces : TYPE list of lists
-        DESCRIPTION. A list of lists, where each list contains integers numbers of
+    new_faces : list of lists
+        A list of lists, where each list contains integers numbers of
     vert conections
 
     """
@@ -283,13 +309,13 @@ def boolean_add(surfaces):
 
     Parameters
     ----------
-    surfaces : TYPE list of pyprocar.Surface
+    surfaces : list of pyprocar.Surface
         DESCRIPTION.
 
     Returns
     -------
-    surf : TYPE  pyprocar surface
-        DESCRIPTION. The unionized surface from surfaces
+    surf : pyprocar surface
+        The unionized surface from surfaces
 
     """
     try:

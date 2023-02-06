@@ -10,21 +10,25 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class FermiSurface:
-    def __init__(self, kpoints, bands, spd, loglevel=logging.WARNING):
-        """FermiSurface: Class to build and to plot a 2D fermi surface.  It
-    finds the relevant bands (crossig the Fermi level) and interpolate
-    them
+    """This object is used to help plot the 2d fermi surface
 
-    args:
-      kpoints: Numpy array with kpoints Nx3.
-      bands: the bands with Fermi energy already substracted!, numpy array,
-             Nkpoints x Nbands.
-      spd: character (atomic, orbital) of each bands at each Kpoint, numpy
-           array Nkpoints x Nbands.
-      loglevel(=logging.WARNING): the verbosity level.
+        Parameters
+        ----------
+        kpoints : np.ndarray
+            Numpy array with kpoints Nx3.
+        bands :  np.ndarray
+            Numpy array with the bands. The Fermi energy is already substracted. 
+            (n_kpoints, n_bands)
+        spd : np.ndarray
+            Numpy array with the projections. Expected size (n_kppints,n_bands,n_spins,n_orbitals,n_atoms)
+            _description_
+        loglevel : _type_, optional
+            The verbosity level., by default logging.WARNING
     """
+    def __init__(self, kpoints, bands, spd, loglevel=logging.WARNING):
+        
+        
         # Since some time ago Kpoints are in cartesian coords (ready to use)
         self.kpoints = kpoints
         self.bands = bands
@@ -46,9 +50,27 @@ class FermiSurface:
         self.log.info("bands.shape   : " + str(self.bands.shape))
         self.log.info("spd.shape     : " + str(self.spd.shape))
         self.log.debug("FermiSurface.init: ...Done")
-        return
+        return None
 
     def find_energy(self, energy):
+        """A method to find bands which are near a given energy
+
+        Parameters
+        ----------
+        energy : float
+            The energy to search for bands around.
+
+        Returns
+        -------
+        None
+            None
+
+        Raises
+        ------
+        RuntimeError
+            If no bands are found, raise an error.
+        """
+
         self.log.debug("FindEnergy: ...")
         self.energy = energy
         self.log.info("Energy   : " + str(energy))
@@ -66,15 +88,33 @@ class FermiSurface:
             self.log.error("No bands found in that range. Check your data. Returning")
             raise RuntimeError("No bands to plot")
         self.log.debug("FindEnergy: ...Done")
-        return
+        return None
 
-    def plot(self, interpolation=500, mask=None):
-        """Only 2D layer geometry along z"""
+    def plot(self, interpolation=500):
+        """ This method plots the 2d fermi surface along the z axis
+        
+        Only 2D layer geometry along z
+
+        Parameters
+        ----------
+        interpolation : int, optional
+            The interpolation level, by default 500
+
+        Returns
+        -------
+        List[plots]
+            Returns a list of matplotlib.pyplot instances
+
+        Raises
+        ------
+        RuntimeError
+            Raise error if find energy was not called before plotting.
+        """
         self.log.debug("Plot: ...")
         from scipy.interpolate import griddata
 
         if self.useful is None:
-            raise RuntimeError("self.FindEnergy() must be called before Plotting")
+            raise RuntimeError("self.find_energy() must be called before Plotting")
 
         # selecting components of K-points
         x, y = self.kpoints[:, 0], self.kpoints[:, 1]
@@ -113,19 +153,40 @@ class FermiSurface:
         return plots
 
     def spin_texture(self, sx, sy, sz, spin=None, noarrow=False, interpolation=300):
-        """Only 2D layer geometry along z. It is like a enhanced version
-    of 'plot' method.
+        """This method plots spin texture of the 2d fermi surface
+        
+        Only 2D layer geometry along z. It is like a enhanced version of 'plot' method.
+        
+        sx, sy, sz are spin projected Nkpoints x Nbands numpy arrays. They
+        also are (already) projected by orbital and atom (from other
+        class)
 
-    sx, sy, sz are spin projected Nkpoints x Nbands numpy arrays. They
-    also are (already) projected by orbital and atom (from other
-    class)
+        Parameters
+        ----------
+        sx : np.ndarray
+            Spin projected array for the x component. size (n_kpoints,n_bands)
+        sy : np.ndarray
+            Spin projected array for the y component. size (n_kpoints,n_bands)
+        sz : np.ndarray
+            Spin projected array for the z component. size (n_kpoints,n_bands)
+        spin : List or array-like, optional
+            List of marker colors for the arrows, by default None
+        noarrow : bool, optional
+            Determines whether to plot arrows, by default False
+        interpolation : int, optional
+            The interpolation level, by default 300
 
-    """
+        Raises
+        ------
+        RuntimeError
+            Raise error if find energy was not called before plotting.
+        """
+
         self.log.debug("spin_texture: ...")
         from scipy.interpolate import griddata
 
         if self.useful is None:
-            raise RuntimeError("self.FindEnergy() must be called before Plotting")
+            raise RuntimeError("self.find_energy() must be called before plotting")
 
         # selecting components of K-points
         x, y = self.kpoints[:, 0], self.kpoints[:, 1]
