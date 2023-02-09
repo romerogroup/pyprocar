@@ -60,25 +60,25 @@ class Lines:
                 entries=entries, vertices=self.verts
             )
 
-
 class BrillouinZone(Surface):
     """
-    A Surface object with verts, faces and line representation, representing
-    the BrillouinZone
+    A Surface object with verts, faces and line representation, representing the BrillouinZone.
+    This class will calculate the BrillouinZone corresponding to a reciprocal lattice.
+
+    Parameters
+    ----------
+    reciprocal_lattice : np.ndarray, 
+        Reciprocal lattice used to generate Brillouin zone usgin Wigner Seitz. (3,3) float
+    transformation_matrix : np.ndarray
+        Any transformation to be applied to the unit cell such as rotation or supercell. (3,3) float. defaults to None
+            
     """
+        
 
     def __init__(self, 
             reciprocal_lattice:np.ndarray, 
-            transformation_matrix:List[int]=None):
-        """
-        This class will calculate the BrillouinZone corresponding to a reciprocal lattice.
-
-        :param reciprocal_lattice: Reciprocal lattice used to generate Brillouin zone usgin Wigner Seitz. (3,3) float
-        :type reciprocal_lattice: np.ndarray
-        :param transformation_matrix: Any transformation to be applied to the unit cell such as rotation
-#             or supercell. (3,3) float. defaults to None
-        :type transformation_matrix: List[int], optional
-        """
+            transformation_matrix:List[int]=None
+        ):
         
         self.reciprocal = reciprocal_lattice
         # for ix in range(3):
@@ -92,33 +92,18 @@ class BrillouinZone(Surface):
             for ivert in iface:
                 new_faces.append(ivert)
 
-        
-
         super().__init__(verts=verts, faces = new_faces )
         
-        
-        
         self._fix_normals_direction(n_faces = len(faces))
-
-        # self.pyvista_obj.face_normals*=-1
-        # self.pyvista_obj['scalars'] = [0]*len(faces)
-        # self.pyvista_obj.set_active_scalars('scalars')
-        
-        # self.lines = Lines(verts, faces)
-        #         """
-
-        # Returns
-        # -------
-        # TYPE
-        #     Using the Wigner-Seitz Method, this function finds the 1st
-        #     Brillouin Zone in terms of vertices and faces
-        # """
+        return None
 
     def wigner_seitz(self):
         """Calculates the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
 
-        :return: Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
-        :rtype: Tuple(n_verts,n_faces)
+        Returns
+        -------
+        Tuple(n_verts,n_faces)
+            Returns the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
         """
 
         kpoints = []
@@ -152,5 +137,6 @@ class BrillouinZone(Surface):
         correction = np.sign(np.dot(n1, n2))
         if correction == -1:
             self.compute_normals(flip_normals=True, inplace=True)
+        return None
 
     

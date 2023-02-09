@@ -72,8 +72,9 @@ Further Details
    dos
    ebs
    fermi2d
-   fermi3D
+   fermi3d
    filter
    kpath
    repair
+   structure
    unfold

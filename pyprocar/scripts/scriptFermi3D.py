@@ -20,9 +20,6 @@ from ..splash import welcome
 from ..utilsprocar import UtilsProcar
 from ..io.procarparser import ProcarParser
 from ..procarselect import ProcarSelect
-from ..io.bxsf import BxsfParser
-from ..io.frmsf import FrmsfParser
-from ..io.qeparser import QEFermiParser
 from ..io.lobsterparser import LobsterFermiParser
 from ..io.abinitparser import AbinitParser
 from .. import io
@@ -357,8 +354,7 @@ def fermi3D(
         if dirname is None:
             dirname = "bands"
         parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
-                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
-                             dos_interpolation_factor = None)
+                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
         reciprocal_lattice = parser.reciprocal_lattice
         if fermi is None:
             e_fermi = parser.efermi
@@ -381,15 +377,14 @@ def fermi3D(
         else:
             e_fermi = fermi
 
-
     elif code == "bxsf":
         e_fermi = fermi
-        parser = BxsfParser(infile= infile)
+        parser = io.qe.bxsf.BxsfParser(infile= infile)
         reciprocal_lattice = parser.reclat
 
     elif code == "frmsf":
         e_fermi = fermi
-        parser = FrmsfParser(infile=infile)
+        parser = io.frmsf.FrmsfParser(infile=infile)
         reciprocal_lattice = parser.rec_lattice
         bands = np.arange(len(parser.bands[0, :]))
 

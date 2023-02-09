@@ -29,56 +29,60 @@ FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
 
 class FermiSurface3D(Surface):
     """
-        The object is used to store and manapulate a 3d fermi surface.
+    The object is used to store and manapulate a 3d fermi surface.
 
-        Parameters
-        ----------
-        kpoints : (n,3) float
-            A numpy array of kpoints used in the DFT calculation, this list
-            has to be (n,3), n being number of kpoints and 3 being the
-            3 different cartesian coordinates.
-        band : (n,) float
-            A numpy array of energies of ith band cooresponding to the
-            kpoints.
-        fermi : float
-            Value of the fermi energy or any energy that one wants to
-            find the isosurface with.
-        reciprocal_lattice : (3,3) float
-            Reciprocal lattice of the structure.
-        spd :
-            numpy array containing the information about projection of atoms,
-            orbitals and spin on each band 
-        spd_spin :
-            numpy array containing the information about spin projection of atoms
-        fermi_shift : float
-            Value to shift fermi energy.
-        fermi_tolerance : float = 0.1
-            This is used to improve search effiency by doing a prior search selecting band within a tolerance of the fermi energy
-        interpolation_factor : int
-            The default is 1. number of kpoints in every direction
-            will increase by this factor.
-        colors : list str or list tuples of size 4, optional
-            List of colors for each band. If you use tuple, it represents rgba values
-            This argument does not work whena 3d file is saved. 
-            The colors for when ``save3d`` is used, we
-            recomend using qualitative colormaps, as this function will
-            automatically choose colors from the colormaps.
-            e.g. ``colors=['red', 'blue', 'green']``
-                ``colors=[(1,0,0,1), (0,1,0,1), (0,0,1,1)]``
-        projection_accuracy : str, optional
-            Controls the accuracy of the projects. 2 types ('high', normal) 
-            The default is ``projection_accuracy=normal``.
-        cmap : str
-            The default is 'viridis'. Color map used in projecting the
-            colors on the surface
-        vmin :  float
-            Value to normalize the minimum projection value. The default is 0.
-        vmax :  float
-            Value to normalize the maximum projection value.. The default is 1.
-        supercell : list int
-            This is used to add padding to the array 
-            to assist in the calculation of the isosurface.
+    Parameters
+    ----------
+    kpoints : (n,3) float
+        A numpy array of kpoints used in the DFT calculation, this list
+        has to be (n,3), n being number of kpoints and 3 being the
+        3 different cartesian coordinates.
+    band : (n,) float
+        A numpy array of energies of ith band cooresponding to the
+        kpoints.
+    fermi : float
+        Value of the fermi energy or any energy that one wants to
+        find the isosurface with.
+    reciprocal_lattice : (3,3) float
+        Reciprocal lattice of the structure.
+    spd :
+        numpy array containing the information about projection of atoms,
+        orbitals and spin on each band 
+    spd_spin :
+        numpy array containing the information about spin projection of atoms
+    fermi_shift : float
+        Value to shift fermi energy.
+    fermi_tolerance : float = 0.1
+        This is used to improve search effiency by doing a prior search selecting band within a tolerance of the fermi energy
+    interpolation_factor : int
+        The default is 1. number of kpoints in every direction
+        will increase by this factor.
+    colors : list str or list tuples of size 4, optional
+        List of colors for each band. If you use tuple, it represents rgba values
+        This argument does not work whena 3d file is saved. 
+        The colors for when ``save3d`` is used, we
+        recomend using qualitative colormaps, as this function will
+        automatically choose colors from the colormaps. e.g. 
+        
+        .. code-block::
+            :linenos: 
 
+            colors=['red', 'blue', 'green']
+            colors=[(1,0,0,1), (0,1,0,1), (0,0,1,1)]
+            
+    projection_accuracy : str, optional
+        Controls the accuracy of the projects. 2 types ('high', normal) 
+        The default is ``projection_accuracy=normal``.
+    cmap : str
+        The default is 'viridis'. Color map used in projecting the
+        colors on the surface
+    vmin :  float
+        Value to normalize the minimum projection value. The default is 0.
+    vmax :  float
+        Value to normalize the maximum projection value.. The default is 1.
+    supercell : list int
+        This is used to add padding to the array 
+        to assist in the calculation of the isosurface.
     """
 
     def __init__(

@@ -15,6 +15,25 @@ from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, K
 
 HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class QEParser():
+    """The class is used to parse Quantum Expresso files. 
+        The most important objects that comes from this parser are the .ebs and .dos
+
+        Parameters
+        ----------
+        dirname : str, optional
+            Directory path to where calculation took place, by default ""
+        scf_in_filename : str, optional
+            The scf filename, by default "scf.in"
+        bands_in_filename : str, optional
+            The bands filename in the case of a band structure calculation, by default "bands.in"
+        pdos_in_filename : str, optional
+            The pdos filename in the case of a density ofstates calculation, by default "pdos.in"
+        kpdos_in_filename : str, optional
+            The kpdos filename, by default "kpdos.in"
+        atomic_proj_xml : str, optional
+            The atomic projection xml name. This is located in the where the outdir is and in the {prefix}.save directory, by default "atomic_proj.xml"
+    """
+
     def __init__(self,
                         dirname:str = "", 
                         scf_in_filename:str = "scf.in", 
@@ -22,9 +41,8 @@ class QEParser():
                         pdos_in_filename:str = "pdos.in", 
                         kpdos_in_filename:str = "kpdos.in", 
                         atomic_proj_xml:str = "atomic_proj.xml", 
-                        dos_interpolation_factor:int  = 1):
+        ):
         
-        dos_interpolation_factor = dos_interpolation_factor
 
         # Handles the pathing to the files
         self.dirname, prefix, xml_root, atomic_proj_xml_filename, pdos_in_filename,bands_in_filename,proj_out_filename = self._initialize_filenames(dirname, scf_in_filename, bands_in_filename,pdos_in_filename)
@@ -68,10 +86,18 @@ class QEParser():
                                 projected_phase=self._spd2projected(self.spd_phase),
                                 labels=self.orbital_names[:-1],
                                 reciprocal_lattice=self.reciprocal_lattice,
-                                interpolation_factor=dos_interpolation_factor,
                             )
 
+        return None
+
     def kpoints_cart(self):
+        """Returns the kpoints in cartesian coordinates
+
+        Returns
+        -------
+        np.ndarray
+            Kpoints in cartesian coordinates
+        """
         # cart_kpoints self.kpoints = self.kpoints*(2*np.pi /self.alat)
         # Converting back to crystal basis
         cart_kpoints = self.kpoints.dot(self.reciprocal_lattice) * (self.alat/ (2*np.pi))
@@ -80,16 +106,25 @@ class QEParser():
 
     @property
     def species(self):
-        """
-        Returns the species in POSCAR
+        """Returns the species of the calculation
+
+        Returns
+        -------
+        List
+            Returns a list of string or atomic numbers[int]
         """
         return self.initial_structure.species
 
     @property
     def structures(self):
+        """Returns a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        List
+            Returns a list of pyprocar.core.Structure
         """
-        Returns a list of pychemia.core.Structure representing all the ionic step structures
-        """
+
         # symbols = [x.strip() for x in self.data['ions']]
         symbols = [x.strip() for x in self.ions]
         structures = []
@@ -101,27 +136,54 @@ class QEParser():
 
     @property
     def structure(self):
-        """
-        crystal structure of the last step
+        """Returns a the last element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the last element of a list of pyprocar.core.Structure
         """
         return self.structures[-1]
     
     @property
     def initial_structure(self):
-        """
-        Returns the initial Structure as a pychemia structure
+        """Returns a the first element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the first element of a list of pyprocar.core.Structure
         """
         return self.structures[0]
     
     @property
     def final_structure(self):
-        """
-        Returns the final Structure as a pychemia structure
+        """Returns a the last element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the last element of a list of pyprocar.core.Structure
         """
 
         return self.structures[-1]
 
     def _parse_pdos(self,pdos_in_filename,dirname):
+        """Helper method to parse the pdos files
+
+        Parameters
+        ----------
+        pdos_in_filename : str
+            The pdos.in filename
+        dirname : str
+            The directory path where the calculation took place.
+
+        Returns
+        -------
+        pyprocar.core.DensityOfStates
+            The density of states object for the calculation
+        """
+        
         with open(pdos_in_filename, "r") as f:
             pdos_in = f.read()
 
@@ -145,6 +207,18 @@ class QEParser():
         return dos    
     
     def _parse_dos_total(self, dos_total_filename ):
+        """Helper method to parse the dos total file
+
+        Parameters
+        ----------
+        dos_total_filename : str
+            The dos total filename
+
+        Returns
+        -------
+        Tupole
+            Returns a tuple with energies and the total dos arrays
+        """
         with open(dos_total_filename) as f:
             tmp_text = f.readlines()
             header = tmp_text[0]
@@ -172,6 +246,25 @@ class QEParser():
         return energies, total_dos
    
     def _parse_dos_projections(self,wfc_filenames,n_energy):
+        """Helper method to parse the dos projection files
+
+        Parameters
+        ----------
+        wfc_filenames : List[str]
+            A List of projection filenames.
+        n_energy : int
+            The number of energies for which the density of states is calculated at.
+
+        Returns
+        -------
+        _type_
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         n_principal_number = 1
         projected_dos_array =  np.zeros(shape=(self.n_atoms,n_principal_number,self.n_orbitals,self.n_spin,n_energy))
         for filename in wfc_filenames[:]:
@@ -275,6 +368,9 @@ class QEParser():
         return projected_dos_array, self.orbital_names
 
     def getKpointLabels(self):
+        """
+        This method will parse the bands.in file to get the kpath information.
+        """
         
         # Parsing klabels 
         self.ngrids = []
@@ -360,13 +456,27 @@ class QEParser():
                     )
 
     def _initialize_filenames(self, dirname, scf_in, bands_in_filename, pdos_in_filename):
-        """This function handles pathing to the to locate files
+        """This helper method handles pathing to the to locate files
 
-        :param dirname: _description_
-        :type dirname: _type_
-        :param scf_in: _description_
-        :type scf_in: _type_
+        Parameters
+        ----------
+        dirname : str
+            The directory path where the calculation is
+        scf_in : str
+            The input scf filename
+        bands_in_filename : str
+            The input bands filename
+        pdos_in_filename : str
+            The input pdos filename
+
+        Returns
+        -------
+        Tuple
+            Returns a tuple of important pathing information. 
+            Mainly, the directory path is prepended to the filenames.
         """
+
+        
         if dirname != "":
             dirname = dirname + os.sep
         else:
@@ -400,6 +510,18 @@ class QEParser():
         return dirname, prefix, root, atomic_proj_xml, pdos_in_filename,bands_in_filename,proj_out_filename
 
     def _parse_available_wfc_filenames(self, dirname):
+        """Helper method to parse the projection filename from the pdos.out file
+
+        Parameters
+        ----------
+        dirname : str
+            The directory name where the calculation is.
+
+        Returns
+        -------
+        List
+            Returns a list of projection file names
+        """
 
         wfc_filenames = []
         tmp_wfc_filenames = []
@@ -432,6 +554,18 @@ class QEParser():
         return wfc_filenames
 
     def _parse_wfc_mapping(self, proj_out_filename):
+        """Helper method which creates a mapping between wfc number and the orbtial and atom numbers
+
+        Parameters
+        ----------
+        proj_out_filename : str
+            The proj out filename
+
+        Returns
+        -------
+        None
+            None
+        """
         with open(proj_out_filename) as f:
             proj_out =  f.read()
         raw_wfc  =  re.findall('(?<=read\sfrom\spseudopotential\sfiles).*\n\n([\S\s]*?)\n\n(?=\sk\s=)', proj_out)[0]
@@ -464,10 +598,21 @@ class QEParser():
         
             self.wfc_mapping.update({f"wfc_{iwfc}":{"orbital" : iorb, "atom" : iatm}})
 
-        # print(self.orbitals)
         return None
-    def _parse_atomic_projections(self,atomic_proj_xml_filename):
 
+    def _parse_atomic_projections(self,atomic_proj_xml_filename):
+        """A Helper method to parse the atomic projection xml file
+
+        Parameters
+        ----------
+        atomic_proj_xml_filename : str
+            The atomic_proj.xml filename
+
+        Returns
+        -------
+        None
+            None
+        """
         atmProj_tree = ET.parse(atomic_proj_xml_filename)
         atm_proj_root = atmProj_tree.getroot()
 
@@ -541,6 +686,19 @@ class QEParser():
         return None
                 
     def _parse_structure(self,main_xml_root):
+        """A helper method to parse the structure tag of the main xml file
+
+        Parameters
+        ----------
+        main_xml_root : xml.etree.ElementTree.Element
+            The main xml Element
+
+        Returns
+        -------
+        None
+            None
+        """
+        print(type(main_xml_root))
 
         self.nspecies = len(main_xml_root.findall(".//output/atomic_species")[0])
         self.composition = { species.attrib['name'] : 0 for species in  main_xml_root.findall(".//output/atomic_species")[0]  }
@@ -564,6 +722,18 @@ class QEParser():
         return None
 
     def _parse_symmetries(self,main_xml_root):
+        """A helper method to parse the symmetries tag of the main xml file
+
+        Parameters
+        ----------
+        main_xml_root : xml.etree.ElementTree.Element
+            The main xml Element
+
+        Returns
+        -------
+        None
+            None
+        """
         self.nsym = int(main_xml_root.findall(".//output/symmetries/nsym")[0].text)
         self.nrot = int(main_xml_root.findall(".//output/symmetries/nrot")[0].text)
         self.spg = int(main_xml_root.findall(".//output/symmetries/space_group")[0].text)
@@ -579,6 +749,18 @@ class QEParser():
         return None
             
     def _parse_magnetization(self,main_xml_root):
+        """A helper method to parse the magnetization tag of the main xml file
+
+        Parameters
+        ----------
+        main_xml_root : xml.etree.ElementTree.Element
+            The main xml Element
+
+        Returns
+        -------
+        None
+            None
+        """
         is_non_colinear = str2bool(main_xml_root.findall(".//output/magnetization/noncolin")[0].text)
         is_spin_calc = str2bool(main_xml_root.findall(".//output/magnetization/lsda")[0].text)
         is_spin_orbit_calc = str2bool(main_xml_root.findall(".//output/magnetization/spinorbit")[0].text)
@@ -663,12 +845,17 @@ class QEParser():
         return None
                
     def _parse_band_structure_tag(self,main_xml_root):
-        """This function parse the brand structure tag of the xml
+        """A helper method to parse the band_structure tag of the main xml file
 
-        :param main_xml_root: The xml that is found inside {prefix.save}/prefix.xml
-        :type main_xml_root: _type_
-        :return: _description_
-        :rtype: _type_
+        Parameters
+        ----------
+        main_xml_root : xml.etree.ElementTree.Element
+            The main xml Element
+
+        Returns
+        -------
+        None
+            None
         """
         if 'monkhorst_pack' in main_xml_root.findall(".//output/band_structure/starting_k_points")[0].tag:
             self.nk1 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['nk1']
@@ -734,6 +921,23 @@ class QEParser():
         return None
 
     def _spd2projected(self, spd, nprinciples=1):
+        """
+        Helpermethod to project the spd array to the projected array 
+        which will be fed into pyprocar.coreElectronicBandStructure object
+
+        Parameters
+        ----------
+        spd : np.ndarray
+            The spd array from the earlier parse. This has a structure simlar to the PROCAR output in vasp
+            Has the shape [n_kpoints,n_band,n_spins,n-orbital,n_atoms]
+        nprinciples : int, optional
+            The prinicipal quantum numbers, by default 1
+
+        Returns
+        -------
+        np.ndarray
+            The projected array. Has the shape [n_kpoints,n_band,n_atom,n_principal,n-orbital,n_spin]
+        """
         # This function is for VASP
         # non-pol and colinear
         # spd is formed as (nkpoints,nbands, nspin, natom+1, norbital+2)
@@ -786,14 +990,50 @@ class QEParser():
         return projected
 
     def _parse_efermi(self,main_xml_root):
+        """A helper method to parse the band_structure tag of the main xml file for the fermi energy
+
+        Parameters
+        ----------
+        main_xml_root : xml.etree.ElementTree.Element
+            The main xml Element
+
+        Returns
+        -------
+        None
+            None
+        """
         self.efermi =  float(main_xml_root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
-        return 
+        return None
 
     def _convert_lorbnum_to_letter(self, lorbnum):
+        """A helper method to convert the lorb number to the letter format
+
+        Parameters
+        ----------
+        lorbnum : int
+            The number of the l orbital
+
+        Returns
+        -------
+        str
+            The l orbital name
+        """
         lorb_mapping = {0:'s',1:'p',2:'d',3:'f'}
         return lorb_mapping[lorbnum]
 
 def str2bool(v):
-  return v.lower() in ("true") 
+    """Converts a string of a boolean to an actual boolean
+
+    Parameters
+    ----------
+    v : str
+        The string of the boolean value
+
+    Returns
+    -------
+    boolean
+        The boolean value
+    """
+    return v.lower() in ("true") 
         
 

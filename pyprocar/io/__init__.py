@@ -9,7 +9,6 @@ from . import siesta
 from .procarparser import ProcarParser
 from .abinitparser import AbinitParser
 from .elkparser import ElkParser
-from .qeparser import QEParser, QEDOSParser, QEFermiParser
 from .lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
 from .vaspxml import VaspXML
 # from . import vaspxml

@@ -24,9 +24,7 @@ from ..splash import welcome
 from ..utilsprocar import UtilsProcar
 from ..io.procarparser import ProcarParser
 from ..procarselect import ProcarSelect
-from ..io.bxsf import BxsfParser
-from ..io.frmsf import FrmsfParser
-from ..io.qeparser import QEFermiParser
+
 from ..io.lobsterparser import LobsterFermiParser
 from ..io.abinitparser import AbinitParser
 from .. import io
@@ -36,7 +34,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 class FermiHandler:
-    """_summary_
+    """
     This class handles the plotting of the fermi surface. Initialize by specifying the code and directory name where the data is stored. 
     Then call one of the plotting methods provided.
     """
@@ -974,8 +972,7 @@ class FermiHandler:
             if self.dirname is None:
                 self.dirname = "fermi"
             parser = io.qe.QEParser( dirname = self.dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
-                                pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
-                                dos_interpolation_factor = None)
+                                pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
             reciprocal_lattice = parser.reciprocal_lattice
 
             e_fermi = parser.efermi
@@ -995,7 +992,7 @@ class FermiHandler:
 
             infiles = [f"{self.dirname}{os.sep}{file}" for file in os.listdir(self.dirname) if 'bxsf' in file]
           
-            parser = BxsfParser(infiles=infiles)
+            parser = io.bxsf.BxsfParser(infiles=infiles)
 
             e_fermi = parser.e_fermi
             # e_fermi = 0
@@ -1009,7 +1006,7 @@ class FermiHandler:
 
             e_fermi = 0
 
-            parser = FrmsfParser(infile=infile)
+            parser = io.frmsf.FrmsfParser(infile=infile)
             reciprocal_lattice = parser.rec_lattice
             bands = np.arange(len(parser.bands[0, :]))
             procarFile = None

@@ -6,7 +6,6 @@ from ..io import vasp
 from ..plotter import EBSPlot
 from ..io import AbinitParser
 from ..io import ElkParser
-from ..io import QEParser
 from ..io import LobsterParser
 from ..io import ProcarParser
 from ..procarplot import ProcarPlot

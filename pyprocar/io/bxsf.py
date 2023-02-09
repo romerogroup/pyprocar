@@ -1,15 +1,24 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep 24 13:40:39 2020
-
-@author: lllan
-"""
+__author__ = "Logan Lang"
+__maintainer__ = "Logan Lang"
+__email__ = "lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
 
 import re
 import numpy as np
 from pyprocar.core import ElectronicBandStructure
 
 class BxsfParser:
+    """
+    The class is used to parse the information inside bxsf files
+
+    Parameters
+    ----------
+    infiles : list, optional
+        This is a list of .bxsf filenames to parse through. 
+        It is a list because in some codes there can be multiple .bsxf files representing spin-up and spin-sown bands
+        ,by default ["in.bxsf"]
+
+    """
 
     def __init__(self, infiles = ["in.bxsf"]):
         
@@ -42,9 +51,17 @@ class BxsfParser:
                                 reciprocal_lattice=self.reciprocal_lattice,
                                 interpolation_factor=None,
                             )
+        return None
 
         
     def parse_bxsf(self, infiles):
+        """A Helper method to parse bxsf files
+
+        Parameters
+        ----------
+        infiles : List
+            This is a list of .bxsf filenames to parse through. 
+        """
         
         band_labels = []
         # If 2 bxsf files search for total number of bands in both files
@@ -125,5 +142,7 @@ class BxsfParser:
         
         # Deletes extra band energies
         self.bands = np.delete(self.bands, extra_band_energy_indices , axis = 0)
+
+        return None
 
  

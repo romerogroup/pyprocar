@@ -234,7 +234,9 @@ class DensityOfStates:
         return basis
 
     def coupled_to_uncoupled_basis(self):
-        """Converts coupled projections to uncoupled projections. This assumes the orbitals are order by
+        """
+        Converts coupled projections to uncoupled projections. This assumes the orbitals are order by
+        
         .. code-block::
             :linenos:
 

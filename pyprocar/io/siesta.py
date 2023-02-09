@@ -17,6 +17,13 @@ HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class SiestaParser():
     def __init__(self,
                     fdf_file:str ):
+        """The class is used to parse information in a siesta calculation
+
+        Parameters
+        ----------
+        fdf_file : str
+            The .fdf file that has the inputs for the Siesta calculation
+        """
 
         self.dirname = os.path.dirname(fdf_file)
 
@@ -31,6 +38,18 @@ class SiestaParser():
         # self._parse_struct_out(struct_out_file=f"{self.prefix}{os.sep}STRUCT_OUT")
 
     def _parse_fdf(self,fdf_file):
+        """A helper method to parse the infromation inside the fdf file
+
+        Parameters
+        ----------
+        fdf_file : str
+            The .fdf file that has the inputs for the Siesta calculation
+
+        Returns
+        -------
+        None
+            None
+        """
         with open(fdf_file) as f:
             fdf_text = f.read()
 
@@ -51,6 +70,19 @@ class SiestaParser():
         return None
 
     def _parse_kpath(self,fdf_text):
+        """
+        A helper method to parse the kpath information
+
+        Parameters
+        ----------
+        fdf_text : str
+            The .fdf file text that has the inputs for the Siesta calculation
+
+        Returns
+        -------
+        None
+            None
+        """
         raw_kpath = re.findall("(?<=%block BandLines).*\n([\s\S]*?)(?=%endblock BandLines)", fdf_text)[0].rstrip().split('\n')
 
         k_names=[]
@@ -103,6 +135,19 @@ class SiestaParser():
         return None
 
     def _parse_direct_lattice(self,fdf_text):
+        """
+        A helper method to parse the direct lattice information
+
+        Parameters
+        ----------
+        fdf_text : str
+            The .fdf file text that has the inputs for the Siesta calculation
+
+        Returns
+        -------
+        None
+            None
+        """
         raw_lattice = re.findall("(?<=%block [Ll]atticeVectors).*\n([\s\S]*?)(?=%endblock [Ll]atticeVectors)", fdf_text)[0].rstrip().split('\n')
 
         direct_lattice = np.zeros(shape=(3,3))
@@ -113,6 +158,20 @@ class SiestaParser():
         return None
 
     def _parse_atomic_positions(self,fdf_text):
+        """
+        A helper method to parse the atomic positions information
+
+        Parameters
+        ----------
+        fdf_text : str
+            The .fdf file text that has the inputs for the Siesta calculation
+
+        Returns
+        -------
+        None
+            None
+        """
+
         raw_atom_positions = re.findall("(?<=%block atomiccoordinatesandatomicspecies).*\n([\s\S]*?)(?=%endblock atomiccoordinatesandatomicspecies)", fdf_text)[0].rstrip().split('\n')
         raw_species_labels = re.findall("(?<=%block ChemicalSpeciesLabel).*\n([\s\S]*?)(?=%endblock ChemicalSpeciesLabel)", fdf_text)[0].rstrip().split('\n')
         atomic_coords_format = re.findall("AtomicCoordinatesFormat\s([A-Za-z]*)",fdf_text)[0]
@@ -145,6 +204,14 @@ class SiestaParser():
         return None
 
     def _create_structure(self):
+        """
+        A helper method to create a pyprocar.core.Structure
+
+        Returns
+        -------
+        None
+            None
+        """
 
         # Depends on atomic coords format
         if self.atomic_coords_format == 'Fractional':
@@ -157,6 +224,19 @@ class SiestaParser():
         return None
 
     def _parse_dos_info(self,fdf_text):
+        """
+        A helper method to parse the density of states information
+
+        Parameters
+        ----------
+        fdf_text : str
+            The .fdf file text that has the inputs for the Siesta calculation
+
+        Returns
+        -------
+        None
+            None
+        """
         raw_pdos_info = re.findall("(?<=%block ProjectedDensityOfStates).*\n([\s\S]*?)(?=%endblock ProjectedDensityOfStates)", fdf_text)[0].rstrip().split('\n')
         raw_pdos_kmesh = re.findall("(?<=%block PDOS\.kgrid_Monkhorst_Pack).*\n([\s\S]*?)(?=%endblock PDOS\.kgrid_Monkhorst_Pack)", fdf_text)[0].rstrip().split('\n')
 
@@ -167,6 +247,19 @@ class SiestaParser():
         return None
 
     def _parse_bands(self,bands_file):
+        """
+        A helper method to parse the density of states information
+
+        Parameters
+        ----------
+        bands_file : str
+            The .BANDS file that has the band structure output information
+
+        Returns
+        -------
+        None
+            None
+        """
         with open(bands_file) as f:
 
             bands_text = f.readlines()

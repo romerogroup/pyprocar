@@ -515,8 +515,7 @@ def parse(code: str='vasp',
         if dirname is None:
             dirname = "dos"
         parser = io.qe.QEParser(dirname = dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
-                             pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml", 
-                             dos_interpolation_factor =interpolation_factor)
+                             pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
         if fermi is None:
             fermi = parser.efermi
         

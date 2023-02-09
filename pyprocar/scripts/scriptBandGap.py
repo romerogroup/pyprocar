@@ -3,9 +3,10 @@ import numpy as np
 from ..io import AbinitParser
 from ..io import ElkParser
 from ..io import ProcarParser
-from ..io import QEParser
 from ..io import LobsterParser
 from ..utilsprocar import UtilsProcar
+
+from .. import io
 
 
 def getFermi(procar, code, outcar):  # from ScriptsBandPlot made into method
