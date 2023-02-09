@@ -490,7 +490,7 @@ class QEParser():
         xml_filename =  prefix + ".xml"
         
         if os.path.exists(f"{dirname}{outdir}"):
-            atomic_proj_xml = f"{outdir}{os.sep}{prefix}.save{os.sep}atomic_proj.xml"
+            atomic_proj_xml = f"{dirname}{os.sep}{outdir}{os.sep}{prefix}.save{os.sep}atomic_proj.xml"
         else:
             atomic_proj_xml = f"{dirname}atomic_proj.xml"
 

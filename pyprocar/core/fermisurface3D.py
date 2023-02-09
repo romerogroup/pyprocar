@@ -672,7 +672,7 @@ class FermiSurface3D(Surface):
             
         scalars_array = np.vstack(scalars_array).T 
         
-        self.project_color(scalars_array = scalars_array, cmap=self.cmap, vmin=self.vmin, vmax=self.vmax,  scalar_name = "Fermi Speed")
+        self.project_color(scalars_array = scalars_array, scalar_name = "Fermi Speed")
 
     def calculate_effective_mass(self):
         """
@@ -685,7 +685,7 @@ class FermiSurface3D(Surface):
             scalars_array.append(self.first_and_second_derivative_energy_property_dict[band_name]["effective_mass_list"])
         scalars_array = np.vstack(scalars_array).T 
         
-        self.project_color(scalars_array = scalars_array, cmap=self.cmap, vmin=self.vmin, vmax=self.vmax, scalar_name="Geometric Average Effective Mass")
+        self.project_color(scalars_array = scalars_array, scalar_name="Geometric Average Effective Mass")
 
     def project_atomic_projections(self):
         """
@@ -701,7 +701,7 @@ class FermiSurface3D(Surface):
             count+=1
             scalars_array.append(self.spd[:,iband])
         scalars_array = np.vstack(scalars_array).T
-        self.project_color(scalars_array = scalars_array, cmap=self.cmap, vmin=self.vmin, vmax=self.vmax, scalar_name = "scalars")
+        self.project_color(scalars_array = scalars_array, scalar_name = "scalars")
 
     def project_spin_texture_atomic_projections(self):
         """

@@ -94,7 +94,8 @@ class BrillouinZone(Surface):
 
         super().__init__(verts=verts, faces = new_faces )
         
-        self._fix_normals_direction(n_faces = len(faces))
+        # self._fix_normals_direction(n_faces = len(faces))
+        self._fix_normals_direction()
         return None
 
     def wigner_seitz(self):
@@ -127,7 +128,7 @@ class BrillouinZone(Surface):
 
         return np.array(verts,dtype = float), faces
 
-    def _fix_normals_direction(self,):
+    def _fix_normals_direction(self):
         """
         Helper method that calculates the normals of the Wigner seits cell
         """

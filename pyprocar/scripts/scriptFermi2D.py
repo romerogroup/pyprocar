@@ -33,8 +33,7 @@ def fermi2D(
     spins:List[int]=[0],
     atoms:List[int]=None,
     orbitals:List[int]=None,
-    energy=None,
-    fermi:float=None,
+    energy:float=None,
     k_z_plane:float=0.0,
     rec_basis=None,
     rot_symm=1,
@@ -142,7 +141,7 @@ def fermi2D(
     print("spin_texture    : ", spin_texture)
     print("no_arrows       : ", noarrow)
 
-  
+    
 
     parser, kpoints, reciprocal_lattice, e_fermi = parse(code=code,
                                             lobster=lobster,
@@ -151,6 +150,8 @@ def fermi2D(
                                             outcar=outcar,
                                             poscar=poscar,
                                             procar=procar)
+
+
     ### End of parsing ###
 
     # Selecting kpoints in a constant k_z plane
