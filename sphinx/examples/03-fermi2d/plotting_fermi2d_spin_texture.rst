@@ -58,21 +58,30 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-37
+.. GENERATED FROM PYTHON SOURCE LINES 33-40
 
-Spin Texture
+Spin Texture Projection
 +++++++++++++++++++++++++++++++++++++++
 
+By setting spin_texture to be true, You can plot the arrows for the spin textures.
+By default the projected values of the arrows will be s_z. 
+But you can change this by setting arrow_projection to one of the following
+'x','y','z','x^2','y^2','z^2'
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 37-42
+.. GENERATED FROM PYTHON SOURCE LINES 40-51
 
 .. code-block:: default
 
 
+
     pyprocar.fermi2D(code = 'qe',
                    dirname=data_dir,
-                   spin_texture=True)
+                   spin_texture=True,
+                   arrow_projection='x',
+                   arrow_size =15,
+                   arrow_density=10,
+                   color_bar=True)
+
 
 
 
@@ -115,22 +124,94 @@ Spin Texture
     - Logan Lang
     - Freddy Farah
     
-    file            :  None
-    outcar          :  OUTCAR
-    Abinit output   :  None
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
     atoms           :  [-1]
     orbitals        :  [-1]
     spin comp.      :  [0]
     energy          :  None
-    fermi energy    :  None
-    Rec. basis      :  None
     rot. symmetry   :  1
     origin (trasl.) :  [0, 0, 0]
     rotation        :  [0, 0, 0, 1]
-    masking thres.  :  None
     save figure     :  None
     spin_texture    :  True
     no_arrows       :  False
+    <class 'xml.etree.ElementTree.Element'>
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 52-55
+
+Spin Texture single color
++++++++++++++++++++++++++++++++++++++++
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 55-64
+
+.. code-block:: default
+
+
+
+    pyprocar.fermi2D(code = 'qe',
+                   dirname=data_dir,
+                   spin_texture=True,
+                   arrow_color = 'blue',
+                   arrow_size =15,
+                   arrow_density=10)
+
+
+
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_spin_texture_002.png
+   :alt: plotting fermi2d spin texture
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_spin_texture_002.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 5.6.5 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    atoms           :  [-1]
+    orbitals        :  [-1]
+    spin comp.      :  [0]
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  True
+    no_arrows       :  False
+    <class 'xml.etree.ElementTree.Element'>
 
 
 
@@ -138,7 +219,7 @@ Spin Texture
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.475 seconds)
+   **Total running time of the script:** ( 0 minutes  10.869 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

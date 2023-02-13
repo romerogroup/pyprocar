@@ -15,7 +15,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='non-spin-polarized',
+                                spin_calc_type='spin-polarized',
                                 calc_type='fermi')
 """
 
@@ -27,7 +27,7 @@ import pyprocar
 
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}colinear{os.sep}Fe"
+data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}spin_colinear{os.sep}Fe"
 
 ###############################################################################
 # Plain mode
@@ -36,11 +36,24 @@ data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}colinear{os.
 #
 
 pyprocar.fermi2D(code = 'qe', 
-                dirname=data_dir)
+               mode='plain',
+               dirname=data_dir)
 
 
 ###############################################################################
-# Projection
+# plain_bands mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+#
+
+pyprocar.fermi2D(code = 'qe', 
+               mode='plain_bands',
+               add_legend=True,
+               dirname=data_dir)
+
+
+###############################################################################
+# parametric mode
 # +++++++++++++++++++++++++++++++++++++++
 #
 # Does not work. Contact developers
@@ -48,8 +61,9 @@ pyprocar.fermi2D(code = 'qe',
 
 atoms=[0]
 orbitals=[4,5,6,7,8]
-spins=[0]
-pyprocar.fermi2D(code = 'qe', 
+spins=[0,1]
+pyprocar.fermi2D(code = 'qe',
+               mode='parametric', 
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,

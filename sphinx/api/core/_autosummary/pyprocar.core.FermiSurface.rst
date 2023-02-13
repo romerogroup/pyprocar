@@ -20,6 +20,16 @@
       
       
         
+          FermiSurface.add_axes_labels
+        
+      
+      
+        
+          FermiSurface.add_legend
+        
+      
+      
+        
           FermiSurface.find_energy
         
       

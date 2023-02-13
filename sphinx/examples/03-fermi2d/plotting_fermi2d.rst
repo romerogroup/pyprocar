@@ -33,7 +33,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='non-spin-polarized',
+                                spin_calc_type='spin-polarized',
                                 calc_type='fermi')
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-25
@@ -49,7 +49,7 @@ importing pyprocar and specifying local data_dir
 
 
     parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}colinear{os.sep}Fe"
+    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}spin_colinear{os.sep}Fe"
 
 
 
@@ -65,13 +65,14 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-42
+.. GENERATED FROM PYTHON SOURCE LINES 37-43
 
 .. code-block:: default
 
 
     pyprocar.fermi2D(code = 'qe', 
-                    dirname=data_dir)
+                   mode='plain',
+                   dirname=data_dir)
 
 
 
@@ -115,48 +116,42 @@ Plain mode
     - Logan Lang
     - Freddy Farah
     
-    file            :  None
-    outcar          :  OUTCAR
-    Abinit output   :  None
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
     atoms           :  [-1]
     orbitals        :  [-1]
-    spin comp.      :  [0]
+    spin comp.      :  None
     energy          :  None
-    fermi energy    :  None
-    Rec. basis      :  None
     rot. symmetry   :  1
     origin (trasl.) :  [0, 0, 0]
     rotation        :  [0, 0, 0, 1]
-    masking thres.  :  None
     save figure     :  None
     spin_texture    :  False
     no_arrows       :  False
+    <class 'xml.etree.ElementTree.Element'>
+    (400, 24, 2)
+    (400, 24, 2)
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-48
+.. GENERATED FROM PYTHON SOURCE LINES 44-48
 
-Projection
+plain_bands mode
 +++++++++++++++++++++++++++++++++++++++
 
-Does not work. Contact developers
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-58
+.. GENERATED FROM PYTHON SOURCE LINES 48-55
 
 .. code-block:: default
 
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0]
     pyprocar.fermi2D(code = 'qe', 
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spins=spins,
-                    dirname=data_dir, 
-                    spin_texture=False)
+                   mode='plain_bands',
+                   add_legend=True,
+                   dirname=data_dir)
+
+
 
 
 
@@ -198,22 +193,102 @@ Does not work. Contact developers
     - Logan Lang
     - Freddy Farah
     
-    file            :  None
-    outcar          :  OUTCAR
-    Abinit output   :  None
-    atoms           :  [0]
-    orbitals        :  [4, 5, 6, 7, 8]
-    spin comp.      :  [0]
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    atoms           :  [-1]
+    orbitals        :  [-1]
+    spin comp.      :  None
     energy          :  None
-    fermi energy    :  None
-    Rec. basis      :  None
     rot. symmetry   :  1
     origin (trasl.) :  [0, 0, 0]
     rotation        :  [0, 0, 0, 1]
-    masking thres.  :  None
     save figure     :  None
     spin_texture    :  False
     no_arrows       :  False
+    <class 'xml.etree.ElementTree.Element'>
+    (400, 24, 2)
+    (400, 24, 2)
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 56-61
+
+parametric mode
++++++++++++++++++++++++++++++++++++++++
+
+Does not work. Contact developers
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 61-72
+
+.. code-block:: default
+
+
+    atoms=[0]
+    orbitals=[4,5,6,7,8]
+    spins=[0,1]
+    pyprocar.fermi2D(code = 'qe',
+                   mode='parametric', 
+                    atoms=atoms,
+                    orbitals=orbitals,
+                    spins=spins,
+                    dirname=data_dir, 
+                    spin_texture=False)
+
+
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_003.png
+   :alt: plotting fermi2d
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_003.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 5.6.5 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    atoms           :  [0]
+    orbitals        :  [4, 5, 6, 7, 8]
+    spin comp.      :  [0, 1]
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  False
+    no_arrows       :  False
+    <class 'xml.etree.ElementTree.Element'>
+    (400, 24, 2)
+    (400, 24, 2)
 
 
 
@@ -221,7 +296,7 @@ Does not work. Contact developers
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.145 seconds)
+   **Total running time of the script:** ( 0 minutes  23.483 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:
