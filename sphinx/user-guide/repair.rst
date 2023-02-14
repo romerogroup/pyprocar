@@ -9,5 +9,5 @@ Usage::
 
 	pyprocar.repair('PROCAR','PROCAR-repaired')
 
-.. automodule:: pyprocar.scriptRepair
+.. automodule:: pyprocar.scripts.scriptRepair
 	:members:

@@ -3,7 +3,7 @@ import re
 import logging
 import matplotlib.pyplot as plt
 import sys
-from ...utilsprocar import UtilsProcar
+from ...utils import UtilsProcar
 
 
 class ProcarParser:

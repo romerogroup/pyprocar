@@ -1,23 +1,35 @@
-import re
-from numpy import array
-from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
-from ..utils import elements
-import numpy as np
 import glob
 import collections
 import os
 import sys
+import re
+from typing import List
+
+from numpy import array
+import numpy as np
+
+from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
+from ..utils import elements
 
 
 class Output(collections.abc.Mapping):
-    """This class contains methods to parse the fermi energy and reciprocal
+    """
+    This class contains methods to parse the fermi energy and reciprocal
     lattice vectors from the Abinit output file.
 
     Since abinit v9.x creates the PROCAR file,
     the methods in vasp.py will be used to parse it.
+
+    Parameters
+    ----------
+    abinit_output : str, optional
+        The output abinit file, by default None
     """
 
-    def __init__(self, abinit_output=None):
+    def __init__(self, 
+                abinit_output:str=None
+        ):
+        
 
         # variables
         self.abinit_output = abinit_output
@@ -41,10 +53,12 @@ class Output(collections.abc.Mapping):
             lattice=self.lattice,
         )
 
-        return
+        return None
 
     def _readFermi(self):
-        """Reads the Fermi energy from the Abinit output file."""
+        """
+        Reads the Fermi energy from the Abinit output file.
+        """
 
         with open(self.abinit_output, "r") as rf:
             data = rf.read()
@@ -60,12 +74,14 @@ class Output(collections.abc.Mapping):
             # read spin (nsppol)
             self.nspin = re.findall(r"nsppol\s*=\s*([1-9]*)", data)[0]
 
-            return
+        return None
 
     def _readRecLattice(self):
-        """Reads the reciprocal lattice vectors
+        """
+        Reads the reciprocal lattice vectors
         from the Abinit output file. This is used to calculate
-        the k-path in cartesian coordinates if required."""
+        the k-path in cartesian coordinates if required.
+        """
 
         with open(self.abinit_output, "r") as rf:
             data = rf.read()
@@ -76,10 +92,12 @@ class Output(collections.abc.Mapping):
                 dtype=float,
             )
 
-            return
+        return None
 
     def _readCoordinates(self):
-        """Reads the coordinates as given by the xred keyword."""
+        """
+        Reads the coordinates as given by the xred keyword.
+        """
 
         with open(self.abinit_output, "r") as rf:
             data = rf.read()
@@ -87,10 +105,12 @@ class Output(collections.abc.Mapping):
             coordinate_list = np.array([float(x) for x in coordinate_block])
             self.coordinates = coordinate_list.reshape(len(coordinate_list) // 3, 3)
 
-            return
+        return None
 
     def _readLattice(self):
-        """Reads the lattice vectors from rprim keyword and scales with acell."""
+        """
+        Reads the lattice vectors from rprim keyword and scales with acell.
+        """
 
         with open(self.abinit_output, "r") as rf:
             data = rf.read()
@@ -112,10 +132,12 @@ class Output(collections.abc.Mapping):
             for i in range(len(acell)):
                 self.lattice[i, :] = acell[i] * rprim[i, :]
 
-            return
+        return None
 
     def _readAtoms(self):
-        """Reads atomic elements used and puts them in an array according to their composition."""
+        """
+        Reads atomic elements used and puts them in an array according to their composition.
+        """
 
         with open(self.abinit_output, "r") as rf:
             data = rf.read()
@@ -128,7 +150,7 @@ class Output(collections.abc.Mapping):
             znucl = [int(float(x)) for x in znucl]
 
             self.atoms = [elements.atomic_symbol(znucl[x - 1]) for x in typat]
-
+        return None
     def __contains__(self, x):
         return x in self.variables
 
@@ -143,27 +165,22 @@ class Output(collections.abc.Mapping):
 
 
 class Kpoints(collections.abc.Mapping):
-    """This class parses the k-point information.
+    """
+    This class parses the k-point information.
 
-    Attributes
+    Parameters
     ----------
-        file_str :
-        kgrid :
-        mode :
-        cartesian :
-        ngrids :
-        knames :
-        kshift :
-        variables :
-        metadata :
-        comment :
-        special_kpoints :
-        automatic :
-        filename :
-
+    filename : str, optional
+        The kpoints file name, by default "KPOINTS"
+    has_time_reversal : bool, optional
+        boolean file to determine if kpoints have time reversal symmetry, by default True
     """
 
-    def __init__(self, filename="KPOINTS", has_time_reversal=True):
+    def __init__(self, 
+                filename="KPOINTS", 
+                has_time_reversal=True
+        ):
+
         self.variables = {}
         self.filename = filename
         self.file_str = None
@@ -185,16 +202,13 @@ class Kpoints(collections.abc.Mapping):
             ngrids=self.ngrids,
             has_time_reversal=has_time_reversal,
         )
-
+        return None
     def _parse_kpoints(self):
-        """This method parses a VASP-type KPOINTS file for plotting band structures
+        """
+        This method parses a VASP-type KPOINTS file for plotting band structures
         for Abinit calculations. Abinit has multiple ways of providing k-points for
         band structure calculations, therefore we need to come up with a general way
         to tackle this.
-
-        TODO:
-        - Generalize a method for obtaining k-point information from Abinit.
-
         """
 
         # with open(self.filename, "r") as rf:
@@ -251,7 +265,7 @@ class Kpoints(collections.abc.Mapping):
                 )
                 self.special_kpoints = temp_special_kp.reshape(nsegments, 2, 3)
 
-        return
+        return None
 
     def __contains__(self, x):
         return x in self.variables
@@ -267,50 +281,53 @@ class Kpoints(collections.abc.Mapping):
 
 
 class Procar(collections.abc.Mapping):
-    """This class has functions to parse the PROCAR file
+    """
+    This class has functions to parse the PROCAR file
     generated from Abinit. Unlike, VASP here the PROCAR files
     need to be merged and fixed for formatting issues prior to
     further processing.
 
+    Parameters
+    ----------
+    filename : str, optional
+        The filename, by default "PROCAR"
+    filelist : List[str], optional
+        A list of filenames, by default None
+    abinit_output : str, optional
+        The abinit output filename, by default None
+    structure : Structure, optional
+        The pyprocar.core.Structure object, by default None
+    reciprocal_lattice : np.ndarray, optional
+        The reciprocal lattice vectors, by default None
+    kpath : KPath, optional
+        The pyprocar.core.KPath, by default None
+    kpoints : np.ndarray, optional
+        The kpoints array, by default None
+    efermi : float, optional
+        The fermi energy, by default None
+    interpolation_factor : float, optional
+        The interpolation factor, by default 1
+
     Attributes
     ----------
-        file_str :
-        spd :
-        structure :
-        orbitalName_short :
-        kpoints :
-        occupancies :
-        spd_phase :
-        ebs :
-        variables :
-        ispin :
-        orbitalName :
-        filename :
-        bandsCount :
-        ionsCount :
-        has_phase :
-        labels :
-        carray :
-        meta_lines :
-        orbitalName_old :
-        reciprocal_lattice :
-        bands :
-        kpointsCount :
-
+    variables : dict
+        A dict with important variables
     """
 
     def __init__(
         self,
-        filename="PROCAR",
-        filelist=None,
-        abinit_output=None,
-        structure=None,
-        reciprocal_lattice=None,
-        kpath=None,
-        kpoints=None,
-        efermi=None,
-        interpolation_factor=1,
-    ):
+        filename:str="PROCAR",
+        filelist:List[str]=None,
+        abinit_output:str=None,
+        structure:Structure=None,
+        reciprocal_lattice:np.ndarray=None,
+        kpath:KPath=None,
+        kpoints:np.ndarray=None,
+        efermi:float=None,
+        interpolation_factor:float=1,
+        ):
+        
+
         self.variables = {}
         self.filename = filename
         self.filelist = filelist
@@ -386,9 +403,22 @@ class Procar(collections.abc.Mapping):
             shifted_to_efermi=False,
         )
 
-    def _mergeparallel(self, inputfiles=None, outputfile=None, abinit_output=None):
-        """This merges Procar files seperated between k-point ranges.
+    def _mergeparallel(self, 
+                    inputfiles:List[str]=None, 
+                    outputfile:str=None, 
+                    abinit_output:str=None):
+        """
+        This merges Procar files seperated between k-point ranges.
         Happens with parallel Abinit runs.
+
+        Parameters
+        ----------
+        inputfiles : List[str], optional
+            A list of input filenames, by default "PROCAR"
+        outputfile : str, optional
+           The output file, by default None
+        abinit_output : str, optional
+            The abinit output file, by default None
         """
         print("Merging parallel files...")
         filenames = sorted(inputfiles)
@@ -440,11 +470,21 @@ class Procar(collections.abc.Mapping):
                         for line in infile:
                             outfile.write(line)
 
-    def _fixformat(self, inputfile=None, outputfile=None):
+    def _fixformat(self, 
+                inputfile=None, 
+                outputfile=None):
 
-        """Fixes the formatting of Abinit's Procar
+        """
+        Fixes the formatting of Abinit's Procar
         when the tot projection is not summed and spin directions
         not seperated.
+
+        Parameters
+        ----------
+        inputfiles : List[str], optional
+            A list of input filenames, by default "PROCAR"
+        outputfile : str, optional
+           The output file, by default None
         """
         print("Fixing formatting errors...")
         # removing existing temporary fixed file
@@ -584,7 +624,8 @@ class Procar(collections.abc.Mapping):
         fp.close()
 
     def repair(self):
-        """It Tries to repair some stupid problems due the stupid fixed
+        """
+        It Tries to repair some stupid problems due the stupid fixed
         format of the stupid fortran.
 
         Up to now it only separes k-points as the following:
@@ -701,6 +742,9 @@ class Procar(collections.abc.Mapping):
         return in_file
 
     def _read(self):
+        """
+        Helper method to read the files
+        """
 
         rf = self._open_file()
         # Line 1: PROCAR lm decomposed
@@ -741,7 +785,8 @@ class Procar(collections.abc.Mapping):
         return
 
     def _read_kpoints(self):
-        """Reads the k-point headers. A typical k-point line is:
+        """
+        Reads the k-point headers. A typical k-point line is:
         k-point    1 :    0.00000000 0.00000000 0.00000000  weight = 0.00003704\n
         fills self.kpoint[kpointsCount][3]
         The weights are discarded (are they useful?)
@@ -805,6 +850,14 @@ class Procar(collections.abc.Mapping):
 
     @property
     def kpoints_cartesian(self):
+        """
+        The kpoints in cartesian coords
+
+        Returns
+        -------
+        np.ndarray
+            The kpoints in cartesian coords
+        """
         if self.reciprocal_lattice is not None:
             return np.dot(self.kpoints, self.reciprocal_lattice)
         else:
@@ -815,15 +868,25 @@ class Procar(collections.abc.Mapping):
 
     @property
     def kpoints_reduced(self):
+        """
+        The kpoints in reduced coords
+
+        Returns
+        -------
+        np.ndarray
+            The kpoints in reduced coords
+        """
         return self.kpoints
 
     def _read_bands(self):
-        """Reads the bands header. A typical bands is:
+        """
+        Reads the bands header. A typical bands is:
         band   1 # energy   -7.11986315 # occ.  1.00000000
 
         fills self.bands[kpointsCount][bandsCount]
 
-        The occupation numbers are discarded (are they useful?)"""
+        The occupation numbers are discarded (are they useful?)
+        """
         if not self.file_str:
             print("You should invoke `procar.read()` instead. Returning")
             return
@@ -879,7 +942,9 @@ class Procar(collections.abc.Mapping):
         return
 
     def _read_orbitals(self):
-        """Reads all the spd-projected data. A typical/expected block is:
+        """
+        Reads all the spd-projected data. A typical/expected block is:
+
             ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot
             1  0.079  0.000  0.001  0.000  0.000  0.000  0.000  0.000  0.000  0.079
             2  0.152  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.152
@@ -1008,6 +1073,8 @@ class Procar(collections.abc.Mapping):
         return
 
     def _read_phases(self):
+        """Helper method to read the projection phases
+        """
 
         if self.ionsCount == 1:
             self.spd_phase = re.findall(r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
@@ -1107,6 +1174,23 @@ class Procar(collections.abc.Mapping):
         return
 
     def _spd2projected(self, spd, nprinciples=1):
+        """
+        Helpermethod to project the spd array to the projected array 
+        which will be fed into pyprocar.coreElectronicBandStructure object
+
+        Parameters
+        ----------
+        spd : np.ndarray
+            The spd array from the earlier parse. This has a structure simlar to the PROCAR output in vasp
+            Has the shape [n_kpoints,n_band,n_spins,n-orbital,n_atoms]
+        nprinciples : int, optional
+            The prinicipal quantum numbers, by default 1
+
+        Returns
+        -------
+        np.ndarray
+            The projected array. Has the shape [n_kpoints,n_band,n_atom,n_principal,n-orbital,n_spin]
+        """
         # This function is for VASP
         # non-pol and colinear
         # spd is formed as (nkpoints,nbands, nspin, natom+1, norbital+2)
@@ -1153,6 +1237,21 @@ class Procar(collections.abc.Mapping):
         return projected
 
     def symmetrize(self, symprec=1e-5, outcar=None, structure=None, spglib=True):
+        """
+        A method that will symmetrize the kpoints, projections, and bands 
+        of the calculation
+
+        Parameters
+        ----------
+        symprec : float, optional
+            The symmetry precision, by default 1e-5
+        outcar : str, optional
+            The OUTCAR filename, by default None
+        structure : pyprocar.core.Structure, optional
+            The structure of the calculation, by default None
+        spglib : bool, optional
+            Boolean value to use spglib for the symmetrization, by default True
+        """
         if outcar is not None:
             with open(outcar) as f:
                 txt = f.readlines()

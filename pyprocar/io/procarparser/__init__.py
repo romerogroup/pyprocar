@@ -1,2 +1,2 @@
 from .procarparser import ProcarParser
-from ...utilsprocar import UtilsProcar
+from ...utils import UtilsProcar

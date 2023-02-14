@@ -1,7 +1,7 @@
-from ..utilsprocar import UtilsProcar
+from ..utils import UtilsProcar
 from ..io import ProcarParser
-from ..procarselect import ProcarSelect
-from ..procarplot import ProcarPlot
+from ..core import ProcarSelect
+from ..plotter import ProcarPlot
 from ..fermisurface import FermiSurface
 from ..splash import welcome
 

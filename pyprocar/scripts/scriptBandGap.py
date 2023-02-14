@@ -4,7 +4,7 @@ from ..io import AbinitParser
 from ..io import ElkParser
 from ..io import ProcarParser
 from ..io import LobsterParser
-from ..utilsprocar import UtilsProcar
+from ..utils import UtilsProcar
 
 from .. import io
 

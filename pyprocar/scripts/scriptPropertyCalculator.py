@@ -17,8 +17,8 @@ import vtk
 import pyvista as pv
 from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
 
-from ..utilsprocar import UtilsProcar
-from ..procarselect import ProcarSelect
+from ..utils import UtilsProcar
+from ..core import ProcarSelect
 from .. import io
 
 HBAR_EV = 6.582119 *10**(-16) #eV*s

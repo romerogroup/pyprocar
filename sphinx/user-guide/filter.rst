@@ -57,5 +57,5 @@ Usage::
 
 PyProcar counts each row of ions in PROCAR file starting from 0. Keep in mind: ``atoms=0`` does not define the atom_type, rather it defines only the first ion in the POSCAR. So if you have more than one ion of the same element, use ``atoms = [[0,1,2,3,...]]``.
 
-.. automodule:: pyprocar.scriptFilter
+.. automodule:: pyprocar.scripts.scriptFilter
 	:members:

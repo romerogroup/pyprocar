@@ -8,12 +8,11 @@ from typing import List
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
+from matplotlib import colors as mpcolors
+from matplotlib import cm
 
-from ..utilsprocar import UtilsProcar
-from ..io import ProcarParser
-from ..procarselect import ProcarSelect
-from ..procarplot import ProcarPlot
-from ..procarsymmetry import ProcarSymmetry
+from ..utils import UtilsProcar
+from ..core import ProcarSymmetry
 from ..core import FermiSurface
 from ..io import ElkParser
 from ..io import AbinitParser
@@ -22,87 +21,96 @@ from .. import io
 
 
 def fermi2D(
-    file=None,
-    code:str="vasp",
-    outcar:str='OUTCAR',
-    poscar:str='POSCAR',
-    procar:str='PROCAR',
+    code:str,
+    dirname:str,
+    mode:str='plain',
     lobster:bool=False,
-    dirname:str='',
-    abinit_output=None,
-    spins:List[int]=[0],
+    spins:List[int]=None,
     atoms:List[int]=None,
     orbitals:List[int]=None,
     energy:float=None,
     k_z_plane:float=0.0,
-    rec_basis=None,
     rot_symm=1,
     translate:List[int]=[0, 0, 0],
     rotation:List[int]=[0, 0, 0, 1],
-    human:bool=False,
-    mask=None,
-    savefig=None,
+    savefig:str=None,
     spin_texture:bool=False,
-    noarrow:bool=False,
+    arrow_projection:str='sz',
+    arrow_size:float=None,
+    arrow_color:List[int] or str=None,
+    arrow_density:float=6,
+    no_arrow:bool=False,
+    cmap = 'jet',
+    color_bar:bool=False,
+    add_axes_labels:bool=True,
+    add_legend:bool=False,
     exportplt:bool=False,
-
+    
     repair:bool=True,
-):
-    """_summary_
+    ):
+    """This function plots the 2d fermi surface in the z = 0 plane
 
-    :param file: _description_, defaults to None
-    :type file: _type_, optional
-    :param code: _description_, defaults to "vasp"
-    :type code: str, optional
-    :param outcar: _description_, defaults to 'OUTCAR'
-    :type outcar: str, optional
-    :param poscar: _description_, defaults to 'POSCAR'
-    :type poscar: str, optional
-    :param procar: _description_, defaults to 'PROCAR'
-    :type procar: str, optional
-    :param lobster: _description_, defaults to False
-    :type lobster: bool, optional
-    :param dirname: _description_, defaults to ''
-    :type dirname: str, optional
-    :param abinit_output: _description_, defaults to None
-    :type abinit_output: _type_, optional
-    :param spins: _description_, defaults to [0]
-    :type spins: List[int], optional
-    :param atoms: _description_, defaults to None
-    :type atoms: List[int], optional
-    :param orbitals: _description_, defaults to None
-    :type orbitals: List[int], optional
-    :param energy: _description_, defaults to None
-    :type energy: _type_, optional
-    :param fermi: _description_, defaults to None
-    :type fermi: float, optional
-    :param rec_basis: _description_, defaults to None
-    :type rec_basis: _type_, optional
-    :param rot_symm: _description_, defaults to 1
-    :type rot_symm: int, optional
-    :param translate: _description_, defaults to [0, 0, 0]
-    :type translate: List[int], optional
-    :param rotation: _description_, defaults to [0, 0, 0, 1]
-    :type rotation: List[int], optional
-    :param human: _description_, defaults to False
-    :type human: bool, optional
-    :param mask: _description_, defaults to None
-    :type mask: _type_, optional
-    :param savefig: _description_, defaults to None
-    :type savefig: _type_, optional
-    :param spin_texture: _description_, defaults to False
-    :type spin_texture: bool, optional
-    :param noarrow: _description_, defaults to False
-    :type noarrow: bool, optional
-    :param exportplt: _description_, defaults to False
-    :type exportplt: bool, optional
-    :param repair: _description_, defaults to True
-    :type repair: bool, optional
-    :raises RuntimeError: _description_
-    :return: _description_
-    :rtype: _type_
+    Parameters
+    ----------
+    code : str, 
+        This parameter sets the code to parse, by default "vasp"
+    dirname : str, optional
+        This parameter is the directory of the calculation, by default ''
+    lobster : bool, optional
+        A boolean value to determine to use lobster, by default False
+    spins : List[int], optional
+        List of spins, by default [0]
+    atoms : List[int], optional
+        List of atoms, by default None
+    orbitals : List[int], optional
+        List of orbitals, by default None
+    energy : float, optional
+        The energy to generate the iso surface. 
+        When energy is None the 0 is used by default, which is the fermi energy, 
+        by default None
+    k_z_plane : float, optional
+        Which K_z plane to generate 2d fermi surface, by default 0.0
+    rot_symm : int, optional
+        _description_, by default 1
+    translate : List[int], optional
+        Matrix to translate the kpoints, by default [0, 0, 0]
+    rotation : List[int], optional
+         Matrix to rotate the kpoints, by default [0, 0, 0, 1]
+    savefig : str, optional
+        The filename to save the plot as., by default None
+    spin_texture : bool, optional
+        Boolean value to determine if spin arrows are plotted, by default False
+    arrow_size : float, optional
+        Inversely determines the arrow size, by default None
+    arrow_color : List[int] or str, optional
+        Either a list for the rbg value or a string for the color, by default None
+    arrow_density : float, optional
+        Inversely determines the arrow density
+    no_arrow : bool, optional
+        A boolean value to determine if arrows or a heat map is produced for spins, by default False
+    add_axes_labels : bool, optional
+        Boolean value to add axes labels, by default True
+    add_legend : bool, optional
+        Boolean value to add legend, by default True
+    exportplt : bool, optional
+        Boolean value where to return the matplotlib.pyplot state plt, by default False
+    color_bar : bool, optional
+        Boolean value to plot the color bar, by default False
+    cmap : bool, optional
+        The colormap to be used, by default False
+    repair : bool, optional
+        Option for vasp to repair the procar file, by default True
+
+    Returns
+    -------
+    matplotlib.pyplot
+        Returns the matplotlib.pyplot state plt
+
+    Raises
+    ------
+    RuntimeError
+        invalid option --translate
     """
-
     welcome()
 
     # Turn interactive plotting off
@@ -110,55 +118,47 @@ def fermi2D(
 
     if atoms is None:
         atoms = [-1]
-        if human is True:
-            print("WARNING: `--human` option given without atoms list!!!!!")
+        
 
     if orbitals is None:
         orbitals = [-1]
 
-    if rec_basis != None:
-        rec_basis = np.array(rec_basis)
-        rec_basis.shape = (3, 3)
+    
+
+
 
     if len(translate) != 3 and len(translate) != 1:
         print("Error: --translate option is invalid! (", translate, ")")
         raise RuntimeError("invalid option --translate")
 
-    print("file            : ", file)
-    print("outcar          : ", outcar)
-    print("Abinit output   : ", abinit_output)
+    print("dirname         : ", dirname)
     print("atoms           : ", atoms)
     print("orbitals        : ", orbitals)
     print("spin comp.      : ", spins)
     print("energy          : ", energy)
-    print("fermi energy    : ", fermi)
-    print("Rec. basis      : ", rec_basis)
     print("rot. symmetry   : ", rot_symm)
     print("origin (trasl.) : ", translate)
     print("rotation        : ", rotation)
-    print("masking thres.  : ", mask)
     print("save figure     : ", savefig)
     print("spin_texture    : ", spin_texture)
-    print("no_arrows       : ", noarrow)
+    print("no_arrows       : ", no_arrow)
 
     
 
     parser, kpoints, reciprocal_lattice, e_fermi = parse(code=code,
                                             lobster=lobster,
                                             repair=repair,
-                                            dirname=dirname,
-                                            outcar=outcar,
-                                            poscar=poscar,
-                                            procar=procar)
-
+                                            dirname=dirname)
+    if spins is None:
+        spins = np.arange(parser.ebs.bands.shape[-1])
 
     ### End of parsing ###
 
     # Selecting kpoints in a constant k_z plane
     i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2]< k_z_plane + 0.01, kpoints[:,2] > k_z_plane - 0.01) )
-    kpoints = kpoints[i_kpoints_near_z_0,:][0,:,:]
-    parser.ebs.bands = parser.ebs.bands[i_kpoints_near_z_0,:][0,:,:]
-    parser.ebs.projected = parser.ebs.projected[i_kpoints_near_z_0,:][0,:,:]
+    kpoints = kpoints[i_kpoints_near_z_0,:][0]
+    parser.ebs.bands = parser.ebs.bands[i_kpoints_near_z_0,:][0]
+    parser.ebs.projected = parser.ebs.projected[i_kpoints_near_z_0,:][0]
 
     if energy is None:
         energy = 0
@@ -170,7 +170,7 @@ def fermi2D(
         if atoms is None and parser.ebs.projected is not None:
             atoms = np.arange(parser.ebs.natoms, dtype=int)
         projected = parser.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
-        projected = projected[:,:,spins[0]]
+        projected = projected[:,:,spins]
     else:
         # first get the sdp reduced array for all spin components.
         stData = []
@@ -198,7 +198,8 @@ def fermi2D(
     # bands = data.bands
     # character = data.spd
 
-    bands = parser.ebs.bands[:,:,0]
+    bands = parser.ebs.bands
+
     # kpoints = kpoints.dot(reciprocal_lattice  * (parser.alat/(2*np.pi)))
     character = projected
     if spin_texture is True:
@@ -210,14 +211,29 @@ def fermi2D(
         symm.general_rotation(rotation[0], rotation[1:])
         # symm.MirrorX()
         symm.rot_symmetry_z(rot_symm)
-
-    fs = FermiSurface(symm.kpoints, symm.bands, symm.character)
+    fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap)
     fs.find_energy(energy)
 
     if not spin_texture:
-        fs.plot(mask=mask, interpolation=300)
+        fs.plot(mode=mode, interpolation=300)
     else:
-        fs.spin_texture(sx=symm.sx, sy=symm.sy, sz=symm.sz, noarrow=noarrow, spin=spins[0])
+        fs.spin_texture(sx=symm.sx, 
+                        sy=symm.sy, 
+                        sz=symm.sz, 
+                        arrow_projection=arrow_projection,
+                        no_arrow=no_arrow, 
+                        spin=spins[0], 
+                        arrow_size = arrow_size,
+                        arrow_color = arrow_color,
+                        arrow_density=arrow_density,
+                        color_bar=color_bar
+                        )
+
+    if add_axes_labels:
+        fs.add_axes_labels()
+
+    if add_legend:
+        fs.add_legend()
 
     if exportplt:
         return plt
@@ -235,9 +251,6 @@ def parse(code:str='vasp',
           lobster:bool=False,
           repair:bool=False,
           dirname:str="",
-          outcar:str='OUTCAR',
-          poscar:str='PORCAR',
-          procar:str='PROCAR',
           apply_symmetry:bool=True):
         if code == "vasp" or code == "abinit":
             if repair:

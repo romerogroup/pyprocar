@@ -50,5 +50,5 @@ Usage::
     plt.show()
 
 
-.. automodule:: pyprocar.scriptFermi2D
+.. automodule:: pyprocar.scripts.scriptFermi2D
 	:members:

@@ -38,12 +38,12 @@ import pyvista
 import trimesh
 
 
-from pyprocar.procarfilefilter import ProcarFileFilter
-from pyprocar.procarplot import ProcarPlot
-from pyprocar.procarselect import ProcarSelect
-from pyprocar.procarsymmetry import ProcarSymmetry
-from pyprocar.utilsprocar import UtilsProcar
-from pyprocar.procarunfold import ProcarUnfolder
+# from pyprocar.procarfilefilter import ProcarFileFilter
+# from pyprocar.procarplot import ProcarPlot
+# from pyprocar.procarselect import ProcarSelect
+# from pyprocar.procarsymmetry import ProcarSymmetry
+# from pyprocar.utilsprocar import UtilsProcar
+# from pyprocar.procarunfold import ProcarUnfolder
 
 from .splash import welcome
 

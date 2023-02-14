@@ -1,4 +1,4 @@
-from ..procarfilefilter import ProcarFileFilter
+from ..utils import ProcarFileFilter
 from ..splash import welcome
 
 

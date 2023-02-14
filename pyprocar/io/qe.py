@@ -672,8 +672,15 @@ class QEParser():
                         comp = complex(real , imag)
                         comp_squared = np.absolute(comp)**2
 
+                        
                         self.spd_phase[ik,iband,ispin,iatm - 1,iorb + 1] = complex(real , imag)
-                        self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = comp_squared
+
+                        # The spd will depend on of the calculation is a non colinear or colinear. Noncolinear
+                        if self.is_non_colinear:
+                            self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = real
+                        else:
+                            self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = comp_squared
+
                         
         for ions in range(self.ionsCount):
             self.spd[:, :, :, ions, 0] = ions + 1
@@ -698,7 +705,6 @@ class QEParser():
         None
             None
         """
-        print(type(main_xml_root))
 
         self.nspecies = len(main_xml_root.findall(".//output/atomic_species")[0])
         self.composition = { species.attrib['name'] : 0 for species in  main_xml_root.findall(".//output/atomic_species")[0]  }

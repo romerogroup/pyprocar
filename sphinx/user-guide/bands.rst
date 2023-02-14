@@ -125,5 +125,5 @@ PyProcar allows the plotting of band structures with a discontinuous :math:`k`-p
 .. image:: ../images/continuousbands.png
 
 
-.. automodule:: pyprocar.scriptBandsplot
+.. automodule:: pyprocar.scripts.scriptBandsplot
 	:members:

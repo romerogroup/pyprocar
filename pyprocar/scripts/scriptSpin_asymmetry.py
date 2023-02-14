@@ -13,9 +13,9 @@ from matplotlib import cm
 from ..core import boolean_add
 from ..core import FermiSurface3D
 from ..splash import welcome
-from ..utilsprocar import UtilsProcar
+from ..utils import UtilsProcar
 from ..io import ProcarParser
-from ..procarselect import ProcarSelect
+from ..core import ProcarSelect
 
 def spin_asymmetry(procar='PROCAR',
                    outcar='OUTCAR',

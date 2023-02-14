@@ -49,7 +49,7 @@ Usage::
 	plt.title('Using matplotlib options')
 	plt.show()	        
 
-.. automodule:: pyprocar.scriptUnfold
+.. automodule:: pyprocar.scripts.scriptUnfold
 	:members:
 	:undoc-members:
 	:inherited-members:

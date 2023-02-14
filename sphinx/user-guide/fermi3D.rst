@@ -206,5 +206,6 @@ shortcuts are available:
 | ``+``/``-``                                           | Increase/decrease the point size and line widths    |
 +-------------------------------------+-----------------+-----------------------------------------------------+
 
-.. automodule:: pyprocar.scriptFermi3D
+.. automodule:: pyprocar.scripts.scriptFermi3D
 	:members:
+

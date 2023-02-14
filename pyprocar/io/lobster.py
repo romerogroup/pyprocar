@@ -15,6 +15,30 @@ def str2bool(v):
   return v.lower() in ("true") 
         
 class LobsterParser():
+    """The class helps parse the information from a lobster calculation
+
+    Parameters
+    ----------
+    dirname : str, optional
+        The directory name for the calculation, by default ""
+    code : str, optional
+        The code name, by default 'qe'
+    lobsterin : str, optional
+        The lobster in put filename, by default 'lobsterin'
+    lobsterout : str, optional
+        The lobster output filename, by default 'lobsterout'
+    scfIn_filename : str, optional
+        The scf.in file for QE calculations, by default "scf.in"
+    outcar : str, optional
+        The outcar for vasp calculations, by default 'OUTCAR'
+    poscar : str, optional
+        The poscar for vasp calculations, by default 'POSCAR'
+    procar : str, optional
+        The procar for vasp calculations, by default 'PROCAR'
+    dos_interpolation_factor : _type_, optional
+        The interpolation factor on the density of states, by default None
+
+    """
     def __init__(self,
         dirname = "",
         code = 'qe',
@@ -25,6 +49,7 @@ class LobsterParser():
         poscar = 'POSCAR',
         procar = 'PROCAR',
         dos_interpolation_factor = None ):
+        
 
         if dirname != "":
             dirname = dirname + os.sep
@@ -114,15 +139,23 @@ class LobsterParser():
 
     @property
     def species(self):
-        """
-        Returns the species in POSCAR
+        """Returns the species of the calculation
+
+        Returns
+        -------
+        List
+            Returns a list of string or atomic numbers[int]
         """
         return self.initial_structure.species
 
     @property
     def structures(self):
-        """
-        Returns a list of pychemia.core.Structure representing all the ionic step structures
+        """Returns a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        List
+            Returns a list of pyprocar.core.Structure
         """
         # symbols = [x.strip() for x in self.data['ions']]
         symbols = [x.strip() for x in self.ions]
@@ -135,28 +168,47 @@ class LobsterParser():
 
     @property
     def structure(self):
-        """
-        crystal structure of the last step
+        """Returns a the last element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the last element of a list of pyprocar.core.Structure
         """
         return self.structures[-1]
     
     @property
     def initial_structure(self):
-        """
-        Returns the initial Structure as a pychemia structure
+        """Returns a the first element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the first element of a list of pyprocar.core.Structure
         """
         return self.structures[0]
     
     @property
     def final_structure(self):
-        """
-        Returns the final Structure as a pychemia structure
+        """Returns a the last element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the last element of a list of pyprocar.core.Structure
         """
 
         return self.structures[-1]
          
     @property
     def dos(self):
+        """Initializes the pyprocar.core.DensityOfStates
+
+        Returns
+        -------
+        pyprocar.core.DensityOfStates
+            Retruns the pyprocar.core.DensityOfStates object
+        """
         energies = self.dos_total['energies']
         total = []
         for ispin in self.dos_total:
@@ -169,22 +221,35 @@ class LobsterParser():
             total=total,
             projected=self.dos_projected,
             interpolation_factor=self.dos_interpolation_factor)
-  
-    @property
-    def dos_to_dict(self):
-        """
+    """
         Returns the complete density (total,projected) of states as a python dictionary
         """
+    @property
+    def dos_to_dict(self):
+        """Returns the complete density (total,projected) of states as a python dictionary
+
+        Returns
+        -------
+        dict
+            Returns a dictionary with the projected and total denisity of states
+        """
+        
         return {
             'total': self._get_dos_total(),
             'projected': self._get_dos_projected()
         }
-    
+
     @property
     def dos_total(self):
+        """Returns the density of states total as a dict. 
+        The keys are energies,Spin-up, Spin-down
+
+        Returns
+        -------
+        dict
+            Returns the density of states total as a dict
         """
-        Returns the total density of states as a pychemia.visual.DensityOfSates object
-        """
+        
         dos_total, labels = self._get_dos_total()
         #dos_total['energies'] -= self.fermi
 
@@ -192,10 +257,15 @@ class LobsterParser():
 
     @property
     def dos_projected(self):
+        """Returns the projected DOS as a multi-dimentional array, 
+        to be used in the pyprocar.core.DensityOfStates object
+
+        Returns
+        -------
+        list
+            A list of projections per atom
         """
-        Returns the projected DOS as a multi-dimentional array, to be used in the
-        pyprocar.core.dos object
-        """
+       
         ret = []
         dos_projected, info = self._get_dos_projected()
         if dos_projected is None:
@@ -218,6 +288,13 @@ class LobsterParser():
         return ret   
 
     def _get_dos_total(self):
+        """Helper method to get the total density of state
+
+        Returns
+        -------
+        dict, list
+            Returns the total_dos dict and label names
+        """
         
         energies = self.data['total'][:, 0]
         dos_total = {'energies': energies}
@@ -234,7 +311,18 @@ class LobsterParser():
         return dos_total,list(dos_total.keys())
 
     def _get_dos_projected(self, atoms=[]):
+        """
+        Helper method to get the total density of state
 
+        Parameters
+        -------
+        atoms: list, optional
+            Atoms to to iterate through
+        Returns
+        -------
+        list, list
+            Returns the porjected dos istt and label names
+        """
         if len(atoms) == 0:
             atoms = np.arange(self.initial_structure.natoms)
 
@@ -262,22 +350,28 @@ class LobsterParser():
             return None, None
 
     def dos_parametric(self,atoms=None,orbitals=None,spin=None,title=None):
-        """
-        This function sums over the list of atoms and orbitals given 
+        """This function sums over the list of atoms and orbitals given 
         for example dos_paramateric(atoms=[0,1,2],orbitals=[1,2,3],spin=[0,1])
         will sum all the projections of atoms 0,1,2 and all the orbitals of 1,2,3 (px,py,pz)
         and return separatly for the 2 spins as a DensityOfStates object from pychemia.visual.DensityofStates
-        
-        :param atoms: list of atom index needed to be sumed over. count from zero with the same 
-                      order as POSCAR
-        
-        :param orbitals: list of orbitals needed to be sumed over 
+
+        Parameters
+        ----------
+        atoms : list[int], optional
+            list of atom index needed to be sumed over., by default None
+        orbitals : list[int], optional
+            list of orbitals needed to be sumed over 
         |  s  ||  py ||  pz ||  px || dxy || dyz || dz2 || dxz ||x2-y2||
-        |  0  ||  1  ||  2  ||  3  ||  4  ||  5  ||  6  ||  7  ||  8  ||
-        
-        :param spin: which spins to be included. count from 0
-                      There are no sum over spins
-        
+        |  0  ||  1  ||  2  ||  3  ||  4  ||  5  ||  6  ||  7  ||  8  ||, by default None
+        spin : list[int], optional
+            which spins to be included, by default None
+        title : str, optional
+            Title, by default None
+
+        Returns
+        -------
+        pyprocar.core.DensityOfStates
+            Returns the dos object
         """
         projected = self.dos_projected
         dos_projected,labelsInfo = self._get_dos_projected()
@@ -331,7 +425,23 @@ class LobsterParser():
         return DensityOfStates(table=ret,title=title,labels=labels)
     
     def _parse_doscar(self, filename):
+        """Helper method to parse the DOSCAR
 
+        Parameters
+        ----------
+        filename : str
+            The filename of the DOSCAR
+
+        Returns
+        -------
+        dict
+            Returns a dict with the total, projected, and labels
+
+        Raises
+        ------
+        ValueError
+            DOSCAR seems truncated
+        """
         rf = open(filename)
         data = rf.readlines()
         rf.close()
@@ -450,6 +560,13 @@ class LobsterParser():
             return {'total': total_dos}
 
     def _readFileNames(self):
+        """Helper method to parse filenames form the lobster outfile
+
+        Returns
+        -------
+        None
+            None
+        """
         self.file_names = []
         self.ionsList = re.findall(
             "calculating FatBand for Element: (.*) Orbital.*", self.lobsterout
@@ -466,6 +583,13 @@ class LobsterParser():
         return None
 
     def _readFatBands(self):
+        """Helpermethod to parse the fatbands
+
+        Returns
+        -------
+        None
+            None
+        """
         rf = open(self.file_names[0], "r")
         projFile = rf.read()
         rf.close()
@@ -533,6 +657,21 @@ class LobsterParser():
         return None
 
     def _spd2projected(self, spd, nprinciples=1):
+        """A helper method to conver spd format to projected format 
+        to be inputed in to pyprocar.core.ElectronicBandStructure
+
+        Parameters
+        ----------
+        spd : np.ndarray
+            The spd array
+        nprinciples : int, optional
+            The principle quantum number, by default 1
+
+        Returns
+        -------
+        np.ndarray
+            The projected array
+        """
         # This function is for VASP
         # non-pol and colinear
         # spd is formed as (nkpoints,nbands, nspin, natom+1, norbital+2)
@@ -581,6 +720,14 @@ class LobsterParser():
         return projected
 
     def _createKPath(self):
+        """Helper method to format thwe kpath information into
+         the pyprocar.core.KPath
+
+        Returns
+        -------
+        None
+            None
+        """
         self.special_kpoints = np.zeros(shape = (len(self.kticks) -1 ,2,3) )
         self.modified_knames = []
         for itick in range(len(self.kticks)):
@@ -602,6 +749,13 @@ class LobsterParser():
         return None
 
     def _getSpecialKpoints(self):
+        """Helper method to get the special kpoints for a given code
+
+        Returns
+        -------
+        None
+            None
+        """
 
         if self.code == 'qe':
             numK = int(re.findall("K_POINTS.*\n([0-9]*)", self.scfIn)[0])
@@ -644,13 +798,37 @@ class LobsterParser():
         return None
 
     def parse_structure(self,
-            outcar=None,
-            poscar=None,
-            procar=None,
-            reciprocal_lattice=None,
-            kpoints=None,
-            interpolation_factor=1,
-            fermi=None):
+            outcar:str=None,
+            poscar:str=None,
+            procar:str=None,
+            reciprocal_lattice:np.ndarray=None,
+            kpoints:str=None,
+            interpolation_factor:int=1,
+            fermi:float=None):
+        """A method to parse the electronic sturcutue information
+
+        Parameters
+        ----------
+        outcar : str, optional
+            The OUTCAR filename, by default None
+        poscar : str, optional
+            The POSCAR filename, by default None
+        procar : str, optional
+            The POSCAR filename, by default None
+        reciprocal_lattice : np.ndarray, optional
+            The reciprocal lattice matrix, by default None
+        kpoints : str, optional
+            The KPOINTS file name, by default None
+        interpolation_factor : int, optional
+            The interpolation factor, by default 1
+        fermi : float, optional
+            The fermi energy, by default None
+
+        Returns
+        -------
+        None
+            None
+        """
 
         if self.code == "vasp":
             if outcar is not None:

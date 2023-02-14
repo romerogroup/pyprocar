@@ -259,6 +259,7 @@ class EBSPlot:
                 points = np.array(
                     [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
+                
                 # this is to delete the segments on the high sym points
                 x = self.x
                 # segments = np.delete(

@@ -372,11 +372,13 @@ class ElectronicBandStructure:
         plist = []
         bandslist = []
         # for each symmetry operation
-
+        
         for i, rotation in enumerate(rotations):
             # for each point
             for j, kpoint in enumerate(self.kpoints):
                 # apply symmetry operation to kpoint
+
+                
                 sympoint_vector = rotation.dot(kpoint)
                 # apply boundary conditions
                 bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector <= -0.5)

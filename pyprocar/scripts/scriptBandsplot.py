@@ -50,8 +50,9 @@ def bandsplot(
     show:bool=True,
     savefig:str=None,
     **kwargs,
-):
+    ):
     """
+    The function will plot the band structure.
 
     Parameters
     ----------
@@ -61,7 +62,7 @@ def bandsplot(
         DESCRIPTION. The default is "abinit.out".
     outcar : TYPE, optional
         DESCRIPTION. The default is "OUTCAR".
-         kpoints : TYPE, optional
+    kpoints : TYPE, optional
         DESCRIPTION. The default is "KPOINTS".
     elkin : TYPE, optional
         DESCRIPTION. The default is "elk.in".
@@ -219,7 +220,6 @@ def bandsplot(
 
 
         weights = ebs_plot.ebs.ebs_sum(atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
-            
         if settings.ebs.weighted_color:
             color_weights = weights
         else:

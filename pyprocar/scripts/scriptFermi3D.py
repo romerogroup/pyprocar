@@ -17,9 +17,8 @@ from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
 
 from ..core import FermiSurface3D
 from ..splash import welcome
-from ..utilsprocar import UtilsProcar
+from ..utils import UtilsProcar
 from ..io.procarparser import ProcarParser
-from ..procarselect import ProcarSelect
 from ..io.lobsterparser import LobsterFermiParser
 from ..io.abinitparser import AbinitParser
 from .. import io
@@ -80,8 +79,10 @@ def fermi3D(
     widget:bool=False,
     show:bool=True,
     repair:bool=True,
-):
+    ):
     """
+    This function plots the fermi surface
+
     Parameters
     ----------
     procar : str, optional (default ``'PROCAR'``)
@@ -131,7 +132,7 @@ def fermi3D(
         recomend using qualitative colormaps, as this function will
         automatically choose colors from the colormaps.
         e.g. ``colors=['red', 'blue', 'green']``
-            ``colors=[(1,0,0,1), (0,1,0,1), (0,0,1,1)]``
+        ``colors=[(1,0,0,1), (0,1,0,1), (0,0,1,1)]``
     background_color : str, optional (default ``white``)
         Defines the background color.
         e.g. ``background_color='gray'``
@@ -157,6 +158,7 @@ def fermi3D(
         e.g. for SrVO\ :sub:`3`\  we are choosing only the oxygen
         atoms. ``atoms=[2, 3, 4]``, keep in mind that python counting
         starts from zero, for a **POSCAR** similar to following::
+
             Sr1 V1 O3
             1.0
             3.900891 0.000000 0.000000
@@ -170,6 +172,7 @@ def fermi3D(
             0.000000 0.500000 0.000000 O  atom 2
             0.000000 0.000000 0.500000 O  atom 3
             0.500000 0.000000 0.000000 O  atom 4
+
         if nothing is specified this parameter will consider all the
         atoms present.
     orbitals : list int, optional
@@ -179,12 +182,14 @@ def fermi3D(
         numpy array) containing the Orbital indices. Orbitals indices
         has to be order of the input files of DFT package. The
         following table represents the indecies for different orbitals
-        in **VASP**.
+        in **VASP**.::
+
             +-----+-----+----+----+-----+-----+-----+-----+-------+
             |  s  | py  | pz | px | dxy | dyz | dz2 | dxz | x2-y2 |
             +-----+-----+----+----+-----+-----+-----+-----+-------+
             |  0  |  1  |  2 |  3 |  4  |  5  |  6  |  7  |   8   |
             +-----+-----+----+----+-----+-----+-----+-----+-------+
+
         ``orbitals`` is only relavent in ``mode='parametric'``
         e.g. ``orbitals=[1,2,3]`` will only select the p orbitals
         while ``orbitals=[4,5,6,7,8]`` will select the d orbitals.
@@ -299,16 +304,18 @@ def fermi3D(
         one chooses to use the ``save2d``, ``savegif`` or ``savemp4``
         option.
         e.g. ``camera_pos=[0.5, 1, -1]``
-    widget : , optional
-        .. todo::
+    widget : bool, optional
+        boolean argument to use
     show : bool, optional (default ``True``)
         If set to ``False`` it will not show the 3D plot.
+
     Returns
     -------
     s : pyprocar surface object
         The whole fermi surface added bands
     surfaces : list pyprocar surface objects
         list of fermi surface of each band
+
     """
 
     welcome()

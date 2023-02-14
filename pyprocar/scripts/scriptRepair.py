@@ -1,4 +1,4 @@
-from ..utilsprocar import UtilsProcar
+from ..utils import UtilsProcar
 from ..splash import welcome
 
 

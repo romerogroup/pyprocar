@@ -11,7 +11,16 @@ from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
 
 
 class Outcar(collections.abc.Mapping):
+    """
+    A class to parse the OUTCAR
+
+    Parameters
+    ----------
+    filename : str, optional
+        The OURCAR filename, by default "OUTCAR"
+    """
     def __init__(self, filename="OUTCAR"):
+        
         self.variables = {}
         self.filename = filename
 
@@ -22,24 +31,29 @@ class Outcar(collections.abc.Mapping):
 
     @property
     def efermi(self):
-        """Just finds all E-fermi fields in the outcar file and keeps the
+        """
+        Just finds all E-fermi fields in the outcar file and keeps the
         last one (if more than one found).
 
-        Args:
-            -filename: the file name of the outcar to be read
-
+        Returns
+        -------
+        fermi
+            the fermi energy
         """
         return float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", self.file_str)[-1])
 
     @property
     def reciprocal_lattice(self):
-        """Finds and return the reciprocal lattice vectors, if more than
+        """
+        Finds and return the reciprocal lattice vectors, if more than
         one set present, it return just the last one.
 
-        Args:
-            -filename: the name of the outcar file  to be read
-
+        Returns
+        -------
+        np.ndaaray
+            return the reciprocal lattice vectors
         """
+
         reciprocal_lattice = re.findall(
             r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", self.file_str
         )[-1]
@@ -52,14 +66,16 @@ class Outcar(collections.abc.Mapping):
 
     @property
     def rotations(self):
-        """Finds the point symmetry operations included in the OUTCAR file
+        """
+        Finds the point symmetry operations included in the OUTCAR file
         and returns them in matrix form.
 
-        Args:
-            -filename: the file name of the outcar file to be read
-            -reciprocal_lattice: reciprocal lattice of the structure
-
+        Returns
+        -------
+        np.ndarray
+            The rotation matrices
         """
+
 
         with open(self.filename) as f:
             txt = f.readlines()
@@ -153,13 +169,23 @@ class Outcar(collections.abc.Mapping):
 
 
 class Poscar(collections.abc.Mapping):
+    """
+    A class to parse the POSCAR file
+
+    Parameters
+    ----------
+    filename : str, optional
+        The POSCAR filename, by default "POSCAR"
+    """
     def __init__(self, filename="POSCAR"):
+        
         self.variables = {}
         self.filename = filename
         atoms, coordinates, lattice = self._parse_poscar()
         self.structure = Structure(
             atoms=atoms, fractional_coordinates=coordinates, lattice=lattice
         )
+
 
     def _parse_poscar(self):
         """
@@ -238,7 +264,19 @@ class Poscar(collections.abc.Mapping):
 
 
 class Kpoints(collections.abc.Mapping):
+    """
+    A class to parse the KPOINTS file
+
+    Parameters
+    ----------
+    filename : str, optional
+        The KPOINTS filename, by default "KPOINTS"
+    has_time_reversal : bool, optional
+        A boolean vlaue to determine if the kpioints has time reversal symmetry, 
+        by default True
+    """
     def __init__(self, filename="KPOINTS", has_time_reversal=True):
+        
         self.variables = {}
         self.filename = filename
         self.file_str = None
@@ -259,7 +297,10 @@ class Kpoints(collections.abc.Mapping):
             has_time_reversal=has_time_reversal,
         )
 
+
     def _parse_kpoints(self):
+        """A helper method to parse the KOINTS file
+        """
         with open(self.filename, "r") as rf:
             self.comment = rf.readline()
             grids = rf.readline()
@@ -386,16 +427,37 @@ class Kpoints(collections.abc.Mapping):
 
 
 class Procar(collections.abc.Mapping):
+    """
+    A class to parse the PROCAR file
+
+    Parameters
+    ----------
+    filename : str, optional
+        The PROCAR filename, by default "PROCAR"
+    structure : pyprocar.core.Structure, optional
+        The structure of the calculation, by default None
+    reciprocal_lattice : np.ndarray, optional
+        The reciprocal lattice matrix, by default None
+    kpath :  pyprocar.core.KPath, optional
+        The pyprocar.core.KPath object, by default None
+    kpoints : np.ndarray, optional
+        The kpoints, by default None
+    efermi : float, optional
+        The fermi energy, by default None
+    interpolation_factor : int, optional
+        The interpolation factor, by default 1
+        """
     def __init__(
         self,
-        filename="PROCAR",
-        structure=None,
-        reciprocal_lattice=None,
-        kpath=None,
-        kpoints=None,
-        efermi=None,
-        interpolation_factor=1,
+        filename:str="PROCAR",
+        structure:Structure=None,
+        reciprocal_lattice:np.ndarray=None,
+        kpath:KPath=None,
+        kpoints:np.ndarray=None,
+        efermi:float=None,
+        interpolation_factor:float=1,
     ):
+        
         self.variables = {}
         self.filename = filename
         self.meta_lines = []
@@ -460,12 +522,13 @@ class Procar(collections.abc.Mapping):
             projected_phase=self._spd2projected(self.spd_phase),
             labels=self.orbitalNames[:-1],
             reciprocal_lattice=reciprocal_lattice,
-            interpolation_factor=interpolation_factor,
+            # interpolation_factor=interpolation_factor,
             shifted_to_efermi=False,
         )
 
     def repair(self):
-        """It Tries to repair some stupid problems due the stupid fixed
+        """
+        It Tries to repair some stupid problems due the stupid fixed
         format of the stupid fortran.
 
         Up to now it only separes k-points as the following:
@@ -475,6 +538,7 @@ class Procar(collections.abc.Mapping):
 
         But as I found new stupid errors they should be fixed here.
         """
+        
 
         print("PROCAR needs repairing")
         # Fixing bands issues (when there are more than 999 bands)
@@ -546,6 +610,9 @@ class Procar(collections.abc.Mapping):
         return in_file
 
     def _read(self):
+        """
+        Helper method to parse the procar file
+        """
 
         rf = self._open_file()
         # Line 1: PROCAR lm decomposed
@@ -587,7 +654,8 @@ class Procar(collections.abc.Mapping):
         return
 
     def _read_kpoints(self):
-        """Reads the k-point headers. A typical k-point line is:
+        """
+        Reads the k-point headers. A typical k-point line is:
         k-point    1 :    0.00000000 0.00000000 0.00000000  weight = 0.00003704\n
         fills self.kpoint[kpointsCount][3]
         The weights are discarded (are they useful?)
@@ -653,6 +721,13 @@ class Procar(collections.abc.Mapping):
 
     @property
     def kpoints_cartesian(self):
+        """The kpoints in cartesian coordinates
+
+        Returns
+        -------
+        np.ndarray
+            The kpoints in cartesian coordinates
+        """
         if self.reciprocal_lattice is not None:
             return np.dot(self.kpoints, self.reciprocal_lattice)
         else:
@@ -663,15 +738,24 @@ class Procar(collections.abc.Mapping):
 
     @property
     def kpoints_reduced(self):
+        """The kpoints in reduced coordinates
+
+        Returns
+        -------
+        np.ndarray
+            The kpoints in reduced coordinates
+        """
         return self.kpoints
 
     def _read_bands(self):
-        """Reads the bands header. A typical bands is:
+        """
+        Reads the bands header. A typical bands is:
         band   1 # energy   -7.11986315 # occ.  1.00000000
 
         fills self.bands[kpointsCount][bandsCount]
 
-        The occupation numbers are discarded (are they useful?)"""
+        The occupation numbers are discarded (are they useful?)
+        """
         if not self.file_str:
             print("You should invoke `procar.read()` instead. Returning")
             return
@@ -728,7 +812,9 @@ class Procar(collections.abc.Mapping):
         return
 
     def _read_orbitals(self):
-        """Reads all the spd-projected data. A typical/expected block is:
+        """
+        Reads all the spd-projected data. A typical/expected block is:
+
             ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot
             1  0.079  0.000  0.001  0.000  0.000  0.000  0.000  0.000  0.000  0.079
             2  0.152  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.152
@@ -870,7 +956,9 @@ class Procar(collections.abc.Mapping):
         return
 
     def _read_phases(self):
-
+        """
+        Helped method to parse the projection phases
+        """
         if self.ionsCount == 1:
             self.spd_phase = re.findall(
                 r"^(\s*1\s+.+)$", self.file_str, re.MULTILINE)
@@ -979,6 +1067,23 @@ class Procar(collections.abc.Mapping):
         return
 
     def _spd2projected(self, spd, nprinciples=1):
+        """
+        Helpermethod to project the spd array to the projected array 
+        which will be fed into pyprocar.coreElectronicBandStructure object
+
+        Parameters
+        ----------
+        spd : np.ndarray
+            The spd array from the earlier parse. This has a structure simlar to the PROCAR output in vasp
+            Has the shape [n_kpoints,n_band,n_spins,n-orbital,n_atoms]
+        nprinciples : int, optional
+            The prinicipal quantum numbers, by default 1
+
+        Returns
+        -------
+        np.ndarray
+            The projected array. Has the shape [n_kpoints,n_band,n_atom,n_principal,n-orbital,n_spin]
+        """
         # This function is for VASP
         # non-pol and colinear
         # spd is formed as (nkpoints,nbands, nspin, natom+1, norbital+2)
@@ -1027,7 +1132,26 @@ class Procar(collections.abc.Mapping):
 
         return projected
 
-    def symmetrize(self, symprec=1e-5, outcar=None, structure=None, spglib=True):
+    def symmetrize(self, symprec:float=1e-5,
+                        outcar:str=None, 
+                        structure=None, 
+                        spglib:bool=True):
+        """
+        A method that will symmetrize the kpoints, projections, and bands 
+        of the calculation
+
+        Parameters
+        ----------
+        symprec : float, optional
+            The symmetry precision, by default 1e-5
+        outcar : str, optional
+            The OUTCAR filename, by default None
+        structure : pyprocar.core.Structure, optional
+            The structure of the calculation, by default None
+        spglib : bool, optional
+            Boolean value to use spglib for the symmetrization, by default True
+        """
+        
         if outcar is not None:
             with open(outcar) as f:
                 txt = f.readlines()
@@ -1130,10 +1254,24 @@ class Procar(collections.abc.Mapping):
 
 
 class VaspXML(collections.abc.Mapping):
-    """contains."""
+    """A class to parse the vasprun xml file
 
-    def __init__(self, filename="vasprun.xml", dos_interpolation_factor=None):
+    Parameters
+    ----------
+    filename : str, optional
+        The vasprun.xml filename, by default "vasprun.xml"
+    dos_interpolation_factor : float, optional
+        The interpolation factor, by default None
 
+    Raises
+    ------
+    ValueError
+        File not found
+    """
+    def __init__(self, 
+                filename="vasprun.xml", 
+                dos_interpolation_factor:float=None):
+        
         self.variables = {}
         self.dos_interpolation_factor = dos_interpolation_factor
 
@@ -1169,14 +1307,21 @@ class VaspXML(collections.abc.Mapping):
 
         Returns
         -------
-        TYPE
-            DESCRIPTION.
+        dict
+            Returns a dict of information about the calculation.
 
         """
         return self.parse_vasprun(self.filename)
 
     @property
     def bands(self):
+        """ Parses the electronic bands
+
+        Returns
+        -------
+        np.ndarray
+            The electronic bands
+        """
         spins = list(self.data["general"]["eigenvalues"]
                      ["array"]["data"].keys())
         kpoints_list = list(
@@ -1209,6 +1354,13 @@ class VaspXML(collections.abc.Mapping):
 
     @property
     def bands_projected(self):
+        """Parse the band projections
+
+        Returns
+        -------
+        np.ndarray
+            The band projections
+        """
         # projected[iatom][ikpoint][iband][iprincipal][iorbital][ispin]
         labels = self.data["general"]["projected"]["array"]["info"]
         spins = list(self.data["general"]["projected"]["array"]["data"].keys())
@@ -1254,7 +1406,13 @@ class VaspXML(collections.abc.Mapping):
         return bands_projected
 
     def _get_dos_total(self):
+        """A helper method to get the total density of states 
 
+        Returns
+        -------
+        tuple
+            Returns the dos_total info as a dict and the a list of labels
+        """
         spins = list(self.data["general"]["dos"]
                      ["total"]["array"]["data"].keys())
         energies = np.array(
@@ -1270,7 +1428,18 @@ class VaspXML(collections.abc.Mapping):
         return dos_total, list(dos_total.keys())
 
     def _get_dos_projected(self, atoms=[]):
+        """A helper method to get the projected density of states 
 
+        Parameters
+        ----------
+        atoms : list, optional
+            List of atoms, by default []
+
+        Returns
+        -------
+        _type_
+            Returns the dos_total info as a dict and the a list of labels
+        """
         if len(atoms) == 0:
             atoms = np.arange(self.initial_structure.natoms)
 
@@ -1311,6 +1480,13 @@ class VaspXML(collections.abc.Mapping):
 
     @property
     def dos(self):
+        """The pyprocar.core.DensityOfStates Object
+
+        Returns
+        -------
+        pyprocar.core.DensityOfStates
+            Returns the pyprocar.core.DensityOfStates for the calculation
+        """
         energies = self.dos_total["energies"]
         total = []
         for ispin in self.dos_total:
@@ -1327,15 +1503,27 @@ class VaspXML(collections.abc.Mapping):
 
     @property
     def dos_to_dict(self):
-        """
-        the complete density (total,projected) of states as a python dictionary
-        """
-        return {"total": self._get_dos_total(), "projected": self._get_dos_projected()}
+        """ 
+        The complete density (total,projected) of states as a python dictionary
 
-    @property
-    def dos_total(self):
+        Returns
+        -------
+        dict
+             The complete density (total,projected) of states as a python dictionary
+        """
+
+        return {"total": self._get_dos_total(), "projected": self._get_dos_projected()}
         """
         Returns the total density of states as a pychemia.visual.DensityOfSates object
+        """
+    @property
+    def dos_total(self):
+        """Returns the total dos dict
+
+        Returns
+        -------
+        dict
+            Returns the total dos dict
         """
         dos_total, labels = self._get_dos_total()
         dos_total["energies"] -= self.fermi
@@ -1347,6 +1535,12 @@ class VaspXML(collections.abc.Mapping):
         """
         Returns the projected DOS as a multi-dimentional array, to be used in the
         pyprocar.core.dos object
+
+        Returns
+        -------
+        np.ndarray
+            Returns the projected DOS as a multi-dimentional array, to be used in the
+            pyprocar.core.dos object
         """
         ret = []
         dos_projected, info = self._get_dos_projected()
@@ -1373,6 +1567,12 @@ class VaspXML(collections.abc.Mapping):
     def kpoints(self):
         """
         Returns the kpoints used in the calculation in form of a pychemia.core.KPoints object
+        
+        Returns
+        -------
+        np.ndarray
+            Returns the kpoints used in the calculation 
+            in form of a pychemia.core.KPoints object
         """
 
         if self.data["kpoints_info"]["mode"] == "listgenerated":
@@ -1390,7 +1590,13 @@ class VaspXML(collections.abc.Mapping):
     @property
     def kpoints_list(self):
         """
-        Returns the list of kpoints and weights used in the calculation in form of a pychemia.core.KPoints object
+        Returns the dict of kpoints and weights used in the calculation in form of a pychemia.core.KPoints object
+        
+        Returns
+        -------
+        dict
+            Returns a dict of kpoints information
+            in form of a pychemia.core.KPoints object
         """
         return dict(
             mode="reduced",
@@ -1402,6 +1608,11 @@ class VaspXML(collections.abc.Mapping):
     def incar(self):
         """
         Returns the incar parameters used in the calculation as pychemia.code.vasp.VaspIncar object
+        
+        Returns
+        -------
+        Description
+            Returns the incar parameters
         """
         return self.data["incar"]
 
