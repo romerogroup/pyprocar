@@ -222,23 +222,26 @@ Spin Texture single color
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-72
+.. GENERATED FROM PYTHON SOURCE LINES 67-73
 
 Selecting band indices
 +++++++++++++++++++++++++++++++++++++++
 
 You can specify specfic bands with the band indices keyword. 
 band_indices will be a list of list that contain band indices. Below I only plot bands 14,15
+Also you can specify the colors of the bands as well with band_colors
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-80
+.. GENERATED FROM PYTHON SOURCE LINES 73-83
 
 .. code-block:: default
 
 
     band_indices = [[14,15]]
+    band_colors = [['blue','red']]
     pyprocar.fermi2D(code = 'qe', 
                    mode='plain_bands',
                    band_indices = band_indices,
+                   band_colors=band_colors,
                    spin_texture=True,
                    arrow_size =15,
                    arrow_density=10,
@@ -304,7 +307,7 @@ band_indices will be a list of list that contain band indices. Below I only plot
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.443 seconds)
+   **Total running time of the script:** ( 0 minutes  15.916 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

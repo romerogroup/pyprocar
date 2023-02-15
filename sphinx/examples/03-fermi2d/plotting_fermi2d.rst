@@ -302,26 +302,25 @@ Does not work. Contact developers
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-84
+.. GENERATED FROM PYTHON SOURCE LINES 79-85
 
 Selecting band indices
 +++++++++++++++++++++++++++++++++++++++
 
 You can specify specfic bands with the band indices keyword. 
 band_indices will be a list of list that contain band indices to plot for a given spin. Below I only plot bands 6 and 7 for spin 0
+Also you can specify the colors of the bands as well with band_colors
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-93
+.. GENERATED FROM PYTHON SOURCE LINES 85-92
 
 .. code-block:: default
 
-
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0,1]
-    band_indices = [[6,7,],[]]
+    band_indices = [[6,7],[]]
+    band_colors = [['blue','navy'], []]
     pyprocar.fermi2D(code = 'qe', 
                    mode='plain_bands',
                    band_indices = band_indices,
+                   band_colors=band_colors,
                    add_legend=True,
                    dirname=data_dir)
 
@@ -386,7 +385,7 @@ band_indices will be a list of list that contain band indices to plot for a give
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  34.683 seconds)
+   **Total running time of the script:** ( 0 minutes  32.985 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

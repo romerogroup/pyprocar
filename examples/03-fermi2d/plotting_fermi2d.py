@@ -81,13 +81,12 @@ pyprocar.fermi2D(code = 'qe',
 #
 # You can specify specfic bands with the band indices keyword. 
 # band_indices will be a list of list that contain band indices to plot for a given spin. Below I only plot bands 6 and 7 for spin 0
-
-atoms=[0]
-orbitals=[4,5,6,7,8]
-spins=[0,1]
-band_indices = [[6,7,],[]]
+# Also you can specify the colors of the bands as well with band_colors
+band_indices = [[6,7],[]]
+band_colors = [['blue','navy'], []]
 pyprocar.fermi2D(code = 'qe', 
                mode='plain_bands',
                band_indices = band_indices,
+               band_colors=band_colors,
                add_legend=True,
                dirname=data_dir)

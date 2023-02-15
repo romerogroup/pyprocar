@@ -34,10 +34,13 @@ class FermiSurface:
             The cmap to use. default = 'jet
         band_indices : List[List]
             A list of list that contains band indices for a given spin
+        band_colors : List[List]
+            A list of list that contains colors for the band index 
+            corresponding the band_indices for a given spin
         loglevel : _type_, optional
             The verbosity level., by default logging.WARNING
     """
-    def __init__(self, kpoints, bands, spd, band_indices:List[List]=None, cmap='jet', loglevel=logging.WARNING):
+    def __init__(self, kpoints, bands, spd, band_indices:List[List]=None, band_colors:List[List]=None, cmap='jet', loglevel=logging.WARNING):
         
         
         # Since some time ago Kpoints are in cartesian coords (ready to use)
@@ -45,6 +48,7 @@ class FermiSurface:
         self.bands = bands
         self.spd = spd
         self.band_indices = band_indices
+        self.band_colors = band_colors
         self.cmap = cmap
         self.useful = None  # List of useful bands (filled in findEnergy)
         self.energy = None
@@ -195,7 +199,11 @@ class FermiSurface:
             n_bands = bands.shape[0]
             norm = mpcolors.Normalize(vmin=0, vmax=1)
             cmap = cm.get_cmap(self.cmap)
-            solid_color_surface = np.arange(n_bands) / n_bands
+            if i_spin == 1:
+                factor = 0.25
+            else:
+                factor = 0
+            solid_color_surface = np.arange(n_bands) / n_bands + factor
             band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(-1, 4)
             plots = []
             for i_band,band_energies in enumerate(bnew):
@@ -205,10 +213,14 @@ class FermiSurface:
                     segments = np.concatenate([points[:-1], points[1:]], axis=1)
                     if mode=='plain':
                         lc = LineCollection(segments, colors=settings.ebs.color[i_spin], linestyle=settings.ebs.linestyle[i_spin])
+                        lc.set_linestyle(settings.ebs.linestyle[i_spin])
                     if mode=='plain_bands':
-                        c = band_colors[i_band]
-                        lc = LineCollection(segments, colors=c, linestyle=settings.ebs.linestyle[i_spin])
-                        lc.set_array(c)
+                        if self.band_colors is None:
+                            c = band_colors[i_band]
+                        else:
+                            c = self.band_colors[i_spin][i_band]
+                        lc = LineCollection(segments, colors=c)
+                        # lc.set_array(c)
                         if i_contour == 0:
                             if n_spins == 2:
                                 label=f'Band {band_labels[i_band]}- Spin - {i_spin}'
@@ -324,7 +336,7 @@ class FermiSurface:
         ]
         plt.axis("equal")
 
-        for (contour, spinX, spinY, spinZ) in zip(cont, sx, sy, sz):
+        for i_band, (contour, spinX, spinY, spinZ) in enumerate(zip(cont, sx, sy, sz)):
             # The previous interp. yields the level curves, nothing more is
             # useful from there
             paths = contour.collections[0].get_paths()
@@ -362,7 +374,11 @@ class FermiSurface:
                 )
 
             else:
-                if arrow_color is not None:
+                if arrow_color is not None or self.band_colors is not None:
+                    if self.band_colors is not None:
+                        c = self.band_colors[0][i_band]
+                    if arrow_color is not None:
+                        c = arrow_color
                     plt.quiver(
                         points[::arrow_density, 0],  # Arrow position x-component
                         points[::arrow_density, 1],  # Arrow position y-component
@@ -371,7 +387,7 @@ class FermiSurface:
                         scale=scale,
                         scale_units=scale_units,
                         angles=angles,
-                        color=arrow_color
+                        color=c
                     )
                 else:
                     if arrow_projection == 'z':

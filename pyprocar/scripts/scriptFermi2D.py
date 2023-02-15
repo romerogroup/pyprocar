@@ -24,7 +24,8 @@ def fermi2D(
     code:str,
     dirname:str,
     mode:str='plain',
-    band_indices:List[int]=None,
+    band_indices:List[List]=None,
+    band_colors:List[List]=None,
     lobster:bool=False,
     spins:List[int]=None,
     atoms:List[int]=None,
@@ -61,6 +62,9 @@ def fermi2D(
         A boolean value to determine to use lobster, by default False
     band_indices : List[List]
         A list of list that contains band indices for a given spin
+    band_colors : List[List]
+            A list of list that contains colors for the band index 
+            corresponding the band_indices for a given spin
     spins : List[int], optional
         List of spins, by default [0]
     atoms : List[int], optional
@@ -227,7 +231,7 @@ def fermi2D(
         symm.general_rotation(rotation[0], rotation[1:])
         # symm.MirrorX()
         symm.rot_symmetry_z(rot_symm)
-    fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap,  band_indices=band_indices)
+    fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap,  band_indices=band_indices, band_colors=band_colors)
     fs.find_energy(energy)
 
     if not spin_texture:
