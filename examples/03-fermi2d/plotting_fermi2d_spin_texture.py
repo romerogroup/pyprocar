@@ -61,3 +61,20 @@ pyprocar.fermi2D(code = 'qe',
                arrow_size =15,
                arrow_density=10)
 
+
+
+###############################################################################
+# Selecting band indices
+# +++++++++++++++++++++++++++++++++++++++
+#
+# You can specify specfic bands with the band indices keyword. 
+# band_indices will be a list of list that contain band indices. Below I only plot bands 14,15
+
+band_indices = [[14,15]]
+pyprocar.fermi2D(code = 'qe', 
+               mode='plain_bands',
+               band_indices = band_indices,
+               spin_texture=True,
+               arrow_size =15,
+               arrow_density=10,
+               dirname=data_dir)

@@ -117,6 +117,7 @@ Plain mode
     - Freddy Farah
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
     spin comp.      :  None
@@ -127,9 +128,9 @@ Plain mode
     save figure     :  None
     spin_texture    :  False
     no_arrows       :  False
-    <class 'xml.etree.ElementTree.Element'>
-    (400, 24, 2)
-    (400, 24, 2)
+    _____________________________________________________
+    Useful band indices for spin-0 : [6 7 8 9]
+    Useful band indices for spin-1 : [6 7]
 
 
 
@@ -141,7 +142,7 @@ plain_bands mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-55
+.. GENERATED FROM PYTHON SOURCE LINES 48-58
 
 .. code-block:: default
 
@@ -150,6 +151,9 @@ plain_bands mode
                    mode='plain_bands',
                    add_legend=True,
                    dirname=data_dir)
+
+
+
 
 
 
@@ -194,6 +198,7 @@ plain_bands mode
     - Freddy Farah
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
     spin comp.      :  None
@@ -204,14 +209,14 @@ plain_bands mode
     save figure     :  None
     spin_texture    :  False
     no_arrows       :  False
-    <class 'xml.etree.ElementTree.Element'>
-    (400, 24, 2)
-    (400, 24, 2)
+    _____________________________________________________
+    Useful band indices for spin-0 : [6 7 8 9]
+    Useful band indices for spin-1 : [6 7]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-61
+.. GENERATED FROM PYTHON SOURCE LINES 59-64
 
 parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -219,7 +224,7 @@ parametric mode
 Does not work. Contact developers
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-72
+.. GENERATED FROM PYTHON SOURCE LINES 64-78
 
 .. code-block:: default
 
@@ -234,6 +239,9 @@ Does not work. Contact developers
                     spins=spins,
                     dirname=data_dir, 
                     spin_texture=False)
+
+
+
 
 
 
@@ -276,6 +284,7 @@ Does not work. Contact developers
     - Freddy Farah
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    bands           :  None
     atoms           :  [0]
     orbitals        :  [4, 5, 6, 7, 8]
     spin comp.      :  [0, 1]
@@ -286,9 +295,90 @@ Does not work. Contact developers
     save figure     :  None
     spin_texture    :  False
     no_arrows       :  False
-    <class 'xml.etree.ElementTree.Element'>
-    (400, 24, 2)
-    (400, 24, 2)
+    _____________________________________________________
+    Useful band indices for spin-0 : [6 7 8 9]
+    Useful band indices for spin-1 : [6 7]
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 79-84
+
+Selecting band indices
++++++++++++++++++++++++++++++++++++++++
+
+You can specify specfic bands with the band indices keyword. 
+band_indices will be a list of list that contain band indices to plot for a given spin. Below I only plot bands 6 and 7 for spin 0
+
+.. GENERATED FROM PYTHON SOURCE LINES 84-93
+
+.. code-block:: default
+
+
+    atoms=[0]
+    orbitals=[4,5,6,7,8]
+    spins=[0,1]
+    band_indices = [[6,7,],[]]
+    pyprocar.fermi2D(code = 'qe', 
+                   mode='plain_bands',
+                   band_indices = band_indices,
+                   add_legend=True,
+                   dirname=data_dir)
+
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_004.png
+   :alt: plotting fermi2d
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_004.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 5.6.5 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    bands           :  [[6, 7], []]
+    atoms           :  [-1]
+    orbitals        :  [-1]
+    spin comp.      :  None
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  False
+    no_arrows       :  False
+    _____________________________________________________
+    Useful band indices for spin-0 : [6 7 8 9]
+    Useful band indices for spin-1 : [6 7]
 
 
 
@@ -296,7 +386,7 @@ Does not work. Contact developers
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.483 seconds)
+   **Total running time of the script:** ( 0 minutes  34.683 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

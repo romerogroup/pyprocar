@@ -6,6 +6,7 @@ __date__ = "December 01, 2020"
 import sys
 import re
 import logging
+from typing import List
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,16 +30,21 @@ class FermiSurface:
             (n_kpoints, n_bands)
         spd : np.ndarray
             Numpy array with the projections. Expected size (n_kppints,n_bands,n_spins,n_orbitals,n_atoms)
+        cmap : str
+            The cmap to use. default = 'jet
+        band_indices : List[List]
+            A list of list that contains band indices for a given spin
         loglevel : _type_, optional
             The verbosity level., by default logging.WARNING
     """
-    def __init__(self, kpoints, bands, spd, cmap='jet', loglevel=logging.WARNING):
+    def __init__(self, kpoints, bands, spd, band_indices:List[List]=None, cmap='jet', loglevel=logging.WARNING):
         
         
         # Since some time ago Kpoints are in cartesian coords (ready to use)
         self.kpoints = kpoints
         self.bands = bands
         self.spd = spd
+        self.band_indices = band_indices
         self.cmap = cmap
         self.useful = None  # List of useful bands (filled in findEnergy)
         self.energy = None
@@ -82,10 +88,15 @@ class FermiSurface:
         self.energy = energy
         self.log.info("Energy   : " + str(energy))
 
+
+        self.band_indices
+
         # searching for bands crossing the desired energy
         self.useful_bands_by_spins = []
         for i_spin in range(self.bands.shape[2]):
-            indices = np.where( np.logical_and(self.bands[:,:,i_spin].min(axis=0) < energy, self.bands[:,:,i_spin].max(axis=0) > energy))
+            bands = self.bands[:,:, i_spin]
+
+            indices = np.where( np.logical_and(bands.min(axis=0) < energy, bands.max(axis=0) > energy))
             self.useful_bands_by_spins.append(indices[0])
         self.log.info("set of useful bands    : " + str(self.useful_bands_by_spins))
         
@@ -155,15 +166,23 @@ class FermiSurface:
         n_spins = self.bands.shape[2]
         for i_spin in range(n_spins):
             # transpose so bands axis is first
-            bands = self.bands[:,self.useful_bands_by_spins[i_spin],i_spin].transpose()
-            spd = self.spd[:,self.useful_bands_by_spins[i_spin],i_spin].transpose()
-            band_labels = np.unique(self.useful_bands_by_spins[i_spin])
+            if self.band_indices is None:
+                bands = self.bands[:,self.useful_bands_by_spins[i_spin],i_spin].transpose()
+                spd = self.spd[:,self.useful_bands_by_spins[i_spin],i_spin].transpose()
+                band_labels = np.unique(self.useful_bands_by_spins[i_spin])
+            else:
+                bands = self.bands[:,self.band_indices[i_spin], i_spin].transpose()
+                spd = self.spd[:,self.band_indices[i_spin],i_spin].transpose()
+                band_labels = np.unique(self.band_indices[i_spin])
+            
+            if spd.shape[0] == 0:
+                continue
+
+            # Normalizing
             vmin = spd.min()
-        
-            vmax = spd.max()
-            # print("normalizing to : ", (vmin, vmax))
+            vmax = spd.max()            # print("normalizing to : ", (vmin, vmax))
             norm = mpcolors.Normalize(vmin, vmax)
-    
+
             # Interpolating band energies on to new grid
             bnew = []
             for i_band, band in enumerate(bands):
@@ -258,13 +277,20 @@ class FermiSurface:
         # selecting components of K-points
         x, y = self.kpoints[:, 0], self.kpoints[:, 1]
 
+        if self.band_indices is None:
+            bands = self.bands[:,self.useful_bands_by_spins[0],0].transpose()
+            band_labels = np.unique(self.useful_bands_by_spins[0])
+            sx = sx[:,self.useful_bands_by_spins[0]].transpose()
+            sy = sy[:,self.useful_bands_by_spins[0]].transpose()
+            sz = sz[:,self.useful_bands_by_spins[0]].transpose()
+        else:
+            bands = self.bands[:,self.band_indices[0],0].transpose()
 
-        bands = self.bands[:,self.useful_bands_by_spins[0],0].transpose()
+            band_labels = np.unique(self.band_indices[0])
+            sx = sx[:,self.band_indices[0]].transpose()
+            sy = sy[:,self.band_indices[0]].transpose()
+            sz = sz[:,self.band_indices[0]].transpose()
 
-        band_labels = np.unique(self.useful_bands_by_spins[0])
-        sx = sx[:,self.useful_bands_by_spins[0]].transpose()
-        sy = sy[:,self.useful_bands_by_spins[0]].transpose()
-        sz = sz[:,self.useful_bands_by_spins[0]].transpose()
 
         # and new, interpolated component
         xmax, xmin = x.max(), x.min()

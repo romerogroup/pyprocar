@@ -24,6 +24,7 @@ def fermi2D(
     code:str,
     dirname:str,
     mode:str='plain',
+    band_indices:List[int]=None,
     lobster:bool=False,
     spins:List[int]=None,
     atoms:List[int]=None,
@@ -35,7 +36,7 @@ def fermi2D(
     rotation:List[int]=[0, 0, 0, 1],
     savefig:str=None,
     spin_texture:bool=False,
-    arrow_projection:str='sz',
+    arrow_projection:str='z',
     arrow_size:float=None,
     arrow_color:List[int] or str=None,
     arrow_density:float=6,
@@ -58,6 +59,8 @@ def fermi2D(
         This parameter is the directory of the calculation, by default ''
     lobster : bool, optional
         A boolean value to determine to use lobster, by default False
+    band_indices : List[List]
+        A list of list that contains band indices for a given spin
     spins : List[int], optional
         List of spins, by default [0]
     atoms : List[int], optional
@@ -132,6 +135,7 @@ def fermi2D(
         raise RuntimeError("invalid option --translate")
 
     print("dirname         : ", dirname)
+    print("bands           : ", band_indices)
     print("atoms           : ", atoms)
     print("orbitals        : ", orbitals)
     print("spin comp.      : ", spins)
@@ -151,7 +155,10 @@ def fermi2D(
                                             dirname=dirname)
     if spins is None:
         spins = np.arange(parser.ebs.bands.shape[-1])
-
+    # if bands is None:
+    #     bands = np.arange(parser.ebs.bands.shape[1])
+    if energy is None:
+        energy = 0
     ### End of parsing ###
 
     # Selecting kpoints in a constant k_z plane
@@ -159,9 +166,18 @@ def fermi2D(
     kpoints = kpoints[i_kpoints_near_z_0,:][0]
     parser.ebs.bands = parser.ebs.bands[i_kpoints_near_z_0,:][0]
     parser.ebs.projected = parser.ebs.projected[i_kpoints_near_z_0,:][0]
+    print('_____________________________________________________')
+    for i_spin in spins:
+        indices = np.where( np.logical_and(parser.ebs.bands[:,:,i_spin].min(axis=0) < energy, parser.ebs.bands[:,:,i_spin].max(axis=0) > energy))
+        if len(indices) != 0:
+            print(f"Useful band indices for spin-{i_spin} : {indices[0]}")
 
-    if energy is None:
-        energy = 0
+    
+    
+    # parser.ebs.bands = parser.ebs.bands[:,bands,:]
+    # parser.ebs.projected = parser.ebs.projected[:,bands,:,:,:,:]
+
+    
 
     if spin_texture is not True:
         # processing the data
@@ -211,7 +227,7 @@ def fermi2D(
         symm.general_rotation(rotation[0], rotation[1:])
         # symm.MirrorX()
         symm.rot_symmetry_z(rot_symm)
-    fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap)
+    fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap,  band_indices=band_indices)
     fs.find_energy(energy)
 
     if not spin_texture:

@@ -125,9 +125,10 @@ But you can change this by setting arrow_projection to one of the following
     - Freddy Farah
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
-    spin comp.      :  [0]
+    spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
     origin (trasl.) :  [0, 0, 0]
@@ -135,7 +136,8 @@ But you can change this by setting arrow_projection to one of the following
     save figure     :  None
     spin_texture    :  True
     no_arrows       :  False
-    <class 'xml.etree.ElementTree.Element'>
+    _____________________________________________________
+    Useful band indices for spin-0 : [14 15 16 17]
 
 
 
@@ -146,7 +148,7 @@ Spin Texture single color
 +++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-64
+.. GENERATED FROM PYTHON SOURCE LINES 55-66
 
 .. code-block:: default
 
@@ -158,6 +160,8 @@ Spin Texture single color
                    arrow_color = 'blue',
                    arrow_size =15,
                    arrow_density=10)
+
+
 
 
 
@@ -201,9 +205,10 @@ Spin Texture single color
     - Freddy Farah
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
-    spin comp.      :  [0]
+    spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
     origin (trasl.) :  [0, 0, 0]
@@ -211,7 +216,87 @@ Spin Texture single color
     save figure     :  None
     spin_texture    :  True
     no_arrows       :  False
-    <class 'xml.etree.ElementTree.Element'>
+    _____________________________________________________
+    Useful band indices for spin-0 : [14 15 16 17]
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 67-72
+
+Selecting band indices
++++++++++++++++++++++++++++++++++++++++
+
+You can specify specfic bands with the band indices keyword. 
+band_indices will be a list of list that contain band indices. Below I only plot bands 14,15
+
+.. GENERATED FROM PYTHON SOURCE LINES 72-80
+
+.. code-block:: default
+
+
+    band_indices = [[14,15]]
+    pyprocar.fermi2D(code = 'qe', 
+                   mode='plain_bands',
+                   band_indices = band_indices,
+                   spin_texture=True,
+                   arrow_size =15,
+                   arrow_density=10,
+                   dirname=data_dir)
+
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_spin_texture_003.png
+   :alt: plotting fermi2d spin texture
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plotting_fermi2d_spin_texture_003.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 5.6.5 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    bands           :  [[14, 15]]
+    atoms           :  [-1]
+    orbitals        :  [-1]
+    spin comp.      :  None
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  True
+    no_arrows       :  False
+    _____________________________________________________
+    Useful band indices for spin-0 : [14 15 16 17]
 
 
 
@@ -219,7 +304,7 @@ Spin Texture single color
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.869 seconds)
+   **Total running time of the script:** ( 0 minutes  14.443 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:
