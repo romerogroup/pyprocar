@@ -25,7 +25,7 @@ def kpath(
     ----------
 
     infile : str, optional
-
+    
     outfile : str, optional
 
     grid_size : int, optional

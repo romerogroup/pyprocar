@@ -21,13 +21,7 @@ from ..utils.defaults import settings
 
 def bandsplot_2d(
     code="vasp",
-    procar:str="PROCAR",
-    poscar:str="POSCAR",
-    outcar:str="OUTCAR",
-    abinit_output:str="abinit.out",
-    elkin:str="elk.in",
     dirname:str=None,
-    kpoints:np.ndarray=None,
     lobster:bool=False,
     mode:str="plain",
     spins:List[int]=None,
@@ -49,82 +43,55 @@ def bandsplot_2d(
     show:bool=True,
     savefig:str=None,
     **kwargs,
-):
-    """
+    ):
+    """A function to plot the 2d bandstructure
 
     Parameters
     ----------
-    procar : TYPE, optional
-        DESCRIPTION. The default is "PROCAR".
-    abinit_output : TYPE, optional
-        DESCRIPTION. The default is "abinit.out".
-    outcar : TYPE, optional
-        DESCRIPTION. The default is "OUTCAR".
-         kpoints : TYPE, optional
-        DESCRIPTION. The default is "KPOINTS".
-    elkin : TYPE, optional
-        DESCRIPTION. The default is "elk.in".
-    mode : TYPE, optional
-        DESCRIPTION. The default is "plain".
-    spin_mode : TYPE, optional
-        plain, magnetization, density, "spin_up", "spin_down", "both", "sx",
-        "sy", "sz", "spin_texture"
-        DESCRIPTION. The default is "plain".
-    spins : TYPE, optional
-        DESCRIPTION.
-    atoms : TYPE, optional
-        DESCRIPTION. The default is None.
-    orbitals : TYPE, optional
-        DESCRIPTION. The default is None.
-    fermi : TYPE, optional
-        DESCRIPTION. The default is None.
-    mask : TYPE, optional
-        DESCRIPTION. The default is None.
-    colors : TYPE, optional
-        DESCRIPTION.
-    cmap : TYPE, optional
-        DESCRIPTION. The default is "jet".
-    marker : TYPE, optional
-        DESCRIPTION. The default is "o".
-    markersize : TYPE, optional
-        DESCRIPTION. The default is 0.02.
-    linewidth : TYPE, optional
-        DESCRIPTION. The default is 1.
-    vmax : TYPE, optional
-        DESCRIPTION. The default is None.
-    vmin : TYPE, optional
-        DESCRIPTION. The default is None.
-    grid : TYPE, optional
-        DESCRIPTION. The default is False.
-    kticks : TYPE, optional
-        DESCRIPTION. The default is None.
-    knames : TYPE, optional
-        DESCRIPTION. The default is None.
-    elimit : TYPE, optional
-        DESCRIPTION. The default is None.
-    ax : TYPE, optional
-        DESCRIPTION. The default is None.
-    show : TYPE, optional
-        DESCRIPTION. The default is True.
-    savefig : TYPE, optional
-        DESCRIPTION. The default is None.
-    plot_color_bar : TYPE, optional
-        DESCRIPTION. The default is True.
-    title : TYPE, optional
-        DESCRIPTION. The default is None.
-    kdirect : TYPE, optional
-        DESCRIPTION. The default is True.
-    code : TYPE, optional
-        DESCRIPTION. The default is "vasp".
-    lobstercode : TYPE, optional
-        DESCRIPTION. The default is "qe".
-    verbose : TYPE, optional
-        DESCRIPTION. The default is True.
-
-    Returns
-    -------
-    None.
-
+    code : str, optional
+        The code name, by default "vasp"
+    dirname : str, optional
+        The directory name where the calculation is, by default None
+    lobster : bool, optional
+        Boolean if this is a lobster calculation, by default False
+    mode : str, optional
+        String for mode type, by default "plain"
+    spins : List[int], optional
+        A list of spins, by default None
+    atoms : List[int], optional
+        A list of atoms, by default None
+    orbitals : List[int], optional
+        A list of orbitals, by default None
+    items : dict, optional
+        A dictionary where the keys are the atoms and the values a list of orbitals , by default {}
+    fermi : float, optional
+        Ther fermi energy, by default None
+    interpolation_factor : int, optional
+        The interpolation factor, by default 1
+    interpolation_type : str, optional
+        The interpolation type, by default "cubic"
+    projection_mask : np.ndarray, optional
+        A custom projection mask, by default None
+    vmax : float, optional
+        Value to normalize the minimum projection value., by default None, by default None, by default None
+    vmin : float, optional
+        Value to normalize the maximum projection value., by default None, by default None, by default None
+    kticks : _type_, optional
+        The kitcks, by default None
+    knames : _type_, optional
+        The knames, by default None
+    kdirect : bool, optional
+        _description_, by default True
+    elimit : List[float], optional
+        The energy window, by default None
+    ax : plt.Axes, optional
+        A matplotlib axes objext, by default None
+    title : str, optional
+        String for the title name, by default None
+    show : bool, optional
+        Boolean to show the plot, by default True
+    savefig : str, optional
+        String to save the plot, by default None
     """
 
 
@@ -136,25 +103,17 @@ def bandsplot_2d(
     settings.modify(kwargs)
 
     ebs, kpath, structure, reciprocal_lattice = parse(
-        code, lobster, dirname ,outcar, poscar, procar, kpoints,
-        interpolation_factor, fermi)
-
-
- 
+        code, dirname, lobster, interpolation_factor, fermi)
     
-        
-    return 
+    return None
 
 
 def parse(code:str='vasp',
-          lobster:bool=False,
-          dirname:str="",
-          outcar:str='OUTCAR',
-          poscar:str='PORCAR',
-          procar:str='PROCAR',
-          kpoints:np.ndarray=None,
-          interpolation_factor:int=1,
-          fermi:float=None):
+        dirname:str="",
+        lobster:bool=False,
+        
+        interpolation_factor:int=1,
+        fermi:float=None):
     ebs = None
     kpath = None
     structure = None

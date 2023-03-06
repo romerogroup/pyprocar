@@ -3,6 +3,8 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
+from typing import List
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pylab as plt
@@ -10,32 +12,38 @@ from matplotlib.collections import LineCollection
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 
 from ..utils.defaults import settings
+from ..core import Structure, DensityOfStates
 
 np.seterr(divide="ignore", invalid="ignore")
 
 # TODO add python typing to all of the functions
 # TODO Generalize orientation to remove if statments
+
 class DOSPlot:
-    def __init__(self, dos=None, structure=None, ax=None, **kwargs):
-        """
-        class to plot an electronic band structure.
+    """
+    Class to plot an electronic band structure.
 
-        Parameters
-        ----------
-        dos : object
-            An density of states pyprocar.core.DensityOfStates.
-        structure : object
-            An density of states pyprocar.core.Structure.
-        
-        ax : object, optional
-            A matplotlib Axes object. If provided the plot will be located at that ax.
-            The default is None.
+    Parameters
+    ----------
+    dos : DensityOfStates
+        An density of states pyprocar.core.DensityOfStates.
+    structure : Structure
+        An density of states pyprocar.core.Structure.
+    
+    ax : mpl.axes.Axes, optional
+        A matplotlib Axes object. If provided the plot will be located at that ax.
+        The default is None.
 
-        Returns
-        -------
-        None.
+    Returns
+    -------
+    None.
 
-        """
+    """
+    def __init__(self, 
+                    dos:DensityOfStates=None, 
+                    structure:Structure=None, 
+                    ax:mpl.axes.Axes=None, 
+                    **kwargs):
         settings.modify(kwargs)
 
         self.dos = dos
@@ -58,21 +66,21 @@ class DOSPlot:
             self.fig = plt.gcf()
             self.ax = ax
     
-        return
+        return None
 
 
-    def plot_dos(self,spins=None, orientation = 'horizontal'):
+    def plot_dos(self,
+                spins:List[int]=None, 
+                orientation:str = 'horizontal'):
         """
         Plot the plain density of states.
 
         Parameters
         ----------
-        spins : list, optional
+        spins : list of ints, optional
             A list of the spins to be plotted. The default is None.
         color : string, optional
             Color for the bands. The default is "blue".
-        opacity : float, optional
-            Opacity level between 0.0 and 1.0. The default is 1.0.
 
         Returns
         -------
@@ -111,18 +119,47 @@ class DOSPlot:
             self.handles.append(handle)
 
     def plot_parametric(self,
-                        atoms=None,
-                        orbitals=None,
-                        spins=None,
-                        principal_q_numbers=[-1],
-                        spin_colors=None,
-                        spin_labels=None,
-                        cmap="jet",
-                        vmin=0,
-                        vmax=1,
-                        plot_total=True,
-                        plot_bar=True,
-                        orientation = 'horizontal'):
+                        atoms:List[int]=None,
+                        orbitals:List[int]=None,
+                        spins:List[int]=None,
+                        principal_q_numbers:List[int]=[-1],
+                        spin_colors:List[str] or List[List[float]] =None,
+                        spin_labels:List[str]=None,
+                        cmap:str="jet",
+                        vmin:float=0,
+                        vmax:float=1,
+                        plot_total:bool=True,
+                        plot_bar:bool=True,
+                        orientation:str='horizontal'):
+        """The method will plot the parametric density of states
+
+        Parameters
+        ----------
+        atoms : List[int], optional
+            A list of atoms, by default None
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        principal_q_numbers : List[int], optional
+            A list of principal quantum numbers, by default [-1]
+        spin_colors : List[str] or List[List[float]], optional
+            List of spin colors, by default None
+        spin_labels : List[str], optional
+            A list of spin labels, by default None
+        cmap : str, optional
+            The color map to use, by default "jet"
+        vmin : float, optional
+            Value to normalize the minimum projection value., by default 0
+        vmax : float, optional
+            Value to normalize the maximum projection value., by default 1
+        plot_total : bool, optional
+            Boolean to plot the total dos, by default True
+        plot_bar : bool, optional
+            Boolean to include colorbas, by default True
+        orientation : str, optional
+            String to plot horizontal or vertical plot, by default 'horizontal'
+        """
         if spins is None:
             if self.dos.is_non_collinear:
                 spins = [0,1,2]
@@ -245,18 +282,45 @@ class DOSPlot:
                             )
                     
     def plot_parametric_line(self,
-                             atoms=None,
-                             spins=None,
-                             principal_q_numbers=[-1],
-                             orbitals=None,
-                             spin_colors=None,
-                             spin_labels=None,
-                             vmin=None,
-                             vmax=None,
-                             plot_bar=True,
-                             cmap='jet',
-                             orientation="horizontal",
+                             atoms:List[int]=None,
+                             spins:List[int]=None,
+                             principal_q_numbers:List[int]=[-1],
+                             orbitals:List[int]=None,
+                             spin_colors:List[str] or List[List[float]] =None,
+                             spin_labels:List[str]=None,
+                             vmin:float=None,
+                             vmax:float=None,
+                             plot_bar:bool=True,
+                             cmap:str='jet',
+                             orientation:str="horizontal",
                              ):
+        """A method to plot the parametric line plot
+
+        Parameters
+        ----------
+        atoms : List[int], optional
+            A list of atoms, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        principal_q_numbers : List[int], optional
+            A list of principal quantum numbers, by default [-1]
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spin_colors : List[str] or List[List[float]], optional
+            A list of spins colors, by default None
+        spin_labels : List[str], optional
+            A list of spin labels, by default None
+        vmin : float, optional
+            Value to normalize the minimum projection value., by default None
+        vmax : float, optional
+            Value to normalize the mmaximum projection value., by default None
+        plot_bar : bool, optional
+            Boolean to plot the colorbar, by default True
+        cmap : str, optional
+            The colormap to use, by default 'jet'
+        orientation : str, optional
+            String to plot vertical or horizontal, by default "horizontal"
+        """
 
         if spin_colors is None:
             spin_colors = settings.dos.spin_colors
@@ -341,15 +405,36 @@ class DOSPlot:
 
     def plot_stack_species(
             self,
-            principal_q_numbers=[-1],
-            orbitals=None,
-            spins=None,
-            spin_colors=None,
-            spin_labels = None,
-            colors=None,
-            plot_total=False,
-            orientation="horizontal",
-    ):
+            principal_q_numbers:List[int]=[-1],
+            orbitals:List[int]=None,
+            spins:List[int]=None,
+            spin_colors:List[str] or List[List[float]] =None,
+            spin_labels:List[str] = None,
+            colors:List[str] or List[List[float]] =None,
+            plot_total:bool=False,
+            orientation:str="horizontal",
+        ):
+        """A method to plot the dos with the species contribution stacked on eachother
+
+        Parameters
+        ----------
+        principal_q_numbers : List[int], optional
+            A list of principal quantum numbers, by default [-1]
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        spin_colors : List[str] or List[List[float]], optional
+            A list of spin colors, by default None
+        spin_labels : List[str], optional
+            A list of spin labels, by default None
+        colors : List[str] or List[List[float]], optional
+            A list of colors, by default None
+        plot_total : bool, optional
+            Boolean to plot the total dos, by default False
+        orientation : str, optional
+            String to plot horizontal or vertical plot, by default "horizontal"
+        """
         
         if spin_colors is None:
             spin_colors = settings.dos.spin_colors
@@ -528,15 +613,37 @@ class DOSPlot:
 
 
     def plot_stack_orbitals(self,
-            atoms=None,
-            spins=None,
-            principal_q_numbers=[-1],
-            spin_colors=None,
-            spin_labels = None,
-            colors=None,
-            plot_total = True,
-            orientation="horizontal",
-    ):
+            atoms:List[int]=None,
+            spins:List[int]=None,
+            principal_q_numbers:List[int]=[-1],
+            spin_colors:List[str] or List[List[float]] =None,
+            spin_labels:List[str] = None,
+            colors:List[str] or List[List[float]] =None,
+            plot_total:bool= True,
+            orientation:str="horizontal",
+        ):
+        """A method to plot dos orbitals contribution stacked.
+
+        Parameters
+        ----------
+        atoms : List[int], optional
+            A list of atoms, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        principal_q_numbers : List[int], optional
+            A list of principal quantum numbers, by default [-1]
+        spin_colors : List[str] or List[List[float]], optional
+            A list of spin colors, by default None
+        spin_labels : List[str], optional
+            A list of spin labels, by default None
+        colors : List[str] or List[List[float]], optional
+            A list of colors, by default None
+        plot_total : bool, optional
+            Boolean to plot the total dos, by default True
+        orientation : str, optional
+            String to plot horizontal or vertical, by default "horizontal"
+        """
+
 
         if spin_colors is None:
             spin_colors = settings.dos.spin_colors
@@ -688,19 +795,37 @@ class DOSPlot:
                             -self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.dos.opacity[ispin], 
                             linestyle=settings.dos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.dos.linewidth[ispin],
                         )
-
-
-
             
     def plot_stack(self,
-                    items=None,
-                    spins=None,
-                    spin_colors=None,
-                    spin_labels=None,
-                    colors = None,
-                    plot_total = True,
-                    orientation=None,
-                ):
+                items:dict=None,
+                spins:List[int]=None,
+                spin_colors:List[str] or List[List[float]] =None,
+                spin_labels:List[str]=None,
+                colors:List[str] or List[List[float]] =None,
+                plot_total:bool= True,
+                orientation:str='horizontal',
+        ):
+        """A method to plot dos contributions stacked.
+
+        Parameters
+        ----------
+        items : dict, optional
+            A dictionary where the keys represent the atom and the 
+            values are the orbital contributions to include for that item, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        spin_colors : List[str] or List[List[float]], optional
+            A list of spin colors, by default None
+        spin_labels : List[str], optional
+            A list of spin labels, by default None
+        colors : List[str] or List[List[float]], optional
+            A list of colors, by default None
+        plot_total : bool, optional
+            Boolean to plot the total dos, by default True
+        orientation : str, optional
+            String to plot horizontal or vertical, by default "horizontal"
+        """
+            
         if len(items) is None:
             print("""Please provide the stacking items in which you want
                 to plot, example : {'Sr':[1,2,3],'O':[4,5,6,7,8]}
@@ -911,60 +1036,197 @@ class DOSPlot:
                                 -self.dos.total[ispin, :], self.dos.energies, color= 'black', alpha=settings.dos.opacity[ispin], 
                                 linestyle=settings.dos.linestyle[ispin], label=spin_labels[ispin], linewidth=settings.dos.linewidth[ispin],
                             )
+        return None
 
 
 
-    def set_xticks(self, tick_positions=None, tick_names=None, color="black"):
+    def set_xticks(self, 
+                tick_positions:List[int]=None, 
+                tick_names:List[str]=None):
+        """A method to set the xticks of the plot
+
+        Parameters
+        ----------
+        tick_positions : List[int], optional
+            A list of tick positions, by default None
+        tick_names : List[str], optional
+            A list of tick names, by default None
+
+        """
+
         if tick_positions is not None:
             self.ax.set_xticks(tick_positions)
         if tick_names is not None:
             self.ax.set_xticklabels(tick_names)
-        
-    def set_yticks(self,  tick_positions=None, tick_names=None, color="black"):
+        return None
+    def set_yticks(self,  
+                    tick_positions:List[int]=None, 
+                    tick_name:List[str]=None):
+        """A method to set the yticks of the plot
+
+        Parameters
+        ----------
+        tick_positions : List[int], optional
+            A list of tick positions, by default None
+        tick_names : List[str], optional
+            A list of tick names, by default None
+
+        """
         if tick_positions is not None:
             self.ax.set_xticks(tick_positions)
         if tick_names is not None:
             self.ax.set_xticklabels(tick_names)
+        return None
         
-    def set_xlim(self, interval=None):
+    def set_xlim(self, 
+                interval:List[int]=None):
+        """A method to set the xlim of the plot
+
+        Parameters
+        ----------
+        interval : List[int], optional
+            The x interval, by default None
+        """
         if interval is not None:
             self.ax.set_xlim(interval)
+        return None
 
-    def set_ylim(self, interval=None):
+    def set_ylim(self, 
+                interval:List[int]=None):
+        """A method to set the ylim of the plot
+
+        Parameters
+        ----------
+        interval : List[int], optional
+            The y interval, by default None
+        """
         if interval is not None:
             self.ax.set_ylim(interval)
+        return None
 
-    def set_xlabel(self, label):
+    def set_xlabel(self, label:str):
+        """A method to set the x label
+
+        Parameters
+        ----------
+        label : str
+            The x label name
+
+        Returns
+        -------
+        None
+            None
+        """
         self.ax.set_xlabel(label)
+        return None
 
-    def set_ylabel(self, label):
+    def set_ylabel(self, label:str):
+        """A method to set the y label
+
+        Parameters
+        ----------
+        label : str
+            The y label name
+
+        Returns
+        -------
+        None
+            None
+        """
         self.ax.set_ylabel(label)
     
-    def legend(self, labels=None):
+    def legend(self, 
+                label:List[str]=None):
+        """A method to include the legend
+
+        Parameters
+        ----------
+        label : str
+            The labels for the legend
+
+        Returns
+        -------
+        None
+            None
+        """
         if labels == None:
             labels = self.labels
         self.ax.legend(self.handles, labels)
+        return None
 
-    def draw_fermi(self, orientation = 'horizontal',color="blue", linestyle="dotted", linewidth=1):
+    def draw_fermi(self, 
+                orientation:str='horizontal',
+                color:str="blue", 
+                linestyle:str="dotted", 
+                linewidth:float=1):
+        """A method to draw the fermi surface
+
+        Parameters
+        ----------
+        orientation : str, optional
+            Boolean to plot vertical or horizontal, by default 'horizontal'
+        color : str, optional
+            A color , by default "blue"
+        linestyle : str, optional
+            THe line style, by default "dotted"
+        linewidth : float, optional
+            The linewidth, by default 1
+
+        Returns
+        -------
+        None
+            None
+        """
         if orientation == 'horizontal':
             self.ax.axvline(x=0, color=color, linestyle=linestyle, linewidth=linewidth)
         elif orientation == 'vertical':
             self.ax.axhline(y=0, color=color, linestyle=linestyle, linewidth=linewidth)
-
+        return None
     def grid(self):
+        """A method to include a grid on the plot.
+
+        Returns
+        -------
+        None
+            None
+        """
         self.ax.grid(
             settings.dos.grid,
             which=settings.dos.grid_which,
             color=settings.dos.grid_color,
             linestyle=settings.dos.grid_linestyle,
             linewidth=settings.dos.grid_linewidth)
-           
-    def show(self):
-        plt.show()
+        return None
 
-    def save(self, filename='dos.pdf'):        
+    def show(self):
+        """A method to show the plot
+
+        Returns
+        -------
+        None
+            None
+        """
+        plt.show()
+        return None
+
+    def save(self, filename:str='dos.pdf'
+        ):
+        """A method to save the plot
+
+        Parameters
+        ----------
+        filename : str, optional
+            The filename, by default 'dos.pdf'
+
+        Returns
+        -------
+        None
+            None
+        """
+
         plt.savefig(filename, bbox_inches="tight")
         plt.clf()
+        return None
     
         
 

@@ -30,9 +30,7 @@ the `Anaconda Distribution <https://www.anaconda.com/>`_.
 
           conda install -c conda-forge pyprocar
 
-
     .. grid-item-card:: Prefer pip?
-       :columns: auto
        :class-title: pyprocar-card-title
 
        PyProcar can be installed via pip from `PyPI
@@ -52,25 +50,10 @@ the `Anaconda Distribution <https://www.anaconda.com/>`_.
       Installing a specific version? Installing from source? Check the
       :ref:`install_ref` page.
 
-First Steps
+Paper
 -------------------------------
-We've provided a variety of resources for you to get used to PyProcar's API
-through a range of examples and tutorials.
 
-
-
-.. grid:: 2
-
-   .. grid-item-card:: Why PyProcar?
-      :link: why_pyprocar
-      :link-type: ref
-      :class-title: pyprocar-card-title
-
-      Learn more about why we created PyProcar
-
-      To be added...
-
-
+.. grid:: 1
 
    .. grid-item-card:: Authors & Citation
       :link: authors_ref
@@ -82,6 +65,8 @@ through a range of examples and tutorials.
 
       .. image:: ../images/1st_publication.png
          :target: https://www.sciencedirect.com/science/article/abs/pii/S0010465519303935?via%3Dihub
+
+
 
 
 Support

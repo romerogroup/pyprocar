@@ -1,4 +1,11 @@
+__author__ = "Pedram Tavadze and Logan Lang"
+__maintainer__ = "Pedram Tavadze and Logan Lang"
+__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
+__date__ = "March 31, 2020"
+
+
 import os
+from typing import List
 import re
 import glob
 
@@ -8,26 +15,41 @@ from ..splash import welcome
 from ..utils import UtilsProcar
 from ..io import AbinitParser
 
-
 def cat(
-    inFiles=None,
-    outFile="PROCAR_merged",
-    gz=False,
-    mergeparallel=False,
-    fixformat=False,
-    nspin=1,
-    abinit_output=None,
-):
+    inFiles:List[str]=None,
+    outFile:str="PROCAR_merged",
+    gz:bool=False,
+    mergeparallel:bool=False,
+    fixformat:bool=False,
+    nspin:int=1,
+    abinit_output:str=None,
+    ):
     """
     This module concatenates multiple PROCARs.
     If a list of input PROCAR files is not provided it will merge all the PROCAR_*
     files in the directory.
-    set mergeparallel = True for merging PROCARs generated from
-    parallel Abinit calculations. Set fixformat = True to fix formatting issues
-    in the Abinit PROCAR file.
-    To detect if the calculation is spin-colinear it checks for the nsppol flag
-    in the Abinit output file as set in abinit_output. If not present, set nspin.
+
+    Parameters
+    ----------
+    inFiles : List[str], optional
+        A list of PROCAR files to concatenate, by default None
+    outFile : str, optional
+        String for the output, by default "PROCAR_merged"
+    gz : bool, optional
+        Boolean if output should be compressed to .gz file, by default False
+    mergeparallel : bool, optional
+        Boolean for merging PROCARs generated 
+        from parallel Abinit calculations., by default False
+    fixformat : bool, optional
+        Boolean to fix formatting issues
+        in the Abinit PROCAR file., by default False
+    nspin : int, optional
+        To detect if the calculation is spin-colinear it checks for the nsppol flag
+        in the Abinit output file as set in abinit_output. If not present, set nspin., by default 1
+    abinit_output : str, optional
+        The abinit output file, by default None
     """
+
     welcome()
 
     # reading in all PROCAR_* files and putting it into a list if not provided.

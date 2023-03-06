@@ -6,6 +6,8 @@ import sys
 
 
 class ProcarPlot:
+    """A depeciated class ot plot the band structure
+    """
     def __init__(self, bands, spd, kpoints=None):
         self.bands = bands.transpose()
         self.spd = spd.transpose()

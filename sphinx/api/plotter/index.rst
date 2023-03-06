@@ -12,3 +12,12 @@ PyProcar has the following data types:
 
 - :class:`pyprocar.EBSPlot` is used to plot the electronic band structure. 
     DOSPlot expects :class:`pyprocar.ElectronicBandStructure`
+
+
+.. toctree::
+    :maxdepth: 2
+
+    bandsplot
+    dosplot
+    procarplot
+    

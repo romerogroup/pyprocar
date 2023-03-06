@@ -1,11 +1,32 @@
 import numpy as np
 from ..splash import welcome
 
+def generate2dkmesh(x1:float, y1:float, x2:float, y2:float, z:float, nkx:int, nky:int,):
+    """_summary_
 
-def generate2dkmesh(x1, y1, x2, y2, z, nkx, nky):
+    Parameters
+    ----------
+    x1 : float
+        The beginning value to generate x coords
+    y1 : float
+        The beginning value to generate y coords
+    x2 : float
+        The end value to generate x coords
+    y2 : float
+        The end value to generate y coords
+    z : float
+        The z coordinate
+    nkx : int
+        The number of points to generate in the x direction
+    nky : int
+        The number of points to generate in the y direction
+
+    Returns
+    -------
+    _type_
+        _description_
     """
-	This module generates a KPOINTS mesh file for 2D plotting.
-	"""
+    
     welcome()
 
     kx = np.linspace(x1, x2, nkx)

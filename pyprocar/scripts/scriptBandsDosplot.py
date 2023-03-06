@@ -37,11 +37,46 @@ def bandsdosplot(
     draw_fermi:bool=True,
     plot_color_bar:bool=True,
     repair:bool=True,
-    old:bool=False,
     show:bool=True,
     **kwargs
     ):
-    """This function creates plots containing both DOS and bands."""
+    """A function to plot the band structure and the density of states in the same plot
+
+    Parameters
+    ----------
+    bands_settings : dict, optional
+        A dictionary containing the keyword arguments from bandsplot, by default bands_settings
+    dos_settings : dict, optional
+         A dictionary containing the keyword arguments from dosplot, by default dos_settings
+    dos_limit : List[int], optional
+        The dos window to plot, by default None
+    elimit : List[int], optional
+        The energy window to plot, by default None
+    k_limit : _type_, optional
+        The kpath points to plot, by default None
+    grid : bool, optional
+        Boolean to plot a grid, by default False
+    code : str, optional
+        The code to use, by default "vasp"
+    lobster : bool, optional
+        Boolean if this is a lobster calculation, by default False
+    savefig : str, optional
+        The filename to to save the plot as., by default None
+    title : str, optional
+        String for the title name, by default None
+    title_fontsize : float, optional
+        Float for the title size, by default 16
+    discontinuities : _type_, optional
+        _description_, by default None
+    draw_fermi : bool, optional
+        Boolean to plot the fermi level, by default True
+    plot_color_bar : bool, optional
+        Boolean to plot the color bar, by default True
+    repair : bool, optional
+        Boolean to repair the PROCAR file, by default True
+    show : bool, optional
+        Boolean to show the plot, by default True
+    """
 
     welcome()
 

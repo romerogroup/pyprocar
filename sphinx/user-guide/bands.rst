@@ -13,14 +13,14 @@ This is the most basic type of band structure. No projection information is cont
 
 Usage::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',code='vasp')
+	pyprocar.bandsplot(code='vasp',dirname='bands',elimit=[-2,2],mode='plain',color='blue')
 
 PyProcar is capable of labeling the :math:`k`-path names automatically, however, the user can manually input them as desired.
 
 
 One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` corresponds to the labels and the number of grid points between the high symmetry points in the :math:`k`-path used for the band structure calculation. Usage::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],code='vasp')
+	pyprocar.bandsplot(code='vasp',dirname='bands',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'])
 
 
 ==================
@@ -34,7 +34,7 @@ For non-collinear spin calculations, ``spin=0`` plots the spin density (magnitud
 
 Usage::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet',mode='parametric',spin=1)
+	pyprocar.bandsplot(code='vasp',dirname='bands',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet',mode='parametric',spin=1)
 
 If spin-up and spin-down bands are to be plot separately (for colinear calculations), there are two methods one can follow.
 
@@ -55,8 +55,8 @@ These methods can be used for both plain and parametric modes. If a comparison o
 
 E.g.::
 
-    fig, ax = pyprocar.bandsplot('PROCAR-up',show=False,color='red',mode='plain')
-    pyprocar.bandsplot('PROCAR-down',color='blue',mode='plain',ax=ax)
+    fig, ax = pyprocar.bandsplot(code='vasp',dirname='bands_up',,show=False,color='red',mode='plain')
+    pyprocar.bandsplot(code='vasp',dirname='bands',color='blue',mode='plain',ax=ax)
     
 
 Note:
@@ -71,7 +71,7 @@ The projection of atoms onto bands can provide information such as which atoms c
 
 Usage::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet', mode='parametric',atoms=[1])
+	pyprocar.bandsplot(code='vasp',dirname='bands',,elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet', mode='parametric',atoms=[1])
 
 NOTE:
 
@@ -102,7 +102,7 @@ Export plot as a matplotlib.pyplot object
 PyProcar allows the plot to be exported as a matplotlib.pyplot object. This allows for further processing of the plot through options available in matplotlib.
 Usage::
 
-	fig, ax = pyprocar.bandsplot('PROCAR', outcar='OUTCAR', mode='plain', show=False)
+	fig, ax = pyprocar.bandsplot(code='vasp',dirname='bands', mode='plain', show=False)
 	ax.set_title('Using matplotlib options')
 	fig.show()
 

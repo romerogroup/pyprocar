@@ -1,20 +1,48 @@
+
+from typing import List
+
 from ..utils import ProcarFileFilter
 from ..splash import welcome
 
 
 def filter(
-    inFile,
-    outFile,
-    atoms=None,
-    orbitals=None,
-    orbital_names=None,
-    bands=None,
+    inFile:str,
+    outFile:str,
+    atoms:List[int]=None,
+    orbitals:List[int]=None,
+    orbital_names:List[str]=None,
+    bands:List[int]=None,
     spin=None,
     kpoints=None,
-    human_atoms=False,
-):
-    """
-    This module filters the PROCAR file and re-write a new one.
+    human_atoms:bool=False,
+    ):
+    """This module filters the PROCAR file and re-write a new one.
+
+    Parameters
+    ----------
+    inFile : str
+        _description_
+    outFile : str
+        _description_
+    atoms : List[int], optional
+        _description_, by default None
+    orbitals : List[int], optional
+        _description_, by default None
+    orbital_names : List[str], optional
+        _description_, by default None
+    bands : List[int], optional
+        _description_, by default None
+    spin : _type_, optional
+        _description_, by default None
+    kpoints : _type_, optional
+        _description_, by default None
+    human_atoms : bool, optional
+        _description_, by default False
+
+    Raises
+    ------
+    RuntimeError
+        _description_
     """
     welcome()
 

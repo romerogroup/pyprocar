@@ -3,10 +3,16 @@ from ..splash import welcome
 
 
 # calls ProcarRepair
-def repair(infile, outfile):
+def repair(infile:str, outfile:str):
+    """This module calls ProcarRepair to repair the PROCAR file.
+
+    Parameters
+    ----------
+    infile : str
+        The input filename
+    outfile : _type_
+        The output filename
     """
-	This module calls ProcarRepair to repair the PROCAR file.
-	"""
     welcome()
 
     print("Input File    : ", infile)

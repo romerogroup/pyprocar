@@ -30,18 +30,30 @@ from .. import io
 np.set_printoptions(threshold=sys.maxsize)
 
 
-
 class FermiHandler:
-    """
-    This class handles the plotting of the fermi surface. Initialize by specifying the code and directory name where the data is stored. 
-    Then call one of the plotting methods provided.
-    """
+
     def __init__(self,
             code:str,
             dirname:str="",
             repair:bool=False,
             apply_symmetry:bool=True,
         ):
+        """
+        This class handles the plotting of the fermi surface. Initialize by specifying the code and directory name where the data is stored. 
+        Then call one of the plotting methods provided.
+
+        Parameters
+        ----------
+        code : str
+            The code name
+        dirname : str, optional
+            the directory name where the calculation is, by default ""
+        repair : bool, optional
+            Boolean to repair the PROCAR file, by default False
+        apply_symmetry : bool, optional
+            Boolean to apply symmetry to the fermi sruface.
+            This is used when only symmetry reduced kpoints used in the calculation, by default True
+        """
         self.code = code
         self.dirname=dirname
         self.repair = repair
@@ -86,11 +98,87 @@ class FermiHandler:
                         camera_pos:List[float]=[1, 1, 1],
                         background_color:str or Tuple[float,float,float,float]="white",
                         perspective:bool=True,
-                        save_2d:bool=None,
+                        save_2d:str=None,
                         save_gif:str=None,
                         save_mp4:str=None,
                         save_3d:str=None
         ):
+        """A method to plot the 3d fermi surface
+
+        Parameters
+        ----------
+        mode : str
+            The mode to calculate
+        bands : List[int], optional
+            A list of band indexes to plot, by default None
+        atoms : List[int], optional
+            A list of atoms, by default None
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        fermi : float, optional
+            Ther fermi energy, by default None
+        fermi_shift : float, optional
+            A float to shift the fermi energy, by default 0
+        fermi_tolerance : float, optional
+            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1
+        spin_texture : bool, optional
+            Boolean to plot spin texture, by default False
+        calculate_fermi_speed : bool, optional
+            Boolean to calculate the fermi speed, by default False
+        calculate_fermi_velocity : bool, optional
+            Boolean to calculate the fermi velocity, by default False
+        calculate_effective_mass : bool, optional
+            Boolean to calculate the effective mass, by default False
+        supercell : List[int], optional
+            A list of integers for the supercell to include, by default [1, 1, 1]
+        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            A list of list that describe the directions to expand the fermi surface, by default None
+        interpolation_factor : int, optional
+            The interpolation factor, by default 1
+        projection_accuracy : str, optional
+            String for the projection method to use, by default "normal"
+        plot_brillouin_zone : bool, optional
+            Boolean to plot the Brillouin zone, by default True
+        arrow_color : List[str]orList[Tuple[float,float,float]], optional
+            The arrow colors, by default None
+        arrow_size : float, optional
+            The arrow size, by default 0.1
+        spin_colors : List[str]orList[Tuple[float,float,float]], optional
+            The spin colors, by default None
+        colors : List[str]orList[Tuple[float,float,float]], optional
+            The colors of the fermi surface bands, by default None
+        cmap : str, optional
+            The colormap to use, by default "jet"
+        vmin : float, optional
+            Value to normalize the minimum projection value., by default None, by default None, by default 0
+        vmax : float, optional
+            Value to normalize the maximum projection value., by default None, by default None, by default 1
+        show : bool, optional
+            Boollean to show the plot, by default True
+        plot_directional_arrows : bool, optional
+            Boolean to include direction arrows, by default True
+        camera_pos : List[float], optional
+            The camera position, by default [1, 1, 1]
+        background_color : strorTuple[float,float,float,float], optional
+            The background color of the plot, by default "white"
+        perspective : bool, optional
+            Boolean , by default True
+        save_2d : str, optional
+            String to save a screenshot, by default None
+        save_gif : str, optional
+            String to save an orbiting .gif file, by default None
+        save_mp4 : str, optional
+            String to save an orbiting .mp4 file, by default None
+        save_3d : str, optional
+            String to save ther fermisurface as a 3d object, by default None
+
+        Returns
+        -------
+        None
+            None
+        """
         ################################################################
         # Initialize the Fermi Surface 
         ################################################################
@@ -285,8 +373,87 @@ class FermiHandler:
                         camera_pos:List[float]=[1, 1, 1],
                         background_color:str or Tuple[float,float,float,float]="white",
                         perspective:bool=True,
-                        save_2d:bool=None,
+                        save_2d:str=None,
         ):
+        """A method to plot a fermi surface with an isoslider widget
+
+        Parameters
+        ----------
+        mode : str
+            The mode name
+        iso_range : float
+            A range of energies the slide will go through
+        iso_surfaces : int
+            Ther number of fermi sruface to calculate on the range
+        bands : List[int], optional
+            A list of bands to plot, by default None
+        atoms : List[int], optional
+            A list of atoms, by default None
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        fermi : float, optional
+            Ther fermi energy, by default None
+        fermi_shift : float, optional
+            A float to shift the fermi energy, by default 0
+        fermi_tolerance : float, optional
+            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1
+        spin_texture : bool, optional
+            Boolean to plot spin texture, by default False
+        calculate_fermi_speed : bool, optional
+            Boolean to calculate the fermi speed, by default False
+        calculate_fermi_velocity : bool, optional
+            Boolean to calculate the fermi velocity, by default False
+        calculate_effective_mass : bool, optional
+            Boolean to calculate the effective mass, by default False
+        supercell : List[int], optional
+            A list of integers for the supercell to include, by default [1, 1, 1]
+        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            A list of list that describe the directions to expand the fermi surface, by default None
+        interpolation_factor : int, optional
+            The interpolation factor, by default 1
+        projection_accuracy : str, optional
+            String for the projection method to use, by default "normal"
+        plot_brillouin_zone : bool, optional
+            Boolean to plot the Brillouin zone, by default True
+        arrow_color : List[str]orList[Tuple[float,float,float]], optional
+            The arrow colors, by default None
+        arrow_size : float, optional
+            The arrow size, by default 0.1
+        spin_colors : List[str]orList[Tuple[float,float,float]], optional
+            The spin colors, by default None
+        colors : List[str]orList[Tuple[float,float,float]], optional
+            The colors of the fermi surface bands, by default None
+        cmap : str, optional
+            The colormap to use, by default "jet"
+        vmin : float, optional
+            Value to normalize the minimum projection value., by default None, by default None, by default 0
+        vmax : float, optional
+            Value to normalize the maximum projection value., by default None, by default None, by default 1
+        show : bool, optional
+            Boolean to show the plot, by default True
+        plot_directional_arrows : bool, optional
+            Boolean to plot direction arrows, by default True
+        camera_pos : List[float], optional
+            List to specify the camera position, by default [1, 1, 1]
+        background_color : strorTuple[float,float,float,float], optional
+            The background color of the plot, by default "white"
+        perspective : bool, optional
+            Boolean, by default True
+        save_2d : str, optional
+            String to save a screenshot fo the plotter, by default None
+
+        Returns
+        -------
+        _type_
+            _description_
+
+        Raises
+        ------
+        Exception
+            _description_
+        """
         ################################################################
         # callback function for the isoslider
         ################################################################
@@ -494,6 +661,76 @@ class FermiHandler:
                         save_gif:str=None,
 
         ):
+        """A method to genrate a gif that changes the isovlaue
+
+        Parameters
+        ----------
+        mode : str
+            The mode name
+        iso_range : float, optional
+            The energy range, by default 3
+        iso_surfaces : int, optional
+            The number of surface to generate in the range, by default 10
+        iso_values : List[float], optional
+            Excat energy values, by default None
+        bands : List[int], optional
+            A list of bands to plot, by default None
+        atoms : List[int], optional
+            A list of atoms, by default None
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        fermi : float, optional
+            Ther fermi energy, by default None
+        fermi_shift : float, optional
+            A float to shift the fermi energy, by default 0
+        fermi_tolerance : float, optional
+            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1
+        spin_texture : bool, optional
+            Boolean to plot spin texture, by default False
+        calculate_fermi_speed : bool, optional
+            Boolean to calculate the fermi speed, by default False
+        calculate_fermi_velocity : bool, optional
+            Boolean to calculate the fermi velocity, by default False
+        calculate_effective_mass : bool, optional
+            Boolean to calculate the effective mass, by default False
+        supercell : List[int], optional
+            A list of integers for the supercell to include, by default [1, 1, 1]
+        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            A list of list that describe the directions to expand the fermi surface, by default None
+        interpolation_factor : int, optional
+            The interpolation factor, by default 1
+        projection_accuracy : str, optional
+            String for the projection method to use, by default "normal"
+        plot_brillouin_zone : bool, optional
+            Boolean to plot the Brillouin zone, by default True
+        arrow_color : List[str]orList[Tuple[float,float,float]], optional
+            The arrow colors, by default None
+        arrow_size : float, optional
+            The arrow size, by default 0.1
+        spin_colors : List[str]orList[Tuple[float,float,float]], optional
+            The spin colors, by default None
+        colors : List[str]orList[Tuple[float,float,float]], optional
+            The colors of the fermi surface bands, by default None
+        cmap : str, optional
+            The colormap to use, by default "jet"
+        vmin : float, optional
+            Value to normalize the minimum projection value., by default None, by default None, by default 0
+        vmax : float, optional
+            Value to normalize the maximum projection value., by default None, by default None, by default 1
+        show : bool, optional
+            Boolean to show the plot, by default True
+        plot_directional_arrows : bool, optional
+            Boolean to plot direction arrows, by default True
+        camera_pos : List[float], optional
+            List to specify the camera position, by default [1, 1, 1]
+        background_color : strorTuple[float,float,float,float], optional
+            The background color of the plot, by default "white"
+        save_gif : str, optional
+            String to save the gif, by default None
+
+        """
         if fermi is not None:
             self.e_fermi = None
 
@@ -688,12 +925,85 @@ class FermiHandler:
                                 plot_directional_arrows:bool=True,
                                 background_color:str or Tuple[float,float,float,float]="white",
                                 perspective:bool=True,
-                                save_2d:bool=None,
+                                save_2d:str=None,
                                 save_2d_slice:str=None,
-                                save_gif:str=None,
-                                save_mp4:str=None,
-                                save_3d:str=None
         ):
+        """A method to plot the fermi sruafce with a cross section widget
+
+        Parameters
+        ----------
+        mode : str
+            The mode name
+        show_cross_section_area : bool, optional
+            Boolean to show the cross section area, by default False
+        slice_normal : Tuple[float,float,float], optional
+            The initial slice noraml direction, by default (1,0,0)
+        slice_origin : Tuple[float,float,float], optional
+            The initial slice origin, by default (0,0,0)
+        line_width : float, optional
+            The linwidth of the slice, by default 5.0
+        bands : List[int], optional
+            A list of bands to plot, by default None
+        atoms : List[int], optional
+            A list of atoms, by default None
+        orbitals : List[int], optional
+            A list of orbitals, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        fermi : float, optional
+            Ther fermi energy, by default None
+        fermi_shift : float, optional
+            A float to shift the fermi energy, by default 0
+        fermi_tolerance : float, optional
+            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1
+        spin_texture : bool, optional
+            Boolean to plot spin texture, by default False
+        calculate_fermi_speed : bool, optional
+            Boolean to calculate the fermi speed, by default False
+        calculate_fermi_velocity : bool, optional
+            Boolean to calculate the fermi velocity, by default False
+        calculate_effective_mass : bool, optional
+            Boolean to calculate the effective mass, by default False
+        supercell : List[int], optional
+            A list of integers for the supercell to include, by default [1, 1, 1]
+        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            A list of list that describe the directions to expand the fermi surface, by default None
+        interpolation_factor : int, optional
+            The interpolation factor, by default 1
+        projection_accuracy : str, optional
+            String for the projection method to use, by default "normal"
+        plot_brillouin_zone : bool, optional
+            Boolean to plot the Brillouin zone, by default True
+        arrow_color : List[str]orList[Tuple[float,float,float]], optional
+            The arrow colors, by default None
+        arrow_size : float, optional
+            The arrow size, by default 0.1
+        spin_colors : List[str]orList[Tuple[float,float,float]], optional
+            The spin colors, by default None
+        colors : List[str]orList[Tuple[float,float,float]], optional
+            The colors of the fermi surface bands, by default None
+        cmap : str, optional
+            The colormap to use, by default "jet"
+        vmin : float, optional
+            Value to normalize the minimum projection value., by default None, by default None, by default 0
+        vmax : float, optional
+            Value to normalize the maximum projection value., by default None, by default None, by default 1
+        show : bool, optional
+            Boolean to show the plot, by default True
+        plot_directional_arrows : bool, optional
+            Boolean to plot direction arrows, by default True
+        camera_pos : List[float], optional
+            List to specify the camera position, by default [1, 1, 1]
+        background_color : strorTuple[float,float,float,float], optional
+            The background color of the plot, by default "white"
+        perspective : bool, optional
+            Boolean, by default True
+        save_2d : str, optional
+            String to save a screenshot of the plotter, by default None
+        save_2d_slice : str, optional
+            String to save the 2d slice when done with the plotter, by default None
+
+        """
 
         ################################################################
         # Initialize the Fermi Surface 
@@ -862,6 +1172,37 @@ class FermiHandler:
                         show:bool=True,
                         savefig:str=None
         ):
+        """A method to plot the fermi surface area vs the isovlaue
+
+        Parameters
+        ----------
+        iso_range : float, optional
+            The isovalue range, by default 3
+        iso_surfaces : int, optional
+            The number of sruafce to generate in the range, by default 10
+        iso_values : List[float], optional
+            Exact iso vlaues to generate surfaces, by default None
+        spins : List[int], optional
+            A list of spins, by default None
+        fermi : float, optional
+            Ther fermi energy, by default None
+        fermi_shift : float, optional
+            Float to shift the fermi energy, by default 0
+        fermi_tolerance : float, optional
+            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1
+        supercell : List[int], optional
+            A list of integers for the supercell to include, by default [1, 1, 1]
+        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            A list of list that describe the directions to expand the fermi surface, by default None
+        interpolation_factor : int, optional
+            The interpolation factor, by default 1
+        cmap : str, optional
+            The colormap, by default "jet"
+        show : bool, optional
+            Boolean to show the plot, by default True
+        savefig : str, optional
+            String to save the plot, by default None
+        """
 
         if fermi is not None:
             self.e_fermi = None
@@ -932,11 +1273,12 @@ class FermiHandler:
             plt.savefig(savefig)
 
     def __parse_code(self):
+        """Helper method to parse the codes
 
-        """_summary_
-        Helper method to handle the parsing of the codes
-        Returns:
-            _type_: _description_
+        Returns
+        -------
+        _type_
+            _description_
         """
         if self.code == "vasp":
             if self.dirname is None:
@@ -1046,6 +1388,30 @@ class FermiHandler:
                     spins:List[int]=None, 
                     spin_texture: bool=False,
                     fermi_tolerance:float=0.1,):
+        """A helper method to process/aggregate data
+
+        Parameters
+        ----------
+        mode : str
+            the mdoe name
+        bands : List[int], optional
+            List of bands, by default None
+        atoms : List[int], optional
+            List of stoms, by default None
+        orbitals : List[int], optional
+            List of orbitals, by default None
+        spins : List[int], optional
+            List of spins, by default None
+        spin_texture : bool, optional
+            Boolean to plot spin texture, by default False
+        fermi_tolerance : float, optional
+            The tolerace to search for bands around the fermi energy, by default 0.1
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
 
         bands_to_keep = bands
         if bands_to_keep is None:
@@ -1122,6 +1488,24 @@ class FermiHandler:
                             calculate_effective_mass:bool=False,
 
                             ):
+        """Helper method set parameter values
+
+        Parameters
+        ----------
+        mode : str
+            The mode name
+        calculate_fermi_speed : bool, optional
+            Boolean for fermi speed calculation, by default False
+        calculate_fermi_velocity : bool, optional
+            Boolean for fermi velocity calculation, by default False
+        calculate_effective_mass : bool, optional
+            Boolean for effective mass calculation, by default False
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         
         if mode == "plain":
             text = "plain"
@@ -1185,6 +1569,37 @@ class FermiHandler:
                         save_gif:str=None,
                         save_mp4:str=None,
                         save_3d:str=None):
+        """Helper method to set some common plotting options
+
+        Parameters
+        ----------
+        fermi_surface : _type_
+            _description_
+        plotter : pv.Plotter
+            _description_
+        mode : str
+            _description_
+        text : str
+            _description_
+        spin_texture : bool, optional
+            _description_, by default False
+        camera_pos : List[float], optional
+            _description_, by default [1, 1, 1]
+        background_color : strorTuple[float,float,float,float], optional
+            _description_, by default "white"
+        perspective : bool, optional
+            _description_, by default True
+        show : bool, optional
+            _description_, by default False
+        save_2d : bool, optional
+            _description_, by default None
+        save_gif : str, optional
+            _description_, by default None
+        save_mp4 : str, optional
+            _description_, by default None
+        save_3d : str, optional
+            _description_, by default None
+        """
 
         if mode != "plain" or spin_texture:
             plotter.add_scalar_bar(

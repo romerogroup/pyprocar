@@ -9,7 +9,24 @@ from ..utils import UtilsProcar
 from .. import io
 
 
-def getFermi(procar, code, outcar):  # from ScriptsBandPlot made into method
+def getFermi(procar:str, code:str, outcar:str):
+    """A function to get the fermi energy
+
+    Parameters
+    ----------
+    procar : str
+        The PROCAR filename
+    code : str
+        The code name
+    outcar : str
+        The OUTCAR filename
+
+    Returns
+    -------
+    float
+        The fermi energy in ev
+    """
+    
     fermi = None
 
     if code == "vasp":
@@ -55,7 +72,27 @@ def getFermi(procar, code, outcar):  # from ScriptsBandPlot made into method
     return fermi
 
 
-def bandgap(procar=None, outcar=None, code="vasp", fermi=None, repair=True):
+def bandgap(procar:str=None, outcar:str=None, code:str="vasp", fermi:float=None, repair:bool=True):
+    """A function to find the band gap
+
+    Parameters
+    ----------
+    procar : str, optional
+        The PROCAR filename, by default None
+    outcar : str, optional
+        The OUTCAR filename, by default None
+    code : str, optional
+        The code name, by default "vasp"
+    fermi : float, optional
+        The fermi energy, by default None
+    repair : bool, optional
+        Boolean to repair the PROCAR file, by default True
+
+    Returns
+    -------
+    float
+        Returns the bandgap energy
+    """
 
     if code == "vasp" or code == "abinit":
         if repair:

@@ -97,8 +97,7 @@ def dosplot(
 
         e.g. ``orientation='vertical'``
 
-    spin_colors : list str or tuples, (optional ``spin_colors=['blue',
-        'red']``)
+    spin_colors : list str or tuples, (optional ``spin_colors=['blue','red']``)
         **spin_colors** represent the colors the different spin
         ploarizations are going to be represented in the DOS
         plot. These colors can be chosen from any type of color
@@ -108,9 +107,11 @@ def dosplot(
         ``spin_colors=[(0, 0, 1),(1, 0,0 )]``,
         ``spin_colors=['#0000ff','#ff0000']``
 
-        .. caution:: If the calculation is spin polarized one has to
-        provide two colors even if one is plotting one spin. I
-        disregard this cation if using default.
+        .. caution:: 
+        
+            If the calculation is spin polarized one has to
+            provide two colors even if one is plotting one spin. I
+            disregard this cation if using default.
 
     colors : list str or tuples, optional (default, optional)
         ``colors`` defines the color of plots filling the area under
@@ -175,11 +176,16 @@ def dosplot(
         has to be order of the input files of DFT package. The
         following table represents the indecies for different orbitals
         in **VASP**.
+
+        .. code-block::
+            :linenos:
+            
             +-----+-----+----+----+-----+-----+-----+-----+-------+
             |  s  | py  | pz | px | dxy | dyz | dz2 | dxz | x2-y2 |
             +-----+-----+----+----+-----+-----+-----+-----+-------+
             |  0  |  1  |  2 |  3 |  4  |  5  |  6  |  7  |   8   |
             +-----+-----+----+----+-----+-----+-----+-----+-------+
+
         ``orbitals`` is only relavent in ``mode='parametric'``,
         ``mode='parametric_line'``, ``mode='stack_species'``.
 
@@ -327,9 +333,9 @@ def dosplot(
         using this returned object.
         e.g. ::
 
-            >>> fig, ax = pyprocar.dosplot(mode='plain', plt_show=False)
-            >>> ax.set_ylim(-2,2)
-            >>> fig.show()
+        >>> fig, ax = pyprocar.dosplot(mode='plain', plt_show=False)
+        >>> ax.set_ylim(-2,2)
+        >>> fig.show()
 
     """
     

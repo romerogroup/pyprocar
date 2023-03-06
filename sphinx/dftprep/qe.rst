@@ -38,8 +38,7 @@ _______________________________________________
 Band Structure and Density of States 
 _______________________________________________
 1. Run the band structure and dos calculation as stated above
-
-5. Run pyprocar.bandsdosplot(bands_dirname = 'bands', dos_dirname = 'dos', bands_mode = 'plain', dos_mode = 'plain', code = 'qe')
+2. Run pyprocar.bandsdosplot(bands_dirname = 'bands', dos_dirname = 'dos', bands_mode = 'plain', dos_mode = 'plain', code = 'qe')
 
 Fermi
 _______________________________________________
