@@ -87,7 +87,7 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0C0E8040>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1437C00A0>
 
 
 
@@ -132,9 +132,8 @@ For details on the meaning of the indices of the atomic projection please refer 
 
  .. code-block:: none
 
-    normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0B9B3A60>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1191681C0>
 
 
 
@@ -181,9 +180,8 @@ For details on the meaning of the indices of the atomic projection please refer 
 
  .. code-block:: none
 
-    normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0B9B3070>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A141D1B910>
 
 
 
@@ -227,10 +225,8 @@ Scatter mode
 
  .. code-block:: none
 
-    8.145362043680577e-25
-    normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BD62970>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A141A69340>
 
 
 
@@ -270,7 +266,7 @@ overlay_species mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BD4AC70>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1419A9430>
 
 
 
@@ -310,7 +306,7 @@ overlay_orbtials mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0C35EA60>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A141CD7340>
 
 
 
@@ -348,7 +344,7 @@ overlay mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0CDE3220>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A143E299D0>
 
 
 
@@ -384,14 +380,14 @@ overlay mode by orbital names
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BD617F0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A141BD5AC0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.343 seconds)
+   **Total running time of the script:** ( 0 minutes  2.342 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_colinear.py:

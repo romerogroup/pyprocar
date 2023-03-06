@@ -33,6 +33,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Comparing band structures example.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_compare_bands_thumb.png
+    :alt: Comparing band structures
+
+  :ref:`sphx_glr_examples_00-band_structure_plotting_compare_bands.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Comparing band structures</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
 
 .. only:: html

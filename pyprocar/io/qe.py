@@ -407,18 +407,21 @@ class QEParser():
             
             self.kticks = []
             self.high_symmetry_points = np.zeros(shape=(self.nhigh_sym, 3))
-
-            
             tick_Count = 1
             for ihs in range(self.nhigh_sym):
+
+                # In QE cyrstal_b mode, the user is able to specify grid on last high symmetry point. 
+                # QE just uses 1 for the last high symmetry point.
+                grid_current = int(raw_khigh_sym[ihs].split()[3])
+                if ihs < self.nhigh_sym - 2:
+                    self.ngrids.append(grid_current)
+                elif ihs == self.nhigh_sym - 1:
+                    self.ngrids.append(grid_current+1)
+                elif ihs == self.nhigh_sym:
+                    continue
                 self.kticks.append(tick_Count - 1)
-                if ihs != self.nhigh_sym - 1:
-                    self.ngrids.append(int(raw_khigh_sym[ihs].split()[3]))
-                else:
-                    self.ngrids.append(1)
-                tick_Count += int(raw_khigh_sym[ihs].split()[3])
-                
-                
+                tick_Count += grid_current
+
                 
                 
             raw_ticks = re.findall(

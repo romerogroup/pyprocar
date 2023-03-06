@@ -92,7 +92,7 @@ Plain mode
     Repaired PROCAR is written at C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired
     Please use C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired next time for better efficiency
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A0BFBFD30>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14153E040>
 
 
 
@@ -140,16 +140,15 @@ For details on the meaning of the indices of the atomic projection please refer 
     PROCAR needs repairing
     Repaired PROCAR is written at C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired
     Please use C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired next time for better efficiency
-    normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000024A636385E0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1412B1730>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.997 seconds)
+   **Total running time of the script:** ( 0 minutes  0.885 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_noncolinear_vasp.py:

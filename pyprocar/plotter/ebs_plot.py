@@ -91,9 +91,11 @@ class EBSPlot:
 
         """
         pos = 0
+
         if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
+
                 distance = np.linalg.norm(kend - kstart)
                 if isegment == 0:
                     x = np.linspace(pos, pos + distance,
@@ -191,14 +193,10 @@ class EBSPlot:
             mbands = np.ma.masked_array(self.ebs.bands, False)
 
         if color_weights is not None:
-
-            if vmin is None:
+            if vmin is None: 
                 vmin = color_weights.min()
             if vmax is None:
                 vmax = color_weights.max()
-
-            print(color_weights.min())
-            print("normalizing to : ", (vmin, vmax))
 
         for ispin in spins:
             for iband in range(self.ebs.nbands):
@@ -293,8 +291,8 @@ class EBSPlot:
                 vmin = color_weights.min()
             if vmax is None:
                 vmax = color_weights.max()
-            print("normalizing to : ", (vmin, vmax))
-            norm = matplotlib.colors.Normalize(vmin, vmax)
+                
+            norm = mpl.colors.Normalize(vmin, vmax)
 
         for ispin in spins:
             for iband in range(self.ebs.nbands):
@@ -363,7 +361,7 @@ class EBSPlot:
                 vmin = 0
             if vmax is None:
                 vmax = 1
-            norm = matplotlib.colors.Normalize(vmin, vmax)
+            norm = mpl.colors.Normalize(vmin, vmax)
             for ispin in spins:
                 # plotting
                 for iband in range(self.ebs.nbands):
