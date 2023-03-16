@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.core.structure &#8212; PyProcar 5.5.0 documentation</title>
+    <title>pyprocar.core.structure &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -379,27 +379,26 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for pyprocar.core.structure</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">spglib</span>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze and Logan Lang&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze and Logan Lang&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;petavazohi@mail.wvu.edu, lllang@mix.wvu.edu&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;March 31, 2020&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">spglib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">ConvexHull</span>
 
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">elements</span>
 <span class="kn">from</span> <span class="nn">.surface</span> <span class="kn">import</span> <span class="n">Surface</span>
 
-<span class="c1"># TODO add python typing to all of the functions</span>
 <span class="c1"># TODO add __str__ method </span>
 
 <span class="n">N_AVOGADRO</span> <span class="o">=</span> <span class="mf">6.022140857e23</span>
 
-<div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">cartesian_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">fractional_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.html#pyprocar.core.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class to define a peridic crystal structure.</span>
 
 <span class="sd">        Parameters</span>
@@ -416,7 +415,15 @@
 <span class="sd">        -------</span>
 <span class="sd">        None.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Structure.__init__"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.__init__.html#pyprocar.core.Structure.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cartesian_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fractional_coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        
         <span class="k">if</span> <span class="n">fractional_coordinates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fractional_coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fractional_coordinates</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cartesian_coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">fractional_coordinates</span><span class="p">,</span> <span class="n">lattice</span><span class="p">)</span>
@@ -444,6 +451,8 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_complete_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_wyckoff_positions</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -486,18 +495,54 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The magnitude of the first crystal lattice vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The magnitude of the first crystal lattice vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The magnitude of the second crystal lattice vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The magnitude of the second crystal lattice vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The magnitude of the third crystal lattice vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The magnitude of the third crystal lattice vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The angle between the of the second and third crystal lattice vectors</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The angle between the of the second and third crystal lattice vectors</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
@@ -506,6 +551,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The angle between the of the first and third crystal lattice vectors</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The angle between the of the first and third crystal lattice vectors</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
@@ -514,6 +568,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The angle between the of the first and second crystal lattice vectors</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The angle between the of the first and second crystal lattice vectors</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
@@ -574,6 +637,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reciprocal_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The reciprocal lattice matrix corresponding the the crystal lattice</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            The reciprocal lattice matrix corresponding the the crystal lattice</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
         <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
@@ -591,15 +661,58 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_spglib_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the structure in spglib format</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple</span>
+<span class="sd">            Return the structure in spglib format (lattice, frac_coords, atomic_numbers)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fractional_coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Structure.get_space_group_number"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.get_space_group_number">[docs]</a>    <span class="k">def</span> <span class="nf">get_space_group_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.get_space_group_number"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.get_space_group_number.html#pyprocar.core.Structure.get_space_group_number">[docs]</a>    <span class="k">def</span> <span class="nf">get_space_group_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the Space Group Number of the material</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symprec : float, optional</span>
+<span class="sd">            tolerence for symmetry, by default 1e-5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The Space Group Number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spglib_cell</span><span class="p">,</span> <span class="n">symprec</span><span class="p">)[</span><span class="s2">&quot;number&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Structure.get_space_group_international"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.get_space_group_international">[docs]</a>    <span class="k">def</span> <span class="nf">get_space_group_international</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.get_space_group_international"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.get_space_group_international.html#pyprocar.core.Structure.get_space_group_international">[docs]</a>    <span class="k">def</span> <span class="nf">get_space_group_international</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the international Space Group Number of the material</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symprec : float, optional</span>
+<span class="sd">            tolerence for symmetry, by default 1e-5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The international Space Group Number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spglib_cell</span><span class="p">,</span> <span class="n">symprec</span><span class="p">)[</span><span class="s2">&quot;international&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Structure.get_wyckoff_positions"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.get_wyckoff_positions">[docs]</a>    <span class="k">def</span> <span class="nf">get_wyckoff_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.get_wyckoff_positions"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.get_wyckoff_positions.html#pyprocar.core.Structure.get_wyckoff_positions">[docs]</a>    <span class="k">def</span> <span class="nf">get_wyckoff_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the wyckoff positions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symprec : float, optional</span>
+<span class="sd">            tolerence for symmetry, by default 1e-5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            The wyckoff positions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wyckoff_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;&lt;U4&quot;</span><span class="p">)</span>
         <span class="n">wyckoffs_temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spglib_cell</span><span class="p">,</span> <span class="n">symprec</span><span class="p">)[</span><span class="s2">&quot;wyckoffs&quot;</span><span class="p">]</span>
@@ -621,6 +734,18 @@
         <span class="k">return</span> <span class="n">wyckoff_positions</span></div>
 
     <span class="k">def</span> <span class="nf">_get_lattice_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattice</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the corners of the crystal lattice</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lattice : np.ndarray</span>
+<span class="sd">            The crystal lattice</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Returns the corners of the crystal lattice</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
@@ -637,27 +762,74 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lattice_corners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the corners of the crystal lattice</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Returns the corners of the crystal lattice</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lattice_corners</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cell_convex_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the cell convex hull</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        scipy.spatial.ConvexHull</span>
+<span class="sd">            Returns the cell convex hull</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ConvexHull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice_corners</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Structure.plot_cell_convex_hull"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.plot_cell_convex_hull">[docs]</a>    <span class="k">def</span> <span class="nf">plot_cell_convex_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.plot_cell_convex_hull"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.plot_cell_convex_hull.html#pyprocar.core.Structure.plot_cell_convex_hull">[docs]</a>    <span class="k">def</span> <span class="nf">plot_cell_convex_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method to plot the the convex hull</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">surface</span> <span class="o">=</span> <span class="n">Surface</span><span class="p">(</span>
             <span class="n">verts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_convex_hull</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">faces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_convex_hull</span><span class="o">.</span><span class="n">simplices</span>
         <span class="p">)</span>
-        <span class="n">surface</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span></div>
+        <span class="n">surface</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="Structure.get_spglib_symmetry_dataset"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.get_spglib_symmetry_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">get_spglib_symmetry_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.get_spglib_symmetry_dataset"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.get_spglib_symmetry_dataset.html#pyprocar.core.Structure.get_spglib_symmetry_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">get_spglib_symmetry_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the spglib symmetry dataset</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symprec : float, optional</span>
+<span class="sd">            tolerence for symmetry, by default 1e-5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            spglib symmetry dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spglib_cell</span><span class="p">,</span> <span class="n">symprec</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Structure.transform"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
+<div class="viewcode-block" id="Structure.transform"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.transform.html#pyprocar.core.Structure.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
-    <span class="p">):</span>
+        <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the crystla lattice by a transformation matrix</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transformation_matrix : np.ndarray, optional</span>
+<span class="sd">            The transformation matrix, by default np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyprocar.core.Structure</span>
+<span class="sd">            The transformed structure</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            Raise error if the transform is not proper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">transformation_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">scale</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This transfare with is not proper.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This transform is not proper.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
         <span class="n">new_lattice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="p">)</span>
@@ -692,7 +864,21 @@
             <span class="n">atoms</span><span class="o">=</span><span class="n">new_atoms</span><span class="p">,</span> <span class="n">fractional_coordinates</span><span class="o">=</span><span class="n">new_fractional</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">new_lattice</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Structure.is_point_inside"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.is_point_inside">[docs]</a>    <span class="k">def</span> <span class="nf">is_point_inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.is_point_inside"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.is_point_inside.html#pyprocar.core.Structure.is_point_inside">[docs]</a>    <span class="k">def</span> <span class="nf">is_point_inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to determine if a point is inside the unitcell</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        point : np.ndarray</span>
+<span class="sd">            The point in question</span>
+<span class="sd">        lattice : np.ndarray, optional</span>
+<span class="sd">            The crystal lattice matrix, by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Boolean if a point is inside the unitcell</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">lattice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">lattic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lattice_corners</span><span class="p">(</span><span class="n">lattic</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -703,7 +889,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="Structure.supercell"><a class="viewcode-back" href="../../../pyprocar.core.html#pyprocar.core.structure.Structure.supercell">[docs]</a>    <span class="k">def</span> <span class="nf">supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="Structure.supercell"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.Structure.supercell.html#pyprocar.core.Structure.supercell">[docs]</a>    <span class="k">def</span> <span class="nf">supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to transform the Structure to a supercell</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        matrix : np.ndarray</span>
+<span class="sd">            The matrix to transform the Structure</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyprocar.core.Structure</span>
+<span class="sd">            The transformed structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span></div></div>
 </pre></div>
 

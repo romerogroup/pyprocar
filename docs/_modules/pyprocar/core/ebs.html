@@ -1,0 +1,1018 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyprocar.core.ebs &#8212; PyProcar 2.0.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyprocar/core/ebs';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for pyprocar.core.ebs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Sat Jan 16 2021</span>
+
+<span class="sd">@author: Pedram Tavadze</span>
+<span class="sd">@author: Freddy Farah</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># from . import Structure</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pylab</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">pyvista</span>
+
+<span class="kn">from</span> <span class="nn">.kpath</span> <span class="kn">import</span> <span class="n">KPath</span>
+<span class="kn">from</span> <span class="nn">.brillouin_zone</span> <span class="kn">import</span> <span class="n">BrillouinZone</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">Unfolder</span><span class="p">,</span> <span class="n">mathematics</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.html#pyprocar.core.ElectronicBandStructure">[docs]</a><span class="k">class</span> <span class="nc">ElectronicBandStructure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This object stores electronic band structure informomration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kpoints : np.ndarray</span>
+<span class="sd">            The kpoints array. Will have the shape (n_kpoints, 3)</span>
+<span class="sd">        bands : np.ndarray</span>
+<span class="sd">            The bands array. Will have the shape (n_kpoints, n_bands)</span>
+<span class="sd">        efermi : float</span>
+<span class="sd">            The fermi energy</span>
+<span class="sd">        projected : np.ndarray, optional</span>
+<span class="sd">            The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</span>
+<span class="sd">        projected_phase : np.ndarray, optional</span>
+<span class="sd">            The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</span>
+<span class="sd">        kpath : KPath, optional</span>
+<span class="sd">            The kpath for band structure claculation, defaults to None</span>
+<span class="sd">        weights : np.ndarray, optional</span>
+<span class="sd">            The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None</span>
+<span class="sd">        labels : List, optional</span>
+<span class="sd">            A list of orbital names, defaults to None</span>
+<span class="sd">        reciprocal_lattice : np.ndarray, optional</span>
+<span class="sd">            The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None</span>
+<span class="sd">        shifted_to_efermi : bool, optional</span>
+<span class="sd">             Boolean to determine if the fermi energy is shifted, defaults to False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.__init__"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.__init__.html#pyprocar.core.ElectronicBandStructure.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">kpoints</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">bands</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">efermi</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">projected</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">projected_phase</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kpath</span><span class="p">:</span><span class="n">KPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">labels</span><span class="p">:</span><span class="n">List</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reciprocal_lattice</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">shifted_to_efermi</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">):</span>
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span> <span class="o">-</span> <span class="n">efermi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">efermi</span> <span class="o">=</span> <span class="n">efermi</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="o">=</span> <span class="n">projected_phase</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">reciprocal_lattice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="o">=</span> <span class="n">kpath</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">has_phase</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">has_phase</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nkpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of k points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of k points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nbands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of bands</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of bands</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">natoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of atoms</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of atoms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nprincipals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of principal quantum numbers</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of principal quantum numbersk points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">norbitals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of orbitals</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of orbitals</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nspins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of spin channels</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of spin channels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_non_collinear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean to determine if this is a non-colinear calculation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Boolean to determine if this is a non-colinear calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspins</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kpoints_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the kpoints in cartesian basis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Returns the kpoints in cartesian basis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Please provide a reciprocal lattice when initiating the Procar class&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kpoints_reduced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the kpoints in fractional basis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Returns the kpoints in fractional basis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span>
+
+    
+<div class="viewcode-block" id="ElectronicBandStructure.ebs_sum"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">principal_q_numbers</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
+                <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">sum_noncolinear</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : List[int], optional</span>
+<span class="sd">            List of atoms to be summed over, by default None</span>
+<span class="sd">        principal_q_numbers : List[int], optional</span>
+<span class="sd">            List of principal quantum numbers to be summed over, by default [-1]</span>
+<span class="sd">        orbitals : List[int], optional</span>
+<span class="sd">            List of orbitals to be summed over, by default None</span>
+<span class="sd">        spins : List[int], optional</span>
+<span class="sd">            List of spins to be summed over, by default None</span>
+<span class="sd">        sum_noncolinear : bool, optional</span>
+<span class="sd">            Determines if the projection should be summed in a non-colinear calculation, by default True</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ret : list float</span>
+<span class="sd">            The summed projections</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">principal_q_numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">principal_q_numbers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nspins</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1"># sum over orbitals</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">orbitals</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># sum over principle quantum number</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ret</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">principal_q_numbers</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># sum over atoms</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ret</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">atoms</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># sum over spins only in non collinear and reshaping for consistency (nkpoints, nbands, nspins)</span>
+        <span class="c1"># in non-mag, non-colin nspin=1, in colin nspin=2</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_non_collinear</span> <span class="ow">and</span> <span class="n">sum_noncolinear</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ret</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">spins</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nkpoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">,</span> <span class="mi">1</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.update_weights"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the weights corresponding to the kpoints</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        weights : List[float]</span>
+<span class="sd">            A list of weights corresponding to the kpoints</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.unfold"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold">[docs]</a>    <span class="k">def</span> <span class="nf">unfold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.</span>
+<span class="sd">        The current weights are then updated</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transformation_matrix : np.ndarray, optional</span>
+<span class="sd">            The transformation matrix to transform the basis. Expected size is (3,3), by default None</span>
+<span class="sd">        structure : pyprocar.core.Structure, optional</span>
+<span class="sd">            The structure of a material, by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uf</span> <span class="o">=</span> <span class="n">Unfolder</span><span class="p">(</span>
+            <span class="n">ebs</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="n">transformation_matrix</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_weights</span><span class="p">(</span><span class="n">uf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.plot_kpoints"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">plot_kpoints</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">reduced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">show_brillouin_zone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+        <span class="n">point_size</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span>
+        <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">transformation_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This needs to be moved to core.KPath and updated new implementation of pyvista PolyData</span>
+
+<span class="sd">        This method will plot the K points in pyvista</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        reduced : bool, optional</span>
+<span class="sd">            Determines wether to plot the kpoints in the reduced or cartesian basis, defaults to False</span>
+<span class="sd">        show_brillouin_zone : bool, optional</span>
+<span class="sd">            Boolean to show the Brillouin zone, defaults to True</span>
+<span class="sd">        color : str, optional</span>
+<span class="sd">            Color of the points, defaults to &quot;r&quot;</span>
+<span class="sd">        point_size : float, optional</span>
+<span class="sd">            Size of points, defaults to 4.0</span>
+<span class="sd">        render_points_as_spheres : bool, optional</span>
+<span class="sd">            Boolean for how points are rendered, defaults to True</span>
+<span class="sd">        transformation_matrix : np.ndarray, optional, optional</span>
+<span class="sd">            Reciprocal Lattice Matrix, defaults to None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">p</span> <span class="o">=</span> <span class="n">pyvista</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">show_brillouin_zone</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reduced</span><span class="p">:</span>
+                <span class="n">brillouin_zone</span> <span class="o">=</span> <span class="n">BrillouinZone</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">transformation_matrix</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">brillouin_zone_non</span> <span class="o">=</span> <span class="n">BrillouinZone</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">brillouin_zone</span> <span class="o">=</span> <span class="n">BrillouinZone</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span> <span class="n">transformation_matrix</span>
+                <span class="p">)</span>
+                <span class="n">brillouin_zone_non</span> <span class="o">=</span> <span class="n">BrillouinZone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,)</span>
+
+            <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+                <span class="n">brillouin_zone</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">&quot;wireframe&quot;</span><span class="p">,</span>
+                <span class="n">line_width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+                <span class="n">brillouin_zone_non</span><span class="o">.</span><span class="n">pyvista_obj</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">&quot;wireframe&quot;</span><span class="p">,</span>
+                <span class="n">line_width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">reduced</span><span class="p">:</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_reduced</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+            <span class="n">kpoints</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+            <span class="n">point_size</span><span class="o">=</span><span class="n">point_size</span><span class="p">,</span>
+            <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="n">render_points_as_spheres</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">transformation_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="p">),</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+                <span class="n">point_size</span><span class="o">=</span><span class="n">point_size</span><span class="p">,</span>
+                <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="n">render_points_as_spheres</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+            <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Kx&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Ky&quot;</span><span class="p">,</span> <span class="n">zlabel</span><span class="o">=</span><span class="s2">&quot;Kz&quot;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">labels_off</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.ibz2fbz"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz">[docs]</a>    <span class="k">def</span> <span class="nf">ibz2fbz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotations</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applys symmetry operations to the kpoints, bands, and projections</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rotations : np.ndarray</span>
+<span class="sd">            The point symmetry operations of the lattice</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">klist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">plist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bandslist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># for each symmetry operation</span>
+        
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rotation</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rotations</span><span class="p">):</span>
+            <span class="c1"># for each point</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">kpoint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">):</span>
+                <span class="c1"># apply symmetry operation to kpoint</span>
+
+                
+                <span class="n">sympoint_vector</span> <span class="o">=</span> <span class="n">rotation</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kpoint</span><span class="p">)</span>
+                <span class="c1"># apply boundary conditions</span>
+                <span class="n">bound_ops</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">sympoint_vector</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">sympoint_vector</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+                <span class="n">sympoint_vector</span> <span class="o">+=</span> <span class="n">bound_ops</span>
+
+                <span class="n">sympoint_vector</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">sympoint_vector</span><span class="p">,</span><span class="n">decimals</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+                <span class="n">sympoint</span> <span class="o">=</span> <span class="n">sympoint_vector</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">sympoint</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">klist</span><span class="p">:</span>
+                    <span class="n">klist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympoint</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">band</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">bandslist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">band</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">projection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">plist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">klist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">plist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bandslist</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;Enectronic Band Structure     </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;------------------------     </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of kpoints  = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nkpoints</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of bands    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of atoms    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of orbitals = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+        
+    <span class="c1"># def reorder(self, plot=True, cutoff=0.2):</span>
+    <span class="c1">#     nspins = self.nspins</span>
+    <span class="c1">#     if self.is_non_collinear:</span>
+    <span class="c1">#         nspins = 1</span>
+    <span class="c1">#         # projected = np.sum(self.projected, axis=-1).reshape(self.nkpoints,</span>
+    <span class="c1">#         #                                                     self.nbands,</span>
+    <span class="c1">#         #                                                     self.natoms,</span>
+    <span class="c1">#         #                                                     self.nprincipals,</span>
+    <span class="c1">#         #                                                     self.norbitals,</span>
+    <span class="c1">#         #                                                     nspins)</span>
+    <span class="c1">#         projected = self.projected</span>
+    <span class="c1">#         projected_phase = self.projected_phase</span>
+            
+    <span class="c1">#     else:</span>
+    <span class="c1">#         projected = self.projected</span>
+    <span class="c1">#         projected_phase = self.projected_phase</span>
+    <span class="c1">#     new_bands = np.zeros_like(self.bands)</span>
+    <span class="c1">#     new_projected = np.zeros_like(self.projected)</span>
+    <span class="c1">#     new_projected_phase = np.zeros_like(self.projected_phase)</span>
+    <span class="c1">#     for ispin in range(nspins):</span>
+    <span class="c1">#         # DG = nx.Graph()</span>
+    <span class="c1">#         # X = np.arange(self.nkpoints)</span>
+    <span class="c1">#         # DG.add_nodes_from(</span>
+    <span class="c1">#         #     [</span>
+    <span class="c1">#         #         ((i, j), {&quot;pos&quot;: (X[i], self.bands[i, j, ispin])})</span>
+    <span class="c1">#         #         for i, j in itertools.product(</span>
+    <span class="c1">#         #             range(self.nkpoints), range(self.nbands)</span>
+    <span class="c1">#         #         )</span>
+    <span class="c1">#         #     ]</span>
+    <span class="c1">#         # )</span>
+    <span class="c1">#         # pos = nx.get_node_attributes(DG, &quot;pos&quot;)</span>
+    <span class="c1">#         # S = np.zeros(shape=(self.nkpoints, self.nbands, self.nbands))</span>
+    <span class="c1">#         for ikpoint in range(1, self.nkpoints):</span>
+    <span class="c1">#             order = []</span>
+    <span class="c1">#             for iband in range(self.nbands):</span>
+    <span class="c1">#                 prj = []</span>
+    <span class="c1">#                 idx = []</span>
+    <span class="c1">#                 for jband in range(self.nbands):# range(max(0, iband-2), min(iband+2, self.nbands-1)):</span>
+    <span class="c1">#                     psi_i = projected_phase[ikpoint, iband, :, :, :, ispin].flatten() # |psi(k,iband)&gt;=\sum u(atom, n, ml)</span>
+    <span class="c1">#                     psi_j = projected_phase[ikpoint-1, jband, :, :, :, ispin].flatten() # |psi(k+1,jband)&gt;</span>
+    <span class="c1">#                     psi_i /= np.absolute(psi_i).sum()</span>
+    <span class="c1">#                     psi_j /= np.absolute(psi_j).sum()</span>
+    <span class="c1">#                     # diff = np.absolute(psi_i-psi_j).sum()</span>
+    <span class="c1">#                     diff = np.absolute(np.vdot(psi_i, psi_j))</span>
+    <span class="c1">#                     prj.append(diff)</span>
+    <span class="c1">#                     if iband == jband and  prj[-1] &lt; cutoff:</span>
+    <span class="c1">#                         prj[-1] = cutoff</span>
+    <span class="c1">#                     idx.append(jband)</span>
+    <span class="c1">#                 jband = idx[np.argmax(prj)]</span>
+    <span class="c1">#                 self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]</span>
+    <span class="c1">#         # for ikpoint in range(1, self.nkpoints):</span>
+    <span class="c1">#         #     order = []</span>
+    <span class="c1">#         #     for iband in range(self.nbands):</span>
+    <span class="c1">#         #         prj = []</span>
+    <span class="c1">#         #         idx = []</span>
+    <span class="c1">#         #         slope = </span>
+    <span class="c1">#         #         for jband in range(max(0, iband-2), min(iband+2, self.nbands-1)):</span>
+    <span class="c1">#         #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])</span>
+    <span class="c1">#         #             dE = self.bands[ikpoint + 1, jband, ispin]</span>
+    <span class="c1">#         #                 - self.bands[ikpoint, iband, ispin]</span>
+    <span class="c1">#         #             ) </span>
+    <span class="c1">#         #             dEdK = (dE / dK)</span>
+                        
+    <span class="c1">#         #             prj.append(dEdk)</span>
+    <span class="c1">#         #             if iband == jband and  prj[-1] &lt; cutoff:</span>
+    <span class="c1">#         #                 prj[-1] = cutoff</span>
+    <span class="c1">#         #             idx.append(jband)</span>
+    <span class="c1">#         #         jband = idx[np.argmax(prj)]</span>
+    <span class="c1">#         #         self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]</span>
+    <span class="c1">#     #             prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,</span>
+    <span class="c1">#     #                                                                               self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)</span>
+    <span class="c1">#     #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])</span>
+    <span class="c1">#     #             if dK == 0:</span>
+    <span class="c1">#     #                 continue</span>
+    <span class="c1">#     #             prj = np.repeat(</span>
+    <span class="c1">#     #                 np.sqrt(projected[ikpoint, iband, :, :, :, ispin].astype(np.complex_)).reshape(</span>
+    <span class="c1">#     #                     1, -1</span>
+    <span class="c1">#     #                 ),  </span>
+    <span class="c1">#     #                 self.nbands,</span>
+    <span class="c1">#     #                 axis=0,</span>
+    <span class="c1">#     #             )</span>
+    <span class="c1">#     #             prj /= np.linalg.norm(prj[0])</span>
+    <span class="c1">#     #             prj_1 = np.sqrt(</span>
+    <span class="c1">#     #                 projected[ikpoint + 1, :, :, :, :, ispin].astype(np.complex_).reshape(</span>
+    <span class="c1">#     #                     self.nbands, -1</span>
+    <span class="c1">#     #                 )</span>
+    <span class="c1">#     #             )</span>
+    <span class="c1">#     #             prj_1 = prj_1.T / np.linalg.norm(prj_1, axis=1)</span>
+    <span class="c1">#     #             prj_1 = prj_1.T</span>
+    <span class="c1">#     #             # return prj, prj_1</span>
+    <span class="c1">#     #             # prod = prj*prj_1</span>
+    <span class="c1">#     #             # prod = prod.sum(axis=-1)</span>
+    <span class="c1">#     #             # prod = prod.sum(axis=-1)</span>
+    <span class="c1">#     #             # prod = prod.sum(axis=-1)</span>
+    <span class="c1">#     #             # return prj, prj_1</span>
+    <span class="c1">#     #             # # prod = np.exp(-1*prod* 1/(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]))</span>
+    <span class="c1">#     #             # prod = np.exp(-1/abs(prod))</span>
+    <span class="c1">#     #             # prod = np.exp(-1*abs(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]+e))</span>
+    <span class="c1">#     #             dots = np.array([np.vdot(x, y) for x, y in zip(prj, prj_1)])</span>
+                    
+    <span class="c1">#     #             diff = np.linalg.norm(prj - prj_1, axis=1)</span>
+    <span class="c1">#     #             dE = np.abs(</span>
+    <span class="c1">#     #                 self.bands[ikpoint + 1, :, ispin]</span>
+    <span class="c1">#     #                 - self.bands[ikpoint, iband, ispin]</span>
+    <span class="c1">#     #             ) </span>
+    <span class="c1">#     #             dEdK = (dE / dK)</span>
+    <span class="c1">#     #             jband = np.argsort(diff)</span>
+    <span class="c1">#     #             counter = 0</span>
+    <span class="c1">#     #             # while jband[counter] in order:</span>
+    <span class="c1">#     #             #     counter+=1</span>
+    <span class="c1">#     #             order.append(jband[counter])  </span>
+                    
+    <span class="c1">#     #             # if iband !=0 and jband== 0:</span>
+    <span class="c1">#     #             #     print(ikpoint, iband)</span>
+                    
+    <span class="c1">#     #             # print(iband, self.bands[ikpoint, iband, ispin], jband, self.bands[ikpoint, jband, ispin])</span>
+                    
+    <span class="c1">#     #             # diffs.append(diff)</span>
+    <span class="c1">#     #             # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])</span>
+    <span class="c1">#     #             DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))</span>
+                    
+    <span class="c1">#     #     if plot:</span>
+    <span class="c1">#     #         plt.figure(figsize=(16, 9))</span>
+    <span class="c1">#     #         nodes = nx.draw_networkx_nodes(</span>
+    <span class="c1">#     #             DG, pos, node_size=5, node_color=[&quot;blue&quot;, &quot;red&quot;][ispin])</span>
+    <span class="c1">#     #         edges = nx.draw_networkx_edges(</span>
+    <span class="c1">#     #             DG,</span>
+    <span class="c1">#     #             pos,</span>
+    <span class="c1">#     #             edge_color=&#39;red&#39;</span>
+    <span class="c1">#     #         )</span>
+    <span class="c1">#     #         plt.show()</span>
+    <span class="c1">#     # #         if len(order) == 0:</span>
+    <span class="c1">#     # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]</span>
+    <span class="c1">#     # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]</span>
+    <span class="c1">#     # #         else :</span>
+    <span class="c1">#     # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]</span>
+    <span class="c1">#     # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]</span>
+                
+    <span class="c1">#     # # self.bands = new_bands</span>
+    <span class="c1">#     # # self.projected = new_projected</span>
+    <span class="c1">#     return </span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2020, Romero Group.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

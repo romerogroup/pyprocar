@@ -21,7 +21,7 @@
 .. _ref_plotting_fermi3d_plain:
 
 Plotting fermi3d plain
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d plain example.
 
@@ -96,7 +96,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 45-49
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -134,7 +134,7 @@ Plain mode
 .. GENERATED FROM PYTHON SOURCE LINES 58-62
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -175,7 +175,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.718 seconds)
+   **Total running time of the script:** ( 0 minutes  12.302 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_plain.py:

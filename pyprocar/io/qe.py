@@ -202,8 +202,7 @@ class QEParser():
         dos = DensityOfStates(energies=energies,
                             total=total_dos,
                             projected=projected_dos, 
-                            interpolation_factor = 1,
-                            interpolation_kind='cubic')
+                            interpolation_factor = 1)
         return dos    
     
     def _parse_dos_total(self, dos_total_filename ):

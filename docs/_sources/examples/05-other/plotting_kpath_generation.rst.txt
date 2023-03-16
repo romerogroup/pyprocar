@@ -21,7 +21,7 @@
 .. _ref_example_kpath_generator:
 
 Example of kpath_generator 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to plot a band structure, one must define a set of :math:`k`-points following a desired :math:`k`-path in momentum space. 
 PyProcar's :math:`k`-path generation utility enables a the user to automatically generate 
@@ -68,7 +68,7 @@ The :math:`k`-path generation utility within PyProcar is based on the Python lib
 .. GENERATED FROM PYTHON SOURCE LINES 42-44
 
 Plotting K Path
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 .. GENERATED FROM PYTHON SOURCE LINES 44-48
 
@@ -177,7 +177,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.424 seconds)
+   **Total running time of the script:** ( 0 minutes  0.429 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plotting_kpath_generation.py:

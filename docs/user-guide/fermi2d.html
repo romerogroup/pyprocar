@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>2D spin-texture &#8212; PyProcar 5.5.0 documentation</title>
+    <title>2D spin-texture &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -51,8 +51,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/fermi2d';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="DFT Prep" href="../dftprep/index.html" />
-    <link rel="prev" title="Atomic Projections" href="atomic_projections.html" />
+    <link rel="next" title="Filtering data" href="filter.html" />
+    <link rel="prev" title="ElectronicBandStructure" href="ebs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -108,7 +108,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -366,7 +366,17 @@
   <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="atomic_projections.html">Atomic Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ebs.html">ElectronicBandStructure</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">2D spin-texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpath.html">K Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
 </ul>
 
   </div>
@@ -400,7 +410,7 @@
               
   <section id="d-spin-texture">
 <span id="fermi2d"></span><h1>2D spin-texture<a class="headerlink" href="#d-spin-texture" title="Permalink to this heading">#</a></h1>
-<p>This module can be utilized to visualize the constant energy surface spin textures in a given system. This feature is particularly useful in identifying Rashba and Dresselhaus type spin-splitting effects, analyzing the topology of Fermi-surface, and examining Lifshitz transitions. To plot 2D spin texture, we require a 2D <span class="math notranslate nohighlight">\(k\)</span>-grid centered a certain special <span class="math notranslate nohighlight">\(k\)</span>-point in Brillouin zone near which we want to examine the spin-texture in <span class="math notranslate nohighlight">\(k\)</span>-space (see section <span class="xref std std-ref">labelkmesh</span> regarding generation of 2D <span class="math notranslate nohighlight">\(k\)</span>-mesh).</p>
+<p>This module can be utilized to visualize the constant energy surface spin textures in a given system. This feature is particularly useful in identifying Rashba and Dresselhaus type spin-splitting effects, analyzing the topology of Fermi-surface, and examining Lifshitz transitions. To plot 2D spin texture, we require a 2D <span class="math notranslate nohighlight">\(k\)</span>-grid centered a certain special <span class="math notranslate nohighlight">\(k\)</span>-point in Brillouin zone near which we want to examine the spin-texture in <span class="math notranslate nohighlight">\(k\)</span>-space (see section <a class="reference internal" href="../examples/05-other/plotting_2dkmesh_generation.html#example-kmesh-generator"><span class="std std-ref">Example of kmesh_generator</span></a> regarding generation of 2D <span class="math notranslate nohighlight">\(k\)</span>-mesh).</p>
 <p>Usage: To plot <span class="math notranslate nohighlight">\(S_x\)</span> spin component at a constant energy surface <span class="math notranslate nohighlight">\(E = E_{F} + 0.60\,eV\)</span> (spin=1, 2, 3 for <span class="math notranslate nohighlight">\(S_x\)</span>, <span class="math notranslate nohighlight">\(S_y\)</span>, <span class="math notranslate nohighlight">\(S_z\)</span>, respectively):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="s1">&#39;PROCAR&#39;</span><span class="p">,</span> <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR&#39;</span><span class="p">,</span> <span class="n">st</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span> <span class="n">noarrow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">)</span>
 </pre></div>
@@ -435,7 +445,56 @@ Usage:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<span class="target" id="module-pyprocar.scriptFermi2D"></span></section>
+<span class="target" id="module-pyprocar.scripts.scriptFermi2D"></span><dl class="py function">
+<dt class="sig sig-object py" id="pyprocar.scripts.scriptFermi2D.fermi2D">
+<span class="sig-prename descclassname"><span class="pre">pyprocar.scripts.scriptFermi2D.</span></span><span class="sig-name descname"><span class="pre">fermi2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'plain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lobster</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbitals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_z_plane</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_symm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_texture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_projection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'z'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_arrow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axes_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exportplt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyprocar/scripts/scriptFermi2D.html#fermi2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scripts.scriptFermi2D.fermi2D" title="Permalink to this definition">#</a></dt>
+<dd><p>This function plots the 2d fermi surface in the z = 0 plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<em>str</em><em>,</em>) – This parameter sets the code to parse, by default “vasp”</p></li>
+<li><p><strong>dirname</strong> (<em>str</em><em>, </em><em>optional</em>) – This parameter is the directory of the calculation, by default ‘’</p></li>
+<li><p><strong>lobster</strong> (<em>bool</em><em>, </em><em>optional</em>) – A boolean value to determine to use lobster, by default False</p></li>
+<li><p><strong>band_indices</strong> (<em>List</em><em>[</em><em>List</em><em>]</em>) – A list of list that contains band indices for a given spin</p></li>
+<li><p><strong>band_colors</strong> (<em>List</em><em>[</em><em>List</em><em>]</em>) – A list of list that contains colors for the band index
+corresponding the band_indices for a given spin</p></li>
+<li><p><strong>spins</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of spins, by default [0]</p></li>
+<li><p><strong>atoms</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of atoms, by default None</p></li>
+<li><p><strong>orbitals</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of orbitals, by default None</p></li>
+<li><p><strong>energy</strong> (<em>float</em><em>, </em><em>optional</em>) – The energy to generate the iso surface.
+When energy is None the 0 is used by default, which is the fermi energy,
+by default None</p></li>
+<li><p><strong>k_z_plane</strong> (<em>float</em><em>, </em><em>optional</em>) – Which K_z plane to generate 2d fermi surface, by default 0.0</p></li>
+<li><p><strong>rot_symm</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 1</p></li>
+<li><p><strong>translate</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Matrix to translate the kpoints, by default [0, 0, 0]</p></li>
+<li><p><strong>rotation</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Matrix to rotate the kpoints, by default [0, 0, 0, 1]</p></li>
+<li><p><strong>savefig</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename to save the plot as., by default None</p></li>
+<li><p><strong>spin_texture</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to determine if spin arrows are plotted, by default False</p></li>
+<li><p><strong>arrow_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Inversely determines the arrow size, by default None</p></li>
+<li><p><strong>arrow_color</strong> (<em>List</em><em>[</em><em>int</em><em>] or </em><em>str</em><em>, </em><em>optional</em>) – Either a list for the rbg value or a string for the color, by default None</p></li>
+<li><p><strong>arrow_density</strong> (<em>float</em><em>, </em><em>optional</em>) – Inversely determines the arrow density</p></li>
+<li><p><strong>no_arrow</strong> (<em>bool</em><em>, </em><em>optional</em>) – A boolean value to determine if arrows or a heat map is produced for spins, by default False</p></li>
+<li><p><strong>add_axes_labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to add axes labels, by default True</p></li>
+<li><p><strong>add_legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to add legend, by default True</p></li>
+<li><p><strong>exportplt</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value where to return the matplotlib.pyplot state plt, by default False</p></li>
+<li><p><strong>color_bar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to plot the color bar, by default False</p></li>
+<li><p><strong>cmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – The colormap to be used, by default False</p></li>
+<li><p><strong>repair</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option for vasp to repair the procar file, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the matplotlib.pyplot state plt</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.pyplot</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – invalid option –translate</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -446,17 +505,17 @@ Usage:</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="atomic_projections.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="ebs.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Atomic Projections</p>
+          <p class="prev-next-title">ElectronicBandStructure</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="../dftprep/index.html" title="next page">
+  <a class='right-next' id="next-link" href="filter.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">DFT Prep</p>
+      <p class="prev-next-title">Filtering data</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -485,6 +544,17 @@ Usage:</p>
   <a class="reference internal nav-link" href="#export-plot-as-a-matplotlib-pyplot-object">
    Export plot as a matplotlib.pyplot object
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pyprocar.scripts.scriptFermi2D.fermi2D">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       fermi2D()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
 </ul>
 

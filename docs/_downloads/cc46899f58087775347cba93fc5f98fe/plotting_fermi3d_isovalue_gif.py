@@ -3,7 +3,7 @@
 .. _ref_plotting_fermi3d_isovalue_gif:
 
 Plotting fermi3d isovalue_gif
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d isovalue_gif example.
 
@@ -43,7 +43,7 @@ fermiHandler = pyprocar.FermiHandler(
 
 ###############################################################################
 # Plain mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 # 
 #
 

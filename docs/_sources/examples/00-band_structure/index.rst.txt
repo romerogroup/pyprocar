@@ -3,7 +3,7 @@
 .. _sphx_glr_examples_00-band_structure:
 
 Band Structure
--------------
+-------------------------------
 
 These examples demonstrate the band structure plotting capabilities.
 
@@ -11,6 +11,23 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Comparing band structures example.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_compare_bands_thumb.png
+    :alt: Comparing band structures
+
+  :ref:`sphx_glr_examples_00-band_structure_plotting_compare_bands.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Comparing band structures</div>
+    </div>
 
 
 .. raw:: html
@@ -89,6 +106,7 @@ These examples demonstrate the band structure plotting capabilities.
 .. toctree::
    :hidden:
 
+   /examples/00-band_structure/plotting_compare_bands
    /examples/00-band_structure/plotting_noncolinear_qe
    /examples/00-band_structure/plotting_noncolinear_vasp
    /examples/00-band_structure/plotting_spin_polarized

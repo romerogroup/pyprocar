@@ -18,7 +18,7 @@ PyProcar
 	 	<a href="./examples/index.html"><center><img src="_static/images/welcome.png" alt="pyprocar" width="75%"/></a>
     </div>
 
-|
+
 PyProcar is a robust, open-source Python library used for pre- and post-processing of the electronic structure data coming from DFT calculations. 
 PyProcar provides a set of functions that manage data from the PROCAR format obtained from various DFT codes. 
 Basically, the PROCAR file is a projection of the Kohn-Sham states over atomic orbitals. 

@@ -1,4 +1,4 @@
-.. _labelcat:
+.. _cat:
 
 Concatenating multiple calculations
 ===================================
@@ -16,5 +16,5 @@ NOTE:
 When running Abinit in parallel the PROCAR is split into multiple files. To merge these files, set ``mergeparallel=True``. To detect if the calculation is spin polarized, provide ``abinit_output`` or set ``nspin`` value manually.
 To fix formatting errors in Abinit PROCARs (spin directions not seperated, total projections not calculated) set ``fixformat=True`` as well. 
 
-.. automodule:: pyprocar.scriptCat
+.. automodule:: pyprocar.scripts.scriptCat
 	:members:

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>VASP Preparation &#8212; PyProcar 5.5.0 documentation</title>
+    <title>VASP Preparation &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -51,7 +51,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'dftprep/vasp';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Examples" href="../examples/index.html" />
+    <link rel="next" title="Abinit Perperation" href="abinit.html" />
     <link rel="prev" title="Quantum Espresso Preparation" href="qe.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -108,7 +108,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -367,6 +367,10 @@
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="qe.html">Quantum Espresso Preparation</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">VASP Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abinit.html">Abinit Perperation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elk.html">Elk Perperation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="siesta.html">Siesta Perperation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lobster.html">Lobster Perperation</a></li>
 </ul>
 
   </div>
@@ -399,7 +403,7 @@
             <article class="bd-article" role="main">
               
   <section id="vasp-preparation">
-<h1>VASP Preparation<a class="headerlink" href="#vasp-preparation" title="Permalink to this heading">#</a></h1>
+<span id="vasp"></span><h1>VASP Preparation<a class="headerlink" href="#vasp-preparation" title="Permalink to this heading">#</a></h1>
 <p>This guide is here to help you prepare VASP Calculations to be used with pyprocar.</p>
 <ul class="simple">
 <li><p>Required files : PROCAR, OUTCAR (optional), KPOINTS (optional)</p></li>
@@ -409,7 +413,91 @@
 An OUTCAR file is required to extract the Fermi-energy and reciprocal lattice vectors. If a KPOINTS file is provided, the <span class="math notranslate nohighlight">\(k\)</span>-path will automatically be labeled in the band structure.
 To perform spin colinear calculations set <code class="docutils literal notranslate"><span class="pre">ISPIN</span> <span class="pre">=</span> <span class="pre">2</span></code> in the <code class="docutils literal notranslate"><span class="pre">INCAR</span></code>.
 To perform spin non-colinear calculations set <code class="docutils literal notranslate"><span class="pre">ISPIN</span> <span class="pre">=</span> <span class="pre">2</span></code> and <code class="docutils literal notranslate"><span class="pre">LNONCOLLINEAR</span> <span class="pre">=</span> <span class="pre">.TRUE.</span></code>.</p>
-<p>First perform a self-consistent calculation with a <span class="math notranslate nohighlight">\(k\)</span>-mesh grid. Then set <code class="docutils literal notranslate"><span class="pre">ICHARG=11</span></code> in the INCAR and create a KPOINTS file containing the :math:-<cite>k</cite>-path. This can be done with the <span class="xref std std-ref">labelkpath</span> feature in PyProcar.</p>
+<p>First perform a self-consistent calculation with a <span class="math notranslate nohighlight">\(k\)</span>-mesh grid. Then set <code class="docutils literal notranslate"><span class="pre">ICHARG=11</span></code> in the INCAR and create a KPOINTS file containing the :math:-<cite>k</cite>-path. This can be done with the <a class="reference internal" href="../user-guide/kpath.html#kpath"><span class="std std-ref">K Path</span></a> feature in PyProcar.</p>
+<section id="preparing-calculations">
+<h2>Preparing Calculations<a class="headerlink" href="#preparing-calculations" title="Permalink to this heading">#</a></h2>
+<p>To use VASP with QE, one has to run various calculations in independent directories. Here, we will show examples for the different calculations.</p>
+<section id="band-structure">
+<h3>Band Structure<a class="headerlink" href="#band-structure" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Create directory called <code class="docutils literal notranslate"><span class="pre">scf</span></code>.</p></li>
+<li><p>Perform self-consistent calculation in this <code class="docutils literal notranslate"><span class="pre">scf</span></code> directory.</p></li>
+<li><p>Create directory called <code class="docutils literal notranslate"><span class="pre">bands</span></code>.</p></li>
+<li><p>Move the CHGCAR file in the <code class="docutils literal notranslate"><span class="pre">scf</span></code> directory to the <code class="docutils literal notranslate"><span class="pre">bands</span></code> directory</p></li>
+<li><p>Create a KPOINTS file containing the :math:-<cite>k</cite>-path. This can be done with the <a class="reference internal" href="../user-guide/kpath.html#kpath"><span class="std std-ref">K Path</span></a> feature in PyProcar.</p></li>
+<li><p>Make sure to set <code class="docutils literal notranslate"><span class="pre">LORBIT=11</span></code> or <code class="docutils literal notranslate"><span class="pre">LORBIT=12</span></code> for the INCAR in <code class="docutils literal notranslate"><span class="pre">bands</span></code> directory</p></li>
+<li><p>Perform a non-self consistent calculation in the <code class="docutils literal notranslate"><span class="pre">bands</span></code> by setting <code class="docutils literal notranslate"><span class="pre">ICHARG=11</span></code> in the INCAR.</p></li>
+<li><p>Run pyprocar.bandsplot(dirname = ‘bands’ ,mode = ‘plain’, code = ‘vasp’)</p></li>
+</ol>
+</section>
+<section id="density-of-states">
+<h3>Density of States<a class="headerlink" href="#density-of-states" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Create directory called <code class="docutils literal notranslate"><span class="pre">scf</span></code>.</p></li>
+<li><p>Perform self-consistent calculation in this <code class="docutils literal notranslate"><span class="pre">scf</span></code> directory.</p></li>
+<li><p>Create directory called <code class="docutils literal notranslate"><span class="pre">dos</span></code>.</p></li>
+<li><p>Move the CHGCAR file in the <code class="docutils literal notranslate"><span class="pre">scf</span></code> directory to the <code class="docutils literal notranslate"><span class="pre">dos</span></code> directory.</p></li>
+<li><p>Make sure there is a kmesh in the KPOINTS file in the <code class="docutils literal notranslate"><span class="pre">dos</span></code> directory.</p></li>
+<li><p>Make sure to set <code class="docutils literal notranslate"><span class="pre">LORBIT=11</span></code> or <code class="docutils literal notranslate"><span class="pre">LORBIT=12</span></code> for the INCAR in <code class="docutils literal notranslate"><span class="pre">dos</span></code> directory</p></li>
+<li><p>Perform a non-self consistent calculation in the <code class="docutils literal notranslate"><span class="pre">dos</span></code> by setting <code class="docutils literal notranslate"><span class="pre">ICHARG=11</span></code> in the INCAR.</p></li>
+<li><p>Run pyprocar.dosplot(dirname = ‘bands’ ,mode = ‘plain’, code = ‘vasp’)</p></li>
+</ol>
+</section>
+<section id="band-structure-and-density-of-states">
+<h3>Band Structure and Density of States<a class="headerlink" href="#band-structure-and-density-of-states" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Run the band structure and dos calculation as stated above</p></li>
+<li><p>Run pyprocar.bandsdosplot(bands_dirname = ‘bands’, dos_dirname = ‘dos’, bands_mode = ‘plain’, dos_mode = ‘plain’, code = ‘vasp’)</p></li>
+</ol>
+</section>
+<section id="fermi">
+<h3>Fermi<a class="headerlink" href="#fermi" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Create directory called <code class="docutils literal notranslate"><span class="pre">scf</span></code>.</p></li>
+<li><p>Perform self-consistent calculation in this <code class="docutils literal notranslate"><span class="pre">scf</span></code> directory.</p></li>
+<li><p>Create directory called <code class="docutils literal notranslate"><span class="pre">fermi</span></code>.</p></li>
+<li><p>Move the CHGCAR file in the <code class="docutils literal notranslate"><span class="pre">scf</span></code> directory to the <code class="docutils literal notranslate"><span class="pre">fermi</span></code> directory.</p></li>
+<li><p>Make sure there is a kmesh in the KPOINTS file in the <code class="docutils literal notranslate"><span class="pre">fermi</span></code> directory.</p></li>
+<li><p>Make sure to set <code class="docutils literal notranslate"><span class="pre">LORBIT=11</span></code> or <code class="docutils literal notranslate"><span class="pre">LORBIT=12</span></code> for the INCAR in <code class="docutils literal notranslate"><span class="pre">fermi</span></code> directory</p></li>
+<li><p>Perform a non-self consistent calculation in the <code class="docutils literal notranslate"><span class="pre">fermi</span></code> by setting <code class="docutils literal notranslate"><span class="pre">ICHARG=11</span></code> in the INCAR.</p></li>
+<li><p>Run pyprocar.FermiHandler(dirname = ‘fermi’, code = ‘vasp’)</p></li>
+</ol>
+</section>
+<section id="k-points-format">
+<h3>K-Points Format<a class="headerlink" href="#k-points-format" title="Permalink to this heading">#</a></h3>
+<p>The <span class="math notranslate nohighlight">\(k\)</span>-path can be specified in <code class="docutils literal notranslate"><span class="pre">KPOINTS</span></code> which is used for the band structure calculation. Here is an example with <span class="math notranslate nohighlight">\(k\)</span>-path</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>50 ! Grid points
+Line_mode
+reciprocal
+0.0 0.0 0.0 ! GAMMA
+0.5 -0.5 0.5 ! H
+
+0.5 -0.5 0.5 ! H
+0.0 0.0 0.5 ! N
+
+0.0 0.0 0.5 ! N
+0.0 0.0 0.0 ! GAMMA
+
+0.0 0.0 0.0 ! GAMMA
+0.25 0.25 0.25 ! P
+
+0.25 0.25 0.25 ! P
+0.5 -0.5 0.5 ! H
+
+0.25 0.25 0.25 ! P
+0.0 0.0 0.5 ! N
+</pre></div>
+</div>
+</section>
+<section id="magnetic-calculations">
+<h3>Magnetic Calculations<a class="headerlink" href="#magnetic-calculations" title="Permalink to this heading">#</a></h3>
+<p>Magnetic calculations follow the same steps as above, but it requires additional parameters</p>
+<p><strong>Colinear-Spin</strong>
+To perform spin colinear calculations set <code class="docutils literal notranslate"><span class="pre">ISPIN</span> <span class="pre">=</span> <span class="pre">2</span></code> in the <code class="docutils literal notranslate"><span class="pre">INCAR</span></code>.</p>
+<p><strong>Non-colinear-Spin</strong>
+To perform spin non-colinear calculations set <code class="docutils literal notranslate"><span class="pre">ISPIN</span> <span class="pre">=</span> <span class="pre">2</span></code> and <code class="docutils literal notranslate"><span class="pre">LNONCOLLINEAR</span> <span class="pre">=</span> <span class="pre">.TRUE.</span></code>.</p>
+</section>
+</section>
 </section>
 
 
@@ -427,10 +515,10 @@ To perform spin non-colinear calculations set <code class="docutils literal notr
           <p class="prev-next-title">Quantum Espresso Preparation</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="../examples/index.html" title="next page">
+  <a class='right-next' id="next-link" href="abinit.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Examples</p>
+      <p class="prev-next-title">Abinit Perperation</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -443,6 +531,55 @@ To perform spin non-colinear calculations set <code class="docutils literal notr
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#preparing-calculations">
+   Preparing Calculations
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#band-structure">
+     Band Structure
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#density-of-states">
+     Density of States
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#band-structure-and-density-of-states">
+     Band Structure and Density of States
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#fermi">
+     Fermi
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#k-points-format">
+     K-Points Format
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#magnetic-calculations">
+     Magnetic Calculations
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Compare bands &#8212; PyProcar 5.5.0 documentation</title>
+    <title>Compare bands &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -51,6 +51,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/comparebands';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Density of States" href="dos.html" />
+    <link rel="prev" title="Concatenating multiple calculations" href="cat.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -106,7 +108,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -130,7 +132,7 @@
                     </li>
                 
 
-                    <li class="nav-item">
+                    <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="index.html">
                         User Guide
                       </a>
@@ -245,7 +247,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -267,7 +269,7 @@
                     </li>
                 
 
-                    <li class="nav-item">
+                    <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="index.html">
                         User Guide
                       </a>
@@ -356,6 +358,32 @@
   </div>
 
   
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="atomic_projections.html">Atomic Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Compare bands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ebs.html">ElectronicBandStructure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fermi2d.html">2D spin-texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpath.html">K Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -381,7 +409,7 @@
             <article class="bd-article" role="main">
               
   <section id="compare-bands">
-<span id="labelbandscompare"></span><h1>Compare bands<a class="headerlink" href="#compare-bands" title="Permalink to this heading">#</a></h1>
+<span id="comparebands"></span><h1>Compare bands<a class="headerlink" href="#compare-bands" title="Permalink to this heading">#</a></h1>
 <p>This module is useful to compare bands from different materials on the same band structure plot. The bands are plotted for the same <span class="math notranslate nohighlight">\(k\)</span>-path in order to have a meaningful comparison but they do not need to have the same number of <span class="math notranslate nohighlight">\(k\)</span>-points in each interval.
 This is acheived by setting <code class="docutils literal notranslate"><span class="pre">show=False</span></code> in pyprocar.bandsplot for the first plot so that the figure is not cleared when show() is called. Any number of different modes of plots can be plot on the same figure with this function. The <code class="docutils literal notranslate"><span class="pre">savefig</span></code> parameter can be used to save the figure if required.</p>
 <p>Usage:</p>
@@ -390,7 +418,7 @@ This is acheived by setting <code class="docutils literal notranslate"><span cla
 </pre></div>
 </div>
 <p>The above command plots the figure displayed below. The black bands are plain bands of <span class="math notranslate nohighlight">\(SrVO_3\)</span> calculated from VASP and the jet colormap is d orbital projected bands of the same material calculated from Elk.</p>
-<img alt="user-guide/images/ElkvsVASP.png" src="user-guide/images/ElkvsVASP.png" />
+<img alt="../_images/ElkvsVASP.png" src="../_images/ElkvsVASP.png" />
 </section>
 
 
@@ -401,6 +429,20 @@ This is acheived by setting <code class="docutils literal notranslate"><span cla
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="cat.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Concatenating multiple calculations</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="dos.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Density of States</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
 </div>
             </footer>
             

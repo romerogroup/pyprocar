@@ -21,7 +21,7 @@
 .. _ref_plotting_fermi3d_cross_section:
 
 Plotting fermi3d cross_section
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d cross_section example.
 
@@ -99,7 +99,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 48-52
 
 Cross section
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -159,7 +159,7 @@ Cross section
 .. GENERATED FROM PYTHON SOURCE LINES 82-86
 
 Cross section. Save slice
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -224,7 +224,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.794 seconds)
+   **Total running time of the script:** ( 0 minutes  9.723 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_cross_section.py:

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Atomic Projections &#8212; PyProcar 5.5.0 documentation</title>
+    <title>Atomic Projections &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -51,7 +51,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/atomic_projections';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="2D spin-texture" href="fermi2d.html" />
+    <link rel="next" title="Band structure" href="bands.html" />
     <link rel="prev" title="User Guide" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -108,7 +108,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -366,7 +366,17 @@
   <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Atomic Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ebs.html">ElectronicBandStructure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fermi2d.html">2D spin-texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpath.html">K Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
 </ul>
 
   </div>
@@ -416,10 +426,8 @@ For colinear spin calculations setting <code class="docutils literal notranslate
 <section id="atom-projection">
 <h2>2. Atom projection<a class="headerlink" href="#atom-projection" title="Permalink to this heading">#</a></h2>
 <p>The projection of atoms onto bands can provide information such as which atoms contribute to the electronic states near the Fermi level.
-PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO:math:<cite>_3</cite>, the indexes of <code class="docutils literal notranslate"><span class="pre">atoms</span></code> for Sr, V and the three O atoms would be 0,1 and 2,3,4 respectively.</p>
-<blockquote>
-<div><p>It is also possible to include more than one type of atom by using an array such as <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[0,1,3]</span></code>.</p>
-</div></blockquote>
+PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO:math:<cite>_3</cite>, the indexes of <code class="docutils literal notranslate"><span class="pre">atoms</span></code> for Sr, V and the three O atoms would be 0,1 and 2,3,4 respectively.
+It is also possible to include more than one type of atom by using an array such as <code class="docutils literal notranslate"><span class="pre">atoms</span> <span class="pre">=</span> <span class="pre">[0,1,3]</span></code>.</p>
 </section>
 <section id="orbital-projection">
 <h2>3. Orbital projection<a class="headerlink" href="#orbital-projection" title="Permalink to this heading">#</a></h2>
@@ -428,36 +436,36 @@ For instance, to identify correlated <span class="math notranslate nohighlight">
 It is possible to include more than one type of orbital projection.
 The mapping of the index of orbitals to be used in <code class="docutils literal notranslate"><span class="pre">orbitals</span></code> is as follows (this is the same order from the PROCAR file).
 Quantum Espresso, VASP and Abinit follows this order.</p>
-<img alt="user-guide/images/orbitals.png" src="user-guide/images/orbitals.png" />
-<p>In Quantum Espresso when there is a noncolinear spin-orbit calculation, the orbitals will be in the coupled basis, therefore the mapping of the index of the orbitals will be as follows.
-.. code-block:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span><span class="n">caption</span><span class="p">:</span> <span class="n">coupled</span> <span class="n">orbitals</span> <span class="nb">list</span>
+<img alt="../_images/orbitals.png" src="../_images/orbitals.png" />
+<p>In Quantum Espresso when there is a noncolinear spin-orbit calculation, the orbitals will be in the JM basis, therefore the index mapping of the orbitals will be the following.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">JM orbital mapping</span><a class="headerlink" href="#id2" title="Permalink to this code">#</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">1</span>
 
-    <span class="n">orbitals</span> <span class="o">=</span> <span class="p">[</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">0</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">1</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">2</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">3</span>
 
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">2</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">3</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">4</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">5</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">6</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">7</span>
 
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">4</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">5</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">6</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">7</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">8</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">9</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">10</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">11</span>
 
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">8</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">9</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">10</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">11</span>
-
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">12</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">13</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">14</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">15</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">16</span>
-                     <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">17</span>
-                 <span class="p">]</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">12</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">13</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span> <span class="o">-&gt;</span> <span class="mi">14</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">15</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">16</span>
+                <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">},</span>  <span class="o">-&gt;</span> <span class="mi">17</span>
+            <span class="p">]</span>
 </pre></div>
+</div>
 </div>
 <p>In Elk, the <span class="math notranslate nohighlight">\(Y_{lm}\)</span> projections of the atomic site resolved DOS are arranged in logical order in the BAND_S*A* files, namely: (l,m) = (0,0), (1,-1), (1,0), (1,1), (2,-2), (2,-1), (2,0), (2,1), (2,2), etc.,</p>
 <p>One or many of the above can be combined together to allow the user to probe into more specific queries such as a collinear spin projection of a certain orbital of a certain atom.</p>
@@ -479,10 +487,10 @@ Quantum Espresso, VASP and Abinit follows this order.</p>
           <p class="prev-next-title">User Guide</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="fermi2d.html" title="next page">
+  <a class='right-next' id="next-link" href="bands.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">2D spin-texture</p>
+      <p class="prev-next-title">Band structure</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>

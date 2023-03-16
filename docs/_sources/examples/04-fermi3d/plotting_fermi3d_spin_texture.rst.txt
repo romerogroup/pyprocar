@@ -21,7 +21,7 @@
 .. _ref_plotting_fermi3d_spin_texture:
 
 Plotting fermi3d spin_texture
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting fermi3d spin_texture example.
 
@@ -99,7 +99,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 48-52
 
 Spin Texture mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -136,7 +136,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.308 seconds)
+   **Total running time of the script:** ( 0 minutes  7.655 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin_texture.py:

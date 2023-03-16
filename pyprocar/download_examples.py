@@ -1,4 +1,5 @@
 import os
+import shutil
 import gdown
 
 # TODO Zip file in google drive then download
@@ -10,9 +11,9 @@ examples_dict = {"Fe" :
                         {
                         'non-colinear':
                             {
-                            'bands':'',
-                            'dos':'',
-                            'fermi':''},
+                            'bands':'1Eo1VUuT6rmEKMy2-NtYo2kVH5Vc4PeFJ',
+                            'dos':'1y1Q0w31iN_HAUDnm4lcTdqPfWKggYDRE',
+                            'fermi':'1XLiYwN_W3AFAzbGOGfGVn-ha5tXFwYLw'},
                         'non-spin-polarized':
                             {
                             'bands':'1__DI_iqS3zFVerDMh9WjqXy8oE2XaJkK?usp=share_link',
@@ -100,16 +101,21 @@ def download_example(material: str,
 
     url  = f'https://drive.google.com/drive/folders/{examples_dict[material][code][spin_calc_type][calc_type]}'
 
-    dir_name = f'{material}-{code}-{spin_calc_type}-{calc_type}_example'
+    dir_name = f'{material}{os.sep}{code}{os.sep}{spin_calc_type}{os.sep}'
+
+
+    
     if save_dir != '':
         output = f"{save_dir}{os.sep}{dir_name}.zip"
         to = f"{save_dir}{os.sep}{dir_name}{os.sep}"
     else:
         output=f'{dir_name}.zip'
         to = f"{dir_name}{os.sep}"
-        
-    gdown.download_folder(url=url, output=to,use_cookies=False)
-    # gdown.download(url=url, output=output,use_cookies=False)
-    # gdown.extractall(output, to = to)
 
-    return to
+    print(f"Saving to : {to} ")
+
+    gdown.download_folder(url=url, output=to,use_cookies=False)
+
+    final_dir = to + calc_type
+    return final_dir
+

@@ -3,7 +3,7 @@
 .. _sphx_glr_examples_03-fermi2d:
 
 Fermi 2D
--------------
+-------------------------------
 
 These examples demonstrate the Fermi2D plotting capabilities.
 

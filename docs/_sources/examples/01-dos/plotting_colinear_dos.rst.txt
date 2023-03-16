@@ -21,7 +21,7 @@
 .. _ref_plotting_colinear_dos:
 
 Plotting density of states
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting density example.
 
@@ -61,7 +61,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 33-35
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 .. GENERATED FROM PYTHON SOURCE LINES 35-41
 
@@ -87,14 +87,14 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002261B3179D0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0B97C790>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 42-49
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -133,14 +133,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002261B36DFA0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0B986AC0>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 64-71
 
 parametric_line mode
-++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
@@ -181,14 +181,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002262D045700>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A1A77BE50>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 88-93
 
 stack_species mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -222,14 +222,14 @@ stack_species mode
 
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002262D045280>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0CA43670>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 104-109
 
 stack_orbtials mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -263,14 +263,14 @@ stack_orbtials mode
 
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002261BC19340>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A1B535310>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 120-125
 
 overlay mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -301,14 +301,14 @@ overlay mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000226304F72E0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A1B36B4C0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.763 seconds)
+   **Total running time of the script:** ( 0 minutes  24.260 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_colinear_dos.py:

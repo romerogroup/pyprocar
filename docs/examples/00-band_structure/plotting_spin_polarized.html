@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting spin polarized band structures &#8212; PyProcar 5.5.0 documentation</title>
+    <title>Plotting spin polarized band structures &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -365,6 +365,7 @@
   <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plotting_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting spin polarized band structures</a></li>
@@ -473,7 +474,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_001.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_001.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002873DC874F0&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_001.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_001.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1414B6460&gt;
 </pre></div>
 </div>
 <p>The line-styles or line-colors, these may be changed in the ebs section in the :doc:’pyprocar/utils/default_settings.ini’ file.</p>
@@ -486,7 +487,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_002.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_002.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000287676B3130&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_002.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_002.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14125FBE0&gt;
 </pre></div>
 </div>
 </section>
@@ -508,9 +509,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_003.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_003.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>normalizing to :  (0, 1)
-
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000287673E5160&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_003.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_003.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1414FAF40&gt;
 </pre></div>
 </div>
 </section>
@@ -531,13 +530,10 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_004.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_004.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2.7540042621116334e-26
-normalizing to :  (0, 1)
-
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002873DC87550&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_004.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_004.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14125FD00&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.412 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.373 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plotting-spin-polarized-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e6316109fe1dbd60bebecc4c45535ecb/plotting_spin_polarized.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_spin_polarized.py</span></code></a></p>

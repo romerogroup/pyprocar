@@ -27,7 +27,7 @@ Currently, Elk only supports spin colinear plotting.
 
 The projection of atoms onto bands can provide information such as which atoms contribute to the electronic states near the Fermi level. 
 PyProcar counts each row of ions in the PROCAR file, starting from zero. In an example of a five atom SrVO:math:`_3`, the indexes of ``atoms`` for Sr, V and the three O atoms would be 0,1 and 2,3,4 respectively.
- It is also possible to include more than one type of atom by using an array such as ``atoms = [0,1,3]``. 
+It is also possible to include more than one type of atom by using an array such as ``atoms = [0,1,3]``. 
 
 
 =====================
@@ -40,36 +40,37 @@ It is possible to include more than one type of orbital projection.
 The mapping of the index of orbitals to be used in ``orbitals`` is as follows (this is the same order from the PROCAR file). 
 Quantum Espresso, VASP and Abinit follows this order. 
 
-.. image:: images/orbitals.png
+.. image:: ../images/orbitals.png
 
-In Quantum Espresso when there is a noncolinear spin-orbit calculation, the orbitals will be in the coupled basis, therefore the mapping of the index of the orbitals will be as follows.
+In Quantum Espresso when there is a noncolinear spin-orbit calculation, the orbitals will be in the JM basis, therefore the index mapping of the orbitals will be the following.
+
 .. code-block::
-   :caption: coupled orbitals list
+    :caption: JM orbital mapping
 
-       orbitals = [
-                        {"l": 's', "j": 0.5, "m": -0.5}, -> 0
-                        {"l": 's', "j": 0.5, "m": 0.5},  -> 1
+    orbitals = [
+                    {"l": 's', "j": 0.5, "m": -0.5}, -> 0
+                    {"l": 's', "j": 0.5, "m": 0.5},  -> 1
 
-                        {"l": 'p', "j": 0.5, "m": -0.5}, -> 2
-                        {"l": 'p', "j": 0.5, "m": 0.5},  -> 3
+                    {"l": 'p', "j": 0.5, "m": -0.5}, -> 2
+                    {"l": 'p', "j": 0.5, "m": 0.5},  -> 3
 
-                        {"l": 'p', "j": 1.5, "m": -1.5}, -> 4
-                        {"l": 'p', "j": 1.5, "m": -0.5}, -> 5
-                        {"l": 'p', "j": 1.5, "m": -0.5}, -> 6
-                        {"l": 'p', "j": 1.5, "m": 1.5},  -> 7
+                    {"l": 'p', "j": 1.5, "m": -1.5}, -> 4
+                    {"l": 'p', "j": 1.5, "m": -0.5}, -> 5
+                    {"l": 'p', "j": 1.5, "m": -0.5}, -> 6
+                    {"l": 'p', "j": 1.5, "m": 1.5},  -> 7
 
-                        {"l": 'd', "j": 1.5, "m": -1.5}, -> 8
-                        {"l": 'd', "j": 1.5, "m": -0.5}, -> 9
-                        {"l": 'd', "j": 1.5, "m": -0.5}, -> 10
-                        {"l": 'd', "j": 1.5, "m": 1.5},  -> 11
+                    {"l": 'd', "j": 1.5, "m": -1.5}, -> 8
+                    {"l": 'd', "j": 1.5, "m": -0.5}, -> 9
+                    {"l": 'd', "j": 1.5, "m": -0.5}, -> 10
+                    {"l": 'd', "j": 1.5, "m": 1.5},  -> 11
 
-                        {"l": 'd', "j": 2.5, "m": -2.5}, -> 12
-                        {"l": 'd', "j": 2.5, "m": -1.5}, -> 13
-                        {"l": 'd', "j": 2.5, "m": -0.5}, -> 14
-                        {"l": 'd', "j": 2.5, "m": 0.5},  -> 15
-                        {"l": 'd', "j": 2.5, "m": 1.5},  -> 16
-                        {"l": 'd', "j": 2.5, "m": 2.5},  -> 17
-                    ]
+                    {"l": 'd', "j": 2.5, "m": -2.5}, -> 12
+                    {"l": 'd', "j": 2.5, "m": -1.5}, -> 13
+                    {"l": 'd', "j": 2.5, "m": -0.5}, -> 14
+                    {"l": 'd', "j": 2.5, "m": 0.5},  -> 15
+                    {"l": 'd', "j": 2.5, "m": 1.5},  -> 16
+                    {"l": 'd', "j": 2.5, "m": 2.5},  -> 17
+                ]
 
 In Elk, the :math:`Y_{lm}` projections of the atomic site resolved DOS are arranged in logical order in the BAND_S*A* files, namely: (l,m) = (0,0), (1,-1), (1,0), (1,1), (2,-2), (2,-1), (2,0), (2,1), (2,2), etc., 
 

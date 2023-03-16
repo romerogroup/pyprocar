@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>User Guide &#8212; PyProcar 5.5.0 documentation</title>
+    <title>User Guide &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -52,7 +52,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Atomic Projections" href="atomic_projections.html" />
-    <link rel="prev" title="Authors &amp; Citation" href="../getting-started/authors.html" />
+    <link rel="prev" title="Why PyProcar?" href="../getting-started/why.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -108,7 +108,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 5.5.0 documentation</p>
+    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
   
 </a>
     
@@ -366,7 +366,17 @@
   <div class="bd-toc-item navbar-nav">
     <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="atomic_projections.html">Atomic Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dos.html">Density of States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ebs.html">ElectronicBandStructure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fermi2d.html">2D spin-texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpath.html">K Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
 </ul>
 
   </div>
@@ -456,9 +466,51 @@ For spin polarized or non-collinear spin calculations there are additional block
 <li class="toctree-l2"><a class="reference internal" href="atomic_projections.html#orbital-projection">3. Orbital projection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="bands.html">Band structure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#plain-band-structure">1. Plain band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#spin-projection">2. Spin projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#atom-projection">3. Atom projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#orbital-projection">4. Orbital projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#converting-k-points-from-reduced-to-cartesian-coordinates">Converting <span class="math notranslate nohighlight">\(k\)</span>-points from reduced to cartesian coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bands.html#plotting-band-structures-with-a-discontinuous-k-path">Plotting band structures with a discontinuous <span class="math notranslate nohighlight">\(k\)</span>-path</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cat.html#pyprocar.scripts.scriptCat.cat"><code class="docutils literal notranslate"><span class="pre">cat()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dos.html">Density of States</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dos.html#mode-plain">1. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html#mode-parametric">2. <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html#mode-parametric-line">3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html#mode-stack">4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html#mode-stack-species">5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dos.html#mode-stack-orbitals">6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ebs.html">ElectronicBandStructure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fermi2d.html">2D spin-texture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="fermi2d.html#translate-and-rotate-the-2d-kpoint-mesh">Translate and Rotate the 2D KPOINT mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fermi2d.html#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filtering data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#to-filter-selected-orbitals">To filter selected orbitals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#to-filter-selected-k-points">To filter selected <span class="math notranslate nohighlight">\(k\)</span>-points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#to-filter-selected-spins">To filter selected spins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#to-filter-selected-atoms">To filter selected atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kpath.html">K Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repair.html">Repair</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="repair.html#pyprocar.scripts.scriptRepair.repair"><code class="docutils literal notranslate"><span class="pre">repair()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unfold.html">Band unfolding</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="unfold.html#export-plot-as-a-matplotlib-pyplot-object">Export plot as a matplotlib.pyplot object</a></li>
 </ul>
 </li>
 </ul>
@@ -474,11 +526,11 @@ For spin polarized or non-collinear spin calculations there are additional block
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../getting-started/authors.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="../getting-started/why.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Authors &amp; Citation</p>
+          <p class="prev-next-title">Why PyProcar?</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="atomic_projections.html" title="next page">

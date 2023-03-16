@@ -21,7 +21,7 @@
 .. _ref_plotting_noncolinear_qe:
 
 Plotting non colinear band structures in Quantum Espresso
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting non colinear band structures in Quantum Espresso.
 
@@ -75,7 +75,7 @@ importing pyprocar and specifying local data_dir
 .. GENERATED FROM PYTHON SOURCE LINES 36-40
 
 Plain mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -102,14 +102,14 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000219B6225520>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A141891D90>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 46-52
 
 Parametric mode
-+++++++++++++++
++++++++++++++++++++++++++++++++++++++++
 Quantum Espresso expresses the projections in the coupled basis, 
 therefore orbitals takes different meanings.
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
@@ -148,16 +148,15 @@ For details on the meaning of the indices of the atomic projection please refer 
 
  .. code-block:: none
 
-    normalizing to :  (0, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000219B7E8EA00>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14125E430>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.348 seconds)
+   **Total running time of the script:** ( 0 minutes  1.359 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_noncolinear_qe.py:

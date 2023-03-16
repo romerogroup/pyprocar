@@ -149,3 +149,7 @@ _build/
 
 # PyTests
 .pytest_cache/
+
+my_tests/
+
+data/

@@ -3,7 +3,7 @@
 .. _ref_plotting_spin_polarized:
 
 Plotting spin polarized band structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting spin polarized band structures.
 
@@ -34,7 +34,7 @@ spins=[0,1]
 
 ###############################################################################
 # Plain mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do. 
 # The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.
@@ -56,7 +56,7 @@ pyprocar.bandsplot(
 
 ###############################################################################
 # Parametric mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 # 
@@ -77,7 +77,7 @@ pyprocar.bandsplot(
 
 ###############################################################################
 # Scatter mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # 
 #

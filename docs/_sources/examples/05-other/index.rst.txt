@@ -3,7 +3,7 @@
 .. _sphx_glr_examples_05-other:
 
 Other
--------------
+-------------------------------
 
 These examples demonstrate other capabilities.
 

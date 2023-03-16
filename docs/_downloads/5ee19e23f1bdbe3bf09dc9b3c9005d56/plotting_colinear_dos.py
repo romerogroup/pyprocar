@@ -3,7 +3,7 @@
 .. _ref_plotting_colinear_dos:
 
 Plotting density of states
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plotting density example.
 
@@ -31,7 +31,7 @@ data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}dos{os.sep}colinear{os.se
 
 ###############################################################################
 # Plain mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 
 pyprocar.dosplot(
                 code='qe', 
@@ -40,7 +40,7 @@ pyprocar.dosplot(
 
 ###############################################################################
 # Parametric mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 # 
@@ -62,7 +62,7 @@ pyprocar.dosplot(
 
 ###############################################################################
 # parametric_line mode
-# ++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 # 
@@ -86,7 +86,7 @@ pyprocar.dosplot(
 
 ###############################################################################
 # stack_species mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # 
 #
@@ -102,7 +102,7 @@ pyprocar.dosplot(
 
 ###############################################################################
 # stack_orbtials mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # 
 #
@@ -118,7 +118,7 @@ pyprocar.dosplot(
 
 ###############################################################################
 # overlay mode
-# +++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++
 #
 # 
 #
