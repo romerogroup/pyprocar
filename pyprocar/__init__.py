@@ -45,16 +45,15 @@ import trimesh
 # from pyprocar.utilsprocar import UtilsProcar
 # from pyprocar.procarunfold import ProcarUnfolder
 
-from .splash import welcome
-
 from .scripts import *
 from .io import *
 from . import io
 from . import core
 from . import utils
 from . import plotter
-from .download_examples import download_examples, download_example
+from .utils.download_examples import download_examples, download_example
 from .utils.defaults import Settings
+from .utils import welcome
 
 # TODO change all n* variables to n_* variable (norbital to n_orbital)
 # TODO remove importing skimage, pyvista, trimesh, matplotlib, numpy, and seekpath. It is not needed here

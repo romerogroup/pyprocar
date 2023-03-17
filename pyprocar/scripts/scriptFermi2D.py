@@ -16,7 +16,7 @@ from ..core import ProcarSymmetry
 from ..core import FermiSurface
 from ..io import ElkParser
 from ..io import AbinitParser
-from ..splash import welcome
+from ..utils import welcome
 from .. import io
 
 

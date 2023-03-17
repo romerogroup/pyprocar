@@ -1,5 +1,5 @@
 from ..utils import UtilsProcar
-from ..splash import welcome
+from ..utils import welcome
 
 
 # calls ProcarRepair

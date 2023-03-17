@@ -10,7 +10,7 @@ from typing import List, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ..splash import welcome
+from ..utils import welcome
 from .. import io
 from ..utils.info import orbital_names
 from ..plotter import DOSPlot

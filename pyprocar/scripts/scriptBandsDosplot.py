@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from .scriptDosplot import dosplot
 from .scriptBandsplot import bandsplot
-from ..splash import welcome
+from ..utils import welcome
 from ..io import vasp, qe 
 from ..utils.info import orbital_names
 from ..plotter import DOSPlot, EBSPlot

@@ -3,7 +3,7 @@ from ..io import ProcarParser
 from ..core import ProcarSelect
 from ..plotter import ProcarPlot
 from ..core import FermiSurface
-from ..splash import welcome
+from ..utils import welcome
 
 
 def Vector(

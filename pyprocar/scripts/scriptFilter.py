@@ -2,7 +2,7 @@
 from typing import List
 
 from ..utils import ProcarFileFilter
-from ..splash import welcome
+from ..utils import welcome
 
 
 def filter(

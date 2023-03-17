@@ -12,7 +12,7 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 from ..core import boolean_add
 from ..core import FermiSurface3D
-from ..splash import welcome
+from ..utils import welcome
 from ..utils import UtilsProcar
 from ..io import ProcarParser
 from ..core import ProcarSelect

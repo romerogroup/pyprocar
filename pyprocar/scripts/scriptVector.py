@@ -2,8 +2,8 @@ from ..utils import UtilsProcar
 from ..io import ProcarParser
 from ..core import ProcarSelect
 from ..plotter import ProcarPlot
-from ..fermisurface import FermiSurface
-from ..splash import welcome
+from ..core.fermisurface import FermiSurface
+from ..utils import welcome
 
 
 def Vector(

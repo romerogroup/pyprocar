@@ -10,7 +10,7 @@ from ..io import LobsterParser
 from ..io import ProcarParser
 from ..plotter import ProcarPlot
 from ..core import ProcarSelect
-from ..splash import welcome
+from ..utils import welcome
 from ..utils import UtilsProcar
 
 

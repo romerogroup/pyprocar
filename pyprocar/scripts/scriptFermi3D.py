@@ -16,7 +16,7 @@ from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
 
 
 from ..core import FermiSurface3D
-from ..splash import welcome
+from ..utils import welcome
 from ..utils import UtilsProcar
 from ..io.procarparser import ProcarParser
 from ..io.lobsterparser import LobsterFermiParser

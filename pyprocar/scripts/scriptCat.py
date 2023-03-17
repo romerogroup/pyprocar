@@ -11,7 +11,7 @@ import glob
 
 import numpy as np
 
-from ..splash import welcome
+from ..utils import welcome
 from ..utils import UtilsProcar
 from ..io import AbinitParser
 

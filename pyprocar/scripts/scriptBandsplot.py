@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from ..utils.info import orbital_names
 from .. import io
 from ..plotter import EBSPlot
-from ..splash import welcome
+from ..utils import welcome
 from ..utils.defaults import settings
 
 
