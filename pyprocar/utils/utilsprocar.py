@@ -129,7 +129,7 @@ class UtilsProcar:
         else:
             self.log.debug("File not exist, neither a gzipped version")
             print(FileName)
-            raise IOError("File not found")
+            raise IOError(f"File not found : {FileName}")
 
         self.log.debug("OpenFile()...done")
         return inFile

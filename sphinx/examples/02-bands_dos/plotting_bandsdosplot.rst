@@ -54,9 +54,9 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    bands_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}bands{os.sep}colinear{os.sep}Fe"
-    dos_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}dos{os.sep}colinear{os.sep}Fe"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    bands_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}bands"
+    dos_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}dos"
 
 
 
@@ -137,7 +137,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.097 seconds)
+   **Total running time of the script:** ( 0 minutes  1.025 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plotting_bandsdosplot.py:

@@ -61,7 +61,7 @@ The bandgap calculation should be done for non-self consistent (band structure) 
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-45
+.. GENERATED FROM PYTHON SOURCE LINES 33-47
 
 .. code-block:: default
 
@@ -70,8 +70,10 @@ importing pyprocar and specifying local data_dir
     import numpy as np
     import pyprocar
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-spin-polarized{os.sep}Fe{os.sep}bands"
+
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
+
     procar = f"{data_dir}{os.sep}PROCAR"
     outcar = f"{data_dir}{os.sep}OUTCAR"
 
@@ -98,7 +100,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.164 seconds)
+   **Total running time of the script:** ( 0 minutes  0.147 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plotting_bandgap.py:

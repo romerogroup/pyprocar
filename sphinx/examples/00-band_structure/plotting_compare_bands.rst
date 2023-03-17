@@ -47,7 +47,7 @@ First download the example files with the code below. Then replace data_dir belo
 importing pyprocar and specifying local data_dir
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-41
+.. GENERATED FROM PYTHON SOURCE LINES 32-43
 
 .. code-block:: default
 
@@ -55,9 +55,11 @@ importing pyprocar and specifying local data_dir
     import os
     import pyprocar
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    vasp_data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-spin-polarized{os.sep}Fe{os.sep}bands"
-    qe_data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}bands{os.sep}colinear{os.sep}Fe"
+
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+
+    vasp_data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
+    qe_data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}bands"
 
 
 
@@ -67,13 +69,13 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-45
+.. GENERATED FROM PYTHON SOURCE LINES 44-47
 
 When show is equal to False, bandsplot will return a EBSPlot object. 
 This object has information about the band structure and has matplotlib.axes.Axes object as an attribute.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-47
+.. GENERATED FROM PYTHON SOURCE LINES 47-49
 
 .. code-block:: default
 
@@ -92,15 +94,18 @@ This object has information about the band structure and has matplotlib.axes.Axe
 
  .. code-block:: none
 
+    PROCAR needs repairing
+    Repaired PROCAR is written at C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-spin-polarized\bands\PROCAR-repaired
+    Please use C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-spin-polarized\bands\PROCAR-repaired next time for better efficiency
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001410B24B940>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000149B49072E0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.527 seconds)
+   **Total running time of the script:** ( 0 minutes  0.481 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_compare_bands.py:

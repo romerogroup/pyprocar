@@ -33,24 +33,22 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='spin-polarized',
+                                spin_calc_type='spin-polarized-colinear',
                                 calc_type='dos')
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-25
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-32
+.. GENERATED FROM PYTHON SOURCE LINES 25-31
 
 .. code-block:: default
 
     import os
     import pyprocar
 
-
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}dos{os.sep}spin_colinear{os.sep}Fe"
-
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}dos"
 
 
 
@@ -58,7 +56,8 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-38
+
+.. GENERATED FROM PYTHON SOURCE LINES 32-37
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
@@ -66,7 +65,7 @@ Plain mode
 When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do. 
 The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-43
+.. GENERATED FROM PYTHON SOURCE LINES 37-42
 
 .. code-block:: default
 
@@ -89,17 +88,17 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0CA6A6D0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270BCB35DF0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-47
+.. GENERATED FROM PYTHON SOURCE LINES 43-46
 
 The line-styles or line-colors, these may be changed in the ebs section in the :doc:'pyprocar/utils/default_settings.ini' file.
 
 The keyword spins can also be used to select which spin bands to plot
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-54
+.. GENERATED FROM PYTHON SOURCE LINES 46-53
 
 .. code-block:: default
 
@@ -124,11 +123,11 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0C30C0D0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270AA9F34C0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-62
+.. GENERATED FROM PYTHON SOURCE LINES 54-61
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -138,7 +137,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-76
+.. GENERATED FROM PYTHON SOURCE LINES 61-75
 
 .. code-block:: default
 
@@ -170,11 +169,11 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0C36BE50>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270AB046F40>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 77-84
+.. GENERATED FROM PYTHON SOURCE LINES 76-83
 
 parametric_line mode
 +++++++++++++++++++++++++++++++++++++++
@@ -184,7 +183,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-100
+.. GENERATED FROM PYTHON SOURCE LINES 83-99
 
 .. code-block:: default
 
@@ -218,11 +217,11 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A2F196880>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CD8CC0A0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-106
+.. GENERATED FROM PYTHON SOURCE LINES 100-105
 
 stack_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -230,7 +229,7 @@ stack_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-116
+.. GENERATED FROM PYTHON SOURCE LINES 105-115
 
 .. code-block:: default
 
@@ -259,11 +258,11 @@ stack_species mode
 
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A31451AF0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CF9140D0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-122
+.. GENERATED FROM PYTHON SOURCE LINES 116-121
 
 stack_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -271,7 +270,7 @@ stack_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 122-133
+.. GENERATED FROM PYTHON SOURCE LINES 121-132
 
 .. code-block:: default
 
@@ -301,11 +300,11 @@ stack_orbtials mode
 
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A31853FA0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CFCE4D30>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-139
+.. GENERATED FROM PYTHON SOURCE LINES 133-138
 
 stack mode
 +++++++++++++++++++++++++++++++++++++++
@@ -313,7 +312,7 @@ stack mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-148
+.. GENERATED FROM PYTHON SOURCE LINES 138-147
 
 .. code-block:: default
 
@@ -340,14 +339,14 @@ stack mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A3173EFA0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CFBD8100>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  46.800 seconds)
+   **Total running time of the script:** ( 0 minutes  41.817 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_spin_polarized_dos.py:

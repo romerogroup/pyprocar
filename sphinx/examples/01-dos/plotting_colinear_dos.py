@@ -26,8 +26,9 @@ import os
 import pyprocar
 
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}dos{os.sep}colinear{os.sep}Fe"
+project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}dos"
+
 
 ###############################################################################
 # Plain mode

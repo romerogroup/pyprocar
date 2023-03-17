@@ -1061,7 +1061,7 @@ class DOSPlot:
         return None
     def set_yticks(self,  
                     tick_positions:List[int]=None, 
-                    tick_name:List[str]=None):
+                    tick_names:List[str]=None):
         """A method to set the yticks of the plot
 
         Parameters
@@ -1136,7 +1136,7 @@ class DOSPlot:
         self.ax.set_ylabel(label)
     
     def legend(self, 
-                label:List[str]=None):
+                labels:List[str]=None):
         """A method to include the legend
 
         Parameters

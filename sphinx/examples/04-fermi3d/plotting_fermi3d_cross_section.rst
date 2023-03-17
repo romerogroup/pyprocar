@@ -69,15 +69,16 @@ First download the example files with the code below. Then replace data_dir belo
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-47
+.. GENERATED FROM PYTHON SOURCE LINES 31-48
 
 .. code-block:: default
 
 
     import os
     import pyprocar
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}noncolinear{os.sep}Fe"
+
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
@@ -96,14 +97,14 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-52
+.. GENERATED FROM PYTHON SOURCE LINES 49-53
 
 Cross section
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-81
+.. GENERATED FROM PYTHON SOURCE LINES 53-82
 
 .. code-block:: default
 
@@ -156,14 +157,14 @@ Cross section
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-86
+.. GENERATED FROM PYTHON SOURCE LINES 83-87
 
 Cross section. Save slice
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-108
+.. GENERATED FROM PYTHON SOURCE LINES 87-109
 
 .. code-block:: default
 
@@ -224,7 +225,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.723 seconds)
+   **Total running time of the script:** ( 0 minutes  9.201 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_cross_section.py:

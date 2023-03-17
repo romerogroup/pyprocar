@@ -48,8 +48,8 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}noncolinear{os.sep}Fe"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
 
 
 
@@ -124,7 +124,7 @@ But you can change this by setting arrow_projection to one of the following
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\non-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -204,7 +204,7 @@ Spin Texture single color
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\non-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -286,7 +286,7 @@ Also you can specify the colors of the bands as well with band_colors
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\noncolinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\non-colinear\fermi
     bands           :  [[14, 15]]
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -307,7 +307,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.916 seconds)
+   **Total running time of the script:** ( 0 minutes  14.440 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

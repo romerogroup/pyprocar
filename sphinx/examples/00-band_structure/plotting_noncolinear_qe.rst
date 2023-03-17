@@ -33,7 +33,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='noncolinear',
+                                spin_calc_type='non-colinear',
                                 calc_type='bands')
 
 .. GENERATED FROM PYTHON SOURCE LINES 21-23
@@ -62,8 +62,8 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}bands{os.sep}noncolinear{os.sep}Fe"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}bands"
 
 
 
@@ -72,16 +72,16 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-40
+.. GENERATED FROM PYTHON SOURCE LINES 36-38
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 40-45
+.. GENERATED FROM PYTHON SOURCE LINES 38-45
 
 .. code-block:: default
+
+
 
     pyprocar.bandsplot(
                     code='qe', 
@@ -102,7 +102,7 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A141891D90>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002BBD42CD3A0>
 
 
 
@@ -149,14 +149,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14125E430>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002BBD4418C10>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.359 seconds)
+   **Total running time of the script:** ( 0 minutes  1.914 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_noncolinear_qe.py:
