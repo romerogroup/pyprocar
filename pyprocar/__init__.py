@@ -55,6 +55,9 @@ from .utils.download_examples import download_examples, download_example, downlo
 from .utils.defaults import Settings
 from .utils import welcome
 
+
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # TODO change all n* variables to n_* variable (norbital to n_orbital)
 # TODO remove importing skimage, pyvista, trimesh, matplotlib, numpy, and seekpath. It is not needed here
 # TODO create a function in utils that does ProcarFileFilter

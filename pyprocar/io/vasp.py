@@ -181,9 +181,9 @@ class Poscar(collections.abc.Mapping):
         
         self.variables = {}
         self.filename = filename
-        atoms, coordinates, lattice = self._parse_poscar()
+        self.atoms, self.coordinates, self.lattice = self._parse_poscar()
         self.structure = Structure(
-            atoms=atoms, fractional_coordinates=coordinates, lattice=lattice
+            atoms=self.atoms, fractional_coordinates=self.coordinates, lattice=self.lattice
         )
 
 
