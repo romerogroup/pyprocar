@@ -333,6 +333,7 @@ class Structure:
             The wyckoff positions
         """
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
+        print(self._spglib_cell)
         wyckoffs_temp = np.array(
             spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
         )

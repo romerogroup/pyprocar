@@ -321,33 +321,12 @@ def parse(code:str='vasp',
         kpointsfile = f"{dirname}{os.sep}KPOINTS"
         # e_fermi = 0
 
-        output = io.abinit.Output(abinit_output=outfile)
-        # e_fermi = 0
-        e_fermi = output.fermi
-        
-        # poscar = io.vasp.Poscar(filename=poscar_file)
-        structure = output.structure
-        reciprocal_lattice = output.structure.reciprocal_lattice
-        ab_kpoints = io.abinit.Kpoints(filename=kpointsfile)
+        parser = io.abinit.AbinitParser(abinit_output=outfile)
 
-        parser = io.abinit.Procar(
-                            filename=dirname,
-                            abinit_output=outfile,
-                            structure=output.structure,
-                            reciprocal_lattice=output.reclat,
-                            kpath=ab_kpoints,
-                            efermi=output.fermi,
-                        )
-
-
-        structure = parser.structure
-        kpoints = parser.kpoints
-        kpath = ab_kpoints.kpath
-        ebs = parser.ebs
-
-        ebs.bands +=  e_fermi
-
-
-        
+        ebs = parser.abinitprocarobject.ebs
+        kpath = parser.abinitprocarobject.ebs.kpath
+        e_fermi = parser.fermi
+        reciprocal_lattice = parser.reclat
+    ebs.bands += e_fermi
 
     return ebs, kpath, structure, reciprocal_lattice

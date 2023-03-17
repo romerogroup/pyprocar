@@ -53,7 +53,7 @@ examples_dict = {"Fe" :
                             'fermi':''},
                         'non-spin-polarized':
                             {
-                            'bands':'',
+                            'bands':'1Re6N2rj9AnzefmJOYLeUecMHbH2eMRWu',
                             'dos':'',
                             'fermi':''},
                         'spin-polarized-colinear':
@@ -87,7 +87,7 @@ def download_dev_data(examples_dirname: str = 'examples'):
 
     print('Storing development data in', data_dir)
     if not os.path.exists(data_dir):
-        os.mkdir(data_dir) 
+        os.mkdirs(data_dir) 
 
     # output = f"{data_dir}{os.sep}{examples_dirname}"
     to = f"{data_dir}{os.sep}{examples_dirname}{os.sep}{material_name}"
@@ -134,7 +134,7 @@ def download_example(material: str,
 
     print(f"Saving to : {to} ")
 
-    gdown.download_folder(url=url, output=to,use_cookies=False)
+    gdown.download_folder(url=url, output=to,use_cookies=False,remaining_ok=True)
 
     final_dir = to + calc_type
     return final_dir

@@ -197,7 +197,7 @@ class QEParser():
         # print(self.wfc_filenames)
         wfc_filenames = self._parse_available_wfc_filenames(dirname = self.dirname)
         projected_dos, projected_labels = self._parse_dos_projections(wfc_filenames=wfc_filenames, n_energy = len(energies))    
-   
+        
         # print(projected_labels)
         dos = DensityOfStates(energies=energies,
                             total=total_dos,
