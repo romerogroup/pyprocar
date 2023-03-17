@@ -79,6 +79,26 @@ def download_examples(save_dir=''):
     gdown.download(id="1AAcJ17ghTVcw_nRICX5IAwhqmtaRP6fd", output=output)
     gdown.extractall(output, to = to)
 
+def download_dev_data(examples_dirname: str = 'examples'):
+    project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    data_dir = os.path.join(project_dir, 'data')
+
+    material_name = 'Fe'
+
+    print('Storing development data in', data_dir)
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir) 
+
+    # output = f"{data_dir}{os.sep}{examples_dirname}"
+    to = f"{data_dir}{os.sep}{examples_dirname}{os.sep}{material_name}"
+
+    print('___Starting download___')
+    url  = f'https://drive.google.com/drive/folders/1FQ5suC2e-Wp9LfWQqeb_2pRJDO00QQvQ'
+    gdown.download_folder(url=url, output=to,use_cookies=False,remaining_ok=True)
+
+    print('___Download Finished___')
+    return None 
+
 def download_example(material: str,
                     code: str, 
                     spin_calc_type: str,

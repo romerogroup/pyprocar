@@ -51,7 +51,7 @@ from . import io
 from . import core
 from . import utils
 from . import plotter
-from .utils.download_examples import download_examples, download_example
+from .utils.download_examples import download_examples, download_example, download_dev_data
 from .utils.defaults import Settings
 from .utils import welcome
 
