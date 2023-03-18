@@ -177,13 +177,13 @@ class Poscar(collections.abc.Mapping):
     filename : str, optional
         The POSCAR filename, by default "POSCAR"
     """
-    def __init__(self, filename="POSCAR"):
+    def __init__(self, filename="POSCAR",rotations = None):
         
         self.variables = {}
         self.filename = filename
         self.atoms, self.coordinates, self.lattice = self._parse_poscar()
         self.structure = Structure(
-            atoms=self.atoms, fractional_coordinates=self.coordinates, lattice=self.lattice
+            atoms=self.atoms, fractional_coordinates=self.coordinates, lattice=self.lattice,rotations=rotations
         )
 
 
@@ -1270,7 +1270,7 @@ class VaspXML(collections.abc.Mapping):
     """
     def __init__(self, 
                 filename="vasprun.xml", 
-                dos_interpolation_factor:float=None):
+                dos_interpolation_factor:float=1.0):
         
         self.variables = {}
         self.dos_interpolation_factor = dos_interpolation_factor
@@ -1280,10 +1280,6 @@ class VaspXML(collections.abc.Mapping):
         else:
             self.filename = filename
 
-        
-        # self.positions = None
-        # self.stress = None
-        # self.array_sizes = {}
         self.data = self.read()
 
         spins = list(self.data["general"]["dos"]["total"]["array"]["data"].keys())
@@ -1300,6 +1296,7 @@ class VaspXML(collections.abc.Mapping):
         else:
             self.is_noncolinear = False
             self.spins_dict = {"spin 1": "Spin-up", "spin 2": "Spin-down"}
+
 
     def read(self):
         """
@@ -1494,6 +1491,8 @@ class VaspXML(collections.abc.Mapping):
                 continue
             total.append(self.dos_total[ispin])
         # total = np.array(total).T
+
+        
         return DensityOfStates(
             energies=energies,
             total=total,

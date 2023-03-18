@@ -88,7 +88,7 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD64AE3DC0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E515CD6E50>
 
 
 
@@ -134,7 +134,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD65113D60>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E51536B910>
 
 
 
@@ -182,7 +182,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD651132E0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E515A93340>
 
 
 
@@ -227,7 +227,7 @@ Scatter mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD6582F610>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E515993BB0>
 
 
 
@@ -267,7 +267,7 @@ overlay_species mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD66E9F280>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E515995A60>
 
 
 
@@ -307,7 +307,7 @@ overlay_orbtials mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD6704EF40>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E5154AA8E0>
 
 
 
@@ -345,7 +345,7 @@ overlay mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD65116550>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E5170B39A0>
 
 
 
@@ -381,14 +381,14 @@ overlay mode by orbital names
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001DD65982E20>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E5170E8F40>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.261 seconds)
+   **Total running time of the script:** ( 0 minutes  2.141 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_colinear.py:

@@ -322,99 +322,27 @@ def fermi3D(
     ##########################################################################
     # Code dependencies
     ##########################################################################
-    if code == "vasp" or code == "abinit":
-        if repair:
-            repairhandle = UtilsProcar()
-            repairhandle.ProcarRepair(procar, procar)
-            print("PROCAR repaired. Run with repair=False next time.")
-
-    if code == "vasp":
-        outcar = io.vasp.Outcar(filename=outcar)
-            
-        e_fermi = outcar.efermi
-        
-        poscar = io.vasp.Poscar(filename=poscar)
-        structure = poscar.structure
-        reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-        parser = io.vasp.Procar(filename=procar,
-                                structure=structure,
-                                reciprocal_lattice=reciprocal_lattice,
-                                efermi=e_fermi,
-                                )
-
-    elif code == "abinit":
-        parser = ProcarParser()
-        parser.readFile(procar, False)
-        abinitFile = AbinitParser(abinit_output=abinit_output)
-        if fermi is None:
-            e_fermi = abinitFile.fermi
-        else:
-            e_fermi = fermi
-        reciprocal_lattice = abinitFile.reclat
-
-        # Converting Ha to eV
-        parser.bands = 27.211396641308 * parser.bands
-
-    elif code == "qe":
-        # procarFile = parser
-        if dirname is None:
-            dirname = "bands"
-        parser = io.qe.QEParser(scfIn_filename = "scf.in", dirname = dirname, bandsIn_filename = "bands.in", 
-                             pdosIn_filename = "pdos.in", kpdosIn_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
-        reciprocal_lattice = parser.reciprocal_lattice
-        if fermi is None:
-            e_fermi = parser.efermi
-        else:
-            e_fermi = fermi
-
-        # procarFile = QEFermiParser()
-        # reciprocal_lattice = procarFile.reclat
-        # data = ProcarSelect(procarFile, deepCopy=True)
-        # if fermi is None:
-        #     e_fermi = procarFile.efermi
-        # else:
-        #     e_fermi = fermi
-
-    elif code == "lobster":
-        parser = LobsterFermiParser()
-        reciprocal_lattice = parser.reclat
-        if fermi is None:
-            e_fermi = 0
-        else:
-            e_fermi = fermi
-
-    elif code == "bxsf":
-        e_fermi = fermi
-        parser = io.qe.bxsf.BxsfParser(infile= infile)
-        reciprocal_lattice = parser.reclat
-
-    elif code == "frmsf":
-        e_fermi = fermi
-        parser = io.frmsf.FrmsfParser(infile=infile)
-        reciprocal_lattice = parser.rec_lattice
-        bands = np.arange(len(parser.bands[0, :]))
-
-    parser.ebs.bands += e_fermi
-
-
+    parser = io.Parser(code = code, dir = dirname)
+    ebs = parser.ebs
+    reciprocal_lattice = parser.ebs.reciprocal_lattice
+    if fermi is None:
+        e_fermi = ebs.efermi
     ##########################################################################
     # Data Formating
     ##########################################################################
 
-
     bands_to_keep = bands
     if bands_to_keep is None:
-        bands_to_keep = np.arange(len(parser.bands[0, :]))
+        bands_to_keep = np.arange(len(bands[0, :]))
 
 
     spd = []
     
     if mode == "parametric":
         if orbitals is None:
-            orbitals = np.arange(parser.ebs.norbitals, dtype=int)
+            orbitals = np.arange(ebs.norbitals, dtype=int)
         if atoms is None:
-            atoms = np.arange(parser.ebs.natoms, dtype=int)
+            atoms = np.arange(ebs.natoms, dtype=int)
         if spins is None:
             spins = [0]
 
@@ -422,7 +350,7 @@ def fermi3D(
         # data.selectAtoms(atoms, fortran=False)
         # data.selectOrbital(orbitals)
 
-        projected = parser.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+        projected = ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
         projected = projected[:,:,spins[0]]
 
         for iband in bands_to_keep:
@@ -437,9 +365,9 @@ def fermi3D(
     spd_spin = []
 
     if spin_texture:
-        ebsX = copy.deepcopy(parser.ebs)
-        ebsY = copy.deepcopy(parser.ebs)
-        ebsZ = copy.deepcopy(parser.ebs)
+        ebsX = copy.deepcopy(ebs)
+        ebsY = copy.deepcopy(ebs)
+        ebsZ = copy.deepcopy(ebs)
 
         ebsX.projected = ebsX.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
         ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
@@ -464,8 +392,8 @@ def fermi3D(
     ##########################################################################
     if iso_slider == False:
         fermi_surface3D = FermiSurface3D(
-                                        kpoints=parser.ebs.kpoints,
-                                        bands=parser.ebs.bands,
+                                        kpoints=ebs.kpoints,
+                                        bands=ebs.bands,
                                         bands_to_keep = bands_to_keep,
                                         spd=spd,
                                         spd_spin=spd_spin,
@@ -505,9 +433,9 @@ def fermi3D(
     
         for e_value in energy_values:
             fermi_surface3D = FermiSurface3D(
-                                            kpoints=parser.ebs.kpoints,
+                                            kpoints=ebs.kpoints,
                                             bands_to_keep = bands_to_keep,
-                                            bands=parser.ebs.bands,
+                                            bands=ebs.bands,
                                             spd=spd,
                                             spd_spin=spd_spin,
                                             calculate_fermi_speed = calculate_fermi_speed,

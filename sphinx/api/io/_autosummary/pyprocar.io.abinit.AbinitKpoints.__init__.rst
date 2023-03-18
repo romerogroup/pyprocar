@@ -3,4 +3,4 @@
 
 .. currentmodule:: pyprocar.io.abinit
 
-.. automethod:: Procar.__init__
+.. automethod:: AbinitKpoints.__init__

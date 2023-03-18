@@ -544,6 +544,7 @@ class EBSPlot:
         self.ax.legend(self.handles, labels)
 
     def draw_fermi(self, 
+                fermi_level:float=0, 
                 color:str="blue", 
                 linestyle:str="dotted", 
                 linewidth:float=1):
@@ -558,7 +559,7 @@ class EBSPlot:
         linewidth : float, optional
             The linewidth, by default 1
         """
-        self.ax.axhline(y=0, color=color, linestyle=linestyle, linewidth=linewidth)
+        self.ax.axhline(y=fermi_level, color=color, linestyle=linestyle, linewidth=linewidth)
 
 
     def grid(self):

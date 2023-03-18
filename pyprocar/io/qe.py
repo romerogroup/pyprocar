@@ -63,7 +63,8 @@ class QEParser():
         # Parsing density of states files
         if os.path.exists(pdos_in_filename):
             self.dos = self._parse_pdos(pdos_in_filename=pdos_in_filename,dirname=dirname)
-        
+        else:
+            self.dos = None
         # Parsing information related to the bandstructure calculations kpath and klabels
         self.kticks = None
         self.knames = None
@@ -100,7 +101,7 @@ class QEParser():
         """
         # cart_kpoints self.kpoints = self.kpoints*(2*np.pi /self.alat)
         # Converting back to crystal basis
-        cart_kpoints = self.kpoints.dot(self.reciprocal_lattice) * (self.alat/ (2*np.pi))
+        cart_kpoints = self.kpoints.dot(self.reciprocal_lattice)
 
         return cart_kpoints
 
@@ -125,11 +126,15 @@ class QEParser():
             Returns a list of pyprocar.core.Structure
         """
 
-        # symbols = [x.strip() for x in self.data['ions']]
         symbols = [x.strip() for x in self.ions]
         structures = []
 
-        st = Structure(atoms=symbols, lattice = self.direct_lattice, fractional_coordinates =self.atomic_positions )
+        st = Structure(
+                    atoms=symbols, 
+                    lattice=self.direct_lattice, 
+                    fractional_coordinates=self.atomic_positions, 
+                    rotations=self.rotations 
+                    )
                       
         structures.append(st)
         return structures
@@ -726,7 +731,7 @@ class QEParser():
         self.direct_lattice = np.array([ acell.text.split() for acell  in main_xml_root.findall(".//output/atomic_structure/cell")[0] ],dtype = float)
 
 
-        self.reciprocal_lattice =  (2 * np.pi / self.alat) * np.array([ acell.text.split() for acell  in main_xml_root.findall(".//output/basis_set/reciprocal_lattice")[0] ],dtype = float)
+        self.reciprocal_lattice = (2 * np.pi /self.alat) * np.array([ acell.text.split() for acell  in main_xml_root.findall(".//output/basis_set/reciprocal_lattice")[0] ],dtype = float)
         return None
 
     def _parse_symmetries(self,main_xml_root):

@@ -88,7 +88,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270BCB35DF0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E52442FAC0>
 
 
 
@@ -123,7 +123,7 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270AA9F34C0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E5159B90A0>
 
 
 
@@ -169,7 +169,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270AB046F40>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E5170B3CD0>
 
 
 
@@ -217,7 +217,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CD8CC0A0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E538EC4DF0>
 
 
 
@@ -258,7 +258,7 @@ stack_species mode
 
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CF9140D0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E53B50C550>
 
 
 
@@ -300,7 +300,7 @@ stack_orbtials mode
 
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CFCE4D30>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E53A6884C0>
 
 
 
@@ -339,14 +339,14 @@ stack mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000270CFBD8100>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001E53A571D90>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  41.817 seconds)
+   **Total running time of the script:** ( 0 minutes  42.390 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_spin_polarized_dos.py:

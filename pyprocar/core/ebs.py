@@ -64,6 +64,7 @@ class ElectronicBandStructure:
         
 
         self.kpoints = kpoints
+        
         self.bands = bands - efermi
         self.efermi = efermi
         

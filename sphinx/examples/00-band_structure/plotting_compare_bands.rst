@@ -94,18 +94,15 @@ This object has information about the band structure and has matplotlib.axes.Axe
 
  .. code-block:: none
 
-    PROCAR needs repairing
-    Repaired PROCAR is written at C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-spin-polarized\bands\PROCAR-repaired
-    Please use C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-spin-polarized\bands\PROCAR-repaired next time for better efficiency
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000149B49072E0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E5156D9E80>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.481 seconds)
+   **Total running time of the script:** ( 0 minutes  0.881 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_compare_bands.py:

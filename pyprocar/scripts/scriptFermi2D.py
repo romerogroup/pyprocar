@@ -11,11 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 
-from ..utils import UtilsProcar
-from ..core import ProcarSymmetry
-from ..core import FermiSurface
-from ..io import ElkParser
-from ..io import AbinitParser
+from ..core import ProcarSymmetry, FermiSurface
 from ..utils import welcome
 from .. import io
 
@@ -152,15 +148,21 @@ def fermi2D(
     print("no_arrows       : ", no_arrow)
 
     
+    parser = io.Parser(code = code, dir = dirname)
+    ebs = parser.ebs
+    structure = parser.structure
+    ebs.bands -= ebs.efermi
 
-    parser, kpoints, reciprocal_lattice, e_fermi = parse(code=code,
-                                            lobster=lobster,
-                                            repair=repair,
-                                            dirname=dirname)
+    if structure.rotations is not None:
+        ebs.ibz2fbz(structure.rotations)
+        
+    # Shifting all kpoint to first Brillouin zone
+    bound_ops = -1.0*(ebs.kpoints > 0.5) + 1.0*(ebs.kpoints <= -0.5)
+    ebs.kpoints = ebs.kpoints + bound_ops
+    kpoints = ebs.kpoints_cartesian
+
     if spins is None:
-        spins = np.arange(parser.ebs.bands.shape[-1])
-    # if bands is None:
-    #     bands = np.arange(parser.ebs.bands.shape[1])
+        spins = np.arange(ebs.bands.shape[-1])
     if energy is None:
         energy = 0
     ### End of parsing ###
@@ -168,35 +170,29 @@ def fermi2D(
     # Selecting kpoints in a constant k_z plane
     i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2]< k_z_plane + 0.01, kpoints[:,2] > k_z_plane - 0.01) )
     kpoints = kpoints[i_kpoints_near_z_0,:][0]
-    parser.ebs.bands = parser.ebs.bands[i_kpoints_near_z_0,:][0]
-    parser.ebs.projected = parser.ebs.projected[i_kpoints_near_z_0,:][0]
+    ebs.bands = ebs.bands[i_kpoints_near_z_0,:][0]
+    ebs.projected = ebs.projected[i_kpoints_near_z_0,:][0]
     print('_____________________________________________________')
     for i_spin in spins:
-        indices = np.where( np.logical_and(parser.ebs.bands[:,:,i_spin].min(axis=0) < energy, parser.ebs.bands[:,:,i_spin].max(axis=0) > energy))
+        indices = np.where( np.logical_and(ebs.bands[:,:,i_spin].min(axis=0) < energy, ebs.bands[:,:,i_spin].max(axis=0) > energy))
         if len(indices) != 0:
             print(f"Useful band indices for spin-{i_spin} : {indices[0]}")
 
-    
-    
-    # parser.ebs.bands = parser.ebs.bands[:,bands,:]
-    # parser.ebs.projected = parser.ebs.projected[:,bands,:,:,:,:]
-
-    
 
     if spin_texture is not True:
         # processing the data
-        if orbitals is None and parser.ebs.projected is not None:
-            orbitals = np.arange(parser.ebs.norbitals, dtype=int)
-        if atoms is None and parser.ebs.projected is not None:
-            atoms = np.arange(parser.ebs.natoms, dtype=int)
-        projected = parser.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+        if orbitals is None and ebs.projected is not None:
+            orbitals = np.arange(ebs.norbitals, dtype=int)
+        if atoms is None and ebs.projected is not None:
+            atoms = np.arange(ebs.natoms, dtype=int)
+        projected = ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
         projected = projected[:,:,spins]
     else:
         # first get the sdp reduced array for all spin components.
         stData = []
-        ebsX = copy.deepcopy(parser.ebs)
-        ebsY = copy.deepcopy(parser.ebs)
-        ebsZ = copy.deepcopy(parser.ebs)
+        ebsX = copy.deepcopy(ebs)
+        ebsY = copy.deepcopy(ebs)
+        ebsZ = copy.deepcopy(ebs)
 
         ebsX.projected = ebsX.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
         ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
@@ -211,16 +207,15 @@ def fermi2D(
         stData.append(ebsY.projected )
         stData.append(ebsZ.projected )
 
-        projected = parser.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+        
+        projected = ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
     # Once the PROCAR is parsed and reduced to 2x2 arrays, we can apply
     # symmetry operations to unfold the Brillouin Zone
     # kpoints = data.kpoints
     # bands = data.bands
     # character = data.spd
 
-    bands = parser.ebs.bands
-
-    # kpoints = kpoints.dot(reciprocal_lattice  * (parser.alat/(2*np.pi)))
+    bands = ebs.bands
     character = projected
     if spin_texture is True:
         sx, sy, sz = stData[0], stData[1], stData[2]
@@ -267,58 +262,58 @@ def fermi2D(
         return
 
 
-def parse(code:str='vasp',
-          lobster:bool=False,
-          repair:bool=False,
-          dirname:str="",
-          apply_symmetry:bool=True):
-        if code == "vasp" or code == "abinit":
-            if repair:
-                repairhandle = UtilsProcar()
-                repairhandle.ProcarRepair(procar, procar)
-                print("PROCAR repaired. Run with repair=False next time.")
+# def parse(code:str='vasp',
+#           lobster:bool=False,
+#           repair:bool=False,
+#           dirname:str="",
+#           apply_symmetry:bool=True):
+#         if code == "vasp" or code == "abinit":
+#             if repair:
+#                 repairhandle = UtilsProcar()
+#                 repairhandle.ProcarRepair(procar, procar)
+#                 print("PROCAR repaired. Run with repair=False next time.")
 
-        if code == "vasp":
-            outcar = f"{dirname}{os.sep}OUTCAR"
-            poscar = f"{dirname}{os.sep}POSCAR"
-            procar = f"{dirname}{os.sep}PROCAR"
-            kpoints = f"{dirname}{os.sep}KPOINTS"
-            filename = f"{dirname}{os.sep}{filename}"
-            outcar = io.vasp.Outcar(filename=outcar)
+#         if code == "vasp":
+#             outcar = f"{dirname}{os.sep}OUTCAR"
+#             poscar = f"{dirname}{os.sep}POSCAR"
+#             procar = f"{dirname}{os.sep}PROCAR"
+#             kpoints = f"{dirname}{os.sep}KPOINTS"
+#             filename = f"{dirname}{os.sep}{filename}"
+#             outcar = io.vasp.Outcar(filename=outcar)
         
-            e_fermi = outcar.efermi
+#             e_fermi = outcar.efermi
         
-            poscar = io.vasp.Poscar(filename=poscar)
-            structure = poscar.structure
-            reciprocal_lattice = poscar.structure.reciprocal_lattice
+#             poscar = io.vasp.Poscar(filename=poscar)
+#             structure = poscar.structure
+#             reciprocal_lattice = poscar.structure.reciprocal_lattice
 
-            parser = io.vasp.Procar(filename=procar,
-                                    structure=structure,
-                                    reciprocal_lattice=reciprocal_lattice,
-                                    efermi=e_fermi,
-                                    )
+#             parser = io.vasp.Procar(filename=procar,
+#                                     structure=structure,
+#                                     reciprocal_lattice=reciprocal_lattice,
+#                                     efermi=e_fermi,
+#                                     )
 
-            if apply_symmetry:                       
-                parser.ebs.ibz2fbz(parser.rotations)
+#             if apply_symmetry:                       
+#                 ebs.ibz2fbz(rotations)
 
-            bound_ops = -1.0*(parser.ebs.kpoints > 0.5) + 1.0*(parser.ebs.kpoints <= -0.5)
-            kpoints_cart = kpoints.dot(reciprocal_lattice)
+#             bound_ops = -1.0*(ebs.kpoints > 0.5) + 1.0*(ebs.kpoints <= -0.5)
+#             kpoints_cart = kpoints.dot(reciprocal_lattice)
 
-        elif code == "qe":
+#         elif code == "qe":
 
-            if dirname is None:
-                dirname = "bands"
-            parser = io.qe.QEParser(dirname = dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
-                                    pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
-            reciprocal_lattice = parser.reciprocal_lattice
+#             if dirname is None:
+#                 dirname = "bands"
+#             parser = io.qe.QEParser(dirname = dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
+#                                     pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
+#             reciprocal_lattice = reciprocal_lattice
 
-            e_fermi = parser.efermi
+#             e_fermi = efermi
 
-            if apply_symmetry:
-                parser.ebs.ibz2fbz(parser.rotations)
+#             if apply_symmetry:
+#                 ebs.ibz2fbz(rotations)
 
-            bound_ops = -1.0*(parser.ebs.kpoints > 0.5) + 1.0*(parser.ebs.kpoints <= -0.5)
-            kpoints = parser.ebs.kpoints  + bound_ops
-            kpoints_cart = kpoints.dot(reciprocal_lattice) * (parser.alat/(2*np.pi))
+#             bound_ops = -1.0*(ebs.kpoints > 0.5) + 1.0*(ebs.kpoints <= -0.5)
+#             kpoints = ebs.kpoints  + bound_ops
+#             kpoints_cart = kpoints.dot(reciprocal_lattice) * (alat/(2*np.pi))
 
-        return parser, kpoints_cart, reciprocal_lattice, e_fermi
+#         return parser, kpoints_cart, reciprocal_lattice, e_fermi

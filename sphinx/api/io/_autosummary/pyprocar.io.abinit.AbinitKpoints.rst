@@ -1,9 +1,9 @@
-﻿pyprocar.io.abinit.Output
-=========================
+﻿pyprocar.io.abinit.AbinitKpoints
+================================
 
 .. currentmodule:: pyprocar.io.abinit
 
-.. autoclass:: Output
+.. autoclass:: AbinitKpoints
 
    
 
@@ -15,7 +15,7 @@
    
       
         
-          Output.__init__
+          AbinitKpoints.__init__
         
       
       

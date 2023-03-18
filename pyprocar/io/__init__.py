@@ -6,11 +6,15 @@ from . import siesta
 # from . import bsxf
 # from . import frmsf
 
+from .parser import Parser
+
 from .procarparser import ProcarParser
 from .abinitparser import AbinitParser
 from .elkparser import ElkParser
 from .lobsterparser import LobsterParser, LobsterDOSParser, LobsterFermiParser
 from .vaspxml import VaspXML
+
+
 # from . import vaspxml
 
 # TODO remove the directories abinitparser

@@ -1,78 +1,14 @@
 import numpy as np
 
-from ..io import AbinitParser
-from ..io import ElkParser
-from ..io import ProcarParser
-from ..io import LobsterParser
-from ..utils import UtilsProcar
-
 from .. import io
 
 
-def getFermi(procar:str, code:str, outcar:str):
-    """A function to get the fermi energy
-
-    Parameters
-    ----------
-    procar : str
-        The PROCAR filename
-    code : str
-        The code name
-    outcar : str
-        The OUTCAR filename
-
-    Returns
-    -------
-    float
-        The fermi energy in ev
-    """
-    
-    fermi = None
-
-    if code == "vasp":
-        # Parses through Bands in PROCAR
-        procarFile = ProcarParser()
-        procarFile.readFile(procar=procar)
-        if outcar:
-            outcarparser = UtilsProcar()
-            if fermi is None:
-                fermi = outcarparser.FermiOutcar(outcar)
-                print("Fermi energy found in OUTCAR file = %s eV" % str(fermi))
-        else:
-            print("ERROR: OUTCAR Not Found")
-
-    elif code == "elk":
-        if fermi is None:
-            procarFile = ElkParser()
-            procarFile.readFile()
-            fermi = procarFile.fermi
-            print("Fermi energy found in Elk output file = %s eV " % str(fermi))
-
-    elif code == "abinit":
-        procarFile = ProcarParser()
-        procarFile.readFile(procar=procar)
-        if fermi is None:
-            abinitFile = AbinitParser(abinit_output=outcar)
-            fermi = abinitFile.fermi
-            print("Fermi energy found in Abinit output file = %s eV" % str(fermi))
-
-    elif code == "qe":
-        if fermi is None:
-            procarFile = QEParser()
-            fermi = procarFile.fermi
-            print("Fermi energy   :  %s eV (from Quantum Espresso output)" % str(fermi))
-
-    elif code == "lobster":
-        if fermi is None:
-            fermi = procarFile.fermi
-            print("Fermi energy   :  %s eV (from Lobster output)" % str(fermi))
-            # lobster already shifts fermi so we set it to zero here.
-            fermi = 0.0
-
-    return fermi
-
-
-def bandgap(procar:str=None, outcar:str=None, code:str="vasp", fermi:float=None, repair:bool=True):
+def bandgap(procar:str=None, 
+            dirname:str =None, 
+            outcar:str=None, 
+            code:str="vasp", 
+            fermi:float=None, 
+            repair:bool=True):
     """A function to find the band gap
 
     Parameters
@@ -94,35 +30,15 @@ def bandgap(procar:str=None, outcar:str=None, code:str="vasp", fermi:float=None,
         Returns the bandgap energy
     """
 
-    if code == "vasp" or code == "abinit":
-        if repair:
-            repairhandle = UtilsProcar()
-            repairhandle.ProcarRepair(procar, procar)
-            print("PROCAR repaired. Run with repair=False next time.")
-
     bandGap = None
 
+    parser = io.Parser(code = code, dir = dirname)
+    ebs = parser.ebs
+
     if fermi is None:
-        fermi = getFermi(procar, code, outcar)
+        fermi = ebs.efermi
 
-    if code == "vasp":
-        procarFile = ProcarParser()
-        procarFile.readFile(procar=procar)
-
-    elif code == "abinit":
-        procarFile = ProcarParser()
-        procarFile.readFile(procar=procar)
-
-    elif code == "elk":
-        procarFile = ElkParser()
-
-    elif code == "qe":
-        procarFile = QEParser()
-
-    elif code == "lobsters":
-        procarFile = LobsterParser()
-
-    bands = np.array(procarFile.bands)
+    bands = np.array(ebs.bands)
     subBands = np.subtract(bands, fermi)
 
     negArr = subBands[subBands < 0]

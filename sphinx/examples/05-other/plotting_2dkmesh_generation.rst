@@ -135,7 +135,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.405 seconds)
+   **Total running time of the script:** ( 0 minutes  0.502 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plotting_2dkmesh_generation.py:

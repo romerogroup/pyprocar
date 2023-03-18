@@ -21,10 +21,9 @@ from ..utils.defaults import settings
 # TODO Needs elk parsing
 
 def bandsplot(
-    code="vasp",
-    dirname:str=None,
+    code: str,
+    dirname: str,
     mode:str="plain",
-    lobster:bool=False,
     spins:List[int]=None,
     atoms:List[int]=None,
     orbitals:List[int]=None,
@@ -54,8 +53,6 @@ def bandsplot(
         The directory name of the calculation, by default None
     mode : str, optional
         Sting for the mode of the calculation, by default "plain"
-    lobster : bool, optional
-        Boolean if this is a lobster calculation, by default False
     spins : List[int], optional
         A list of spins, by default None
     atoms : List[int], optional
@@ -92,16 +89,19 @@ def bandsplot(
         String to save the plot, by default None
     """
 
-    # Turn interactive plotting off
-    # plt.ioff()
-
-    # Verbose section
-
     settings.modify(kwargs)
 
-    ebs, kpath, structure, reciprocal_lattice = parse(
-        code, dirname, lobster, interpolation_factor, fermi)
-    
+    parser = io.Parser(code = code, dir = dirname)
+    ebs = parser.ebs
+    structure = parser.structure
+    kpath = parser.kpath
+
+    if fermi:
+        ebs.bands += fermi
+        fermi_level = fermi
+    else:
+        fermi_level = 0
+
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
 
  
@@ -200,7 +200,7 @@ def bandsplot(
                 vmin=vmin,
                 vmax=vmax,
                 spins=spins
-)
+                )
         elif mode == "scatter":
             ebs_plot.plot_scatter(
                 color_weights=color_weights,
@@ -220,6 +220,7 @@ def bandsplot(
     ebs_plot.set_xlim()
     ebs_plot.set_ylim(elimit)
     ebs_plot.draw_fermi(
+        fermi_level=fermi_level,
         color=settings.ebs.fermi_color,
         linestyle=settings.ebs.fermi_linestyle,
         linewidth=settings.ebs.fermi_linewidth,
@@ -238,95 +239,3 @@ def bandsplot(
         ebs_plot.show()
         
     return ebs_plot
-
-
-def parse(code:str='vasp',
-            dirname:str="",
-            lobster:bool=False,
-            
-            interpolation_factor:int=1,
-            fermi:float=None):
-    ebs = None
-    kpath = None
-    structure = None
-
-
-    if lobster is True:
-        parser = io.lobster.LobsterParser(dirname = dirname, 
-                        code = code,
-                        dos_interpolation_factor = None )
-
-        if fermi is None:
-            fermi = parser.efermi
-        reciprocal_lattice = parser.reciprocal_lattice
-    
-        structure = parser.structure
-        
-        kpoints = parser.kpoints
-        kpath = parser.kpath
-
-        ebs = parser.ebs
-
-    elif code == "vasp":
-        if dirname is None:
-            dirname = "bands"
-        outcar = f"{dirname}{os.sep}OUTCAR"
-        poscar = f"{dirname}{os.sep}POSCAR"
-        procar = f"{dirname}{os.sep}PROCAR"
-        kpoints = f"{dirname}{os.sep}KPOINTS"
-        if outcar is not None:
-            outcar = io.vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        if poscar is not None:
-            poscar = io.vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-        if kpoints is not None:
-            kpoints = io.vasp.Kpoints(kpoints)
-            kpath = kpoints.kpath
-
-        procar = io.vasp.Procar(filename=procar,
-                             structure=structure,
-                             reciprocal_lattice=reciprocal_lattice,
-                             kpath=kpath,
-                             efermi=fermi,
-                             interpolation_factor=interpolation_factor)
-        ebs = procar.ebs
-        
-        
-    elif code == "qe":
-        if dirname is None:
-            dirname = "bands"
-        parser = io.qe.QEParser(dirname = dirname,scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
-                             pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
-        if fermi is None:
-            fermi = parser.efermi
-        reciprocal_lattice = parser.reciprocal_lattice
-    
-        structure = parser.structure
-        
-        kpoints = parser.kpoints
-        kpath = parser.kpath
-
-        ebs = parser.ebs
-        
-    elif code == "abinit":
-        if dirname is None:
-            dirname = "fermi"
-        outfile = f"{dirname}{os.sep}abinit.out"
-        kpointsfile = f"{dirname}{os.sep}KPOINTS"
-        # e_fermi = 0
-
-        parser = io.abinit.AbinitParser(abinit_output=outfile)
-
-        ebs = parser.abinitprocarobject.ebs
-        kpath = parser.abinitprocarobject.ebs.kpath
-        e_fermi = parser.fermi
-        reciprocal_lattice = parser.reclat
-    ebs.bands += e_fermi
-
-    return ebs, kpath, structure, reciprocal_lattice

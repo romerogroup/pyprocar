@@ -344,16 +344,10 @@ def dosplot(
     elif orientation[0].lower() == 'v':
         orientation = 'vertical'
 
-    dos, structure, reciprocal_lattice = parse(
-                                        code=code,
-                                        filename=filename,
-                                        lobster=lobster, 
-                                        dirname=dirname, 
-                                        outcar=outcar, 
-                                        poscar=poscar, 
-                                        procar=procar,
-                                        interpolation_factor=interpolation_factor, 
-                                        fermi=fermi)
+    
+    parser = io.Parser(code = code, dir = dirname)
+    dos = parser.dos
+    structure = parser.structure
 
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
@@ -465,72 +459,3 @@ def dosplot(
     if show:
         edos_plot.show()
     return edos_plot
-
-def parse(code: str='vasp',
-          filename:str='vasprun.xml',
-          lobster: bool=False,
-          dirname: str="",
-          outcar:str='OUTCAR',
-          poscar:str='POSCAR',
-          procar:str='PROCAR',
-          interpolation_factor:int=1,
-          fermi:float=None):
-    ebs = None
-    kpath = None
-    structure = None
-
-
-    if lobster is True:
-        if dirname is None:
-            dirname = "dos"
-        parser = io.lobster.LobsterParser(dirname = dirname,code = code, dos_interpolation_factor =interpolation_factor)
-        if fermi is None:
-            fermi = parser.efermi
-        
-        reciprocal_lattice = parser.reciprocal_lattice
-    
-        structure = parser.structure
-        
-        dos = parser.dos
-
-    elif code == "vasp":
-        outcar = f"{dirname}{os.sep}OUTCAR"
-        poscar = f"{dirname}{os.sep}POSCAR"
-        procar = f"{dirname}{os.sep}PROCAR"
-        kpoints = f"{dirname}{os.sep}KPOINTS"
-        filename = f"{dirname}{os.sep}{filename}"
-        if outcar is not None:
-            outcar = io.vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        if poscar is not None:
-            poscar = io.vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-
-        vaspxml = io.vasp.VaspXML(filename=filename,
-                               dos_interpolation_factor=interpolation_factor) 
-        
-        dos = vaspxml.dos
-        
-        
-    elif code == "qe":
-        if dirname is None:
-            dirname = "dos"
-        parser = io.qe.QEParser(dirname = dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
-                             pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
-        if fermi is None:
-            fermi = parser.efermi
-        
-        reciprocal_lattice = parser.reciprocal_lattice
-    
-        structure = parser.structure
-        
-        dos = parser.dos
-        
-    
-    return dos,  structure, reciprocal_lattice
-

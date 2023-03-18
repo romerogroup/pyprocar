@@ -13,6 +13,7 @@ def unfold(
         outcar="OUTCAR",
         vaspxml=None,
         abinit_output="abinit.out",
+        dirname= None,
         transformation_matrix=np.diag([2, 2, 2]),
         kpoints=None,
         elkin="elk.in",
@@ -78,35 +79,36 @@ def unfold(
     settings.unfold.modify(kwargs)
     settings.ebs.modify(settings.unfold.config)
 
-    if code == "vasp":
-        if outcar is not None:
-            outcar = io.vasp.Outcar(outcar)
-            if fermi is None:
-                fermi = outcar.efermi
-            reciprocal_lattice = outcar.reciprocal_lattice
-        elif vaspxml is not None:
-            vasprun = io.vasp.VaspXML(vaspxml)
-            fermi = vasprun.fermi
+    # if code == "vasp":
+    #     if outcar is not None:
+    #         outcar = io.vasp.Outcar(outcar)
+    #         if fermi is None:
+    #             fermi = outcar.efermi
+    #         reciprocal_lattice = outcar.reciprocal_lattice
+    #     elif vaspxml is not None:
+    #         vasprun = io.vasp.VaspXML(vaspxml)
+    #         fermi = vasprun.fermi
             
-        if poscar is not None:
-            poscar = io.vasp.Poscar(poscar)
-            structure = poscar.structure
-            if reciprocal_lattice is None:
-                reciprocal_lattice = poscar.structure.reciprocal_lattice
+    #     if poscar is not None:
+    #         poscar = io.vasp.Poscar(poscar)
+    #         structure = poscar.structure
+    #         if reciprocal_lattice is None:
+    #             reciprocal_lattice = poscar.structure.reciprocal_lattice
 
-        if kpoints is not None:
-            kpoints = io.vasp.Kpoints(kpoints)
-            kpath = kpoints.kpath
+    #     if kpoints is not None:
+    #         kpoints = io.vasp.Kpoints(kpoints)
+    #         kpath = kpoints.kpath
 
-        procar = io.vasp.Procar(
-            procar,
-            structure,
-            reciprocal_lattice,
-            kpath,
-            fermi,
-            interpolation_factor=interpolation_factor,
-        )
-        ebs = procar.ebs
+    #     procar = io.vasp.Procar(
+    #         procar,
+    #         structure,
+    #         reciprocal_lattice,
+    #         kpath,
+    #         fermi,
+    #         interpolation_factor=interpolation_factor,
+    #     )
+    parser = io.Parser(code = code, dir = dirname)
+    ebs = parser.ebs
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
 

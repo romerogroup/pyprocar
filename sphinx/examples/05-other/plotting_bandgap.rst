@@ -61,7 +61,7 @@ The bandgap calculation should be done for non-self consistent (band structure) 
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-47
+.. GENERATED FROM PYTHON SOURCE LINES 33-43
 
 .. code-block:: default
 
@@ -74,11 +74,7 @@ importing pyprocar and specifying local data_dir
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
     data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
 
-    procar = f"{data_dir}{os.sep}PROCAR"
-    outcar = f"{data_dir}{os.sep}OUTCAR"
-
-
-    band_gap = pyprocar.bandgap(procar=procar, outcar=outcar, code="vasp")
+    band_gap = pyprocar.bandgap(dirname=data_dir, code="vasp")
 
 
 
@@ -87,11 +83,6 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
-    PROCAR repaired. Run with repair=False next time.
-    ProcarParser::WARNING: Special case: only one atom found. The program may not work as expected
-    Fermi energy found in OUTCAR file = 5.7365 eV
-    ProcarParser::WARNING: Special case: only one atom found. The program may not work as expected
-    ProcarParser::WARNING: Special case: only one atom found. The program may not work as expected
     Band Gap = 0 eV 
 
 
@@ -100,7 +91,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.147 seconds)
+   **Total running time of the script:** ( 0 minutes  0.127 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plotting_bandgap.py:

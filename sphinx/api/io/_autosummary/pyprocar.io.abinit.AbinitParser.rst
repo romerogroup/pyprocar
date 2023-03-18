@@ -1,9 +1,9 @@
-﻿pyprocar.io.abinit.Kpoints
-==========================
+﻿pyprocar.io.abinit.AbinitParser
+===============================
 
 .. currentmodule:: pyprocar.io.abinit
 
-.. autoclass:: Kpoints
+.. autoclass:: AbinitParser
 
    
 
@@ -15,7 +15,7 @@
    
       
         
-          Kpoints.__init__
+          AbinitParser.__init__
         
       
       

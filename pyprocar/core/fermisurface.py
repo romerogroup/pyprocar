@@ -241,7 +241,7 @@ class FermiSurface:
 
         plt.axis("equal")
         self.log.debug("Plot: ...Done")
-        return plots
+        # return plots
 
     def spin_texture(self, sx, sy, sz, 
                     arrow_projection:str='sz',
