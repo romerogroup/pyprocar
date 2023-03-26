@@ -1355,7 +1355,6 @@ class FermiHandler:
             ebsX = copy.deepcopy(self.ebs)
             ebsY = copy.deepcopy(self.ebs)
             ebsZ = copy.deepcopy(self.ebs)
-            print(ebsX.projected.shape)
             ebsX.projected = ebsX.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
             ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
             ebsZ.projected = ebsZ.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)

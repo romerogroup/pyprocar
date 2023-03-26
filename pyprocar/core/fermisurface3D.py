@@ -534,10 +534,11 @@ class FermiSurface3D(Surface):
                                                              np.linalg.norm(lattice[:,2])*METER_ANGSTROM * len(np.unique(self.XYZ[:,2]))])
                             )
         
+
+        
         gradient_list_cart = np.array([np.matmul(lattice, gradient) for gradient in gradient_list])
         
- 
-        
+
         # kp_reduced_to_grad_x = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,grad_x_list)}
         # kp_reduced_to_grad_y = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,grad_y_list)}
         # kp_reduced_to_grad_z = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,grad_z_list)}

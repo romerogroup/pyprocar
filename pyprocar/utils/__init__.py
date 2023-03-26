@@ -6,4 +6,5 @@ from .splash import welcome
 from . import mathematics
 from . import defaults
 from . import elements 
+from . import sorting
 
