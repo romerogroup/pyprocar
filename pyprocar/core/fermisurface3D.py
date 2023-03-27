@@ -91,6 +91,8 @@ class FermiSurface3D(Surface):
         bands: np.ndarray,
         fermi: float,
         reciprocal_lattice: np.ndarray,
+
+        ebs=None,
         bands_to_keep: List[int]=None,
         spd: np.ndarray=None,
         spd_spin:np.ndarray=None,
@@ -108,8 +110,7 @@ class FermiSurface3D(Surface):
         # sym: bool=False
         ):
 
-        
-
+    
         self.kpoints = kpoints
         
         # Shifts kpoints between [0.5,0.5)
