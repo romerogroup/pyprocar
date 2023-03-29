@@ -118,6 +118,7 @@ ENV/
 # VS code
 .vscode/
 .vs/
+*.code-workspace
 
 # Visual Studio 
 *.pyproj

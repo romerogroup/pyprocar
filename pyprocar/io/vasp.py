@@ -1,8 +1,15 @@
+__author__ = "Pedram Tavadze, Uthpala Herath, Fransicso Muñoz"
+__maintainer__ = "Pedram Tavadze"
+__email__ = "petavazohi@mix.wvu.edu"
+__date__ = "March 29, 2023"
+
 import os
 import re
 import xml.etree.ElementTree as ET
 import collections
 import gzip
+from typing import Union
+from pathlib import Path
 
 import numpy as np
 from numpy import array
@@ -11,7 +18,7 @@ from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
 
 
 class Outcar(collections.abc.Mapping):
-    def __init__(self, filename="OUTCAR"):
+    def __init__(self, filename: Union[str, Path] = "OUTCAR"):
         self.variables = {}
         self.filename = filename
 
@@ -132,7 +139,7 @@ class Outcar(collections.abc.Mapping):
 
 
 class Poscar(collections.abc.Mapping):
-    def __init__(self, filename="POSCAR"):
+    def __init__(self, filename: Union[str, Path] = "POSCAR"):
         self.variables = {}
         self.filename = filename
         atoms, coordinates, lattice = self._parse_poscar()
@@ -217,7 +224,9 @@ class Poscar(collections.abc.Mapping):
 
 
 class Kpoints(collections.abc.Mapping):
-    def __init__(self, filename="KPOINTS", has_time_reversal=True):
+    def __init__(self,
+                 filename: Union[str, Path] = "KPOINTS",
+                 has_time_reversal: bool = True):
         self.variables = {}
         self.filename = filename
         self.file_str = None
@@ -367,7 +376,7 @@ class Kpoints(collections.abc.Mapping):
 class Procar(collections.abc.Mapping):
     def __init__(
         self,
-        filename="PROCAR",
+        filename: Union[str, Path] = "PROCAR",
         structure=None,
         reciprocal_lattice=None,
         kpath=None,

@@ -1,3 +1,8 @@
+__author__ = "Uthpala Herath"
+__maintainer__ = "Uthpala Herath"
+__email__ = "ukh0001@mix.wvu.edu"
+__date__ = "March 29, 2023"
+
 from re import findall
 from numpy import array
 from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
