@@ -6,24 +6,22 @@ __author__ = "Pedram Tavadze, Logan Lang"
 __copyright__ = "Copyright (C) 2007 Free Software Foundation,"
 __credits__ = ["Uthpala Herath"]
 __license__ = "GNU GENERAL PUBLIC LICENSE"
-__version__ = "2.0"
 __maintainer__ = "Logan Lang, Pedram Tavadze"
-__email__ = "petavazohi@spot.colorado.edu"
+__email__ = "petavazohi@mix.wvu.edu"
 __status__ = "Production"
 
-from traceback import print_tb
 from scipy.interpolate import CubicSpline
 import numpy as np
-import numpy.typing as npt
+from typing import List, Tuple, Union
 
 # TODO When PEP 646 is introduced in numpy. need to update the python typing.
 
 class DensityOfStates:
     def __init__(
         self, 
-        energies: npt.NDArray[np.float64],
-        total: npt.NDArray[np.float64], 
-        projected: npt.NDArray[np.float64] = None, 
+        energies: np.ndarray,
+        total: np.ndarray, 
+        projected: np.ndarray = None, 
         interpolation_factor: int = 1,
         interpolation_kind: str = 'cubic',
     ):
@@ -120,9 +118,9 @@ class DensityOfStates:
         Parameters
         ----------
         atoms : list int, optional
-             list of atom index needed to be sumed over.
-             count from zero with the same
-             order as input. The default is None.
+            list of atom index needed to be sumed over.
+            count from zero with the same
+            order as input. The default is None.
         principal_q_numbers : list int, optional
             list of . The default is [-1].
         orbitals : TYPE, optional

@@ -84,14 +84,14 @@ class DOSPlot:
         """
         if orientation == 'horizontal':
             self.set_xlabel('Energy (eV)')
-            self.set_ylabel('DOS')
+            self.set_ylabel('Density of States (a.u.)')
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
-            self.set_ylim([self.dos.total.min(),self.dos.total.max()])
+            self.set_ylim([self.dos.total.min()*1.1,self.dos.total.max()*1.1])
         elif orientation == 'vertical':
-            self.set_xlabel('DOS')
+            self.set_xlabel('Density of States (a.u.)')
             self.set_ylabel('Energy (eV)')
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
-            self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
+            self.set_ylim([self.dos.energies.min()*1.1,self.dos.energies.max()*1.1])
 
         for ispin in range(len(self.spins)):
             # for iband in range(self.edos.nbands):
@@ -150,7 +150,7 @@ class DOSPlot:
                                principal_q_numbers=principal_q_numbers,
                                orbitals=orbitals,
                                spins=self.spins)
-     
+        
         if vmin is None or vmax is None:
             vmin = 0
             vmax = (dos.max() / dos_total.max())
