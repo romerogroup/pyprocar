@@ -522,8 +522,7 @@ class Procar(collections.abc.Mapping):
             projected_phase=self._spd2projected(self.spd_phase),
             labels=self.orbitalNames[:-1],
             reciprocal_lattice=reciprocal_lattice,
-            # interpolation_factor=interpolation_factor,
-            shifted_to_efermi=False,
+
         )
 
     def repair(self):

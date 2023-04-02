@@ -42,7 +42,6 @@ class Lines:
                 point_1 = self.faces[ipoint]
                 point_2 = self.faces[ipoint + 1]
                 self.connectivity.append([point_1, point_2])
-                print("Right here")
 
     # def _create_pyvista(self):
     #     cell = []

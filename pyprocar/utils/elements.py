@@ -241,7 +241,8 @@ def atomic_mass(element):
     float
         atomic mass.
     """
-    if type(element) is str:
+    # if type(element) is str:
+    if isinstance(element,str):
         return atomic_masses[element]
     elif type(element) is int:
         return atomic_masses[elements_reversed[element]]

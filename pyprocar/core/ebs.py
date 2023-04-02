@@ -556,14 +556,25 @@ class ElectronicBandStructure:
         sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*nz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*nz], :])
 
         # Calculate indices with periodic boundary conditions
-        plus_one_indices = np.arange(20) + 1
-        minus_one_indices = np.arange(20) - 1
-        plus_one_indices[-1] = 0
-        minus_one_indices[0] = 19
+        plus_one_indices_x = np.arange(nx) + 1
+        plus_one_indices_y = np.arange(ny) + 1
+        plus_one_indices_z = np.arange(nz) + 1
 
-        scalar_diffs_i = scalar_mesh[plus_one_indices,:,:] - scalar_mesh[minus_one_indices,:,:]
-        scalar_diffs_j = scalar_mesh[:,plus_one_indices,:] - scalar_mesh[:,minus_one_indices,:]
-        scalar_diffs_k = scalar_mesh[:,:,plus_one_indices] - scalar_mesh[:,:,minus_one_indices]
+        minus_one_indices_x = np.arange(nx) - 1
+        minus_one_indices_y = np.arange(ny) - 1
+        minus_one_indices_z = np.arange(nz) - 1
+
+        plus_one_indices_x[-1] = 0
+        plus_one_indices_y[-1] = 0
+        plus_one_indices_z[-1] = 0
+
+        minus_one_indices_x[0] = nx - 1
+        minus_one_indices_y[0] = ny - 1
+        minus_one_indices_z[0] = nz - 1
+
+        scalar_diffs_i = scalar_mesh[plus_one_indices_x,:,:] - scalar_mesh[minus_one_indices_x,:,:]
+        scalar_diffs_j = scalar_mesh[:,plus_one_indices_y,:] - scalar_mesh[:,minus_one_indices_y,:]
+        scalar_diffs_k = scalar_mesh[:,:,plus_one_indices_z] - scalar_mesh[:,:,minus_one_indices_z]
         
         # Calculating gradients
         sep_vectors = [sep_vectors_i,sep_vectors_j,sep_vectors_k]
@@ -598,32 +609,37 @@ class ElectronicBandStructure:
         return integral
 
     def create_nd_mesh(self, nd_list):
-        nd_shape = list(nd_list.shape[1:])
-        nd_shape.append(self.n_kx)
-        nd_shape.append(self.n_ky)
-        nd_shape.append(self.n_kz)
 
-        nd_mesh = np.zeros(nd_shape,dtype=nd_list.dtype)
-        non_grid_dims = nd_shape[:-3]
-        for i_dim, non_grid_dim in enumerate(non_grid_dims):
-            for i in range(non_grid_dim):
-                for x in range(self.n_kx):
-                    for y in range(self.n_ky):
-                        for z in range(self.n_kz):
-                            # Forming slicing tuples for mesh
-                            mesh_idx = [ np.s_[:]]*nd_mesh.ndim
-                            mesh_idx[i_dim] = i
-                            mesh_idx[-3] = x
-                            mesh_idx[-2] = y
-                            mesh_idx[-1] = z
+        if nd_list is not  None:
 
-                            # Forming slicing tuples for list
-                            list_idx = [ np.s_[:]]*nd_list.ndim
-                            list_idx[0] = self.index_mesh[x,y,z]
-                            list_idx[i_dim+1] = i
-                            
-                            # Assigning mesh values from list
-                            nd_mesh[ tuple(mesh_idx) ] = nd_list[ tuple(list_idx) ]
+            nd_shape = list(nd_list.shape[1:])
+            nd_shape.append(self.n_kx)
+            nd_shape.append(self.n_ky)
+            nd_shape.append(self.n_kz)
+
+            nd_mesh = np.zeros(nd_shape,dtype=nd_list.dtype)
+            non_grid_dims = nd_shape[:-3]
+            for i_dim, non_grid_dim in enumerate(non_grid_dims):
+                for i in range(non_grid_dim):
+                    for x in range(self.n_kx):
+                        for y in range(self.n_ky):
+                            for z in range(self.n_kz):
+                                # Forming slicing tuples for mesh
+                                mesh_idx = [ np.s_[:]]*nd_mesh.ndim
+                                mesh_idx[i_dim] = i
+                                mesh_idx[-3] = x
+                                mesh_idx[-2] = y
+                                mesh_idx[-1] = z
+
+                                # Forming slicing tuples for list
+                                list_idx = [ np.s_[:]]*nd_list.ndim
+                                list_idx[0] = self.index_mesh[x,y,z]
+                                list_idx[i_dim+1] = i
+                                
+                                # Assigning mesh values from list
+                                nd_mesh[ tuple(mesh_idx) ] = nd_list[ tuple(list_idx) ]
+        else:
+            nd_mesh = None
         return nd_mesh
     
     def create_vector_mesh(self, vector_list):
