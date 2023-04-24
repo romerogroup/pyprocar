@@ -8,22 +8,22 @@ import numpy as np
 
 class UtilsProcar:
     """
-  This class store handy methods that do not fit any other place
+    This class store handy methods that do not fit any other place
 
-  members:
+    members:
 
-  -Openfile: Tries to open a File, it has suitable values for PROCARs
-   and can handle gzipped files
+    -Openfile: Tries to open a File, it has suitable values for PROCARs
+     and can handle gzipped files
 
-  -MergeFiles: concatenate two or more PROCAR files taking care of
-   metadata and kpoint indexes. Useful for splitted bandstructures
-   calculation.
+    -MergeFiles: concatenate two or more PROCAR files taking care of
+     metadata and kpoint indexes. Useful for splitted bandstructures
+     calculation.
 
-  -FermiOutcar: it greps the Fermi Energy from a given outcar file.
+    -FermiOutcar: it greps the Fermi Energy from a given outcar file.
 
-  -RecLatOutcar: it greps the reciprocal lattice from the outcar.
+    -RecLatOutcar: it greps the reciprocal lattice from the outcar.
 
-  """
+    """
 
     def __init__(self, loglevel=logging.WARNING):
         self.log = logging.getLogger("UtilsProcar")
@@ -71,25 +71,25 @@ class UtilsProcar:
 
     def OpenFile(self, FileName=None):
         """
-    Tries to open a File, it has suitable values for PROCAR and can
-    handle gzipped files
+        Tries to open a File, it has suitable values for PROCAR and can
+        handle gzipped files
 
-    Example:
+        Example:
 
-    >>> foo =  UtilsProcar.Openfile()
-    Tries to open "PROCAR", then "PROCAR.gz"
+        >>> foo =  UtilsProcar.Openfile()
+        Tries to open "PROCAR", then "PROCAR.gz"
 
-    >>> foo = UtilsProcar.Openfile("../bar")
-    Tries to open "../bar". If it is a directory, it will try to open
-    "../bar/PROCAR" and if fails again "../bar/PROCAR.gz"
+        >>> foo = UtilsProcar.Openfile("../bar")
+        Tries to open "../bar". If it is a directory, it will try to open
+        "../bar/PROCAR" and if fails again "../bar/PROCAR.gz"
 
-    >>> foo = UtilsProcar.Openfile("PROCAR-spd.gz")
-    Tries to open a gzipped file "PROCAR-spd.gz"
+        >>> foo = UtilsProcar.Openfile("PROCAR-spd.gz")
+        Tries to open a gzipped file "PROCAR-spd.gz"
 
-    If unable to open a file, it raises a "IOError" exception.
-"""
+        If unable to open a file, it raises a "IOError" exception."""
         import os
         import gzip
+        import bz2
 
         self.log.debug("OpenFile()")
         self.log.debug("Filename :" + FileName)
@@ -114,6 +114,9 @@ class UtilsProcar:
             if FileName[-2:] == "gz":
                 self.log.info("A gzipped file found")
                 inFile = gzip.open(FileName, mode="rt")
+            elif FileName[-3:] == "bz2":
+                self.log.info("A bz2-zipped file found")
+                inFile = bz2.open(FileName, mode="rt")
             else:
                 self.log.debug("A normal file found")
                 inFile = open(FileName, "r")
@@ -125,7 +128,11 @@ class UtilsProcar:
                 "File not found, however a .gz version does exist and will" " be used"
             )
             inFile = gzip.open(FileName + ".gz", mode="rt")
-
+        elif os.path.isfile(FileName + ".bz2"):
+            self.log.info(
+                "File not found, however a .bz2 version does exist and will" " be used"
+            )
+            inFile = bz2.open(FileName + ".gz", mode="rt")
         else:
             self.log.debug("File not exist, neither a gzipped version")
             print(FileName)
@@ -134,25 +141,28 @@ class UtilsProcar:
         self.log.debug("OpenFile()...done")
         return inFile
 
-    def MergeFiles(self, inFiles, outFile, gzipOut=False):
+    def MergeFiles(self, inFiles, outFile, gzipOut=False, bz2Out=False):
         """
-    Concatenate two or more PROCAR files. This methods
-    takes care of the k-indexes.
+        Concatenate two or more PROCAR files. This methods
+        takes care of the k-indexes.
 
-    Useful when large number of K points have been calculated in
-    different PROCARs.
+        Useful when large number of K points have been calculated in
+        different PROCARs.
 
-    Args:
-    -inFiles: an iterable with files to be concatenated
+        Args:
+        -inFiles: an iterable with files to be concatenated
 
-    -outFile: a string with the outfile name.
+        -outFile: a string with the outfile name.
 
-    -gzipOut: whether gzip or not the outout file.
+        -gzipOut: whether gzip or not the outout file.
 
-    Warning: spin polarized case is not Ok!
+        -bz2Out:  whether bz2 or not the outout file.
 
-    """
+        Warning: spin polarized case is not Ok!
+
+        """
         import gzip
+        import bz2
 
         self.log.debug("MergeFiles()")
         self.log.debug("infiles: " " ,".join(inFiles))
@@ -182,6 +192,9 @@ class UtilsProcar:
         if gzipOut:
             self.log.debug("gzipped output")
             outFile = gzip.open(outFile, mode="wt")
+        elif bz2Out:
+            self.log.debug("bz2-zipped output")
+            outFile = bz2.open(outFile, mode="wt")
         else:
             self.log.debug("normal output")
             outFile = open(outFile, "w")
@@ -237,12 +250,12 @@ class UtilsProcar:
 
     def FermiOutcar(self, filename):
         """Just finds all E-fermi fields in the outcar file and keeps the
-    last one (if more than one found).
+        last one (if more than one found).
 
-    Args:
-    -filename: the file name of the outcar to be readed
+        Args:
+        -filename: the file name of the outcar to be readed
 
-    """
+        """
         self.log.debug("FermiOutcar(): ...")
         self.log.debug("Input filename : " + filename)
 
@@ -254,12 +267,12 @@ class UtilsProcar:
 
     def RecLatOutcar(self, filename):
         """Finds and return the reciprocal lattice vectors, if more than
-    one set present, it return just the last one.
+        one set present, it return just the last one.
 
-    Args:
-    -filename: the name of the outcar file  to be read
+        Args:
+        -filename: the name of the outcar file  to be read
 
-    """
+        """
         self.log.debug("RecLatOutcar(): ...")
         self.log.debug("Input filename : " + filename)
 
@@ -278,15 +291,15 @@ class UtilsProcar:
 
     def ProcarRepair(self, infilename, outfilename):
         """It Tries to repair some stupid problems due the stupid fixed
-    format of the stupid fortran.
+        format of the stupid fortran.
 
-    Up to now it only separes k-points as the following:
-    k-point    61 :    0.00000000-0.50000000 0.00000000 ...
-    to
-    k-point    61 :    0.00000000 -0.50000000 0.00000000 ...
+        Up to now it only separes k-points as the following:
+        k-point    61 :    0.00000000-0.50000000 0.00000000 ...
+        to
+        k-point    61 :    0.00000000 -0.50000000 0.00000000 ...
 
-    But as I found new stupid errors they should be fixed here.
-    """
+        But as I found new stupid errors they should be fixed here.
+        """
         self.log.debug("ProcarRepair(): ...")
         infile = self.OpenFile(infilename)
         fileStr = infile.read()
