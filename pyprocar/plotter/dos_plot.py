@@ -87,21 +87,16 @@ class DOSPlot:
         None.
 
         """
-        if spins is None:
-            if self.dos.is_non_collinear:
-                spins = [0,1,2]
-            else:
-                spins = range(self.dos.n_spins)
-        if self.dos.is_non_collinear:
-            spins = [0]
-
-        # plots over the different dos energies for spin polarized
-        for ispin in spins:
-            if orientation == 'horizontal':
-                self.set_xlabel('Energy (eV)')
-                self.set_ylabel('DOS')
-                self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
-                self.set_ylim([self.dos.total[ispin,:].min(),self.dos.total[ispin,:].max()])
+        if orientation == 'horizontal':
+            self.set_xlabel('Energy (eV)')
+            self.set_ylabel('Density of States (a.u.)')
+            self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
+            self.set_ylim([self.dos.total.min()*1.1,self.dos.total.max()*1.1])
+        elif orientation == 'vertical':
+            self.set_xlabel('Density of States (a.u.)')
+            self.set_ylabel('Energy (eV)')
+            self.set_xlim([self.dos.total.min(),self.dos.total.max()])
+            self.set_ylim([self.dos.energies.min()*1.1,self.dos.energies.max()*1.1])
 
                 handle = self.ax.plot(
                     self.dos.energies, self.dos.total[ispin, :], color=settings.dos.spin_colors[ispin], alpha=settings.dos.opacity[
@@ -182,7 +177,7 @@ class DOSPlot:
             spin_colors = settings.dos.spin_colors
         if spin_labels is None:
             spin_labels = settings.dos.spin_labels
-
+   
         if vmin is None:
             vmin = 0
         if vmax is None:

@@ -6,17 +6,14 @@ __author__ = "Pedram Tavadze, Logan Lang"
 __copyright__ = "Copyright (C) 2007 Free Software Foundation,"
 __credits__ = ["Uthpala Herath"]
 __license__ = "GNU GENERAL PUBLIC LICENSE"
-__version__ = "2.0"
 __maintainer__ = "Logan Lang, Pedram Tavadze"
-__email__ = "petavazohi@spot.colorado.edu"
+__email__ = "petavazohi@mix.wvu.edu"
 __status__ = "Production"
-
-from typing import List
 
 from traceback import print_tb
 from scipy.interpolate import CubicSpline
 import numpy as np
-import numpy.typing as npt
+from typing import List, Tuple, Union
 
 from sympy.physics.quantum.cg import CG
 
@@ -24,7 +21,15 @@ from sympy.physics.quantum.cg import CG
 # TODO When PEP 646 is introduced in numpy. need to update the python typing.
 
 class DensityOfStates:
-    """A class that contains density of states calculated by the a density
+    def __init__(
+        self, 
+        energies: np.ndarray,
+        total: np.ndarray, 
+        projected: np.ndarray = None, 
+        interpolation_factor: int = 1,
+        interpolation_kind: str = 'cubic',
+    ):
+        """A class that contains density of states calculated by the a density
         functional theory calculation.
 
         Parameters
@@ -166,9 +171,9 @@ class DensityOfStates:
         Parameters
         ----------
         atoms : List[int], optional
-             list of atom index needed to be sumed over.
-             count from zero with the same
-             order as input. The default is None.
+            list of atom index needed to be sumed over.
+            count from zero with the same
+            order as input. The default is None.
         principal_q_numbers :List[int], optional
             List of n quantum numbers to be summed over. The default is [-1].
         orbitals : List[int], optional

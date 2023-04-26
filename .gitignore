@@ -120,6 +120,7 @@ ENV/
 
 
 .vs/
+*.code-workspace
 
 # Visual Studio 
 *.pyproj

@@ -1,8 +1,15 @@
+__author__ = "Pedram Tavadze, Uthpala Herath, Fransicso Muñoz"
+__maintainer__ = "Pedram Tavadze"
+__email__ = "petavazohi@mix.wvu.edu"
+__date__ = "March 29, 2023"
+
 import os
 import re
 import xml.etree.ElementTree as ET
 import collections
 import gzip
+from typing import Union
+from pathlib import Path
 
 import numpy as np
 from numpy import array
@@ -19,7 +26,7 @@ class Outcar(collections.abc.Mapping):
     filename : str, optional
         The OURCAR filename, by default "OUTCAR"
     """
-    def __init__(self, filename="OUTCAR"):
+    def __init__(self, filename: Union[str, Path] = "OUTCAR"):
         
         self.variables = {}
         self.filename = filename
@@ -177,7 +184,7 @@ class Poscar(collections.abc.Mapping):
     filename : str, optional
         The POSCAR filename, by default "POSCAR"
     """
-    def __init__(self, filename="POSCAR",rotations = None):
+    def __init__(self, filename: Union[str, Path] = "POSCAR",rotations = None):
         
         self.variables = {}
         self.filename = filename
@@ -275,7 +282,9 @@ class Kpoints(collections.abc.Mapping):
         A boolean vlaue to determine if the kpioints has time reversal symmetry, 
         by default True
     """
-    def __init__(self, filename="KPOINTS", has_time_reversal=True):
+    def __init__(self,
+                 filename: Union[str, Path] = "KPOINTS",
+                 has_time_reversal: bool = True):
         
         self.variables = {}
         self.filename = filename
@@ -449,7 +458,7 @@ class Procar(collections.abc.Mapping):
         """
     def __init__(
         self,
-        filename:str="PROCAR",
+        filename:str: Union[str, Path] = "PROCAR",
         structure:Structure=None,
         reciprocal_lattice:np.ndarray=None,
         kpath:KPath=None,
