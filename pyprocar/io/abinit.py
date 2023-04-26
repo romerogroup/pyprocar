@@ -1,32 +1,203 @@
-import os
 import re
-from re import findall
 from numpy import array
 from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
-from .vasp import Procar
+from ..utils import elements
+from .vasp import Procar, Kpoints
 import numpy as np
 import glob
 import collections
+import os
+import sys
 
 
-class AbinitParser(collections.abc.Mapping):
-    """
-    This class contains methods to parse the fermi energy and reciprocal
-    lattice vectors from the Abinit output file.
-
-    Since abinit v9.x creates the PROCAR file,
-    the methods in vasp.py will be used to parse it.
+class Output(collections.abc.Mapping):
+    """This class contains methods to parse the fermi energy, reciprocal
+    lattice vectors and structure from the Abinit output file.
     """
 
-    def __init__(self, inFiles=None, abinit_output=None):
+    def __init__(self, abinit_output=None):
 
+        # variables
         self.abinit_output = abinit_output
         self.fermi = None
         self.reclat = None  # reciprocal lattice vectors
         self.nspin = None  # spin
+        self.coordinates = None  # reduced atomic coordinates
+        self.variables = {}
 
+        # call parsing functions
         self._readFermi()
         self._readRecLattice()
+        self._readCoordinates()
+        self._readLattice()
+        self._readAtoms()
+
+        # creating structure object
+        self.structure = Structure(
+            atoms=self.atoms,
+            fractional_coordinates=self.coordinates,
+            lattice=self.lattice,
+        )
+
+        return
+
+    def _readFermi(self):
+        """Reads the Fermi energy from the Abinit output file."""
+
+        with open(self.abinit_output, "r") as rf:
+            data = rf.read()
+            self.fermi = float(
+                re.findall(
+                    r"Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)", data
+                )[0]
+            )
+
+            # Converting from Hartree to eV
+            self.fermi = 27.211396641308 * self.fermi
+
+            # read spin (nsppol)
+            self.nspin = re.findall(r"nsppol\s*=\s*([1-9]*)", data)[0]
+
+            return
+
+    def _readRecLattice(self):
+        """Reads the reciprocal lattice vectors
+        from the Abinit output file. This is used to calculate
+        the k-path in cartesian coordinates if required."""
+
+        with open(self.abinit_output, "r") as rf:
+            data = rf.read()
+            lattice_block = re.findall(r"G\([1,2,3]\)=\s*([0-9.\s-]*)", data)
+            lattice_block = lattice_block[3:]
+            self.reclat = array(
+                [lattice_block[0:3][i].split() for i in range(len(lattice_block))],
+                dtype=float,
+            )
+
+            return
+
+    def _readCoordinates(self):
+        """Reads the coordinates as given by the xred keyword."""
+
+        with open(self.abinit_output, "r") as rf:
+            data = rf.read()
+            coordinate_block = re.findall(r"xred\s*([+-.0-9E\s]*)", data)[-1].split()
+            coordinate_list = np.array([float(x) for x in coordinate_block])
+            self.coordinates = coordinate_list.reshape(len(coordinate_list) // 3, 3)
+
+            return
+
+    def _readLattice(self):
+        """Reads the lattice vectors from rprim keyword and scales with acell."""
+
+        with open(self.abinit_output, "r") as rf:
+            data = rf.read()
+
+            # acell
+            acell = re.findall(r"acell\s*([+-.0-9E\s]*)", data)[-1].split()
+            acell = np.array([float(x) for x in acell])
+
+            # convert acell from Bohr to Angstrom
+            acell = 0.529177 * acell
+
+            # rprim
+            rprim_block = re.findall(r"rprim\s*([+-.0-9E\s]*)", data)[-1].split()
+            rprim_list = np.array([float(x) for x in rprim_block])
+            rprim = rprim_list.reshape(len(rprim_list) // 3, 3)
+
+            # lattice
+            self.lattice = np.zeros(shape=(3, 3))
+            for i in range(len(acell)):
+                self.lattice[i, :] = acell[i] * rprim[i, :]
+
+            return
+
+    def _readAtoms(self):
+        """Reads atomic elements used and puts them in an array according to their composition."""
+
+        with open(self.abinit_output, "r") as rf:
+            data = rf.read()
+
+            # Getting typat and znucl
+            typat = re.findall(r"typat\s*([+-.0-9E\s]*)", data)[-1].split()
+            typat = [int(x) for x in typat]
+
+            znucl = re.findall(r"znucl\s*([+-.0-9E\s]*)", data)[-1].split()
+            znucl = [int(float(x)) for x in znucl]
+
+            self.atoms = [elements.atomic_symbol(znucl[x - 1]) for x in typat]
+
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
+
+
+class AbinitKpoints(collections.abc.Mapping):
+    """This class parses the k-point information."""
+
+    def __init__(self, filename="KPOINTS", has_time_reversal=True):
+        self.variables = {}
+
+        # calling parser
+        self._parse_kpoints()
+        self.kpath = KPath(
+            knames=self.abinitkpointsobject.knames,
+            special_kpoints=self.abinitkpointsobject.special_kpoints,
+            ngrids=self.abinitkpointsobject.ngrids,
+            has_time_reversal=has_time_reversal,
+        )
+
+    def _parse_kpoints(self):
+        """Reads KPOINTS file.
+        Abinit has multiple way of defining the
+        k-path. For the time being, we suggest to use
+        a KPOINTS file similar to VASP to obtain the
+        k-path for PyProcar from an Abinit calculation.
+        """
+        self.abinitkpointsobject = Kpoints(filename="KPOINTS", has_time_reversal=True)
+
+    def __contains__(self, x):
+        return x in self.variables
+
+    def __getitem__(self, x):
+        return self.variables.__getitem__(x)
+
+    def __iter__(self):
+        return self.variables.__iter__()
+
+    def __len__(self):
+        return self.variables.__len__()
+
+
+class AbinitProcar(collections.abc.Mapping):
+    """This class has functions to parse the PROCAR file
+    generated from Abinit. Unlike, VASP here the PROCAR files
+    need to be merged and fixed for formatting issues prior to
+    further processing.
+    """
+
+    def __init__(
+        self,
+        inFiles=None,
+        abinit_output=None,
+        reciprocal_lattice=None,
+        kpath=None,
+        efermi=None,
+    ):
+        self.variables = {}
+        self.inFiles = inFiles
+        self.abinit_output = abinit_output
+        self.reciprocal_lattice = reciprocal_lattice
+        self.kpath = kpath
+        self.efermi = efermi
 
         # Preparing files for merging
         # reading in all PROCAR_* files and putting it into a list if not provided.
@@ -39,51 +210,23 @@ class AbinitParser(collections.abc.Mapping):
             self._mergeparallel(
                 inputfiles=inFiles,
                 outputfile="PROCAR",
-                nspin=self.nspin,
                 abinit_output=self.abinit_output,
             )
         else:
             pass
 
-        self._readAbinitProcar()
-
-        return
-
-    def _readFermi(self):
-        """Reads the Fermi energy from the Abinit output file."""
-
-        rf = open(self.abinit_output, "r")
-        data = rf.read()
-        self.fermi = float(
-            findall("Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)", data)[0]
+        # Use VASP Procar parser following PROCAR merge
+        self.abinitprocarobject = Procar(
+            filename="PROCAR",
+            structure=None,
+            reciprocal_lattice=self.reciprocal_lattice,
+            kpath=self.kpath,
+            kpoints=None,
+            efermi=self.efermi,
+            interpolation_factor=1,
         )
 
-        # Converting from Hartree to eV
-        self.fermi = 27.211396641308 * self.fermi
-
-        # read spin (nsppol)
-        self.nspin = findall(r"nsppol\s*=\s*([1-9]*)", data)[0]
-
-        rf.close()
-
-    def _readRecLattice(self):
-        """Reads the reciprocal lattice vectors
-        from the Abinit output file. This is used to calculate
-        the k-path in cartesian coordinates if required."""
-
-        rf = open(self.abinit_output, "r")
-        data = rf.read()
-        rf.close()
-        lattice_block = findall(r"G\([1,2,3]\)=\s*([0-9.\s-]*)", data)
-        lattice_block = lattice_block[3:]
-        self.reclat = array(
-            [lattice_block[0:3][i].split() for i in range(len(lattice_block))],
-            dtype=float,
-        )
-
-    def _mergeparallel(
-        self, inputfiles=None, outputfile=None, nspin=1, abinit_output=None
-    ):
+    def _mergeparallel(self, inputfiles=None, outputfile=None, abinit_output=None):
         """This merges Procar files seperated between k-point ranges.
         Happens with parallel Abinit runs.
         """
@@ -92,7 +235,11 @@ class AbinitParser(collections.abc.Mapping):
         print(filenames)
 
         # creating an instance of the AbinitParser class
-        nspin = int(nspin)
+        if abinit_output:
+            abinitparserobject = Output(abinit_output=abinit_output)
+            nspin = int(abinitparserobject.nspin)
+        else:
+            raise IOError("Abinit output file not found.")
 
         if nspin != 2:
             with open(outputfile, "w") as outfile:
@@ -104,7 +251,7 @@ class AbinitParser(collections.abc.Mapping):
         elif nspin == 2:
             # for spin polarized calculations the spin down segments are saved in the
             # second half of the PROCAR's but in reverse k-point order. So we have to
-            # FIXME the order and merge the second half of the PROCAR's.
+            # fix the order and merge the second half of the PROCAR's.
             spinup_list = filenames[: int(len(filenames) / 2)]
             spindown_list = filenames[int(len(filenames) / 2) :]
 
@@ -275,59 +422,6 @@ class AbinitParser(collections.abc.Mapping):
                     fp.write("tot  " + " ".join(map(str, tot[total_count, :])) + "\n\n")
                     total_count += 1
         fp.close()
-
-    def _readAbinitProcar(self):
-        """Reads the PROCAR generated from Abinit.
-        First this PROCAR will need to be fixed for
-        parallelization and formatting."""
-
-        self.abinitprocarobject = Procar(
-            filename="PROCAR",
-            structure=None,
-            reciprocal_lattice=self.reclat,
-            kpath=None,
-            efermi=self.fermi,
-            interpolation_factor=1,
-        )
-
-    def __contains__(self, x):
-        return x in self.variables
-
-    def __getitem__(self, x):
-        return self.variables.__getitem__(x)
-
-    def __iter__(self):
-        return self.variables.__iter__()
-
-    def __len__(self):
-        return self.variables.__len__()
-
-
-class AbinitKpoints(collections.abc.Mapping):
-    def __init__(self, filename="abinit.out", has_time_reversal=True):
-        self.variables = {}
-        self.filename = filename
-        self.file_str = None
-        self.metadata = None
-        self.mode = None
-        self.kgrid = None
-        self.kshift = None
-        self.ngrids = None
-        self.special_kpoints = None
-        self.knames = None
-        self.cartesian = False
-        self.automatic = False
-        # self._parse_kpoints()
-        # self.kpath = KPath(
-        #     knames=self.knames,
-        #     special_kpoints=self.special_kpoints,
-        #     ngrids=self.ngrids,
-        #     has_time_reversal=has_time_reversal,
-        # )
-
-    # def _parse_kpoints(self):
-    #     self.kgrid
-    #     self.
 
     def __contains__(self, x):
         return x in self.variables
