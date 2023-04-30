@@ -152,5 +152,5 @@ _build/
 my_tests/
 
 data/
-
+reports/
 notebooks/
