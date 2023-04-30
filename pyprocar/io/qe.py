@@ -77,7 +77,8 @@ class QEParser():
 
         # if xml_root.findall(".//input/control_variables/calculation")[0].text == "nscf":
         #     self.is_dos_fermi_calc = True
-        
+        if self.kpath is not None:
+            self.bands -= self.efermi
         self.ebs = ElectronicBandStructure(
                                 kpoints=self.kpoints,
                                 bands=self.bands,
