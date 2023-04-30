@@ -151,7 +151,6 @@ class Parser:
         self.kpath = parser.kpath
         self.structure = parser.structure
         self.dos = parser.dos
-
         return None
     
     def parse_siesta(self):
