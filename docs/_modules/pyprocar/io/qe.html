@@ -444,7 +444,8 @@
         <span class="c1"># Parsing density of states files</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pdos_in_filename</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_pdos</span><span class="p">(</span><span class="n">pdos_in_filename</span><span class="o">=</span><span class="n">pdos_in_filename</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">)</span>
-        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dos</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># Parsing information related to the bandstructure calculations kpath and klabels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kticks</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">knames</span> <span class="o">=</span> <span class="kc">None</span>
@@ -457,7 +458,8 @@
 
         <span class="c1"># if xml_root.findall(&quot;.//input/control_variables/calculation&quot;)[0].text == &quot;nscf&quot;:</span>
         <span class="c1">#     self.is_dos_fermi_calc = True</span>
-        
+        <span class="c1"># if self.kpath is not None:</span>
+        <span class="c1"># self.bands -= self.efermi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span> <span class="o">=</span> <span class="n">ElectronicBandStructure</span><span class="p">(</span>
                                 <span class="n">kpoints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
                                 <span class="n">bands</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span>
@@ -481,7 +483,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># cart_kpoints self.kpoints = self.kpoints*(2*np.pi /self.alat)</span>
         <span class="c1"># Converting back to crystal basis</span>
-        <span class="n">cart_kpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alat</span><span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+        <span class="n">cart_kpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">cart_kpoints</span></div>
 
@@ -506,11 +508,15 @@
 <span class="sd">            Returns a list of pyprocar.core.Structure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># symbols = [x.strip() for x in self.data[&#39;ions&#39;]]</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="p">]</span>
         <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">st</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="n">lattice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direct_lattice</span><span class="p">,</span> <span class="n">fractional_coordinates</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_positions</span> <span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> 
+                    <span class="n">lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">direct_lattice</span><span class="p">,</span> 
+                    <span class="n">fractional_coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_positions</span><span class="p">,</span> 
+                    <span class="n">rotations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rotations</span> 
+                    <span class="p">)</span>
                       
         <span class="n">structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">structures</span>
@@ -578,13 +584,12 @@
         <span class="c1"># print(self.wfc_filenames)</span>
         <span class="n">wfc_filenames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_available_wfc_filenames</span><span class="p">(</span><span class="n">dirname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">)</span>
         <span class="n">projected_dos</span><span class="p">,</span> <span class="n">projected_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_dos_projections</span><span class="p">(</span><span class="n">wfc_filenames</span><span class="o">=</span><span class="n">wfc_filenames</span><span class="p">,</span> <span class="n">n_energy</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">energies</span><span class="p">))</span>    
-   
+        
         <span class="c1"># print(projected_labels)</span>
         <span class="n">dos</span> <span class="o">=</span> <span class="n">DensityOfStates</span><span class="p">(</span><span class="n">energies</span><span class="o">=</span><span class="n">energies</span><span class="p">,</span>
                             <span class="n">total</span><span class="o">=</span><span class="n">total_dos</span><span class="p">,</span>
                             <span class="n">projected</span><span class="o">=</span><span class="n">projected_dos</span><span class="p">,</span> 
-                            <span class="n">interpolation_factor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                            <span class="n">interpolation_kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
+                            <span class="n">interpolation_factor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dos</span>    
     
     <span class="k">def</span> <span class="nf">_parse_dos_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_total_filename</span> <span class="p">):</span>
@@ -1108,7 +1113,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">direct_lattice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="n">acell</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">acell</span>  <span class="ow">in</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/atomic_structure/cell&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">],</span><span class="n">dtype</span> <span class="o">=</span> <span class="nb">float</span><span class="p">)</span>
 
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span>  <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="n">acell</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">acell</span>  <span class="ow">in</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/basis_set/reciprocal_lattice&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">],</span><span class="n">dtype</span> <span class="o">=</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">alat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="n">acell</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">acell</span>  <span class="ow">in</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/basis_set/reciprocal_lattice&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">],</span><span class="n">dtype</span> <span class="o">=</span> <span class="nb">float</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_parse_symmetries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">main_xml_root</span><span class="p">):</span>

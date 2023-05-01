@@ -50,23 +50,6 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_noncolinear_qe_thumb.png
-    :alt: Plotting non colinear band structures in Quantum Espresso
-
-  :ref:`sphx_glr_examples_00-band_structure_plotting_noncolinear_qe.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in VASP.">
 
 .. only:: html
@@ -79,6 +62,23 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in VASP</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_noncolinear_qe_thumb.png
+    :alt: Plotting non colinear band structures in Quantum Espresso
+
+  :ref:`sphx_glr_examples_00-band_structure_plotting_noncolinear_qe.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
     </div>
 
 

@@ -472,6 +472,7 @@
         <span class="n">bands</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">fermi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">reciprocal_lattice</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">ebs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">bands_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">spd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">spd_spin</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -489,8 +490,7 @@
         <span class="c1"># sym: bool=False</span>
         <span class="p">):</span>
 
-        
-
+    
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span>
         
         <span class="c1"># Shifts kpoints between [0.5,0.5)</span>
@@ -915,10 +915,11 @@
                                                              <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lattice</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">METER_ANGSTROM</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]))])</span>
                             <span class="p">)</span>
         
+
+        
         <span class="n">gradient_list_cart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">gradient</span><span class="p">)</span> <span class="k">for</span> <span class="n">gradient</span> <span class="ow">in</span> <span class="n">gradient_list</span><span class="p">])</span>
         
- 
-        
+
         <span class="c1"># kp_reduced_to_grad_x = {f&#39;({key[0]},{key[1]},{key[2]})&#39;:value for (key,value) in zip(self.XYZ,grad_x_list)}</span>
         <span class="c1"># kp_reduced_to_grad_y = {f&#39;({key[0]},{key[1]},{key[2]})&#39;:value for (key,value) in zip(self.XYZ,grad_y_list)}</span>
         <span class="c1"># kp_reduced_to_grad_z = {f&#39;({key[0]},{key[1]},{key[2]})&#39;:value for (key,value) in zip(self.XYZ,grad_z_list)}</span>

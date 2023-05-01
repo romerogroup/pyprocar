@@ -397,7 +397,7 @@
 
 
 <span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">FermiSurface3D</span>
-<span class="kn">from</span> <span class="nn">..splash</span> <span class="kn">import</span> <span class="n">welcome</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">welcome</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
 <span class="kn">from</span> <span class="nn">..io.procarparser</span> <span class="kn">import</span> <span class="n">ProcarParser</span>
 <span class="kn">from</span> <span class="nn">..io.lobsterparser</span> <span class="kn">import</span> <span class="n">LobsterFermiParser</span>
@@ -410,7 +410,7 @@
 <span class="c1"># TODO separate slicing functionality to new function</span>
 <span class="c1"># TODO separate iso-slider functionality to new function. isoslider still experimental</span>
 
-<div class="viewcode-block" id="fermi3D"><a class="viewcode-back" href="../../../user-guide/fermi3D.html#pyprocar.scripts.fermi3D">[docs]</a><span class="k">def</span> <span class="nf">fermi3D</span><span class="p">(</span>
+<div class="viewcode-block" id="fermi3D"><a class="viewcode-back" href="../../../user-guide/fermi3d.html#pyprocar.scripts.fermi3D">[docs]</a><span class="k">def</span> <span class="nf">fermi3D</span><span class="p">(</span>
     <span class="n">procar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
     <span class="n">outcar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
     <span class="n">poscar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span>
@@ -703,99 +703,27 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Code dependencies</span>
     <span class="c1">##########################################################################</span>
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
-            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
-            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
-        <span class="n">outcar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Outcar</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">outcar</span><span class="p">)</span>
-            
-        <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">efermi</span>
-        
-        <span class="n">poscar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">poscar</span><span class="p">)</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span>
-        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
-
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Procar</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">procar</span><span class="p">,</span>
-                                <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-                                <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                                <span class="n">efermi</span><span class="o">=</span><span class="n">e_fermi</span><span class="p">,</span>
-                                <span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="n">abinitFile</span> <span class="o">=</span> <span class="n">AbinitParser</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">abinit_output</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">abinitFile</span><span class="o">.</span><span class="n">fermi</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">abinitFile</span><span class="o">.</span><span class="n">reclat</span>
-
-        <span class="c1"># Converting Ha to eV</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="mf">27.211396641308</span> <span class="o">*</span> <span class="n">parser</span><span class="o">.</span><span class="n">bands</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
-        <span class="c1"># procarFile = parser</span>
-        <span class="k">if</span> <span class="n">dirname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dirname</span> <span class="o">=</span> <span class="s2">&quot;bands&quot;</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">qe</span><span class="o">.</span><span class="n">QEParser</span><span class="p">(</span><span class="n">scfIn_filename</span> <span class="o">=</span> <span class="s2">&quot;scf.in&quot;</span><span class="p">,</span> <span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">bandsIn_filename</span> <span class="o">=</span> <span class="s2">&quot;bands.in&quot;</span><span class="p">,</span> 
-                             <span class="n">pdosIn_filename</span> <span class="o">=</span> <span class="s2">&quot;pdos.in&quot;</span><span class="p">,</span> <span class="n">kpdosIn_filename</span> <span class="o">=</span> <span class="s2">&quot;kpdos.in&quot;</span><span class="p">,</span> <span class="n">atomic_proj_xml</span> <span class="o">=</span> <span class="s2">&quot;atomic_proj.xml&quot;</span><span class="p">)</span>
-        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">efermi</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-
-        <span class="c1"># procarFile = QEFermiParser()</span>
-        <span class="c1"># reciprocal_lattice = procarFile.reclat</span>
-        <span class="c1"># data = ProcarSelect(procarFile, deepCopy=True)</span>
-        <span class="c1"># if fermi is None:</span>
-        <span class="c1">#     e_fermi = procarFile.efermi</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     e_fermi = fermi</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobster&quot;</span><span class="p">:</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">LobsterFermiParser</span><span class="p">()</span>
-        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">reclat</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;bxsf&quot;</span><span class="p">:</span>
-        <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">qe</span><span class="o">.</span><span class="n">bxsf</span><span class="o">.</span><span class="n">BxsfParser</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span> <span class="n">infile</span><span class="p">)</span>
-        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">reclat</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;frmsf&quot;</span><span class="p">:</span>
-        <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">fermi</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">frmsf</span><span class="o">.</span><span class="n">FrmsfParser</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">infile</span><span class="p">)</span>
-        <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">rec_lattice</span>
-        <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
-
-    <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">+=</span> <span class="n">e_fermi</span>
-
-
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
+    <span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
+    <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+    <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data Formating</span>
     <span class="c1">##########################################################################</span>
 
-
     <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">bands</span>
     <span class="k">if</span> <span class="n">bands_to_keep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
+        <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
 
 
     <span class="n">spd</span> <span class="o">=</span> <span class="p">[]</span>
     
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -803,7 +731,7 @@
         <span class="c1"># data.selectAtoms(atoms, fortran=False)</span>
         <span class="c1"># data.selectOrbital(orbitals)</span>
 
-        <span class="n">projected</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span> <span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span> <span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
         <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="n">bands_to_keep</span><span class="p">:</span>
@@ -818,9 +746,9 @@
     <span class="n">spd_spin</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">spin_texture</span><span class="p">:</span>
-        <span class="n">ebsX</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
-        <span class="n">ebsY</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
-        <span class="n">ebsZ</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
+        <span class="n">ebsX</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
+        <span class="n">ebsY</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
+        <span class="n">ebsZ</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
 
         <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -845,8 +773,8 @@
     <span class="c1">##########################################################################</span>
     <span class="k">if</span> <span class="n">iso_slider</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">fermi_surface3D</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
-                                        <span class="n">kpoints</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-                                        <span class="n">bands</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span>
+                                        <span class="n">kpoints</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                                        <span class="n">bands</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span>
                                         <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">bands_to_keep</span><span class="p">,</span>
                                         <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">,</span>
                                         <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">,</span>
@@ -886,9 +814,9 @@
     
         <span class="k">for</span> <span class="n">e_value</span> <span class="ow">in</span> <span class="n">energy_values</span><span class="p">:</span>
             <span class="n">fermi_surface3D</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
-                                            <span class="n">kpoints</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                                            <span class="n">kpoints</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
                                             <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">bands_to_keep</span><span class="p">,</span>
-                                            <span class="n">bands</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span>
+                                            <span class="n">bands</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span>
                                             <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">,</span>
                                             <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">,</span>
                                             <span class="n">calculate_fermi_speed</span> <span class="o">=</span> <span class="n">calculate_fermi_speed</span><span class="p">,</span>

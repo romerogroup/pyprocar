@@ -17,7 +17,7 @@ PyProcar has the following parsers
 
 - :mod:`pyprocar.io.vasp` This module is used to parse Vasp results
 
-- :mod:`pyprocar.io.abinit` This module is used to parse Vasp results
+- :mod:`pyprocar.io.abinit` This module is used to parse Abinit results
 
 .. toctree::
     :maxdepth: 2

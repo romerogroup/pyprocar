@@ -392,12 +392,8 @@
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span> <span class="k">as</span> <span class="n">mpcolors</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
 
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
-<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">ProcarSymmetry</span>
-<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">FermiSurface</span>
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">ElkParser</span>
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">AbinitParser</span>
-<span class="kn">from</span> <span class="nn">..splash</span> <span class="kn">import</span> <span class="n">welcome</span>
+<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">ProcarSymmetry</span><span class="p">,</span> <span class="n">FermiSurface</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">welcome</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">io</span>
 
 
@@ -533,15 +529,21 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no_arrows       : &quot;</span><span class="p">,</span> <span class="n">no_arrow</span><span class="p">)</span>
 
     
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
+    <span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
+    <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">-=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
 
-    <span class="n">parser</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">reciprocal_lattice</span><span class="p">,</span> <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                                            <span class="n">lobster</span><span class="o">=</span><span class="n">lobster</span><span class="p">,</span>
-                                            <span class="n">repair</span><span class="o">=</span><span class="n">repair</span><span class="p">,</span>
-                                            <span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">rotations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ebs</span><span class="o">.</span><span class="n">ibz2fbz</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rotations</span><span class="p">)</span>
+        
+    <span class="c1"># Shifting all kpoint to first Brillouin zone</span>
+    <span class="n">bound_ops</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">+</span> <span class="n">bound_ops</span>
+    <span class="n">kpoints</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">kpoints_cartesian</span>
+
     <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="c1"># if bands is None:</span>
-    <span class="c1">#     bands = np.arange(parser.ebs.bands.shape[1])</span>
+        <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1">### End of parsing ###</span>
@@ -549,35 +551,29 @@
     <span class="c1"># Selecting kpoints in a constant k_z plane</span>
     <span class="n">i_kpoints_near_z_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;</span> <span class="n">k_z_plane</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">k_z_plane</span> <span class="o">-</span> <span class="mf">0.01</span><span class="p">)</span> <span class="p">)</span>
     <span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;_____________________________________________________&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i_spin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,:,</span><span class="n">i_spin</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">energy</span><span class="p">,</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,:,</span><span class="n">i_spin</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">energy</span><span class="p">))</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,:,</span><span class="n">i_spin</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">energy</span><span class="p">,</span> <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,:,</span><span class="n">i_spin</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">energy</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Useful band indices for spin-</span><span class="si">{</span><span class="n">i_spin</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    
-    
-    <span class="c1"># parser.ebs.bands = parser.ebs.bands[:,bands,:]</span>
-    <span class="c1"># parser.ebs.projected = parser.ebs.projected[:,bands,:,:,:,:]</span>
-
-    
 
     <span class="k">if</span> <span class="n">spin_texture</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># processing the data</span>
-        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">projected</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span> <span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span> <span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># first get the sdp reduced array for all spin components.</span>
         <span class="n">stData</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ebsX</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
-        <span class="n">ebsY</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
-        <span class="n">ebsZ</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
+        <span class="n">ebsX</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
+        <span class="n">ebsY</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
+        <span class="n">ebsZ</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
 
         <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -592,16 +588,15 @@
         <span class="n">stData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="p">)</span>
         <span class="n">stData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="p">)</span>
 
-        <span class="n">projected</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span> <span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span> <span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="c1"># Once the PROCAR is parsed and reduced to 2x2 arrays, we can apply</span>
     <span class="c1"># symmetry operations to unfold the Brillouin Zone</span>
     <span class="c1"># kpoints = data.kpoints</span>
     <span class="c1"># bands = data.bands</span>
     <span class="c1"># character = data.spd</span>
 
-    <span class="n">bands</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span>
-
-    <span class="c1"># kpoints = kpoints.dot(reciprocal_lattice  * (parser.alat/(2*np.pi)))</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span>
     <span class="n">character</span> <span class="o">=</span> <span class="n">projected</span>
     <span class="k">if</span> <span class="n">spin_texture</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">stData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stData</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">stData</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -648,61 +643,61 @@
         <span class="k">return</span></div>
 
 
-<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
-          <span class="n">lobster</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-          <span class="n">repair</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-          <span class="n">dirname</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-          <span class="n">apply_symmetry</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
-                <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
-                <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
+<span class="c1"># def parse(code:str=&#39;vasp&#39;,</span>
+<span class="c1">#           lobster:bool=False,</span>
+<span class="c1">#           repair:bool=False,</span>
+<span class="c1">#           dirname:str=&quot;&quot;,</span>
+<span class="c1">#           apply_symmetry:bool=True):</span>
+<span class="c1">#         if code == &quot;vasp&quot; or code == &quot;abinit&quot;:</span>
+<span class="c1">#             if repair:</span>
+<span class="c1">#                 repairhandle = UtilsProcar()</span>
+<span class="c1">#                 repairhandle.ProcarRepair(procar, procar)</span>
+<span class="c1">#                 print(&quot;PROCAR repaired. Run with repair=False next time.&quot;)</span>
 
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
-            <span class="n">outcar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">OUTCAR&quot;</span>
-            <span class="n">poscar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">POSCAR&quot;</span>
-            <span class="n">procar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">PROCAR&quot;</span>
-            <span class="n">kpoints</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">KPOINTS&quot;</span>
-            <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">outcar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Outcar</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">outcar</span><span class="p">)</span>
+<span class="c1">#         if code == &quot;vasp&quot;:</span>
+<span class="c1">#             outcar = f&quot;{dirname}{os.sep}OUTCAR&quot;</span>
+<span class="c1">#             poscar = f&quot;{dirname}{os.sep}POSCAR&quot;</span>
+<span class="c1">#             procar = f&quot;{dirname}{os.sep}PROCAR&quot;</span>
+<span class="c1">#             kpoints = f&quot;{dirname}{os.sep}KPOINTS&quot;</span>
+<span class="c1">#             filename = f&quot;{dirname}{os.sep}{filename}&quot;</span>
+<span class="c1">#             outcar = io.vasp.Outcar(filename=outcar)</span>
         
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">efermi</span>
+<span class="c1">#             e_fermi = outcar.efermi</span>
         
-            <span class="n">poscar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">poscar</span><span class="p">)</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span>
-            <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+<span class="c1">#             poscar = io.vasp.Poscar(filename=poscar)</span>
+<span class="c1">#             structure = poscar.structure</span>
+<span class="c1">#             reciprocal_lattice = poscar.structure.reciprocal_lattice</span>
 
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Procar</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">procar</span><span class="p">,</span>
-                                    <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-                                    <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                                    <span class="n">efermi</span><span class="o">=</span><span class="n">e_fermi</span><span class="p">,</span>
-                                    <span class="p">)</span>
+<span class="c1">#             parser = io.vasp.Procar(filename=procar,</span>
+<span class="c1">#                                     structure=structure,</span>
+<span class="c1">#                                     reciprocal_lattice=reciprocal_lattice,</span>
+<span class="c1">#                                     efermi=e_fermi,</span>
+<span class="c1">#                                     )</span>
 
-            <span class="k">if</span> <span class="n">apply_symmetry</span><span class="p">:</span>                       
-                <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ibz2fbz</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">rotations</span><span class="p">)</span>
+<span class="c1">#             if apply_symmetry:                       </span>
+<span class="c1">#                 ebs.ibz2fbz(rotations)</span>
 
-            <span class="n">bound_ops</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
-            <span class="n">kpoints_cart</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
+<span class="c1">#             bound_ops = -1.0*(ebs.kpoints &gt; 0.5) + 1.0*(ebs.kpoints &lt;= -0.5)</span>
+<span class="c1">#             kpoints_cart = kpoints.dot(reciprocal_lattice)</span>
 
-        <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
+<span class="c1">#         elif code == &quot;qe&quot;:</span>
 
-            <span class="k">if</span> <span class="n">dirname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">dirname</span> <span class="o">=</span> <span class="s2">&quot;bands&quot;</span>
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">qe</span><span class="o">.</span><span class="n">QEParser</span><span class="p">(</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">scf_in_filename</span> <span class="o">=</span> <span class="s2">&quot;scf.in&quot;</span><span class="p">,</span> <span class="n">bands_in_filename</span> <span class="o">=</span> <span class="s2">&quot;bands.in&quot;</span><span class="p">,</span> 
-                                    <span class="n">pdos_in_filename</span> <span class="o">=</span> <span class="s2">&quot;pdos.in&quot;</span><span class="p">,</span> <span class="n">kpdos_in_filename</span> <span class="o">=</span> <span class="s2">&quot;kpdos.in&quot;</span><span class="p">,</span> <span class="n">atomic_proj_xml</span> <span class="o">=</span> <span class="s2">&quot;atomic_proj.xml&quot;</span><span class="p">)</span>
-            <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+<span class="c1">#             if dirname is None:</span>
+<span class="c1">#                 dirname = &quot;bands&quot;</span>
+<span class="c1">#             parser = io.qe.QEParser(dirname = dirname, scf_in_filename = &quot;scf.in&quot;, bands_in_filename = &quot;bands.in&quot;, </span>
+<span class="c1">#                                     pdos_in_filename = &quot;pdos.in&quot;, kpdos_in_filename = &quot;kpdos.in&quot;, atomic_proj_xml = &quot;atomic_proj.xml&quot;)</span>
+<span class="c1">#             reciprocal_lattice = reciprocal_lattice</span>
 
-            <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">efermi</span>
+<span class="c1">#             e_fermi = efermi</span>
 
-            <span class="k">if</span> <span class="n">apply_symmetry</span><span class="p">:</span>
-                <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ibz2fbz</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">rotations</span><span class="p">)</span>
+<span class="c1">#             if apply_symmetry:</span>
+<span class="c1">#                 ebs.ibz2fbz(rotations)</span>
 
-            <span class="n">bound_ops</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
-            <span class="n">kpoints</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span>  <span class="o">+</span> <span class="n">bound_ops</span>
-            <span class="n">kpoints_cart</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">reciprocal_lattice</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">alat</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+<span class="c1">#             bound_ops = -1.0*(ebs.kpoints &gt; 0.5) + 1.0*(ebs.kpoints &lt;= -0.5)</span>
+<span class="c1">#             kpoints = ebs.kpoints  + bound_ops</span>
+<span class="c1">#             kpoints_cart = kpoints.dot(reciprocal_lattice) * (alat/(2*np.pi))</span>
 
-        <span class="k">return</span> <span class="n">parser</span><span class="p">,</span> <span class="n">kpoints_cart</span><span class="p">,</span> <span class="n">reciprocal_lattice</span><span class="p">,</span> <span class="n">e_fermi</span>
+<span class="c1">#         return parser, kpoints_cart, reciprocal_lattice, e_fermi</span>
 </pre></div>
 
             </article>

@@ -96,6 +96,8 @@ def bandsplot(
     structure = parser.structure
     kpath = parser.kpath
 
+    # shifting fermi to 0
+    ebs.bands -= ebs.efermi
     if fermi:
         ebs.bands += fermi
         fermi_level = fermi

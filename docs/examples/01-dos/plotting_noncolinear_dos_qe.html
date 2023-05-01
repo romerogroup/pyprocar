@@ -366,8 +366,8 @@
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_colinear.html">Plotting band structure</a></li>
 </ul>
@@ -448,7 +448,7 @@ to download the full example code</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
                              <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                             <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;noncolinear&#39;</span><span class="p">,</span>
+                             <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-colinear&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;dos&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -458,8 +458,8 @@ to download the full example code</p>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 
-<span class="n">parent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">dos</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">noncolinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe&quot;</span>
+<span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">dos&quot;</span>
 </pre></div>
 </div>
 <section id="parametric-mode">
@@ -482,10 +482,10 @@ For details on the meaning of the indices of the atomic projection please refer 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_noncolinear_dos_qe_001.png" srcset="../../_images/sphx_glr_plotting_noncolinear_dos_qe_001.png" alt="plotting noncolinear dos qe" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0BEAF940&gt;
+<img src="../../_images/sphx_glr_plotting_noncolinear_dos_qe_001.png" srcset="../../_images/sphx_glr_plotting_noncolinear_dos_qe_001.png" alt="plotting noncolinear dos qe" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2DB5E070&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  20.461 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  17.706 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plotting-noncolinear-dos-qe-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/50bdc60b03c45dd8e6198b666c2b9afe/plotting_noncolinear_dos_qe.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_noncolinear_dos_qe.py</span></code></a></p>

@@ -381,7 +381,7 @@
   <h1>Source code for pyprocar.scripts.scriptUnfold</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">..splash</span> <span class="kn">import</span> <span class="n">welcome</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">welcome</span>
 <span class="kn">from</span> <span class="nn">..utils.defaults</span> <span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">..utils.info</span> <span class="kn">import</span> <span class="n">orbital_names</span>
 <span class="kn">from</span> <span class="nn">..plotter</span> <span class="kn">import</span> <span class="n">EBSPlot</span>
@@ -394,6 +394,7 @@
         <span class="n">outcar</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">,</span>
         <span class="n">vaspxml</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">abinit_output</span><span class="o">=</span><span class="s2">&quot;abinit.out&quot;</span><span class="p">,</span>
+        <span class="n">dirname</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">transformation_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
         <span class="n">kpoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">elkin</span><span class="o">=</span><span class="s2">&quot;elk.in&quot;</span><span class="p">,</span>
@@ -459,35 +460,36 @@
     <span class="n">settings</span><span class="o">.</span><span class="n">unfold</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">settings</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">unfold</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">outcar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">outcar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Outcar</span><span class="p">(</span><span class="n">outcar</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fermi</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">efermi</span>
-            <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">outcar</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
-        <span class="k">elif</span> <span class="n">vaspxml</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vasprun</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">VaspXML</span><span class="p">(</span><span class="n">vaspxml</span><span class="p">)</span>
-            <span class="n">fermi</span> <span class="o">=</span> <span class="n">vasprun</span><span class="o">.</span><span class="n">fermi</span>
+    <span class="c1"># if code == &quot;vasp&quot;:</span>
+    <span class="c1">#     if outcar is not None:</span>
+    <span class="c1">#         outcar = io.vasp.Outcar(outcar)</span>
+    <span class="c1">#         if fermi is None:</span>
+    <span class="c1">#             fermi = outcar.efermi</span>
+    <span class="c1">#         reciprocal_lattice = outcar.reciprocal_lattice</span>
+    <span class="c1">#     elif vaspxml is not None:</span>
+    <span class="c1">#         vasprun = io.vasp.VaspXML(vaspxml)</span>
+    <span class="c1">#         fermi = vasprun.fermi</span>
             
-        <span class="k">if</span> <span class="n">poscar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">poscar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">poscar</span><span class="p">)</span>
-            <span class="n">structure</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span>
-            <span class="k">if</span> <span class="n">reciprocal_lattice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+    <span class="c1">#     if poscar is not None:</span>
+    <span class="c1">#         poscar = io.vasp.Poscar(poscar)</span>
+    <span class="c1">#         structure = poscar.structure</span>
+    <span class="c1">#         if reciprocal_lattice is None:</span>
+    <span class="c1">#             reciprocal_lattice = poscar.structure.reciprocal_lattice</span>
 
-        <span class="k">if</span> <span class="n">kpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kpoints</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Kpoints</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)</span>
-            <span class="n">kpath</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">kpath</span>
+    <span class="c1">#     if kpoints is not None:</span>
+    <span class="c1">#         kpoints = io.vasp.Kpoints(kpoints)</span>
+    <span class="c1">#         kpath = kpoints.kpath</span>
 
-        <span class="n">procar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">vasp</span><span class="o">.</span><span class="n">Procar</span><span class="p">(</span>
-            <span class="n">procar</span><span class="p">,</span>
-            <span class="n">structure</span><span class="p">,</span>
-            <span class="n">reciprocal_lattice</span><span class="p">,</span>
-            <span class="n">kpath</span><span class="p">,</span>
-            <span class="n">fermi</span><span class="p">,</span>
-            <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">ebs</span> <span class="o">=</span> <span class="n">procar</span><span class="o">.</span><span class="n">ebs</span>
+    <span class="c1">#     procar = io.vasp.Procar(</span>
+    <span class="c1">#         procar,</span>
+    <span class="c1">#         structure,</span>
+    <span class="c1">#         reciprocal_lattice,</span>
+    <span class="c1">#         kpath,</span>
+    <span class="c1">#         fermi,</span>
+    <span class="c1">#         interpolation_factor=interpolation_factor,</span>
+    <span class="c1">#     )</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
+    <span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
 
     <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">EBSPlot</span><span class="p">(</span><span class="n">ebs</span><span class="p">,</span> <span class="n">kpath</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">spins</span><span class="p">)</span>
 

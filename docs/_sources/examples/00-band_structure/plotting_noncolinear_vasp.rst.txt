@@ -33,7 +33,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='noncolinear',
+                                spin_calc_type='non-colinear',
                                 calc_type='bands')
 
 .. GENERATED FROM PYTHON SOURCE LINES 23-24
@@ -48,9 +48,9 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    # data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}bands{os.sep}non-colinear{os.sep}Fe"
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-colinear{os.sep}bands"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}bands"
+
 
 
 
@@ -88,11 +88,8 @@ Plain mode
 
  .. code-block:: none
 
-    PROCAR needs repairing
-    Repaired PROCAR is written at C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired
-    Please use C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired next time for better efficiency
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14153E040>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E0357C0>
 
 
 
@@ -137,18 +134,15 @@ For details on the meaning of the indices of the atomic projection please refer 
 
  .. code-block:: none
 
-    PROCAR needs repairing
-    Repaired PROCAR is written at C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired
-    Please use C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\vasp\non-colinear\bands\PROCAR-repaired next time for better efficiency
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1412B1730>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DB03F70>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.885 seconds)
+   **Total running time of the script:** ( 0 minutes  1.940 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_noncolinear_vasp.py:

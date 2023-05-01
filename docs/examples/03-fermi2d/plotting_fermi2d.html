@@ -366,8 +366,8 @@
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_colinear.html">Plotting band structure</a></li>
 </ul>
@@ -448,7 +448,7 @@ to download the full example code</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
                              <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                             <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;spin-polarized&#39;</span><span class="p">,</span>
+                             <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;spin-polarized-colinear&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -458,8 +458,8 @@ to download the full example code</p>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 
-<span class="n">parent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">spin_colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe&quot;</span>
+<span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">spin-polarized-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
 </pre></div>
 </div>
 <section id="plain-mode">
@@ -497,7 +497,7 @@ Developers:
 - Logan Lang
 - Freddy Farah
 
-dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
 bands           :  None
 atoms           :  [-1]
 orbitals        :  [-1]
@@ -551,7 +551,7 @@ Developers:
 - Logan Lang
 - Freddy Farah
 
-dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
 bands           :  None
 atoms           :  [-1]
 orbitals        :  [-1]
@@ -612,7 +612,7 @@ Developers:
 - Logan Lang
 - Freddy Farah
 
-dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
 bands           :  None
 atoms           :  [0]
 orbitals        :  [4, 5, 6, 7, 8]
@@ -673,7 +673,7 @@ Developers:
 - Logan Lang
 - Freddy Farah
 
-dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
 bands           :  [[6, 7], []]
 atoms           :  [-1]
 orbitals        :  [-1]
@@ -690,7 +690,7 @@ Useful band indices for spin-0 : [6 7 8 9]
 Useful band indices for spin-1 : [6 7]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  32.985 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  26.581 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-03-fermi2d-plotting-fermi2d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/4c96e2f4b2dda3cad9a9b06d94c631ec/plotting_fermi2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_fermi2d.py</span></code></a></p>

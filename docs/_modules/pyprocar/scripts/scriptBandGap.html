@@ -381,79 +381,15 @@
   <h1>Source code for pyprocar.scripts.scriptBandGap</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">AbinitParser</span>
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">ElkParser</span>
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">ProcarParser</span>
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">LobsterParser</span>
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
-
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">io</span>
 
 
-<span class="k">def</span> <span class="nf">getFermi</span><span class="p">(</span><span class="n">procar</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">outcar</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A function to get the fermi energy</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    procar : str</span>
-<span class="sd">        The PROCAR filename</span>
-<span class="sd">    code : str</span>
-<span class="sd">        The code name</span>
-<span class="sd">    outcar : str</span>
-<span class="sd">        The OUTCAR filename</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        The fermi energy in ev</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">fermi</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
-        <span class="c1"># Parses through Bands in PROCAR</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
-        <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">outcar</span><span class="p">:</span>
-            <span class="n">outcarparser</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fermi</span> <span class="o">=</span> <span class="n">outcarparser</span><span class="o">.</span><span class="n">FermiOutcar</span><span class="p">(</span><span class="n">outcar</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy found in OUTCAR file = </span><span class="si">%s</span><span class="s2"> eV&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: OUTCAR Not Found&quot;</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;elk&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ElkParser</span><span class="p">()</span>
-            <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">()</span>
-            <span class="n">fermi</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">fermi</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy found in Elk output file = </span><span class="si">%s</span><span class="s2"> eV &quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
-        <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">abinitFile</span> <span class="o">=</span> <span class="n">AbinitParser</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">outcar</span><span class="p">)</span>
-            <span class="n">fermi</span> <span class="o">=</span> <span class="n">abinitFile</span><span class="o">.</span><span class="n">fermi</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy found in Abinit output file = </span><span class="si">%s</span><span class="s2"> eV&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">procarFile</span> <span class="o">=</span> <span class="n">QEParser</span><span class="p">()</span>
-            <span class="n">fermi</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">fermi</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy   :  </span><span class="si">%s</span><span class="s2"> eV (from Quantum Espresso output)&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobster&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fermi</span> <span class="o">=</span> <span class="n">procarFile</span><span class="o">.</span><span class="n">fermi</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fermi energy   :  </span><span class="si">%s</span><span class="s2"> eV (from Lobster output)&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fermi</span><span class="p">))</span>
-            <span class="c1"># lobster already shifts fermi so we set it to zero here.</span>
-            <span class="n">fermi</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-    <span class="k">return</span> <span class="n">fermi</span>
-
-
-<div class="viewcode-block" id="bandgap"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.bandgap.html#pyprocar.scripts.bandgap">[docs]</a><span class="k">def</span> <span class="nf">bandgap</span><span class="p">(</span><span class="n">procar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outcar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span> <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repair</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="bandgap"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.bandgap.html#pyprocar.scripts.bandgap">[docs]</a><span class="k">def</span> <span class="nf">bandgap</span><span class="p">(</span><span class="n">procar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">dirname</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">outcar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span> 
+            <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">repair</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A function to find the band gap</span>
 
 <span class="sd">    Parameters</span>
@@ -475,35 +411,15 @@
 <span class="sd">        Returns the bandgap energy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">repair</span><span class="p">:</span>
-            <span class="n">repairhandle</span> <span class="o">=</span> <span class="n">UtilsProcar</span><span class="p">()</span>
-            <span class="n">repairhandle</span><span class="o">.</span><span class="n">ProcarRepair</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROCAR repaired. Run with repair=False next time.&quot;</span><span class="p">)</span>
-
     <span class="n">bandGap</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
+    <span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
+
     <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">fermi</span> <span class="o">=</span> <span class="n">getFermi</span><span class="p">(</span><span class="n">procar</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">outcar</span><span class="p">)</span>
+        <span class="n">fermi</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
 
-    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;vasp&quot;</span><span class="p">:</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
-        <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;abinit&quot;</span><span class="p">:</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ProcarParser</span><span class="p">()</span>
-        <span class="n">procarFile</span><span class="o">.</span><span class="n">readFile</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;elk&quot;</span><span class="p">:</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">ElkParser</span><span class="p">()</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;qe&quot;</span><span class="p">:</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">QEParser</span><span class="p">()</span>
-
-    <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;lobsters&quot;</span><span class="p">:</span>
-        <span class="n">procarFile</span> <span class="o">=</span> <span class="n">LobsterParser</span><span class="p">()</span>
-
-    <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">procarFile</span><span class="o">.</span><span class="n">bands</span><span class="p">)</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">)</span>
     <span class="n">subBands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">fermi</span><span class="p">)</span>
 
     <span class="n">negArr</span> <span class="o">=</span> <span class="n">subBands</span><span class="p">[</span><span class="n">subBands</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>

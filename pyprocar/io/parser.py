@@ -63,7 +63,7 @@ class Parser:
         outfile = f"{self.dir}{os.sep}abinit.out"
         kpointsfile = f"{self.dir}{os.sep}KPOINTS"
 
-        parser = abinit.AbinitParser(abinit_output=outfile)
+        parser = abinit.Output(abinit_output=outfile)
         
         self.ebs = parser.abinitprocarobject.ebs
         self.kpath = parser.abinitprocarobject.ebs.kpath
