@@ -33,7 +33,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='vasp', 
-                                spin_calc_type='noncolinear',
+                                spin_calc_type='non-colinear',
                                 calc_type='dos')
 
 .. GENERATED FROM PYTHON SOURCE LINES 23-24
@@ -48,8 +48,8 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-colinear{os.sep}dos"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}dos"
 
 
 
@@ -99,14 +99,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024A0BCC88B0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2E4A9700>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.056 seconds)
+   **Total running time of the script:** ( 0 minutes  4.568 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_noncolinear_dos_vasp.py:

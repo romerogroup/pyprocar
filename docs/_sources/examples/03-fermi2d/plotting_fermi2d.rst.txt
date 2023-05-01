@@ -33,14 +33,14 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='spin-polarized',
+                                spin_calc_type='spin-polarized-colinear',
                                 calc_type='fermi')
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-25
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-32
+.. GENERATED FROM PYTHON SOURCE LINES 25-33
 
 .. code-block:: default
 
@@ -48,8 +48,8 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}spin_colinear{os.sep}Fe"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}fermi"
 
 
 
@@ -58,14 +58,15 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-37
+
+.. GENERATED FROM PYTHON SOURCE LINES 34-38
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-43
+.. GENERATED FROM PYTHON SOURCE LINES 38-44
 
 .. code-block:: default
 
@@ -116,7 +117,7 @@ Plain mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -135,14 +136,14 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-48
+.. GENERATED FROM PYTHON SOURCE LINES 45-49
 
 plain_bands mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-58
+.. GENERATED FROM PYTHON SOURCE LINES 49-59
 
 .. code-block:: default
 
@@ -197,7 +198,7 @@ plain_bands mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -216,7 +217,7 @@ plain_bands mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-64
+.. GENERATED FROM PYTHON SOURCE LINES 60-65
 
 parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -224,7 +225,7 @@ parametric mode
 Does not work. Contact developers
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-78
+.. GENERATED FROM PYTHON SOURCE LINES 65-79
 
 .. code-block:: default
 
@@ -283,7 +284,7 @@ Does not work. Contact developers
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [0]
     orbitals        :  [4, 5, 6, 7, 8]
@@ -302,7 +303,7 @@ Does not work. Contact developers
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-85
+.. GENERATED FROM PYTHON SOURCE LINES 80-86
 
 Selecting band indices
 +++++++++++++++++++++++++++++++++++++++
@@ -311,7 +312,7 @@ You can specify specfic bands with the band indices keyword.
 band_indices will be a list of list that contain band indices to plot for a given spin. Below I only plot bands 6 and 7 for spin 0
 Also you can specify the colors of the bands as well with band_colors
 
-.. GENERATED FROM PYTHON SOURCE LINES 85-92
+.. GENERATED FROM PYTHON SOURCE LINES 86-93
 
 .. code-block:: default
 
@@ -363,7 +364,7 @@ Also you can specify the colors of the bands as well with band_colors
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar2\data\qe\fermi\spin_colinear\Fe
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
     bands           :  [[6, 7], []]
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -385,7 +386,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  32.985 seconds)
+   **Total running time of the script:** ( 0 minutes  26.581 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

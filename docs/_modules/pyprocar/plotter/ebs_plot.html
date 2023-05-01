@@ -925,6 +925,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EBSPlot.draw_fermi"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.draw_fermi.html#pyprocar.plotter.EBSPlot.draw_fermi">[docs]</a>    <span class="k">def</span> <span class="nf">draw_fermi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                <span class="n">fermi_level</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
                 <span class="n">color</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> 
                 <span class="n">linestyle</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span> 
                 <span class="n">linewidth</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
@@ -939,7 +940,7 @@
 <span class="sd">        linewidth : float, optional</span>
 <span class="sd">            The linewidth, by default 1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">fermi_level</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EBSPlot.grid"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.grid.html#pyprocar.plotter.EBSPlot.grid">[docs]</a>    <span class="k">def</span> <span class="nf">grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

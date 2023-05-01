@@ -91,7 +91,6 @@ class FermiSurface3D(Surface):
         bands: np.ndarray,
         fermi: float,
         reciprocal_lattice: np.ndarray,
-
         ebs=None,
         bands_to_keep: List[int]=None,
         spd: np.ndarray=None,

@@ -33,7 +33,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='spin-polarized',
+                                spin_calc_type='spin-polarized-colinear',
                                 calc_type='fermi')
 
 .. GENERATED FROM PYTHON SOURCE LINES 21-23
@@ -69,15 +69,17 @@ First download the example files with the code below. Then replace data_dir belo
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-44
+.. GENERATED FROM PYTHON SOURCE LINES 31-46
 
 .. code-block:: default
 
 
     import os
     import pyprocar
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}fermi{os.sep}spin_colinear{os.sep}Fe"
+
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}fermi"
+
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
@@ -93,14 +95,14 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-49
+.. GENERATED FROM PYTHON SOURCE LINES 47-51
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-61
+.. GENERATED FROM PYTHON SOURCE LINES 51-63
 
 .. code-block:: default
 
@@ -135,14 +137,14 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-66
+.. GENERATED FROM PYTHON SOURCE LINES 64-68
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-87
+.. GENERATED FROM PYTHON SOURCE LINES 68-89
 
 .. code-block:: default
 
@@ -203,7 +205,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.211 seconds)
+   **Total running time of the script:** ( 0 minutes  13.473 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin-polarized.py:

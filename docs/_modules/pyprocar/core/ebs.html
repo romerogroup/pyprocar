@@ -385,6 +385,7 @@
 
 <span class="sd">@author: Pedram Tavadze</span>
 <span class="sd">@author: Freddy Farah</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># from . import Structure</span>
@@ -402,6 +403,11 @@
 <span class="kn">from</span> <span class="nn">.brillouin_zone</span> <span class="kn">import</span> <span class="n">BrillouinZone</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">Unfolder</span><span class="p">,</span> <span class="n">mathematics</span>
 
+<span class="n">HBAR_EV</span> <span class="o">=</span> <span class="mf">6.582119</span> <span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">16</span><span class="p">)</span> <span class="c1">#eV*s</span>
+<span class="n">HBAR_J</span> <span class="o">=</span> <span class="mf">1.0545718</span> <span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">34</span><span class="p">)</span> <span class="c1">#eV*s</span>
+<span class="n">METER_ANGSTROM</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#m /A</span>
+<span class="n">EV_TO_J</span> <span class="o">=</span> <span class="mf">1.602</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">19</span><span class="p">)</span>
+<span class="n">FREE_ELECTRON_MASS</span> <span class="o">=</span> <span class="mf">9.11</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">31</span> <span class="c1">#  kg</span>
 <div class="viewcode-block" id="ElectronicBandStructure"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.html#pyprocar.core.ElectronicBandStructure">[docs]</a><span class="k">class</span> <span class="nc">ElectronicBandStructure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This object stores electronic band structure informomration.</span>
 
@@ -436,14 +442,13 @@
         <span class="n">efermi</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span>
         <span class="n">projected</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">projected_phase</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">kpath</span><span class="p">:</span><span class="n">KPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kpath</span><span class="p">:</span><span class="n">KPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">labels</span><span class="p">:</span><span class="n">List</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">reciprocal_lattice</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">shifted_to_efermi</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">):</span>
         
-
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span> <span class="o">-</span> <span class="n">efermi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">efermi</span> <span class="o">=</span> <span class="n">efermi</span>
@@ -458,7 +463,53 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">has_phase</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="kc">None</span>
+
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_cartesian_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projected_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projected_phase_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands_gradient_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands_hessian_mesh</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_kx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of unique kpoints in kx direction in the reduced basis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of unique kpoints in kx direction in the reduced basis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_ky</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of unique kpoints in kx direction in the reduced basis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of unique kpoints in kx direction in the reduced basis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span> <span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_kz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of unique kpoints in ky direction in the reduced basis</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The number of unique kpoints in ky direction in the reduced basis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nkpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -568,7 +619,425 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">index_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Index mesh stores the the kpoints index in </span>
+<span class="sd">        kpoints list at a particular grid point . </span>
+<span class="sd">        Shape = [n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Index mesh stores the the kpoints index in </span>
+<span class="sd">            kpoints list at a particular grid point .  Shape = [n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_index_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span>
     
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kpoints_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Kpoint mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Kpoint mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_kpoints_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_mesh</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kpoints_cartesian_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Kpoint cartesian mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Kpoint cartesian mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_cartesian_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_kpoints_cartesian_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_cartesian_mesh</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bands_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bands mesh is a numpy array that stores each band in a mesh grid.   </span>
+<span class="sd">        Shape = [n_bands,n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Bands mesh is a numpy array that stores each band in a mesh grid. </span>
+<span class="sd">            Shape = [n_bands,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_bands_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_mesh</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">projected_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        projected mesh is a numpy array that stores each projection in a mesh grid.   </span>
+<span class="sd">        Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Projection mesh is a numpy array that stores each projection in a mesh grid. </span>
+<span class="sd">            Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projected_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_projected_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projected_mesh</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">projected_phase_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        projected phase mesh is a numpy array that stores each projection phases in a mesh grid.   </span>
+<span class="sd">        Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            projected phase mesh is a numpy array that stores each projection phases in a mesh grid.  </span>
+<span class="sd">            Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projected_phase_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_projected_phase_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projected_phase_mesh</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weights_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        weights mesh is a numpy array that stores each weights in a mesh grid.   </span>
+<span class="sd">        Shape = [1,n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            weights mesh is a numpy array that stores each weights in a mesh grid. </span>
+<span class="sd">            Shape = [1,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_weights_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_mesh</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bands_gradient_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bands gradient mesh is a numpy array that stores each band gradient in a mesh grid.   </span>
+<span class="sd">        Shape = [3,n_bands,n_kx,n_ky,n_kz], where the first dimension represents d/dx,d/dy,d/dz  </span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Bands fradient mesh is a numpy array that stores each band gradient in a mesh grid.</span>
+<span class="sd">            Shape = [3,n_bands,n_kx,n_ky,n_kz], </span>
+<span class="sd">            where the first dimension represents d/dx,d/dy,d/dz  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_gradient_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_bands_gradient_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_gradient_mesh</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bands_hessian_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.   </span>
+<span class="sd">        Shape = [3,3,n_bands,n_kx,n_ky,n_kz], </span>
+<span class="sd">        where the first and second dimension represent d/dx,d/dy,d/dz  </span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.</span>
+<span class="sd">            Shape = [3,3,n_bands,n_kx,n_ky,n_kz], </span>
+<span class="sd">            where the first and second dimension represent d/dx,d/dy,d/dz  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_hessian_mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_bands_hessian_mesh</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_hessian_mesh</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.update_kpoints_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_kpoints_mesh.html#pyprocar.core.ElectronicBandStructure.update_kpoints_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_kpoints_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the kpoints mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the kpoints mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_nd_mesh</span><span class="p">(</span><span class="n">nd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_mesh</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.update_kpoints_cartesian_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_kpoints_cartesian_mesh.html#pyprocar.core.ElectronicBandStructure.update_kpoints_cartesian_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_kpoints_cartesian_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the kpoints mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the kpoints mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_cartesian_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_nd_mesh</span><span class="p">(</span><span class="n">nd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints_cartesian_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.update_bands_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_bands_mesh.html#pyprocar.core.ElectronicBandStructure.update_bands_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_bands_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the bands mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the bands mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_nd_mesh</span><span class="p">(</span><span class="n">nd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.update_projected_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_projected_mesh.html#pyprocar.core.ElectronicBandStructure.update_projected_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_projected_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the projected mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the projected mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projected_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_nd_mesh</span><span class="p">(</span><span class="n">nd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projected_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.update_projected_phase_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_projected_phase_mesh.html#pyprocar.core.ElectronicBandStructure.update_projected_phase_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_projected_phase_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the projected phase mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the projected_phase mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projected_phase_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_nd_mesh</span><span class="p">(</span><span class="n">nd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projected_phase_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.update_weights_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_weights_mesh.html#pyprocar.core.ElectronicBandStructure.update_weights_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the weights mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the weights mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_nd_mesh</span><span class="p">(</span><span class="n">nd_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights_mesh</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.update_bands_gradient_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_bands_gradient_mesh.html#pyprocar.core.ElectronicBandStructure.update_bands_gradient_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_bands_gradient_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the bands_gradient mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the bands_gradient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_bands</span><span class="p">,</span> <span class="n">n_spins</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands_mesh</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">band_gradients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_bands</span><span class="p">,</span> <span class="n">n_spins</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i_band</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bands</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i_spin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spins</span><span class="p">):</span>
+                <span class="n">band_gradients</span><span class="p">[:,</span><span class="n">i_band</span><span class="p">,</span><span class="n">i_spin</span><span class="p">,:,:,:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_scalar_gradient</span><span class="p">(</span><span class="n">scalar_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands_mesh</span><span class="p">[</span><span class="n">i_band</span><span class="p">,</span><span class="n">i_spin</span><span class="p">,:,:,:])</span>
+        
+        <span class="n">band_gradients</span> <span class="o">/=</span> <span class="n">HBAR_EV</span>
+        <span class="n">band_gradients</span> <span class="o">*=</span> <span class="n">METER_ANGSTROM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands_gradient_mesh</span> <span class="o">=</span> <span class="n">band_gradients</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_gradient_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.update_bands_hessian_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_bands_hessian_mesh.html#pyprocar.core.ElectronicBandStructure.update_bands_hessian_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_bands_hessian_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the bands_hessian mesh representation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the bands_hessian</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_dim</span><span class="p">,</span> <span class="n">n_bands</span><span class="p">,</span> <span class="n">n_spins</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands_gradient_mesh</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">band_hessians</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">n_bands</span><span class="p">,</span> <span class="n">n_spins</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i_dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_dim</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i_band</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bands</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i_spin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spins</span><span class="p">):</span>
+                    <span class="n">band_hessians</span><span class="p">[:,</span><span class="n">i_dim</span><span class="p">,</span><span class="n">i_band</span><span class="p">,</span><span class="n">i_spin</span><span class="p">,:,:,:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_scalar_gradient</span><span class="p">(</span><span class="n">scalar_mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands_gradient_mesh</span><span class="p">[</span><span class="n">i_dim</span><span class="p">,</span><span class="n">i_band</span><span class="p">,</span><span class="n">i_spin</span><span class="p">,:,:,:])</span>
+        
+        <span class="n">band_hessians</span> <span class="o">*=</span> <span class="n">METER_ANGSTROM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands_hessian_mesh</span> <span class="o">=</span> <span class="n">band_hessians</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands_hessian_mesh</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.update_index_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_index_mesh.html#pyprocar.core.ElectronicBandStructure.update_index_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">update_index_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method will update the index mesh</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Updated the kpoints mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">kx_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ky_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">kz_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">n_kx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kx_unique</span><span class="p">)</span>
+        <span class="n">n_ky</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ky_unique</span><span class="p">)</span>
+        <span class="n">n_kz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kz_unique</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_kx</span><span class="p">,</span><span class="n">n_ky</span><span class="p">,</span><span class="n">n_kz</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_kz</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ky</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_kx</span><span class="p">):</span>
+
+                    <span class="n">kx</span> <span class="o">=</span> <span class="n">kx_unique</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">ky</span> <span class="o">=</span> <span class="n">ky_unique</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="n">kz</span> <span class="o">=</span> <span class="n">kz_unique</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+                    <span class="n">where_x_true_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">kx</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">where_x_true_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="n">where_x_true_indices</span><span class="p">]</span>
+
+                    <span class="n">where_xy_true_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">where_x_true_points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ky</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">where_xy_true_points</span> <span class="o">=</span> <span class="n">where_x_true_points</span><span class="p">[</span><span class="n">where_xy_true_indices</span><span class="p">]</span>
+
+                    <span class="n">where_xyz_true_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">where_xy_true_points</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">kz</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">where_xyz_true_points</span> <span class="o">=</span> <span class="n">where_xy_true_points</span><span class="p">[</span><span class="n">where_xyz_true_indices</span><span class="p">]</span>
+
+                    <span class="n">original_index</span> <span class="o">=</span> <span class="n">where_x_true_indices</span><span class="p">[</span><span class="n">where_xy_true_indices</span><span class="p">[</span><span class="n">where_xyz_true_indices</span><span class="p">]]</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_index</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span></div>
+        
+<div class="viewcode-block" id="ElectronicBandStructure.calculate_scalar_gradient"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient.html#pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_scalar_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scalar_mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the scalar gradient over the k mesh grid in cartesian coordinates</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scalar_mesh : np.ndarray</span>
+<span class="sd">            The scalar mesh. shape = [n_kx,n_ky,n_kz]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            scalar_gradient_mesh shape = [3,n_kx,n_ky,n_kz]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_kx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ky</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kz</span>
+
+        <span class="n">scalar_gradients</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">))</span>
+
+        <span class="c1"># Calculate cartesian separations along each crystal direction</span>
+        <span class="n">sep_vectors_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">nx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">nx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="p">:])</span>
+        <span class="n">sep_vectors_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span> <span class="p">:],</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span> <span class="p">:],</span> <span class="p">:])</span>
+        <span class="n">sep_vectors_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">nz</span><span class="p">],</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">nz</span><span class="p">],</span> <span class="p">:])</span>
+
+        <span class="c1"># Calculate indices with periodic boundary conditions</span>
+        <span class="n">plus_one_indices_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">plus_one_indices_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ny</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">plus_one_indices_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nz</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">minus_one_indices_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">minus_one_indices_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ny</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">minus_one_indices_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nz</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="n">plus_one_indices_x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">plus_one_indices_y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">plus_one_indices_z</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">minus_one_indices_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">minus_one_indices_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">minus_one_indices_z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nz</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="n">scalar_diffs_i</span> <span class="o">=</span> <span class="n">scalar_mesh</span><span class="p">[</span><span class="n">plus_one_indices_x</span><span class="p">,:,:]</span> <span class="o">-</span> <span class="n">scalar_mesh</span><span class="p">[</span><span class="n">minus_one_indices_x</span><span class="p">,:,:]</span>
+        <span class="n">scalar_diffs_j</span> <span class="o">=</span> <span class="n">scalar_mesh</span><span class="p">[:,</span><span class="n">plus_one_indices_y</span><span class="p">,:]</span> <span class="o">-</span> <span class="n">scalar_mesh</span><span class="p">[:,</span><span class="n">minus_one_indices_y</span><span class="p">,:]</span>
+        <span class="n">scalar_diffs_k</span> <span class="o">=</span> <span class="n">scalar_mesh</span><span class="p">[:,:,</span><span class="n">plus_one_indices_z</span><span class="p">]</span> <span class="o">-</span> <span class="n">scalar_mesh</span><span class="p">[:,:,</span><span class="n">minus_one_indices_z</span><span class="p">]</span>
+        
+        <span class="c1"># Calculating gradients</span>
+        <span class="n">sep_vectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">sep_vectors_i</span><span class="p">,</span><span class="n">sep_vectors_j</span><span class="p">,</span><span class="n">sep_vectors_k</span><span class="p">]</span>
+        <span class="n">energy_diffs</span> <span class="o">=</span> <span class="p">[</span><span class="n">scalar_diffs_i</span><span class="p">,</span><span class="n">scalar_diffs_j</span><span class="p">,</span><span class="n">scalar_diffs_k</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">sep_vector</span><span class="p">,</span><span class="n">energy_diff</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sep_vectors</span><span class="p">,</span><span class="n">energy_diffs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i_coord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">sep_vector</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">i_coord</span><span class="p">]</span>
+                <span class="n">tmp_grad</span> <span class="o">=</span> <span class="n">energy_diff</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="c1"># Changing infinities to 0</span>
+                <span class="n">tmp_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">tmp_grad</span><span class="p">,</span> <span class="n">neginf</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">posinf</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> 
+                <span class="n">scalar_gradients</span><span class="p">[</span><span class="n">i_coord</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">tmp_grad</span>
+        <span class="k">return</span> <span class="n">scalar_gradients</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.calculate_scalar_integral"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_scalar_integral.html#pyprocar.core.ElectronicBandStructure.calculate_scalar_integral">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_scalar_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">scalar_mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the scalar integral&quot;&quot;&quot;</span>
+
+
+        <span class="n">edge1</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:])</span>
+        <span class="n">edge2</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:])</span>
+        <span class="n">edge3</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpoints_cartesian</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:])</span>
+        
+        <span class="c1"># Create a matrix with the edge vectors.</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">edge1</span><span class="p">,</span> <span class="n">edge2</span><span class="p">,</span> <span class="n">edge3</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        
+        <span class="c1"># Calculate the volume using the determinant of the matrix.</span>
+        <span class="n">dv</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">matrix</span><span class="p">))</span>
+
+        <span class="c1"># Compute the integral by summing up the product of scalar values and the volume of each grid cell.</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">scalar_mesh</span> <span class="o">*</span> <span class="n">dv</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">integral</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.create_nd_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.create_nd_mesh.html#pyprocar.core.ElectronicBandStructure.create_nd_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">create_nd_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nd_list</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">nd_list</span> <span class="ow">is</span> <span class="ow">not</span>  <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">nd_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nd_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">nd_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kx</span><span class="p">)</span>
+            <span class="n">nd_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ky</span><span class="p">)</span>
+            <span class="n">nd_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kz</span><span class="p">)</span>
+
+            <span class="n">nd_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nd_shape</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">nd_list</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">non_grid_dims</span> <span class="o">=</span> <span class="n">nd_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i_dim</span><span class="p">,</span> <span class="n">non_grid_dim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">non_grid_dims</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">non_grid_dim</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kx</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ky</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kz</span><span class="p">):</span>
+                                <span class="c1"># Forming slicing tuples for mesh</span>
+                                <span class="n">mesh_idx</span> <span class="o">=</span> <span class="p">[</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]]</span><span class="o">*</span><span class="n">nd_mesh</span><span class="o">.</span><span class="n">ndim</span>
+                                <span class="n">mesh_idx</span><span class="p">[</span><span class="n">i_dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                                <span class="n">mesh_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+                                <span class="n">mesh_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+                                <span class="n">mesh_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
+
+                                <span class="c1"># Forming slicing tuples for list</span>
+                                <span class="n">list_idx</span> <span class="o">=</span> <span class="p">[</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[:]]</span><span class="o">*</span><span class="n">nd_list</span><span class="o">.</span><span class="n">ndim</span>
+                                <span class="n">list_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]</span>
+                                <span class="n">list_idx</span><span class="p">[</span><span class="n">i_dim</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                                
+                                <span class="c1"># Assigning mesh values from list</span>
+                                <span class="n">nd_mesh</span><span class="p">[</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh_idx</span><span class="p">)</span> <span class="p">]</span> <span class="o">=</span> <span class="n">nd_list</span><span class="p">[</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">list_idx</span><span class="p">)</span> <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nd_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">nd_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.create_vector_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.create_vector_mesh.html#pyprocar.core.ElectronicBandStructure.create_vector_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">create_vector_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector_list</span><span class="p">):</span>
+        <span class="n">vector_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ky</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kz</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">vector_mesh</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:,:]</span><span class="o">=</span> <span class="n">vector_list</span><span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span><span class="p">,</span> <span class="n">i</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="n">vector_mesh</span></div>
+    
+<div class="viewcode-block" id="ElectronicBandStructure.create_scaler_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html#pyprocar.core.ElectronicBandStructure.create_scaler_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">create_scaler_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalar_list</span><span class="p">):</span>
+        <span class="n">scalar_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ky</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_kz</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">scalar_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,:,:]</span><span class="o">=</span> <span class="n">scalar_list</span><span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_mesh</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="n">scalar_mesh</span></div>
+
 <div class="viewcode-block" id="ElectronicBandStructure.ebs_sum"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                 <span class="n">principal_q_numbers</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
@@ -752,8 +1221,10 @@
         <span class="n">klist</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">plist</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">bandslist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">weights</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">projected_phases</span><span class="o">=</span><span class="p">[]</span>
+
         <span class="c1"># for each symmetry operation</span>
-        
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rotation</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rotations</span><span class="p">):</span>
             <span class="c1"># for each point</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">kpoint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">):</span>
@@ -776,10 +1247,29 @@
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">projection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                         <span class="n">plist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">projected_phase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">projected_phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">projected_phase</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">klist</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">plist</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bandslist</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bandslist</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">plist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">projected_phases</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span></div>
+        <span class="c1"># self.sort_bands_and_kpoints()</span>
+
+
+        
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;Enectronic Band Structure     </span><span class="se">\n</span><span class="s1">&#39;</span>

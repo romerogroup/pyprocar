@@ -35,10 +35,8 @@ import os
 import numpy as np
 import pyprocar
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-spin-polarized{os.sep}Fe{os.sep}bands"
-procar = f"{data_dir}{os.sep}PROCAR"
-outcar = f"{data_dir}{os.sep}OUTCAR"
 
+project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
 
-band_gap = pyprocar.bandgap(procar=procar, outcar=outcar, code="vasp")
+band_gap = pyprocar.bandgap(dirname=data_dir, code="vasp")

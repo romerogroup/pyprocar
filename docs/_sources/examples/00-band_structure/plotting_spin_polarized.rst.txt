@@ -33,7 +33,7 @@ First download the example files with the code below. Then replace data_dir belo
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
                                 code='qe', 
-                                spin_calc_type='spin-polarized',
+                                spin_calc_type='spin-polarized-colinear',
                                 calc_type='bands')
 
 .. GENERATED FROM PYTHON SOURCE LINES 23-24
@@ -48,8 +48,8 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    data_dir = f"{parent_dir}{os.sep}data{os.sep}qe{os.sep}bands{os.sep}spin_colinear{os.sep}Fe"
+    project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}bands"
 
     spins=[0,1]
 
@@ -91,7 +91,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1414B6460>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DC9B400>
 
 
 
@@ -126,7 +126,7 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14125FBE0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DC501C0>
 
 
 
@@ -171,7 +171,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A1414FAF40>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DABADF0>
 
 
 
@@ -215,14 +215,14 @@ Scatter mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002A14125FD00>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E0E2190>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.373 seconds)
+   **Total running time of the script:** ( 0 minutes  1.293 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_spin_polarized.py:

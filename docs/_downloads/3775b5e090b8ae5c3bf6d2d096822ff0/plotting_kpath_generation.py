@@ -52,8 +52,9 @@ import os
 import numpy as np
 import pyprocar
 
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-data_dir = f"{parent_dir}{os.sep}data{os.sep}vasp{os.sep}non-spin-polarized{os.sep}Fe{os.sep}bands"
+
+project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
 poscar = f"{data_dir}{os.sep}POSCAR"
 
 k_path, k_labels = pyprocar.kpath(poscar,'KPOINTS',40,True,'hpkot',1e-07,1e-05,-1.0,np.eye(3))

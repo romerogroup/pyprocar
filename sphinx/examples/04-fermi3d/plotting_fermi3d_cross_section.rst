@@ -152,7 +152,6 @@ Cross section
 
     Fermi Energy : 18.054241046313987
     Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
-    (3504, 24, 1, 1, 18, 3)
 
 
 
@@ -217,7 +216,6 @@ Cross section. Save slice
 
     Fermi Energy : 18.054241046313987
     Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
-    (3504, 24, 1, 1, 18, 3)
 
 
 
@@ -225,7 +223,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.428 seconds)
+   **Total running time of the script:** ( 0 minutes  10.995 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_cross_section.py:

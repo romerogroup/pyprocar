@@ -4,6 +4,7 @@ Created on Sat Jan 16 2021
 
 @author: Pedram Tavadze
 @author: Freddy Farah
+
 """
 
 # from . import Structure
@@ -239,14 +240,17 @@ class ElectronicBandStructure:
 
     @property
     def index_mesh(self):
-        """Index mesh stores the the kpoints index in 
+        """
+        Index mesh stores the the kpoints index in 
         kpoints list at a particular grid point . 
         Shape = [n_kx,n_ky,n_kz]
+
         Returns
         -------
         np.ndarray
             Index mesh stores the the kpoints index in 
             kpoints list at a particular grid point .  Shape = [n_kx,n_ky,n_kz]
+
         """
         if self._index_mesh is None:
             self.update_index_mesh()

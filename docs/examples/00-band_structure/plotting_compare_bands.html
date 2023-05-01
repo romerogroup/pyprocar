@@ -50,7 +50,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/00-band_structure/plotting_compare_bands';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Plotting non colinear band structures in Quantum Espresso" href="plotting_noncolinear_qe.html" />
+    <link rel="next" title="Plotting non colinear band structures in VASP" href="plotting_noncolinear_vasp.html" />
     <link rel="prev" title="Band Structure" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -366,8 +366,8 @@
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting_colinear.html">Plotting band structure</a></li>
 </ul>
@@ -463,9 +463,11 @@ to download the full example code</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
-<span class="n">parent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())))</span>
-<span class="n">vasp_data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
-<span class="n">qe_data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe&quot;</span>
+
+<span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
+
+<span class="n">vasp_data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
+<span class="n">qe_data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
 </pre></div>
 </div>
 <p>When show is equal to False, bandsplot will return a EBSPlot object.
@@ -474,10 +476,10 @@ This object has information about the band structure and has matplotlib.axes.Axe
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span> <span class="n">dirname</span> <span class="o">=</span> <span class="n">qe_data_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span> <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ebs_plot</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">show</span> <span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_compare_bands_001.png" srcset="../../_images/sphx_glr_plotting_compare_bands_001.png" alt="plotting compare bands" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001410B24B940&gt;
+<img src="../../_images/sphx_glr_plotting_compare_bands_001.png" srcset="../../_images/sphx_glr_plotting_compare_bands_001.png" alt="plotting compare bands" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2D9E2D00&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.527 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.597 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plotting-compare-bands-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/4f84683e7ba25d54b09cc41f52c62cc9/plotting_compare_bands.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_compare_bands.py</span></code></a></p>
@@ -504,10 +506,10 @@ This object has information about the band structure and has matplotlib.axes.Axe
           <p class="prev-next-title">Band Structure</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="plotting_noncolinear_qe.html" title="next page">
+  <a class='right-next' id="next-link" href="plotting_noncolinear_vasp.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Plotting non colinear band structures in Quantum Espresso</p>
+      <p class="prev-next-title">Plotting non colinear band structures in VASP</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
