@@ -72,7 +72,7 @@ Paper
 Support
 -------------------------------
 
-If you want to support the PyProcar please see the Contributing page here : `github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst`.
+If you want to support the PyProcar please see the `Contributing page <https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst>`_.
 
 Citing PyProcar
 -------------------------------
