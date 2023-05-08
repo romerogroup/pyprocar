@@ -205,7 +205,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.473 seconds)
+   **Total running time of the script:** ( 0 minutes  12.484 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin-polarized.py:
