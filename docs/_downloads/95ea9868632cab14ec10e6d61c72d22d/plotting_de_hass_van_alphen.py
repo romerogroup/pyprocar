@@ -62,7 +62,7 @@ fermiHandler = pyprocar.FermiHandler(
 # Maximal cross sectional area along the (0,0,1)
 # ++++++++++++++++++++++++++++++++++++++++++++++++++
 # 
-# In the following line we show how the cross section widget can find the cross sectional areas of the fermi surface
+
 
 
 
@@ -81,7 +81,7 @@ fermiHandler.plot_fermi_cross_section(
 #
 # :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 4.365e^8 G`
 # 
-# :math:`F_{exp} =  = 4.50e^7 G`
+# :math:`F_{exp} = 4.50e^7 G`
 
 ###############################################################################
 # Minimal cross sectional area along the (0,0,1)
@@ -104,7 +104,7 @@ fermiHandler.plot_fermi_cross_section(
 #
 # :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 1.68e^7 G`
 # 
-# :math:`F_{exp} =  = 1.50e^7 G`
+# :math:`F_{exp} = 1.50e^7 G`
 #
 
 ###############################################################################
@@ -129,4 +129,4 @@ fermiHandler.plot_fermi_cross_section(
 #
 # :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G`
 # 
-# :math:`F_{exp} =  = 4.85e^8 G`
+# :math:`F_{exp} = 4.85e^8 G`

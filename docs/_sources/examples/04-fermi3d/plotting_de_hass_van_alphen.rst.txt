@@ -110,16 +110,16 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-66
+.. GENERATED FROM PYTHON SOURCE LINES 62-65
 
 Maximal cross sectional area along the (0,0,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In the following line we show how the cross section widget can find the cross sectional areas of the fermi surface
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-79
+.. GENERATED FROM PYTHON SOURCE LINES 65-79
 
 .. code-block:: default
+
 
 
 
@@ -159,7 +159,7 @@ In the above figure we can see the cross section area is :math:`A = 4.1586 Ang^{
 
 :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 4.365e^8 G`
 
-:math:`F_{exp} =  = 4.50e^7 G`
+:math:`F_{exp} = 4.50e^7 G`
 
 .. GENERATED FROM PYTHON SOURCE LINES 87-91
 
@@ -208,7 +208,7 @@ In the above figure we can see the cross section area is :math:`A = 0.1596 Ang^{
 
 :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 1.68e^7 G`
 
-:math:`F_{exp} =  = 1.50e^7 G`
+:math:`F_{exp} = 1.50e^7 G`
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 111-115
@@ -259,12 +259,12 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
 :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G`
 
-:math:`F_{exp} =  = 4.85e^8 G`
+:math:`F_{exp} = 4.85e^8 G`
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.352 seconds)
+   **Total running time of the script:** ( 0 minutes  4.777 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_de_hass_van_alphen.py:
