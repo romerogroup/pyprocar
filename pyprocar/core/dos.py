@@ -6,14 +6,14 @@ __author__ = "Pedram Tavadze, Logan Lang"
 __copyright__ = "Copyright (C) 2007 Free Software Foundation,"
 __credits__ = ["Uthpala Herath"]
 __license__ = "GNU GENERAL PUBLIC LICENSE"
-__version__ = "2.0"
 __maintainer__ = "Logan Lang, Pedram Tavadze"
-__email__ = "petavazohi@spot.colorado.edu"
+__email__ = "petavazohi@mix.wvu.edu"
 __status__ = "Production"
 
 from typing import List
 
-from traceback import print_tb
+from typing import List
+
 from scipy.interpolate import CubicSpline
 import numpy as np
 import numpy.typing as npt

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting density of states &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Showing how to get van alphen fequencies from the fermi surface &#8212; PyProcar 2.0.0 documentation</title>
   
   
   
@@ -47,11 +47,12 @@
     <script src="../../_static/clipboard.min.js"></script>
     <script src="../../_static/copybutton.js"></script>
     <script src="../../_static/design-tabs.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/01-dos/plotting_colinear_dos';</script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/04-fermi3d/plotting_de_hass_van_alphen';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Plotting spin-polarized density of states" href="plotting_spin_polarized_dos.html" />
-    <link rel="prev" title="Plotting non colinear dos in Quantum Espresso" href="plotting_noncolinear_dos_qe.html" />
+    <link rel="next" title="Plotting fermi3d cross_section" href="plotting_fermi3d_cross_section.html" />
+    <link rel="prev" title="Plotting fermi3d spin-polarized" href="plotting_fermi3d_spin-polarized.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -372,11 +373,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_colinear.html">Plotting band structure</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Density of States</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting density of states</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01-dos/index.html">Density of States</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_colinear_dos.html">Plotting density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -388,14 +389,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../03-fermi2d/plotting_fermi2d.html">Plotting fermi2d</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../04-fermi3d/index.html">Fermi 3D</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_plain.html">Plotting fermi3d plain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_de_hass_van_alphen.html">Showing how to get van alphen fequencies from the fermi surface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Fermi 3D</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plotting_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_fermi3d_plain.html">Plotting fermi3d plain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Showing how to get van alphen fequencies from the fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../05-other/index.html">Other</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -437,145 +438,120 @@
               
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-01-dos-plotting-colinear-dos-py"><span class="std std-ref">here</span></a>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-04-fermi3d-plotting-de-hass-van-alphen-py"><span class="std std-ref">here</span></a>
 to download the full example code</p>
 </div>
-<section class="sphx-glr-example-title" id="plotting-density-of-states">
-<span id="ref-plotting-colinear-dos"></span><span id="sphx-glr-examples-01-dos-plotting-colinear-dos-py"></span><h1>Plotting density of states<a class="headerlink" href="#plotting-density-of-states" title="Permalink to this heading">#</a></h1>
-<p>Plotting density example.</p>
+<section class="sphx-glr-example-title" id="showing-how-to-get-van-alphen-fequencies-from-the-fermi-surface">
+<span id="ref-plotting-de-hass-van-alphen"></span><span id="sphx-glr-examples-04-fermi3d-plotting-de-hass-van-alphen-py"></span><h1>Showing how to get van alphen fequencies from the fermi surface<a class="headerlink" href="#showing-how-to-get-van-alphen-fequencies-from-the-fermi-surface" title="Permalink to this heading">#</a></h1>
+<p>Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi surface areas (A) is given below.
+To compare the theoretical freuqencies we will compare with the results taken from the experimental paper
+“The Fermi surfaces of copper, silver and gold. I. The de Haas-Van alphen effect”(<a class="reference external" href="https://doi.org/10.1098/rsta.1962.0011">https://doi.org/10.1098/rsta.1962.0011</a>).</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}F = \frac{ c \hbar A }{ 2 \pi e  }   !(cgs)\\e = 4.768e^{-10} !statcoulombs\\c = 3.0e^{10} !cm/s\\\hbar = 1.0546e^{-27} !erg*s\end{aligned}\end{align} \]</div>
 <p>First download the example files with the code below. Then replace data_dir below.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                             <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Au&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-spin-polarized&#39;</span><span class="p">,</span>
-                             <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;dos&#39;</span><span class="p">)</span>
+                             <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
+<span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
+<span class="n">pyvista</span><span class="o">.</span><span class="n">OFF_SCREEN</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
-
 <span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">dos&quot;</span>
-</pre></div>
-</div>
-<section id="plain-mode">
-<h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
-                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
-</pre></div>
-</div>
-<img src="../../_images/sphx_glr_plotting_colinear_dos_001.png" srcset="../../_images/sphx_glr_plotting_colinear_dos_001.png" alt="plotting colinear dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2D8AE070&gt;
-</pre></div>
-</div>
-</section>
-<section id="parametric-mode">
-<h2>Parametric mode<a class="headerlink" href="#parametric-mode" title="Permalink to this heading">#</a></h2>
-<p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
-<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Au</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
 
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
-                <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
-                <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
-                <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
-</pre></div>
-</div>
-<img src="../../_images/sphx_glr_plotting_colinear_dos_002.png" srcset="../../_images/sphx_glr_plotting_colinear_dos_002.png" alt="plotting colinear dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB31DABE80&gt;
-</pre></div>
-</div>
-</section>
-<section id="parametric-line-mode">
-<h2>parametric_line mode<a class="headerlink" href="#parametric-line-mode" title="Permalink to this heading">#</a></h2>
-<p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
-<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
-                <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
-                <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
-                <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+<span class="c1"># First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot</span>
+<span class="n">fermiHandler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">FermiHandler</span><span class="p">(</span>
+                                    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
+                                    <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
+                                    <span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_dos_003.png" srcset="../../_images/sphx_glr_plotting_colinear_dos_003.png" alt="plotting colinear dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB3C783250&gt;
+<section id="maximal-cross-sectional-area-along-the-0-0-1">
+<h2>Maximal cross sectional area along the (0,0,1)<a class="headerlink" href="#maximal-cross-sectional-area-along-the-0-0-1" title="Permalink to this heading">#</a></h2>
+<p>In the following line we show how the cross section widget can find the cross sectional areas of the fermi surface</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section</span><span class="p">(</span>
+                            <span class="n">show_cross_section_area</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                            <span class="n">transparent_mesh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">slice_normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">slice_origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                            <span class="n">line_width</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+                            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;parametric&quot;</span><span class="p">,</span>
+                            <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
+<img src="../../_images/sphx_glr_plotting_de_hass_van_alphen_001.png" srcset="../../_images/sphx_glr_plotting_de_hass_van_alphen_001.png" alt="plotting de hass van alphen" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 8.5642
+Bands near the fermi energy : [5]
+</pre></div>
+</div>
+<p>In the above figure we can see the cross section area is <span class="math notranslate nohighlight">\(A = 4.1586 Ang^{-2} = 4.1586e^{16} cm^{-2} (cgs)\)</span>.</p>
+<p><span class="math notranslate nohighlight">\(F = \frac{ c \hbar A }{ 2 \pi e  } = 4.365e^8 G\)</span></p>
+<p><span class="math notranslate nohighlight">\(F_{exp} =  = 4.50e^7 G\)</span></p>
 </section>
-<section id="stack-species-mode">
-<h2>stack_species mode<a class="headerlink" href="#stack-species-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
-<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_species&#39;</span><span class="p">,</span>
-                <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
-                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+<section id="minimal-cross-sectional-area-along-the-0-0-1">
+<h2>Minimal cross sectional area along the (0,0,1)<a class="headerlink" href="#minimal-cross-sectional-area-along-the-0-0-1" title="Permalink to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section</span><span class="p">(</span>
+                                <span class="n">show_cross_section_area</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                                <span class="n">transparent_mesh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">slice_normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                <span class="n">slice_origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.25</span><span class="p">),</span>
+                                <span class="n">line_width</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;parametric&quot;</span><span class="p">,</span>
+                                <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_dos_004.png" srcset="../../_images/sphx_glr_plotting_colinear_dos_004.png" alt="plotting colinear dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The plot only considers orbitals [4, 5, 6, 7, 8]
-
-&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB3D32BAF0&gt;
+<img src="../../_images/sphx_glr_plotting_de_hass_van_alphen_002.png" srcset="../../_images/sphx_glr_plotting_de_hass_van_alphen_002.png" alt="plotting de hass van alphen" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 8.5642
+Bands near the fermi energy : [5]
 </pre></div>
 </div>
+<p>In the above figure we can see the cross section area is <span class="math notranslate nohighlight">\(A = 0.1596 Ang^{-2} = 0.1596e^{16} cm^{-2} (cgs)\)</span>.</p>
+<p><span class="math notranslate nohighlight">\(F = \frac{ c \hbar A }{ 2 \pi e  } = 1.68e^7 G\)</span></p>
+<p><span class="math notranslate nohighlight">\(F_{exp} =  = 1.50e^7 G\)</span></p>
 </section>
-<section id="stack-orbtials-mode">
-<h2>stack_orbtials mode<a class="headerlink" href="#stack-orbtials-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span>
-                <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
-                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
-                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+<section id="extremal-cross-sectional-area-along-the-0-1-1">
+<h2>Extremal cross sectional area along the (0,1,1)<a class="headerlink" href="#extremal-cross-sectional-area-along-the-0-1-1" title="Permalink to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section</span><span class="p">(</span>
+                                <span class="n">show_cross_section_area</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                                <span class="n">transparent_mesh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">slice_normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                <span class="n">slice_origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                <span class="n">line_width</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;parametric&quot;</span><span class="p">,</span>
+                                <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_dos_005.png" srcset="../../_images/sphx_glr_plotting_colinear_dos_005.png" alt="plotting colinear dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The plot only considers atoms [&#39;Fe&#39;]
-
-&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB3CE2C8B0&gt;
+<img src="../../_images/sphx_glr_plotting_de_hass_van_alphen_003.png" srcset="../../_images/sphx_glr_plotting_de_hass_van_alphen_003.png" alt="plotting de hass van alphen" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 8.5642
+Bands near the fermi energy : [5]
 </pre></div>
 </div>
-</section>
-<section id="overlay-mode">
-<h2>overlay mode<a class="headerlink" href="#overlay-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
-                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack&#39;</span><span class="p">,</span>
-                <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
-</pre></div>
-</div>
-<img src="../../_images/sphx_glr_plotting_colinear_dos_006.png" srcset="../../_images/sphx_glr_plotting_colinear_dos_006.png" alt="plotting colinear dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB3CC5B7F0&gt;
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  20.838 seconds)</p>
-<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plotting-colinear-dos-py">
+<p>In the above figure we can see the cross section area is <span class="math notranslate nohighlight">\(A = 4.3956 Ang^{-2} = 4.3956e^{16} cm^{-2} (cgs)\)</span>.</p>
+<p><span class="math notranslate nohighlight">\(F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G\)</span></p>
+<p><span class="math notranslate nohighlight">\(F_{exp} =  = 4.85e^8 G\)</span></p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.352 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plotting-de-hass-van-alphen-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/5ee19e23f1bdbe3bf09dc9b3c9005d56/plotting_colinear_dos.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_colinear_dos.py</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/95ea9868632cab14ec10e6d61c72d22d/plotting_de_hass_van_alphen.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_de_hass_van_alphen.py</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/aa74ed4c2c263acf0b0686980a6d9ee4/plotting_colinear_dos.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plotting_colinear_dos.ipynb</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/f319302996941eb473f5eaf8b3445220/plotting_de_hass_van_alphen.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plotting_de_hass_van_alphen.ipynb</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -590,17 +566,17 @@ to download the full example code</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="plotting_noncolinear_dos_qe.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="plotting_fermi3d_spin-polarized.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Plotting non colinear dos in Quantum Espresso</p>
+          <p class="prev-next-title">Plotting fermi3d spin-polarized</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="plotting_spin_polarized_dos.html" title="next page">
+  <a class='right-next' id="next-link" href="plotting_fermi3d_cross_section.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Plotting spin-polarized density of states</p>
+      <p class="prev-next-title">Plotting fermi3d cross_section</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -621,33 +597,18 @@ to download the full example code</p>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#plain-mode">
-   Plain mode
+  <a class="reference internal nav-link" href="#maximal-cross-sectional-area-along-the-0-0-1">
+   Maximal cross sectional area along the (0,0,1)
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#parametric-mode">
-   Parametric mode
+  <a class="reference internal nav-link" href="#minimal-cross-sectional-area-along-the-0-0-1">
+   Minimal cross sectional area along the (0,0,1)
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#parametric-line-mode">
-   parametric_line mode
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#stack-species-mode">
-   stack_species mode
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#stack-orbtials-mode">
-   stack_orbtials mode
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#overlay-mode">
-   overlay mode
+  <a class="reference internal nav-link" href="#extremal-cross-sectional-area-along-the-0-1-1">
+   Extremal cross sectional area along the (0,1,1)
   </a>
  </li>
 </ul>
@@ -667,7 +628,7 @@ to download the full example code</p>
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
-    <a href="../../_sources/examples/01-dos/plotting_colinear_dos.rst.txt">
+    <a href="../../_sources/examples/04-fermi3d/plotting_de_hass_van_alphen.rst.txt">
         <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>
