@@ -143,7 +143,7 @@ html_theme_options = {
     "icon_links": [ 
         {
             "name": "Contributing",
-            "url": "github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst",
+            "url": "https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst",
             "icon": "fa fa-gavel fa-fw",
         },
         {
