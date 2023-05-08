@@ -893,6 +893,7 @@ class FermiHandler:
     def plot_fermi_cross_section(self,
                                 mode:str,
                                 show_cross_section_area:bool=False,
+                                transparent_mesh: bool=False,
                                 slice_normal: Tuple[float,float,float]=(1,0,0),
                                 slice_origin: Tuple[float,float,float]=(0,0,0),
                                 line_width:float=5.0,
@@ -946,6 +947,8 @@ class FermiHandler:
             The initial slice noraml direction, by default (1,0,0)
         slice_origin : Tuple[float,float,float], optional
             The initial slice origin, by default (0,0,0)
+        transparent_mesh: bool, optionl
+            Adds a transparent mesh of the fermi surface
         line_width : float, optional
             The linwidth of the slice, by default 5.0
         bands : List[int], optional
@@ -1104,6 +1107,8 @@ class FermiHandler:
         # if arrow_color:
         #     options_dict['scalars']= None
         tot_surface= fermi_surface
+        if transparent_mesh:
+            plotter.add_mesh(tot_surface,color='white',opacity=0.5)
         add_custom_mesh_slice(plotter = plotter, 
                                 mesh=tot_surface,
                                 options_dict=options_dict, 
@@ -1271,7 +1276,7 @@ class FermiHandler:
 
         axs.axvline(self.e_fermi, color='blue', linestyle="dotted", linewidth=1)
         axs.set_xlabel("Energy (eV)")
-        axs.set_ylabel("Surface Area (m$^{-2}$)")
+        axs.set_ylabel("Surface Area (Ang$^{-2}$)")
 
         if show:
             plt.show()
@@ -1582,7 +1587,7 @@ def add_custom_mesh_slice(
         if show_cross_section_area:
             user_slice = plotter.plane_sliced_meshes[0]
             surface = user_slice.delaunay_2d()
-            plotter.add_text(f"Cross sectional area : {surface.area:.4f}"+" m^-2", color = 'black')
+            plotter.add_text(f"Cross sectional area : {surface.area:.4f}"+" Ang^-2", color = 'black')
 
   
         def callback(normal, origin):
@@ -1605,12 +1610,12 @@ def add_custom_mesh_slice(
             if show_cross_section_area:
                 user_slice = plotter.plane_sliced_meshes[0]
                 surface = user_slice.delaunay_2d()
-                text = f"Cross sectional area : {surface.area:.4f}"+" m^-2"
+                text = f"Cross sectional area : {surface.area:.4f}"+" Ang^-2"
 
                 plotter.textActor.SetText(2, text)
 
 
-
+        # print(mesh.bounds)
 
         plotter.add_plane_widget(callback=callback, bounds=mesh.bounds,
                               factor=1.25, normal='x',
@@ -1624,6 +1629,9 @@ def add_custom_mesh_slice(
     
         actor = plotter.add_mesh(plane_sliced_mesh,show_scalar_bar=False, line_width=line_width,rgba=options_dict['use_rgba'], **kwargs)
         plotter.plane_widgets[0].SetNormal(normal)
+
+        # Call the callback to update scene
+        callback(normal, origin)
         return actor
     
 def find_nearest(array, value):

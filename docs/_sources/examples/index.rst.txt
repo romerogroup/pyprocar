@@ -382,6 +382,23 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi sur...">
+
+.. only:: html
+
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_de_hass_van_alphen_thumb.png
+    :alt: Showing how to get van alphen fequencies from the fermi surface
+
+  :ref:`sphx_glr_examples_04-fermi3d_plotting_de_hass_van_alphen.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Showing how to get van alphen fequencies from the fermi surface</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d cross_section example.">
 
 .. only:: html
