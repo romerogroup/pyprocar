@@ -72,6 +72,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     "sphinx.ext.mathjax", 
     "sphinx.ext.napoleon", 
+    "pyvista.ext.plot_directive",
     'sphinx.ext.viewcode',
     
     'sphinx_copybutton',

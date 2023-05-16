@@ -671,7 +671,6 @@ class QEParser():
                         if projs_element.tag == "ATOMIC_WFC":
                             ispin = int(projs_element.get('spin'))-1
                        
-                    
 
                     projections = projs_element.text.split("\n")[1:-1]
                     for iband, band_projection in enumerate(projections):
@@ -910,6 +909,7 @@ class QEParser():
                 
                 self.bands[ikpoint, : ,1]  = HARTREE_TO_EV  * np.array(kpoint_element.findall(".//eigenvalues")[0].text.split(),dtype = float)[self.nbnd_down:]
                 self.occupations[ikpoint, : ,1]  = np.array(kpoint_element.findall(".//occupations")[0].text.split(), dtype = float)[self.nbnd_down:]
+        
         # For non-spin-polarized and non colinear
         else:
             self.n_band = int(main_xml_root.findall(".//output/band_structure/nbnd")[0].text)

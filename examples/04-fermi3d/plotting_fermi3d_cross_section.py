@@ -69,7 +69,6 @@ line_width=5.0
 #save_2d_slice=''
 
 fermiHandler.plot_fermi_cross_section(
-                              show_cross_section_area=show_cross_section_area,
                               slice_normal=slice_normal,
                               slice_origin=slice_origin,
                               line_width=line_width,
@@ -94,7 +93,6 @@ show_cross_section_area=True
 save_2d_slice='2d_slice.png'
 
 fermiHandler.plot_fermi_cross_section(
-                              show_cross_section_area=show_cross_section_area,
                               slice_normal=slice_normal,
                               slice_origin=slice_origin,
                               line_width=line_width,

@@ -136,7 +136,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.052 seconds)
+   **Total running time of the script:** ( 0 minutes  11.624 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin_texture.py:

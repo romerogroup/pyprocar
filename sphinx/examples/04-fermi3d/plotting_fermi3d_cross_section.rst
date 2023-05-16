@@ -104,7 +104,7 @@ Cross section
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-82
+.. GENERATED FROM PYTHON SOURCE LINES 53-81
 
 .. code-block:: default
 
@@ -127,7 +127,6 @@ Cross section
     #save_2d_slice=''
 
     fermiHandler.plot_fermi_cross_section(
-                                  show_cross_section_area=show_cross_section_area,
                                   slice_normal=slice_normal,
                                   slice_origin=slice_origin,
                                   line_width=line_width,
@@ -156,14 +155,14 @@ Cross section
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-87
+.. GENERATED FROM PYTHON SOURCE LINES 82-86
 
 Cross section. Save slice
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-109
+.. GENERATED FROM PYTHON SOURCE LINES 86-107
 
 .. code-block:: default
 
@@ -177,7 +176,6 @@ Cross section. Save slice
     save_2d_slice='2d_slice.png'
 
     fermiHandler.plot_fermi_cross_section(
-                                  show_cross_section_area=show_cross_section_area,
                                   slice_normal=slice_normal,
                                   slice_origin=slice_origin,
                                   line_width=line_width,
@@ -223,7 +221,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.836 seconds)
+   **Total running time of the script:** ( 0 minutes  13.864 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_cross_section.py:

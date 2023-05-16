@@ -418,6 +418,21 @@
       
       
         
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
           Surface.set_color_with_cmap
         
       
@@ -797,10 +812,6 @@
         
           Surface.faces_array
         
-      
-      
-      
-      
       
       
       

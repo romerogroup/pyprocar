@@ -396,8 +396,25 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">vtk</span>
 <span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
-<span class="kn">from</span> <span class="nn">pyvista.utilities</span> <span class="kn">import</span> <span class="n">NORMALS</span><span class="p">,</span> <span class="n">generate_plane</span><span class="p">,</span> <span class="n">get_array</span><span class="p">,</span> <span class="n">try_callback</span>
 
+<span class="kn">from</span> <span class="nn">pyvista.core.filters</span> <span class="kn">import</span> <span class="n">_get_output</span>  <span class="c1"># avoids circular import</span>
+<span class="kn">from</span> <span class="nn">pyvista.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NORMALS</span><span class="p">,</span>
+    <span class="n">assert_empty_kwargs</span><span class="p">,</span>
+    <span class="n">generate_plane</span><span class="p">,</span>
+    <span class="n">get_array</span><span class="p">,</span>
+    <span class="n">get_array_association</span><span class="p">,</span>
+    <span class="n">try_callback</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pyvista.utilities.algorithms</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">add_ids_algorithm</span><span class="p">,</span>
+    <span class="n">algorithm_to_mesh_handler</span><span class="p">,</span>
+    <span class="n">crinkle_algorithm</span><span class="p">,</span>
+    <span class="n">outline_algorithm</span><span class="p">,</span>
+    <span class="n">pointset_to_polydata_algorithm</span><span class="p">,</span>
+    <span class="n">set_algorithm_input</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="c1"># from pyprocar.fermisurface3d import fermisurface3D</span>
 
 <span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">FermiSurface3D</span>
@@ -410,7 +427,10 @@
 
 <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
 
-
+<span class="k">def</span> <span class="nf">find_nearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">idx</span>
 <div class="viewcode-block" id="FermiHandler"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.html#pyprocar.scripts.FermiHandler">[docs]</a><span class="k">class</span> <span class="nc">FermiHandler</span><span class="p">:</span>
 
 <div class="viewcode-block" id="FermiHandler.__init__"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html#pyprocar.scripts.FermiHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -630,17 +650,14 @@
                 <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">extend_surface</span><span class="p">(</span><span class="n">extended_zone_directions</span><span class="o">=</span><span class="n">extended_zone_directions</span><span class="p">)</span>
             <span class="n">fermi_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fermi_surface3D</span><span class="p">)</span>
 
+
         <span class="n">fermi_surface</span><span class="o">=</span><span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fermi_surfaces</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">fermi_surface</span><span class="o">=</span><span class="n">surface</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fermi_surface</span><span class="o">+=</span><span class="n">surface</span>
-
-
         
-
-
         <span class="c1">################################################################</span>
         <span class="c1"># Initialize the Plotter</span>
         <span class="c1">################################################################</span>
@@ -665,9 +682,9 @@
         <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
             <span class="n">arrows</span> <span class="o">=</span> <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">arrow_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span><span class="n">scalars</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span><span class="n">scalars</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">fermi_surface</span><span class="p">,</span>
                         <span class="n">scalars</span> <span class="o">=</span>  <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> 
@@ -1152,7 +1169,7 @@
                                             <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">bands_to_keep</span><span class="p">,</span>
                                             <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[:,:,</span><span class="n">ispin</span><span class="p">],</span>
                                             <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">,</span>
-                                            <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">,</span>
+                                            <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
                                             <span class="n">surface_color</span><span class="o">=</span><span class="n">surface_color</span><span class="p">,</span>
                                             <span class="n">fermi</span><span class="o">=</span><span class="n">e_value</span><span class="p">,</span>
                                             <span class="n">fermi_shift</span> <span class="o">=</span> <span class="n">fermi_shift</span><span class="p">,</span>
@@ -1217,9 +1234,11 @@
                 <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
+        
+        <span class="c1"># print(arrows.active_scalars_info)</span>
+        <span class="c1"># print(arrows.active_vectors_info)</span>
         <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span>
-                <span class="n">scalars</span> <span class="o">=</span>  <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> 
+                <span class="n">scalars</span> <span class="o">=</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> 
                 <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
                 <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">rgba</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;use_rgba&#39;</span><span class="p">])</span>
@@ -1247,31 +1266,329 @@
                 <span class="n">line_width</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> 
             <span class="n">labels_off</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="n">plotter</span><span class="o">.</span><span class="n">set_background</span><span class="p">(</span><span class="n">background_color</span><span class="p">)</span>
+
         <span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">auto_close</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Run through each frame</span>
         <span class="k">for</span> <span class="n">e_surface</span><span class="p">,</span><span class="n">evalues</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">e_surfaces</span><span class="p">,</span><span class="n">energy_values</span><span class="p">):</span>
-            <span class="n">surface</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">e_surface</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
-                <span class="n">e_arrows</span> <span class="o">=</span> <span class="n">e_surface</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
-                <span class="n">arrows</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">e_arrows</span><span class="p">)</span>
+
+            <span class="n">surface</span><span class="o">.</span><span class="n">copy_from</span><span class="p">(</span><span class="n">e_surface</span><span class="p">)</span>
+
+            <span class="c1"># Must set active scalars after calling copy_from</span>
+            <span class="n">surface</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">])</span>
+
             <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Energy Value : </span><span class="si">{</span><span class="n">evalues</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> eV&#39;</span>
             <span class="n">plotter</span><span class="o">.</span><span class="n">textActor</span><span class="o">.</span><span class="n">SetText</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
+                <span class="n">e_arrows</span> <span class="o">=</span> <span class="n">e_surface</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
+                <span class="n">arrows</span><span class="o">.</span><span class="n">copy_from</span><span class="p">(</span><span class="n">e_arrows</span><span class="p">)</span>
+
+                <span class="n">arrows</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">])</span>
+                <span class="c1"># arrows.set_active_vectors(name=options_dict[&#39;vector_name&#39;])</span>
+
+                <span class="c1"># print(arrows.point_data.keys())</span>
+                <span class="c1"># print(arrows.active_scalars_info)</span>
+                <span class="c1"># print(arrows.active_vectors_info)</span>
+
             <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+
         <span class="c1"># Run backward through each frame</span>
         <span class="k">for</span> <span class="n">e_surface</span><span class="p">,</span> <span class="n">evalues</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">e_surfaces</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">energy_values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="n">surface</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">e_surface</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
-                <span class="n">e_arrows</span> <span class="o">=</span> <span class="n">e_surface</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
-                <span class="n">arrows</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">e_arrows</span><span class="p">)</span>
-            <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+
+            <span class="n">surface</span><span class="o">.</span><span class="n">copy_from</span><span class="p">(</span><span class="n">e_surface</span><span class="p">)</span>
+            <span class="c1"># Must set active scalars after calling copy_from</span>
+            <span class="n">surface</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">])</span>
+
             <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Energy Value : </span><span class="si">{</span><span class="n">evalues</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1"> eV&#39;</span>
             <span class="n">plotter</span><span class="o">.</span><span class="n">textActor</span><span class="o">.</span><span class="n">SetText</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
+                <span class="n">e_arrows</span> <span class="o">=</span> <span class="n">e_surface</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
+                <span class="n">arrows</span><span class="o">.</span><span class="n">copy_from</span><span class="p">(</span><span class="n">e_arrows</span><span class="p">)</span>
+
+                <span class="n">arrows</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">])</span>
+                <span class="c1"># arrows.set_active_vectors(name=options_dict[&#39;vectors&#39;])</span>
+
+            <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+        
         <span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="FermiHandler.plot_fermi_cross_section"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fermi_cross_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+                                <span class="n">transparent_mesh</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">slice_normal</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                <span class="n">slice_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                <span class="n">line_width</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+                                <span class="n">bands</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+                                <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">fermi_shift</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="n">fermi_tolerance</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                                
+                                <span class="n">spin_texture</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">calculate_fermi_speed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">calculate_fermi_velocity</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">calculate_effective_mass</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+
+                                <span class="n">supercell</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                <span class="n">extended_zone_directions</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">interpolation_factor</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                <span class="n">projection_accuracy</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+
+                                <span class="c1"># plotting saving options</span>
+                                <span class="n">plot_brillouin_zone</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">arrow_color</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">arrow_size</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span>
+                                <span class="n">colors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">spin_colors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="ow">or</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">cmap</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+                                <span class="n">vmin</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="n">vmax</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+
+                                <span class="c1"># saving options</span>
+                                <span class="n">show</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">camera_pos</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                <span class="n">plot_directional_arrows</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">background_color</span><span class="p">:</span><span class="nb">str</span> <span class="ow">or</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+                                <span class="n">perspective</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">save_2d</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">save_2d_slice</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to plot the fermi sruafce with a cross section slicing widget</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mode : str</span>
+<span class="sd">            The mode name</span>
+<span class="sd">        slice_normal : Tuple[float,float,float], optional</span>
+<span class="sd">            The initial slice noraml direction, by default (1,0,0)</span>
+<span class="sd">        slice_origin : Tuple[float,float,float], optional</span>
+<span class="sd">            The initial slice origin, by default (0,0,0)</span>
+<span class="sd">        transparent_mesh: bool, optionl</span>
+<span class="sd">            Adds a transparent mesh of the fermi surface</span>
+<span class="sd">        line_width : float, optional</span>
+<span class="sd">            The linwidth of the slice, by default 5.0</span>
+<span class="sd">        bands : List[int], optional</span>
+<span class="sd">            A list of bands to plot, by default None</span>
+<span class="sd">        atoms : List[int], optional</span>
+<span class="sd">            A list of atoms, by default None</span>
+<span class="sd">        orbitals : List[int], optional</span>
+<span class="sd">            A list of orbitals, by default None</span>
+<span class="sd">        spins : List[int], optional</span>
+<span class="sd">            A list of spins, by default None</span>
+<span class="sd">        fermi : float, optional</span>
+<span class="sd">            Ther fermi energy, by default None</span>
+<span class="sd">        fermi_shift : float, optional</span>
+<span class="sd">            A float to shift the fermi energy, by default 0</span>
+<span class="sd">        fermi_tolerance : float, optional</span>
+<span class="sd">            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1</span>
+<span class="sd">        spin_texture : bool, optional</span>
+<span class="sd">            Boolean to plot spin texture, by default False</span>
+<span class="sd">        calculate_fermi_speed : bool, optional</span>
+<span class="sd">            Boolean to calculate the fermi speed, by default False</span>
+<span class="sd">        calculate_fermi_velocity : bool, optional</span>
+<span class="sd">            Boolean to calculate the fermi velocity, by default False</span>
+<span class="sd">        calculate_effective_mass : bool, optional</span>
+<span class="sd">            Boolean to calculate the effective mass, by default False</span>
+<span class="sd">        supercell : List[int], optional</span>
+<span class="sd">            A list of integers for the supercell to include, by default [1, 1, 1]</span>
+<span class="sd">        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional</span>
+<span class="sd">            A list of list that describe the directions to expand the fermi surface, by default None</span>
+<span class="sd">        interpolation_factor : int, optional</span>
+<span class="sd">            The interpolation factor, by default 1</span>
+<span class="sd">        projection_accuracy : str, optional</span>
+<span class="sd">            String for the projection method to use, by default &quot;normal&quot;</span>
+<span class="sd">        plot_brillouin_zone : bool, optional</span>
+<span class="sd">            Boolean to plot the Brillouin zone, by default True</span>
+<span class="sd">        arrow_color : List[str]orList[Tuple[float,float,float]], optional</span>
+<span class="sd">            The arrow colors, by default None</span>
+<span class="sd">        arrow_size : float, optional</span>
+<span class="sd">            The arrow size, by default 0.1</span>
+<span class="sd">        spin_colors : List[str]orList[Tuple[float,float,float]], optional</span>
+<span class="sd">            The spin colors, by default None</span>
+<span class="sd">        colors : List[str]orList[Tuple[float,float,float]], optional</span>
+<span class="sd">            The colors of the fermi surface bands, by default None</span>
+<span class="sd">        cmap : str, optional</span>
+<span class="sd">            The colormap to use, by default &quot;jet&quot;</span>
+<span class="sd">        vmin : float, optional</span>
+<span class="sd">            Value to normalize the minimum projection value., by default None, by default None, by default 0</span>
+<span class="sd">        vmax : float, optional</span>
+<span class="sd">            Value to normalize the maximum projection value., by default None, by default None, by default 1</span>
+<span class="sd">        show : bool, optional</span>
+<span class="sd">            Boolean to show the plot, by default True</span>
+<span class="sd">        plot_directional_arrows : bool, optional</span>
+<span class="sd">            Boolean to plot direction arrows, by default True</span>
+<span class="sd">        camera_pos : List[float], optional</span>
+<span class="sd">            List to specify the camera position, by default [1, 1, 1]</span>
+<span class="sd">        background_color : strorTuple[float,float,float,float], optional</span>
+<span class="sd">            The background color of the plot, by default &quot;white&quot;</span>
+<span class="sd">        perspective : bool, optional</span>
+<span class="sd">            Boolean, by default True</span>
+<span class="sd">        save_2d : str, optional</span>
+<span class="sd">            String to save a screenshot of the plotter, by default None</span>
+<span class="sd">        save_2d_slice : str, optional</span>
+<span class="sd">            String to save the 2d slice when done with the plotter, by default None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">################################################################</span>
+        <span class="c1"># Initialize the Fermi Surface </span>
+        <span class="c1">################################################################</span>
+        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;property_projection&#39;</span> <span class="ow">and</span> <span class="n">calculate_effective_mass</span><span class="o">==</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">calculate_fermi_speed</span><span class="o">==</span><span class="kc">False</span> <span class="ow">and</span> <span class="n">calculate_fermi_velocity</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span> 
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Turn one property (calculate_fermi_speed,calculate_fermi_velocity,calculate_effective_mass) to True&quot;</span><span class="p">)</span>
+
+        <span class="n">spd</span><span class="p">,</span> <span class="n">spd_spin</span><span class="p">,</span> <span class="n">bands_to_keep</span><span class="p">,</span> <span class="n">spins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__format_data</span><span class="p">(</span>
+                                                        <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                                                        <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span>
+                                                        <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
+                                                        <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                                                        <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                                                        <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">,</span>
+                                                        <span class="n">fermi_tolerance</span><span class="o">=</span><span class="n">fermi_tolerance</span><span class="p">)</span>
+        <span class="n">fermi_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">spin</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spins</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">spin_colors</span><span class="p">:</span>
+                <span class="n">surface_color</span> <span class="o">=</span> <span class="n">spin_colors</span><span class="p">[</span><span class="n">ispin</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">surface_color</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">fermi_surface3D</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
+                                            <span class="n">kpoints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                                            <span class="n">bands</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,:,</span><span class="n">spin</span><span class="p">],</span>
+                                            <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">bands_to_keep</span><span class="p">,</span>
+                                            <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[:,:,</span><span class="n">ispin</span><span class="p">],</span>
+                                            <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">,</span>
+                                            <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">,</span>
+                                            <span class="n">surface_color</span><span class="o">=</span><span class="n">surface_color</span><span class="p">,</span>
+                                            <span class="n">fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span>
+                                            <span class="n">fermi_shift</span> <span class="o">=</span> <span class="n">fermi_shift</span><span class="p">,</span>
+                                            <span class="n">fermi_tolerance</span><span class="o">=</span><span class="n">fermi_tolerance</span><span class="p">,</span>
+                                            <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+                                            <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
+                                            <span class="n">projection_accuracy</span><span class="o">=</span><span class="n">projection_accuracy</span><span class="p">,</span>
+                                            <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
+                                            <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                                            <span class="n">vmin</span> <span class="o">=</span> <span class="n">vmin</span><span class="p">,</span>
+                                            <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+                                        <span class="p">)</span>
+            <span class="k">if</span> <span class="n">calculate_fermi_speed</span><span class="p">:</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">calculate_fermi_speed</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">calculate_fermi_velocity</span><span class="p">:</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">calculate_fermi_velocity</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">calculate_effective_mass</span><span class="p">:</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">calculate_effective_mass</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span><span class="s1">&#39;parametric&#39;</span><span class="p">:</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">project_atomic_projections</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span><span class="s1">&#39;spin_texture&#39;</span><span class="p">:</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">project_spin_texture_atomic_projections</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">extended_zone_directions</span><span class="p">:</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">extend_surface</span><span class="p">(</span><span class="n">extended_zone_directions</span><span class="o">=</span><span class="n">extended_zone_directions</span><span class="p">)</span>
+            <span class="n">fermi_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fermi_surface3D</span><span class="p">)</span>
+
+        <span class="n">fermi_surface</span><span class="o">=</span><span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fermi_surfaces</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">fermi_surface</span><span class="o">=</span><span class="n">surface</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fermi_surface</span><span class="o">+=</span><span class="n">surface</span>
+
+        <span class="c1">################################################################</span>
+        <span class="c1"># Initialize the plotter</span>
+        <span class="c1">################################################################</span>
+        
+        <span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">plot_brillouin_zone</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+                <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">brillouin_zone</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">&quot;wireframe&quot;</span><span class="p">,</span>
+                <span class="n">line_width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Collecting plot options given the mode and other parameters</span>
+        <span class="n">options_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__plot_options_helper</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                                                <span class="n">calculate_fermi_speed</span><span class="o">=</span><span class="n">calculate_fermi_speed</span><span class="p">,</span>
+                                                <span class="n">calculate_fermi_velocity</span><span class="o">=</span><span class="n">calculate_fermi_velocity</span><span class="p">,</span>
+                                                <span class="n">calculate_effective_mass</span><span class="o">=</span><span class="n">calculate_effective_mass</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
+
+            <span class="n">arrows</span> <span class="o">=</span> <span class="n">fermi_surface</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
+            <span class="n">tot_surface</span> <span class="o">=</span> <span class="n">fermi_surface</span> <span class="o">+</span> <span class="n">arrows</span>
+            <span class="c1"># options_dict[&#39;scalars&#39;] = &#39;spin_magnitude&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tot_surface</span><span class="o">=</span> <span class="n">fermi_surface</span>
+        <span class="k">if</span> <span class="n">arrow_color</span><span class="p">:</span>
+            <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">tot_surface</span><span class="o">=</span> <span class="n">fermi_surface</span>
+        <span class="k">if</span> <span class="n">transparent_mesh</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">tot_surface</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">add_custom_mesh_slice</span><span class="p">(</span><span class="n">plotter</span> <span class="o">=</span> <span class="n">plotter</span><span class="p">,</span> 
+                                <span class="n">mesh</span><span class="o">=</span><span class="n">tot_surface</span><span class="p">,</span>
+                                <span class="n">options_dict</span><span class="o">=</span><span class="n">options_dict</span><span class="p">,</span> 
+                                <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+                                <span class="n">normal</span><span class="o">=</span><span class="n">slice_normal</span><span class="p">,</span> 
+                                <span class="n">origin</span> <span class="o">=</span> <span class="n">slice_origin</span><span class="p">,</span>
+                                <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                                <span class="n">arrow_color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span>
+                                <span class="n">scalars</span> <span class="o">=</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;plain&quot;</span> <span class="ow">or</span> <span class="n">spin_texture</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">add_scalar_bar</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span>
+                <span class="n">n_labels</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                <span class="n">italic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">title_font_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">label_font_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">position_x</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                <span class="n">position_y</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,)</span>
+
+        <span class="k">if</span> <span class="n">plot_directional_arrows</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+                <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Kx&quot;</span><span class="p">,</span> 
+                <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Ky&quot;</span><span class="p">,</span> 
+                <span class="n">zlabel</span><span class="o">=</span><span class="s2">&quot;Kz&quot;</span><span class="p">,</span> 
+                <span class="n">line_width</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> 
+            <span class="n">labels_off</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">perspective</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">enable_parallel_projection</span><span class="p">()</span>
+        <span class="n">plotter</span><span class="o">.</span><span class="n">set_background</span><span class="p">(</span><span class="n">background_color</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">cpos</span><span class="o">=</span><span class="n">camera_pos</span><span class="p">,</span> <span class="n">screenshot</span><span class="o">=</span><span class="n">save_2d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_2d_slice</span><span class="p">:</span>
+            <span class="n">slice_2d</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_sliced_meshes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">point1</span> <span class="o">=</span> <span class="n">slice_2d</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>
+            <span class="n">point2</span> <span class="o">=</span> <span class="n">slice_2d</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span>
+            <span class="n">normal_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">point1</span><span class="p">,</span><span class="n">point2</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">]:</span>
+                <span class="n">arrows</span> <span class="o">=</span> <span class="n">slice_2d</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arrow_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;arrows&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;arrows&#39;</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">slice_2d</span><span class="p">,</span><span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">remove_scalar_bar</span><span class="p">()</span>
+            <span class="c1"># p.set_background(background_color)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">view_vector</span><span class="p">(</span><span class="n">normal_vec</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">screenshot</span><span class="o">=</span><span class="n">save_2d_slice</span><span class="p">,</span><span class="n">interactive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FermiHandler.plot_fermi_cross_section_box_widget"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fermi_cross_section_box_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                 <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
                                 <span class="n">show_cross_section_area</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                 <span class="n">transparent_mesh</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1316,7 +1633,7 @@
                                 <span class="n">save_2d</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">save_2d_slice</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to plot the fermi sruafce with a cross section widget</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to plot the fermi sruafce with a cross section and box slicing widget</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1478,29 +1795,29 @@
                                                 <span class="n">calculate_fermi_velocity</span><span class="o">=</span><span class="n">calculate_fermi_velocity</span><span class="p">,</span>
                                                 <span class="n">calculate_effective_mass</span><span class="o">=</span><span class="n">calculate_effective_mass</span><span class="p">)</span>
 
-        <span class="c1"># if options_dict[&#39;scalars&#39;] ==  &quot;spin_magnitude&quot; or options_dict[&#39;scalars&#39;] ==  &quot;Fermi Velocity Vector_magnitude&quot;:</span>
+        <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;spin_magnitude&quot;</span> <span class="ow">or</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span> <span class="o">==</span>  <span class="s2">&quot;Fermi Velocity Vector_magnitude&quot;</span><span class="p">:</span>
 
-        <span class="c1">#     arrows = fermi_surface.glyph(orient=options_dict[&#39;vector_name&#39;],scale=False ,factor=arrow_size)</span>
-        <span class="c1">#     tot_surface = fermi_surface + arrows</span>
-        <span class="c1">#     # options_dict[&#39;scalars&#39;] = &#39;spin_magnitude&#39;</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     tot_surface= fermi_surface</span>
-        <span class="c1"># if arrow_color:</span>
-        <span class="c1">#     options_dict[&#39;scalars&#39;]= None</span>
+            <span class="n">arrows</span> <span class="o">=</span> <span class="n">fermi_surface</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="kc">False</span> <span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">)</span>
+            <span class="n">tot_surface</span> <span class="o">=</span> <span class="n">fermi_surface</span> <span class="o">+</span> <span class="n">arrows</span>
+            <span class="c1"># options_dict[&#39;scalars&#39;] = &#39;spin_magnitude&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tot_surface</span><span class="o">=</span> <span class="n">fermi_surface</span>
+        <span class="k">if</span> <span class="n">arrow_color</span><span class="p">:</span>
+            <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">]</span><span class="o">=</span> <span class="kc">None</span>
         <span class="n">tot_surface</span><span class="o">=</span> <span class="n">fermi_surface</span>
         <span class="k">if</span> <span class="n">transparent_mesh</span><span class="p">:</span>
-            <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">tot_surface</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-        <span class="n">add_custom_mesh_slice</span><span class="p">(</span><span class="n">plotter</span> <span class="o">=</span> <span class="n">plotter</span><span class="p">,</span> 
-                                <span class="n">mesh</span><span class="o">=</span><span class="n">tot_surface</span><span class="p">,</span>
-                                <span class="n">options_dict</span><span class="o">=</span><span class="n">options_dict</span><span class="p">,</span> 
-                                <span class="n">show_cross_section_area</span><span class="o">=</span><span class="n">show_cross_section_area</span><span class="p">,</span>
-                                <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
-                                <span class="n">normal</span><span class="o">=</span><span class="n">slice_normal</span><span class="p">,</span> 
-                                <span class="n">origin</span> <span class="o">=</span> <span class="n">slice_origin</span><span class="p">,</span>
-                                <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-                                <span class="n">arrow_color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span>
-                                <span class="n">scalars</span> <span class="o">=</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">])</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">tot_surface</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 
+        <span class="n">add_custom_box_slice_widget</span><span class="p">(</span>
+                    <span class="n">plotter</span><span class="p">,</span>
+                    <span class="n">mesh</span><span class="o">=</span><span class="n">tot_surface</span><span class="p">,</span> 
+                    <span class="n">options_dict</span><span class="o">=</span><span class="n">options_dict</span><span class="p">,</span>
+                    <span class="n">show_cross_section_area</span><span class="o">=</span><span class="n">show_cross_section_area</span><span class="p">,</span>
+                    <span class="n">normal</span><span class="o">=</span><span class="n">slice_normal</span><span class="p">,</span>
+                    <span class="n">origin</span><span class="o">=</span><span class="n">slice_origin</span><span class="p">,</span>
+                    <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+                    <span class="p">)</span>
+        
         <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;plain&quot;</span> <span class="ow">or</span> <span class="n">spin_texture</span><span class="p">:</span>
             <span class="n">plotter</span><span class="o">.</span><span class="n">add_scalar_bar</span><span class="p">(</span>
                 <span class="n">title</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span>
@@ -1546,123 +1863,6 @@
             <span class="c1"># p.set_background(background_color)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">view_vector</span><span class="p">(</span><span class="n">normal_vec</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">screenshot</span><span class="o">=</span><span class="n">save_2d_slice</span><span class="p">,</span><span class="n">interactive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="FermiHandler.plot_fermi_surface_area_vs_isovalue"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue.html#pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fermi_surface_area_vs_isovalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                        <span class="n">iso_range</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                        <span class="n">iso_surfaces</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                        <span class="n">iso_values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">spins</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">fermi_shift</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                        <span class="n">fermi_tolerance</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-                        <span class="n">supercell</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                        <span class="n">extended_zone_directions</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">interpolation_factor</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                        <span class="c1"># plotting saving options</span>
-                        <span class="n">cmap</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
-                        <span class="c1"># saving options</span>
-                        <span class="n">show</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">savefig</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to plot the fermi surface area vs the isovlaue</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        iso_range : float, optional</span>
-<span class="sd">            The isovalue range, by default 3</span>
-<span class="sd">        iso_surfaces : int, optional</span>
-<span class="sd">            The number of sruafce to generate in the range, by default 10</span>
-<span class="sd">        iso_values : List[float], optional</span>
-<span class="sd">            Exact iso vlaues to generate surfaces, by default None</span>
-<span class="sd">        spins : List[int], optional</span>
-<span class="sd">            A list of spins, by default None</span>
-<span class="sd">        fermi : float, optional</span>
-<span class="sd">            Ther fermi energy, by default None</span>
-<span class="sd">        fermi_shift : float, optional</span>
-<span class="sd">            Float to shift the fermi energy, by default 0</span>
-<span class="sd">        fermi_tolerance : float, optional</span>
-<span class="sd">            The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1</span>
-<span class="sd">        supercell : List[int], optional</span>
-<span class="sd">            A list of integers for the supercell to include, by default [1, 1, 1]</span>
-<span class="sd">        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional</span>
-<span class="sd">            A list of list that describe the directions to expand the fermi surface, by default None</span>
-<span class="sd">        interpolation_factor : int, optional</span>
-<span class="sd">            The interpolation factor, by default 1</span>
-<span class="sd">        cmap : str, optional</span>
-<span class="sd">            The colormap, by default &quot;jet&quot;</span>
-<span class="sd">        show : bool, optional</span>
-<span class="sd">            Boolean to show the plot, by default True</span>
-<span class="sd">        savefig : str, optional</span>
-<span class="sd">            String to save the plot, by default None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span> <span class="o">=</span> <span class="kc">None</span>
-
-
-        <span class="n">spd</span><span class="p">,</span> <span class="n">spd_spin</span><span class="p">,</span> <span class="n">bands_to_keep</span><span class="p">,</span><span class="n">spins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__format_data</span><span class="p">(</span>
-                                                        <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
-                                                        <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                                        <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                                        <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                                        <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                                        <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                                        <span class="n">fermi_tolerance</span><span class="o">=</span><span class="n">fermi_tolerance</span><span class="p">)</span>
-        
-        <span class="n">energy_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">-</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">+</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">iso_surfaces</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">iso_values</span><span class="p">:</span>
-            <span class="n">energy_values</span><span class="o">=</span><span class="n">iso_values</span>
-        <span class="n">e_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">surface_areas</span> <span class="o">=</span> <span class="p">[]</span>
-
-        
-        <span class="k">for</span> <span class="n">e_value</span> <span class="ow">in</span> <span class="n">energy_values</span><span class="p">:</span>
-            <span class="n">fermi_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">spin</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spins</span><span class="p">):</span>
-                <span class="n">fermi_surface3D</span> <span class="o">=</span> <span class="n">FermiSurface3D</span><span class="p">(</span>
-                                            <span class="n">kpoints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
-                                            <span class="n">bands</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,:,</span><span class="n">spin</span><span class="p">],</span>
-                                            <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="n">bands_to_keep</span><span class="p">,</span>
-                                            <span class="n">spd</span><span class="o">=</span><span class="n">spd</span><span class="p">[:,:,:],</span>
-                                            <span class="n">spd_spin</span><span class="o">=</span><span class="n">spd_spin</span><span class="p">,</span>
-                                            <span class="n">colors</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                            <span class="n">fermi</span><span class="o">=</span><span class="n">e_value</span><span class="p">,</span>
-                                            <span class="n">fermi_shift</span> <span class="o">=</span> <span class="n">fermi_shift</span><span class="p">,</span>
-                                            <span class="n">fermi_tolerance</span><span class="o">=</span><span class="n">fermi_tolerance</span><span class="p">,</span>
-                                            <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
-                                            <span class="n">interpolation_factor</span><span class="o">=</span><span class="n">interpolation_factor</span><span class="p">,</span>
-                                            <span class="n">projection_accuracy</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span>
-                                            <span class="n">supercell</span><span class="o">=</span><span class="n">supercell</span><span class="p">,</span>
-                                            <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-                                            <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                            <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                        <span class="p">)</span>
-
-                <span class="n">brillouin_zone</span> <span class="o">=</span> <span class="n">fermi_surface3D</span><span class="o">.</span><span class="n">brillouin_zone</span>
-                <span class="n">fermi_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fermi_surface3D</span><span class="p">)</span>
-
-            <span class="n">fermi_surface</span><span class="o">=</span><span class="kc">None</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">surface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fermi_surfaces</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">fermi_surface</span><span class="o">=</span><span class="n">surface</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">fermi_surface</span><span class="o">+=</span><span class="n">surface</span>
-                
-            <span class="n">surface_areas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fermi_surface</span><span class="o">.</span><span class="n">fermi_surface_area</span><span class="p">)</span>
-            <span class="n">e_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fermi_surface</span><span class="p">)</span>
-
-        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_values</span><span class="p">,</span> <span class="n">surface_areas</span><span class="p">)</span>
-
-        <span class="n">axs</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">)</span>
-        <span class="n">axs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Surface Area (Ang$^{-2}$)&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">savefig</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__format_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                     <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
@@ -1744,7 +1944,7 @@
             <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
+            
             <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">0</span><span class="p">]]</span>
             <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">1</span><span class="p">]]</span>
             <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">2</span><span class="p">]]</span>
@@ -1832,9 +2032,8 @@
                 <span class="s2">&quot;vector_name&quot;</span><span class="p">:</span><span class="n">vector_name</span><span class="p">,</span>
                 <span class="s2">&quot;use_rgba&quot;</span><span class="p">:</span><span class="n">use_rgba</span><span class="p">,</span>
                 <span class="p">}</span>
-
-
         <span class="k">return</span> <span class="n">options_dict</span>
+    
     <span class="c1"># Not used but maybe useful in the future</span>
     <span class="k">def</span> <span class="nf">__common_plotting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                         <span class="n">fermi_surface</span><span class="p">,</span>
@@ -1928,7 +2127,6 @@
                     <span class="n">plotter</span><span class="p">,</span>
                     <span class="n">mesh</span><span class="p">,</span> 
                     <span class="n">options_dict</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span>
-                    <span class="n">show_cross_section_area</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">line_width</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
                     <span class="n">normal</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> 
                     <span class="n">generate_triangles</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1944,11 +2142,14 @@
                     <span class="n">arrow_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
+
+        <span class="c1">#################################################################</span>
+        <span class="c1"># Following code handles the plane clipping</span>
+        <span class="c1">#################################################################</span>
+
         <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">memory_address</span><span class="p">)</span>
 
-        <span class="c1"># print(name)</span>
-        <span class="c1"># if kwargs.get(&#39;scalars&#39;, mesh.active_scalars_name) != &#39;spin&#39;:</span>
-            
+
         <span class="n">rng</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">get_data_range</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scalars&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;clim&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rng&#39;</span><span class="p">,</span> <span class="n">rng</span><span class="p">))</span>
         <span class="n">mesh</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scalars&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">active_scalars_name</span><span class="p">))</span>
@@ -1965,13 +2166,165 @@
         <span class="n">plane_sliced_mesh</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">alg</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
         <span class="n">plotter</span><span class="o">.</span><span class="n">plane_sliced_meshes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane_sliced_mesh</span><span class="p">)</span>
         
+
+        <span class="k">def</span> <span class="nf">callback_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+            <span class="c1"># create the plane for clipping</span>
+            
+            <span class="n">plane</span> <span class="o">=</span> <span class="n">generate_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>
+            <span class="n">alg</span><span class="o">.</span><span class="n">SetCutFunction</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span> <span class="c1"># the cutter to use the plane we made</span>
+            <span class="n">alg</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span> <span class="c1"># Perform the Cut</span>
+            <span class="n">plane_sliced_mesh</span><span class="o">.</span><span class="n">shallow_copy</span><span class="p">(</span><span class="n">alg</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+            <span class="c1"># plotter.add_mesh(plane_sliced_mesh, name=name+&quot;outline&quot;, opacity=0.0, line_width=line_width,show_scalar_bar=False, rgba=options_dict[&#39;use_rgba&#39;])</span>
+            <span class="k">if</span> <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">]:</span>
+                <span class="n">arrows</span> <span class="o">=</span> <span class="n">plane_sliced_mesh</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;vector_name&#39;</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">arrow_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;arrows&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;arrows&#39;</span><span class="p">)</span>
+
+
+        <span class="n">plotter</span><span class="o">.</span><span class="n">add_plane_widget</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">callback_plane</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                              <span class="n">factor</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
+                              <span class="n">color</span><span class="o">=</span><span class="n">widget_color</span><span class="p">,</span> <span class="n">tubing</span><span class="o">=</span><span class="n">tubing</span><span class="p">,</span>
+                              <span class="n">assign_to_axis</span><span class="o">=</span><span class="n">assign_to_axis</span><span class="p">,</span>
+                              <span class="n">origin_translation</span><span class="o">=</span><span class="n">origin_translation</span><span class="p">,</span>
+                              <span class="n">outline_translation</span><span class="o">=</span><span class="n">outline_translation</span><span class="p">,</span>
+                              <span class="n">implicit</span><span class="o">=</span><span class="n">implicit</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
+                              <span class="n">normal_rotation</span><span class="o">=</span><span class="n">normal_rotation</span><span class="p">)</span>
+        
+
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">plane_sliced_mesh</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span><span class="n">rgba</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;use_rgba&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">SetNormal</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="c1"># Call the callback to update scene</span>
+        <span class="n">plane_origin</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetOrigin</span><span class="p">()</span>
+        <span class="n">plane_normal</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetNormal</span><span class="p">()</span>
+        <span class="n">callback_plane</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">plane_origin</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">actor</span>
+
+<span class="k">def</span> <span class="nf">add_custom_box_slice_widget</span><span class="p">(</span>
+                    <span class="n">plotter</span><span class="p">,</span>
+                    <span class="n">mesh</span><span class="p">,</span> 
+                    <span class="n">options_dict</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span>
+                    <span class="n">show_cross_section_area</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">line_width</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+                    <span class="n">normal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> 
+                    <span class="n">generate_triangles</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">widget_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                    <span class="n">assign_to_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">tubing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                    <span class="n">origin_translation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                    <span class="n">origin</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                    <span class="n">outline_translation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                    <span class="n">implicit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">normal_rotation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                    <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span>
+                    <span class="n">arrow_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    
+                    <span class="c1"># box widget options</span>
+                    <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">rotation_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">box_widget_color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                    <span class="n">box_outline_translation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">crinkle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">interaction_event</span><span class="o">=</span><span class="s1">&#39;end&#39;</span><span class="p">,</span>
+
+
+
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="c1">#################################################################</span>
+        <span class="c1"># Following code handles the box clipping</span>
+        <span class="c1">#################################################################</span>
+        
+
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+        <span class="n">mesh</span><span class="p">,</span> <span class="n">algo</span> <span class="o">=</span> <span class="n">algorithm_to_mesh_handler</span><span class="p">(</span>
+            <span class="n">add_ids_algorithm</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">point_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cell_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">memory_address</span><span class="p">)</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">get_data_range</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scalars&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;clim&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rng&#39;</span><span class="p">,</span> <span class="n">rng</span><span class="p">))</span>
+
+        <span class="n">mesh</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scalars&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">active_scalars_name</span><span class="p">))</span>
+
+        <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">outline</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">-outline&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="n">port</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">invert</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">clipper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkBoxClipDataSet</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">merge_points</span><span class="p">:</span>
+            <span class="c1"># vtkBoxClipDataSet uses vtkMergePoints by default</span>
+            <span class="n">clipper</span><span class="o">.</span><span class="n">SetLocator</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkNonMergingPointLocator</span><span class="p">())</span>
+        <span class="n">set_algorithm_input</span><span class="p">(</span><span class="n">clipper</span><span class="p">,</span> <span class="n">algo</span><span class="p">)</span>
+        <span class="n">clipper</span><span class="o">.</span><span class="n">GenerateClippedOutputOn</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">crinkle</span><span class="p">:</span>
+            <span class="n">crinkler</span> <span class="o">=</span> <span class="n">crinkle_algorithm</span><span class="p">(</span><span class="n">clipper</span><span class="o">.</span><span class="n">GetOutputPort</span><span class="p">(</span><span class="n">port</span><span class="p">),</span> <span class="n">algo</span><span class="p">)</span>
+            <span class="n">box_clipped_mesh</span> <span class="o">=</span> <span class="n">_get_output</span><span class="p">(</span><span class="n">crinkler</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">box_clipped_mesh</span> <span class="o">=</span> <span class="n">_get_output</span><span class="p">(</span><span class="n">clipper</span><span class="p">,</span> <span class="n">oport</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+
+        <span class="n">plotter</span><span class="o">.</span><span class="n">box_clipped_meshes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box_clipped_mesh</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">callback_box</span><span class="p">(</span><span class="n">planes</span><span class="p">):</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">planes</span><span class="o">.</span><span class="n">GetNumberOfPlanes</span><span class="p">()):</span>
+                <span class="n">plane</span> <span class="o">=</span> <span class="n">planes</span><span class="o">.</span><span class="n">GetPlane</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetNormal</span><span class="p">())</span>
+                <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">GetOrigin</span><span class="p">())</span>
+
+            <span class="n">clipper</span><span class="o">.</span><span class="n">SetBoxClip</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">)</span>
+            <span class="n">clipper</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">crinkle</span><span class="p">:</span>
+                <span class="n">clipped</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">crinkler</span><span class="o">.</span><span class="n">GetOutputDataObject</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">clipped</span> <span class="o">=</span> <span class="n">_get_output</span><span class="p">(</span><span class="n">clipper</span><span class="p">,</span> <span class="n">oport</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+            <span class="n">box_clipped_mesh</span><span class="o">.</span><span class="n">shallow_copy</span><span class="p">(</span><span class="n">clipped</span><span class="p">)</span>
+
+
+            <span class="c1"># Update plane widget after updating box widget</span>
+            <span class="n">plane_origin</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetOrigin</span><span class="p">()</span>
+            <span class="n">plane_normal</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetNormal</span><span class="p">()</span>
+            <span class="n">callback_plane</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">plane_origin</span><span class="p">)</span>
+
+
+        <span class="c1">#################################################################</span>
+        <span class="c1"># Following code handles the plane clipping</span>
+        <span class="c1">#################################################################</span>
+
+        <span class="n">clipped_box_mesh</span> <span class="o">=</span>  <span class="n">plotter</span><span class="o">.</span><span class="n">box_clipped_meshes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">clipped_box_mesh</span><span class="o">.</span><span class="n">memory_address</span><span class="p">)</span>
+
+        <span class="c1"># print(name)</span>
+        <span class="c1"># if kwargs.get(&#39;scalars&#39;, mesh.active_scalars_name) != &#39;spin&#39;:</span>
+            
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">clipped_box_mesh</span><span class="o">.</span><span class="n">get_data_range</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scalars&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;clim&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rng&#39;</span><span class="p">,</span> <span class="n">rng</span><span class="p">))</span>
+        <span class="n">clipped_box_mesh</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scalars&#39;</span><span class="p">,</span> <span class="n">clipped_box_mesh</span><span class="o">.</span><span class="n">active_scalars_name</span><span class="p">))</span>
+
+        <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">clipped_box_mesh</span><span class="o">.</span><span class="n">outline</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;outline&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;use_rgba&#39;</span><span class="p">])</span>
+
+        <span class="n">alg</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCutter</span><span class="p">()</span> <span class="c1"># Construct the cutter object</span>
+        <span class="n">alg</span><span class="o">.</span><span class="n">SetInputDataObject</span><span class="p">(</span><span class="n">clipped_box_mesh</span><span class="p">)</span> <span class="c1"># Use the grid as the data we desire to cut</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">generate_triangles</span><span class="p">:</span>
+            <span class="n">alg</span><span class="o">.</span><span class="n">GenerateTrianglesOff</span><span class="p">()</span>
+
+    
+        <span class="n">plotter</span><span class="o">.</span><span class="n">plane_sliced_meshes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">plane_sliced_mesh</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">alg</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">())</span>
+        <span class="n">plotter</span><span class="o">.</span><span class="n">plane_sliced_meshes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane_sliced_mesh</span><span class="p">)</span>
+        
         <span class="k">if</span> <span class="n">show_cross_section_area</span><span class="p">:</span>
             <span class="n">user_slice</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_sliced_meshes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">surface</span> <span class="o">=</span> <span class="n">user_slice</span><span class="o">.</span><span class="n">delaunay_2d</span><span class="p">()</span>
             <span class="n">plotter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cross sectional area : </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">+</span><span class="s2">&quot; Ang^-2&quot;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
 
   
-        <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">callback_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
             <span class="c1"># create the plane for clipping</span>
             
             <span class="n">plane</span> <span class="o">=</span> <span class="n">generate_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>
@@ -1996,30 +2349,36 @@
                 <span class="n">plotter</span><span class="o">.</span><span class="n">textActor</span><span class="o">.</span><span class="n">SetText</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
 
-        <span class="c1"># print(mesh.bounds)</span>
-
-        <span class="n">plotter</span><span class="o">.</span><span class="n">add_plane_widget</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
-                              <span class="n">factor</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
+        <span class="n">plotter</span><span class="o">.</span><span class="n">add_plane_widget</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">callback_plane</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                              <span class="n">factor</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="n">normal</span><span class="p">,</span>
                               <span class="n">color</span><span class="o">=</span><span class="n">widget_color</span><span class="p">,</span> <span class="n">tubing</span><span class="o">=</span><span class="n">tubing</span><span class="p">,</span>
                               <span class="n">assign_to_axis</span><span class="o">=</span><span class="n">assign_to_axis</span><span class="p">,</span>
                               <span class="n">origin_translation</span><span class="o">=</span><span class="n">origin_translation</span><span class="p">,</span>
                               <span class="n">outline_translation</span><span class="o">=</span><span class="n">outline_translation</span><span class="p">,</span>
                               <span class="n">implicit</span><span class="o">=</span><span class="n">implicit</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
                               <span class="n">normal_rotation</span><span class="o">=</span><span class="n">normal_rotation</span><span class="p">)</span>
+        
 
-    
+        <span class="n">plotter</span><span class="o">.</span><span class="n">add_box_widget</span><span class="p">(</span>
+            <span class="n">callback</span><span class="o">=</span><span class="n">callback_box</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+            <span class="n">factor</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span>
+            <span class="n">rotation_enabled</span><span class="o">=</span><span class="n">rotation_enabled</span><span class="p">,</span>
+            <span class="n">use_planes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">box_widget_color</span><span class="p">,</span>
+            <span class="n">outline_translation</span><span class="o">=</span><span class="n">box_outline_translation</span><span class="p">,</span>
+            <span class="n">interaction_event</span><span class="o">=</span><span class="n">interaction_event</span><span class="p">,</span>
+        <span class="p">)</span>
+
+       
         <span class="n">actor</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">plane_sliced_mesh</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span><span class="n">rgba</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;use_rgba&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">SetNormal</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
-
-        <span class="c1"># Call the callback to update scene</span>
-        <span class="n">callback</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">actor</span>
     
-<span class="k">def</span> <span class="nf">find_nearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">idx</span>
-
+        <span class="c1"># # Call the callback to update scene</span>
+        <span class="n">plane_origin</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetOrigin</span><span class="p">()</span>
+        <span class="n">plane_normal</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">plane_widgets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetNormal</span><span class="p">()</span>
+        <span class="n">callback_plane</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">plane_origin</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">actor</span>
 </pre></div>
 
             </article>
