@@ -30,7 +30,7 @@ matminer==0.7.4
 matplotlib==3.6.2
 monty==2021.8.17
 mordred==1.2.0
-mpmath==1.2.1
+mpmath==1.3.0
 networkx==3.0
 numpy==1.24.0
 numpydoc==1.5.0
