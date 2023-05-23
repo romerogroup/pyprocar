@@ -1176,7 +1176,7 @@ class Procar(collections.abc.Mapping):
         # (nkpoints,nbands, natom, norbital, nspin)
         # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
         if nspins == 3:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, 1:]
         elif nspins == 2:
             projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
             projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
