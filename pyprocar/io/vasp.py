@@ -64,6 +64,7 @@ class Outcar(collections.abc.Mapping):
         reciprocal_lattice = reciprocal_lattice[:, 3:]
         return reciprocal_lattice
 
+
     @property
     def rotations(self):
         """
@@ -152,8 +153,59 @@ class Outcar(collections.abc.Mapping):
                 R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
                 R = np.round_(R, decimals=3)
                 rotations.append(R)
-        
         return np.array(rotations)
+
+    def get_symmetry_operations(self):
+        with open(self.filename) as f:
+            txt = f.readlines()
+
+        has_new_rotation_format = False
+        i_rotation_lines=[]
+        for i, line in enumerate(txt):
+            if 'isymop' in line:
+                has_new_rotation_format = True
+                i_rotation_lines.append(i)
+            if 'irot' in line:
+                begin_table = i+1
+            if 'Subroutine' in line:
+                end_table = i-1
+
+        n_sym_ops = len(i_rotation_lines)
+        rotations_ops = np.zeros(shape=(n_sym_ops,3,3))
+        gtrans_ops = np.zeros(shape=(n_sym_ops,3))
+        ptrans_ops = np.zeros(shape=(n_sym_ops,3))
+        symmetry_operations = []
+        for i_sym_op, i_rotation_line in enumerate(i_rotation_lines):
+            i_gtrans_line = i_rotation_line + 4
+            i_ptrans_line = i_rotation_line + 6
+
+            # Gets the symmetry translation
+            raw_gtrans_line = txt[i_gtrans_line].split(':')[-1].split()
+            raw_ptrans_line = txt[i_ptrans_line].split(':')[-1].split()
+            gtrans = np.array([float(value) for value in raw_gtrans_line])
+            ptrans = np.array([float(value) for value in raw_ptrans_line])
+
+            # Gets the symmetry rotations
+            rotation=[]
+            raw_rotation_lines = txt[i_rotation_line:i_rotation_line+3]
+            for i,raw_rotation_line in enumerate(raw_rotation_lines):
+                if i ==0:
+                    r_ij = [float(value) for value in raw_rotation_line.split(':')[-1].split()]
+                else:
+                    r_ij = [float(value) for value in raw_rotation_line.split()]
+            
+                rotation.append(r_ij)
+            rotation = np.array(rotation)
+
+            rotations_ops[i_sym_op,:,:] = rotation.T
+            gtrans_ops[i_sym_op,:] = gtrans
+            ptrans_ops[i_sym_op,:] = ptrans
+
+
+            sym_op = (rotation.T,gtrans,ptrans)
+            symmetry_operations.append(sym_op)
+
+        return symmetry_operations
 
     def __contains__(self, x):
         return x in self.variables

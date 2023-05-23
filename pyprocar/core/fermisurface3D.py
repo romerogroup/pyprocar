@@ -206,7 +206,7 @@ class FermiSurface3D(Surface):
                     raise Exception("Could not find any fermi surfaces")
                 continue
             else:    
-                full_isosurface += isosurface_band_copy
+                full_isosurface.merge(isosurface_band_copy, merge_points=False, inplace=True) 
 
             color_band_dict.update({f"band_{iband_with_surface}": {"color" : band_colors[iband_with_surface,:]} })
             band_color = np.array([band_colors[iband_with_surface,:]]*len(isosurface_band.points[:,0]))
