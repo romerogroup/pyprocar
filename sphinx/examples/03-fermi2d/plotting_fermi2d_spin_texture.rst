@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
@@ -49,7 +49,7 @@ importing pyprocar and specifying local data_dir
 
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 
 
@@ -74,11 +74,11 @@ But you can change this by setting arrow_projection to one of the following
 
 
 
-    pyprocar.fermi2D(code = 'qe',
+    pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    spin_texture=True,
                    arrow_projection='x',
-                   arrow_size =15,
+                   arrow_size =0.5,
                    arrow_density=10,
                    color_bar=True)
 
@@ -104,7 +104,7 @@ But you can change this by setting arrow_projection to one of the following
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -124,7 +124,7 @@ But you can change this by setting arrow_projection to one of the following
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\non-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -137,7 +137,9 @@ But you can change this by setting arrow_projection to one of the following
     spin_texture    :  True
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [14 15 16 17]
+    Useful band indices for spin-0 : [4 5 6 7 8 9]
+    C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\pyprocar\core\fermisurface.py:326: UserWarning: No contour levels were found within the data range.
+      plt.contour(
 
 
 
@@ -154,11 +156,11 @@ Spin Texture single color
 
 
 
-    pyprocar.fermi2D(code = 'qe',
+    pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    spin_texture=True,
                    arrow_color = 'blue',
-                   arrow_size =15,
+                   arrow_size =0.5,
                    arrow_density=10)
 
 
@@ -184,7 +186,7 @@ Spin Texture single color
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -204,7 +206,7 @@ Spin Texture single color
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\non-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -217,7 +219,9 @@ Spin Texture single color
     spin_texture    :  True
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [14 15 16 17]
+    Useful band indices for spin-0 : [4 5 6 7 8 9]
+    C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\pyprocar\core\fermisurface.py:326: UserWarning: No contour levels were found within the data range.
+      plt.contour(
 
 
 
@@ -236,14 +240,14 @@ Also you can specify the colors of the bands as well with band_colors
 .. code-block:: default
 
 
-    band_indices = [[14,15]]
+    band_indices = [[6,7]]
     band_colors = [['blue','red']]
-    pyprocar.fermi2D(code = 'qe', 
+    pyprocar.fermi2D(code = 'vasp', 
                    mode='plain_bands',
                    band_indices = band_indices,
                    band_colors=band_colors,
                    spin_texture=True,
-                   arrow_size =15,
+                   arrow_size =0.5,
                    arrow_density=10,
                    dirname=data_dir)
 
@@ -266,7 +270,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -286,8 +290,8 @@ Also you can specify the colors of the bands as well with band_colors
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\non-colinear\fermi
-    bands           :  [[14, 15]]
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    bands           :  [[6, 7]]
     atoms           :  [-1]
     orbitals        :  [-1]
     spin comp.      :  None
@@ -299,7 +303,7 @@ Also you can specify the colors of the bands as well with band_colors
     spin_texture    :  True
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [14 15 16 17]
+    Useful band indices for spin-0 : [4 5 6 7 8 9]
 
 
 
@@ -307,7 +311,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.938 seconds)
+   **Total running time of the script:** ( 0 minutes  17.449 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

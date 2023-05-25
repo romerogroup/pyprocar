@@ -14,7 +14,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     vasp_data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 

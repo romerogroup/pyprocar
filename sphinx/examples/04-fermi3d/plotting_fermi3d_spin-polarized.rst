@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='spin-polarized-colinear',
                                 calc_type='fermi')
 
@@ -78,13 +78,13 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}fermi"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}fermi"
 
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
     fermiHandler = pyprocar.FermiHandler(
-                                        code="qe",
+                                        code="vasp",
                                         dirname=data_dir,
                                         apply_symmetry=True)
 
@@ -131,8 +131,8 @@ Plain mode
 
  .. code-block:: none
 
-    Fermi Energy : 18.042041123610034
-    Bands near the fermi energy : [6, 7, 8, 9]
+    Fermi Energy : 5.599
+    Bands near the fermi energy : [2, 3, 4, 5]
 
 
 
@@ -194,10 +194,10 @@ Parametric mode
 
  .. code-block:: none
 
-    Fermi Energy : 18.042041123610034
-    Bands near the fermi energy : [6, 7, 8, 9]
-    Fermi Energy : 18.042041123610034
-    Bands near the fermi energy : [6, 7, 8, 9]
+    Fermi Energy : 5.599
+    Bands near the fermi energy : [2, 3, 4, 5]
+    Fermi Energy : 5.599
+    Bands near the fermi energy : [2, 3, 4, 5]
 
 
 
@@ -205,7 +205,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.575 seconds)
+   **Total running time of the script:** ( 0 minutes  7.932 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin-polarized.py:

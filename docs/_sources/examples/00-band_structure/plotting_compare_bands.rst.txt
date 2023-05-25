@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     vasp_data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 
@@ -95,14 +95,14 @@ This object has information about the band structure and has matplotlib.axes.Axe
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2D9E2D00>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC2484D340>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.597 seconds)
+   **Total running time of the script:** ( 0 minutes  0.616 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_compare_bands.py:

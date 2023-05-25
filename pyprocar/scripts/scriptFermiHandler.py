@@ -1549,7 +1549,7 @@ class FermiHandler:
                     spin_bands_projections.append(projected[:,iband,ispin])
                 spd.append( spin_bands_projections)
             spd = np.array(spd).T
-            
+            spins = np.arange(spd.shape[2])
         else:
             spd = np.zeros(shape = (self.ebs.nkpoints,len(bands_to_keep),len(spins)))
 
@@ -1564,9 +1564,9 @@ class FermiHandler:
             ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
             ebsZ.projected = ebsZ.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
             
-            ebsX.projected = ebsX.projected[:,:,[0]]
-            ebsY.projected = ebsY.projected[:,:,[1]]
-            ebsZ.projected = ebsZ.projected[:,:,[2]]
+            ebsX.projected = ebsX.projected[:,:,[1]]
+            ebsY.projected = ebsY.projected[:,:,[2]]
+            ebsZ.projected = ebsZ.projected[:,:,[3]]
 
 
             for iband in bands_to_keep:

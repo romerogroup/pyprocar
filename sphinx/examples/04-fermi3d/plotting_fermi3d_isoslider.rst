@@ -150,7 +150,7 @@ Plain mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.869 seconds)
+   **Total running time of the script:** ( 0 minutes  22.394 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_isoslider.py:

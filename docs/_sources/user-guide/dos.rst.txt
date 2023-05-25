@@ -18,7 +18,8 @@ All the arguments invloved in this function are exmplaed in the API of this func
 
 This mode plots the basic Total Density of States of the structure. This mode is set as the default mode of ``dosplot()``.
 
->>>  pyprocar.dosplot(filename='vasprun.xml',
+>>>  pyprocar.dosplot(code='vasp',
+...                   dirname='vasp_dir',
 ...                   mode='plain',
 ...                   elimit=[-4, 4],
 ...                   orientation='horizontal',
@@ -35,7 +36,8 @@ The following will be the change in usage of ``orientation``, and the choice of 
 
 
 
->>>  pyprocar.dosplot(filename='vasprun.xml',
+>>>  pyprocar.dosplot(code='vasp',
+...                   dirname='vasp_dir',
 ...                   mode='plain',
 ...                   elimit=[-4, 4],
 ...                   spins=[0],
@@ -55,7 +57,8 @@ The following will be the change in usage of ``orientation``, and the choice of 
 This mode will use color coding to illustrate the projection of atoms and orbitals asked to be projected. The following will plot shows the projection of p orbitals(``orbitals=[1,2,3]``) of O(``atoms=[2,3,4]``) in SrVO\ :sub:`3`\
 
 
->>>  pyprocar.dosplot(filename='vasprun.xml',
+>>>  pyprocar.dosplot(code='vasp',
+...                   dirname='vasp_dir',
 ...                   mode='parametric',
 ...                   orbitals=[1, 2, 3],
 ...                   atoms=[2, 3, 4],
@@ -73,7 +76,8 @@ This mode will use color coding to illustrate the projection of atoms and orbita
 This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(``orbitals=[1,2,3]``) of O(``atoms=[2,3,4]``) in SrVO\ :sub:`3`\
 
 
->>>  pyprocar.bandsdosplot(filename='vasprun.xml',
+>>>  pyprocar.bandsdosplot(code='vasp',
+...                        dirname='vasp_dir',
 ...                        mode='parametric_line',
 ...                        orbitals=[1, 2, 3],
 ...                        atoms=[2, 3, 4],
@@ -91,7 +95,8 @@ This mode might be the most familiar mode to the users. This mode will use curve
 This mode plots the contribution of the species and their specified orbitals as stacked curves with filled areas under the curves. The following example represents the stacked projected DOS of d orbitals of Sr(Sr=[4,5,6,7,8]), p orbitals of O(O=[1,2,3]) and the s and p orbitals of V(V=[0,1,2,3]). In this example we have specified colors to have an example for not using the default colors. 
 
 
->>>  pyprocar.dosplot(filename='vasprun.xml',
+>>>  pyprocar.dosplot(code='vasp',
+...                   dirname='vasp_dir',
 ...                   mode='stack',
 ...                   colors=['lawngreen', 'orangered', 'royalblue'],
 ...                   items=dict(Sr=[4, 5, 6, 7, 8], O=[1, 2, 3], V=[0, 1, 2, 3]),
@@ -108,7 +113,8 @@ This mode plots the contribution of the species and their specified orbitals as 
 This mode is a more specified version of ``mode=='stack'``. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if ``orbitals=[1,2,3]``, PyProcar will plot all the p orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)
 
 
->>>  pyprocar.dosplot(filename=vasprun,
+>>>  pyprocar.dosplot(code='vasp',
+...                   dirname='vasp_dir',
 ...                   mode='stack_species',
 ...                   orientation='horizontal',
 ...                   elimit=[-4, 4],
@@ -123,7 +129,8 @@ This mode is a more specified version of ``mode=='stack'``. This mode will plot 
 This mode is another variation of ``mode=='stack'``, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(``atoms=[2, 3, 4]``)
 
 
->>>  pyprocar.dosplot(filename=vasprun,
+>>>  pyprocar.dosplot(code='vasp',
+...                   dirname='vasp_dir',
 ...                   mode='stack_orbitals',
 ...                   atoms=[2, 3, 4],
 ...                   orientation='horizontal',

@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='spin-polarized-colinear',
                                 calc_type='fermi')
 
@@ -49,7 +49,7 @@ importing pyprocar and specifying local data_dir
 
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}fermi"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}fermi"
 
 
 
@@ -71,7 +71,7 @@ Plain mode
 .. code-block:: default
 
 
-    pyprocar.fermi2D(code = 'qe', 
+    pyprocar.fermi2D(code = 'vasp', 
                    mode='plain',
                    dirname=data_dir)
 
@@ -97,7 +97,7 @@ Plain mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -117,7 +117,7 @@ Plain mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -130,8 +130,8 @@ Plain mode
     spin_texture    :  False
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [6 7 8 9]
-    Useful band indices for spin-1 : [6 7]
+    Useful band indices for spin-0 : [2 3 4 5]
+    Useful band indices for spin-1 : [2 3]
 
 
 
@@ -148,7 +148,7 @@ plain_bands mode
 .. code-block:: default
 
 
-    pyprocar.fermi2D(code = 'qe', 
+    pyprocar.fermi2D(code = 'vasp', 
                    mode='plain_bands',
                    add_legend=True,
                    dirname=data_dir)
@@ -178,7 +178,7 @@ plain_bands mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -198,7 +198,7 @@ plain_bands mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [-1]
     orbitals        :  [-1]
@@ -211,8 +211,8 @@ plain_bands mode
     spin_texture    :  False
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [6 7 8 9]
-    Useful band indices for spin-1 : [6 7]
+    Useful band indices for spin-0 : [2 3 4 5]
+    Useful band indices for spin-1 : [2 3]
 
 
 
@@ -233,7 +233,7 @@ Does not work. Contact developers
     atoms=[0]
     orbitals=[4,5,6,7,8]
     spins=[0,1]
-    pyprocar.fermi2D(code = 'qe',
+    pyprocar.fermi2D(code = 'vasp',
                    mode='parametric', 
                     atoms=atoms,
                     orbitals=orbitals,
@@ -264,7 +264,7 @@ Does not work. Contact developers
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -284,7 +284,7 @@ Does not work. Contact developers
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [0]
     orbitals        :  [4, 5, 6, 7, 8]
@@ -297,8 +297,8 @@ Does not work. Contact developers
     spin_texture    :  False
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [6 7 8 9]
-    Useful band indices for spin-1 : [6 7]
+    Useful band indices for spin-0 : [2 3 4 5]
+    Useful band indices for spin-1 : [2 3]
 
 
 
@@ -316,9 +316,9 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. code-block:: default
 
-    band_indices = [[6,7],[]]
+    band_indices = [[4,5],[]]
     band_colors = [['blue','navy'], []]
-    pyprocar.fermi2D(code = 'qe', 
+    pyprocar.fermi2D(code = 'vasp', 
                    mode='plain_bands',
                    band_indices = band_indices,
                    band_colors=band_colors,
@@ -344,7 +344,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 5.6.5 created on Jun 10th, 2021
+    Version 6.0.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -364,8 +364,8 @@ Also you can specify the colors of the bands as well with band_colors
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\qe\spin-polarized-colinear\fermi
-    bands           :  [[6, 7], []]
+    dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
+    bands           :  [[4, 5], []]
     atoms           :  [-1]
     orbitals        :  [-1]
     spin comp.      :  None
@@ -377,8 +377,8 @@ Also you can specify the colors of the bands as well with band_colors
     spin_texture    :  False
     no_arrows       :  False
     _____________________________________________________
-    Useful band indices for spin-0 : [6 7 8 9]
-    Useful band indices for spin-1 : [6 7]
+    Useful band indices for spin-0 : [2 3 4 5]
+    Useful band indices for spin-1 : [2 3]
 
 
 
@@ -386,7 +386,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.581 seconds)
+   **Total running time of the script:** ( 0 minutes  5.799 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

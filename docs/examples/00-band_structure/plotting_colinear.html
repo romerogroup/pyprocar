@@ -448,7 +448,7 @@ to download the full example code</p>
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-spin-polarized&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;bands&#39;</span><span class="p">)</span>
 </pre></div>
@@ -460,18 +460,18 @@ to download the full example code</p>
 
 
 <span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
 </pre></div>
 </div>
 <section id="plain-mode">
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_001.png" srcset="../../_images/sphx_glr_plotting_colinear_001.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2EDDA2E0&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_001.png" srcset="../../_images/sphx_glr_plotting_colinear_001.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24678100&gt;
 </pre></div>
 </div>
 </section>
@@ -483,7 +483,7 @@ to download the full example code</p>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
@@ -493,7 +493,7 @@ to download the full example code</p>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_002.png" srcset="../../_images/sphx_glr_plotting_colinear_002.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E480130&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_002.png" srcset="../../_images/sphx_glr_plotting_colinear_002.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24745490&gt;
 </pre></div>
 </div>
 </section>
@@ -505,7 +505,7 @@ to download the full example code</p>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
@@ -515,7 +515,7 @@ to download the full example code</p>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_003.png" srcset="../../_images/sphx_glr_plotting_colinear_003.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2D932850&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_003.png" srcset="../../_images/sphx_glr_plotting_colinear_003.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC2480CFA0&gt;
 </pre></div>
 </div>
 </section>
@@ -526,7 +526,7 @@ to download the full example code</p>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
@@ -536,7 +536,7 @@ to download the full example code</p>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_004.png" srcset="../../_images/sphx_glr_plotting_colinear_004.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E122C10&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_004.png" srcset="../../_images/sphx_glr_plotting_colinear_004.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24E27100&gt;
 </pre></div>
 </div>
 </section>
@@ -546,14 +546,14 @@ to download the full example code</p>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_species&#39;</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_005.png" srcset="../../_images/sphx_glr_plotting_colinear_005.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DD773A0&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_005.png" srcset="../../_images/sphx_glr_plotting_colinear_005.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24965640&gt;
 </pre></div>
 </div>
 </section>
@@ -562,14 +562,14 @@ to download the full example code</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_orbitals&#39;</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_006.png" srcset="../../_images/sphx_glr_plotting_colinear_006.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB31D91BB0&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_006.png" srcset="../../_images/sphx_glr_plotting_colinear_006.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24994BB0&gt;
 </pre></div>
 </div>
 </section>
@@ -577,29 +577,29 @@ to download the full example code</p>
 <h2>overlay mode<a class="headerlink" href="#overlay-mode" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_007.png" srcset="../../_images/sphx_glr_plotting_colinear_007.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2F6EF5E0&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_007.png" srcset="../../_images/sphx_glr_plotting_colinear_007.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC2516DE80&gt;
 </pre></div>
 </div>
 <section id="overlay-mode-by-orbital-names">
 <h3>overlay mode by orbital names<a class="headerlink" href="#overlay-mode-by-orbital-names" title="Permalink to this heading">#</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span><span class="s1">&#39;d&#39;</span><span class="p">]}</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_colinear_008.png" srcset="../../_images/sphx_glr_plotting_colinear_008.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2D99D700&gt;
+<img src="../../_images/sphx_glr_plotting_colinear_008.png" srcset="../../_images/sphx_glr_plotting_colinear_008.png" alt="plotting colinear" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC244D95E0&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.136 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.820 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plotting-colinear-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/13a0cd26fad25e4b8b28a7959413daf0/plotting_colinear.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_colinear.py</span></code></a></p>

@@ -39,7 +39,7 @@ data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.
 #
 atoms=[0]
 orbitals=[4,5,6,7,8]
-spins=[0,1,2]
+spins=[0]
 
 pyprocar.dosplot(
                 code='vasp', 

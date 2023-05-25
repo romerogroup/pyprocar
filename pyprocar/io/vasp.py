@@ -1156,7 +1156,7 @@ class Procar(collections.abc.Mapping):
         nbands = spd.shape[1]
         norbitals = spd.shape[4] - 2
         if spd.shape[2] == 4:
-            nspins = 3
+            nspins = 4
         else:
             nspins = spd.shape[2]
         if nspins == 2:
@@ -1176,7 +1176,7 @@ class Procar(collections.abc.Mapping):
         # (nkpoints,nbands, natom, norbital, nspin)
         # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
         if nspins == 3:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, 1:]
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
         elif nspins == 2:
             projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
             projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
@@ -1342,10 +1342,6 @@ class VaspXML(collections.abc.Mapping):
                                 "spin 2": "Spin-x",
                                 "spin 3": "Spin-y", 
                                 "spin 4": "Spin-z"}
-            # self.spins_dict = {"spin 4": "Spin-Total", 
-            #                     "spin 1": "Spin-x",
-            #                     "spin 2": "Spin-y", 
-            #                     "spin 3": "Spin-z"}
         else:
             self.is_noncolinear = False
             self.spins_dict = {"spin 1": "Spin-up", "spin 2": "Spin-down"}
@@ -1518,8 +1514,9 @@ class VaspXML(collections.abc.Mapping):
                             ispin
                         ][ispin]
                     )[:, 1:]
-                if 'Spin-Total' in list(dos_projected[name].keys()):
-                    del dos_projected[name]['Spin-Total']
+
+                # if 'Spin-Total' in list(dos_projected[name].keys()):
+                #     del dos_projected[name]['Spin-Total']
             return (
                 dos_projected,
                 self.data["general"]["dos"]["partial"]["array"]["info"],
