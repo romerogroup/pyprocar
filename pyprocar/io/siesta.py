@@ -11,12 +11,16 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
-
+from warnings import warn
 
 HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class SiestaParser():
     def __init__(self,
-                    fdf_file:str ):
+                    fdf_file:str = None,
+                    proj_file:str = "atom_proj.projs",
+                    efermi:float = None,
+                    out_file:str = None
+        ):
         """The class is used to parse information in a siesta calculation
 
         Parameters
@@ -25,17 +29,32 @@ class SiestaParser():
             The .fdf file that has the inputs for the Siesta calculation
         """
 
-        self.dirname = os.path.dirname(fdf_file)
-
         # Parse some initial information
         # This contains kpath info, prefix for files, and structure info
         self._parse_fdf(fdf_file=fdf_file)
+        self._parse_structure()
+        if efermi is None:
+            self._parse_out(out_file=out_file)
 
         # parses the bands file. This will initiate the bands array
+        self.dirname = os.path.dirname(self.fdf_file) or '.'
         self._parse_bands(bands_file=f'{self.dirname}{os.sep}{self.prefix}.bands')
 
 
         # self._parse_struct_out(struct_out_file=f"{self.prefix}{os.sep}STRUCT_OUT")
+        
+        if os.path.exists(proj_file):
+            self._parse_projections(proj_file)
+
+        self.ebs = ElectronicBandStructure(
+            kpoints=self.kpoints,
+            bands=self.bands,
+            projected=self._spd2projected(self.spd),
+            efermi=self.efermi,
+            kpath=self.kpath,
+            reciprocal_lattice=self.reciprocal_lattice
+        )
+
 
     def _parse_fdf(self,fdf_file):
         """A helper method to parse the infromation inside the fdf file
@@ -50,14 +69,22 @@ class SiestaParser():
         None
             None
         """
-        with open(fdf_file) as f:
+        if fdf_file is None:
+            try:
+                self.fdf_file = [f for f in os.listdir() if '.fdf' in f][0]
+            except IndexError:
+                raise FileNotFoundError("The .fdf file could not be found.")
+        else:
+            self.fdf_file = fdf_file
+
+        with open(self.fdf_file, 'r') as f:
             fdf_text = f.read()
 
-        self.prefix = re.findall('SystemLabel ([0-9A-Za-z]*)' ,fdf_text)[0]
+        self.prefix = re.findall(r'SystemLabel\s*(.*)' , fdf_text)[0]
 
-        self._parse_direct_lattice(fdf_text=fdf_text)
-        self._parse_atomic_positions(fdf_text=fdf_text)
-        self._create_structure()
+        #self._parse_direct_lattice(fdf_text=fdf_text)
+        #self._parse_atomic_positions(fdf_text=fdf_text)
+        #self._create_structure()
 
         is_bands_calc = len(re.findall("%block (BandLines)", fdf_text)) == 1
         if is_bands_calc:
@@ -68,6 +95,33 @@ class SiestaParser():
             self._parse_dos_info(fdf_text=fdf_text)
 
         return None
+
+    def _parse_out(self, out_file):
+
+        if out_file is None:
+            try:
+                self.out_file = [f for f in os.listdir() if '.out' in f][0]
+            except IndexError:
+                warn(
+                "WARNING: No output file was provided or could be found. Setting efermi = 0"
+                )
+                self.efermi = 0.0
+                return None
+        else:
+            self.out_file = out_file
+
+        with open(self.out_file, 'r') as f:
+            out_text = f.read()
+
+        try:
+            efermi = re.findall(r'Fermi =\s*(.*)', out_text)[0]
+        except IndexError:
+            warn(
+                "WARNING: Failed to read the output file. Setting efermi = 0"
+            )
+            efermi = 0.0
+        self.efermi = float(efermi)
+
 
     def _parse_kpath(self,fdf_text):
         """
@@ -155,6 +209,7 @@ class SiestaParser():
             for j, coord in enumerate(raw_vec.split()):
                 direct_lattice[i,j] = float(coord)
         self.direct_lattice=direct_lattice
+        self.reciprocal_lattice = 2*np.pi* np.linalg.inv( direct_lattice ).T
         return None
 
     def _parse_atomic_positions(self,fdf_text):
@@ -223,6 +278,28 @@ class SiestaParser():
 
         return None
 
+    def _parse_structure(self):
+
+        from ase.data import atomic_numbers
+        atomic_symbols = {key: value for value, key in atomic_numbers.items()}
+
+        print(self.prefix)
+        filename = f'{self.prefix}.STRUCT_OUT'
+
+        cell = np.loadtxt(filename, max_rows=3)
+        self.reciprocal_lattice = 2*np.pi* np.linalg.inv( cell ).T
+
+        raw_data = np.loadtxt(filename, skiprows=4).reshape((-1, 5))
+        numbers = raw_data[:, 1]
+        positions = raw_data[:, (2, 3, 4)]
+        atom_list = [atomic_symbols[x] for x in numbers]
+
+        self.structure = Structure(
+            atoms=atom_list,
+            lattice=cell,
+            fractional_coordinates=positions
+        )
+
     def _parse_dos_info(self,fdf_text):
         """
         A helper method to parse the density of states information
@@ -289,7 +366,88 @@ class SiestaParser():
         self.bands=bands
         return None
 
-        
-            
+    def _parse_projections(self, proj_file):
 
+        with open(proj_file, 'r') as f:
+            file_str = f.read().replace('*', '')
+
+        nkpoints, nbands, nspin, natoms, norbitals = [int(x) for x in file_str.split('\n')[1].split()]
+
+        kpoints = re.findall(r"point:(.+)", file_str)
+        kpoints = [x.split() for x in kpoints]
+        kpoints = np.array(kpoints, dtype=float)
+        self.kpoints = kpoints[:, (1, 2, 3)]
+
+        spd = re.findall(r"s      py.+([-.\d\seto]+)", file_str)
+        spd = [x.split() for x in spd]
+        spd = np.array(spd, dtype=float)
+        spd = spd.reshape((nkpoints, nbands, nspin, natoms, norbitals+2))
+        tot = np.sum(spd, axis=-2).reshape((nkpoints, nbands, nspin, 1, norbitals+2))
+
+        self.spd = np.concatenate((spd, tot), axis=3)
+
+    def _spd2projected(self, spd, nprinciples=1):
+        """
+        Helpermethod to project the spd array to the projected array 
+        which will be fed into pyprocar.coreElectronicBandStructure object
+
+        Parameters
+        ----------
+        spd : np.ndarray
+            The spd array from the earlier parse. This has a structure simlar to the PROCAR output in vasp
+            Has the shape [n_kpoints,n_band,n_spins,n-orbital,n_atoms]
+        nprinciples : int, optional
+            The prinicipal quantum numbers, by default 1
+
+        Returns
+        -------
+        np.ndarray
+            The projected array. Has the shape [n_kpoints,n_band,n_atom,n_principal,n-orbital,n_spin]
+        """
+        # This function is for VASP
+        # non-pol and colinear
+        # spd is formed as (nkpoints,nbands, nspin, natom+1, norbital+2)
+        # natom+1 > last column is total
+        # norbital+2 > 1st column is the number of atom last is total
+        # non-colinear
+        # spd is formed as (nkpoints,nbands, nspin +1 , natom+1, norbital+2)
+        # natom+1 > last column is total
+        # norbital+2 > 1st column is the number of atom last is total
+        # nspin +1 > last column is total
+        if spd is None:
+            return None
+        natoms = spd.shape[3] - 1
         
+        nkpoints = spd.shape[0]
+
+        nbands = spd.shape[1]
+        norbitals = spd.shape[4] - 2
+        if spd.shape[2] == 4:
+            nspins = 3
+        else:
+            nspins = spd.shape[2]
+        if nspins == 2:
+            nbands = int(spd.shape[1] / 2)
+        else:
+            nbands = spd.shape[1]
+        projected = np.zeros(
+            shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
+            dtype=spd.dtype,
+        )
+
+        temp_spd = spd.copy()
+        # (nkpoints,nbands, nspin, natom, norbital)
+        temp_spd = np.swapaxes(temp_spd, 2, 4)
+        # (nkpoints,nbands, norbital , natom , nspin)
+        temp_spd = np.swapaxes(temp_spd, 2, 3)
+        # (nkpoints,nbands, natom, norbital, nspin)
+        # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
+        if nspins == 3:
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
+        elif nspins == 2:
+            projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
+            projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
+        else:
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+
+        return projected

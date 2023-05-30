@@ -162,14 +162,12 @@ class Parser:
             None
         """
         
-        parser = siesta.SiestaParser(
-                            fdf_filename = f"{self.dir}{os.sep}SIESTA.fdf",
-                            )
+        parser = siesta.SiestaParser()
 
         self.ebs = parser.ebs
         self.kpath = parser.kpath
         self.structure = parser.structure
-        self.dos = parser.dos
+        #self.dos = parser.dos
 
         return None
 

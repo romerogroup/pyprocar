@@ -108,6 +108,7 @@ class Outcar(collections.abc.Mapping):
                 rotation = np.array(rotation)
                 rotations.append(rotation.T)
         else:
+            print(end_table, begin_table)
             operators = np.zeros((end_table-begin_table, 9))
             for i, line in enumerate(txt[begin_table:end_table]):
                 str_list = line.split()
