@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
@@ -78,12 +78,12 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
     fermiHandler = pyprocar.FermiHandler(
-                                        code="qe",
+                                        code="vasp",
                                         dirname=data_dir,
                                         apply_symmetry=True)
 
@@ -104,7 +104,7 @@ Cross section
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-82
+.. GENERATED FROM PYTHON SOURCE LINES 53-81
 
 .. code-block:: default
 
@@ -127,7 +127,6 @@ Cross section
     #save_2d_slice=''
 
     fermiHandler.plot_fermi_cross_section(
-                                  show_cross_section_area=show_cross_section_area,
                                   slice_normal=slice_normal,
                                   slice_origin=slice_origin,
                                   line_width=line_width,
@@ -150,20 +149,20 @@ Cross section
 
  .. code-block:: none
 
-    Fermi Energy : 18.054241046313987
-    Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
+    Fermi Energy : 5.5922
+    Bands near the fermi energy : [4, 5, 6, 7, 8, 9]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-87
+.. GENERATED FROM PYTHON SOURCE LINES 82-86
 
 Cross section. Save slice
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-109
+.. GENERATED FROM PYTHON SOURCE LINES 86-107
 
 .. code-block:: default
 
@@ -177,7 +176,6 @@ Cross section. Save slice
     save_2d_slice='2d_slice.png'
 
     fermiHandler.plot_fermi_cross_section(
-                                  show_cross_section_area=show_cross_section_area,
                                   slice_normal=slice_normal,
                                   slice_origin=slice_origin,
                                   line_width=line_width,
@@ -214,8 +212,8 @@ Cross section. Save slice
 
  .. code-block:: none
 
-    Fermi Energy : 18.054241046313987
-    Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
+    Fermi Energy : 5.5922
+    Bands near the fermi energy : [4, 5, 6, 7, 8, 9]
 
 
 
@@ -223,7 +221,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.836 seconds)
+   **Total running time of the script:** ( 0 minutes  13.911 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_cross_section.py:

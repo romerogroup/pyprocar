@@ -66,7 +66,7 @@ fermiHandler = pyprocar.FermiHandler(
 
 
 
-fermiHandler.plot_fermi_cross_section(
+fermiHandler.plot_fermi_cross_section_box_widget(
                             show_cross_section_area=True,
                             bands=[5],
                             transparent_mesh=True,
@@ -89,7 +89,7 @@ fermiHandler.plot_fermi_cross_section(
 # 
 # 
 
-fermiHandler.plot_fermi_cross_section(
+fermiHandler.plot_fermi_cross_section_box_widget(
                                 show_cross_section_area=True,
                                 bands=[5],
                                 transparent_mesh=True,
@@ -113,7 +113,7 @@ fermiHandler.plot_fermi_cross_section(
 # 
 # 
 
-fermiHandler.plot_fermi_cross_section(
+fermiHandler.plot_fermi_cross_section_box_widget(
                                 show_cross_section_area=True,
                                 bands=[5],
                                 transparent_mesh=True,

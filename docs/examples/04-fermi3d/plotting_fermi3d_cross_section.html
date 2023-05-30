@@ -448,7 +448,7 @@ to download the full example code</p>
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-colinear&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
 </pre></div>
@@ -467,12 +467,12 @@ to download the full example code</p>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
 
 
 <span class="c1"># First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot</span>
 <span class="n">fermiHandler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">FermiHandler</span><span class="p">(</span>
-                                    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;qe&quot;</span><span class="p">,</span>
+                                    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
                                     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                                     <span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -497,7 +497,6 @@ to download the full example code</p>
 <span class="c1">#save_2d_slice=&#39;&#39;</span>
 
 <span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section</span><span class="p">(</span>
-                              <span class="n">show_cross_section_area</span><span class="o">=</span><span class="n">show_cross_section_area</span><span class="p">,</span>
                               <span class="n">slice_normal</span><span class="o">=</span><span class="n">slice_normal</span><span class="p">,</span>
                               <span class="n">slice_origin</span><span class="o">=</span><span class="n">slice_origin</span><span class="p">,</span>
                               <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
@@ -508,8 +507,8 @@ to download the full example code</p>
                               <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_fermi3d_cross_section_001.png" srcset="../../_images/sphx_glr_plotting_fermi3d_cross_section_001.png" alt="plotting fermi3d cross section" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 18.054241046313987
-Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
+<img src="../../_images/sphx_glr_plotting_fermi3d_cross_section_001.png" srcset="../../_images/sphx_glr_plotting_fermi3d_cross_section_001.png" alt="plotting fermi3d cross section" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 5.5922
+Bands near the fermi energy : [4, 5, 6, 7, 8, 9]
 </pre></div>
 </div>
 </section>
@@ -524,7 +523,6 @@ Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
 <span class="n">save_2d_slice</span><span class="o">=</span><span class="s1">&#39;2d_slice.png&#39;</span>
 
 <span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section</span><span class="p">(</span>
-                              <span class="n">show_cross_section_area</span><span class="o">=</span><span class="n">show_cross_section_area</span><span class="p">,</span>
                               <span class="n">slice_normal</span><span class="o">=</span><span class="n">slice_normal</span><span class="p">,</span>
                               <span class="n">slice_origin</span><span class="o">=</span><span class="n">slice_origin</span><span class="p">,</span>
                               <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
@@ -540,11 +538,11 @@ Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
 <li><img src="../../_images/sphx_glr_plotting_fermi3d_cross_section_002.png" srcset="../../_images/sphx_glr_plotting_fermi3d_cross_section_002.png" alt="plotting fermi3d cross section" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plotting_fermi3d_cross_section_003.png" srcset="../../_images/sphx_glr_plotting_fermi3d_cross_section_003.png" alt="plotting fermi3d cross section" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 18.054241046313987
-Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 5.5922
+Bands near the fermi energy : [4, 5, 6, 7, 8, 9]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  10.836 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.911 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plotting-fermi3d-cross-section-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e3b2204fd503e1e470fdd73b4e9d2d73/plotting_fermi3d_cross_section.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_fermi3d_cross_section.py</span></code></a></p>

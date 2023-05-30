@@ -239,7 +239,7 @@ class QEParser():
         for ienergy, raw_dos_block_by_energy in enumerate(raw_dos_blocks_by_energy):
             energies[ienergy] = float(raw_dos_block_by_energy.split()[0])
 
-            # Use if self.n_spin==4
+            
             # Covers colinear spin-polarized. This is because these is a difference in energies
             if self.n_spin == 2:
                 total_dos[:,ienergy] = [ float(val) for val in raw_dos_block_by_energy.split()[-self.n_spin:] ] 
@@ -328,7 +328,7 @@ class QEParser():
                     # Orbital_num is the index in the final array, i_orbital is the index in the raw_data
                     for i_orbital,orbital_num in enumerate(orbital_nums):
                         # Loop through spins
-                        for i_spin in range(self.n_spin):
+                        for i_spin,spin_comp in enumerate([1,2,3]):
                             # Totals
                             # if i_spin == 0:
                             #     projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_energy_block.split('\n')[0].split()[2+i_orbital])
@@ -336,10 +336,8 @@ class QEParser():
                             # else:
                             #     projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_energy_block.split('\n')[i_spin+1].split()[1+i_orbital])
                                 
-
-                            # This should be used if we set self.n_spins=3
-                            projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_energy_block.split('\n')[i_spin+2].split()[1+i_orbital])
-
+                            projected_dos_array[atom_num,0,orbital_num,spin_comp,i_energy] += float(raw_energy_block.split('\n')[i_spin+2].split()[1+i_orbital])
+                        
             # For colinear calculations
             else:
                 current_orbital_name =  orbital_name
@@ -370,6 +368,10 @@ class QEParser():
                         # Loop through spins
                         for i_spin in range(self.n_spin):
                             projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_projections[i_spin::self.n_spin][i_orbital])
+
+
+        if self.is_non_colinear:
+            projected_dos_array[:,:,:,0,:] = (projected_dos_array[:,:,:,1,:]**2 + projected_dos_array[:,:,:,2,:]**2 + projected_dos_array[:,:,:,3,:]**2)**0.5 
         return projected_dos_array, self.orbital_names
 
     def getKpointLabels(self):
@@ -666,12 +668,11 @@ class QEParser():
                             continue
                         # Parse spin components. -1 to align index with spd array
                         if projs_element.tag == "ATOMIC_SIGMA_PHI":
-                            ispin = int(projs_element.get('ipol')) -1
+                            ispin = int(projs_element.get('ipol'))
                     else:
                         if projs_element.tag == "ATOMIC_WFC":
                             ispin = int(projs_element.get('spin'))-1
                        
-                    
 
                     projections = projs_element.text.split("\n")[1:-1]
                     for iband, band_projection in enumerate(projections):
@@ -685,11 +686,16 @@ class QEParser():
 
                         # The spd will depend on of the calculation is a non colinear or colinear. Noncolinear
                         if self.is_non_colinear:
+                            
                             self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = real
                         else:
                             self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = comp_squared
 
-                        
+        if self.is_non_colinear:
+            
+            self.spd[:,:,0,:,:] = (self.spd[:,:,1,:,:] ** 2 + self.spd[:,:,2,:,:] ** 2 + self.spd[:,:,3,:,:] ** 2)**0.5
+            self.spd_phase[:,:,0,:,:] = (self.spd_phase[:,:,1,:,:] ** 2 + self.spd_phase[:,:,2,:,:] ** 2 + self.spd_phase[:,:,3,:,:] ** 2)**0.5
+
         for ions in range(self.ionsCount):
             self.spd[:, :, :, ions, 0] = ions + 1
 
@@ -781,7 +787,7 @@ class QEParser():
         
         # The calcuulation is non-colinear 
         if is_non_colinear :
-            n_spin = 3
+            n_spin = 4
 
             orbitals = [
                         {"l": 's', "j": 0.5, "m": -0.5},
@@ -910,6 +916,7 @@ class QEParser():
                 
                 self.bands[ikpoint, : ,1]  = HARTREE_TO_EV  * np.array(kpoint_element.findall(".//eigenvalues")[0].text.split(),dtype = float)[self.nbnd_down:]
                 self.occupations[ikpoint, : ,1]  = np.array(kpoint_element.findall(".//occupations")[0].text.split(), dtype = float)[self.nbnd_down:]
+        
         # For non-spin-polarized and non colinear
         else:
             self.n_band = int(main_xml_root.findall(".//output/band_structure/nbnd")[0].text)
@@ -991,12 +998,12 @@ class QEParser():
         temp_spd = np.swapaxes(temp_spd, 2, 3)
         # (nkpoints,nbands, natom, norbital, nspin)
         # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
-        if nspins == 3:
-            # Used if self.spins==3
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
-            # Used if self.spins == 4 
-            # projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, 1:]
-        elif nspins == 2:
+        # if nspins == 3:
+        #     # Used if self.spins==3
+        #     projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+        #     # Used if self.spins == 4 
+        #     # projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, 1:]
+        if nspins == 2:
             projected[:, :, :, 0, :, 0] = temp_spd[:, :, :-1, 1:-1, 0]
             projected[:, :, :, 0, :, 1] = temp_spd[:, :, :-1, 1:-1, 1]
         else:

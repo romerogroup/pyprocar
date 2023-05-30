@@ -39,7 +39,7 @@ data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.se
 #
 #
 atoms=[0]
-spins=[0,1,2]
+spins=[0]
 orbitals=[8,9,10,11,12,13,14,15,16,17]
 
 pyprocar.dosplot(

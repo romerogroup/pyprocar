@@ -381,6 +381,21 @@
       
       
         
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
           FermiSurface3D.project_atomic_projections
         
       
@@ -572,10 +587,6 @@
    .. autosummary::
       :toctree:
    
-      
-      
-      
-      
       
       
       

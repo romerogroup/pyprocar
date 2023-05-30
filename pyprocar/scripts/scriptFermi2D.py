@@ -198,9 +198,9 @@ def fermi2D(
         ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
         ebsZ.projected = ebsZ.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
 
-        ebsX.projected = ebsX.projected[:,:,[0]][:,:,0]
-        ebsY.projected = ebsY.projected[:,:,[1]][:,:,0]
-        ebsZ.projected = ebsZ.projected[:,:,[2]][:,:,0]
+        ebsX.projected = ebsX.projected[:,:,[1]][:,:,0]
+        ebsY.projected = ebsY.projected[:,:,[2]][:,:,0]
+        ebsZ.projected = ebsZ.projected[:,:,[3]][:,:,0]
 
 
         stData.append(ebsX.projected )

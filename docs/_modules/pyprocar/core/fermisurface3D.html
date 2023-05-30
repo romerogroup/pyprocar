@@ -398,7 +398,7 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Isosurface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">BrillouinZone</span>
 
-
+<span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
 <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
 
 
@@ -409,6 +409,7 @@
 <span class="n">FREE_ELECTRON_MASS</span> <span class="o">=</span> <span class="mf">9.11</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">31</span> <span class="c1">#  kg</span>
 
 <div class="viewcode-block" id="FermiSurface3D"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.FermiSurface3D.html#pyprocar.core.FermiSurface3D">[docs]</a><span class="k">class</span> <span class="nc">FermiSurface3D</span><span class="p">(</span><span class="n">Surface</span><span class="p">):</span>
+<span class="c1"># class FermiSurface3D(pv.PolyData):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The object is used to store and manapulate a 3d fermi surface.</span>
 
@@ -503,7 +504,7 @@
             <span class="n">bands_to_keep</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands_to_keep</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span> <span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span><span class="n">bands_to_keep</span><span class="p">]</span>
-
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">reciprocal_lattice</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">supercell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">supercell</span><span class="p">)</span>
@@ -529,7 +530,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fullBandIndex</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No bands within tolerance. Increase tolerance to increase search space.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span><span class="n">fullBandIndex</span><span class="p">]</span>
-
+        
         <span class="c1"># re-index and creates a mapping to the original bandindex</span>
         <span class="n">reducedBandIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fullBandIndex</span> <span class="o">=</span> <span class="n">fullBandIndex</span>
@@ -557,7 +558,7 @@
             <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
             <span class="n">solid_color_surface</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nsurface</span> <span class="p">)</span> <span class="o">/</span> <span class="n">nsurface</span>
             <span class="n">band_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cmap</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">solid_color_surface</span><span class="p">[:]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-
+        
         <span class="c1"># The following loop generates iso surfaces for each band and then stores them in a list</span>
         <span class="n">color_band_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -586,7 +587,7 @@
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not find any fermi surfaces&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>    
-                <span class="n">full_isosurface</span> <span class="o">+=</span> <span class="n">isosurface_band_copy</span>
+                <span class="n">full_isosurface</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">isosurface_band_copy</span><span class="p">,</span> <span class="n">merge_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
 
             <span class="n">color_band_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">iband_with_surface</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span> <span class="p">:</span> <span class="n">band_colors</span><span class="p">[</span><span class="n">iband_with_surface</span><span class="p">,:]}</span> <span class="p">})</span>
             <span class="n">band_color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">band_colors</span><span class="p">[</span><span class="n">iband_with_surface</span><span class="p">,:]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">isosurface_band</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span>
@@ -597,26 +598,29 @@
         <span class="c1"># Initialize the Fermi Surface which is the combination of all the </span>
         <span class="c1"># isosurface for each band</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verts</span><span class="o">=</span><span class="n">full_isosurface</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">faces</span><span class="o">=</span><span class="n">full_isosurface</span><span class="o">.</span><span class="n">faces</span><span class="p">)</span>
+        <span class="c1"># super().__init__(var_inp=full_isosurface.points, faces=full_isosurface.faces)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fermi_surface_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span>
         
         <span class="c1"># Remapping of the scalar arrays into the combind mesh  </span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">combined_band_color_array</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">iband</span><span class="p">,</span><span class="n">isosurface_band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isosurfaces</span><span class="p">):</span>
-            <span class="n">new_color_array</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">color_array_name</span> <span class="o">=</span> <span class="n">isosurface_band</span><span class="o">.</span><span class="n">point_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">points</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">points</span> <span class="ow">in</span> <span class="n">isosurface_band</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
-                    <span class="n">new_color_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color_band_dict</span><span class="p">[</span><span class="n">color_array_name</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>    
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">new_color_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
 
-            <span class="k">for</span> <span class="n">ipoints</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">isosurface_band</span><span class="o">.</span><span class="n">points</span><span class="p">)):</span>
-                <span class="n">combined_band_color_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color_band_dict</span><span class="p">[</span><span class="n">color_array_name</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">])</span>
+        <span class="n">combined_band_color_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">),</span><span class="mi">4</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">iband</span><span class="p">,</span><span class="n">isosurface_band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isosurfaces</span><span class="p">):</span>
+            <span class="n">color_array_name</span> <span class="o">=</span> <span class="n">isosurface_band</span><span class="o">.</span><span class="n">point_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">i_reduced_band</span> <span class="o">=</span> <span class="n">color_array_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
+            <span class="n">new_color_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">),</span><span class="mi">4</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">):</span>
+                <span class="c1"># Check if the point is in the combined surface</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">isosurface_band</span><span class="o">.</span><span class="n">points</span><span class="p">,</span><span class="n">point</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+                    <span class="n">combined_band_color_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_band_dict</span><span class="p">[</span><span class="n">color_array_name</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+                    <span class="n">new_color_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_band_dict</span><span class="p">[</span><span class="n">color_array_name</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_color_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        
             <span class="bp">self</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span> <span class="s2">&quot;band_&quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reducedBandIndex_to_fullBandIndex</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i_reduced_band</span><span class="p">)])]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_color_array</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s2">&quot;bands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">combined_band_color_array</span> <span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s2">&quot;bands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">combined_band_color_array</span> <span class="c1">#np.array(combined_band_color_array ) </span>
         <span class="k">return</span> <span class="kc">None</span></div>
         
 
@@ -639,6 +643,7 @@
         <span class="n">final_vectors_Z</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">iband</span><span class="p">,</span> <span class="n">isosurface</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isosurfaces</span><span class="p">):</span>
             <span class="n">XYZ_extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            
             <span class="n">vectors_extended_X</span> <span class="o">=</span> <span class="n">vectors_array</span><span class="p">[:,</span><span class="n">iband</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">vectors_extended_Y</span> <span class="o">=</span> <span class="n">vectors_array</span><span class="p">[:,</span><span class="n">iband</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">vectors_extended_Z</span> <span class="o">=</span> <span class="n">vectors_array</span><span class="p">[:,</span><span class="n">iband</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -875,7 +880,6 @@
                                 <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]),</span>
                                 <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">indexing</span> <span class="o">=</span> <span class="s1">&#39;ij&#39;</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="n">kp_reduced_to_energy</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">:</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span><span class="n">iband</span><span class="p">])}</span>
         <span class="n">kp_reduced_to_kp_cart</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">:</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">XYZ</span><span class="p">,</span><span class="n">kpoints_cart</span><span class="p">)}</span>
         <span class="n">kp_reduced_to_mesh_index</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">kp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">kp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">kp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">((</span><span class="n">mesh_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">kp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> 
@@ -1089,16 +1093,14 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to calculate atomic spin texture projections of the surface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">fullBandIndex</span><span class="p">,:]</span>
+
         <span class="n">vectors_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spd_spin</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">create_vector_texture</span><span class="p">(</span><span class="n">vectors_array</span> <span class="o">=</span> <span class="n">vectors_array</span><span class="p">,</span> <span class="n">vectors_name</span> <span class="o">=</span> <span class="s2">&quot;spin&quot;</span> <span class="p">)</span></div>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to extend the surface in reciprocal lattice vecctor</span>
-<span class="sd">        Args:</span>
-<span class="sd">            extended_zone_directions (List[List[int] or Tuple[int,int,int]], optional): List of directions to extend the surface. Defaults to None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="FermiSurface3D.extend_surface"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.FermiSurface3D.extend_surface.html#pyprocar.core.FermiSurface3D.extend_surface">[docs]</a>    <span class="k">def</span> <span class="nf">extend_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">extended_zone_directions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="ow">or</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="nb">int</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to extend the surface in the direction of a reciprocal lattice vecctor</span>
@@ -1108,17 +1110,21 @@
 <span class="sd">        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional</span>
 <span class="sd">            List of directions to expand to, by default None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+        <span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
         <span class="c1"># The following code  creates exteneded surfaces in a given direction</span>
         <span class="n">extended_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">extended_zone_directions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">original_surface</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> 
+            <span class="c1"># new_surface = copy.deepcopy(self)</span>
+            <span class="n">initial_surface</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="n">extended_zone_directions</span><span class="p">:</span>
-                <span class="n">surface</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">original_surface</span><span class="p">)</span>
-                <span class="bp">self</span> <span class="o">+=</span> <span class="n">surface</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">))</span>
-            <span class="c1">#Clearing unneeded surface from memory</span>
-            <span class="k">del</span> <span class="n">original_surface</span>
+                <span class="n">surface</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">initial_surface</span><span class="p">)</span>
+
+                <span class="bp">self</span> <span class="o">+=</span> <span class="n">surface</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+  
+            <span class="c1"># Clearing unneeded surface from memory</span>
             <span class="k">del</span> <span class="n">surface</span></div>
+ 
 
     <span class="k">def</span> <span class="nf">_get_brilloin_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                         <span class="n">supercell</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>

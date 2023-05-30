@@ -509,6 +509,21 @@
       
       
         
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
           BrillouinZone.wigner_seitz
         
       
@@ -522,10 +537,6 @@
    .. autosummary::
       :toctree:
    
-      
-      
-      
-      
       
       
       

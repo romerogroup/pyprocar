@@ -14,7 +14,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='spin-polarized-colinear',
                                 calc_type='bands')
 """
@@ -26,7 +26,7 @@ import pyprocar
 
 
 project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}bands"
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
 
 spins=[0,1]
 
@@ -39,7 +39,7 @@ spins=[0,1]
 # When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do. 
 # The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='plain',
                 dirname=data_dir)
 
@@ -49,7 +49,7 @@ pyprocar.bandsplot(
 # The keyword spins can also be used to select which spin bands to plot
 spins = [1]
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='plain',
                 spins=spins,
                 dirname=data_dir)
@@ -66,7 +66,7 @@ orbitals=[4,5,6,7,8]
 spins=[0,1]
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='parametric',
                 atoms=atoms,
                 orbitals=orbitals,
@@ -86,7 +86,7 @@ orbitals=[4,5,6,7,8]
 spins=[0,1]
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='scatter',
                 atoms=atoms,
                 orbitals=orbitals,

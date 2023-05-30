@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='spin-polarized-colinear',
                                 calc_type='bands')
 
@@ -49,7 +49,7 @@ importing pyprocar and specifying local data_dir
 
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}bands"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
 
     spins=[0,1]
 
@@ -73,7 +73,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 .. code-block:: default
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='plain',
                     dirname=data_dir)
 
@@ -91,7 +91,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DC9B400>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24760910>
 
 
 
@@ -107,7 +107,7 @@ The keyword spins can also be used to select which spin bands to plot
 
     spins = [1]
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='plain',
                     spins=spins,
                     dirname=data_dir)
@@ -126,7 +126,7 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DC501C0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC79090D30>
 
 
 
@@ -148,7 +148,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     spins=[0,1]
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -171,7 +171,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DABADF0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC244C3130>
 
 
 
@@ -192,7 +192,7 @@ Scatter mode
     spins=[0,1]
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='scatter',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -215,14 +215,14 @@ Scatter mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E0E2190>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC247EE940>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.293 seconds)
+   **Total running time of the script:** ( 0 minutes  2.340 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_spin_polarized.py:

@@ -507,6 +507,21 @@
       
         
       
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
+      
+        
+      
    
    
 
@@ -803,7 +818,6 @@
       
       
       
-      
         
           Isosurface.nX
         
@@ -835,12 +849,9 @@
       
       
       
-      
         
           Isosurface.surface_boundaries
         
-      
-      
       
       
       

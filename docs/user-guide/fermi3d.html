@@ -516,46 +516,6 @@ trimesh and pyvista as well with the following citation information.</p>
 </pre></div>
 </div>
 </section>
-<section id="id1">
-<h2>Examples<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
-<p>As a standard example for plotting fermi surfaces we use MgB<sub>2</sub>and SrFeO<sub>3</sub>.</p>
-<section id="plain-fermi-surface">
-<h3>1. Plain Fermi surface<a class="headerlink" href="#plain-fermi-surface" title="Permalink to this heading">#</a></h3>
-<p>This mode is activated by selecting the argument <code class="docutils literal notranslate"><span class="pre">mode</span></code> equal to
-<code class="docutils literal notranslate"><span class="pre">'plain'</span></code>. This mode plots each band in fermi a different color,
-however there won’t be any color projection.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">surfaces</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi3D</span><span class="p">(</span><span class="n">procar</span><span class="o">=</span><span class="s1">&#39;colinear/PROCAR-MgB2-nonPol&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;colinear/OUTCAR-MgB2-nonPol&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">projection_accuracy</span><span class="o">=</span><span class="s1">&#39;high&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">camera_pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">save2d</span><span class="o">=</span><span class="s1">&#39;MgB2-nonPol.png&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">save3d</span><span class="o">=</span><span class="s1">&#39;MgB2-nonPol.glb&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>The main arguments in this function are <code class="docutils literal notranslate"><span class="pre">procar</span></code>, <code class="docutils literal notranslate"><span class="pre">outcar</span></code>, <code class="docutils literal notranslate"><span class="pre">bands</span></code>, <code class="docutils literal notranslate"><span class="pre">scale</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">st</span></code>, where <code class="docutils literal notranslate"><span class="pre">procar</span></code> and <code class="docutils literal notranslate"><span class="pre">outcar</span></code> are the names of the input PROCAR and OUTCAR files respectively, <code class="docutils literal notranslate"><span class="pre">bands</span></code> is an array of the bands that are desired to be plotted. Note if <code class="docutils literal notranslate"><span class="pre">bands</span> <span class="pre">=</span> <span class="pre">-1</span></code>, the function will try to plot all the bands provided in the PROCAR file. The kmesh will be interpolated by a factor of scale in each direction. The <code class="docutils literal notranslate"><span class="pre">st</span></code> tag controls the spin-texture plotting, and <code class="docutils literal notranslate"><span class="pre">mode</span></code> determines the type of projection of colors. There are additional keyword arguments that can be accessed in the help section of this function, such as <code class="docutils literal notranslate"><span class="pre">face_color,</span> <span class="pre">cmap,</span> <span class="pre">atoms,</span> <span class="pre">orbitals,</span> <span class="pre">energy,</span> <span class="pre">transparent,</span> <span class="pre">nprocess</span></code> etc.</p>
-</section>
-<section id="surface-coloring-based-on-properties-from-procar">
-<h3>2. Surface coloring based on properties from PROCAR<a class="headerlink" href="#surface-coloring-based-on-properties-from-procar" title="Permalink to this heading">#</a></h3>
-<p>Similar to the <code class="docutils literal notranslate"><span class="pre">bandsplot()</span></code> section one can choose to project the contribution of different properties provided in the PROCAR file, such as atom, orbital and spin contributions. The projection can be represented by different color mapping schemes chosen by the user. The projection is not restricted to only one property at a time, so it can be chosen from all the provided properties. For example, one might want to see the contribution of the orbitals <span class="math notranslate nohighlight">\(p_x\)</span>, <span class="math notranslate nohighlight">\(p_y\)</span>, <span class="math notranslate nohighlight">\(p_z\)</span> from specific atoms, this function will parse the desired contributions and projects the sum of contributions on each face. To use this functionality one has to change the mode from <code class="docutils literal notranslate"><span class="pre">plain</span></code> to <code class="docutils literal notranslate"><span class="pre">parametric</span></code> and choose the atoms, orbitals, spin that are desired to be projected.</p>
-<p>For noncolinear calculations, this function is able to plot arrows in the direction of the spinors provided in the PROCAR file. To turn this functionality on the one can set <code class="docutils literal notranslate"><span class="pre">st=True</span></code> to turn the spin-texture ON. The user can choose between coloring all the arrows originated from one band with a specific color, or project the contribution of that arrow in a specific Cartesian direction. To better represent the spin-texture we use the key argument <code class="docutils literal notranslate"><span class="pre">transparent=True</span></code> which changes the opacity of the Fermi-surface to zero.</p>
-</section>
-<section id="surface-coloring-based-on-properties-obtained-from-an-external-file">
-<h3>3. Surface coloring based on properties obtained from an external file<a class="headerlink" href="#surface-coloring-based-on-properties-obtained-from-an-external-file" title="Permalink to this heading">#</a></h3>
-<p>Similar to the previous section, this function is able to read an external file, containing information about a scalar or a vector field in BZ and project the field on the Fermi surface. This file does not need to have the same mesh grid as the PROCAR file as long as the mesh sampling is fine enough. This function performs an interpolation on the provided data and evaluates functions at the center of each face on the Fermi surface. The external file should have the following format:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">band</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">band</span> <span class="n">number</span><span class="o">&gt;</span>
-   <span class="o">&lt;</span><span class="n">kx1</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">ky1</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">kz1</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">color1</span><span class="o">&gt;</span>
-   <span class="o">&lt;</span><span class="n">kx2</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">ky2</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">kz2</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">color2</span><span class="o">&gt;</span>
-   <span class="o">&lt;</span><span class="n">kx3</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">ky3</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">kz3</span><span class="o">&gt;</span>  <span class="o">&lt;</span><span class="n">color3</span><span class="o">&gt;</span>
-   <span class="o">...</span>
-<span class="n">band</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">band</span> <span class="n">number</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on.</p>
-</section>
-</section>
 <section id="keyboard-shortcuts">
 <h2>Keyboard shortcuts<a class="headerlink" href="#keyboard-shortcuts" title="Permalink to this heading">#</a></h2>
 <p>When plotting with the interactive rendering windows in VTK, several keyboard
@@ -859,28 +819,6 @@ e.g. <code class="docutils literal notranslate"><span class="pre">camera_pos=[0.
   <a class="reference internal nav-link" href="#d-surfaces">
    3D surfaces
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#id1">
-   Examples
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#plain-fermi-surface">
-     1. Plain Fermi surface
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#surface-coloring-based-on-properties-from-procar">
-     2. Surface coloring based on properties from PROCAR
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#surface-coloring-based-on-properties-obtained-from-an-external-file">
-     3. Surface coloring based on properties obtained from an external file
-    </a>
-   </li>
-  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#keyboard-shortcuts">

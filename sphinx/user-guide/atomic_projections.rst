@@ -13,11 +13,11 @@ These can be applied to the bands structure, density of states, and fermi surfac
 
 For collinear spin polarized and non-collinear spin calculations of DFT codes, PyProcar is able to plot the bands considering spin density (magnitude), spin magnetization and spin channels separately.
 
-For non-collinear spin calculations, ``spin=[0]`` plots the spin density (magnitude) and ``spin=[1,2,3]`` corresponds to spins oriented in :math:`S_x`, :math:`S_y` and :math:`S_z` directions respectively. 
+For non-collinear spin calculations, ``spins=[0]`` plots the spin density (magnitude) and ``spins=[1,2,3]`` corresponds to spins oriented in :math:`S_x`, :math:`S_y` and :math:`S_z` directions respectively. 
 Setting ``spin='st'`` plots the spin texture perpendicular in the plane (:math:`k_x`, :math:`k_y`) to each (:math:`k_x`,i :math:`k_y`) vector. 
 This is useful for Rashba-like states in surfaces. For parametric plots such as spin, atom and orbitals, the user should set ``mode=`parametric'``. ``cmap`` refers 
 to the matplotlib color map used for the parametric plotting and can be modified by using the same color maps used in matplotlib. ``cmap='seismic'`` is recommended for parametric spin band structure plots.  
-For colinear spin calculations setting ``spin=[0]`` plots the spin density (magnitude) and ``spin=[1]`` plots the spin magnetization. Spin channels can also be plot separately (see below).
+For colinear spin calculations setting ``spins=[0]`` plots the spin density (magnitude) and ``spins=[1]`` plots the spin magnetization. Spin channels can also be plot separately (see below).
 
 Currently, Elk only supports spin colinear plotting.
 

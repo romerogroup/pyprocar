@@ -12,10 +12,10 @@ PyProcar is a robust, open-source Python library used for pre- and post-processi
 Currently supports:
 
 1. VASP
-2. Elk
+2. Elk (Stll in development)
 3. Quantum Espresso
-4. Abinit
-5. Lobster
+4. Abinit (DOS Stll in development)
+5. Lobster (Stll in development)
 
 ![](welcome.png)
 

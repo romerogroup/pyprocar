@@ -144,8 +144,6 @@ Plain mode
     Bands near the fermi energy : [6, 7, 8, 9]
     No isosurface for this band
     No isosurface for this band
-    Z:\Anaconda\envs\pyprocar_dev\lib\site-packages\pyvista\core\dataset.py:2132: PyVistaDeprecationWarning: Use of `DataSet.overwrite` is deprecated. Use `DataSet.copy_from` instead.
-      warnings.warn(
 
 
 
@@ -153,7 +151,7 @@ Plain mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.608 seconds)
+   **Total running time of the script:** ( 0 minutes  23.145 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_isovalue_gif.py:

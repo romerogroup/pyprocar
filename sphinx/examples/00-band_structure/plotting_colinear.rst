@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 
@@ -49,7 +49,7 @@ importing pyprocar and specifying local data_dir
 
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}bands"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
 
 
 
@@ -70,7 +70,7 @@ Plain mode
 
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='plain',
                     dirname=data_dir)
 
@@ -88,7 +88,7 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2EDDA2E0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24678100>
 
 
 
@@ -111,7 +111,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     spins=[0]
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -134,7 +134,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E480130>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24745490>
 
 
 
@@ -157,7 +157,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     spins=[0]
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -182,7 +182,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2D932850>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC2480CFA0>
 
 
 
@@ -203,7 +203,7 @@ Scatter mode
     spins=[0]
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='scatter',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -227,7 +227,7 @@ Scatter mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E122C10>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24E27100>
 
 
 
@@ -247,7 +247,7 @@ overlay_species mode
     spins=[0]
 
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay_species',
                     orbitals=orbitals,
                     spins=spins,
@@ -267,7 +267,7 @@ overlay_species mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DD773A0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24965640>
 
 
 
@@ -286,7 +286,7 @@ overlay_orbtials mode
     atoms=[0]
     spins=[0]
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay_orbitals',
                     atoms=atoms,
                     spins=spins,
@@ -307,7 +307,7 @@ overlay_orbtials mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB31D91BB0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC24994BB0>
 
 
 
@@ -326,7 +326,7 @@ overlay mode
 
     items={'Fe':[4,5,6,7,8]}
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay',
                     items=items,
                     dirname=data_dir)
@@ -345,7 +345,7 @@ overlay mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2F6EF5E0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC2516DE80>
 
 
 
@@ -364,7 +364,7 @@ overlay mode by orbital names
 
     items={'Fe':['p','d']}
     pyprocar.bandsplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay',
                     items=items,
                     dirname=data_dir)
@@ -381,14 +381,14 @@ overlay mode by orbital names
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2D99D700>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001EC244D95E0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.136 seconds)
+   **Total running time of the script:** ( 0 minutes  2.820 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_colinear.py:

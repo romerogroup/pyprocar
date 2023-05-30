@@ -190,8 +190,13 @@ class Parser:
         repairhandle.ProcarRepair(procar, procar)
         
         outcar = vasp.Outcar(outcar)
-        poscar = vasp.Poscar(poscar,rotations = outcar.rotations)
 
+        try:
+            poscar = vasp.Poscar(poscar,rotations = outcar.rotations)
+        except:
+            poscar = vasp.Poscar(poscar,rotations = None)
+
+            
         try:
             kpoints = vasp.Kpoints(kpoints)
             self.kpath = kpoints.kpath
@@ -208,7 +213,11 @@ class Parser:
                             efermi=outcar.efermi,
                             interpolation_factor=1
                             )
-        vasprun = vasp.VaspXML(filename = vasprun)
+        
+        try:
+            vasprun = vasp.VaspXML(filename = vasprun)
+        except:
+            pass
         
         self.ebs = procar.ebs
         self.structure = poscar.structure

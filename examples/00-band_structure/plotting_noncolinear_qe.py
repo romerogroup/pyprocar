@@ -51,7 +51,7 @@ pyprocar.bandsplot(
 #
 
 atoms=[0]
-spins=[0,1,2]
+spins=[0]
 orbitals=[8,9,10,11,12,13,14,15,16,17]
 
 pyprocar.bandsplot(
