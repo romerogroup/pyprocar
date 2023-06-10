@@ -106,7 +106,7 @@ will bring a help menu.
 
 Changelog
 --------------
-
+v6.0.0 May 6th, 2021 -- Directory changes. This version is not backwards compatible. <br />
 v5.6.4 May 6th, 2021 -- Updates to Fermi surface plotter. <br />
 v5.6.3 Mar 5th, 2021 -- QE and elk bug fixes. <br />
 v5.6.2 Jan 11th, 2021 -- Updates and bugfixes to fermi surface and dos plotter. <br />
