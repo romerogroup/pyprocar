@@ -23,6 +23,8 @@
 Plotting fermi3d cross_section
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Plotting fermi3d cross_section example.
 
 First download the example files with the code below. Then replace data_dir below.
@@ -36,7 +38,7 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-23
+.. GENERATED FROM PYTHON SOURCE LINES 23-25
 
 .. code-block:: default
 
@@ -49,7 +51,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-29
+.. GENERATED FROM PYTHON SOURCE LINES 26-31
 
 .. code-block:: default
 
@@ -65,11 +67,11 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-31
+.. GENERATED FROM PYTHON SOURCE LINES 32-33
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-48
+.. GENERATED FROM PYTHON SOURCE LINES 33-52
 
 .. code-block:: default
 
@@ -82,6 +84,8 @@ importing pyprocar and specifying local data_dir
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+    # Symmetry only works for specfic space groups currently. 
+    # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
     fermiHandler = pyprocar.FermiHandler(
                                         code="vasp",
                                         dirname=data_dir,
@@ -97,14 +101,14 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-53
+.. GENERATED FROM PYTHON SOURCE LINES 53-57
 
 Cross section
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-81
+.. GENERATED FROM PYTHON SOURCE LINES 57-85
 
 .. code-block:: default
 
@@ -155,14 +159,14 @@ Cross section
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-86
+.. GENERATED FROM PYTHON SOURCE LINES 86-90
 
 Cross section. Save slice
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-107
+.. GENERATED FROM PYTHON SOURCE LINES 90-111
 
 .. code-block:: default
 
@@ -221,7 +225,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.911 seconds)
+   **Total running time of the script:** ( 0 minutes  13.257 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_cross_section.py:

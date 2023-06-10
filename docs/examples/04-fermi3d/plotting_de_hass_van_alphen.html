@@ -443,6 +443,7 @@ to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="showing-how-to-get-van-alphen-fequencies-from-the-fermi-surface">
 <span id="ref-plotting-de-hass-van-alphen"></span><span id="sphx-glr-examples-04-fermi3d-plotting-de-hass-van-alphen-py"></span><h1>Showing how to get van alphen fequencies from the fermi surface<a class="headerlink" href="#showing-how-to-get-van-alphen-fequencies-from-the-fermi-surface" title="Permalink to this heading">#</a></h1>
+<p>Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry</p>
 <p>Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi surface areas (A) is given below.
 To compare the theoretical freuqencies we will compare with the results taken from the experimental paper
 “The Fermi surfaces of copper, silver and gold. I. The de Haas-Van alphen effect”(<a class="reference external" href="https://doi.org/10.1098/rsta.1962.0011">https://doi.org/10.1098/rsta.1962.0011</a>).</p>
@@ -476,6 +477,8 @@ To compare the theoretical freuqencies we will compare with the results taken fr
 
 
 <span class="c1"># First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot</span>
+<span class="c1"># Symmetry only works for specfic space groups currently.</span>
+<span class="c1"># For the actual calculations turn off symmetry and set &#39;apply_symmetry&#39;=False</span>
 <span class="n">fermiHandler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">FermiHandler</span><span class="p">(</span>
                                     <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
                                     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
@@ -544,7 +547,7 @@ Bands near the fermi energy : [5]
 <p>In the above figure we can see the cross section area is <span class="math notranslate nohighlight">\(A = 4.3956 Ang^{-2} = 4.3956e^{16} cm^{-2} (cgs)\)</span>.</p>
 <p><span class="math notranslate nohighlight">\(F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G\)</span></p>
 <p><span class="math notranslate nohighlight">\(F_{exp} = 4.85e^8 G\)</span></p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.997 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.167 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plotting-de-hass-van-alphen-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/95ea9868632cab14ec10e6d61c72d22d/plotting_de_hass_van_alphen.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_de_hass_van_alphen.py</span></code></a></p>

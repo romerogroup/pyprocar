@@ -5,6 +5,8 @@
 Showing how to get van alphen fequencies from the fermi surface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi surface areas (A) is given below.
 To compare the theoretical freuqencies we will compare with the results taken from the experimental paper
 "The Fermi surfaces of copper, silver and gold. I. The de Haas-Van alphen effect"(https://doi.org/10.1098/rsta.1962.0011).
@@ -51,6 +53,8 @@ data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Au{os.sep}vasp{os.
 
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+# Symmetry only works for specfic space groups currently. 
+# For the actual calculations turn off symmetry and set 'apply_symmetry'=False
 fermiHandler = pyprocar.FermiHandler(
                                     code="vasp",
                                     dirname=data_dir,

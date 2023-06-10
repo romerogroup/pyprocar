@@ -442,6 +442,7 @@ to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-fermi3d-spin-texture">
 <span id="ref-plotting-fermi3d-spin-texture"></span><span id="sphx-glr-examples-04-fermi3d-plotting-fermi3d-spin-texture-py"></span><h1>Plotting fermi3d spin_texture<a class="headerlink" href="#plotting-fermi3d-spin-texture" title="Permalink to this heading">#</a></h1>
+<p>Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry</p>
 <p>Plotting fermi3d spin_texture example.</p>
 <p>First download the example files with the code below. Then replace data_dir below.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
@@ -471,6 +472,8 @@ to download the full example code</p>
 
 
 <span class="c1"># First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot</span>
+<span class="c1"># Symmetry only works for specfic space groups currently.</span>
+<span class="c1"># For the actual calculations turn off symmetry and set &#39;apply_symmetry&#39;=False</span>
 <span class="n">fermiHandler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">FermiHandler</span><span class="p">(</span>
                                     <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
                                     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
@@ -489,7 +492,7 @@ to download the full example code</p>
 Bands near the fermi energy : [4, 5, 6, 7, 8, 9]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.535 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.177 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plotting-fermi3d-spin-texture-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/2d0692d7dfe6b0924eec40a010d9577f/plotting_fermi3d_spin_texture.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_fermi3d_spin_texture.py</span></code></a></p>

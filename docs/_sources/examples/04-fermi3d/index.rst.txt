@@ -7,6 +7,8 @@ Fermi 3D
 
 These examples demonstrate the Fermi3D plotting capabilities.
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 
 .. raw:: html
 
@@ -15,7 +17,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d spin_texture example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
@@ -32,7 +34,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d plain example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
@@ -49,7 +51,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d isoslider example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
@@ -66,7 +68,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d isovalue_gif example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
@@ -83,7 +85,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d spin-polarized example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
@@ -100,7 +102,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi sur...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
@@ -117,7 +119,7 @@ These examples demonstrate the Fermi3D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi3d cross_section example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 

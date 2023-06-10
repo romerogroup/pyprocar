@@ -5,6 +5,8 @@
 Plotting fermi3d cross_section
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Plotting fermi3d cross_section example.
 
 First download the example files with the code below. Then replace data_dir below.
@@ -37,6 +39,8 @@ data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.
 
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+# Symmetry only works for specfic space groups currently. 
+# For the actual calculations turn off symmetry and set 'apply_symmetry'=False
 fermiHandler = pyprocar.FermiHandler(
                                     code="vasp",
                                     dirname=data_dir,
