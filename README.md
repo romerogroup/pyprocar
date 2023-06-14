@@ -22,7 +22,13 @@ Currently supports:
 Documentation
 -------------
 
+For versions 6.0.0 and above the documentation is found here:
 https://romerogroup.github.io/pyprocar/
+
+
+For the prior documentation is found here:
+https://romerogroup.github.io/pyprocar5.6.6/
+
 
 Developers
 ------------
@@ -94,7 +100,10 @@ Usage
 Typical use is as follows
 
     import pyprocar
-    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain',code='vasp')
+    pyprocar.bandsplot(code='vasp',mode='plain', dirname='bands')
+
+Previously, bandsplot would accept the OUTCAR and PROCAR file paths as inputs,
+in v6.0.0 we moved to specifying the directory where the bands calculation took place.
 
 Refer to the documentation for further details.
 
@@ -106,7 +115,7 @@ will bring a help menu.
 
 Changelog
 --------------
-v6.0.0 Jun 10th, 2023 -- Directory changes. This version is not backwards compatible. <br />
+v6.0.0 Jun 10th, 2023 -- Major code base changes. <br />
 v5.6.4 May 6th, 2021 -- Updates to Fermi surface plotter. <br />
 v5.6.3 Mar 5th, 2021 -- QE and elk bug fixes. <br />
 v5.6.2 Jan 11th, 2021 -- Updates and bugfixes to fermi surface and dos plotter. <br />
