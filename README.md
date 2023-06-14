@@ -22,11 +22,11 @@ Currently supports:
 Documentation
 -------------
 
-For versions 6.0.0 and above the documentation is found here:
+For versions 6.0.0 and above, the documentation is found here:
 https://romerogroup.github.io/pyprocar/
 
 
-For the prior documentation is found here:
+The prior documentation is found here:
 https://romerogroup.github.io/pyprocar5.6.6/
 
 
