@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.io.vasp &#8212; PyProcar 2.0.0 documentation</title>
+    <title>pyprocar.io.vasp &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -200,7 +200,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -332,7 +332,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -445,6 +445,7 @@
         <span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">reciprocal_lattice</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
         <span class="k">return</span> <span class="n">reciprocal_lattice</span>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -533,8 +534,59 @@
                 <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
                 <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round_</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
                 <span class="n">rotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
-        
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rotations</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Outcar.get_symmetry_operations"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.get_symmetry_operations.html#pyprocar.io.vasp.Outcar.get_symmetry_operations">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetry_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+        <span class="n">has_new_rotation_format</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">i_rotation_lines</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;isymop&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">has_new_rotation_format</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">i_rotation_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;irot&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">begin_table</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="s1">&#39;Subroutine&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">end_table</span> <span class="o">=</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">n_sym_ops</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">i_rotation_lines</span><span class="p">)</span>
+        <span class="n">rotations_ops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_sym_ops</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">gtrans_ops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_sym_ops</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">ptrans_ops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_sym_ops</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">symmetry_operations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i_sym_op</span><span class="p">,</span> <span class="n">i_rotation_line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">i_rotation_lines</span><span class="p">):</span>
+            <span class="n">i_gtrans_line</span> <span class="o">=</span> <span class="n">i_rotation_line</span> <span class="o">+</span> <span class="mi">4</span>
+            <span class="n">i_ptrans_line</span> <span class="o">=</span> <span class="n">i_rotation_line</span> <span class="o">+</span> <span class="mi">6</span>
+
+            <span class="c1"># Gets the symmetry translation</span>
+            <span class="n">raw_gtrans_line</span> <span class="o">=</span> <span class="n">txt</span><span class="p">[</span><span class="n">i_gtrans_line</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">raw_ptrans_line</span> <span class="o">=</span> <span class="n">txt</span><span class="p">[</span><span class="n">i_ptrans_line</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">gtrans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">raw_gtrans_line</span><span class="p">])</span>
+            <span class="n">ptrans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">raw_ptrans_line</span><span class="p">])</span>
+
+            <span class="c1"># Gets the symmetry rotations</span>
+            <span class="n">rotation</span><span class="o">=</span><span class="p">[]</span>
+            <span class="n">raw_rotation_lines</span> <span class="o">=</span> <span class="n">txt</span><span class="p">[</span><span class="n">i_rotation_line</span><span class="p">:</span><span class="n">i_rotation_line</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">raw_rotation_line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_rotation_lines</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">r_ij</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">raw_rotation_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">r_ij</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">raw_rotation_line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+            
+                <span class="n">rotation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r_ij</span><span class="p">)</span>
+            <span class="n">rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rotation</span><span class="p">)</span>
+
+            <span class="n">rotations_ops</span><span class="p">[</span><span class="n">i_sym_op</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">rotation</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">gtrans_ops</span><span class="p">[</span><span class="n">i_sym_op</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">gtrans</span>
+            <span class="n">ptrans_ops</span><span class="p">[</span><span class="n">i_sym_op</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">ptrans</span>
+
+
+            <span class="n">sym_op</span> <span class="o">=</span> <span class="p">(</span><span class="n">rotation</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">gtrans</span><span class="p">,</span><span class="n">ptrans</span><span class="p">)</span>
+            <span class="n">symmetry_operations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sym_op</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">symmetry_operations</span></div>
 
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
@@ -1485,7 +1537,7 @@
         <span class="n">nbands</span> <span class="o">=</span> <span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">norbitals</span> <span class="o">=</span> <span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span>
         <span class="k">if</span> <span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">nspins</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">nspins</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nspins</span> <span class="o">=</span> <span class="n">spd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">nspins</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -1505,7 +1557,7 @@
         <span class="c1"># (nkpoints,nbands, natom, norbital, nspin)</span>
         <span class="c1"># projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]</span>
         <span class="k">if</span> <span class="n">nspins</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">temp_spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">temp_spd</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">elif</span> <span class="n">nspins</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_spd</span><span class="p">[:,</span> <span class="p">:</span><span class="n">nbands</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_spd</span><span class="p">[:,</span> <span class="n">nbands</span><span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
@@ -1671,10 +1723,6 @@
                                 <span class="s2">&quot;spin 2&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-x&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;spin 3&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-y&quot;</span><span class="p">,</span> 
                                 <span class="s2">&quot;spin 4&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-z&quot;</span><span class="p">}</span>
-            <span class="c1"># self.spins_dict = {&quot;spin 4&quot;: &quot;Spin-Total&quot;, </span>
-            <span class="c1">#                     &quot;spin 1&quot;: &quot;Spin-x&quot;,</span>
-            <span class="c1">#                     &quot;spin 2&quot;: &quot;Spin-y&quot;, </span>
-            <span class="c1">#                     &quot;spin 3&quot;: &quot;Spin-z&quot;}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">is_noncolinear</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spins_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;spin 1&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-up&quot;</span><span class="p">,</span> <span class="s2">&quot;spin 2&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-down&quot;</span><span class="p">}</span></div>
@@ -1847,8 +1895,9 @@
                             <span class="n">ispin</span>
                         <span class="p">][</span><span class="n">ispin</span><span class="p">]</span>
                     <span class="p">)[:,</span> <span class="mi">1</span><span class="p">:]</span>
-                <span class="k">if</span> <span class="s1">&#39;Spin-Total&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">dos_projected</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-                    <span class="k">del</span> <span class="n">dos_projected</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;Spin-Total&#39;</span><span class="p">]</span>
+
+                <span class="c1"># if &#39;Spin-Total&#39; in list(dos_projected[name].keys()):</span>
+                <span class="c1">#     del dos_projected[name][&#39;Spin-Total&#39;]</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="n">dos_projected</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;general&quot;</span><span class="p">][</span><span class="s2">&quot;dos&quot;</span><span class="p">][</span><span class="s2">&quot;partial&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">][</span><span class="s2">&quot;info&quot;</span><span class="p">],</span>

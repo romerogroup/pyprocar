@@ -205,7 +205,7 @@ class ElectronicBandStructure:
         bool
             Boolean to determine if this is a non-colinear calculation
         """
-        if self.nspins == 3:
+        if self.nspins == 4:
             return True
         else:
             return False

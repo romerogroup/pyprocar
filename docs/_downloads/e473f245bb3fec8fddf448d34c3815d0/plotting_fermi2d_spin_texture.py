@@ -14,7 +14,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 """
@@ -27,7 +27,7 @@ import pyprocar
 
 
 project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 ###############################################################################
 # Spin Texture Projection
@@ -39,11 +39,11 @@ data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.se
 # 'x','y','z','x^2','y^2','z^2'
 
 
-pyprocar.fermi2D(code = 'qe',
+pyprocar.fermi2D(code = 'vasp',
                dirname=data_dir,
                spin_texture=True,
                arrow_projection='x',
-               arrow_size =15,
+               arrow_size =0.5,
                arrow_density=10,
                color_bar=True)
 
@@ -54,11 +54,11 @@ pyprocar.fermi2D(code = 'qe',
 #
 
 
-pyprocar.fermi2D(code = 'qe',
+pyprocar.fermi2D(code = 'vasp',
                dirname=data_dir,
                spin_texture=True,
                arrow_color = 'blue',
-               arrow_size =15,
+               arrow_size =0.5,
                arrow_density=10)
 
 
@@ -71,13 +71,13 @@ pyprocar.fermi2D(code = 'qe',
 # band_indices will be a list of list that contain band indices. Below I only plot bands 14,15
 # Also you can specify the colors of the bands as well with band_colors
 
-band_indices = [[14,15]]
+band_indices = [[6,7]]
 band_colors = [['blue','red']]
-pyprocar.fermi2D(code = 'qe', 
+pyprocar.fermi2D(code = 'vasp', 
                mode='plain_bands',
                band_indices = band_indices,
                band_colors=band_colors,
                spin_texture=True,
-               arrow_size =15,
+               arrow_size =0.5,
                arrow_density=10,
                dirname=data_dir)

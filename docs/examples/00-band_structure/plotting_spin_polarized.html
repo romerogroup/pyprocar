@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting spin polarized band structures &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Plotting spin polarized band structures &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -448,7 +448,7 @@ to download the full example code</p>
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;spin-polarized-colinear&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;bands&#39;</span><span class="p">)</span>
 </pre></div>
@@ -460,7 +460,7 @@ to download the full example code</p>
 
 
 <span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">spin-polarized-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">spin-polarized-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
 
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
@@ -470,25 +470,25 @@ to download the full example code</p>
 <p>When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do.
 The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_001.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_001.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DC9B400&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_001.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_001.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADD65BB0&gt;
 </pre></div>
 </div>
 <p>The line-styles or line-colors, these may be changed in the ebs section in the :doc:’pyprocar/utils/default_settings.ini’ file.</p>
 <p>The keyword spins can also be used to select which spin bands to plot</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_002.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_002.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DC501C0&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_002.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_002.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADEFAFD0&gt;
 </pre></div>
 </div>
 </section>
@@ -500,7 +500,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
@@ -510,7 +510,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_003.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_003.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DABADF0&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_003.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_003.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADE78400&gt;
 </pre></div>
 </div>
 </section>
@@ -521,7 +521,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
@@ -531,10 +531,10 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_spin_polarized_004.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_004.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E0E2190&gt;
+<img src="../../_images/sphx_glr_plotting_spin_polarized_004.png" srcset="../../_images/sphx_glr_plotting_spin_polarized_004.png" alt="plotting spin polarized" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AAE1C3400&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.293 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.158 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plotting-spin-polarized-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e6316109fe1dbd60bebecc4c45535ecb/plotting_spin_polarized.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_spin_polarized.py</span></code></a></p>

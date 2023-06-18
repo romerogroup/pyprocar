@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting non colinear band structures in VASP &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Plotting non colinear band structures in VASP &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -448,7 +448,7 @@ to download the full example code</p>
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-colinear&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;bands&#39;</span><span class="p">)</span>
 </pre></div>
@@ -471,7 +471,7 @@ to download the full example code</p>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_noncolinear_vasp_001.png" srcset="../../_images/sphx_glr_plotting_noncolinear_vasp_001.png" alt="plotting noncolinear vasp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E0357C0&gt;
+<img src="../../_images/sphx_glr_plotting_noncolinear_vasp_001.png" srcset="../../_images/sphx_glr_plotting_noncolinear_vasp_001.png" alt="plotting noncolinear vasp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AAE48FA00&gt;
 </pre></div>
 </div>
 </section>
@@ -480,7 +480,7 @@ to download the full example code</p>
 <p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
-<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -493,10 +493,10 @@ to download the full example code</p>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_noncolinear_vasp_002.png" srcset="../../_images/sphx_glr_plotting_noncolinear_vasp_002.png" alt="plotting noncolinear vasp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DB03F70&gt;
+<img src="../../_images/sphx_glr_plotting_noncolinear_vasp_002.png" srcset="../../_images/sphx_glr_plotting_noncolinear_vasp_002.png" alt="plotting noncolinear vasp" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADE00760&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.940 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.931 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plotting-noncolinear-vasp-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/dc492ab45e92857b5700d59023be9364/plotting_noncolinear_vasp.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_noncolinear_vasp.py</span></code></a></p>

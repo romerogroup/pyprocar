@@ -31,8 +31,9 @@ Currently supports:
 
 1. VASP
 2. Quantum Espresso
-
-
+3. Abinit (DOS Stll in development)
+4. Elk (Stll in development)
+5. Lobster (Stll in development)
 
 
 Indices and tables

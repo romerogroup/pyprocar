@@ -14,7 +14,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='bands')
 """
@@ -50,7 +50,7 @@ pyprocar.bandsplot(
 
 atoms=[0]
 orbitals=[4,5,6,7,8]
-spins=[0,1,2]
+spins=[0]
 
 pyprocar.bandsplot(
                 code='vasp', 

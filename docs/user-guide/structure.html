@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Structure &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Structure &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -410,6 +410,43 @@
               
   <section id="structure">
 <span id="id1"></span><h1>Structure<a class="headerlink" href="#structure" title="Permalink to this heading">#</a></h1>
+<p>PyProcar provides a data class to manage the structure information of the DFT calculation,
+known as the Structure class. This class takes atoms, cartesian_coordinates,
+fractional_coordinates, lattice, rotations as arguments.</p>
+<section id="accessing-structure-information">
+<h2>Accessing Structure Information<a class="headerlink" href="#accessing-structure-information" title="Permalink to this heading">#</a></h2>
+<p>The Structure object (referred to as “structure”) can be accessed through the main io.Parser class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">path_to_calculation</span><span class="p">)</span>
+
+<span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
+</pre></div>
+</div>
+<p>Using the structure object, you can access various information related to the structure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">structure</span><span class="o">.</span><span class="n">volume</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">density</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">a</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">b</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">c</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">alpha</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">beta</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">gamma</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">nspecies</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">natoms</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">atomic_numbers</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">lattice_corners</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">cell_convex_hull</span>
+
+
+<span class="n">structure</span><span class="o">.</span><span class="n">get_space_group_number</span><span class="p">()</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">get_space_group_international</span><span class="p">()</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">get_wyckoff_positions</span><span class="p">()</span>
+<span class="n">structure</span><span class="o">.</span><span class="n">get_spglib_symmetry_dataset</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -443,6 +480,23 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#accessing-structure-information">
+   Accessing Structure Information
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>

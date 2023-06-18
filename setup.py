@@ -37,7 +37,7 @@ setup(
     author_email=data["email"],
     url=data["url"],
     download_url=data["download_url"],
-    license="LICENSE.txt",
+    license="LICENSE",
     install_requires=[
         'gdown',
         'matplotlib',
@@ -49,7 +49,7 @@ setup(
         'spglib',
         'trimesh',
     ],
-    data_files=[("", ["LICENSE.txt"])],
+    data_files=[("", ["LICENSE"])],
     package_data={"": ["setup.json", '*.ini']},
     scripts=["scripts/procar.py"],
     packages=find_packages(exclude=["scripts"]),

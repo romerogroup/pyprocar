@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Compare bands &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Compare bands &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -108,7 +108,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -204,7 +204,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -336,7 +336,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -414,8 +414,8 @@
 <p>This module is useful to compare bands from different materials on the same band structure plot. The bands are plotted for the same <span class="math notranslate nohighlight">\(k\)</span>-path in order to have a meaningful comparison but they do not need to have the same number of <span class="math notranslate nohighlight">\(k\)</span>-points in each interval.
 This is acheived by setting <code class="docutils literal notranslate"><span class="pre">show=False</span></code> in pyprocar.bandsplot for the first plot so that the figure is not cleared when show() is called. Any number of different modes of plots can be plot on the same figure with this function. The <code class="docutils literal notranslate"><span class="pre">savefig</span></code> parameter can be used to save the figure if required.</p>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;elk&#39;</span><span class="p">,</span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="s1">&#39;PROCAR1&#39;</span><span class="p">,</span><span class="n">kpointsfile</span><span class="o">=</span><span class="s1">&#39;KPOINTS1&#39;</span><span class="p">,</span><span class="n">outcar</span><span class="o">=</span><span class="s1">&#39;OUTCAR1&#39;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="n">elk_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;elk&#39;</span><span class="p">,</span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="n">vasp_dir</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ebs_plot</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The above command plots the figure displayed below. The black bands are plain bands of <span class="math notranslate nohighlight">\(SrVO_3\)</span> calculated from VASP and the jet colormap is d orbital projected bands of the same material calculated from Elk.</p>

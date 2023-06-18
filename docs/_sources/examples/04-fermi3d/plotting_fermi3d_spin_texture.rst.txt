@@ -23,6 +23,8 @@
 Plotting fermi3d spin_texture
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Plotting fermi3d spin_texture example.
 
 First download the example files with the code below. Then replace data_dir below.
@@ -32,11 +34,11 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-23
+.. GENERATED FROM PYTHON SOURCE LINES 23-25
 
 .. code-block:: default
 
@@ -49,7 +51,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-29
+.. GENERATED FROM PYTHON SOURCE LINES 26-31
 
 .. code-block:: default
 
@@ -65,11 +67,11 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-31
+.. GENERATED FROM PYTHON SOURCE LINES 32-33
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-48
+.. GENERATED FROM PYTHON SOURCE LINES 33-52
 
 .. code-block:: default
 
@@ -78,12 +80,14 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+    # Symmetry only works for specfic space groups currently. 
+    # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
     fermiHandler = pyprocar.FermiHandler(
-                                        code="qe",
+                                        code="vasp",
                                         dirname=data_dir,
                                         apply_symmetry=True)
 
@@ -97,14 +101,14 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-53
+.. GENERATED FROM PYTHON SOURCE LINES 53-57
 
 Spin Texture mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-59
+.. GENERATED FROM PYTHON SOURCE LINES 57-63
 
 .. code-block:: default
 
@@ -127,8 +131,8 @@ Spin Texture mode
 
  .. code-block:: none
 
-    Fermi Energy : 18.054241046313987
-    Bands near the fermi energy : [12, 13, 14, 15, 16, 17]
+    Fermi Energy : 5.5922
+    Bands near the fermi energy : [4, 5, 6, 7, 8, 9]
 
 
 
@@ -136,7 +140,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.052 seconds)
+   **Total running time of the script:** ( 0 minutes  11.177 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_spin_texture.py:

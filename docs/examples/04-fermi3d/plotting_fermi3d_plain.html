@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting fermi3d plain &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Plotting fermi3d plain &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -442,13 +442,14 @@ to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-fermi3d-plain">
 <span id="ref-plotting-fermi3d-plain"></span><span id="sphx-glr-examples-04-fermi3d-plotting-fermi3d-plain-py"></span><h1>Plotting fermi3d plain<a class="headerlink" href="#plotting-fermi3d-plain" title="Permalink to this heading">#</a></h1>
+<p>Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry</p>
 <p>Plotting fermi3d plain example.</p>
 <p>First download the example files with the code below. Then replace data_dir below.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                              <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-spin-polarized&#39;</span><span class="p">,</span>
                              <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
 </pre></div>
@@ -467,12 +468,14 @@ to download the full example code</p>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">project_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()))</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">project_dir</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
 
 
 <span class="c1"># First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot</span>
+<span class="c1"># Symmetry only works for specfic space groups currently.</span>
+<span class="c1"># For the actual calculations turn off symmetry and set &#39;apply_symmetry&#39;=False</span>
 <span class="n">fermiHandler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">FermiHandler</span><span class="p">(</span>
-                                    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;qe&quot;</span><span class="p">,</span>
+                                    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
                                     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                                     <span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -485,8 +488,8 @@ to download the full example code</p>
                                 <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_fermi3d_plain_001.png" srcset="../../_images/sphx_glr_plotting_fermi3d_plain_001.png" alt="plotting fermi3d plain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 18.239837592692684
-Bands near the fermi energy : [6, 7, 8, 9]
+<img src="../../_images/sphx_glr_plotting_fermi3d_plain_001.png" srcset="../../_images/sphx_glr_plotting_fermi3d_plain_001.png" alt="plotting fermi3d plain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 5.6251
+Bands near the fermi energy : [2, 3, 4, 5]
 </pre></div>
 </div>
 </section>
@@ -502,11 +505,11 @@ Bands near the fermi energy : [6, 7, 8, 9]
                               <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_fermi3d_plain_002.png" srcset="../../_images/sphx_glr_plotting_fermi3d_plain_002.png" alt="plotting fermi3d plain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 18.239837592692684
-Bands near the fermi energy : [6, 7, 8, 9]
+<img src="../../_images/sphx_glr_plotting_fermi3d_plain_002.png" srcset="../../_images/sphx_glr_plotting_fermi3d_plain_002.png" alt="plotting fermi3d plain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Fermi Energy : 5.6251
+Bands near the fermi energy : [2, 3, 4, 5]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.399 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.691 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plotting-fermi3d-plain-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/bf57c8e69e54077a1282c440c16c0486/plotting_fermi3d_plain.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_fermi3d_plain.py</span></code></a></p>

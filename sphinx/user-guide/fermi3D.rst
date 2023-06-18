@@ -117,53 +117,55 @@ trimesh and pyvista as well with the following citation information.
   journal = {Journal of Open Source Software}
   }
 
-Examples
-======================================
-As a standard example for plotting fermi surfaces we use MgB\
-:sub:`2`\ and SrFeO\ :sub:`3`\. 
+
+..  Examples
+    ======================================
+    As a standard example for plotting fermi surfaces we use MgB\
+    :sub:`2`\ and SrFeO\ :sub:`3`\. 
 
 
-1. Plain Fermi surface
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This mode is activated by selecting the argument ``mode`` equal to
-``'plain'``. This mode plots each band in fermi a different color,
-however there won't be any color projection.
+    1. Plain Fermi surface
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    This mode is activated by selecting the argument ``mode`` equal to
+    ``'plain'``. This mode plots each band in fermi a different color,
+    however there won't be any color projection.
 
->>> surfaces = pyprocar.fermi3D(procar='colinear/PROCAR-MgB2-nonPol',
->>>                            outcar='colinear/OUTCAR-MgB2-nonPol',
->>>                            mode='plain',
->>>                            interpolation_factor=4,
->>>                            projection_accuracy='high',
->>>                            show=True,
->>>                            camera_pos=[0, 1, -1],
->>>                            save2d='MgB2-nonPol.png',
->>>                            save3d='MgB2-nonPol.glb')
-
-
-The main arguments in this function are ``procar``, ``outcar``, ``bands``, ``scale``, ``mode`` and ``st``, where ``procar`` and ``outcar`` are the names of the input PROCAR and OUTCAR files respectively, ``bands`` is an array of the bands that are desired to be plotted. Note if ``bands = -1``, the function will try to plot all the bands provided in the PROCAR file. The kmesh will be interpolated by a factor of scale in each direction. The ``st`` tag controls the spin-texture plotting, and ``mode`` determines the type of projection of colors. There are additional keyword arguments that can be accessed in the help section of this function, such as ``face_color, cmap, atoms, orbitals, energy, transparent, nprocess`` etc. 
+    >>> surfaces = pyprocar.fermi3D(procar='colinear/PROCAR-MgB2-nonPol',
+    >>>                            outcar='colinear/OUTCAR-MgB2-nonPol',
+    >>>                            mode='plain',
+    >>>                            interpolation_factor=4,
+    >>>                            projection_accuracy='high',
+    >>>                            show=True,
+    >>>                            camera_pos=[0, 1, -1],
+    >>>                            save2d='MgB2-nonPol.png',
+    >>>                            save3d='MgB2-nonPol.glb')
 
 
-2. Surface coloring based on properties from PROCAR
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Similar to the ``bandsplot()`` section one can choose to project the contribution of different properties provided in the PROCAR file, such as atom, orbital and spin contributions. The projection can be represented by different color mapping schemes chosen by the user. The projection is not restricted to only one property at a time, so it can be chosen from all the provided properties. For example, one might want to see the contribution of the orbitals :math:`p_x`, :math:`p_y`, :math:`p_z` from specific atoms, this function will parse the desired contributions and projects the sum of contributions on each face. To use this functionality one has to change the mode from ``plain`` to ``parametric`` and choose the atoms, orbitals, spin that are desired to be projected.
-
-For noncolinear calculations, this function is able to plot arrows in the direction of the spinors provided in the PROCAR file. To turn this functionality on the one can set ``st=True`` to turn the spin-texture ON. The user can choose between coloring all the arrows originated from one band with a specific color, or project the contribution of that arrow in a specific Cartesian direction. To better represent the spin-texture we use the key argument ``transparent=True`` which changes the opacity of the Fermi-surface to zero.
+    The main arguments in this function are ``procar``, ``outcar``, ``bands``, ``scale``, ``mode`` and ``st``, where ``procar`` and ``outcar`` are the names of the input PROCAR and OUTCAR files respectively, ``bands`` is an array of the bands that are desired to be plotted. Note if ``bands = -1``, the function will try to plot all the bands provided in the PROCAR file. The kmesh will be interpolated by a factor of scale in each direction. The ``st`` tag controls the spin-texture plotting, and ``mode`` determines the type of projection of colors. There are additional keyword arguments that can be accessed in the help section of this function, such as ``face_color, cmap, atoms, orbitals, energy, transparent, nprocess`` etc. 
 
 
-3. Surface coloring based on properties obtained from an external file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. 2. Surface coloring based on properties from PROCAR
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Similar to the previous section, this function is able to read an external file, containing information about a scalar or a vector field in BZ and project the field on the Fermi surface. This file does not need to have the same mesh grid as the PROCAR file as long as the mesh sampling is fine enough. This function performs an interpolation on the provided data and evaluates functions at the center of each face on the Fermi surface. The external file should have the following format:: 
+  Similar to the ``bandsplot()`` section one can choose to project the contribution of different properties provided in the PROCAR file, such as atom, orbital and spin contributions. The projection can be represented by different color mapping schemes chosen by the user. The projection is not restricted to only one property at a time, so it can be chosen from all the provided properties. For example, one might want to see the contribution of the orbitals :math:`p_x`, :math:`p_y`, :math:`p_z` from specific atoms, this function will parse the desired contributions and projects the sum of contributions on each face. To use this functionality one has to change the mode from ``plain`` to ``parametric`` and choose the atoms, orbitals, spin that are desired to be projected.
 
-	band = <band number>
-	   <kx1>  <ky1>  <kz1>  <color1>
-	   <kx2>  <ky2>  <kz2>  <color2>
-	   <kx3>  <ky3>  <kz3>  <color3>
-	   ...
-	band = <band number>
-    
-The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on. 
+  For noncolinear calculations, this function is able to plot arrows in the direction of the spinors provided in the PROCAR file. To turn this functionality on the one can set ``st=True`` to turn the spin-texture ON. The user can choose between coloring all the arrows originated from one band with a specific color, or project the contribution of that arrow in a specific Cartesian direction. To better represent the spin-texture we use the key argument ``transparent=True`` which changes the opacity of the Fermi-surface to zero.
+
+
+
+    3. Surface coloring based on properties obtained from an external file
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+        Similar to the previous section, this function is able to read an external file, containing information about a scalar or a vector field in BZ and project the field on the Fermi surface. This file does not need to have the same mesh grid as the PROCAR file as long as the mesh sampling is fine enough. This function performs an interpolation on the provided data and evaluates functions at the center of each face on the Fermi surface. The external file should have the following format:: 
+
+          band = <band number>
+            <kx1>  <ky1>  <kz1>  <color1>
+            <kx2>  <ky2>  <kz2>  <color2>
+            <kx3>  <ky3>  <kz3>  <color3>
+            ...
+          band = <band number>
+            
+        The function matches information about the first band present in the file to the first band requested to be plotted, second band present in the file to the second band requested to be plotted, and so on. 
 
 
 

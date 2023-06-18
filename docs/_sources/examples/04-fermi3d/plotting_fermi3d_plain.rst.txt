@@ -23,6 +23,8 @@
 Plotting fermi3d plain
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Plotting fermi3d plain example.
 
 First download the example files with the code below. Then replace data_dir below.
@@ -32,11 +34,11 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-23
+.. GENERATED FROM PYTHON SOURCE LINES 23-25
 
 .. code-block:: default
 
@@ -49,7 +51,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-29
+.. GENERATED FROM PYTHON SOURCE LINES 26-31
 
 .. code-block:: default
 
@@ -65,11 +67,11 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-31
+.. GENERATED FROM PYTHON SOURCE LINES 32-33
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-45
+.. GENERATED FROM PYTHON SOURCE LINES 33-49
 
 .. code-block:: default
 
@@ -78,12 +80,14 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}fermi"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+    # Symmetry only works for specfic space groups currently. 
+    # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
     fermiHandler = pyprocar.FermiHandler(
-                                        code="qe",
+                                        code="vasp",
                                         dirname=data_dir,
                                         apply_symmetry=True)
 
@@ -94,14 +98,14 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-50
+.. GENERATED FROM PYTHON SOURCE LINES 50-54
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-58
+.. GENERATED FROM PYTHON SOURCE LINES 54-62
 
 .. code-block:: default
 
@@ -126,20 +130,20 @@ Plain mode
 
  .. code-block:: none
 
-    Fermi Energy : 18.239837592692684
-    Bands near the fermi energy : [6, 7, 8, 9]
+    Fermi Energy : 5.6251
+    Bands near the fermi energy : [2, 3, 4, 5]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-63
+.. GENERATED FROM PYTHON SOURCE LINES 63-67
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-74
+.. GENERATED FROM PYTHON SOURCE LINES 67-78
 
 .. code-block:: default
 
@@ -167,8 +171,8 @@ Parametric mode
 
  .. code-block:: none
 
-    Fermi Energy : 18.239837592692684
-    Bands near the fermi energy : [6, 7, 8, 9]
+    Fermi Energy : 5.6251
+    Bands near the fermi energy : [2, 3, 4, 5]
 
 
 
@@ -176,7 +180,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.399 seconds)
+   **Total running time of the script:** ( 0 minutes  5.691 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_plain.py:

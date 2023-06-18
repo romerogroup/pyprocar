@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Density of States &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Density of States &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -419,7 +419,8 @@
 <section id="mode-plain">
 <h2>1. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code><a class="headerlink" href="#mode-plain" title="Permalink to this heading">#</a></h2>
 <p>This mode plots the basic Total Density of States of the structure. This mode is set as the default mode of <code class="docutils literal notranslate"><span class="pre">dosplot()</span></code>.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
 <span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
@@ -430,7 +431,8 @@
 <img alt="../_images/dos_plain_hor.png" src="../_images/dos_plain_hor.png" />
 <p>Note that <code class="docutils literal notranslate"><span class="pre">filename</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">orientation</span></code> did not need to be specifies as we are using the defalut values.
 The following will be the change in usage of <code class="docutils literal notranslate"><span class="pre">orientation</span></code>, and the choice of the spin asked to be plotted. After this example we will switch back to horizontal plot for the examples. and plotting both of the spins in plots.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
 <span class="gp">... </span>                  <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -445,7 +447,8 @@ The following will be the change in usage of <code class="docutils literal notra
 <section id="mode-parametric">
 <h2>2. <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code><a class="headerlink" href="#mode-parametric" title="Permalink to this heading">#</a></h2>
 <p>This mode will use color coding to illustrate the projection of atoms and orbitals asked to be projected. The following will plot shows the projection of p orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>) of O(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>) in SrVO<sub>3</sub></p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
 <span class="gp">... </span>                  <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
@@ -460,7 +463,8 @@ The following will be the change in usage of <code class="docutils literal notra
 <section id="mode-parametric-line">
 <h2>3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code><a class="headerlink" href="#mode-parametric-line" title="Permalink to this heading">#</a></h2>
 <p>This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>) of O(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>) in SrVO<sub>3</sub></p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsdosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsdosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                       <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                       <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
 <span class="gp">... </span>                       <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
@@ -474,7 +478,8 @@ The following will be the change in usage of <code class="docutils literal notra
 <section id="mode-stack">
 <h2>4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code><a class="headerlink" href="#mode-stack" title="Permalink to this heading">#</a></h2>
 <p>This mode plots the contribution of the species and their specified orbitals as stacked curves with filled areas under the curves. The following example represents the stacked projected DOS of d orbitals of Sr(Sr=[4,5,6,7,8]), p orbitals of O(O=[1,2,3]) and the s and p orbitals of V(V=[0,1,2,3]). In this example we have specified colors to have an example for not using the default colors.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;vasprun.xml&#39;</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;lawngreen&#39;</span><span class="p">,</span> <span class="s1">&#39;orangered&#39;</span><span class="p">,</span> <span class="s1">&#39;royalblue&#39;</span><span class="p">],</span>
 <span class="gp">... </span>                  <span class="n">items</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">Sr</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="n">O</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">V</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span>
@@ -488,7 +493,8 @@ The following will be the change in usage of <code class="docutils literal notra
 <section id="mode-stack-species">
 <h2>5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code><a class="headerlink" href="#mode-stack-species" title="Permalink to this heading">#</a></h2>
 <p>This mode is a more specified version of <code class="docutils literal notranslate"><span class="pre">mode=='stack'</span></code>. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if <code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>, PyProcar will plot all the p orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">vasprun</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_species&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
@@ -500,7 +506,8 @@ The following will be the change in usage of <code class="docutils literal notra
 <section id="mode-stack-orbitals">
 <h2>6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code><a class="headerlink" href="#mode-stack-orbitals" title="Permalink to this heading">#</a></h2>
 <p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='stack'</span></code>, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(<code class="docutils literal notranslate"><span class="pre">atoms=[2,</span> <span class="pre">3,</span> <span class="pre">4]</span></code>)</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">vasprun</span><span class="p">,</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                  <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
 <span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>

@@ -14,7 +14,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 """
@@ -27,7 +27,7 @@ import pyprocar
 
 
 project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}bands"
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
 
 
 ###############################################################################
@@ -35,7 +35,7 @@ data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.se
 # +++++++++++++++++++++++++++++++++++++++
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='plain',
                 dirname=data_dir)
 
@@ -52,7 +52,7 @@ orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='parametric',
                 atoms=atoms,
                 orbitals=orbitals,
@@ -74,7 +74,7 @@ orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='parametric',
                 atoms=atoms,
                 orbitals=orbitals,
@@ -96,7 +96,7 @@ orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='scatter',
                 atoms=atoms,
                 orbitals=orbitals,
@@ -116,7 +116,7 @@ orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay_species',
                 orbitals=orbitals,
                 spins=spins,
@@ -131,7 +131,7 @@ pyprocar.bandsplot(
 atoms=[0]
 spins=[0]
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay_orbitals',
                 atoms=atoms,
                 spins=spins,
@@ -147,7 +147,7 @@ pyprocar.bandsplot(
 
 items={'Fe':[4,5,6,7,8]}
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay',
                 items=items,
                 dirname=data_dir)
@@ -161,7 +161,7 @@ pyprocar.bandsplot(
 
 items={'Fe':['p','d']}
 pyprocar.bandsplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay',
                 items=items,
                 dirname=data_dir)

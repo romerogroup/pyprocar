@@ -26,7 +26,7 @@ author = "Uthpala Herath"
 # The short X.Y version
 version = ""
 # The full version, including alpha/beta/rc tags
-release = "2.0.0"
+release = "6.0.0"
 
 
 # -- pyvista configuration ---------------------------------------------------
@@ -72,6 +72,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     "sphinx.ext.mathjax", 
     "sphinx.ext.napoleon", 
+    "pyvista.ext.plot_directive",
     'sphinx.ext.viewcode',
     
     'sphinx_copybutton',
@@ -143,7 +144,7 @@ html_theme_options = {
     "icon_links": [ 
         {
             "name": "Contributing",
-            "url": "https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst",
+            "url": "https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst",
             "icon": "fa fa-gavel fa-fw",
         },
         {

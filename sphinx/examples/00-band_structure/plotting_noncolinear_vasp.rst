@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='bands')
 
@@ -89,7 +89,7 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2E0357C0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AAE48FA00>
 
 
 
@@ -108,7 +108,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
-    spins=[0,1,2]
+    spins=[0]
 
     pyprocar.bandsplot(
                     code='vasp', 
@@ -135,14 +135,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001FB2DB03F70>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADE00760>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.940 seconds)
+   **Total running time of the script:** ( 0 minutes  1.931 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_noncolinear_vasp.py:

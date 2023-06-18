@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>ElectronicBandStructure &#8212; PyProcar 2.0.0 documentation</title>
+    <title>ElectronicBandStructure &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -410,7 +410,65 @@
               
   <section id="electronicbandstructure">
 <span id="ebs"></span><h1>ElectronicBandStructure<a class="headerlink" href="#electronicbandstructure" title="Permalink to this heading">#</a></h1>
-<p>To be finished</p>
+<p>PyProcar provides a centralized data class to manage the electronic band structure information from various DFT codes,
+known as the ElectronicBandStructure class. This class takes kpoints, bands, and efermi as arguments,
+which are the essential requirements for plotting a band-like object.
+Additionally, it can accept other keyword arguments, such as projected, projected_phase, Kpath, weights,
+labels, reciprocal_lattice, and shifted_to_efermi.</p>
+<section id="accessing-electronic-band-structure">
+<h2>Accessing Electronic Band Structure<a class="headerlink" href="#accessing-electronic-band-structure" title="Permalink to this heading">#</a></h2>
+<p>The ElectronicBandStructure object (referred to as “ebs”) can be accessed through the main io.Parser class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyprocar</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">path_to_calculation</span><span class="p">)</span>
+<span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
+</pre></div>
+</div>
+<p>Using the ebs object, you can access various information related to the electronic band structure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span> <span class="c1"># kpoints in the reduced basis</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="c1"># bands in the reduced basis</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span> <span class="c1"># The fermi energy</span>
+
+<span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="c1"># The atomic projections array</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">projected_phase</span> <span class="c1"># The complex atomic projections array</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">kpath</span> <span class="c1"># The kpath information</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">labels</span> <span class="c1"># The kpath labels</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">weights</span> <span class="c1"># The kpoint weights</span>
+
+<span class="n">ebs</span><span class="o">.</span><span class="n">n_kx</span> <span class="c1"># Unique kpoints along the k1 direction</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">n_ky</span> <span class="c1"># Unique kpoints along the k2 direction</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">n_kz</span> <span class="c1"># Unique kpoints along the k3 direction</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">nkpoints</span> <span class="c1"># The number of k points</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">nbands</span> <span class="c1"># The number of bands</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">natoms</span> <span class="c1"># The number of atoms</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">nprincipal</span> <span class="c1"># The number of the prinicipal quantum number</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span> <span class="c1"># The number of orbitals</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">nspins</span> <span class="c1"># The number of spins</span>
+
+<span class="n">ebs</span><span class="o">.</span><span class="n">is_non_collinear</span> <span class="c1"># Boolean if this is a non-collinear calcuulation</span>
+
+<span class="n">ebs</span><span class="o">.</span><span class="n">kpoints_cartesian</span> <span class="c1"># The kpoints in cartesian coordinates</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">kpoints_reduced</span> <span class="c1"># The kpoints in reduced coordinates</span>
+
+
+<span class="c1"># Sometimes having kpoint infomation in mesh grid can be useful. So the following attributes are in the form of a meshgrid</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">index_mesh</span> <span class="c1"># The index mesh store the kpoint index in the original kpoints list at particular grid point</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">kpoints_mesh</span> <span class="c1"># Kpoint mesh representation of the kpoints grid.</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">cartesian_mesh</span> <span class="c1"># Kpoint cartesian mesh representation of the kpoints grid.</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">bands_mesh</span> <span class="c1"># Bands mesh is a numpy array that stores each band in a mesh grid.</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">projected_mesh</span> <span class="c1"># projected mesh is a numpy array that stores each projection in a mesh grid.</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">project_phase_mesh</span> <span class="c1"># projected phase mesh is a numpy array that stores each projection phases in a mesh grid.</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">weights_mesh</span> <span class="c1"># weights mesh is a numpy array that stores each weights in a mesh grid.</span>
+
+<span class="n">ebs</span><span class="o">.</span><span class="n">bands_gradient_mesh</span> <span class="c1"># Bands gradient mesh is a numpy array that stores each band gradient in a mesh grid.</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">bands_hessian_mesh</span> <span class="c1"># Bands hessian mesh is a numpy array that stores each band gradient in a mesh grid.</span>
+
+<span class="c1"># Useful methods</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">orbitals</span><span class="p">,</span><span class="n">spins</span><span class="p">)</span> <span class="c1"># Sum the atomic projections over the atoms, orbitals, spins, and prinicipal</span>
+<span class="n">ebs</span><span class="o">.</span><span class="n">ibz2fbz</span><span class="p">(</span><span class="n">rotations</span><span class="o">=</span><span class="n">rotations</span><span class="p">)</span> <span class="c1"># if the calculation used symmetry this method will recover the full information of the broullin zone based on the symmetry rotations</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -444,6 +502,23 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#accessing-electronic-band-structure">
+   Accessing Electronic Band Structure
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>

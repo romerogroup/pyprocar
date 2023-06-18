@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptFermi2D &#8212; PyProcar 2.0.0 documentation</title>
+    <title>pyprocar.scripts.scriptFermi2D &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -200,7 +200,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -332,7 +332,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -397,7 +397,7 @@
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">io</span>
 
 
-<div class="viewcode-block" id="fermi2D"><a class="viewcode-back" href="../../../user-guide/fermi2d.html#pyprocar.scripts.scriptFermi2D.fermi2D">[docs]</a><span class="k">def</span> <span class="nf">fermi2D</span><span class="p">(</span>
+<div class="viewcode-block" id="fermi2D"><a class="viewcode-back" href="../../../user-guide/fermi2d.html#pyprocar.scripts.fermi2D">[docs]</a><span class="k">def</span> <span class="nf">fermi2D</span><span class="p">(</span>
     <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
     <span class="n">dirname</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
     <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
@@ -579,9 +579,9 @@
         <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">0</span><span class="p">]][:,:,</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">1</span><span class="p">]][:,:,</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">2</span><span class="p">]][:,:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">1</span><span class="p">]][:,:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">2</span><span class="p">]][:,:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">3</span><span class="p">]][:,:,</span><span class="mi">0</span><span class="p">]</span>
 
 
         <span class="n">stData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="p">)</span>

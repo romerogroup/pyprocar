@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>plot_fermi_surface_area_vs_isovalue &#8212; PyProcar 2.0.0 documentation</title>
+    <title>fermi2D &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -47,11 +47,11 @@
     <script src="../../../_static/clipboard.min.js"></script>
     <script src="../../../_static/copybutton.js"></script>
     <script src="../../../_static/design-tabs.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/scripts/_autosummary/pyprocar.scripts.fermi2D';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="fermi3D" href="../fermi3d.html" />
-    <link rel="prev" title="plot_fermi_surface" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html" />
+    <link rel="prev" title="fermi2D" href="../fermi2d.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -603,6 +603,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../io/vasp.html">VaspParser</a><input class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-33"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.html">pyprocar.io.vasp.Outcar</a><input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-34"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.get_symmetry_operations.html">get_symmetry_operations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.efermi.html">efermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.reciprocal_lattice.html">reciprocal_lattice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.rotations.html">rotations</a></li>
@@ -754,24 +755,24 @@
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.scripts.dosplot.html">dosplot</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current active has-children"><a class="reference internal" href="../fermi2d.html">FermiHandler</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-53" name="toctree-checkbox-53" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-53"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l3 current active has-children"><a class="reference internal" href="pyprocar.scripts.FermiHandler.html">pyprocar.scripts.FermiHandler</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-54" name="toctree-checkbox-54" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-54"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
-<li class="toctree-l4 current active"><a class="current reference internal" href="#">plot_fermi_surface_area_vs_isovalue</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../fermi2d.html">fermi2D</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-53" name="toctree-checkbox-53" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-53"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">fermi2D</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../fermi3d.html">fermi3D</a><input class="toctree-checkbox" id="toctree-checkbox-55" name="toctree-checkbox-55" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-55"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../fermi3d.html">fermi3D</a><input class="toctree-checkbox" id="toctree-checkbox-54" name="toctree-checkbox-54" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-54"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pyprocar.scripts.fermi3D.html">fermi3D</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../fermihandler.html">bandsplot_2d</a><input class="toctree-checkbox" id="toctree-checkbox-56" name="toctree-checkbox-56" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-56"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="pyprocar.scripts.bandsplot_2d.html">bandsplot_2d</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../fermihandler.html">FermiHandler</a><input class="toctree-checkbox" id="toctree-checkbox-55" name="toctree-checkbox-55" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-55"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.scripts.FermiHandler.html">pyprocar.scripts.FermiHandler</a><input class="toctree-checkbox" id="toctree-checkbox-56" name="toctree-checkbox-56" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-56"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html">plot_fermi_cross_section_box_widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../generate2dkmesh.html">generate2dkmesh</a><input class="toctree-checkbox" id="toctree-checkbox-57" name="toctree-checkbox-57" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-57"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -819,29 +820,53 @@
             
             <article class="bd-article" role="main">
               
-  <section id="plot-fermi-surface-area-vs-isovalue">
-<h1>plot_fermi_surface_area_vs_isovalue<a class="headerlink" href="#plot-fermi-surface-area-vs-isovalue" title="Permalink to this heading">#</a></h1>
-<dl class="py method">
-<dt class="sig sig-object py" id="pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue">
-<span class="sig-prename descclassname"><span class="pre">FermiHandler.</span></span><span class="sig-name descname"><span class="pre">plot_fermi_surface_area_vs_isovalue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iso_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_surfaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_shift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supercell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extended_zone_directions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/scripts/scriptFermiHandler.html#FermiHandler.plot_fermi_surface_area_vs_isovalue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue" title="Permalink to this definition">#</a></dt>
-<dd><p>A method to plot the fermi surface area vs the isovlaue</p>
+  <section id="fermi2d">
+<h1>fermi2D<a class="headerlink" href="#fermi2d" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyprocar.scripts.fermi2D">
+<span class="sig-prename descclassname"><span class="pre">pyprocar.scripts.</span></span><span class="sig-name descname"><span class="pre">fermi2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'plain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lobster</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbitals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_z_plane</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_symm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_texture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_projection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'z'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_arrow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axes_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exportplt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/scripts/scriptFermi2D.html#fermi2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.scripts.fermi2D" title="Permalink to this definition">#</a></dt>
+<dd><p>This function plots the 2d fermi surface in the z = 0 plane</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>iso_range</strong> (<em>float</em><em>, </em><em>optional</em>) – The isovalue range, by default 3</p></li>
-<li><p><strong>iso_surfaces</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of sruafce to generate in the range, by default 10</p></li>
-<li><p><strong>iso_values</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Exact iso vlaues to generate surfaces, by default None</p></li>
-<li><p><strong>spins</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – A list of spins, by default None</p></li>
-<li><p><strong>fermi</strong> (<em>float</em><em>, </em><em>optional</em>) – Ther fermi energy, by default None</p></li>
-<li><p><strong>fermi_shift</strong> (<em>float</em><em>, </em><em>optional</em>) – Float to shift the fermi energy, by default 0</p></li>
-<li><p><strong>fermi_tolerance</strong> (<em>float</em><em>, </em><em>optional</em>) – The fermi tolerance. This will allow more bands when searching for isosurfaces, by default 0.1</p></li>
-<li><p><strong>supercell</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – A list of integers for the supercell to include, by default [1, 1, 1]</p></li>
-<li><p><strong>extended_zone_directions</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em>] or </em><em>Tuple</em><em>[</em><em>int</em><em>,</em><em>int</em><em>,</em><em>int</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – A list of list that describe the directions to expand the fermi surface, by default None</p></li>
-<li><p><strong>interpolation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – The interpolation factor, by default 1</p></li>
-<li><p><strong>cmap</strong> (<em>str</em><em>, </em><em>optional</em>) – The colormap, by default “jet”</p></li>
-<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to show the plot, by default True</p></li>
-<li><p><strong>savefig</strong> (<em>str</em><em>, </em><em>optional</em>) – String to save the plot, by default None</p></li>
+<li><p><strong>code</strong> (<em>str</em><em>,</em>) – This parameter sets the code to parse, by default “vasp”</p></li>
+<li><p><strong>dirname</strong> (<em>str</em><em>, </em><em>optional</em>) – This parameter is the directory of the calculation, by default ‘’</p></li>
+<li><p><strong>lobster</strong> (<em>bool</em><em>, </em><em>optional</em>) – A boolean value to determine to use lobster, by default False</p></li>
+<li><p><strong>band_indices</strong> (<em>List</em><em>[</em><em>List</em><em>]</em>) – A list of list that contains band indices for a given spin</p></li>
+<li><p><strong>band_colors</strong> (<em>List</em><em>[</em><em>List</em><em>]</em>) – A list of list that contains colors for the band index
+corresponding the band_indices for a given spin</p></li>
+<li><p><strong>spins</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of spins, by default [0]</p></li>
+<li><p><strong>atoms</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of atoms, by default None</p></li>
+<li><p><strong>orbitals</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of orbitals, by default None</p></li>
+<li><p><strong>energy</strong> (<em>float</em><em>, </em><em>optional</em>) – The energy to generate the iso surface.
+When energy is None the 0 is used by default, which is the fermi energy,
+by default None</p></li>
+<li><p><strong>k_z_plane</strong> (<em>float</em><em>, </em><em>optional</em>) – Which K_z plane to generate 2d fermi surface, by default 0.0</p></li>
+<li><p><strong>rot_symm</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 1</p></li>
+<li><p><strong>translate</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Matrix to translate the kpoints, by default [0, 0, 0]</p></li>
+<li><p><strong>rotation</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Matrix to rotate the kpoints, by default [0, 0, 0, 1]</p></li>
+<li><p><strong>savefig</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename to save the plot as., by default None</p></li>
+<li><p><strong>spin_texture</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to determine if spin arrows are plotted, by default False</p></li>
+<li><p><strong>arrow_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Inversely determines the arrow size, by default None</p></li>
+<li><p><strong>arrow_color</strong> (<em>List</em><em>[</em><em>int</em><em>] or </em><em>str</em><em>, </em><em>optional</em>) – Either a list for the rbg value or a string for the color, by default None</p></li>
+<li><p><strong>arrow_density</strong> (<em>float</em><em>, </em><em>optional</em>) – Inversely determines the arrow density</p></li>
+<li><p><strong>no_arrow</strong> (<em>bool</em><em>, </em><em>optional</em>) – A boolean value to determine if arrows or a heat map is produced for spins, by default False</p></li>
+<li><p><strong>add_axes_labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to add axes labels, by default True</p></li>
+<li><p><strong>add_legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to add legend, by default True</p></li>
+<li><p><strong>exportplt</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value where to return the matplotlib.pyplot state plt, by default False</p></li>
+<li><p><strong>color_bar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to plot the color bar, by default False</p></li>
+<li><p><strong>cmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – The colormap to be used, by default False</p></li>
+<li><p><strong>repair</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option for vasp to repair the procar file, by default True</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the matplotlib.pyplot state plt</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.pyplot</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – invalid option –translate</p>
 </dd>
 </dl>
 </dd></dl>
@@ -856,11 +881,11 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="../fermi2d.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">plot_fermi_surface</p>
+          <p class="prev-next-title">fermi2D</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="../fermi3d.html" title="next page">
@@ -887,10 +912,10 @@
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue">
+  <a class="reference internal nav-link" href="#pyprocar.scripts.fermi2D">
    <code class="docutils literal notranslate">
     <span class="pre">
-     FermiHandler.plot_fermi_surface_area_vs_isovalue()
+     fermi2D()
     </span>
    </code>
   </a>
@@ -912,7 +937,7 @@
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
-    <a href="../../../_sources/api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface_area_vs_isovalue.rst.txt">
+    <a href="../../../_sources/api/scripts/_autosummary/pyprocar.scripts.fermi2D.rst.txt">
         <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>

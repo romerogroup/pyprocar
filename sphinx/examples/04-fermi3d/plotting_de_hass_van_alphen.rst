@@ -23,6 +23,8 @@
 Showing how to get van alphen fequencies from the fermi surface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi surface areas (A) is given below.
 To compare the theoretical freuqencies we will compare with the results taken from the experimental paper
 "The Fermi surfaces of copper, silver and gold. I. The de Haas-Van alphen effect"(https://doi.org/10.1098/rsta.1962.0011).
@@ -49,7 +51,7 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-37
+.. GENERATED FROM PYTHON SOURCE LINES 36-39
 
 .. code-block:: default
 
@@ -63,7 +65,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-43
+.. GENERATED FROM PYTHON SOURCE LINES 40-45
 
 .. code-block:: default
 
@@ -79,11 +81,11 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-45
+.. GENERATED FROM PYTHON SOURCE LINES 46-47
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-61
+.. GENERATED FROM PYTHON SOURCE LINES 47-65
 
 .. code-block:: default
 
@@ -96,6 +98,8 @@ importing pyprocar and specifying local data_dir
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+    # Symmetry only works for specfic space groups currently. 
+    # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
     fermiHandler = pyprocar.FermiHandler(
                                         code="vasp",
                                         dirname=data_dir,
@@ -110,21 +114,21 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-66
+.. GENERATED FROM PYTHON SOURCE LINES 66-69
 
 Maximal cross sectional area along the (0,0,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In the following line we show how the cross section widget can find the cross sectional areas of the fermi surface
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-79
+.. GENERATED FROM PYTHON SOURCE LINES 69-83
 
 .. code-block:: default
 
 
 
 
-    fermiHandler.plot_fermi_cross_section(
+
+    fermiHandler.plot_fermi_cross_section_box_widget(
                                 show_cross_section_area=True,
                                 bands=[5],
                                 transparent_mesh=True,
@@ -153,27 +157,27 @@ In the following line we show how the cross section widget can find the cross se
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-85
+.. GENERATED FROM PYTHON SOURCE LINES 84-89
 
 In the above figure we can see the cross section area is :math:`A = 4.1586 Ang^{-2} = 4.1586e^{16} cm^{-2} (cgs)`.
 
 :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 4.365e^8 G`
 
-:math:`F_{exp} =  = 4.50e^7 G`
+:math:`F_{exp} = 4.50e^7 G`
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-91
+.. GENERATED FROM PYTHON SOURCE LINES 91-95
 
 Minimal cross sectional area along the (0,0,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-102
+.. GENERATED FROM PYTHON SOURCE LINES 95-106
 
 .. code-block:: default
 
 
-    fermiHandler.plot_fermi_cross_section(
+    fermiHandler.plot_fermi_cross_section_box_widget(
                                     show_cross_section_area=True,
                                     bands=[5],
                                     transparent_mesh=True,
@@ -202,28 +206,28 @@ Minimal cross sectional area along the (0,0,1)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-109
+.. GENERATED FROM PYTHON SOURCE LINES 107-113
 
 In the above figure we can see the cross section area is :math:`A = 0.1596 Ang^{-2} = 0.1596e^{16} cm^{-2} (cgs)`.
 
 :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 1.68e^7 G`
 
-:math:`F_{exp} =  = 1.50e^7 G`
+:math:`F_{exp} = 1.50e^7 G`
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-115
+.. GENERATED FROM PYTHON SOURCE LINES 115-119
 
 Extremal cross sectional area along the (0,1,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-127
+.. GENERATED FROM PYTHON SOURCE LINES 119-131
 
 .. code-block:: default
 
 
-    fermiHandler.plot_fermi_cross_section(
+    fermiHandler.plot_fermi_cross_section_box_widget(
                                     show_cross_section_area=True,
                                     bands=[5],
                                     transparent_mesh=True,
@@ -253,18 +257,18 @@ Extremal cross sectional area along the (0,1,1)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-133
+.. GENERATED FROM PYTHON SOURCE LINES 132-137
 
 In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{-2} = 4.3956e^{16} cm^{-2} (cgs)`.
 
 :math:`F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G`
 
-:math:`F_{exp} =  = 4.85e^8 G`
+:math:`F_{exp} = 4.85e^8 G`
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.352 seconds)
+   **Total running time of the script:** ( 0 minutes  4.167 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_de_hass_van_alphen.py:

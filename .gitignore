@@ -154,3 +154,6 @@ my_tests/
 data/
 reports/
 notebooks/
+
+
+.pypirc

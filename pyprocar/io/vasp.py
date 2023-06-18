@@ -64,6 +64,7 @@ class Outcar(collections.abc.Mapping):
         reciprocal_lattice = reciprocal_lattice[:, 3:]
         return reciprocal_lattice
 
+
     @property
     def rotations(self):
         """
@@ -152,8 +153,59 @@ class Outcar(collections.abc.Mapping):
                 R = np.linalg.inv(self.reciprocal_lattice.T).dot(R).dot(self.reciprocal_lattice.T)
                 R = np.round_(R, decimals=3)
                 rotations.append(R)
-        
         return np.array(rotations)
+
+    def get_symmetry_operations(self):
+        with open(self.filename) as f:
+            txt = f.readlines()
+
+        has_new_rotation_format = False
+        i_rotation_lines=[]
+        for i, line in enumerate(txt):
+            if 'isymop' in line:
+                has_new_rotation_format = True
+                i_rotation_lines.append(i)
+            if 'irot' in line:
+                begin_table = i+1
+            if 'Subroutine' in line:
+                end_table = i-1
+
+        n_sym_ops = len(i_rotation_lines)
+        rotations_ops = np.zeros(shape=(n_sym_ops,3,3))
+        gtrans_ops = np.zeros(shape=(n_sym_ops,3))
+        ptrans_ops = np.zeros(shape=(n_sym_ops,3))
+        symmetry_operations = []
+        for i_sym_op, i_rotation_line in enumerate(i_rotation_lines):
+            i_gtrans_line = i_rotation_line + 4
+            i_ptrans_line = i_rotation_line + 6
+
+            # Gets the symmetry translation
+            raw_gtrans_line = txt[i_gtrans_line].split(':')[-1].split()
+            raw_ptrans_line = txt[i_ptrans_line].split(':')[-1].split()
+            gtrans = np.array([float(value) for value in raw_gtrans_line])
+            ptrans = np.array([float(value) for value in raw_ptrans_line])
+
+            # Gets the symmetry rotations
+            rotation=[]
+            raw_rotation_lines = txt[i_rotation_line:i_rotation_line+3]
+            for i,raw_rotation_line in enumerate(raw_rotation_lines):
+                if i ==0:
+                    r_ij = [float(value) for value in raw_rotation_line.split(':')[-1].split()]
+                else:
+                    r_ij = [float(value) for value in raw_rotation_line.split()]
+            
+                rotation.append(r_ij)
+            rotation = np.array(rotation)
+
+            rotations_ops[i_sym_op,:,:] = rotation.T
+            gtrans_ops[i_sym_op,:] = gtrans
+            ptrans_ops[i_sym_op,:] = ptrans
+
+
+            sym_op = (rotation.T,gtrans,ptrans)
+            symmetry_operations.append(sym_op)
+
+        return symmetry_operations
 
     def __contains__(self, x):
         return x in self.variables
@@ -1104,7 +1156,7 @@ class Procar(collections.abc.Mapping):
         nbands = spd.shape[1]
         norbitals = spd.shape[4] - 2
         if spd.shape[2] == 4:
-            nspins = 3
+            nspins = 4
         else:
             nspins = spd.shape[2]
         if nspins == 2:
@@ -1124,7 +1176,7 @@ class Procar(collections.abc.Mapping):
         # (nkpoints,nbands, natom, norbital, nspin)
         # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
         if nspins == 3:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :-1]
+            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
         elif nspins == 2:
             projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
             projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
@@ -1290,10 +1342,6 @@ class VaspXML(collections.abc.Mapping):
                                 "spin 2": "Spin-x",
                                 "spin 3": "Spin-y", 
                                 "spin 4": "Spin-z"}
-            # self.spins_dict = {"spin 4": "Spin-Total", 
-            #                     "spin 1": "Spin-x",
-            #                     "spin 2": "Spin-y", 
-            #                     "spin 3": "Spin-z"}
         else:
             self.is_noncolinear = False
             self.spins_dict = {"spin 1": "Spin-up", "spin 2": "Spin-down"}
@@ -1466,8 +1514,9 @@ class VaspXML(collections.abc.Mapping):
                             ispin
                         ][ispin]
                     )[:, 1:]
-                if 'Spin-Total' in list(dos_projected[name].keys()):
-                    del dos_projected[name]['Spin-Total']
+
+                # if 'Spin-Total' in list(dos_projected[name].keys()):
+                #     del dos_projected[name]['Spin-Total']
             return (
                 dos_projected,
                 self.data["general"]["dos"]["partial"]["array"]["info"],

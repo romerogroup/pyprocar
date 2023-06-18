@@ -23,6 +23,11 @@
       
       
         
+          Outcar.get_symmetry_operations
+        
+      
+      
+        
       
       
         

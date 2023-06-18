@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Plotting fermi3d isoslider &#8212; PyProcar 2.0.0 documentation</title>
+    <title>Plotting fermi3d isoslider &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -203,7 +203,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -335,7 +335,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -442,6 +442,7 @@ to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-fermi3d-isoslider">
 <span id="ref-plotting-fermi3d-isoslider"></span><span id="sphx-glr-examples-04-fermi3d-plotting-fermi3d-isoslider-py"></span><h1>Plotting fermi3d isoslider<a class="headerlink" href="#plotting-fermi3d-isoslider" title="Permalink to this heading">#</a></h1>
+<p>Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry</p>
 <p>Plotting fermi3d isoslider example.</p>
 <p>First download the example files with the code below. Then replace data_dir below.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
@@ -472,6 +473,8 @@ to download the full example code</p>
 
 
 <span class="c1"># First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot</span>
+<span class="c1"># Symmetry only works for specfic space groups currently.</span>
+<span class="c1"># For the actual calculations turn off symmetry and set &#39;apply_symmetry&#39;=False</span>
 <span class="n">fermiHandler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">FermiHandler</span><span class="p">(</span>
                                     <span class="n">code</span><span class="o">=</span><span class="s2">&quot;qe&quot;</span><span class="p">,</span>
                                     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
@@ -503,7 +506,7 @@ No isosurface for this band
 No isosurface for this band
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.878 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  22.529 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plotting-fermi3d-isoslider-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5d49b54f264d341f27c288ad3652f15c/plotting_fermi3d_isoslider.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_fermi3d_isoslider.py</span></code></a></p>

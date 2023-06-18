@@ -184,7 +184,7 @@ class DOSPlot:
             spin_labels = settings.dos.spin_labels
 
         if vmin is None:
-            vmin = 0
+            vmin = (dos_projected.min() / dos_total_projected.max())
         if vmax is None:
             vmax = (dos_projected.max() / dos_total_projected.max())
 
@@ -346,7 +346,7 @@ class DOSPlot:
         projections_weights = np.divide(dos_projected,dos_total_projected)
 
         if vmin is None:
-            vmin = 0
+            vmin = (dos_projected.min() / dos_total_projected.max())
         if vmax is None:
             vmax = (dos_projected.max() / dos_total_projected.max())
         if plot_bar:

@@ -30,17 +30,17 @@
       
       
         
+          FermiHandler.plot_fermi_cross_section_box_widget
+        
+      
+      
+        
           FermiHandler.plot_fermi_isoslider
         
       
       
         
           FermiHandler.plot_fermi_surface
-        
-      
-      
-        
-          FermiHandler.plot_fermi_surface_area_vs_isovalue
         
       
    

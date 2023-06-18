@@ -32,7 +32,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='spin-polarized-colinear',
                                 calc_type='dos')
 
@@ -48,7 +48,7 @@ importing pyprocar and specifying local data_dir
     import pyprocar
 
     project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}spin-polarized-colinear{os.sep}dos"
+    data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}dos"
 
 
 
@@ -70,7 +70,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 .. code-block:: default
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='plain',
                     dirname=data_dir)
 
@@ -88,7 +88,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2E67C460>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028ABDEA5EB0>
 
 
 
@@ -104,7 +104,7 @@ The keyword spins can also be used to select which spin bands to plot
 
     spins = [1]
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='plain',
                     spins=spins,
                     dirname=data_dir)
@@ -123,7 +123,7 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2D98FC10>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028ABDB6D700>
 
 
 
@@ -146,7 +146,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     spins=[0,1]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -169,7 +169,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2F404A30>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028AAE5A9B50>
 
 
 
@@ -192,7 +192,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     spins=[0,1]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric_line',
                     atoms=atoms,
                     orbitals=orbitals,
@@ -217,7 +217,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB52267E50>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028AB8D542B0>
 
 
 
@@ -237,7 +237,7 @@ stack_species mode
     spins=[0,1]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='stack_species',
                     orbitals=orbitals,
                     spins=spins,
@@ -258,7 +258,7 @@ stack_species mode
 
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2F6C24C0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028AAEF39580>
 
 
 
@@ -277,7 +277,7 @@ stack_orbtials mode
     atoms=[0]
     spins=[0,1]
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='stack_orbitals',
                     atoms=atoms,
                     spins=spins,
@@ -300,7 +300,7 @@ stack_orbtials mode
 
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB2DB77340>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028AAE5BB5B0>
 
 
 
@@ -320,7 +320,7 @@ stack mode
     items={'Fe':[4,5,6,7,8]}
     spins=[0,1]
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='stack',
                     items=items,
                     spins=spins,
@@ -339,14 +339,14 @@ stack mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000001FB526887C0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000028AAE1A9CD0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  43.564 seconds)
+   **Total running time of the script:** ( 0 minutes  2.563 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_spin_polarized_dos.py:

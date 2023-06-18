@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.plotter.dos_plot &#8212; PyProcar 2.0.0 documentation</title>
+    <title>pyprocar.plotter.dos_plot &#8212; PyProcar 6.0.0 documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">PyProcar 2.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
   
 </a>
     
@@ -200,7 +200,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -332,7 +332,7 @@
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa fa-gavel fa-fw"></i></span>
             <label class="sr-only">Contributing</label></a>
         </li>
         <li class="nav-item">
@@ -565,7 +565,7 @@
             <span class="n">spin_labels</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">spin_labels</span>
 
         <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vmin</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">vmin</span> <span class="o">=</span> <span class="p">(</span><span class="n">dos_projected</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="n">dos_total_projected</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">dos_projected</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">dos_total_projected</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
@@ -727,7 +727,7 @@
         <span class="n">projections_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dos_projected</span><span class="p">,</span><span class="n">dos_total_projected</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vmin</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">vmin</span> <span class="o">=</span> <span class="p">(</span><span class="n">dos_projected</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="n">dos_total_projected</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">dos_projected</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">dos_total_projected</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">plot_bar</span><span class="p">:</span>

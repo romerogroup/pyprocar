@@ -17,7 +17,7 @@ from matplotlib import cm
 
 from . import Isosurface, Surface, BrillouinZone
 
-
+import pyvista as pv
 np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -28,6 +28,7 @@ EV_TO_J = 1.602*10**(-19)
 FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
 
 class FermiSurface3D(Surface):
+# class FermiSurface3D(pv.PolyData):
     """
     The object is used to store and manapulate a 3d fermi surface.
 
@@ -122,7 +123,7 @@ class FermiSurface3D(Surface):
             bands_to_keep = len(self.bands[0,:])
         elif len(bands_to_keep) < len(self.bands[0,:]) :
             self.bands = self.bands[:,bands_to_keep]
-
+        
         self.reciprocal_lattice = reciprocal_lattice
 
         self.supercell = np.array(supercell)
@@ -148,7 +149,7 @@ class FermiSurface3D(Surface):
         if len(fullBandIndex)==0:
             raise Exception("No bands within tolerance. Increase tolerance to increase search space.")
         self.bands = self.bands[:,fullBandIndex]
-
+        
         # re-index and creates a mapping to the original bandindex
         reducedBandIndex = np.arange(len(self.bands[0,:]))
         self.fullBandIndex = fullBandIndex
@@ -176,7 +177,7 @@ class FermiSurface3D(Surface):
             cmap = cm.get_cmap(cmap)
             solid_color_surface = np.arange(nsurface ) / nsurface
             band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(-1, 4)
-
+        
         # The following loop generates iso surfaces for each band and then stores them in a list
         color_band_dict = {}
 
@@ -205,7 +206,7 @@ class FermiSurface3D(Surface):
                     raise Exception("Could not find any fermi surfaces")
                 continue
             else:    
-                full_isosurface += isosurface_band_copy
+                full_isosurface.merge(isosurface_band_copy, merge_points=False, inplace=True) 
 
             color_band_dict.update({f"band_{iband_with_surface}": {"color" : band_colors[iband_with_surface,:]} })
             band_color = np.array([band_colors[iband_with_surface,:]]*len(isosurface_band.points[:,0]))
@@ -216,26 +217,29 @@ class FermiSurface3D(Surface):
         # Initialize the Fermi Surface which is the combination of all the 
         # isosurface for each band
         super().__init__(verts=full_isosurface.points, faces=full_isosurface.faces)
+        # super().__init__(var_inp=full_isosurface.points, faces=full_isosurface.faces)
         self.fermi_surface_area = self.area
         
         # Remapping of the scalar arrays into the combind mesh  
         count = 0
         combined_band_color_array = []
-        for iband,isosurface_band in enumerate(self.isosurfaces):
-            new_color_array = []
-            color_array_name = isosurface_band.point_data.keys()[0]
-            for points in self.points:
-                if points in isosurface_band.points:
-                    new_color_array.append(color_band_dict[color_array_name]['color'])    
-                else:
-                    new_color_array.append(np.array([0,0,0,1]))
 
-            for ipoints in range(len(isosurface_band.points)):
-                combined_band_color_array.append(color_band_dict[color_array_name]['color'])
+        combined_band_color_array = np.zeros(shape=(len(self.points),4))
+        for iband,isosurface_band in enumerate(self.isosurfaces):
+            color_array_name = isosurface_band.point_data.keys()[0]
             i_reduced_band = color_array_name.split('_')[1]
 
+            new_color_array = np.zeros(shape=(len(self.points),4))
+            for i,point in enumerate(self.points):
+                # Check if the point is in the combined surface
+                if any(np.equal(isosurface_band.points,point).all(1)):
+                    combined_band_color_array[i] = color_band_dict[color_array_name]['color']
+                    new_color_array[i] = color_band_dict[color_array_name]['color']
+                else:
+                    new_color_array[i] = np.array([0,0,0,1])
+        
             self.point_data[ "band_"+ str(self.reducedBandIndex_to_fullBandIndex[str(i_reduced_band)])] = np.array(new_color_array)
-        self.point_data["bands"] = np.array(combined_band_color_array ) 
+        self.point_data["bands"] = combined_band_color_array #np.array(combined_band_color_array ) 
         return None
         
 
@@ -258,6 +262,7 @@ class FermiSurface3D(Surface):
         final_vectors_Z = []
         for iband, isosurface in enumerate(self.isosurfaces):
             XYZ_extended = self.XYZ.copy()
+            
             vectors_extended_X = vectors_array[:,iband,0].copy()
             vectors_extended_Y = vectors_array[:,iband,1].copy()
             vectors_extended_Z = vectors_array[:,iband,2].copy()
@@ -494,7 +499,6 @@ class FermiSurface3D(Surface):
                                 np.unique(self.XYZ[:,1]),
                                 np.unique(self.XYZ[:,2]), indexing = 'ij')
         
-        print(self.bands.shape)
         kp_reduced_to_energy = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,self.bands[:,iband])}
         kp_reduced_to_kp_cart = {f'({key[0]},{key[1]},{key[2]})':value for (key,value) in zip(self.XYZ,kpoints_cart)}
         kp_reduced_to_mesh_index = {f'({kp[0]},{kp[1]},{kp[2]})': np.argwhere((mesh_list[0]==kp[0]) & 
@@ -708,16 +712,14 @@ class FermiSurface3D(Surface):
         """
         Method to calculate atomic spin texture projections of the surface.
         """
+        
         if self.spd_spin[0] is not None:
             self.spd_spin = self.spd_spin[:,self.fullBandIndex,:]
+
         vectors_array = self.spd_spin
 
         self.create_vector_texture(vectors_array = vectors_array, vectors_name = "spin" )
-    """
-        Method to extend the surface in reciprocal lattice vecctor
-        Args:
-            extended_zone_directions (List[List[int] or Tuple[int,int,int]], optional): List of directions to extend the surface. Defaults to None.
-        """
+
     def extend_surface(self,  extended_zone_directions: List[List[int] or Tuple[int,int,int]]=None,):
         """
         Method to extend the surface in the direction of a reciprocal lattice vecctor
@@ -727,17 +729,21 @@ class FermiSurface3D(Surface):
         extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
             List of directions to expand to, by default None
         """
-        
+        import pyvista as pv
         # The following code  creates exteneded surfaces in a given direction
         extended_surfaces = []
         if extended_zone_directions is not None:
-            original_surface = copy.deepcopy(self) 
+            # new_surface = copy.deepcopy(self)
+            initial_surface = copy.deepcopy(self)
             for direction in extended_zone_directions:
-                surface = copy.deepcopy(original_surface)
-                self += surface.translate(np.dot(direction, self.reciprocal_lattice))
-            #Clearing unneeded surface from memory
-            del original_surface
+                surface = copy.deepcopy(initial_surface)
+
+                self += surface.translate(np.dot(direction, self.reciprocal_lattice), inplace=True)
+            
+  
+            # Clearing unneeded surface from memory
             del surface
+ 
 
     def _get_brilloin_zone(self, 
                         supercell: List[int]):

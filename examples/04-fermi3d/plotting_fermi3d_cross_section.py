@@ -5,6 +5,8 @@
 Plotting fermi3d cross_section
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Plotting fermi3d cross_section example.
 
 First download the example files with the code below. Then replace data_dir below.
@@ -14,7 +16,7 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='Fe',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 """
@@ -33,12 +35,14 @@ import os
 import pyprocar
 
 project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}fermi"
+data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+# Symmetry only works for specfic space groups currently. 
+# For the actual calculations turn off symmetry and set 'apply_symmetry'=False
 fermiHandler = pyprocar.FermiHandler(
-                                    code="qe",
+                                    code="vasp",
                                     dirname=data_dir,
                                     apply_symmetry=True)
 
@@ -69,7 +73,6 @@ line_width=5.0
 #save_2d_slice=''
 
 fermiHandler.plot_fermi_cross_section(
-                              show_cross_section_area=show_cross_section_area,
                               slice_normal=slice_normal,
                               slice_origin=slice_origin,
                               line_width=line_width,
@@ -94,7 +97,6 @@ show_cross_section_area=True
 save_2d_slice='2d_slice.png'
 
 fermiHandler.plot_fermi_cross_section(
-                              show_cross_section_area=show_cross_section_area,
                               slice_normal=slice_normal,
                               slice_origin=slice_origin,
                               line_width=line_width,
