@@ -78,7 +78,7 @@ But you can change this by setting arrow_projection to one of the following
                    dirname=data_dir,
                    spin_texture=True,
                    arrow_projection='x',
-                   arrow_size =0.5,
+                   arrow_size=3,
                    arrow_density=10,
                    color_bar=True)
 
@@ -126,8 +126,8 @@ But you can change this by setting arrow_projection to one of the following
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
-    atoms           :  [-1]
-    orbitals        :  [-1]
+    atoms           :  None
+    orbitals        :  None
     spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
@@ -160,7 +160,7 @@ Spin Texture single color
                    dirname=data_dir,
                    spin_texture=True,
                    arrow_color = 'blue',
-                   arrow_size =0.5,
+                   arrow_size=3,
                    arrow_density=10)
 
 
@@ -208,8 +208,8 @@ Spin Texture single color
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
-    atoms           :  [-1]
-    orbitals        :  [-1]
+    atoms           :  None
+    orbitals        :  None
     spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
@@ -247,7 +247,7 @@ Also you can specify the colors of the bands as well with band_colors
                    band_indices = band_indices,
                    band_colors=band_colors,
                    spin_texture=True,
-                   arrow_size =0.5,
+                   arrow_size=3,
                    arrow_density=10,
                    dirname=data_dir)
 
@@ -292,8 +292,8 @@ Also you can specify the colors of the bands as well with band_colors
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  [[6, 7]]
-    atoms           :  [-1]
-    orbitals        :  [-1]
+    atoms           :  None
+    orbitals        :  None
     spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
@@ -311,7 +311,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.269 seconds)
+   **Total running time of the script:** ( 0 minutes  18.007 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

@@ -502,6 +502,7 @@
                         <span class="c1"># saving options</span>
                         <span class="n">show</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">plot_directional_arrows</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">camera_pos</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                         <span class="n">background_color</span><span class="p">:</span><span class="nb">str</span> <span class="ow">or</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
                         <span class="n">perspective</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -686,11 +687,12 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span><span class="n">scalars</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">arrow_color</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">fermi_surface</span><span class="p">,</span>
-                        <span class="n">scalars</span> <span class="o">=</span>  <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> 
-                        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-                        <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">rgba</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;use_rgba&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">transparent</span><span class="p">:</span>
+            <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">fermi_surface</span><span class="p">,</span>
+                            <span class="n">scalars</span> <span class="o">=</span>  <span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;scalars&#39;</span><span class="p">],</span> 
+                            <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                            <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">rgba</span><span class="o">=</span><span class="n">options_dict</span><span class="p">[</span><span class="s1">&#39;use_rgba&#39;</span><span class="p">])</span>
 
         <span class="c1"># Add in custom scalar bar</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;plain&quot;</span> <span class="ow">or</span> <span class="n">spin_texture</span><span class="p">:</span>
@@ -740,8 +742,9 @@
 
 <div class="viewcode-block" id="FermiHandler.plot_fermi_isoslider"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html#pyprocar.scripts.FermiHandler.plot_fermi_isoslider">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fermi_isoslider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                         <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
-                        <span class="n">iso_range</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                        <span class="n">iso_surfaces</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">iso_range</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">iso_surfaces</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">iso_values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">bands</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                         <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -930,8 +933,10 @@
                                                         <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                                                         <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">,</span>
                                                         <span class="n">fermi_tolerance</span><span class="o">=</span><span class="n">fermi_tolerance</span><span class="p">)</span>
-
-        <span class="n">energy_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">-</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">+</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">iso_surfaces</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">iso_surfaces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">energy_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">-</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">+</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">iso_surfaces</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">iso_values</span><span class="p">:</span>
+            <span class="n">energy_values</span><span class="o">=</span><span class="n">iso_values</span>
         <span class="n">e_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">e_value</span> <span class="ow">in</span> <span class="n">energy_values</span><span class="p">:</span>
             <span class="n">fermi_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1941,15 +1946,16 @@
             <span class="n">ebsX</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
             <span class="n">ebsY</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
             <span class="n">ebsZ</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">)</span>
+
             <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">ebs_sum</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">sum_noncolinear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            
+
             <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">1</span><span class="p">]]</span>
             <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">2</span><span class="p">]]</span>
             <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,:,[</span><span class="mi">3</span><span class="p">]]</span>
 
-
+            
             <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="n">bands_to_keep</span><span class="p">:</span>
                 <span class="n">spd_spin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">[</span><span class="n">ebsX</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span> <span class="n">ebsY</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">],</span> <span class="n">ebsZ</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span> <span class="n">iband</span><span class="p">]]</span>

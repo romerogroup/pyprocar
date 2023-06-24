@@ -65,7 +65,20 @@ examples_dict = {"Fe" :
 
 
                     },
+
+                "BiSb_monolayer" :
+                    {"vasp": 
+                        {
+                        'non-colinear':
+                            {
+                            'bands':'',
+                            'dos':'',
+                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF'},
+
+
+                    },
                 }
+    }
 
 
 def download_examples(save_dir=''):

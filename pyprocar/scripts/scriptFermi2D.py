@@ -120,17 +120,6 @@ def fermi2D(
     # Turn interactive plotting off
     plt.ioff()
 
-    if atoms is None:
-        atoms = [-1]
-        
-
-    if orbitals is None:
-        orbitals = [-1]
-
-    
-
-
-
     if len(translate) != 3 and len(translate) != 1:
         print("Error: --translate option is invalid! (", translate, ")")
         raise RuntimeError("invalid option --translate")
@@ -180,7 +169,7 @@ def fermi2D(
             print(f"Useful band indices for spin-{i_spin} : {indices[0]}")
 
 
-    if spin_texture is not True:
+    if spin_texture is False:
         # processing the data
         if orbitals is None and ebs.projected is not None:
             orbitals = np.arange(ebs.norbitals, dtype=int)

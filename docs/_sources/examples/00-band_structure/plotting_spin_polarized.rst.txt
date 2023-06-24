@@ -91,7 +91,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADD65BB0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E20A83B160>
 
 
 
@@ -126,7 +126,7 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADEFAFD0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E20A89AEB0>
 
 
 
@@ -171,7 +171,7 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AADE78400>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E20A80D160>
 
 
 
@@ -215,14 +215,14 @@ Scatter mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AAE1C3400>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E20A7136D0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.158 seconds)
+   **Total running time of the script:** ( 0 minutes  2.618 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_spin_polarized.py:
