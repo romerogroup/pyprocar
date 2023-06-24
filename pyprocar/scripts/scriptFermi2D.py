@@ -28,6 +28,7 @@ def fermi2D(
     orbitals:List[int]=None,
     energy:float=None,
     k_z_plane:float=0.0,
+    k_z_plane_tol:float=0.01,
     rot_symm=1,
     translate:List[int]=[0, 0, 0],
     rotation:List[int]=[0, 0, 0, 1],
@@ -119,17 +120,6 @@ def fermi2D(
     # Turn interactive plotting off
     plt.ioff()
 
-    if atoms is None:
-        atoms = [-1]
-        
-
-    if orbitals is None:
-        orbitals = [-1]
-
-    
-
-
-
     if len(translate) != 3 and len(translate) != 1:
         print("Error: --translate option is invalid! (", translate, ")")
         raise RuntimeError("invalid option --translate")
@@ -165,10 +155,10 @@ def fermi2D(
         spins = np.arange(ebs.bands.shape[-1])
     if energy is None:
         energy = 0
-    ### End of parsing ###
 
+    ### End of parsing ###
     # Selecting kpoints in a constant k_z plane
-    i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2]< k_z_plane + 0.01, kpoints[:,2] > k_z_plane - 0.01) )
+    i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2]< k_z_plane + k_z_plane_tol, kpoints[:,2] > k_z_plane - k_z_plane_tol) )
     kpoints = kpoints[i_kpoints_near_z_0,:][0]
     ebs.bands = ebs.bands[i_kpoints_near_z_0,:][0]
     ebs.projected = ebs.projected[i_kpoints_near_z_0,:][0]
@@ -179,7 +169,7 @@ def fermi2D(
             print(f"Useful band indices for spin-{i_spin} : {indices[0]}")
 
 
-    if spin_texture is not True:
+    if spin_texture is False:
         # processing the data
         if orbitals is None and ebs.projected is not None:
             orbitals = np.arange(ebs.norbitals, dtype=int)
@@ -217,6 +207,7 @@ def fermi2D(
 
     bands = ebs.bands
     character = projected
+
     if spin_texture is True:
         sx, sy, sz = stData[0], stData[1], stData[2]
         symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz, character=character)
@@ -226,6 +217,7 @@ def fermi2D(
         symm.general_rotation(rotation[0], rotation[1:])
         # symm.MirrorX()
         symm.rot_symmetry_z(rot_symm)
+
     fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap,  band_indices=band_indices, band_colors=band_colors)
     fs.find_energy(energy)
 

@@ -121,6 +121,7 @@ class FermiHandler:
                         # saving options
                         show:bool=True,
                         plot_directional_arrows:bool=True,
+                        transparent=False,
                         camera_pos:List[float]=[1, 1, 1],
                         background_color:str or Tuple[float,float,float,float]="white",
                         perspective:bool=True,
@@ -305,11 +306,12 @@ class FermiHandler:
             else:
                 plotter.add_mesh(arrows,scalars=options_dict['scalars'], color=arrow_color,show_scalar_bar=False)
 
-        plotter.add_mesh(fermi_surface,
-                        scalars =  options_dict['scalars'], 
-                        cmap=cmap,
-                        show_scalar_bar=False,
-                        rgba=options_dict['use_rgba'])
+        if not transparent:
+            plotter.add_mesh(fermi_surface,
+                            scalars =  options_dict['scalars'], 
+                            cmap=cmap,
+                            show_scalar_bar=False,
+                            rgba=options_dict['use_rgba'])
 
         # Add in custom scalar bar
         if mode != "plain" or spin_texture:
@@ -359,8 +361,9 @@ class FermiHandler:
 
     def plot_fermi_isoslider(self, 
                         mode:str,
-                        iso_range: float,
-                        iso_surfaces: int,
+                        iso_range: float=None,
+                        iso_surfaces: int=None,
+                        iso_values: List[float]=None,
                         bands:List[int]=None, 
                         atoms:List[int]=None,
                         orbitals:List[int]=None,
@@ -549,8 +552,10 @@ class FermiHandler:
                                                         spins=spins,
                                                         spin_texture=spin_texture,
                                                         fermi_tolerance=fermi_tolerance)
-
-        energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
+        if iso_surfaces is not None:
+            energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
+        if iso_values:
+            energy_values=iso_values
         e_surfaces = []
         for e_value in energy_values:
             fermi_surfaces = []
@@ -1560,15 +1565,16 @@ class FermiHandler:
             ebsX = copy.deepcopy(self.ebs)
             ebsY = copy.deepcopy(self.ebs)
             ebsZ = copy.deepcopy(self.ebs)
+
             ebsX.projected = ebsX.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
             ebsY.projected = ebsY.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
             ebsZ.projected = ebsZ.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
-            
+
             ebsX.projected = ebsX.projected[:,:,[1]]
             ebsY.projected = ebsY.projected[:,:,[2]]
             ebsZ.projected = ebsZ.projected[:,:,[3]]
 
-
+            
             for iband in bands_to_keep:
                 spd_spin.append(
                     [ebsX.projected[:, iband], ebsY.projected[:, iband], ebsZ.projected[:, iband]]

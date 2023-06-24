@@ -119,8 +119,8 @@ Plain mode
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
-    atoms           :  [-1]
-    orbitals        :  [-1]
+    atoms           :  None
+    orbitals        :  None
     spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
@@ -200,8 +200,8 @@ plain_bands mode
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
-    atoms           :  [-1]
-    orbitals        :  [-1]
+    atoms           :  None
+    orbitals        :  None
     spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
@@ -366,8 +366,8 @@ Also you can specify the colors of the bands as well with band_colors
     
     dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  [[4, 5], []]
-    atoms           :  [-1]
-    orbitals        :  [-1]
+    atoms           :  None
+    orbitals        :  None
     spin comp.      :  None
     energy          :  None
     rot. symmetry   :  1
@@ -386,7 +386,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.683 seconds)
+   **Total running time of the script:** ( 0 minutes  5.931 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

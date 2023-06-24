@@ -386,6 +386,7 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Fermi 2D</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting fermi2d noncolinear</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting_fermi2d.html">Plotting fermi2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_rashba_spin_spliting.html">Plotting rashba spin splitting</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../04-fermi3d/index.html">Fermi 3D</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -473,7 +474,7 @@ But you can change this by setting arrow_projection to one of the following
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">spin_texture</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">arrow_projection</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
-               <span class="n">arrow_size</span> <span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+               <span class="n">arrow_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                <span class="n">arrow_density</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
                <span class="n">color_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -508,8 +509,8 @@ Developers:
 
 dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
 bands           :  None
-atoms           :  [-1]
-orbitals        :  [-1]
+atoms           :  None
+orbitals        :  None
 spin comp.      :  None
 energy          :  None
 rot. symmetry   :  1
@@ -531,7 +532,7 @@ C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\pyproca
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">spin_texture</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">arrow_color</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span>
-               <span class="n">arrow_size</span> <span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+               <span class="n">arrow_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                <span class="n">arrow_density</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -565,8 +566,8 @@ Developers:
 
 dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
 bands           :  None
-atoms           :  [-1]
-orbitals        :  [-1]
+atoms           :  None
+orbitals        :  None
 spin comp.      :  None
 energy          :  None
 rot. symmetry   :  1
@@ -594,7 +595,7 @@ Also you can specify the colors of the bands as well with band_colors</p>
                <span class="n">band_indices</span> <span class="o">=</span> <span class="n">band_indices</span><span class="p">,</span>
                <span class="n">band_colors</span><span class="o">=</span><span class="n">band_colors</span><span class="p">,</span>
                <span class="n">spin_texture</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-               <span class="n">arrow_size</span> <span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+               <span class="n">arrow_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                <span class="n">arrow_density</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -629,8 +630,8 @@ Developers:
 
 dirname         :  C:\Users\lllang\Desktop\Romero Group Research\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
 bands           :  [[6, 7]]
-atoms           :  [-1]
-orbitals        :  [-1]
+atoms           :  None
+orbitals        :  None
 spin comp.      :  None
 energy          :  None
 rot. symmetry   :  1
@@ -643,7 +644,7 @@ _____________________________________________________
 Useful band indices for spin-0 : [4 5 6 7 8 9]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  17.269 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  18.007 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-03-fermi2d-plotting-fermi2d-spin-texture-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e473f245bb3fec8fddf448d34c3815d0/plotting_fermi2d_spin_texture.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_fermi2d_spin_texture.py</span></code></a></p>

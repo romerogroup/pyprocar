@@ -414,6 +414,7 @@ class FermiSurface:
                         scale=scale,
                         scale_units=scale_units,
                         angles=angles,
+                        cmap='seismic',
                         norm=colors.Normalize(-0.5, 0.5),
                     )
                 
@@ -440,7 +441,7 @@ class FermiSurface:
         """
 
         plt.ylabel('$k_{y}$  ($\AA^{-1}$)')
-        plt.xlabel('$k_{z}$  ($\AA^{-1}$)')
+        plt.xlabel('$k_{x}$  ($\AA^{-1}$)')
 
     def add_legend(self):
         """

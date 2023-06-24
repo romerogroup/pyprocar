@@ -282,6 +282,23 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the dif...">
+
+.. only:: html
+
+  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_rashba_spin_spliting_thumb.png
+    :alt: Plotting rashba spin splitting
+
+  :ref:`sphx_glr_examples_03-fermi2d_plotting_rashba_spin_spliting.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting rashba spin splitting</div>
+    </div>
+
+
+.. raw:: html
+
     </div>
 
 Fermi 3D

@@ -43,7 +43,7 @@ pyprocar.fermi2D(code = 'vasp',
                dirname=data_dir,
                spin_texture=True,
                arrow_projection='x',
-               arrow_size =0.5,
+               arrow_size=3,
                arrow_density=10,
                color_bar=True)
 
@@ -58,7 +58,7 @@ pyprocar.fermi2D(code = 'vasp',
                dirname=data_dir,
                spin_texture=True,
                arrow_color = 'blue',
-               arrow_size =0.5,
+               arrow_size=3,
                arrow_density=10)
 
 
@@ -78,6 +78,6 @@ pyprocar.fermi2D(code = 'vasp',
                band_indices = band_indices,
                band_colors=band_colors,
                spin_texture=True,
-               arrow_size =0.5,
+               arrow_size=3,
                arrow_density=10,
                dirname=data_dir)

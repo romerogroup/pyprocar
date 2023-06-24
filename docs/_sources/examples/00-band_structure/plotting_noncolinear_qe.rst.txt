@@ -102,7 +102,7 @@ Plain mode
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AAFCAC640>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E25F148850>
 
 
 
@@ -149,14 +149,14 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000028AAE486A30>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001E20A7C5460>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.261 seconds)
+   **Total running time of the script:** ( 0 minutes  1.364 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_noncolinear_qe.py:

@@ -409,6 +409,7 @@
     <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">k_z_plane</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">k_z_plane_tol</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">rot_symm</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">translate</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
     <span class="n">rotation</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
@@ -500,17 +501,6 @@
     <span class="c1"># Turn interactive plotting off</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        
-
-    <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">orbitals</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-    
-
-
-
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">translate</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">translate</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: --translate option is invalid! (&quot;</span><span class="p">,</span> <span class="n">translate</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;invalid option --translate&quot;</span><span class="p">)</span>
@@ -546,10 +536,10 @@
         <span class="n">spins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="c1">### End of parsing ###</span>
 
+    <span class="c1">### End of parsing ###</span>
     <span class="c1"># Selecting kpoints in a constant k_z plane</span>
-    <span class="n">i_kpoints_near_z_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;</span> <span class="n">k_z_plane</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">k_z_plane</span> <span class="o">-</span> <span class="mf">0.01</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">i_kpoints_near_z_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;</span> <span class="n">k_z_plane</span> <span class="o">+</span> <span class="n">k_z_plane_tol</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">k_z_plane</span> <span class="o">-</span> <span class="n">k_z_plane_tol</span><span class="p">)</span> <span class="p">)</span>
     <span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]</span>
@@ -560,7 +550,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Useful band indices for spin-</span><span class="si">{</span><span class="n">i_spin</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
-    <span class="k">if</span> <span class="n">spin_texture</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">spin_texture</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="c1"># processing the data</span>
         <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -598,6 +588,7 @@
 
     <span class="n">bands</span> <span class="o">=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span>
     <span class="n">character</span> <span class="o">=</span> <span class="n">projected</span>
+
     <span class="k">if</span> <span class="n">spin_texture</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">stData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stData</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">stData</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">symm</span> <span class="o">=</span> <span class="n">ProcarSymmetry</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">sx</span><span class="o">=</span><span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="o">=</span><span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="o">=</span><span class="n">sz</span><span class="p">,</span> <span class="n">character</span><span class="o">=</span><span class="n">character</span><span class="p">)</span>
@@ -607,6 +598,7 @@
         <span class="n">symm</span><span class="o">.</span><span class="n">general_rotation</span><span class="p">(</span><span class="n">rotation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rotation</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
         <span class="c1"># symm.MirrorX()</span>
         <span class="n">symm</span><span class="o">.</span><span class="n">rot_symmetry_z</span><span class="p">(</span><span class="n">rot_symm</span><span class="p">)</span>
+
     <span class="n">fs</span> <span class="o">=</span> <span class="n">FermiSurface</span><span class="p">(</span><span class="n">symm</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">symm</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">symm</span><span class="o">.</span><span class="n">character</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">,</span>  <span class="n">band_indices</span><span class="o">=</span><span class="n">band_indices</span><span class="p">,</span> <span class="n">band_colors</span><span class="o">=</span><span class="n">band_colors</span><span class="p">)</span>
     <span class="n">fs</span><span class="o">.</span><span class="n">find_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
 
