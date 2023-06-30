@@ -1,0 +1,6 @@
+/research/svn/pyposcar/clusters.py:277: UserWarning: At least one atom was replaced twice (or more times) by an H. Check wether this makes sense
+  warnings.warn('At least one atom was replaced twice (or more times)'
+/research/svn/pyposcar/clusters.py:277: UserWarning: At least one atom was replaced twice (or more times) by an H. Check wether this makes sense
+  warnings.warn('At least one atom was replaced twice (or more times)'
+/research/svn/pyposcar/clusters.py:277: UserWarning: At least one atom was replaced twice (or more times) by an H. Check wether this makes sense
+  warnings.warn('At least one atom was replaced twice (or more times)'
