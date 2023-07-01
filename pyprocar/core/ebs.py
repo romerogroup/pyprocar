@@ -837,58 +837,49 @@ class ElectronicBandStructure:
             The point symmetry operations of the lattice
         """
         
-        klist = []
-        plist = []
-        bandslist = []
-        weights=[]
-        projected_phases=[]
+        full_kpoints=[]
+        full_projected=[]
+        full_bands=[]
+        full_weights=[]
+        full_projected_phases=[]
 
+        # Used for indexing full_kpoints
+        ik=0
         # for each symmetry operation
         for i, rotation in enumerate(rotations):
             # for each point
             for j, kpoint in enumerate(self.kpoints):
                 # apply symmetry operation to kpoint
-
                 
-                sympoint_vector = rotation.dot(kpoint)
+                new_kp = rotation.dot(kpoint)
                 # apply boundary conditions
-                bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector <= -0.5)
-                sympoint_vector += bound_ops
-
-                sympoint_vector=np.around(sympoint_vector,decimals=6)
-                sympoint = sympoint_vector.tolist()
-
-                if sympoint not in klist:
-                    klist.append(sympoint)
+                new_kp = np.fmod(new_kp + 6.5, 1 ) - 0.5
+                new_kp = np.around(new_kp,decimals=6)
+                new_kp=new_kp.tolist()
+                if new_kp not in full_kpoints:
+                    full_kpoints.append(new_kp)
                     if self.bands is not None:
                         band = self.bands[j].tolist()
-                        bandslist.append(band)
+                        full_bands.append(band)
                     if self.projected is not None:
                         projection = self.projected[j].tolist()
-                        plist.append(projection)
+                        full_projected.append(projection)
                     if self.weights is not None:
                         weight = self.weights[j].tolist()
-                        weights.append(weight)
-                    if self.weights is not None:
-                        weight = self.weights[j].tolist()
-                        weights.append(weight)
+                        full_weights.append(weight)
                     if self.projected_phase is not None:
                         projected_phase = self.projected_phase[j].tolist()
-                        projected_phases.append(projected_phase)
-
-        self.kpoints = np.array(klist)
-        self.bands = np.array(bandslist)
+                        full_projected_phases.append(projected_phase)
+        self.kpoints = np.array(full_kpoints)
+        self.bands = np.array(full_bands)
 
         if self.projected is not None:
-            self.projected = np.array(plist)
+            self.projected = np.array(full_projected)
         if self.projected_phase is not None:
-            self.projected_phase = np.array(projected_phases)
+            self.projected_phase = np.array(full_projected_phases)
         if self.weights is not None:
-            self.weights = np.array(weights)
-        # self.sort_bands_and_kpoints()
+            self.weights = np.array(full_weights)
 
-
-        
 
     def __str__(self):
         ret = 'Enectronic Band Structure     \n'

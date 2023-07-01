@@ -114,9 +114,8 @@ class FermiSurface3D(Surface):
         self.kpoints = kpoints
         
         # Shifts kpoints between [0.5,0.5)
-        bound_ops = -1.0*(self.kpoints > 0.5) + 1.0*(self.kpoints <= -0.5)
-        self.XYZ = self.kpoints + bound_ops
-
+        self.XYZ = np.fmod(self.kpoints + 6.5, 1 ) - 0.5
+        print(self.XYZ.shape)
         self.bands = bands 
 
         if bands_to_keep is None:
