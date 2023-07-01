@@ -78,7 +78,7 @@ class plotBands:
                 f.write(str(i).rstrip("\n"))
         f.write("] \n")
 
-    #Checking OUTCAR for SPIN and Kpoint information
+        #Checking OUTCAR for SPIN and Kpoint information
         out = open(self.outcar ,"r")
         out = out.readlines()
         if(out):
@@ -109,6 +109,8 @@ class plotBands:
         f.close()
         os.system("chmod +rwx plot_file.py") 
         #pyprocar.bandsplot(PROCAR,outcar = outcar, elimit = elimit, mode = mode_,savefig = savefigure ,atoms = atoms, orbitals = asked_orb)
+
+        return
 
 if __name__ == '__main__':
     #plot(orbitals='s', POSCAR='POSCAR')
