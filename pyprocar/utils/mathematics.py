@@ -80,3 +80,27 @@ def fft_interpolate(function, interpolation_factor=2, axis=None):
             interpolation_factor * factor
         )
     return interpolated
+
+def change_of_basis(tensor,A,B):
+    """changes the basis of a tensor given the column vectors of A and B
+
+    This changes the basis from B to A. The tensor has to be in the A basis.
+
+    Parameters
+    ----------
+    tensor : np.ndarray
+        Rank 1 or rank 2 tensor
+    A : np.ndarray
+        column vectors of the A basis
+    B : np.ndarray
+        column vectors of the B basis
+    """
+    transform = np.linalg.inv(B).dot(A)
+    n_dim = len(tensor.shape)
+    if n_dim == 1:
+        tensor_b = transform.dot(tensor)
+    else:
+        transform_inv = np.linalg.inv(transform)
+        tensor_b = transform_inv.dot(tensor).dot(transform)
+        # tensor_b = transform.dot(tensor).dot(transform_inv)
+    return tensor_b

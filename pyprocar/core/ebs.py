@@ -853,7 +853,7 @@ class ElectronicBandStructure:
                 
                 new_kp = rotation.dot(kpoint)
                 # apply boundary conditions
-                new_kp = np.fmod(new_kp + 6.5, 1 ) - 0.5
+                new_kp = -np.fmod(new_kp + 6.5, 1 ) + 0.5
                 new_kp = np.around(new_kp,decimals=6)
                 new_kp=new_kp.tolist()
                 if new_kp not in full_kpoints:
@@ -879,6 +879,7 @@ class ElectronicBandStructure:
             self.projected_phase = np.array(full_projected_phases)
         if self.weights is not None:
             self.weights = np.array(full_weights)
+
 
 
     def __str__(self):
