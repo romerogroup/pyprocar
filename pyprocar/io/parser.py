@@ -7,7 +7,7 @@ from ..core import DensityOfStates
 from ..core import Structure
 from ..utils import UtilsProcar
 
-from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf
+from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf, elk
 
 class Parser:
     """
@@ -48,7 +48,11 @@ class Parser:
         elif self.code == "vasp":
             self.parse_vasp()
 
-        self.ebs.bands += self.ebs.efermi
+        elif self.code == "elk":
+            self.parse_elk()
+
+        if self.ebs:
+            self.ebs.bands += self.ebs.efermi
 
         return None
 
@@ -87,6 +91,20 @@ class Parser:
         self.kpath = parser.kpath
         self.structure = parser.structure
         self.dos = parser.dos
+
+        return None
+    
+    def parse_elk(self):
+        """parses bxsf files.
+
+        Returns
+        -------
+        None
+            None
+        """
+        
+        dos = elk.read_dos(path = self.dir)
+        self.dos = dos
 
         return None
     

@@ -101,8 +101,7 @@ class DOSPlot:
                 self.set_xlabel('Energy (eV)')
                 self.set_ylabel('DOS')
                 self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
-                self.set_ylim([self.dos.total[ispin,:].min(),self.dos.total[ispin,:].max()])
-
+                self.set_ylim([self.dos.total.min(),self.dos.total.max()])
                 handle = self.ax.plot(
                     self.dos.energies, self.dos.total[ispin, :], color=settings.dos.spin_colors[ispin], alpha=settings.dos.opacity[
                         ispin], linestyle=settings.dos.linestyle[ispin], label=settings.dos.spin_labels[ispin], linewidth=settings.dos.linewidth[ispin],
@@ -110,7 +109,7 @@ class DOSPlot:
             elif orientation == 'vertical':
                 self.set_xlabel('DOS')
                 self.set_ylabel('Energy (eV)')
-                self.set_xlim([self.dos.total[ispin,:].min(),self.dos.total[ispin,:].max()])
+                self.set_xlim([self.dos.total.min(),self.dos.total.max()])
                 self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
                 handle = self.ax.plot(
                         self.dos.total[ispin, :], self.dos.energies, color=settings.dos.spin_colors[ispin], alpha=settings.dos.opacity[
