@@ -67,11 +67,24 @@ class Parser:
         outfile = f"{self.dir}{os.sep}abinit.out"
         kpointsfile = f"{self.dir}{os.sep}KPOINTS"
 
-        parser = abinit.Output(abinit_output=outfile)
+        abinit_output = abinit.Output(abinit_output=outfile)
+        abinit_kpoints = abinit.AbinitKpoints(filename=kpointsfile)
+
+        parser =  abinit.AbinitProcar(  
+                                        dirname=self.dir,
+                                        abinit_output=outfile,
+                                        kpath=abinit_kpoints.kpath,
+                                        reciprocal_lattice=abinit_output.reclat,
+                                        efermi=abinit_output.fermi
+                                        )
         
+        abinit_dos = abinit.AbinitDOSParser(dirname=self.dir)
+
+        self.dos = abinit_dos.dos
         self.ebs = parser.abinitprocarobject.ebs
         self.kpath = parser.abinitprocarobject.ebs.kpath
-        self.structure = parser.abinitprocarobject.structure
+        self.structure = abinit_output.structure
+        
 
         return None
     

@@ -186,6 +186,7 @@ class AbinitProcar(collections.abc.Mapping):
 
     def __init__(
         self,
+        dirname=None,
         inFiles=None,
         abinit_output=None,
         reciprocal_lattice=None,
@@ -202,7 +203,8 @@ class AbinitProcar(collections.abc.Mapping):
         # Preparing files for merging
         # reading in all PROCAR_* files and putting it into a list if not provided.
         if inFiles is None:
-            inFiles = sorted(glob.glob("PROCAR_*"))
+            tmp_str = os.path.join(dirname,"PROCAR_*")
+            inFiles = sorted(glob.glob(tmp_str))
         else:
             inFiles = inFiles
 
@@ -214,10 +216,11 @@ class AbinitProcar(collections.abc.Mapping):
             )
         else:
             pass
-
+        
+        filename = os.path.join(dirname,"PROCAR")
         # Use VASP Procar parser following PROCAR merge
         self.abinitprocarobject = Procar(
-            filename="PROCAR",
+            filename=filename,
             structure=None,
             reciprocal_lattice=self.reciprocal_lattice,
             kpath=self.kpath,
