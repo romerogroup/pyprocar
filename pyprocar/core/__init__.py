@@ -12,4 +12,6 @@ from .fermisurface3D import FermiSurface3D
 from .procarsymmetry import ProcarSymmetry
 from .procarselect import ProcarSelect
 
+from . import fermisurface3D_new
+
  
