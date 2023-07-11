@@ -82,6 +82,15 @@ class Output(collections.abc.Mapping):
         with open(self.abinit_output, "r") as rf:
             data = rf.read()
             coordinate_block = re.findall(r"xred\s*([+-.0-9E\s]*)", data)[-1].split()
+
+            # for single atom at (0,0,0) xred is not printed out at the end.
+            # So we use this workaround.
+            if not coordinate_block.size > 0:
+                coordinate_block = re.findall(
+                    r"reduced\scoordinates\s\(array\sxred\)\sfor\s*[1-9]\satoms\n([+-.0-9E\s]*)\n",
+                    data,
+                )[-1].split()
+
             coordinate_list = np.array([float(x) for x in coordinate_block])
             self.coordinates = coordinate_list.reshape(len(coordinate_list) // 3, 3)
 
@@ -203,7 +212,7 @@ class AbinitProcar(collections.abc.Mapping):
         # Preparing files for merging
         # reading in all PROCAR_* files and putting it into a list if not provided.
         if inFiles is None:
-            tmp_str = os.path.join(dirname,"PROCAR_*")
+            tmp_str = os.path.join(dirname, "PROCAR_*")
             inFiles = sorted(glob.glob(tmp_str))
         else:
             inFiles = inFiles
@@ -216,8 +225,8 @@ class AbinitProcar(collections.abc.Mapping):
             )
         else:
             pass
-        
-        filename = os.path.join(dirname,"PROCAR")
+
+        filename = os.path.join(dirname, "PROCAR")
         # Use VASP Procar parser following PROCAR merge
         self.abinitprocarobject = Procar(
             filename=filename,
@@ -437,150 +446,172 @@ class AbinitProcar(collections.abc.Mapping):
 
     def __len__(self):
         return self.variables.__len__()
-    
 
 
 class AbinitDOSParser:
-    def __init__(self,dirname:str = "", ):
-        self.dirname=dirname
+    def __init__(
+        self,
+        dirname: str = "",
+    ):
+        self.dirname = dirname
 
         self.dos_total, self.energies, self.fermi = self._parse_total_dos()
         self.projected = self._parse_projected_dos_files()
 
-        self.dos = DensityOfStates(energies=self.energies,
-                            total=self.dos_total,
-                            projected=self.projected , 
-                            interpolation_factor = 1)
+        self.dos = DensityOfStates(
+            energies=self.energies,
+            total=self.dos_total,
+            projected=self.projected,
+            interpolation_factor=1,
+        )
 
     def _parse_total_dos(self):
-        self.total_dos_filename=glob.glob(self.dirname + '/abinito_DOS_TOTAL*')[0]
-        
+        self.total_dos_filename = glob.glob(self.dirname + "/abinito_DOS_TOTAL*")[0]
+
         with open(self.total_dos_filename) as f:
             text_lines = f.readlines()
-            header_text =  ''.join(text_lines[:13])
+            header_text = "".join(text_lines[:13])
             dos_text = text_lines[13:]
 
-        nsppol = int(re.findall('nsppol\s=\s(\d)',header_text)[0])
-        fermi = float(re.findall('Fermi energy\s:\s*([-\d*.]*)',header_text)[0])
+        nsppol = int(re.findall("nsppol\s=\s(\d)", header_text)[0])
+        fermi = float(re.findall("Fermi energy\s:\s*([-\d*.]*)", header_text)[0])
 
-        energy_details = re.findall('between\s*([-\d*.]*)\s*and\s*([-\d*.]*)\s*Hartree\s*by\s*steps\s*of\s*([-\d*.]*)',header_text)[0]
+        energy_details = re.findall(
+            "between\s*([-\d*.]*)\s*and\s*([-\d*.]*)\s*Hartree\s*by\s*steps\s*of\s*([-\d*.]*)",
+            header_text,
+        )[0]
         energy_details = [float(x) for x in energy_details]
-        e_min, e_max, e_step =  energy_details
+        e_min, e_max, e_step = energy_details
 
-        energies = np.arange(e_min, e_max+e_step, e_step)
+        energies = np.arange(e_min, e_max + e_step, e_step)
         n_energies = energies.shape[0]
 
-        if nsppol==2:
-            n_spin_header=3
-            n_up_start=n_spin_header
-            n_up_end=n_up_start+n_energies
-            dos_up=dos_text[n_up_start:n_up_end]
+        if nsppol == 2:
+            n_spin_header = 3
+            n_up_start = n_spin_header
+            n_up_end = n_up_start + n_energies
+            dos_up = dos_text[n_up_start:n_up_end]
 
-            n_block_spacing=3
-            n_down_start=n_spin_header+n_energies+n_block_spacing
-            n_down_end=n_down_start+n_energies
-            dos_down=dos_text[n_down_start:n_down_end]
+            n_block_spacing = 3
+            n_down_start = n_spin_header + n_energies + n_block_spacing
+            n_down_end = n_down_start + n_energies
+            dos_down = dos_text[n_down_start:n_down_end]
 
             # converting to floats
-            dos_down = np.array([[float(value) for value in line.split()] for line in dos_down])
-            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
+            dos_down = np.array(
+                [[float(value) for value in line.split()] for line in dos_down]
+            )
+            dos_up = np.array(
+                [[float(value) for value in line.split()] for line in dos_up]
+            )
 
             # Keep dos column
-            dos_down=dos_down[:,1]
-            dos_up=dos_up[:,1]
+            dos_down = dos_down[:, 1]
+            dos_up = dos_up[:, 1]
 
-            dos_total = np.vstack([dos_up,dos_down])
+            dos_total = np.vstack([dos_up, dos_down])
 
         else:
-            n_header=2
-            n_up_start=n_header
-            n_up_end=n_up_start+n_energies
-            dos_up=dos_text[n_up_start:n_up_end]
+            n_header = 2
+            n_up_start = n_header
+            n_up_end = n_up_start + n_energies
+            dos_up = dos_text[n_up_start:n_up_end]
 
             # converting to floats
-            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
+            dos_up = np.array(
+                [[float(value) for value in line.split()] for line in dos_up]
+            )
 
             # Keep dos column
-            dos_up=dos_up[:,1]
+            dos_up = dos_up[:, 1]
 
-            dos_total=dos_up[None,:]
+            dos_total = dos_up[None, :]
 
         energies -= fermi
         return dos_total, energies, fermi
-    
+
     def _parse_projected_dos_files(self):
-        self.projected_dos_filenames=glob.glob(self.dirname + '/abinito_DOS_AT*')
-        
-        n_atoms=len(self.projected_dos_filenames)
-        projected=[0]*n_atoms
+        self.projected_dos_filenames = glob.glob(self.dirname + "/abinito_DOS_AT*")
+
+        n_atoms = len(self.projected_dos_filenames)
+        projected = [0] * n_atoms
         for filename in self.projected_dos_filenames:
             dos_atom_projections, atom_index = self._parse_projected_dos_file(filename)
 
-            projected[atom_index-1]=dos_atom_projections
+            projected[atom_index - 1] = dos_atom_projections
             projected.append(dos_atom_projections)
-        projected=np.array(projected)
+        projected = np.array(projected)
 
         # organizing the projection array in the appropiate formate
         # (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
         print(projected.shape)
-        projected = np.transpose(projected, (0,2,3,1))
+        projected = np.transpose(projected, (0, 2, 3, 1))
 
         # This is adding for the principle quantum number. Throughout the code this is unecessary, but puting here for consitency
-        projected=projected[:,None,:,:,:]
+        projected = projected[:, None, :, :, :]
         print(projected.shape)
         return projected
-    
-    def _parse_projected_dos_file(self,filename):
+
+    def _parse_projected_dos_file(self, filename):
         with open(filename) as f:
             text_lines = f.readlines()
-            header_text =  ''.join(text_lines[:13])
+            header_text = "".join(text_lines[:13])
             dos_text = text_lines[13:]
 
-        nsppol = int(re.findall('nsppol\s=\s(\d)',header_text)[0])
+        nsppol = int(re.findall("nsppol\s=\s(\d)", header_text)[0])
 
-        energy_details = re.findall('between\s*([-\d*.]*)\s*and\s*([-\d*.]*)\s*Hartree\s*by\s*steps\s*of\s*([-\d*.]*)',header_text)[0]
+        energy_details = re.findall(
+            "between\s*([-\d*.]*)\s*and\s*([-\d*.]*)\s*Hartree\s*by\s*steps\s*of\s*([-\d*.]*)",
+            header_text,
+        )[0]
         energy_details = [float(x) for x in energy_details]
-        e_min, e_max, e_step =  energy_details
+        e_min, e_max, e_step = energy_details
 
-        atom_detail_text = ''.join(dos_text[:4])
-        atom_index = int(re.findall('iatom=\s*(\d)',atom_detail_text)[0])
+        atom_detail_text = "".join(dos_text[:4])
+        atom_index = int(re.findall("iatom=\s*(\d)", atom_detail_text)[0])
 
-        energies = np.arange(e_min, e_max+e_step, e_step)
+        energies = np.arange(e_min, e_max + e_step, e_step)
         n_energies = energies.shape[0]
 
-        if nsppol==2:
-            n_spin_header=7
-            n_up_start=n_spin_header
-            n_up_end=n_up_start+n_energies
-            dos_up=dos_text[n_up_start:n_up_end]
-            
-            n_block_spacing=7
-            n_down_start=n_up_end+n_block_spacing
-            n_down_end=n_down_start+n_energies
-            dos_down=dos_text[n_down_start:n_down_end]
+        if nsppol == 2:
+            n_spin_header = 7
+            n_up_start = n_spin_header
+            n_up_end = n_up_start + n_energies
+            dos_up = dos_text[n_up_start:n_up_end]
+
+            n_block_spacing = 7
+            n_down_start = n_up_end + n_block_spacing
+            n_down_end = n_down_start + n_energies
+            dos_down = dos_text[n_down_start:n_down_end]
 
             # converting to floats
-            dos_down = np.array([[float(value) for value in line.split()] for line in dos_down])
-            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
+            dos_down = np.array(
+                [[float(value) for value in line.split()] for line in dos_down]
+            )
+            dos_up = np.array(
+                [[float(value) for value in line.split()] for line in dos_up]
+            )
 
             # Keep only s,p,d projections
-            dos_down=dos_down[:,11:20]
-            dos_up=dos_up[:,11:20]
+            dos_down = dos_down[:, 11:20]
+            dos_up = dos_up[:, 11:20]
 
-            dos_atom_projections = np.dstack([dos_up,dos_down])
+            dos_atom_projections = np.dstack([dos_up, dos_down])
 
         else:
-            n_spin_header=6
-            n_up_start=n_spin_header
-            n_up_end=n_up_start+n_energies
-            dos_up=dos_text[n_up_start:n_up_end]
+            n_spin_header = 6
+            n_up_start = n_spin_header
+            n_up_end = n_up_start + n_energies
+            dos_up = dos_text[n_up_start:n_up_end]
 
-             # converting to floats
-            dos_up = np.array([[float(value) for value in line.split()] for line in dos_up])
+            # converting to floats
+            dos_up = np.array(
+                [[float(value) for value in line.split()] for line in dos_up]
+            )
 
             # Keep only s,p,d projections
-            dos_up=dos_up[:,11:20]
+            dos_up = dos_up[:, 11:20]
 
-            dos_atom_projections=dos_up[:,:,None]
+            dos_atom_projections = dos_up[:, :, None]
 
         return dos_atom_projections, atom_index
