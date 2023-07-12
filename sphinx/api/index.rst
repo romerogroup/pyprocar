@@ -9,6 +9,7 @@ API Reference
    io/index
    plotter/index
    scripts/index
+   pyposcar/index
 
 
 In this section, you can learn more about how PyProcar is intended parses DFT codes

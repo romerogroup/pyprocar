@@ -38,7 +38,7 @@ These examples demonstrate the band structure plotting capabilities.
 .. only:: html
 
   .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_compare_bands_thumb.png
-    :alt: Comparing band structures
+    :alt:
 
   :ref:`sphx_glr_examples_00-band_structure_plotting_compare_bands.py`
 
@@ -55,7 +55,7 @@ These examples demonstrate the band structure plotting capabilities.
 .. only:: html
 
   .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_noncolinear_vasp_thumb.png
-    :alt: Plotting non colinear band structures in VASP
+    :alt:
 
   :ref:`sphx_glr_examples_00-band_structure_plotting_noncolinear_vasp.py`
 
@@ -72,7 +72,7 @@ These examples demonstrate the band structure plotting capabilities.
 .. only:: html
 
   .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_noncolinear_qe_thumb.png
-    :alt: Plotting non colinear band structures in Quantum Espresso
+    :alt:
 
   :ref:`sphx_glr_examples_00-band_structure_plotting_noncolinear_qe.py`
 
@@ -89,7 +89,7 @@ These examples demonstrate the band structure plotting capabilities.
 .. only:: html
 
   .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_spin_polarized_thumb.png
-    :alt: Plotting spin polarized band structures
+    :alt:
 
   :ref:`sphx_glr_examples_00-band_structure_plotting_spin_polarized.py`
 
@@ -106,7 +106,7 @@ These examples demonstrate the band structure plotting capabilities.
 .. only:: html
 
   .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_colinear_thumb.png
-    :alt: Plotting band structure
+    :alt:
 
   :ref:`sphx_glr_examples_00-band_structure_plotting_colinear.py`
 
@@ -138,7 +138,7 @@ These examples demonstrate the density of states plotting capabilities.
 .. only:: html
 
   .. image:: /examples/01-dos/images/thumb/sphx_glr_plotting_noncolinear_dos_vasp_thumb.png
-    :alt: Plotting non colinear dos in VASP
+    :alt:
 
   :ref:`sphx_glr_examples_01-dos_plotting_noncolinear_dos_vasp.py`
 
@@ -155,7 +155,7 @@ These examples demonstrate the density of states plotting capabilities.
 .. only:: html
 
   .. image:: /examples/01-dos/images/thumb/sphx_glr_plotting_noncolinear_dos_qe_thumb.png
-    :alt: Plotting non colinear dos in Quantum Espresso
+    :alt:
 
   :ref:`sphx_glr_examples_01-dos_plotting_noncolinear_dos_qe.py`
 
@@ -172,7 +172,7 @@ These examples demonstrate the density of states plotting capabilities.
 .. only:: html
 
   .. image:: /examples/01-dos/images/thumb/sphx_glr_plotting_colinear_dos_thumb.png
-    :alt: Plotting density of states
+    :alt:
 
   :ref:`sphx_glr_examples_01-dos_plotting_colinear_dos.py`
 
@@ -189,7 +189,7 @@ These examples demonstrate the density of states plotting capabilities.
 .. only:: html
 
   .. image:: /examples/01-dos/images/thumb/sphx_glr_plotting_spin_polarized_dos_thumb.png
-    :alt: Plotting spin-polarized density of states
+    :alt:
 
   :ref:`sphx_glr_examples_01-dos_plotting_spin_polarized_dos.py`
 
@@ -221,7 +221,7 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 .. only:: html
 
   .. image:: /examples/02-bands_dos/images/thumb/sphx_glr_plotting_bandsdosplot_thumb.png
-    :alt: Plotting bandsdosplot
+    :alt:
 
   :ref:`sphx_glr_examples_02-bands_dos_plotting_bandsdosplot.py`
 
@@ -253,7 +253,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 .. only:: html
 
   .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_fermi2d_spin_texture_thumb.png
-    :alt: Plotting fermi2d noncolinear
+    :alt:
 
   :ref:`sphx_glr_examples_03-fermi2d_plotting_fermi2d_spin_texture.py`
 
@@ -270,7 +270,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 .. only:: html
 
   .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_fermi2d_thumb.png
-    :alt: Plotting fermi2d
+    :alt:
 
   :ref:`sphx_glr_examples_03-fermi2d_plotting_fermi2d.py`
 
@@ -287,7 +287,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 .. only:: html
 
   .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_rashba_spin_spliting_thumb.png
-    :alt: Plotting rashba spin splitting
+    :alt:
 
   :ref:`sphx_glr_examples_03-fermi2d_plotting_rashba_spin_spliting.py`
 
@@ -321,7 +321,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_spin_texture_thumb.png
-    :alt: Plotting fermi3d spin_texture
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_spin_texture.py`
 
@@ -338,7 +338,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_plain_thumb.png
-    :alt: Plotting fermi3d plain
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_plain.py`
 
@@ -355,7 +355,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_isoslider_thumb.png
-    :alt: Plotting fermi3d isoslider
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_isoslider.py`
 
@@ -372,7 +372,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_isovalue_gif_thumb.png
-    :alt: Plotting fermi3d isovalue_gif
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_isovalue_gif.py`
 
@@ -389,7 +389,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_spin-polarized_thumb.png
-    :alt: Plotting fermi3d spin-polarized
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_spin-polarized.py`
 
@@ -406,7 +406,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_de_hass_van_alphen_thumb.png
-    :alt: Showing how to get van alphen fequencies from the fermi surface
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_de_hass_van_alphen.py`
 
@@ -423,7 +423,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. only:: html
 
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_cross_section_thumb.png
-    :alt: Plotting fermi3d cross_section
+    :alt:
 
   :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_cross_section.py`
 
@@ -455,7 +455,7 @@ These examples demonstrate other capabilities.
 .. only:: html
 
   .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_bandgap_thumb.png
-    :alt: Example of finding the bandgap
+    :alt:
 
   :ref:`sphx_glr_examples_05-other_plotting_bandgap.py`
 
@@ -472,7 +472,7 @@ These examples demonstrate other capabilities.
 .. only:: html
 
   .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_2dkmesh_generation_thumb.png
-    :alt: Example of kmesh_generator
+    :alt:
 
   :ref:`sphx_glr_examples_05-other_plotting_2dkmesh_generation.py`
 
@@ -489,7 +489,7 @@ These examples demonstrate other capabilities.
 .. only:: html
 
   .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_kpath_generation_thumb.png
-    :alt: Example of kpath_generator
+    :alt:
 
   :ref:`sphx_glr_examples_05-other_plotting_kpath_generation.py`
 
@@ -507,6 +507,7 @@ These examples demonstrate other capabilities.
 .. toctree::
    :hidden:
    :includehidden:
+
 
    /examples/00-band_structure/index.rst
    /examples/01-dos/index.rst

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
+from __future__ import annotations
 import sys
 import re
 import numpy as np
 import argparse
-
 
 class Poscar:
   """A low-level class to store a crystal structure input (tailored for
@@ -32,18 +32,25 @@ class Poscar:
 
   """
 
-  def __init__(self, filename, verbose=False):
+  def __init__(self,
+               filename:str,
+               verbose:bool=False):
     """The file is not automatically loaded, you need to run
     `self.parse()`
+    
+    Parameters
+    ----------
 
-    `filename` = POSCAR-like file
-    `verbose` = verbosity level, for debugging
+    filename : str,
+        POSCAR-like file
+    verbose: bool,
+        verbosity level, for debugging. Default: False
 
     Attributes:
 
     self.verbose
     self.filename
-    self.poscar: str with the full POSCAR file
+    self.poscar:str str with the full POSCAR file
     self.cpos: np.nadarray, Cartesian coordinates
     self.dpos: np.ndarray, direct coordinates
     self.lat: np.ndarray (3x3), the  lattice
@@ -58,26 +65,28 @@ class Poscar:
     """
     self.verbose = verbose
     self.filename = filename
-    self.poscar = None
-    self.cpos = None # cartesian coordinates
-    self.dpos = None # direct coordinates
-    self.lat = None # lattice
-    self.typeSp = None # Name of atomic species
-    self.numberSp = None # Number of atoms per specie
-    self.Ntotal = None # Total atoms in system
-    self.elm = None # Element of each atoms one-by-one. list(str)
-    self.selective = None # Selective dynamics
-    self.selectFlags = None # all the T,F from selective dynamics. np.array(str)
-    self.volume = None
+    self.poscar:str = None
+    self.cpos:np.ndarray = None # cartesian coordinates
+    self.dpos:np.ndarray = None # direct coordinates
+    self.lat:np.ndarray = None # lattice
+    self.typeSp:List[str] = None # Name of atomic species
+    self.numberSp:nd.array = None # Number of atoms per specie
+    self.Ntotal:int = None # Total atoms in system
+    self.elm:List[str] = None # Element of each atoms one-by-one.
+    self.selective:bool = None # Selective dynamics
+    self.selectFlags:np.ndarray = None # all the T,F from selective dynamics
+    self.volume:float = None
     return
     
-  def parse(self, fromString=None):
+  def parse(self, fromString:str = None):
     """Loads into memory all the content of the POSCAR file.
 
-    Args:
+    Parameters
+    ----------
     
-    `fromString` : If present, instead of loading a file, it uses this
-    variable as a string with the contents of the POSCAR file. Default=None
+    fromString : str 
+      If present, instead of loading a file, it uses
+      this variable to populate the class. Default=None
 
     """
     if fromString and isinstance(fromString, str):
@@ -165,33 +174,33 @@ class Poscar:
     return
 
   def _set_cartesian(self):
-    """Calculate and set the cartesian positions from direct positions, self.lat must be
-    set before.
+    """set the cartesian positions (self.cpos) from direct positions (self.dpos).
     """
     cart = np.dot(self.lat.T, self.dpos.T)
     cart = cart.T
     self.cpos = cart
     
   def _set_direct(self):
-    """Calculate and set the cartesian positions from direct positions, self.lat must be
-    set before.
+    """set the direct positions (self.dpos) from Cartesian positions (self.cpos).
     """
     inverse = np.linalg.inv(self.lat)
     direct = np.dot(inverse.T, self.cpos.T)
     direct = direct.T
     self.dpos = direct
     
-  def _unparse(self, direct=True):
-    """Internal method to write a POSCAR file with the info stored in the
-    arrays. The information is as it is. No PBC are applied, and no
-    checks are performed at this stage.  The scaling factor is 1.0,
-    always.
+  def _unparse(self, direct:bool=True):
+    """Internal method to be used previously to to writing a POSCAR
+    file. It group together all the information in a single str,
+    `self.poscar`. The information is as it is. No PBC are applied,
+    and no checks are performed at this stage.  The scaling factor is
+    1.0, always.
 
-    This method do not writes a file, but stores its content in the
-    str `self.poscar`
 
-    Args: 
-    direct: bool, direct or Cartesian positions?
+    Parameters
+    ----------
+
+    direct: bool
+        direct positons is True, Cartesian is Falsepositions. Default is True
 
     """
 
@@ -232,14 +241,16 @@ class Poscar:
       print('unparse, self.poscar\n', self.poscar)
 
 
-  def write(self, filename='POSCAR.out', direct=True):
+  def write(self, filename:str='POSCAR.out', direct:bool=True):
     """Writes a poscar file with the information stored in the class.
 
-    Args:
+    Parameters
+    ----------
 
-    filename: str, default='POSCAR.out', name of the output file
-    direct = bool, default=True, Cartesian or direct positions
-
+    filename : str
+        default='POSCAR.out', name of the output file.
+    direct : bool
+        direct positons is True, Cartesian is Falsepositions. Default is True
     """
     self._unparse(direct=direct)
     fout = open(filename, 'w')
@@ -248,12 +259,14 @@ class Poscar:
       print('File '  + filename + ' written.')
     return
       
-  def xyz(self, filename):
-    """Writes an xyz file, the lattice is written in the comment line
+  def xyz(self, filename:str):
+    """Writes an xyz file, the lattice is written as a comment line
 
-    Args:
+    Parameters
+    ----------
 
-    filename: str, the name of the .xyz file
+    filename: str
+        the name of the .xyz file, The .xyz extension is not automatically added
     """
     xyzf = open(filename, 'w')
     xyzf.write(str(self.Ntotal) + '\n')
@@ -320,13 +333,14 @@ class Poscar:
     if self.verbose:
       print ("N atoms per specie, ", self.numberSp, '. Total: ', self.Ntotal)
 
-  def remove(self, atoms):
+  def remove(self, atoms:list|int):
     """
     Remove one or more atoms.
 
-    Args:
+    Parameters:
 
-    atoms: int or list, removes the atoms with given indexes (0-based)
+    atoms : int|list
+        removes the atom(s) with given indexes (0-based)
     """
     # atoms maybe (or not) just one atom (an int, not a one-sized list)
     if self.verbose:
@@ -366,15 +380,25 @@ class Poscar:
     # no need to sort, deleting doesn't alters the occurence
     return
 
-  def add(self, position, element, direct=True, selectiveFlags=None):
-    """Adds one atom to the class. The atoms must be added one at the time
+  def add(self,
+          position:np.ndarray,
+          element:str,
+          direct:bool=True,
+          selectiveFlags:np.ndarray=None):
+    """Adds one atom to the class. Only one atom at the time
 
-    Args:
+    Parameters
+    ----------
 
-    -position: np.ndarray (3 or 1x3), with the positions
-    -element: str, Name of the element of new atom
-    -direct: bool, are the positions given in Cartesian or direct coords?
-    -selectiveFlags: np.ndarray(str), only of `self.selective == True`
+    position : np.ndarray
+        (3 or 1x3) the positions of new atom
+    element : str
+        Name of the element of the new atom
+    direct : bool
+        are the positions given  direct (True) or Cartesian (False) 
+        coordinates? Default is True
+    selectiveFlags : np.ndarray(str)
+        only of `self.selective == True`
 
     """
     position = np.array(position, dtype=float)
