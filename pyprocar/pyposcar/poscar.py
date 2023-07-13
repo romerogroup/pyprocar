@@ -76,6 +76,7 @@ class Poscar:
     self.selective:bool = None # Selective dynamics
     self.selectFlags:np.ndarray = None # all the T,F from selective dynamics
     self.volume:float = None
+    self.loaded:bool = False # was the POSCAR-file loaded? i.e. self.parse()
     return
     
   def parse(self, fromString:str = None):
@@ -171,6 +172,7 @@ class Poscar:
 
     # setting the volume, just as an utility
     self.volume = np.linalg.det(self.lat)
+    self.loaded = True
     return
 
   def _set_cartesian(self):

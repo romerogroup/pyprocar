@@ -48,6 +48,7 @@ setup(
         'seekpath',
         'spglib',
         'trimesh',
+        'scikit-learn',
     ],
     data_files=[("", ["LICENSE"])],
     package_data={"": ["setup.json", '*.ini']},

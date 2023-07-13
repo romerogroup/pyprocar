@@ -8,8 +8,8 @@ add RDF here
 
 """
 import numpy as np
-import db
-import rdf
+from . import db
+from . import rdf
 np.set_printoptions(precision=4, linewidth=160, suppress=True)
 
 
