@@ -880,7 +880,36 @@ class ElectronicBandStructure:
         if self.weights is not None:
             self.weights = np.array(full_weights)
 
+    def interpolate_mesh_grid(self, mesh_grid,interpolation_factor=2):
+        """This function will interpolate an Nd, 3d mesh grid
+        [...,nx,ny,nz]
 
+        Parameters
+        ----------
+        mesh_grid : np.ndarray
+            The mesh grid to interpolate
+        """
+        scalar_dims=mesh_grid.shape[:-3]
+        new_mesh=None
+        for i, idx in enumerate(np.ndindex(scalar_dims)):
+            # Creating slicing list. idx are the scalar dimensions, last 3 are the grid
+            mesh_idx = list(idx)
+            mesh_idx.extend([ np.s_[:]]*3)
+
+            new_grid = mathematics.fft_interpolate(mesh_grid[mesh_idx], interpolation_factor=interpolation_factor)
+            
+            if i==0:
+                new_dim = np.append(scalar_dims,new_grid.shape,axis=0)
+                new_mesh=np.zeros(shape=(new_dim))
+
+            new_mesh[mesh_idx]=new_grid
+        return new_mesh
+    
+    def ravel_array(self,mesh_grid):
+        shape = mesh_grid.shape
+        mesh_grid=mesh_grid.reshape(shape[:-3] + (-1,))
+        mesh_grid=np.moveaxis(mesh_grid,-1,0)
+        return mesh_grid
 
     def __str__(self):
         ret = 'Enectronic Band Structure     \n'

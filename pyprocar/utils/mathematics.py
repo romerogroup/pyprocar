@@ -36,22 +36,23 @@ def get_angle(v, w, radians=False):
 
 def fft_interpolate(function, interpolation_factor=2, axis=None):
     """
-
+    This method will interpolate using a Fast-Fourier Transform
+    
+    if I = interpolation_factor
+    This function withh recieve f(x,y,z) with dimensions of (nx,ny,nz)
+    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)
 
     Parameters
     ----------
-    function : TYPE
-        DESCRIPTION.
-    interpolation_factor : TYPE, optional
-        DESCRIPTION. The default is 2.
-    axis : TYPE, optional
-        DESCRIPTION. The default is None.
+    function : np.ndarray
+        The values array to do the interpolation on.
+    interpolation_factor : int, optional
+        Interpolation Factor, by default 2
 
     Returns
     -------
-    interpolated : TYPE
-        DESCRIPTION.
-
+    np.ndarray
+        The interpolated points
     """
 
     if axis is None:
