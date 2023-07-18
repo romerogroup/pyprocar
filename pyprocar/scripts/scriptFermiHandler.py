@@ -17,7 +17,7 @@ import vtk
 import pyvista as pv
 
 from pyvista.core.filters import _get_output  # avoids circular import
-from pyvista.utilities import (
+from pyvista.core.utilities import (
     NORMALS,
     assert_empty_kwargs,
     generate_plane,
@@ -26,7 +26,7 @@ from pyvista.utilities import (
     try_callback,
 )
 
-from pyvista.utilities.algorithms import (
+from pyvista.plotting.utilities import (
     add_ids_algorithm,
     algorithm_to_mesh_handler,
     crinkle_algorithm,
