@@ -42,7 +42,7 @@ plotly==5.3.1
 pluggy==1.0.0
 pooch==1.6.0
 pydata-sphinx-theme==0.12.0
-Pygments==2.14.0
+Pygments==2.15.0
 pypandoc==1.10
 pyparsing==3.0.9
 PySocks==1.7.1
