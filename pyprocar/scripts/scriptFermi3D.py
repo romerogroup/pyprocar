@@ -12,7 +12,7 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 import vtk
 import pyvista
-from pyvista.utilities import NORMALS, generate_plane, get_array, try_callback
+from pyvista.core.utilities import NORMALS, generate_plane, get_array, try_callback
 
 
 from ..core import FermiSurface3D
