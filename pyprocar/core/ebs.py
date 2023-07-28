@@ -264,7 +264,7 @@ class ElectronicBandStructure:
         """
 
         if self._bands_gradient is None:
-            self._bands_hessian = self.mesh_to_array(mesh=self.bands_hessian_mesh)
+            self._bands_gradient = self.mesh_to_array(mesh=self._bands_gradient_mesh)
         return self._bands_gradient
     
     @property
@@ -415,7 +415,7 @@ class ElectronicBandStructure:
         return self._kpoints_cartesian_mesh
     
     @property
-    def bands_mesh(self):
+    def bands_mesh(self,force_update=False):
         """
         Bands mesh is a numpy array that stores each band in a mesh grid.   
         Shape = [n_bands,n_kx,n_ky,n_kz]
@@ -427,7 +427,7 @@ class ElectronicBandStructure:
             Shape = [n_bands,n_kx,n_ky,n_kz]
         """
 
-        if self._bands_mesh is None:
+        if self._bands_mesh is None or force_update:
             self._bands_mesh = self.create_nd_mesh(nd_list = self.bands)
         return self._bands_mesh
     
@@ -624,9 +624,11 @@ class ElectronicBandStructure:
             scalar_gradient_mesh shape = [3,n_kx,n_ky,n_kz]
         """
         nx,ny,nz = self.n_kx,self.n_ky,self.n_kz
-
         scalar_gradients =  np.zeros((3,nx,ny,nz))
 
+        if nx==1 or ny==1 or nz==1:
+            raise ValueError("The mesh cannot be 2 dimensional")
+        
         # Calculate cartesian separations along each crystal direction
         sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*nx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*nx, :, :], :])
         sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*ny, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*ny, :], :])
@@ -802,22 +804,6 @@ class ElectronicBandStructure:
             )
         return ret
 
-    def update_weights(self, weights):
-        """Updates the weights corresponding to the kpoints
-
-        Parameters
-        ----------
-        weights : List[float]
-            A list of weights corresponding to the kpoints
-
-        Returns
-        -------
-        None
-            None
-        """
-        self.weights = weights
-        return None
-
     def unfold(self, transformation_matrix=None, structure=None):
         """The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.
         The current weights are then updated
@@ -991,8 +977,8 @@ class ElectronicBandStructure:
         for i, idx in enumerate(np.ndindex(scalar_dims)):
             # Creating slicing list. idx are the scalar dimensions, last 3 are the grid
             mesh_idx = list(idx)
-            mesh_idx.extend([ np.s_[:]]*3)
-
+            tmp = [slice(None)]*3
+            mesh_idx.extend(tmp)
             new_grid = mathematics.fft_interpolate(mesh_grid[mesh_idx], interpolation_factor=interpolation_factor)
             
             if i==0:

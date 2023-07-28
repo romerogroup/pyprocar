@@ -8,37 +8,17 @@ import functools
 import copy
 from typing import List, Tuple
 import os
+import yaml
 
 import numpy as np
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 import matplotlib.pyplot as plt
-import vtk
 import pyvista as pv
 
-from pyvista.core.filters import _get_output  # avoids circular import
-from pyvista.core.utilities import (
-    NORMALS,
-    assert_empty_kwargs,
-    generate_plane,
-    get_array,
-    get_array_association,
-    try_callback,
-)
-
-from pyvista.plotting.utilities import (
-    add_ids_algorithm,
-    algorithm_to_mesh_handler,
-    crinkle_algorithm,
-    outline_algorithm,
-    pointset_to_polydata_algorithm,
-    set_algorithm_input,
-)
-# from pyprocar.fermisurface3d import fermisurface3D
 from pyprocar.core import FermiSurface3D
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
-from pyprocar.utils import welcome
-from pyprocar.utils import UtilsProcar
+
 
 from .. import io
 
