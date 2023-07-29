@@ -243,6 +243,9 @@ class Parser:
                             structure=poscar.structure,
                             reciprocal_lattice=poscar.structure.reciprocal_lattice,
                             kpath=self.kpath,
+                            n_kx=outcar.n_kx,
+                            n_ky=outcar.n_ky,
+                            n_kz=outcar.n_kz,
                             efermi=outcar.efermi,
                             interpolation_factor=1
                             )

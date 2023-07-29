@@ -336,6 +336,8 @@ class FermiVisualizer:
                                       color=self.plotting_options['texture_color']['value'],
                                       show_scalar_bar=False,
                                       opacity=self.plotting_options['texture_opacity']['value'])
+        else:
+            arrows=None
         return arrows
     
     def add_isoslider(self,e_surfaces, energy_values):

@@ -59,6 +59,9 @@ class ElectronicBandStructure:
         kpoints:np.ndarray,
         bands:np.ndarray,
         efermi:float,
+        n_kx:int=None,
+        n_ky:int=None,
+        n_kz:int=None,
         projected:np.ndarray = None,
         projected_phase:np.ndarray =None,
         weights:np.ndarray=None,
@@ -84,7 +87,9 @@ class ElectronicBandStructure:
         self.weights = weights
         self.graph = None
 
-        
+        self._n_kx=n_kx
+        self._n_ky=n_ky
+        self._n_kz=n_kz
         
         self._index_mesh=None
         self._kpoints_mesh=None
@@ -117,7 +122,10 @@ class ElectronicBandStructure:
         int
             The number of unique kpoints in kx direction in the reduced basis
         """
-        return len( np.unique(self.kpoints[:,0]) )
+
+        if self._n_kx==None:
+            self._n_kx=len( np.unique(self.kpoints[:,0]) )
+        return self._n_kx
     
     @property
     def n_ky(self):
@@ -128,7 +136,9 @@ class ElectronicBandStructure:
         int
             The number of unique kpoints in kx direction in the reduced basis
         """
-        return len( np.unique(self.kpoints[:,1]) )
+        if self._n_ky==None:
+            self._n_ky=len( np.unique(self.kpoints[:,1]) )
+        return self._n_ky
     
     @property
     def n_kz(self):
@@ -139,7 +149,9 @@ class ElectronicBandStructure:
         int
             The number of unique kpoints in ky direction in the reduced basis
         """
-        return len( np.unique(self.kpoints[:,2]) )
+        if self._n_kz==None:
+            self._n_kz=len( np.unique(self.kpoints[:,2]) )
+        return self._n_kz
 
     @property
     def nkpoints(self):
@@ -264,7 +276,7 @@ class ElectronicBandStructure:
         """
 
         if self._bands_gradient is None:
-            self._bands_gradient = self.mesh_to_array(mesh=self._bands_gradient_mesh)
+            self._bands_gradient = self.mesh_to_array(mesh=self.bands_gradient_mesh)
         return self._bands_gradient
     
     @property
@@ -359,11 +371,9 @@ class ElectronicBandStructure:
             kx_unique = np.unique(self.kpoints[:,0])
             ky_unique = np.unique(self.kpoints[:,1])
             kz_unique = np.unique(self.kpoints[:,2])
-
             n_kx = len(kx_unique)
             n_ky = len(ky_unique)
             n_kz = len(kz_unique)
-
             self._index_mesh = np.zeros((n_kx,n_ky,n_kz),dtype=int)
 
             for k in range(n_kz):
@@ -384,7 +394,7 @@ class ElectronicBandStructure:
                         where_xyz_true_points = where_xy_true_points[where_xyz_true_indices]
 
                         original_index = where_x_true_indices[where_xy_true_indices[where_xyz_true_indices]]
-
+                        # print(original_index)
                         self._index_mesh[i,j,k] = original_index
         return self._index_mesh
     
@@ -409,7 +419,6 @@ class ElectronicBandStructure:
         np.ndarray
             Kpoint cartesian mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
         """
-
         if self._kpoints_cartesian_mesh is None:
             self._kpoints_cartesian_mesh = self.create_nd_mesh(nd_list = self.kpoints_cartesian)
         return self._kpoints_cartesian_mesh
@@ -623,33 +632,35 @@ class ElectronicBandStructure:
         np.ndarray
             scalar_gradient_mesh shape = [3,n_kx,n_ky,n_kz]
         """
-        nx,ny,nz = self.n_kx,self.n_ky,self.n_kz
-        scalar_gradients =  np.zeros((3,nx,ny,nz))
+        n_kx=len(np.unique(self.kpoints[:,0]))
+        n_ky=len(np.unique(self.kpoints[:,1]))
+        n_kz=len(np.unique(self.kpoints[:,2]))
+        scalar_gradients =  np.zeros((3,n_kx,n_ky,n_kz))
 
-        if nx==1 or ny==1 or nz==1:
+        if n_kx==1 or n_ky==1 or n_kz==1:
             raise ValueError("The mesh cannot be 2 dimensional")
         
         # Calculate cartesian separations along each crystal direction
-        sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*nx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*nx, :, :], :])
-        sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*ny, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*ny, :], :])
-        sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*nz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*nz], :])
+        sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*n_kx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*n_kx, :, :], :])
+        sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*n_ky, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*n_ky, :], :])
+        sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*n_kz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*n_kz], :])
 
         # Calculate indices with periodic boundary conditions
-        plus_one_indices_x = np.arange(nx) + 1
-        plus_one_indices_y = np.arange(ny) + 1
-        plus_one_indices_z = np.arange(nz) + 1
+        plus_one_indices_x = np.arange(n_kx) + 1
+        plus_one_indices_y = np.arange(n_ky) + 1
+        plus_one_indices_z = np.arange(n_kz) + 1
 
-        minus_one_indices_x = np.arange(nx) - 1
-        minus_one_indices_y = np.arange(ny) - 1
-        minus_one_indices_z = np.arange(nz) - 1
+        minus_one_indices_x = np.arange(n_kx) - 1
+        minus_one_indices_y = np.arange(n_ky) - 1
+        minus_one_indices_z = np.arange(n_kz) - 1
 
         plus_one_indices_x[-1] = 0
         plus_one_indices_y[-1] = 0
         plus_one_indices_z[-1] = 0
 
-        minus_one_indices_x[0] = nx - 1
-        minus_one_indices_y[0] = ny - 1
-        minus_one_indices_z[0] = nz - 1
+        minus_one_indices_x[0] = n_kx - 1
+        minus_one_indices_y[0] = n_ky - 1
+        minus_one_indices_z[0] = n_kz - 1
 
         scalar_diffs_i = scalar_mesh[plus_one_indices_x,:,:] - scalar_mesh[minus_one_indices_x,:,:]
         scalar_diffs_j = scalar_mesh[:,plus_one_indices_y,:] - scalar_mesh[:,minus_one_indices_y,:]
@@ -692,17 +703,21 @@ class ElectronicBandStructure:
         if nd_list is not  None:
 
             nd_shape = list(nd_list.shape[1:])
-            nd_shape.append(self.n_kx)
-            nd_shape.append(self.n_ky)
-            nd_shape.append(self.n_kz)
 
+
+            n_kx=len(np.unique(self.kpoints[:,0]))
+            n_ky=len(np.unique(self.kpoints[:,1]))
+            n_kz=len(np.unique(self.kpoints[:,2]))
+            nd_shape.append(n_kx)
+            nd_shape.append(n_ky)
+            nd_shape.append(n_kz)
             nd_mesh = np.zeros(nd_shape,dtype=nd_list.dtype)
             non_grid_dims = nd_shape[:-3]
             for i_dim, non_grid_dim in enumerate(non_grid_dims):
                 for i in range(non_grid_dim):
-                    for x in range(self.n_kx):
-                        for y in range(self.n_ky):
-                            for z in range(self.n_kz):
+                    for x in range(n_kx):
+                        for y in range(n_ky):
+                            for z in range(n_kz):
                                 # Forming slicing tuples for mesh
                                 mesh_idx = [ np.s_[:]]*nd_mesh.ndim
                                 mesh_idx[i_dim] = i
@@ -962,6 +977,20 @@ class ElectronicBandStructure:
             self.projected_phase = np.array(full_projected_phases)
         if self.weights is not None:
             self.weights = np.array(full_weights)
+
+        nk=self.kpoints.shape[0]
+        if self.n_kx:
+            if nk != self.n_kx*self.n_ky*self.n_kz:
+
+                err_text="""
+                        nkpoints != n_kx*n_ky*n_kz
+                        Error trying to symmetrize the irreducible kmesh. 
+                        This is issue is most likely related to 
+                        how the DFT code using symmetry operations to reduce the kmesh.
+                        Check the recommendations for k-mesh type for the crystal system.
+                        If all else fails turn off symmetry.
+                        """
+                raise ValueError(err_text)
 
     def interpolate_mesh_grid(self, mesh_grid,interpolation_factor=2):
         """This function will interpolate an Nd, 3d mesh grid

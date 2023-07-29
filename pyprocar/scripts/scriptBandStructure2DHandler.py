@@ -64,18 +64,20 @@ class BandStructure2DHandler:
         self.data_handler.process_data(mode, bands, atoms, orbitals, spins, spin_texture)
 
     def plot_band_structure(self, mode, 
-                           bands=None, 
-                           atoms=None, 
-                           orbitals=None, 
-                           spins=None, 
-                           spin_texture=False,
-                           property_name=None,
-                           show=True,
-                           save_2d=None,
-                           save_gif=None,
-                           save_mp4=None,
-                           save_3d=None,
-                           **kwargs):
+                            bands=None, 
+                            atoms=None, 
+                            orbitals=None, 
+                            spins=None, 
+                            spin_texture=False,
+                            property_name=None,
+                            k_z_plane=0, 
+                            k_z_plane_tol=0.0001,
+                            show=True,
+                            save_2d=None,
+                            save_gif=None,
+                            save_mp4=None,
+                            save_3d=None,
+                            **kwargs):
         """A method to plot the 3d fermi surface
 
         Parameters
@@ -93,7 +95,7 @@ class BandStructure2DHandler:
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
         """
-        
+        self._reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
         # Process the data
         self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         band_structure_surface=self.data_handler.get_surface_data(property_name=property_name)
@@ -139,6 +141,13 @@ class BandStructure2DHandler:
         self.ebs.bands=self.ebs.bands[:,full_band_index,:]
         self.ebs.projected=self.ebs.projected[:,full_band_index,:,:,:]
         print("Bands near the fermi level : " , full_band_index )
+
+    def _reduce_kpoints_to_plane(self,k_z_plane,k_z_plane_tol):
+        i_kpoints_near_z_0 = np.where(np.logical_and(self.ebs.kpoints_cartesian[:,2] < k_z_plane + k_z_plane_tol, 
+                                                     self.ebs.kpoints_cartesian[:,2] > k_z_plane - k_z_plane_tol) )
+        self.ebs.kpoints = self.ebs.kpoints[i_kpoints_near_z_0,:][0]
+        self.ebs.bands = self.ebs.bands[i_kpoints_near_z_0,:][0]
+        self.ebs.projected = self.ebs.projected[i_kpoints_near_z_0,:][0]
 
 # def find_nearest(array, value):
 #     array = np.asarray(array)
