@@ -1,24 +1,57 @@
 #!/usr/bin/env python
-
+from __future__ import annotations
 import argparse
 import numpy as np
-from poscar import Poscar
-import latticeUtils
+from .poscar import Poscar
+from . import latticeUtils
 
 
-def poscarDiff(poscar1, poscar2, tolerance=0.01):
+def poscarDiff(poscar1 : Poscar | str,
+               poscar2 : Poscar | str,
+               tolerance : float = 0.01) -> dict:
   """It compares two different Poscar objects. Small numerical errors
   up to `tolerance` are ignored.
 
   Return: a dictionary with the differences found. If the files are
-  the same, it returns an empty dictionary
+  the same, it returns an empty dictionary (i.e. a False value)
 
   The comparison does:
   -comparison between elements
   -comparison between lattices (distances and angles)
   -comparison of the relative distances between atoms
 
+  Parameters
+  ----------
+
+  poscar1 : Poscar | str
+      the first Poscar filename or object
+  poscar2 : Poscar | str
+      the first Poscar filename or object
+  tolerance : float
+      numerical difference to consider both files equal. Default 0.01
+
+
+  Returns
+  -------
+  
+  dict: 
+    the differences are stored with keys 'Elements', 'lattices',
+    'distances'. If no differences are found an empty dict is
+    returned
+
   """
+  # If poscar1, poscar2 are string a Poscar-object needs to be created
+  if isinstance(poscar1, str):
+    poscar1 = Poscar(poscar1)
+  if isinstance(poscar2, str):
+    poscar2 = Poscar(poscar2)
+    
+  if poscar1.loaded is False:
+      poscar1.parse()
+  if poscar2.loaded is False:
+      poscar2.parse()
+
+  
   differences = {}
   #Checking for type of elements
   if(list(poscar1.elm) != list(poscar2.elm)):
@@ -50,8 +83,7 @@ def poscarDiff(poscar1, poscar2, tolerance=0.01):
   
 
 class poscar_modify:
-  """ class to change properties of a Poscar-object.
-      It requires a poscar-object, not a filename.
+  """ High-level class to change properties of a Poscar-object.
 
   Methods:
 
@@ -64,17 +96,43 @@ class poscar_modify:
   scale_lattice(factor, cartesian)  # scale the lattice by `factor`. are `cartesian` fixed?
 
   """
-  def __init__(self, poscar, verbose=False):
-    self.p = poscar
+  def __init__(self, poscar:Poscar|str, verbose:bool=False):
+    """High-level class to change properties of a Poscar-object.
+    
+    Parameters
+    ----------
+
+    poscar : Poscar|str
+        Filename or Poscar instance to be modified
+    verbose : bool
+        verbosity. Default is False
+
+    """
+    if isinstance(poscar, str):
+      self.p = Poscar(poscar)
+    else:
+      self.p = poscar
+    if self.p.loaded is False:
+      self.p.parse()
     self.verbose = verbose
 
-  def write(self, filename, cartesian=False, xyz=False):
-    """It just invokes the write method from the poscar. Is here just
-    for convenience
+  def write(self,
+            filename:str,
+            cartesian:bool=False,
+            xyz:bool=False):
+    """Writes the content of this class into a file. It just invokes the
+    write method from the `Poscar` class. Is here just for convenience. 
 
-    filename: the name of the file to be written
-    cartesian: write in cartesian or direct coordinates
-    xyz: should a xyz be written too?
+    Parameters
+    ----------
+
+    filename : str
+        the name of the file to be written
+    cartesian: bool: 
+        Cartesian (True) or direct (False) coordinates. Default is True
+    xyz: bool
+        should a xyz be written too? The '.xyz' extension will be added 
+        automatically to `filename` Default is False. 
 
     """
     direct = True
@@ -90,12 +148,19 @@ class poscar_modify:
       if xyz:
         print('XYZ file written')
     
-  def pos_multiply(self, factor, cartesian=True):
+  def pos_multiply(self,
+                   factor:np.ndarray|list[float],
+                   cartesian:bool = True):
     """ Multiplies each (x,y,z) position by the Factor (Fx,Fy,Fz)
-    args:
 
-    factor: a list or array with 3 numbers
-    cartesian: should the operation be done in Cartesian or direct coordinates
+    Parameters
+    ----------
+
+    factor : np.ndarray|list[float]
+        array or list with 3 numbers, the x,y,z factors to scale each position
+    cartesian: bool
+        should the operation be done in Cartesian (False) or direct (True) 
+        coordinates? Default is True
     
     """
     factor = np.array(factor, dtype=float)
@@ -122,12 +187,18 @@ class poscar_modify:
         print(self.p.dpos)      
     return
 
-  def pos_sum(self, factor, cartesian=True):
-    """ Add each (x,y,z) position by the Factor (Fx,Fy,Fz)
-    args:
+  def pos_sum(self,
+              factor:np.ndarray|list[float],
+              cartesian=False):
+    """ Add the Factor (Fx,Fy,Fz) to each position
+    
+    Parameters:
 
-    factor: a list or array with 3 numbers
-    cartesian: should the operation be done in Cartesian or direct coordinates
+    factor : np.ndarray|list[float]
+        3 numbers, the factor to add to each position
+    cartesian : bool
+        should the operation be done in Cartesian (True) or direct coordinates (False).
+        Default is False
     
     """
     factor = np.array(factor, dtype=float)
@@ -155,28 +226,33 @@ class poscar_modify:
         print(self.p.dpos)      
     return
 
-  def change_elements(self, indexes, newElements, human=False):
-    """It changes the Element of an atom in a poscar object.
+  def change_elements(self,
+                      indexes : np.ndarray|List[int]|int,
+                      newElements : np.ndarray|List[str]|str,
+                      human : bool = False):
+    """It changes the Element of one or more atoms in this poscar object.
 
-    args:
+    Parameters
+    ----------
 
-    indexes: the 0-based indexes of the atom to be replaced. A single
-    number, or list
-
-    newElements: the element to replace. Same size of `indexes`
-
-    human: if True, the index will be one-based
+    indexes : np.ndarray | List[int] | int
+        the 0-based index(es) of the atom to be replaced.
+    newElements : np.ndarray | List[str] | str
+        the element(s) to replace. Same size of `indexes`
+    human : bool
+        if True, the index(es) will be one-based, as humans like to count. Default is False
 
     """
-    # converting anything to list
-    try:
-      indexes = np.array(indexes, dtype=int)
-      newElements = list(newElements)
-    except TypeError:
+    # converting anything to arrays
+    if isinstance(indexes, int):
       indexes = np.array([indexes], dtype=int)
-      newElements = [newElements]
+    # I need a np.ndarray 
+    indexes = np.array(indexes, dtype=int)
     if human:
       indexes = indexes - 1
+
+    if isinstance(newElements, str):
+      newElements = [newElements]
       
     # first retrive the positions
     dpos = self.p.dpos[indexes]
@@ -190,15 +266,21 @@ class poscar_modify:
     if self.verbose:
       print('Added element ', newElement, 'at direct coord:', dpos)
       
-  def remove(self, atoms, human=False):
+  def remove(self,
+             atoms : List[int] | np.ndarray,
+             human : bool = False):
     """Removes a list of atoms from the Poscar object. The order of
-    remotion is not trivial, but the method (at the Poscar-class
-    level) sort it before removing the atoms.
+    removal is not trivial, and it is equivalent to removing all the
+    desired atoms at once.
     
-    args:
+    Parameters
+    ----------
     
-    atoms: a list with the indexes of the atoms
-    human: does `atoms` start from 1 (True) or 0 (False)?
+    atoms : List[int] | np.ndarray
+        a list with the indexes of the atoms to remove
+    human : bool
+        does `atoms` start from 1 (True) or 0 (False)? Default is False
+
     """
     atoms = np.array(atoms)
     # the atoms list could be disordered, Poscar.remove is safe
@@ -209,14 +291,22 @@ class poscar_modify:
       print('removing the following atoms (0-based indexes):', atoms)
       print(self.p.numberSp, self.p.typeSp)
 
-  def add(self, element, position, cartesian=True):
+  def add(self,
+          element : str,
+          position : List[float] | np.nadarray,
+          cartesian : bool = False):
     """Adds a single atom to the Poscar object.
     
-    args:
+    Parameters
+    ----------
     
-    element: a string with the atomic specie, e.g. 'Cu'
-    position: [X, Y, Z]
-    cartesian: Cartesian (True) or direct coordiantes (False)?
+    element : str
+        a string with the atomic specie, e.g. 'Cu'
+    position : List[float] | np.nadarray
+        [X, Y, Z]
+    cartesian : bool
+        are the positions in Cartesian (True) or direct coordiantes (False)? Default is False
+
     """
     position = np.array(position, dtype=float)
     if self.verbose:
@@ -226,14 +316,21 @@ class poscar_modify:
       direct = False
     self.p.add(position=position, element=element, direct=direct)
 
-  def shift(self, amount, cartesian):
-    """Shift all the positions by `amount`, given in cartesian or direct
+  def shift(self,
+            amount : List[float] | np.ndarray,
+            cartesian : bool = False ):
+    """Shift all the positions by `amount`, given in Cartesian or direct
     coordinates. The PBCs are always enforced (i.e. [0,1] in direct
-    coords)
+    coords). If amount = [0,0,0] it just applies the perodic boundary
+    conditions.
 
-    args:
-    amount: [X,Y,Z] a list or array with the shift along each basios vector
-    cartesian: is `amount` given in cartesian (True) or direct (False) coords?
+    Parameters
+    ----------
+
+    amount : List[float] | np.ndarray
+        [X,Y,Z] the shift along each basis vector or along Cartesian axis.
+    cartesian : bool
+        is the `amount` given in Cartesian (True) or direct (False) coords? Default False
 
     """
     amount = np.array(amount, dtype=float)
@@ -261,13 +358,18 @@ class poscar_modify:
     self.p._set_cartesian()
     return
 
-  def scale_lattice(self, factor, cartesian):
-    """ Scale the lattice vectors by factor [a,b,c] 
+  def scale_lattice(self,
+                    factor : np.ndarray,
+                    keep_cartesian : bool = False):
+    """Scale the lattice vectors by factor [a,b,c] 
 
-    args:
+    Parameters:
 
-    factor: [A,B,C] the first lattice vector is multiplied by A, etc.
-    cartesian: What cooddinates should remain constant? Cartesian or direct?
+    factor : np.ndarray
+       [A,B,C], the first lattice vector is multiplied by A, etc.
+    keep_cartesian : bool
+        What cooddinates should remain constant? Cartesian or direct? Default is False
+
     """
     if self.verbose:
       print("Old lattice")
@@ -277,8 +379,11 @@ class poscar_modify:
     if self.verbose:
       print("New lattice")
       print(self.p.lat)
+    # setting the new volume
+    self.p.volume = np.linalg.det(self.p.lat)
 
-    if cartesian:
+
+    if keep_cartesian:
       # if cartesian positions are to remain constant, the direct ones
       # needs to be updated
       self.p._set_direct()
@@ -289,20 +394,57 @@ class poscar_modify:
   
 
 class poscar_supercell:
-  """ class to generate a supercell 
+  """ class to generate a supercell by providing a supercell matrix.
   """
   
-  def __init__(self, poscar, verbose=False):
-    self.poscar = poscar
+  def __init__(self,
+               poscar : Poscar | str,
+               verbose : bool = False):
+    """This class created a supercell of `poscar`, see the `supercell`
+    method
+
+    Parameters
+    __________
+
+    poscar : Poscar | str
+        Filename or Poscar instance to be modified
+    verbose : bool
+        verbosity. Default is False
+    
+    """
+    if isinstance(poscar, str):
+      self.poscar = Poscar(poscar)
+    else:
+      self.poscar = poscar
+    if self.poscar.loaded is False:
+      self.poscar.parse()
+
     self.verbose = verbose
 
-  def supercell(self, size):
-    """ 
-    Creates a new poscar object with size:
+  def supercell(self,
+                size : np.ndarray) -> Poscar:
+    """Creates a supercell of the given size. The content of the original
+    Poscar is overwritten
 
     size = [[b1x, b1y, b1z],
             [b2x, b2y, b2z],
             [b3x, b3y, b3z]]
+
+    Parameters
+    ----------
+
+    size : ndarray
+        (3x3) array of integers with the supercell vectors in term of the
+        original lattice vectors. The order is [[b1x, b1y, b1z], [b2x, ...] ...]
+
+
+    Returns
+    -------
+
+    Poscar
+        A Poscar object with the desired supercell. It is the same instance 
+        stored in this class
+
     """
     lat = self.poscar.lat
     pos = self.poscar.dpos
@@ -393,8 +535,22 @@ class poscar_supercell:
 
     return self.poscar
 
-  def write(self, filename, cartesian=False, xyz=False):
-    """Just a convenience method 
+  def write(self,
+            filename : str,
+            cartesian : bool = False,
+            xyz : bool = False):
+    """Just a convenience method to save the content into a file.
+
+    Parameters
+    ----------
+
+    filename : str
+        the name of the file to be written
+    cartesian : bool
+        Do you prefer the output position in Cartesian coords (True)? Default is False
+    xyz : bool
+        Do you want to write an .xyz file? the .xyz extension will be added to filename. 
+        Default is False
 
     """
     pm = poscar_modify(self.poscar, verbose=False)

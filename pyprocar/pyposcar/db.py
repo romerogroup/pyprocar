@@ -1,4 +1,4 @@
-import dbCovalentBond
+from . import dbCovalentBond
 import numpy as np
 
 class DB:

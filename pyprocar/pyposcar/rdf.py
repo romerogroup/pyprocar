@@ -1,7 +1,6 @@
 from code import interact
 import numpy as np
-from poscar import Poscar
-import latticeUtils
+from . import latticeUtils
 try:
   from sklearn.neighbors.kde import KernelDensity
 except:
@@ -9,8 +8,8 @@ except:
 import scipy
 import scipy.signal
 import matplotlib.pyplot as plt
-import generalUtils
-import db
+from . import generalUtils
+from . import db
 
 
 class RDF:
