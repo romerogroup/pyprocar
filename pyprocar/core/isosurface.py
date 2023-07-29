@@ -283,7 +283,7 @@ class Isosurface(Surface):
             return [(mins[0], maxs[0]), (mins[1], maxs[1]), (mins[2], maxs[2])]
         except Exception as e:
             # print(e)
-            print("No isosurface for this band")
+            # print("No isosurface for this band")
             return None
 
     def _get_isosurface(self, interp_factor:float=1):
@@ -339,7 +339,7 @@ class Isosurface(Surface):
 
         except Exception as e:
             # print(e)
-            print("No isosurface for this band")
+            # print("No isosurface for this band")
             return None, None, None, None
             
         # recenter

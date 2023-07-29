@@ -59,6 +59,9 @@ class ElectronicBandStructure:
         kpoints:np.ndarray,
         bands:np.ndarray,
         efermi:float,
+        n_kx:int=None,
+        n_ky:int=None,
+        n_kz:int=None,
         projected:np.ndarray = None,
         projected_phase:np.ndarray =None,
         weights:np.ndarray=None,
@@ -84,17 +87,30 @@ class ElectronicBandStructure:
         self.weights = weights
         self.graph = None
 
+        self._n_kx=n_kx
+        self._n_ky=n_ky
+        self._n_kz=n_kz
         
+        self._index_mesh=None
+        self._kpoints_mesh=None
+        self._kpoints_cartesian_mesh=None
+        self._bands_mesh=None
+        self._projected_mesh=None
+        self._projected_phase_mesh=None
+        self._weights_mesh=None
+        self._bands_gradient_mesh=None
+        self._bands_hessian_mesh=None
+        self._fermi_velocity_mesh=None
+        self._harmonic_average_effective_mass_mesh=None
+        self._fermi_speed_mesh=None
+
+        self._bands_gradient=None
+        self._bands_hessian=None
+        self._fermi_velocity=None
+        self._effective_mass=None
+        self._fermi_speed=None
+        self._harmonic_average_effective_mass=None
         
-        self._index_mesh = None
-        self._kpoints_mesh = None
-        self._kpoints_cartesian_mesh = None
-        self._bands_mesh = None
-        self._projected_mesh = None
-        self._projected_phase_mesh = None
-        self._weights_mesh = None
-        self._bands_gradient_mesh = None
-        self._bands_hessian_mesh = None
 
             
     @property
@@ -106,7 +122,10 @@ class ElectronicBandStructure:
         int
             The number of unique kpoints in kx direction in the reduced basis
         """
-        return len( np.unique(self.kpoints[:,0]) )
+
+        if self._n_kx==None:
+            self._n_kx=len( np.unique(self.kpoints[:,0]) )
+        return self._n_kx
     
     @property
     def n_ky(self):
@@ -117,7 +136,9 @@ class ElectronicBandStructure:
         int
             The number of unique kpoints in kx direction in the reduced basis
         """
-        return len( np.unique(self.kpoints[:,1]) )
+        if self._n_ky==None:
+            self._n_ky=len( np.unique(self.kpoints[:,1]) )
+        return self._n_ky
     
     @property
     def n_kz(self):
@@ -128,7 +149,9 @@ class ElectronicBandStructure:
         int
             The number of unique kpoints in ky direction in the reduced basis
         """
-        return len( np.unique(self.kpoints[:,2]) )
+        if self._n_kz==None:
+            self._n_kz=len( np.unique(self.kpoints[:,2]) )
+        return self._n_kz
 
     @property
     def nkpoints(self):
@@ -237,6 +260,98 @@ class ElectronicBandStructure:
             Returns the kpoints in fractional basis
         """
         return self.kpoints
+    
+    @property
+    def bands_gradient(self):
+        """
+        Bands gradient is a numpy array that stores each band gradient a list that corresponds to the self.kpoints
+        Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz  
+        
+        Returns
+        -------
+        np.ndarray
+            Bands fradient is a numpy array that stores each band gradient in a list that corresponds to the self.kpoints
+            Shape = [n_kpoints,3,n_bands], 
+            where the second dimension represents d/dx,d/dy,d/dz  
+        """
+
+        if self._bands_gradient is None:
+            self._bands_gradient = self.mesh_to_array(mesh=self.bands_gradient_mesh)
+        return self._bands_gradient
+    
+    @property
+    def bands_hessian(self):
+        """
+        Bands hessian is a numpy array that stores each band hessian in a list that corresponds to the self.kpoints   
+        Shape = [n_kpoints,3,3,n_bands], 
+        where the second and third dimension represent d/dx,d/dy,d/dz  
+        
+        Returns
+        -------
+        np.ndarray
+            Bands hessian is a numpy array that stores each band hessian in a list that corresponds to the self.kpoints
+            Shape = [n_kpoints,3,3,n_bands], 
+            where the second and third dimension represent d/dx,d/dy,d/dz  
+        """
+
+        if self._bands_hessian is None:
+            self._bands_hessian = self.mesh_to_array(mesh=self.bands_hessian_mesh)
+        return self._bands_hessian
+
+    @property
+    def fermi_velocity(self):
+        """
+        fermi_velocity is a numpy array that stores each fermi_velocity a list that corresponds to the self.kpoints
+        Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz  
+        
+        Returns
+        -------
+        np.ndarray
+            fermi_velocity is a numpy array that stores each fermi_velocity in a list that corresponds to the self.kpoints
+            Shape = [n_kpoints,3,n_bands], 
+            where the second dimension represents d/dx,d/dy,d/dz  
+        """
+
+        if self._fermi_velocity is None:
+            self._fermi_velocity = self.mesh_to_array(mesh=self.fermi_velocity_mesh)
+        return self._fermi_velocity
+    
+    @property
+    def fermi_speed(self):
+        """
+        fermi speed is a numpy array that stores each fermi speed a list that corresponds to the self.kpoints
+        Shape = [n_kpoints,n_bands] 
+        
+        Returns
+        -------
+        np.ndarray
+            fermi speed is a numpy array that stores each fermi speed 
+            in a list that corresponds to the self.kpoints
+            Shape = [n_kpoints,n_bands], 
+        """
+
+        if self._fermi_speed is None:
+            self._fermi_speed = self.mesh_to_array(mesh=self.fermi_speed_mesh)
+        return self._fermi_speed
+
+    @property
+    def harmonic_average_effective_mass(self):
+        """
+        harmonic average effective mass is a numpy array that stores 
+        each harmonic average effective mass in a list that corresponds to the self.kpoints   
+        Shape = [n_kpoints,n_bands], 
+        
+        Returns
+        -------
+        np.ndarray
+            harmonic average effective mass is a numpy array that stores 
+            each harmonic average effective mass in a list that corresponds to the self.kpoints
+            Shape = [n_kpoints,n_bands],
+        """
+
+        if self._harmonic_average_effective_mass is None:
+            self._harmonic_average_effective_mass=self.mesh_to_array(mesh=self.harmonic_average_effective_mass_mesh)
+        return self._harmonic_average_effective_mass
 
     @property
     def index_mesh(self):
@@ -253,7 +368,34 @@ class ElectronicBandStructure:
 
         """
         if self._index_mesh is None:
-            self.update_index_mesh()
+            kx_unique = np.unique(self.kpoints[:,0])
+            ky_unique = np.unique(self.kpoints[:,1])
+            kz_unique = np.unique(self.kpoints[:,2])
+            n_kx = len(kx_unique)
+            n_ky = len(ky_unique)
+            n_kz = len(kz_unique)
+            self._index_mesh = np.zeros((n_kx,n_ky,n_kz),dtype=int)
+
+            for k in range(n_kz):
+                for j in range(n_ky):
+                    for i in range(n_kx):
+
+                        kx = kx_unique[i]
+                        ky = ky_unique[j]
+                        kz = kz_unique[k]
+
+                        where_x_true_indices = np.where(self.kpoints[:,0] == kx)[0]
+                        where_x_true_points = self.kpoints[where_x_true_indices]
+
+                        where_xy_true_indices = np.where(where_x_true_points[:,1] == ky)[0]
+                        where_xy_true_points = where_x_true_points[where_xy_true_indices]
+
+                        where_xyz_true_indices = np.where(where_xy_true_points[:,2] == kz)[0]
+                        where_xyz_true_points = where_xy_true_points[where_xyz_true_indices]
+
+                        original_index = where_x_true_indices[where_xy_true_indices[where_xyz_true_indices]]
+                        # print(original_index)
+                        self._index_mesh[i,j,k] = original_index
         return self._index_mesh
     
     @property
@@ -266,7 +408,7 @@ class ElectronicBandStructure:
         """
 
         if self._kpoints_mesh is None:
-            self.update_kpoints_mesh()
+            self._kpoints_mesh = self.create_nd_mesh(nd_list = self.kpoints)
         return self._kpoints_mesh
     
     @property
@@ -277,13 +419,12 @@ class ElectronicBandStructure:
         np.ndarray
             Kpoint cartesian mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
         """
-
         if self._kpoints_cartesian_mesh is None:
-            self.update_kpoints_cartesian_mesh()
+            self._kpoints_cartesian_mesh = self.create_nd_mesh(nd_list = self.kpoints_cartesian)
         return self._kpoints_cartesian_mesh
     
     @property
-    def bands_mesh(self):
+    def bands_mesh(self,force_update=False):
         """
         Bands mesh is a numpy array that stores each band in a mesh grid.   
         Shape = [n_bands,n_kx,n_ky,n_kz]
@@ -295,8 +436,8 @@ class ElectronicBandStructure:
             Shape = [n_bands,n_kx,n_ky,n_kz]
         """
 
-        if self._bands_mesh is None:
-            self.update_bands_mesh()
+        if self._bands_mesh is None or force_update:
+            self._bands_mesh = self.create_nd_mesh(nd_list = self.bands)
         return self._bands_mesh
     
     @property
@@ -313,7 +454,7 @@ class ElectronicBandStructure:
         """
 
         if self._projected_mesh is None:
-            self.update_projected_mesh()
+            self._projected_mesh = self.create_nd_mesh(nd_list = self.projected)
         return self._projected_mesh
     
     @property
@@ -330,7 +471,7 @@ class ElectronicBandStructure:
         """
 
         if self._projected_phase_mesh is None:
-            self.update_projected_phase_mesh()
+            self._projected_phase_mesh = self.create_nd_mesh(nd_list = self.projected_phase)
         return self._projected_phase_mesh
 
     @property
@@ -347,7 +488,7 @@ class ElectronicBandStructure:
         """
 
         if self._weights_mesh is None:
-            self.update_weights_mesh()
+            self._weights_mesh = self.create_nd_mesh(nd_list = self.weights)
         return self._weights_mesh
 
     @property
@@ -365,178 +506,119 @@ class ElectronicBandStructure:
         """
 
         if self._bands_gradient_mesh is None:
-            self.update_bands_gradient_mesh()
+            n_bands, n_spins, n_i, n_j, n_k = self.bands_mesh.shape
+
+            band_gradients = np.zeros((3, n_bands, n_spins, n_i, n_j, n_k))
+
+            for i_band in range(n_bands):
+                for i_spin in range(n_spins):
+                    band_gradients[:,i_band,i_spin,:,:,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_mesh[i_band,i_spin,:,:,:])
+            
+            band_gradients *= METER_ANGSTROM
+            self._bands_gradient_mesh = band_gradients
         return self._bands_gradient_mesh
     
     @property
     def bands_hessian_mesh(self):
         """
         Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.   
-        Shape = [3,3,n_bands,n_kx,n_ky,n_kz], 
+        Shape = [3,3,n_bands,n_spin,n_kx,n_ky,n_kz], 
         where the first and second dimension represent d/dx,d/dy,d/dz  
         
         Returns
         -------
         np.ndarray
             Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.
-            Shape = [3,3,n_bands,n_kx,n_ky,n_kz], 
+            Shape = [3,3,n_bands,n_spin,n_kx,n_ky,n_kz], 
             where the first and second dimension represent d/dx,d/dy,d/dz  
         """
 
         if self._bands_hessian_mesh is None:
-            self.update_bands_hessian_mesh()
+            n_dim, n_bands, n_spins, n_i, n_j, n_k = self.bands_gradient_mesh.shape
+
+            band_hessians = np.zeros((3, 3,n_bands, n_spins, n_i, n_j, n_k))
+
+            for i_dim in range(n_dim):
+                for i_band in range(n_bands):
+                    for i_spin in range(n_spins):
+                        band_hessians[:,i_dim,i_band,i_spin,:,:,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_gradient_mesh[i_dim,i_band,i_spin,:,:,:])
+            
+            band_hessians *= METER_ANGSTROM
+            self._bands_hessian_mesh = band_hessians
         return self._bands_hessian_mesh
-
-    def update_kpoints_mesh(self):
-        """This method will update the kpoints mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the kpoints mesh
-        """
-        self._kpoints_mesh = self.create_nd_mesh(nd_list = self.kpoints)
-        return self._kpoints_mesh
-
-    def update_kpoints_cartesian_mesh(self):
-        """This method will update the kpoints mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the kpoints mesh
-        """
-        self._kpoints_cartesian_mesh = self.create_nd_mesh(nd_list = self.kpoints_cartesian)
-        return self._kpoints_cartesian_mesh
     
-    def update_bands_mesh(self):
-        """This method will update the bands mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the bands mesh
+    @property
+    def fermi_velocity_mesh(self):
         """
-        self._bands_mesh = self.create_nd_mesh(nd_list = self.bands)
-        return self._bands_mesh
-    
-    def update_projected_mesh(self):
-        """This method will update the projected mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the projected mesh
-        """
-        self._projected_mesh = self.create_nd_mesh(nd_list = self.projected)
-        return self._projected_mesh
-    
-    def update_projected_phase_mesh(self):
-        """This method will update the projected phase mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the projected_phase mesh
-        """
-        self._projected_phase_mesh = self.create_nd_mesh(nd_list = self.projected_phase)
-        return self._projected_phase_mesh
-    
-    def update_weights_mesh(self):
-        """This method will update the weights mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the weights mesh
-        """
-        self._weights_mesh = self.create_nd_mesh(nd_list = self.weights)
-        return self._weights_mesh
-
-    def update_bands_gradient_mesh(self):
-        """This method will update the bands_gradient mesh representation
-
-        Returns
-        -------
-        np.ndarray
-            Updated the bands_gradient
-        """
-        n_bands, n_spins, n_i, n_j, n_k = self.bands_mesh.shape
-
-        band_gradients = np.zeros((3, n_bands, n_spins, n_i, n_j, n_k))
-
-        for i_band in range(n_bands):
-            for i_spin in range(n_spins):
-                band_gradients[:,i_band,i_spin,:,:,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_mesh[i_band,i_spin,:,:,:])
+        Fermi Velocity mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.   
+        Shape = [3,n_bands,n_kx,n_ky,n_kz], where the first dimension represents d/dx,d/dy,d/dz  
         
-        band_gradients /= HBAR_EV
-        band_gradients *= METER_ANGSTROM
-        self._bands_gradient_mesh = band_gradients
-        return self._bands_gradient_mesh
+        Returns
+        -------
+        np.ndarray
+            Fermi Velocity mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.
+            Shape = [3,n_bands,n_kx,n_ky,n_kz], 
+            where the first dimension represents d/dx,d/dy,d/dz  
+        """
+
+        if self._fermi_velocity_mesh is None:
+            self._fermi_velocity_mesh =  self.bands_gradient_mesh / HBAR_EV
+        return self._fermi_velocity_mesh
     
-    def update_bands_hessian_mesh(self):
-        """This method will update the bands_hessian mesh representation
-
+    @property
+    def fermi_speed_mesh(self):
+        """
+        Fermi speed mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.   
+        Shape = [n_bands,n_kx,n_ky,n_kz],
+        
         Returns
         -------
         np.ndarray
-            Updated the bands_hessian
+            Fermi speed mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.
+            Shape = [n_bands,n_kx,n_ky,n_kz], 
         """
-        n_dim, n_bands, n_spins, n_i, n_j, n_k = self.bands_gradient_mesh.shape
 
-        band_hessians = np.zeros((3, 3,n_bands, n_spins, n_i, n_j, n_k))
+        if self._fermi_speed_mesh is None:
+            n_grad_1, n_bands, n_spins, n_i, n_j, n_k = self.fermi_velocity_mesh.shape
 
-        for i_dim in range(n_dim):
-            for i_band in range(n_bands):
-                for i_spin in range(n_spins):
-                    band_hessians[:,i_dim,i_band,i_spin,:,:,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_gradient_mesh[i_dim,i_band,i_spin,:,:,:])
+            self._fermi_speed_mesh = np.zeros(shape=(n_bands, n_spins, n_i, n_j, n_k))
+            for iband in range(n_bands):
+                for ispin in range(n_spins):
+                    for k in range(n_k):
+                        for j in range(n_j):
+                            for i in range(n_i):
+                                self._fermi_speed_mesh[iband,ispin,i,j,k] =  np.linalg.norm(self.fermi_velocity_mesh[:,iband,ispin,i,j,k])
+        return self._fermi_speed_mesh
+    
+    @property
+    def harmonic_average_effective_mass_mesh(self):
+        """
+        harmonic average effective mass mesh is a numpy array that stores each 
+        harmonic average effective mass mesh in a mesh grid.   
+        Shape = [n_bands,n_kx,n_ky,n_kz], 
         
-        band_hessians *= METER_ANGSTROM
-        self._bands_hessian_mesh = band_hessians
-        return self._bands_hessian_mesh
-
-    def update_index_mesh(self):
-        """This method will update the index mesh
-
         Returns
         -------
         np.ndarray
-            Updated the kpoints mesh
+            harmonic average effective mass mesh is a numpy array that stores 
+            each harmonic average effective mass in a mesh grid.
+            Shape = [n_bands,n_kx,n_ky,n_kz], 
         """
 
-        kx_unique = np.unique(self.kpoints[:,0])
-        ky_unique = np.unique(self.kpoints[:,1])
-        kz_unique = np.unique(self.kpoints[:,2])
+        if self._harmonic_average_effective_mass_mesh is None:
+            n_grad_1,n_grad_2, n_bands, n_spins, n_i, n_j, n_k = self.bands_hessian_mesh.shape
 
-        n_kx = len(kx_unique)
-        n_ky = len(ky_unique)
-        n_kz = len(kz_unique)
+            self._harmonic_average_effective_mass_mesh = np.zeros(shape=(n_bands, n_spins, n_i, n_j, n_k))
 
-        self._index_mesh = np.zeros((n_kx,n_ky,n_kz),dtype=int)
-
-        for k in range(n_kz):
-            for j in range(n_ky):
-                for i in range(n_kx):
-
-                    kx = kx_unique[i]
-                    ky = ky_unique[j]
-                    kz = kz_unique[k]
-
-                    where_x_true_indices = np.where(self.kpoints[:,0] == kx)[0]
-                    where_x_true_points = self.kpoints[where_x_true_indices]
-
-                    where_xy_true_indices = np.where(where_x_true_points[:,1] == ky)[0]
-                    where_xy_true_points = where_x_true_points[where_xy_true_indices]
-
-                    where_xyz_true_indices = np.where(where_xy_true_points[:,2] == kz)[0]
-                    where_xyz_true_points = where_xy_true_points[where_xyz_true_indices]
-
-                    original_index = where_x_true_indices[where_xy_true_indices[where_xyz_true_indices]]
-
-                    self._index_mesh[i,j,k] = original_index
-
-        return self._index_mesh
-        
+            for iband in range(n_bands):
+                for ispin in range(n_spins):
+                    for k in range(n_k):
+                        for j in range(n_j):
+                            for i in range(n_i):
+                                hessian = self.bands_hessian_mesh[...,iband,ispin,i,j,k] * EV_TO_J/ HBAR_J**2
+                                self._harmonic_average_effective_mass_mesh[iband,ispin,i,j,k] = harmonic_average_effective_mass(hessian)
+        return self._harmonic_average_effective_mass_mesh
+    
     def calculate_scalar_gradient(self,scalar_mesh):
         """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
 
@@ -550,31 +632,35 @@ class ElectronicBandStructure:
         np.ndarray
             scalar_gradient_mesh shape = [3,n_kx,n_ky,n_kz]
         """
-        nx,ny,nz = self.n_kx,self.n_ky,self.n_kz
+        n_kx=len(np.unique(self.kpoints[:,0]))
+        n_ky=len(np.unique(self.kpoints[:,1]))
+        n_kz=len(np.unique(self.kpoints[:,2]))
+        scalar_gradients =  np.zeros((3,n_kx,n_ky,n_kz))
 
-        scalar_gradients =  np.zeros((3,nx,ny,nz))
-
+        if n_kx==1 or n_ky==1 or n_kz==1:
+            raise ValueError("The mesh cannot be 2 dimensional")
+        
         # Calculate cartesian separations along each crystal direction
-        sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*nx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*nx, :, :], :])
-        sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*ny, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*ny, :], :])
-        sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*nz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*nz], :])
+        sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*n_kx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*n_kx, :, :], :])
+        sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*n_ky, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*n_ky, :], :])
+        sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*n_kz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*n_kz], :])
 
         # Calculate indices with periodic boundary conditions
-        plus_one_indices_x = np.arange(nx) + 1
-        plus_one_indices_y = np.arange(ny) + 1
-        plus_one_indices_z = np.arange(nz) + 1
+        plus_one_indices_x = np.arange(n_kx) + 1
+        plus_one_indices_y = np.arange(n_ky) + 1
+        plus_one_indices_z = np.arange(n_kz) + 1
 
-        minus_one_indices_x = np.arange(nx) - 1
-        minus_one_indices_y = np.arange(ny) - 1
-        minus_one_indices_z = np.arange(nz) - 1
+        minus_one_indices_x = np.arange(n_kx) - 1
+        minus_one_indices_y = np.arange(n_ky) - 1
+        minus_one_indices_z = np.arange(n_kz) - 1
 
         plus_one_indices_x[-1] = 0
         plus_one_indices_y[-1] = 0
         plus_one_indices_z[-1] = 0
 
-        minus_one_indices_x[0] = nx - 1
-        minus_one_indices_y[0] = ny - 1
-        minus_one_indices_z[0] = nz - 1
+        minus_one_indices_x[0] = n_kx - 1
+        minus_one_indices_y[0] = n_ky - 1
+        minus_one_indices_z[0] = n_kz - 1
 
         scalar_diffs_i = scalar_mesh[plus_one_indices_x,:,:] - scalar_mesh[minus_one_indices_x,:,:]
         scalar_diffs_j = scalar_mesh[:,plus_one_indices_y,:] - scalar_mesh[:,minus_one_indices_y,:]
@@ -617,17 +703,21 @@ class ElectronicBandStructure:
         if nd_list is not  None:
 
             nd_shape = list(nd_list.shape[1:])
-            nd_shape.append(self.n_kx)
-            nd_shape.append(self.n_ky)
-            nd_shape.append(self.n_kz)
 
+
+            n_kx=len(np.unique(self.kpoints[:,0]))
+            n_ky=len(np.unique(self.kpoints[:,1]))
+            n_kz=len(np.unique(self.kpoints[:,2]))
+            nd_shape.append(n_kx)
+            nd_shape.append(n_ky)
+            nd_shape.append(n_kz)
             nd_mesh = np.zeros(nd_shape,dtype=nd_list.dtype)
             non_grid_dims = nd_shape[:-3]
             for i_dim, non_grid_dim in enumerate(non_grid_dims):
                 for i in range(non_grid_dim):
-                    for x in range(self.n_kx):
-                        for y in range(self.n_ky):
-                            for z in range(self.n_kz):
+                    for x in range(n_kx):
+                        for y in range(n_ky):
+                            for z in range(n_kz):
                                 # Forming slicing tuples for mesh
                                 mesh_idx = [ np.s_[:]]*nd_mesh.ndim
                                 mesh_idx[i_dim] = i
@@ -656,6 +746,30 @@ class ElectronicBandStructure:
         scalar_mesh = np.zeros((1,self.n_kx,self.n_ky,self.n_kz),dtype=float)
         scalar_mesh[0,:,:,:]= scalar_list[ self.index_mesh ]
         return scalar_mesh
+
+    def mesh_to_array(self, mesh):
+        """
+        Converts a mesh to a list that corresponds to ebs.kpoints  
+
+        Parameters
+        ----------
+        mesh : np.ndarray
+            The mesh to convert to a list
+        Returns
+        -------
+        np.ndarray
+           lsit
+        """
+        nkx, nky, nkz = mesh.shape[-3:]
+        tmp_shape=[nkx*nky*nkz]
+        tmp_shape.extend(mesh.shape[:-3])
+        tmp_array=np.zeros(shape=tmp_shape)
+        for k in range(nkz):
+            for j in range(nky):
+                for i in range(nkx):
+                    index=self.index_mesh[i,j,k]
+                    tmp_array[index,...]=mesh[...,i,j,k]
+        return tmp_array
 
     def ebs_sum(self, 
                 atoms:List[int]=None, 
@@ -704,22 +818,6 @@ class ElectronicBandStructure:
                 self.nkpoints, self.nbands, 1
             )
         return ret
-
-    def update_weights(self, weights):
-        """Updates the weights corresponding to the kpoints
-
-        Parameters
-        ----------
-        weights : List[float]
-            A list of weights corresponding to the kpoints
-
-        Returns
-        -------
-        None
-            None
-        """
-        self.weights = weights
-        return None
 
     def unfold(self, transformation_matrix=None, structure=None):
         """The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.
@@ -837,58 +935,93 @@ class ElectronicBandStructure:
             The point symmetry operations of the lattice
         """
         
-        klist = []
-        plist = []
-        bandslist = []
-        weights=[]
-        projected_phases=[]
+        full_kpoints=[]
+        full_projected=[]
+        full_bands=[]
+        full_weights=[]
+        full_projected_phases=[]
 
+        # Used for indexing full_kpoints
+        ik=0
         # for each symmetry operation
         for i, rotation in enumerate(rotations):
             # for each point
             for j, kpoint in enumerate(self.kpoints):
                 # apply symmetry operation to kpoint
-
                 
-                sympoint_vector = rotation.dot(kpoint)
+                new_kp = rotation.dot(kpoint)
                 # apply boundary conditions
-                bound_ops = -1.0*(sympoint_vector > 0.5) + 1.0*(sympoint_vector <= -0.5)
-                sympoint_vector += bound_ops
-
-                sympoint_vector=np.around(sympoint_vector,decimals=6)
-                sympoint = sympoint_vector.tolist()
-
-                if sympoint not in klist:
-                    klist.append(sympoint)
+                new_kp = -np.fmod(new_kp + 6.5, 1 ) + 0.5
+                new_kp = np.around(new_kp,decimals=6)
+                new_kp=new_kp.tolist()
+                if new_kp not in full_kpoints:
+                    full_kpoints.append(new_kp)
                     if self.bands is not None:
                         band = self.bands[j].tolist()
-                        bandslist.append(band)
+                        full_bands.append(band)
                     if self.projected is not None:
                         projection = self.projected[j].tolist()
-                        plist.append(projection)
+                        full_projected.append(projection)
                     if self.weights is not None:
                         weight = self.weights[j].tolist()
-                        weights.append(weight)
-                    if self.weights is not None:
-                        weight = self.weights[j].tolist()
-                        weights.append(weight)
+                        full_weights.append(weight)
                     if self.projected_phase is not None:
                         projected_phase = self.projected_phase[j].tolist()
-                        projected_phases.append(projected_phase)
-
-        self.kpoints = np.array(klist)
-        self.bands = np.array(bandslist)
+                        full_projected_phases.append(projected_phase)
+        self.kpoints = np.array(full_kpoints)
+        self.bands = np.array(full_bands)
 
         if self.projected is not None:
-            self.projected = np.array(plist)
+            self.projected = np.array(full_projected)
         if self.projected_phase is not None:
-            self.projected_phase = np.array(projected_phases)
+            self.projected_phase = np.array(full_projected_phases)
         if self.weights is not None:
-            self.weights = np.array(weights)
-        # self.sort_bands_and_kpoints()
+            self.weights = np.array(full_weights)
 
+        nk=self.kpoints.shape[0]
+        if self.n_kx:
+            if nk != self.n_kx*self.n_ky*self.n_kz:
 
-        
+                err_text="""
+                        nkpoints != n_kx*n_ky*n_kz
+                        Error trying to symmetrize the irreducible kmesh. 
+                        This is issue is most likely related to 
+                        how the DFT code using symmetry operations to reduce the kmesh.
+                        Check the recommendations for k-mesh type for the crystal system.
+                        If all else fails turn off symmetry.
+                        """
+                raise ValueError(err_text)
+
+    def interpolate_mesh_grid(self, mesh_grid,interpolation_factor=2):
+        """This function will interpolate an Nd, 3d mesh grid
+        [...,nx,ny,nz]
+
+        Parameters
+        ----------
+        mesh_grid : np.ndarray
+            The mesh grid to interpolate
+        """
+        scalar_dims=mesh_grid.shape[:-3]
+        new_mesh=None
+        for i, idx in enumerate(np.ndindex(scalar_dims)):
+            # Creating slicing list. idx are the scalar dimensions, last 3 are the grid
+            mesh_idx = list(idx)
+            tmp = [slice(None)]*3
+            mesh_idx.extend(tmp)
+            new_grid = mathematics.fft_interpolate(mesh_grid[mesh_idx], interpolation_factor=interpolation_factor)
+            
+            if i==0:
+                new_dim = np.append(scalar_dims,new_grid.shape,axis=0)
+                new_mesh=np.zeros(shape=(new_dim))
+
+            new_mesh[mesh_idx]=new_grid
+        return new_mesh
+    
+    def ravel_array(self,mesh_grid):
+        shape = mesh_grid.shape
+        mesh_grid=mesh_grid.reshape(shape[:-3] + (-1,))
+        mesh_grid=np.moveaxis(mesh_grid,-1,0)
+        return mesh_grid
 
     def __str__(self):
         ret = 'Enectronic Band Structure     \n'
@@ -898,7 +1031,12 @@ class ElectronicBandStructure:
         ret += 'Total number of atoms    = {}\n'.format(self.natoms)
         ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
         return ret
-        
+
+def harmonic_average_effective_mass(tensor):
+    inv_effective_mass_tensor = tensor
+    e_mass = 3*(inv_effective_mass_tensor[0,0] + inv_effective_mass_tensor[1,1] + inv_effective_mass_tensor[2,2])**-1 /FREE_ELECTRON_MASS
+    return e_mass
+
     # def reorder(self, plot=True, cutoff=0.2):
     #     nspins = self.nspins
     #     if self.is_non_collinear:

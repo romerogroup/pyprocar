@@ -15,20 +15,12 @@ import scipy.interpolate as interpolate
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 
-from . import Isosurface, Surface, BrillouinZone
+from . import Surface, BrillouinZone2D
 
 import pyvista as pv
 np.set_printoptions(threshold=sys.maxsize)
 
-
-HBAR_EV = 6.582119 *10**(-16) #eV*s
-HBAR_J = 1.0545718 *10**(-34) #eV*s
-METER_ANGSTROM = 10**(-10) #m /A
-EV_TO_J = 1.602*10**(-19)
-FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
-
-class FermiSurface3D(Surface):
-# class FermiSurface3D(pv.PolyData):
+class BandStructure2D(Surface):
     """
     The object is used to store and manapulate a 3d fermi surface.
 
@@ -36,12 +28,6 @@ class FermiSurface3D(Surface):
     ----------
     ebs : ElectronicBandStructure
         The ElectronicBandStructure object
-    fermi : float
-        The energy to search for the fermi surface
-    fermi_shift : float
-        Value to shift fermi energy.
-    fermi_tolerance : float = 0.1
-        This is used to improve search effiency by doing a prior search selecting band within a tolerance of the fermi energy
     interpolation_factor : int
         The default is 1. number of kpoints in every direction
         will increase by this factor.
@@ -56,97 +42,74 @@ class FermiSurface3D(Surface):
     def __init__(
         self,
         ebs,
-        fermi:float=0.0,
-        fermi_shift: float=0.0,
+        ispin,
         interpolation_factor: int=1,
         projection_accuracy: str="Normal",
         supercell: List[int]=[1, 1, 1],
         ):
 
         self.ebs = copy.copy(ebs)
-        if (self.ebs.bands.shape)==3:
-            raise "Must reduce ebs.bands into 2d darray"
-        
+        self.ispin=ispin
         # Shifts kpoints between [0.5,0.5)
         self.ebs.kpoints = -np.fmod(self.ebs.kpoints + 6.5, 1 ) + 0.5
-
+        self.n_bands=self.ebs.bands.shape[1]
         self.supercell = np.array(supercell)
-        self.fermi = fermi + fermi_shift
         self.interpolation_factor = interpolation_factor
         self.projection_accuracy = projection_accuracy
 
-        self._input_checks()
         self.brillouin_zone = self._get_brilloin_zone(self.supercell)
-        self.isosurfaces = self._generate_isosurfaces()
-        self.surface = self._combine_isosurfaces()
+
+        grid_cart_x=ebs.kpoints_cartesian_mesh[0,:,:,0]
+        grid_cart_y=ebs.kpoints_cartesian_mesh[1,:,:,0]
+        
+        self.band_surfaces = self._generate_band_structure_2d(grid_cart_x,grid_cart_y)
+        self.surface = self._combine_band_surfaces()
         # Initialize the Fermi Surface
         super().__init__(verts=self.surface.points, faces=self.surface.faces)
+        self.point_data['band_index'] = self.surface.point_data['band_index']
 
-
-        self.point_data['band_index'] = self.surface.point_data['band_index'] 
-        self.fermi_surface_area = self.area
         return None
     
-    def _input_checks(self):
-        assert len(self.ebs.bands.shape)==2
-
-    def _generate_isosurfaces(self):
-        # code to generate isosurfaces for each band
-        isosurfaces=[]
-        self.band_index_map = []
-
-        for iband in  range(self.ebs.bands.shape[1]):
-            isosurface_band = Isosurface(
-                                XYZ=self.ebs.kpoints,
-                                V=self.ebs.bands[:,iband],
-                                isovalue=self.fermi,
-                                algorithm="lewiner",
-                                interpolation_factor=self.interpolation_factor,
-                                padding=self.supercell,
-                                transform_matrix=self.ebs.reciprocal_lattice,
-                                boundaries=self.brillouin_zone,
-                            )
-            
-
-            # Check to see if the generated isosurface has points
-            if isosurface_band.points.shape[0] != 0:
-                isosurfaces.append(isosurface_band)
-                n_isosurface=len(isosurfaces)
-                self.band_index_map.append(iband)
-
-        self.ebs.bands=self.ebs.bands[:,self.band_index_map]
-        return isosurfaces
-    
-    def _combine_isosurfaces(self):
-        isosurfaces=copy.deepcopy(self.isosurfaces)
+    def _combine_band_surfaces(self):
+        band_surfaces=copy.deepcopy(self.band_surfaces)
         band_indices=[]
 
-        surface=isosurfaces[0]
+        surface=band_surfaces[0]
         band_index_list=[0]*surface.points.shape[0]
         band_indices.extend(band_index_list)
-        for i_band,isosurface in enumerate(isosurfaces[1:]):
+        for i_band,band_surface in enumerate(band_surfaces[1:]):
             # The points are prepended to surface.points, 
             # so at the end we need to reverse this list
-            surface.merge(isosurface, merge_points=False, inplace=True)
-            band_index_list=[i_band+1]*isosurface.points.shape[0]
+            surface.merge(band_surface, merge_points=False, inplace=True)
+            band_index_list=[i_band+1]*band_surface.points.shape[0]
             band_indices.extend(band_index_list)
+
+
         band_indices.reverse()
         surface.point_data['band_index']=np.array(band_indices)
         return surface
     
-    def _get_brilloin_zone(self, 
-                        supercell: List[int]):
+    def _generate_band_structure_2d(self,grid_cart_x,grid_cart_y):
+        surfaces=[]
+        n_bands=self.ebs.bands_mesh.shape[0]
+        n_points=0
+        for iband in range(n_bands):
+            
+            grid_z=self.ebs.bands_mesh[iband,self.ispin,:,:,0]
+            
+            surface = pv.StructuredGrid(grid_cart_x,grid_cart_y,grid_z)
+            surface = surface.cast_to_unstructured_grid()
+            surface = surface.extract_surface()
+            
+            surface = Surface(verts=surface.points, faces=surface.faces)
+            n_points+=surface.points.shape[0]
+            
+            band_index_list=[iband]*surface.points.shape[0]
+            surface.point_data['bandindex']=np.array(band_index_list)
+            surfaces.append(surface)
 
-        """Returns the BrillouinZone of the material
-
-        Returns
-        -------
-        pyprocar.core.BrillouinZone
-            The BrillouinZone of the material
-        """
-
-        return BrillouinZone(self.ebs.reciprocal_lattice, supercell)
-
+        return surfaces
+     
     def _create_vector_texture(self,
                             vectors_array: np.ndarray, 
                             vectors_name: str="vector" ):
@@ -164,42 +127,16 @@ class FermiSurface3D(Surface):
         final_vectors_X = []
         final_vectors_Y = []
         final_vectors_Z = []
-        for iband, isosurface in enumerate(self.isosurfaces):
-            XYZ_extended = self.ebs.kpoints.copy()
-            
+        for iband, isosurface in enumerate(self.band_surfaces):
+            XYZ_extended = copy.copy(self.ebs.kpoints_cartesian)
+            XYZ_extended[:,2]=self.ebs.bands[:,iband,self.ispin]
+
             vectors_extended_X = vectors_array[:,iband,0].copy()
             vectors_extended_Y = vectors_array[:,iband,1].copy()
             vectors_extended_Z = vectors_array[:,iband,2].copy()
-    
-            for ix in range(3):
-                for iy in range(self.supercell[ix]):
-                    temp = self.ebs.kpoints.copy()
-                    temp[:, ix] += 1 * (iy + 1)
-                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                    vectors_extended_X = np.append(
-                        vectors_extended_X, vectors_array[:,iband,0], axis=0
-                    )
-                    vectors_extended_Y = np.append(
-                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
-                    )
-                    vectors_extended_Z = np.append(
-                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
-                    )
-                    temp = self.ebs.kpoints.copy()
-                    temp[:, ix] -= 1 * (iy + 1)
-                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                    vectors_extended_X = np.append(
-                        vectors_extended_X, vectors_array[:,iband,0], axis=0
-                    )
-                    vectors_extended_Y = np.append(
-                        vectors_extended_Y, vectors_array[:,iband,1], axis=0
-                    )
-                    vectors_extended_Z = np.append(
-                        vectors_extended_Z, vectors_array[:,iband,2], axis=0
-                    )
-    
-            XYZ_transformed = np.dot(XYZ_extended, self.ebs.reciprocal_lattice)
-    
+
+            XYZ_transformed=XYZ_extended
+
             if self.projection_accuracy.lower()[0] == "n":
                
                 vectors_X = interpolate.griddata(
@@ -248,24 +185,15 @@ class FermiSurface3D(Surface):
         -------
         None.
         """
+
+        points = self.ebs.kpoints_cartesian
         final_scalars = []
-        for iband, isosurface in enumerate(self.isosurfaces):
-            XYZ_extended = self.ebs.kpoints.copy()
+        for iband, isosurface in enumerate(self.band_surfaces):
+            XYZ_extended = copy.copy(self.ebs.kpoints_cartesian)
+            XYZ_extended[:,2]=self.ebs.bands[:,iband,self.ispin]
             scalars_extended =  scalars_array[:,iband].copy()
-    
-    
-            for ix in range(3):
-                for iy in range(self.supercell[ix]):
-                    temp = self.ebs.kpoints.copy()
-                    temp[:, ix] += 1 * (iy + 1)
-                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
-                    temp = self.ebs.kpoints.copy()
-                    temp[:, ix] -= 1 * (iy + 1)
-                    XYZ_extended = np.append(XYZ_extended, temp, axis=0)
-                    scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
-  
-            XYZ_transformed = np.dot(XYZ_extended, self.ebs.reciprocal_lattice)
+            
+            XYZ_transformed=XYZ_extended
             if self.projection_accuracy.lower()[0] == "n":
                 colors = interpolate.griddata(
                     XYZ_transformed, scalars_extended, isosurface.centers, method="nearest"
@@ -286,7 +214,7 @@ class FermiSurface3D(Surface):
         """
         scalars_array = []
         count = 0
-        for iband in range(len(self.isosurfaces)):
+        for iband in range(self.n_bands):
             count+=1
             scalars_array.append(spd[:,iband])
         scalars_array = np.vstack(scalars_array).T
@@ -301,7 +229,7 @@ class FermiSurface3D(Surface):
 
     def project_fermi_velocity(self,fermi_velocity):
         """
-        Method to calculate atomic spin texture projections of the surface.
+        Method to calculate fermi velocity of the surface.
         """
         vectors_array = fermi_velocity.swapaxes(1, 2)
         self._create_vector_texture(vectors_array = vectors_array, vectors_name = "Fermi Velocity Vector" )
@@ -312,7 +240,7 @@ class FermiSurface3D(Surface):
         """
         scalars_array = []
         count = 0
-        for iband in range(len(self.isosurfaces)):
+        for iband in range(self.n_bands):
             count+=1
             scalars_array.append(fermi_speed[:,iband])
         scalars_array = np.vstack(scalars_array).T
@@ -324,7 +252,7 @@ class FermiSurface3D(Surface):
         """
         scalars_array = []
         count = 0
-        for iband in range(len(self.isosurfaces)):
+        for iband in range(self.n_bands):
             count+=1
             scalars_array.append(harmonic_effective_mass[:,iband])
         scalars_array = np.vstack(scalars_array).T
@@ -350,7 +278,19 @@ class FermiSurface3D(Surface):
                 self += surface.translate(np.dot(direction, self.ebs.reciprocal_lattice), inplace=True)
             # Clearing unneeded surface from memory
             del surface
- 
+    
+    def _get_brilloin_zone(self, 
+                        supercell: List[int]):
 
+        """Returns the BrillouinZone of the material
 
-
+        Returns
+        -------
+        pyprocar.core.BrillouinZone
+            The BrillouinZone of the material
+        """
+        e_min=self.ebs.bands.min()
+        e_max=self.ebs.bands.max()
+        return BrillouinZone2D(e_min,e_max,self.ebs.reciprocal_lattice, supercell)
+    
+    
