@@ -130,7 +130,7 @@ x_label:
 y_label:
   description: The label for the y-axis.
   value: DOS
-y_label:
+dpi:
   description: The resolution in dots per inch. If 'figure', use the figure's dpi value.
   value: 'figure'
 
