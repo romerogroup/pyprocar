@@ -6,29 +6,24 @@ __date__ = "March 31, 2020"
 
 import os
 from typing import List, Tuple
+import yaml
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ..utils import welcome
+from ..utils import welcome, ROOT
 from .. import io
 from ..utils.info import orbital_names
 from ..plotter import DOSPlot
-from ..utils.defaults import settings
 
+with open(os.path.join(ROOT,'pyprocar','cfg','dos.yml'), 'r') as file:
+    plot_opts = yaml.safe_load(file)
 
 def dosplot(
-        filename:str="vasprun.xml",
         dirname:str=None,
-        poscar:str='POSCAR',
-        procar:str="PROCAR",
-        outcar:str='OUTCAR',
         mode:str="plain",
         interpolation_factor:int=1,
         orientation:str="horizontal",
-        spin_colors:List[str] or List[Tuple[int,int,int]]=None,
-        spin_labels:List[str]=None,
-        colors:List[str] or List[Tuple[int,int,int]]=None,
         spins:List[int]=None,
         atoms:List[int]=None,
         orbitals:List[int]=None,
@@ -36,22 +31,15 @@ def dosplot(
         fermi:float=None,
         elimit:List[float]=None,
         dos_limit:List[float]=None,
-        cmap:str="jet",
-        linewidth:float=1,
-        vmax:float=None,
-        vmin:float=None,
         grid:bool=False,
         savefig:str=None,
-        title:str=None,
-        plot_total:bool=True,
         projection_mask=None,
         code:str="vasp",
-        lobster:bool=False,
-        labels:List[str]=None, 
         ax:plt.Axes=None,
         verbose:bool=True,
-        old:bool=False,
-        show:bool=True
+        print_plot_opts:bool=False,
+        show:bool=True,
+        **kwargs
     ):
 
     """
@@ -97,33 +85,6 @@ def dosplot(
 
         e.g. ``orientation='vertical'``
 
-    spin_colors : list str or tuples, (optional ``spin_colors=['blue','red']``)
-        **spin_colors** represent the colors the different spin
-        ploarizations are going to be represented in the DOS
-        plot. These colors can be chosen from any type of color
-        acceptable by matplotlib(string,rgb,html).
-
-        e.g. ``spin_colors=['blue','red']``,
-        ``spin_colors=[(0, 0, 1),(1, 0,0 )]``,
-        ``spin_colors=['#0000ff','#ff0000']``
-
-        .. caution:: 
-        
-            If the calculation is spin polarized one has to
-            provide two colors even if one is plotting one spin. I
-            disregard this cation if using default.
-
-    colors : list str or tuples, optional (default, optional)
-        ``colors`` defines the color of plots filling the area under
-        the curve of Total density of states. This is only important in the
-        ``mode=stack``, ``mode=stack_species``,
-        ``mode=stack_orbitals``. To have a better sense of this
-        parameter refer to the stack plots of  SrVO\ :sub:`3`\. These
-        colors can be chosen from any type of color acceptable by
-        matplotlib(string,rgb,html).
-
-        e.g. ``colors=['red', 'blue', 'green', 'magenta', 'cyan']``
-
     spins : list int, optional
         ``spins`` defines plotting of different spins channels present
         in the calculation, If the calculation is spin non-polorized
@@ -132,11 +93,6 @@ def dosplot(
         or 1 or both.
 
         e.g. ``spins=[0, 1]``
-
-    spin_labels : list str, optional
-        ``spin_labels`` defines labels to use to represent spin 
-        in the legend of the plot.
-        e.g. ``spin_labels=['up','down']``
 
     atoms : list int, optional
         ``atoms`` define the projection of the atoms in the Density of
@@ -210,38 +166,6 @@ def dosplot(
 
        e.g. ``dos_limit=[0, 30]``
 
-    cmap : str , optional (default 'jet')
-        The color map used for color coding the projections. ``cmap``
-        is only relevant in ``mode='parametric'``. a full list of
-        color maps in matplotlib are provided in this web
-        page. `https://matplotlib.org/2.0.1/users/colormaps.html
-        <https://matplotlib.org/2.0.1/users/colormaps.html>`_
-
-        e.g. ``cmap='plasma'``
-
-    linewidth : float, optional (default 1)
-        The line width with which the total DOS is ploted
-
-        e.g. linewidth=2
-
-    vmax : float, optional
-        The maximum value in the color bar. ``cmap`` is only relevant
-        in ``mode='parametric'``.
-
-        e.g. ``vmax=1.0``
-
-    vmin : float, optional
-        The maximum value in the color bar. ``cmap`` is only relevant
-        in ``mode='parametric'``.
-
-        e.g. ``vmin=-1.0``
-
-    grid : bool, optional (default Flase)
-        Defines If a grid is plotted in the plot. The entry should be
-        python boolian.
-
-        e.g. ``grid=True``
-
     savefig : str , optional (default None)
         ``savefig`` defines the file that the plot is going to be
         saved in. ``savefig`` accepts all the formats accepted by
@@ -250,13 +174,6 @@ def dosplot(
         interactive matplotlib mode.
 
         e.g. ``savefig='DOS.png'``, ``savefig='DOS.pdf'``
-
-    title : str, optional
-        Defines the plot title asked to be added above the plot. If
-        ``title`` is not defined, PyProcar will not add any title.
-
-        e.g. ``title="Total Density of States SrVO_$3$"``. One can use
-        LaTex format as well.
 
     plot_total : bool, optional (default ``True``)
         If the total density of states is plotted as well as other
@@ -270,18 +187,6 @@ def dosplot(
         cal is done in vasp one does not need to define this argumnet.
 
         e.g. ``code=vasp``, ``code=elk``, ``code=abinit``
-
-    labels : list str, optional
-        ``labels`` define the legends plotted in defining each spin.
-
-        e.g.  ``labels=['Oxygen-Up','Oxygen-Down']``,
-        ``labels=['Oxygen-'+r'$\\uparrow$','Oxygen-'+r'$\\downarrow$']``
-        Side means the string will be treated as raw string. This has
-        to be used if LaTex formating is used.
-        No default is used in the ``mode=plain``, ``mode=parametric``,
-        ``mode=parametric_line``. In ``mode=stack``, `ack_species``,
-        ``mode=stack_orbitals`` the labels are generated automatically
-        based on the other parameters such as atoms and orbitals.
 
     items : dict, optional
         ``items`` is only relavent for ``mode='stack'``. stack will
@@ -339,6 +244,25 @@ def dosplot(
 
     """
     
+    modes=['plain','parametric',
+           'parametric_line', 'stack', 
+           'stack_orbitals', 'stack_species']
+    modes_txt=' , '.join(modes)
+    message=f"""
+            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file. 
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
+
+            Here is a list modes : {modes_txt}
+            --------------------------------------------------------
+            """
+    print(message)
+    if print_plot_opts:
+        for key,value in plot_opts.items():
+            print(key,':',value)
+    
+
     if orientation[0].lower() == 'h':
         orientation = 'horizontal'
     elif orientation[0].lower() == 'v':
@@ -352,7 +276,7 @@ def dosplot(
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
     
-    edos_plot = DOSPlot(dos = dos, structure = structure, orientation = orientation)
+    edos_plot = DOSPlot(dos = dos, structure = structure, **kwargs)
     
     if mode == "plain":
         edos_plot.plot_dos(spins=spins, orientation = orientation)
@@ -369,14 +293,7 @@ def dosplot(
                         principal_q_numbers=[-1],
                         orbitals=orbitals,
                         spins=spins,
-                        spin_colors=spin_colors,
-                        spin_labels=spin_labels,
-                        cmap=cmap,
-                        vmin=vmin,
-                        vmax=vmax,
-                        orientation = orientation,
-                        plot_total=plot_total,
-                        plot_bar=True)
+                        orientation=orientation)
 
     elif mode == "parametric_line":
         if atoms is None:
@@ -391,10 +308,6 @@ def dosplot(
                         principal_q_numbers=[-1],
                         spins=spins,
                         orbitals=orbitals,
-                        spin_colors=spin_colors,
-                        vmax=vmax,
-                        vmin=vmin,
-                        cmap=cmap,
                         orientation=orientation
                         )
 
@@ -402,10 +315,6 @@ def dosplot(
         edos_plot.plot_stack_species(
             spins=spins,
             orbitals=orbitals,
-            spin_colors=spin_colors,
-            spin_labels = spin_labels,
-            colors = colors,
-            plot_total = plot_total,
             orientation=orientation,
         )
 
@@ -413,10 +322,6 @@ def dosplot(
         edos_plot.plot_stack_orbitals(
             spins=spins,
             atoms=atoms,
-            spin_colors=spin_colors,
-            spin_labels = spin_labels,
-            colors = colors,
-            plot_total = plot_total,
             orientation=orientation,
         )
 
@@ -424,20 +329,16 @@ def dosplot(
         edos_plot.plot_stack(
             spins=spins,
             items=items,
-            spin_colors=spin_colors,
-            spin_labels = spin_labels,
-            colors=colors,
             orientation=orientation,
-            plot_total = plot_total,
         )
     else:
         raise ValueError("The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]")
 
     edos_plot.draw_fermi(
             orientation = orientation,
-            color=settings.dos.fermi_color,
-            linestyle=settings.dos.fermi_linestyle,
-            linewidth=settings.dos.fermi_linewidth,
+            color=plot_opts['fermi_color']['value'],
+            linestyle=plot_opts['fermi_linestyle']['value'],
+            linewidth=plot_opts['fermi_linewidth']['value'],
         )
     if orientation == 'horizontal':
         if elimit is not None:
@@ -450,9 +351,9 @@ def dosplot(
         if dos_limit is not None:
             edos_plot.set_xlim(dos_limit)
 
-    if settings.dos.grid or grid:
+    if plot_opts['grid']['value']:
         edos_plot.grid()
-    if settings.dos.legend and len(edos_plot.labels) != 0:
+    if plot_opts['legend']['value'] and len(edos_plot.labels) != 0:
         edos_plot.legend(edos_plot.labels)
     if savefig is not None:
         edos_plot.save(savefig)

@@ -20,6 +20,7 @@ from pyprocar.utils import ROOT
 
 
 class BandStructure2DataHandler:
+
     def __init__(self, ebs, fermi_tolerance=0.1):
         self.initial_ebs=copy.copy(ebs)
         self.ebs = ebs
@@ -441,10 +442,6 @@ class BandStructure2DVisualizer:
     
     def save_mesh(self,filename,surface):
         pv.save_meshio(filename, surface)
-
-    def update_config(self, config_dict):
-        for key,value in config_dict.items():
-            self.plotting_options[key]['value']=value
     
     def _setup_band_colors(self,fermi_surface):
         band_colors = self.plotting_options['surface_bands_colors']['value']
@@ -545,3 +542,7 @@ class BandStructure2DVisualizer:
         for normal,center in zip(surface.brillouin_zone.face_normals, surface.brillouin_zone.centers):
             surface.clip(origin=center, normal=normal, inplace=True)
         return surface
+    
+    def update_config(self, config_dict):
+        for key,value in config_dict.items():
+            self.plotting_options[key]['value']=value
