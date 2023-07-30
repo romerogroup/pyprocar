@@ -538,7 +538,7 @@ class EBSPlot:
             A list of strings for the labels of each element for the legend, by default None
         """
         if labels == None:
-            labels = settings.ebs.label
+            labels = self.plot_opt['label']['value']
         self.ax.legend(self.handles, labels)
 
     def draw_fermi(self, 
