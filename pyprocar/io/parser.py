@@ -229,11 +229,8 @@ class Parser:
             poscar = vasp.Poscar(poscar,rotations = None)
 
             
-        try:
-            kpoints = vasp.Kpoints(kpoints)
-            self.kpath = kpoints.kpath
-        except:
-            self.kpath = None
+        kpoints = vasp.Kpoints(kpoints)
+        self.kpath = kpoints.kpath
 
         
 
