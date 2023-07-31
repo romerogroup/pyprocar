@@ -18,7 +18,7 @@ import pyvista as pv
 
 from pyprocar.core import FermiSurface3D
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
-
+from pyprocar.utils import ROOT
 
 from .. import io
 

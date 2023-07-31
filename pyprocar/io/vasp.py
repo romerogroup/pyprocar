@@ -363,13 +363,13 @@ class Kpoints(collections.abc.Mapping):
         self.cartesian = False
         self.automatic = False
         self._parse_kpoints()
-        self.kpath = KPath(
-            knames=self.knames,
-            special_kpoints=self.special_kpoints,
-            ngrids=self.ngrids,
-            has_time_reversal=has_time_reversal,
-        )
-
+        if self.knames is not None:
+            self.kpath = KPath(
+                knames=self.knames,
+                special_kpoints=self.special_kpoints,
+                ngrids=self.ngrids,
+                has_time_reversal=has_time_reversal,
+            )
 
     def _parse_kpoints(self):
         """A helper method to parse the KOINTS file
@@ -669,7 +669,7 @@ class Procar(collections.abc.Mapping):
             if self.filename[-1] != r"/":
                 self.filename += "/"
             self.filename += "PROCAR"
-
+        
         # checking that the file exist
         if os.path.isfile(self.filename):
             # Checking if compressed

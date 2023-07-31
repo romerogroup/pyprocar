@@ -2,9 +2,10 @@ __author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "December 01, 2020"
+
 import os
 from typing import List
-
+import yaml 
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
@@ -12,9 +13,11 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 
 from ..core import ProcarSymmetry, FermiSurface
-from ..utils import welcome
+from ..utils import welcome, ROOT
 from .. import io
 
+with open(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_2d.yml'), 'r') as file:
+    plot_opt = yaml.safe_load(file)
 
 def fermi2D(
     code:str,
@@ -22,7 +25,6 @@ def fermi2D(
     mode:str='plain',
     band_indices:List[List]=None,
     band_colors:List[List]=None,
-    lobster:bool=False,
     spins:List[int]=None,
     atoms:List[int]=None,
     orbitals:List[int]=None,
@@ -32,20 +34,11 @@ def fermi2D(
     rot_symm=1,
     translate:List[int]=[0, 0, 0],
     rotation:List[int]=[0, 0, 0, 1],
-    savefig:str=None,
     spin_texture:bool=False,
-    arrow_projection:str='z',
-    arrow_size:float=None,
-    arrow_color:List[int] or str=None,
-    arrow_density:float=6,
-    no_arrow:bool=False,
-    cmap = 'jet',
-    color_bar:bool=False,
-    add_axes_labels:bool=True,
-    add_legend:bool=False,
     exportplt:bool=False,
-    
-    repair:bool=True,
+    savefig:str=None,
+    print_plot_opts:bool=False,
+    **kwargs
     ):
     """This function plots the 2d fermi surface in the z = 0 plane
 
@@ -84,26 +77,10 @@ def fermi2D(
         The filename to save the plot as., by default None
     spin_texture : bool, optional
         Boolean value to determine if spin arrows are plotted, by default False
-    arrow_size : float, optional
-        Inversely determines the arrow size, by default None
-    arrow_color : List[int] or str, optional
-        Either a list for the rbg value or a string for the color, by default None
-    arrow_density : float, optional
-        Inversely determines the arrow density
-    no_arrow : bool, optional
-        A boolean value to determine if arrows or a heat map is produced for spins, by default False
-    add_axes_labels : bool, optional
-        Boolean value to add axes labels, by default True
-    add_legend : bool, optional
-        Boolean value to add legend, by default True
     exportplt : bool, optional
         Boolean value where to return the matplotlib.pyplot state plt, by default False
-    color_bar : bool, optional
-        Boolean value to plot the color bar, by default False
-    cmap : bool, optional
-        The colormap to be used, by default False
-    repair : bool, optional
-        Option for vasp to repair the procar file, by default True
+    print_plot_opts: bool, optional
+        Boolean to print the plotting options
 
     Returns
     -------
@@ -116,7 +93,6 @@ def fermi2D(
         invalid option --translate
     """
     welcome()
-
     # Turn interactive plotting off
     plt.ioff()
 
@@ -135,9 +111,25 @@ def fermi2D(
     print("rotation        : ", rotation)
     print("save figure     : ", savefig)
     print("spin_texture    : ", spin_texture)
-    print("no_arrows       : ", no_arrow)
 
-    
+
+    modes=["plain","plain_bands","parametric"]
+    modes_txt=' , '.join(modes)
+    message=f"""
+            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file. 
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
+
+            Here is a list modes : {modes_txt}
+            --------------------------------------------------------
+            """
+    print(message)
+    if print_plot_opts:
+        for key,value in plot_opt.items():
+            print(key,':',value)
+
+
     parser = io.Parser(code = code, dir = dirname)
     ebs = parser.ebs
     structure = parser.structure
@@ -158,7 +150,8 @@ def fermi2D(
 
     ### End of parsing ###
     # Selecting kpoints in a constant k_z plane
-    i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2]< k_z_plane + k_z_plane_tol, kpoints[:,2] > k_z_plane - k_z_plane_tol) )
+    i_kpoints_near_z_0 = np.where(np.logical_and(kpoints[:,2] < k_z_plane + k_z_plane_tol, 
+                                                 kpoints[:,2] > k_z_plane - k_z_plane_tol) )
     kpoints = kpoints[i_kpoints_near_z_0,:][0]
     ebs.bands = ebs.bands[i_kpoints_near_z_0,:][0]
     ebs.projected = ebs.projected[i_kpoints_near_z_0,:][0]
@@ -218,7 +211,9 @@ def fermi2D(
         # symm.MirrorX()
         symm.rot_symmetry_z(rot_symm)
 
-    fs = FermiSurface(symm.kpoints, symm.bands, symm.character, cmap = cmap,  band_indices=band_indices, band_colors=band_colors)
+    fs = FermiSurface(symm.kpoints, symm.bands, symm.character,  
+                      band_indices=band_indices, 
+                      band_colors=band_colors,**kwargs)
     fs.find_energy(energy)
 
     if not spin_texture:
@@ -227,19 +222,12 @@ def fermi2D(
         fs.spin_texture(sx=symm.sx, 
                         sy=symm.sy, 
                         sz=symm.sz, 
-                        arrow_projection=arrow_projection,
-                        no_arrow=no_arrow, 
-                        spin=spins[0], 
-                        arrow_size = arrow_size,
-                        arrow_color = arrow_color,
-                        arrow_density=arrow_density,
-                        color_bar=color_bar
-                        )
+                        spin=spins[0])
 
-    if add_axes_labels:
+    if plot_opt['add_axes_labels']['value']:
         fs.add_axes_labels()
 
-    if add_legend:
+    if plot_opt['add_legend']['value']:
         fs.add_legend()
 
     if exportplt:
@@ -247,65 +235,8 @@ def fermi2D(
 
     else:
         if savefig:
-            plt.savefig(savefig, bbox_inches="tight")
+            plt.savefig(savefig,dpi=plot_opt['dpi']['value'], bbox_inches="tight")
             plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
         else:
             plt.show()
         return
-
-
-# def parse(code:str='vasp',
-#           lobster:bool=False,
-#           repair:bool=False,
-#           dirname:str="",
-#           apply_symmetry:bool=True):
-#         if code == "vasp" or code == "abinit":
-#             if repair:
-#                 repairhandle = UtilsProcar()
-#                 repairhandle.ProcarRepair(procar, procar)
-#                 print("PROCAR repaired. Run with repair=False next time.")
-
-#         if code == "vasp":
-#             outcar = f"{dirname}{os.sep}OUTCAR"
-#             poscar = f"{dirname}{os.sep}POSCAR"
-#             procar = f"{dirname}{os.sep}PROCAR"
-#             kpoints = f"{dirname}{os.sep}KPOINTS"
-#             filename = f"{dirname}{os.sep}{filename}"
-#             outcar = io.vasp.Outcar(filename=outcar)
-        
-#             e_fermi = outcar.efermi
-        
-#             poscar = io.vasp.Poscar(filename=poscar)
-#             structure = poscar.structure
-#             reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-#             parser = io.vasp.Procar(filename=procar,
-#                                     structure=structure,
-#                                     reciprocal_lattice=reciprocal_lattice,
-#                                     efermi=e_fermi,
-#                                     )
-
-#             if apply_symmetry:                       
-#                 ebs.ibz2fbz(rotations)
-
-#             bound_ops = -1.0*(ebs.kpoints > 0.5) + 1.0*(ebs.kpoints <= -0.5)
-#             kpoints_cart = kpoints.dot(reciprocal_lattice)
-
-#         elif code == "qe":
-
-#             if dirname is None:
-#                 dirname = "bands"
-#             parser = io.qe.QEParser(dirname = dirname, scf_in_filename = "scf.in", bands_in_filename = "bands.in", 
-#                                     pdos_in_filename = "pdos.in", kpdos_in_filename = "kpdos.in", atomic_proj_xml = "atomic_proj.xml")
-#             reciprocal_lattice = reciprocal_lattice
-
-#             e_fermi = efermi
-
-#             if apply_symmetry:
-#                 ebs.ibz2fbz(rotations)
-
-#             bound_ops = -1.0*(ebs.kpoints > 0.5) + 1.0*(ebs.kpoints <= -0.5)
-#             kpoints = ebs.kpoints  + bound_ops
-#             kpoints_cart = kpoints.dot(reciprocal_lattice) * (alat/(2*np.pi))
-
-#         return parser, kpoints_cart, reciprocal_lattice, e_fermi

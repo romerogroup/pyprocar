@@ -10,7 +10,7 @@ Created on Sat Jan 16 2021
 # from . import Structure
 from typing import List
 import itertools
-
+import copy
 from scipy.interpolate import CubicSpline
 
 import numpy as np
@@ -637,13 +637,15 @@ class ElectronicBandStructure:
         n_kz=len(np.unique(self.kpoints[:,2]))
         scalar_gradients =  np.zeros((3,n_kx,n_ky,n_kz))
 
-        if n_kx==1 or n_ky==1 or n_kz==1:
-            raise ValueError("The mesh cannot be 2 dimensional")
-        
         # Calculate cartesian separations along each crystal direction
         sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*n_kx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*n_kx, :, :], :])
         sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*n_ky, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*n_ky, :], :])
-        sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*n_kz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*n_kz], :])
+
+        if n_kz>1:
+            sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*n_kz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*n_kz], :])
+        else:
+            sep_vectors_k=copy.copy(sep_vectors_j)
+            sep_vectors_k[:,:,:,:]=0
 
         # Calculate indices with periodic boundary conditions
         plus_one_indices_x = np.arange(n_kx) + 1
@@ -669,6 +671,14 @@ class ElectronicBandStructure:
         # Calculating gradients
         sep_vectors = [sep_vectors_i,sep_vectors_j,sep_vectors_k]
         energy_diffs = [scalar_diffs_i,scalar_diffs_j,scalar_diffs_k]
+
+        # Calculate gradients
+        # sep_vectors = [sep_vectors_i,sep_vectors_j]
+        # energy_diffs = [scalar_diffs_i,scalar_diffs_j]
+        # if n_kz > 1:  # Only add sep_vectors_k and scalar_diffs_k in 3D
+        #     sep_vectors.append(sep_vectors_k)
+        #     energy_diffs.append(scalar_diffs_k)
+
         for sep_vector,energy_diff in zip(sep_vectors,energy_diffs):
             for i_coord in range(3):
                 
@@ -677,6 +687,9 @@ class ElectronicBandStructure:
                 # Changing infinities to 0
                 tmp_grad = np.nan_to_num(tmp_grad, neginf=0,posinf=0) 
                 scalar_gradients[i_coord, :, :, :] += tmp_grad
+
+        if n_kz == 1:
+            scalar_gradients[2,:,:,:]=0
         return scalar_gradients
     
     def calculate_scalar_integral(self,scalar_mesh):

@@ -85,7 +85,7 @@ class Output(collections.abc.Mapping):
 
             # for single atom at (0,0,0) xred is not printed out at the end.
             # So we use this workaround.
-            if not coordinate_block.size > 0:
+            if not coordinate_block:
                 coordinate_block = re.findall(
                     r"reduced\scoordinates\s\(array\sxred\)\sfor\s*[1-9]\satoms\n([+-.0-9E\s]*)\n",
                     data,
@@ -154,15 +154,18 @@ class AbinitKpoints(collections.abc.Mapping):
 
     def __init__(self, filename="KPOINTS", has_time_reversal=True):
         self.variables = {}
-
+        self.filename=filename
         # calling parser
         self._parse_kpoints()
-        self.kpath = KPath(
-            knames=self.abinitkpointsobject.knames,
-            special_kpoints=self.abinitkpointsobject.special_kpoints,
-            ngrids=self.abinitkpointsobject.ngrids,
-            has_time_reversal=has_time_reversal,
-        )
+
+        self.kpath=None
+        if self.abinitkpointsobject.knames:
+            self.kpath = KPath(
+                knames=self.abinitkpointsobject.knames,
+                special_kpoints=self.abinitkpointsobject.special_kpoints,
+                ngrids=self.abinitkpointsobject.ngrids,
+                has_time_reversal=has_time_reversal,
+            )
 
     def _parse_kpoints(self):
         """Reads KPOINTS file.
@@ -171,7 +174,9 @@ class AbinitKpoints(collections.abc.Mapping):
         a KPOINTS file similar to VASP to obtain the
         k-path for PyProcar from an Abinit calculation.
         """
-        self.abinitkpointsobject = Kpoints(filename="KPOINTS", has_time_reversal=True)
+
+        
+        self.abinitkpointsobject = Kpoints(filename=self.filename, has_time_reversal=True)
 
     def __contains__(self, x):
         return x in self.variables
@@ -216,24 +221,23 @@ class AbinitProcar(collections.abc.Mapping):
             inFiles = sorted(glob.glob(tmp_str))
         else:
             inFiles = inFiles
-
+        filename = os.path.join(dirname, "PROCAR")
         if isinstance(inFiles, list):
             self._mergeparallel(
                 inputfiles=inFiles,
-                outputfile="PROCAR",
+                outputfile=filename,
                 abinit_output=self.abinit_output,
             )
         else:
             pass
 
-        filename = os.path.join(dirname, "PROCAR")
+
         # Use VASP Procar parser following PROCAR merge
         self.abinitprocarobject = Procar(
             filename=filename,
             structure=None,
             reciprocal_lattice=self.reciprocal_lattice,
             kpath=self.kpath,
-            kpoints=None,
             efermi=self.efermi,
             interpolation_factor=1,
         )
@@ -244,7 +248,6 @@ class AbinitProcar(collections.abc.Mapping):
         """
         print("Merging parallel files...")
         filenames = sorted(inputfiles)
-        print(filenames)
 
         # creating an instance of the AbinitParser class
         if abinit_output:
@@ -544,12 +547,10 @@ class AbinitDOSParser:
 
         # organizing the projection array in the appropiate formate
         # (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
-        print(projected.shape)
         projected = np.transpose(projected, (0, 2, 3, 1))
 
         # This is adding for the principle quantum number. Throughout the code this is unecessary, but puting here for consitency
         projected = projected[:, None, :, :, :]
-        print(projected.shape)
         return projected
 
     def _parse_projected_dos_file(self, filename):

@@ -66,7 +66,6 @@ class Parser:
         """
         outfile = f"{self.dir}{os.sep}abinit.out"
         kpointsfile = f"{self.dir}{os.sep}KPOINTS"
-
         abinit_output = abinit.Output(abinit_output=outfile)
         abinit_kpoints = abinit.AbinitKpoints(filename=kpointsfile)
 
@@ -229,12 +228,11 @@ class Parser:
         except:
             poscar = vasp.Poscar(poscar,rotations = None)
 
-            
         try:
             kpoints = vasp.Kpoints(kpoints)
             self.kpath = kpoints.kpath
         except:
-            self.kpath = None
+            self.kpath=None
 
         
 
@@ -261,7 +259,6 @@ class Parser:
         try:
             self.dos = vasprun.dos
         except Exception as e:
-            print(e)
             self.dos = None
 
         return None
