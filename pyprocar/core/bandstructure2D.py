@@ -192,7 +192,6 @@ class BandStructure2D(Surface):
             XYZ_extended = copy.copy(self.ebs.kpoints_cartesian)
             XYZ_extended[:,2]=self.ebs.bands[:,iband,self.ispin]
             scalars_extended =  scalars_array[:,iband].copy()
-            
             XYZ_transformed=XYZ_extended
             if self.projection_accuracy.lower()[0] == "n":
                 colors = interpolate.griddata(
@@ -218,6 +217,7 @@ class BandStructure2D(Surface):
             count+=1
             scalars_array.append(spd[:,iband])
         scalars_array = np.vstack(scalars_array).T
+
         self._project_color(scalars_array = scalars_array, scalar_name = "scalars")
 
     def project_spin_texture_atomic_projections(self,spd_spin):

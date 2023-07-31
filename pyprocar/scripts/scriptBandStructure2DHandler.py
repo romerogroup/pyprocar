@@ -143,11 +143,11 @@ class BandStructure2DHandler:
         print("Bands near the fermi level : " , full_band_index )
 
     def _reduce_kpoints_to_plane(self,k_z_plane,k_z_plane_tol):
-        i_kpoints_near_z_0 = np.where(np.logical_and(self.ebs.kpoints_cartesian[:,2] < k_z_plane + k_z_plane_tol, 
-                                                     self.ebs.kpoints_cartesian[:,2] > k_z_plane - k_z_plane_tol) )
-        self.ebs.kpoints = self.ebs.kpoints[i_kpoints_near_z_0,:][0]
-        self.ebs.bands = self.ebs.bands[i_kpoints_near_z_0,:][0]
-        self.ebs.projected = self.ebs.projected[i_kpoints_near_z_0,:][0]
+        i_kpoints_near_z_0 = np.where(np.logical_and(self.data_handler.ebs.kpoints_cartesian[:,2] < k_z_plane + k_z_plane_tol, 
+                                                     self.data_handler.ebs.kpoints_cartesian[:,2] > k_z_plane - k_z_plane_tol) )
+        self.data_handler.ebs.kpoints = self.data_handler.ebs.kpoints[i_kpoints_near_z_0,:][0]
+        self.data_handler.ebs.bands = self.data_handler.ebs.bands[i_kpoints_near_z_0,:][0]
+        self.data_handler.ebs.projected = self.data_handler.ebs.projected[i_kpoints_near_z_0,:][0]
 
 # def find_nearest(array, value):
 #     array = np.asarray(array)
