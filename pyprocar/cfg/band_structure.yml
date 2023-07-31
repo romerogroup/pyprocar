@@ -1,8 +1,11 @@
-color:
+spin_colors:
   description: The colors for the plot lines.
   value:
   - blue
   - red
+color:
+  description: The colors for the plot lines.
+  value: 'black'
 cmap:
   description: The colormap used for the plot.
   value: jet

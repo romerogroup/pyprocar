@@ -126,12 +126,17 @@ class EBSPlot:
         None.
 
         """
+
         
         for ispin in self.spins:
+            if len(self.spins)==1:
+                color=self.plot_opt['color']['value']
+            else:
+                color=self.plot_opt['color']['value'][ispin],
             for iband in range(self.ebs.nbands):
                 handle = self.ax.plot(
                     self.x, self.ebs.bands[:, iband, ispin], 
-                    color=self.plot_opt['color']['value'][ispin], 
+                    color=color, 
                     alpha=self.plot_opt['opacity']['value'][ispin], 
                     linestyle=self.plot_opt['linestyle']['value'][ispin], 
                     label=self.plot_opt['label']['value'][ispin], 
@@ -198,11 +203,15 @@ class EBSPlot:
 
         for ispin in spins:
             for iband in range(self.ebs.nbands):
+                if len(self.spins)==1:
+                    color=self.plot_opt['color']['value']
+                else:
+                    color=self.plot_opt['color']['value'][ispin],
                 if color_weights is None:
                     sc = self.ax.scatter(
                         self.x,
                         mbands[:, iband, ispin],
-                        c=self.plot_opt['color']['value'][ispin],
+                        c=color,
                         s=width_weights[:, iband, ispin].round(
                             2)*markersize[ispin],
                         # edgecolors="none",
@@ -293,6 +302,10 @@ class EBSPlot:
 
         for ispin in spins:
             for iband in range(self.ebs.nbands):
+                if len(self.spins)==1:
+                    color=self.plot_opt['color']['value']
+                else:
+                    color=self.plot_opt['color']['value'][ispin],
                 points = np.array(
                     [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
@@ -303,7 +316,7 @@ class EBSPlot:
                 #     segments, np.where(x[1:] == x[:-1])[0], axis=0)
                 if color_weights is None:
                     lc = LineCollection(
-                        segments, colors=self.plot_opt['color']['value'][ispin], 
+                        segments, colors=color, 
                         linestyle=self.plot_opt['linestyle']['value'][ispin])
                 else:
                     lc = LineCollection(
