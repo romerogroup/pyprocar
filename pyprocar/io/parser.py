@@ -228,9 +228,11 @@ class Parser:
         except:
             poscar = vasp.Poscar(poscar,rotations = None)
 
-            
-        kpoints = vasp.Kpoints(kpoints)
-        self.kpath = kpoints.kpath
+        try:
+            kpoints = vasp.Kpoints(kpoints)
+            self.kpath = kpoints.kpath
+        except:
+            self.kpath=None
 
         
 
@@ -257,7 +259,6 @@ class Parser:
         try:
             self.dos = vasprun.dos
         except Exception as e:
-            print(e)
             self.dos = None
 
         return None
