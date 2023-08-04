@@ -7,7 +7,7 @@ from ..core import DensityOfStates
 from ..core import Structure
 from ..utils import UtilsProcar
 
-from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf
+from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf, elk
 
 class Parser:
     """
@@ -48,7 +48,11 @@ class Parser:
         elif self.code == "vasp":
             self.parse_vasp()
 
-        self.ebs.bands += self.ebs.efermi
+        elif self.code == "elk":
+            self.parse_elk()
+
+        if self.ebs:
+            self.ebs.bands += self.ebs.efermi
 
         return None
 
@@ -62,12 +66,24 @@ class Parser:
         """
         outfile = f"{self.dir}{os.sep}abinit.out"
         kpointsfile = f"{self.dir}{os.sep}KPOINTS"
+        abinit_output = abinit.Output(abinit_output=outfile)
+        abinit_kpoints = abinit.AbinitKpoints(filename=kpointsfile)
 
-        parser = abinit.Output(abinit_output=outfile)
+        parser =  abinit.AbinitProcar(  
+                                        dirname=self.dir,
+                                        abinit_output=outfile,
+                                        kpath=abinit_kpoints.kpath,
+                                        reciprocal_lattice=abinit_output.reclat,
+                                        efermi=abinit_output.fermi
+                                        )
         
+        abinit_dos = abinit.AbinitDOSParser(dirname=self.dir)
+
+        self.dos = abinit_dos.dos
         self.ebs = parser.abinitprocarobject.ebs
         self.kpath = parser.abinitprocarobject.ebs.kpath
-        self.structure = parser.abinitprocarobject.structure
+        self.structure = abinit_output.structure
+        
 
         return None
     
@@ -87,6 +103,20 @@ class Parser:
         self.kpath = parser.kpath
         self.structure = parser.structure
         self.dos = parser.dos
+
+        return None
+    
+    def parse_elk(self):
+        """parses bxsf files.
+
+        Returns
+        -------
+        None
+            None
+        """
+        
+        dos = elk.read_dos(path = self.dir)
+        self.dos = dos
 
         return None
     
@@ -198,12 +228,11 @@ class Parser:
         except:
             poscar = vasp.Poscar(poscar,rotations = None)
 
-            
         try:
             kpoints = vasp.Kpoints(kpoints)
             self.kpath = kpoints.kpath
         except:
-            self.kpath = None
+            self.kpath=None
 
         
 
@@ -212,6 +241,9 @@ class Parser:
                             structure=poscar.structure,
                             reciprocal_lattice=poscar.structure.reciprocal_lattice,
                             kpath=self.kpath,
+                            n_kx=outcar.n_kx,
+                            n_ky=outcar.n_ky,
+                            n_kz=outcar.n_kz,
                             efermi=outcar.efermi,
                             interpolation_factor=1
                             )
@@ -227,7 +259,6 @@ class Parser:
         try:
             self.dos = vasprun.dos
         except Exception as e:
-            print(e)
             self.dos = None
 
         return None

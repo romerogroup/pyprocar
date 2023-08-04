@@ -51,9 +51,30 @@ class Outcar(collections.abc.Mapping):
         
         self.variables: dict = {}
         self.filename: Path = Path(filename)
-        
+                self._get_axes_nk()
+
         with open(self.filename, "r") as rf:
             self.file_str: str = rf.read()
+    def _get_axes_nk(self):
+        """
+        n_kx
+
+        Returns
+        -------
+        n_kx
+            n_kx
+        """
+        try:
+            raw_text=re.findall("generate\s*k-points\s*for:\s*(.*)", self.file_str)[-1]
+            self.n_kx=int(raw_text.split()[0])
+            self.n_ky=int(raw_text.split()[1])
+            self.n_kz=int(raw_text.split()[2])
+        except:
+            self.n_kx=None
+            self.n_ky=None
+            self.n_kz=None
+            
+        return None
 
 
     @cached_property
@@ -367,13 +388,13 @@ class Kpoints(collections.abc.Mapping):
         self.cartesian = False
         self.automatic = False
         self._parse_kpoints()
-        self.kpath = KPath(
-            knames=self.knames,
-            special_kpoints=self.special_kpoints,
-            ngrids=self.ngrids,
-            has_time_reversal=has_time_reversal,
-        )
-
+        if self.knames is not None:
+            self.kpath = KPath(
+                knames=self.knames,
+                special_kpoints=self.special_kpoints,
+                ngrids=self.ngrids,
+                has_time_reversal=has_time_reversal,
+            )
 
     def _parse_kpoints(self):
         """A helper method to parse the KOINTS file
@@ -530,7 +551,9 @@ class Procar(collections.abc.Mapping):
         structure:Structure=None,
         reciprocal_lattice:np.ndarray=None,
         kpath:KPath=None,
-        kpoints:np.ndarray=None,
+        n_kx:int=None,
+        n_ky:int=None,
+        n_kz:int=None,
         efermi:float=None,
         interpolation_factor:float=1,
     ):
@@ -598,6 +621,9 @@ class Procar(collections.abc.Mapping):
             projected=self._spd2projected(self.spd),
             efermi=efermi,
             kpath=kpath,
+            n_kx=n_kx,
+            n_ky=n_ky,
+            n_kz=n_kz,
             projected_phase=self._spd2projected(self.spd_phase),
             labels=self.orbitalNames[:-1],
             reciprocal_lattice=reciprocal_lattice,
@@ -668,7 +694,7 @@ class Procar(collections.abc.Mapping):
             if self.filename[-1] != r"/":
                 self.filename += "/"
             self.filename += "PROCAR"
-
+        
         # checking that the file exist
         if os.path.isfile(self.filename):
             # Checking if compressed

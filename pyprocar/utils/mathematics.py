@@ -36,22 +36,23 @@ def get_angle(v, w, radians=False):
 
 def fft_interpolate(function, interpolation_factor=2, axis=None):
     """
-
+    This method will interpolate using a Fast-Fourier Transform
+    
+    if I = interpolation_factor
+    This function withh recieve f(x,y,z) with dimensions of (nx,ny,nz)
+    and returns f(x,y,z) with dimensions of (nx*I,ny*I,nz*I)
 
     Parameters
     ----------
-    function : TYPE
-        DESCRIPTION.
-    interpolation_factor : TYPE, optional
-        DESCRIPTION. The default is 2.
-    axis : TYPE, optional
-        DESCRIPTION. The default is None.
+    function : np.ndarray
+        The values array to do the interpolation on.
+    interpolation_factor : int, optional
+        Interpolation Factor, by default 2
 
     Returns
     -------
-    interpolated : TYPE
-        DESCRIPTION.
-
+    np.ndarray
+        The interpolated points
     """
 
     if axis is None:
@@ -80,3 +81,27 @@ def fft_interpolate(function, interpolation_factor=2, axis=None):
             interpolation_factor * factor
         )
     return interpolated
+
+def change_of_basis(tensor,A,B):
+    """changes the basis of a tensor given the column vectors of A and B
+
+    This changes the basis from B to A. The tensor has to be in the A basis.
+
+    Parameters
+    ----------
+    tensor : np.ndarray
+        Rank 1 or rank 2 tensor
+    A : np.ndarray
+        column vectors of the A basis
+    B : np.ndarray
+        column vectors of the B basis
+    """
+    transform = np.linalg.inv(B).dot(A)
+    n_dim = len(tensor.shape)
+    if n_dim == 1:
+        tensor_b = transform.dot(tensor)
+    else:
+        transform_inv = np.linalg.inv(transform)
+        tensor_b = transform_inv.dot(tensor).dot(transform)
+        # tensor_b = transform.dot(tensor).dot(transform_inv)
+    return tensor_b

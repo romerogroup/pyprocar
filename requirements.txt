@@ -7,4 +7,6 @@ scipy
 seekpath
 spglib
 trimesh
-scikit-learn
+ase
+sympy
+PyYAML
