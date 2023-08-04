@@ -3,6 +3,9 @@ import re
 import xml.etree.ElementTree as ET
 import collections
 import gzip
+from typing import List, Tuple, Union, Dict, Any, Optional
+from pathlib import Path
+from functools import cached_property
 
 import numpy as np
 from numpy import array
@@ -12,24 +15,48 @@ from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
 
 class Outcar(collections.abc.Mapping):
     """
-    A class to parse the OUTCAR
+    A class to parse the OUTCAR file from a VASP run and extract electronic structure data.
+
+    The OUTCAR file provides detailed output of a VASP run, including a summary of used input parameters, 
+    information about electronic steps and KS-eigenvalues, stress tensors, forces on atoms, local charges 
+    and magnetic moments, and dielectric properties. The amount of output written onto the OUTCAR file can 
+    be chosen by modifying the NWRITE tag in the INCAR file.
+    
+    The Outcar class acts as a Mapping, providing key-value access to the variables parsed from the OUTCAR file.
 
     Parameters
     ----------
-    filename : str, optional
-        The OURCAR filename, by default "OUTCAR"
-    """
-    def __init__(self, filename="OUTCAR"):
+    filename : Union[str, Path], optional
+        The OUTCAR filename. If not provided, defaults to "OUTCAR".
         
-        self.variables = {}
-        self.filename = filename
+    Attributes
+    ----------
+    variables : dict
+        A dictionary storing variables parsed from the OUTCAR file.
+    filename : Path
+        The path to the OUTCAR file.
+    file_str : str
+        The full string content of the OUTCAR file.
+    """
+    
+    def __init__(self, filename: Union[str, Path] = "OUTCAR"):
+        """
+        Constructor method to initialize an Outcar object. Reads the file specified by filename and stores its content.
 
+        Parameters
+        ----------
+        filename : Union[str, Path], optional
+            The OUTCAR filename. If not provided, defaults to "OUTCAR".
+        """
+        
+        self.variables: dict = {}
+        self.filename: Path = Path(filename)
+        
         with open(self.filename, "r") as rf:
-            self.file_str = rf.read()
+            self.file_str: str = rf.read()
 
 
-
-    @property
+    @cached_property
     def efermi(self):
         """
         Just finds all E-fermi fields in the outcar file and keeps the
@@ -42,7 +69,7 @@ class Outcar(collections.abc.Mapping):
         """
         return float(re.findall(r"E-fermi\s*:\s*(-?\d+.\d+)", self.file_str)[-1])
 
-    @property
+    @cached_property
     def reciprocal_lattice(self):
         """
         Finds and return the reciprocal lattice vectors, if more than
@@ -65,7 +92,7 @@ class Outcar(collections.abc.Mapping):
         return reciprocal_lattice
 
 
-    @property
+    @cached_property
     def rotations(self):
         """
         Finds the point symmetry operations included in the OUTCAR file
@@ -78,8 +105,7 @@ class Outcar(collections.abc.Mapping):
         """
 
 
-        with open(self.filename) as f:
-            txt = f.readlines()
+        txt = self.file_str.split('\n')
 
         has_new_rotation_format = False
         i_rotation_lines=[]
@@ -156,9 +182,8 @@ class Outcar(collections.abc.Mapping):
         return np.array(rotations)
 
     def get_symmetry_operations(self):
-        with open(self.filename) as f:
-            txt = f.readlines()
 
+        txt = self.file_str.split('\n')
         has_new_rotation_format = False
         i_rotation_lines=[]
         for i, line in enumerate(txt):
