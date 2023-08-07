@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.io.vasp.Outcar &#8212; PyProcar 6.0.0 documentation</title>
+    <title>pyprocar.io.vasp.Outcar &#8212; PyProcar 6.1.1 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4a2dc4d6"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=87a260f4"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.1 documentation</p>
   
 </a></div>
     
@@ -927,18 +927,56 @@ document.write(`
 <h1>pyprocar.io.vasp.Outcar<a class="headerlink" href="#pyprocar-io-vasp-outcar" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.io.vasp.</span></span><span class="sig-name descname"><span class="pre">Outcar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OUTCAR'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/io/vasp.html#Outcar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.io.vasp.Outcar" title="Permalink to this definition">#</a></dt>
-<dd><p>A class to parse the OUTCAR</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.io.vasp.</span></span><span class="sig-name descname"><span class="pre">Outcar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'OUTCAR'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/io/vasp.html#Outcar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.io.vasp.Outcar" title="Permalink to this definition">#</a></dt>
+<dd><p>A class to parse the OUTCAR file from a VASP run and extract electronic structure data.</p>
+<p>The OUTCAR file provides detailed output of a VASP run, including a summary of used input parameters,
+information about electronic steps and KS-eigenvalues, stress tensors, forces on atoms, local charges
+and magnetic moments, and dielectric properties. The amount of output written onto the OUTCAR file can
+be chosen by modifying the NWRITE tag in the INCAR file.</p>
+<p>The Outcar class acts as a Mapping, providing key-value access to the variables parsed from the OUTCAR file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – The OURCAR filename, by default “OUTCAR”</p>
+<dd class="field-odd"><p><strong>filename</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – The OUTCAR filename. If not provided, defaults to “OUTCAR”.</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#pyprocar.io.vasp.Outcar.variables" title="Permalink to this definition">#</a></dt>
+<dd><p>A dictionary storing variables parsed from the OUTCAR file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#pyprocar.io.vasp.Outcar.filename" title="Permalink to this definition">#</a></dt>
+<dd><p>The path to the OUTCAR file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar.file_str">
+<span class="sig-name descname"><span class="pre">file_str</span></span><a class="headerlink" href="#pyprocar.io.vasp.Outcar.file_str" title="Permalink to this definition">#</a></dt>
+<dd><p>The full string content of the OUTCAR file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.io.vasp.Outcar.__init__.html#pyprocar.io.vasp.Outcar.__init__" title="pyprocar.io.vasp.Outcar.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcar.__init__</span></code></a>([filename])</p></td>
-<td><p></p></td>
+<td><p>Constructor method to initialize an Outcar object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.io.vasp.Outcar.get_symmetry_operations.html#pyprocar.io.vasp.Outcar.get_symmetry_operations" title="pyprocar.io.vasp.Outcar.get_symmetry_operations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Outcar.get_symmetry_operations</span></code></a>()</p></td>
 <td><p></p></td>
@@ -1010,7 +1048,12 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar"><code class="docutils literal notranslate"><span class="pre">Outcar</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar"><code class="docutils literal notranslate"><span class="pre">Outcar</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar.variables"><code class="docutils literal notranslate"><span class="pre">Outcar.variables</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar.filename"><code class="docutils literal notranslate"><span class="pre">Outcar.filename</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar.file_str"><code class="docutils literal notranslate"><span class="pre">Outcar.file_str</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

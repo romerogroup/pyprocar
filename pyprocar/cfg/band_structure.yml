@@ -84,7 +84,7 @@ savefig:
   value: null
 title:
   description: The title for the plot. If null, no title will be displayed.
-  value: null
+  value: 
 weighted_color:
   description: If true, the color of the lines will be weighted.
   value: true

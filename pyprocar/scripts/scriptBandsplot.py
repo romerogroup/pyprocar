@@ -113,7 +113,7 @@ def bandsplot(
     else:
         fermi_level = 0
 
-    ebs_plot = EBSPlot(ebs, kpath, ax, spins)
+    ebs_plot = EBSPlot(ebs, kpath, ax, spins ,**kwargs)
 
  
     labels = []
@@ -224,20 +224,13 @@ def bandsplot(
     ebs_plot.set_yticks(interval=elimit)
     ebs_plot.set_xlim()
     ebs_plot.set_ylim(elimit)
-    ebs_plot.draw_fermi(
-        fermi_level=fermi_level,
-        color=plot_opt['fermi_color']['value'],
-        linestyle=plot_opt['fermi_linestyle']['value'],
-        linewidth=plot_opt['fermi_linewidth']['value'],
-    )
+    ebs_plot.draw_fermi(fermi_level=fermi_level)
     ebs_plot.set_ylabel()
 
-    if plot_opt['title']['value']:
-        ebs_plot.set_title(title=plot_opt['title']['value'])
-    if plot_opt['grid']['value']:
-        ebs_plot.grid()
-    if plot_opt['legend']['value'] and len(labels) != 0:
-        ebs_plot.legend(labels)
+
+    ebs_plot.set_title()
+    ebs_plot.grid()
+    ebs_plot.legend(labels)
     if savefig is not None:
         ebs_plot.save(savefig)
     if show:

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.io.vasp &#8212; PyProcar 6.0.0 documentation</title>
+    <title>pyprocar.io.vasp &#8212; PyProcar 6.1.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4a2dc4d6"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2ee21492"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.0 documentation</p>
   
 </a></div>
     
@@ -432,6 +432,9 @@ document.write(`
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
@@ -441,23 +444,46 @@ document.write(`
 
 <div class="viewcode-block" id="Outcar"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.html#pyprocar.io.vasp.Outcar">[docs]</a><span class="k">class</span> <span class="nc">Outcar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class to parse the OUTCAR</span>
+<span class="sd">    A class to parse the OUTCAR file from a VASP run and extract electronic structure data.</span>
+
+<span class="sd">    The OUTCAR file provides detailed output of a VASP run, including a summary of used input parameters, </span>
+<span class="sd">    information about electronic steps and KS-eigenvalues, stress tensors, forces on atoms, local charges </span>
+<span class="sd">    and magnetic moments, and dielectric properties. The amount of output written onto the OUTCAR file can </span>
+<span class="sd">    be chosen by modifying the NWRITE tag in the INCAR file.</span>
+<span class="sd">    </span>
+<span class="sd">    The Outcar class acts as a Mapping, providing key-value access to the variables parsed from the OUTCAR file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    filename : str, optional</span>
-<span class="sd">        The OURCAR filename, by default &quot;OUTCAR&quot;</span>
+<span class="sd">    filename : Union[str, Path], optional</span>
+<span class="sd">        The OUTCAR filename. If not provided, defaults to &quot;OUTCAR&quot;.</span>
+<span class="sd">        </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    variables : dict</span>
+<span class="sd">        A dictionary storing variables parsed from the OUTCAR file.</span>
+<span class="sd">    filename : Path</span>
+<span class="sd">        The path to the OUTCAR file.</span>
+<span class="sd">    file_str : str</span>
+<span class="sd">        The full string content of the OUTCAR file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Outcar.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.__init__.html#pyprocar.io.vasp.Outcar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;OUTCAR&quot;</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="Outcar.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.__init__.html#pyprocar.io.vasp.Outcar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OUTCAR&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor method to initialize an Outcar object. Reads the file specified by filename and stores its content.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : Union[str, Path], optional</span>
+<span class="sd">            The OUTCAR filename. If not provided, defaults to &quot;OUTCAR&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_axes_nk</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_get_axes_nk</span><span class="p">()</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
     <span class="k">def</span> <span class="nf">_get_axes_nk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        n_kx</span>
@@ -479,7 +505,8 @@ document.write(`
             
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="nd">@property</span>
+
+    <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">efermi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Just finds all E-fermi fields in the outcar file and keeps the</span>
@@ -492,7 +519,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;E-fermi\s*:\s*(-?\d+.\d+)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="nd">@property</span>
+    <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">reciprocal_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds and return the reciprocal lattice vectors, if more than</span>
@@ -515,7 +542,7 @@ document.write(`
         <span class="k">return</span> <span class="n">reciprocal_lattice</span>
 
 
-    <span class="nd">@property</span>
+    <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">rotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds the point symmetry operations included in the OUTCAR file</span>
@@ -528,8 +555,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
 
 
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">has_new_rotation_format</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">i_rotation_lines</span><span class="o">=</span><span class="p">[]</span>
@@ -606,9 +632,8 @@ document.write(`
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rotations</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Outcar.get_symmetry_operations"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.get_symmetry_operations.html#pyprocar.io.vasp.Outcar.get_symmetry_operations">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetry_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 
+        <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">has_new_rotation_format</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">i_rotation_lines</span><span class="o">=</span><span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>

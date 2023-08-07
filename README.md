@@ -28,7 +28,7 @@ Currently supports:
 Documentation
 -------------
 
-For versions 6.0.0 and above, the documentation is found here:
+For versions 6.1.1 and above, the documentation is found here:
 https://romerogroup.github.io/pyprocar/
 
 
@@ -121,6 +121,8 @@ will bring a help menu.
 
 Changelog
 --------------
+v6.1.1 Aug 7th, 2023 -- Bug fix <br />
+v6.1.0 Aug 7th, 2023 -- Bug fixes, doc update, config files <br />
 v6.0.0 Jun 10th, 2023 -- Major code base changes. <br />
 v5.6.6 Mar 6th, 2022 -- QE, bandsplot, dosplot, fermi surface, and band unfolding bug fixes. Directory change, parsers are now in the io directory. <br />
 v5.6.5 Jun 10th, 2021 -- Fermi surface object and fermi surface plotter bug fixes <br />

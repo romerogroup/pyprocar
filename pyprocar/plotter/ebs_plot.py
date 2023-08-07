@@ -50,7 +50,6 @@ class EBSPlot:
         with open(os.path.join(ROOT,'pyprocar','cfg','band_structure.yml'), 'r') as file:
             self.plot_opt = yaml.safe_load(file)
         self.update_config(kwargs)
-
         self.ebs = ebs
         self.kpath = kpath
         self.spins = spins
@@ -527,7 +526,8 @@ class EBSPlot:
         title : str, optional
             String for the title, by default "Band Structure"
         """
-        self.ax.set_title(label=title)
+        if self.plot_opt['title']['value']:
+            self.ax.set_title(label=self.plot_opt['title']['value'])
 
     def legend(self, labels:List[str]=None):
         """A methdo to plot the legend
@@ -539,35 +539,33 @@ class EBSPlot:
         """
         if labels == None:
             labels = self.plot_opt['label']['value']
-        self.ax.legend(self.handles, labels)
 
-    def draw_fermi(self, 
-                fermi_level:float=0, 
-                color:str="blue", 
-                linestyle:str="dotted", 
-                linewidth:float=1):
+        if self.plot_opt['legend']['value']:
+            self.ax.legend(self.handles, labels)
+
+    def draw_fermi(self, fermi_level:float=0, ):
         """A method to draw the fermi line
 
         Parameters
         ----------
-        color : str, optional
-            The color of the fermi line, by default "blue"
-        linestyle : str, optional
-            The linestyle, by default "dotted"
-        linewidth : float, optional
-            The linewidth, by default 1
+        fermi_level : str, optional
+            The energy level to draw the line
         """
-        self.ax.axhline(y=fermi_level, color=color, linestyle=linestyle, linewidth=linewidth)
+        self.ax.axhline(y=fermi_level, 
+                        color=self.plot_opt['fermi_color']['value'], 
+                        linestyle=self.plot_opt['fermi_linestyle']['value'], 
+                        linewidth=self.plot_opt['fermi_linewidth']['value'])
 
     def grid(self):
         """A method to plot a grid
         """
-        self.ax.grid(
-            self.plot_opt['grid']['value'],
-            which=self.plot_opt['grid_which']['value'],
-            color=self.plot_opt['grid_color']['value'],
-            linestyle=self.plot_opt['grid_linestlye']['value'],
-            linewidth=self.plot_opt['grid_linewidth']['value'])
+        if self.plot_opt['grid']['value']:
+            self.ax.grid(
+                self.plot_opt['grid']['value'],
+                which=self.plot_opt['grid_which']['value'],
+                color=self.plot_opt['grid_color']['value'],
+                linestyle=self.plot_opt['grid_linestlye']['value'],
+                linewidth=self.plot_opt['grid_linewidth']['value'])
     
     def show(self):
         """A method to show the plot

@@ -84,7 +84,7 @@ importing pyprocar and specify the local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 44-45
 
-Initial ize the parser object and get the ElectronicBandStructure 
+Initialize the parser object and get the ElectronicBandStructure 
 
 .. GENERATED FROM PYTHON SOURCE LINES 45-54
 
@@ -163,13 +163,15 @@ Let's plot the kpoints
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-72
+.. GENERATED FROM PYTHON SOURCE LINES 69-74
 
-Other properties can be access as properties.
+Other properties
++++++++++++++++++++++++++++
 
 Bands
++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-80
+.. GENERATED FROM PYTHON SOURCE LINES 74-82
 
 .. code-block:: default
 
@@ -193,11 +195,12 @@ Bands
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-82
+.. GENERATED FROM PYTHON SOURCE LINES 83-85
 
 Projections
++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-89
+.. GENERATED FROM PYTHON SOURCE LINES 85-92
 
 .. code-block:: default
 
@@ -226,11 +229,12 @@ Projections
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-91
+.. GENERATED FROM PYTHON SOURCE LINES 93-95
 
 Gradients
++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-100
+.. GENERATED FROM PYTHON SOURCE LINES 95-104
 
 .. code-block:: default
 
@@ -240,7 +244,7 @@ Gradients
     # Use the Glyph filter to generate arrows for the vectors
     arrows = kpoints.glyph(orient='band_0-gradients', scale=False, factor=0.08)
     p=pv.Plotter()
-    p.add_mesh(arrows)
+    p.add_mesh(arrows,scalar_bar_args={'title':'band_0-band_velocity'})
     p.show()
 
 
@@ -261,11 +265,12 @@ Gradients
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-102
+.. GENERATED FROM PYTHON SOURCE LINES 105-107
 
 Band/Fermi velocities
++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-114
+.. GENERATED FROM PYTHON SOURCE LINES 107-118
 
 .. code-block:: default
 
@@ -273,11 +278,10 @@ Band/Fermi velocities
     kpoints['band_0-band_velocity']=ebs.fermi_velocity[:,:,0,0]
     kpoints['band_0-band_speed']=ebs.fermi_speed[:,0,0]
 
-    # Use the Glyph filter to generate arrows for the vectors
     arrows = kpoints.glyph(orient='band_0-band_velocity', scale=False, factor=0.08)
     p=pv.Plotter()
-    p.add_mesh(kpoints, scalars='band_0-band_speed', render_points_as_spheres=True, point_size=0.1)
-    p.add_mesh(arrows)
+    p.add_mesh(kpoints, scalars='band_0-band_speed', render_points_as_spheres=True, point_size=0.1,show_scalar_bar=False)
+    p.add_mesh(arrows,scalar_bar_args={'title':'band_0-band_velocity'})
     p.show()
 
 
@@ -299,11 +303,12 @@ Band/Fermi velocities
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-116
+.. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 Effective mass
++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-124
+.. GENERATED FROM PYTHON SOURCE LINES 121-129
 
 .. code-block:: default
 
@@ -336,7 +341,7 @@ Effective mass
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.218 seconds)
+   **Total running time of the script:** ( 0 minutes  4.186 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plotting_ebs.py:

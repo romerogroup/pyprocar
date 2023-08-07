@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Example of finding the bandgap &#8212; PyProcar 6.0.0 documentation</title>
+    <title>Example of finding the bandgap &#8212; PyProcar 6.1.1 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4a2dc4d6"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=87a260f4"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.1 documentation</p>
   
 </a></div>
     
@@ -529,7 +529,7 @@ related to the electronic band structure.</p>
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
 </pre></div>
 </div>
-<p>Initial ize the parser object and get the ElectronicBandStructure</p>
+<p>Initialize the parser object and get the ElectronicBandStructure</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parser</span><span class="o">=</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span><span class="nb">dir</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 <span class="n">ebs</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
 <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
@@ -557,8 +557,11 @@ Total number of orbitals = 9
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_ebs_001.png" srcset="../../_images/sphx_glr_plotting_ebs_001.png" alt="plotting ebs" class = "sphx-glr-single-img"/><p>Other properties can be access as properties.</p>
-<p>Bands</p>
+<img src="../../_images/sphx_glr_plotting_ebs_001.png" srcset="../../_images/sphx_glr_plotting_ebs_001.png" alt="plotting ebs" class = "sphx-glr-single-img"/><section id="other-properties">
+<h2>Other properties<a class="headerlink" href="#other-properties" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="bands">
+<h2>Bands<a class="headerlink" href="#bands" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kpoints</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
@@ -567,7 +570,9 @@ Total number of orbitals = 9
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plotting_ebs_002.png" srcset="../../_images/sphx_glr_plotting_ebs_002.png" alt="plotting ebs" class = "sphx-glr-single-img"/><p>Projections</p>
+<img src="../../_images/sphx_glr_plotting_ebs_002.png" srcset="../../_images/sphx_glr_plotting_ebs_002.png" alt="plotting ebs" class = "sphx-glr-single-img"/></section>
+<section id="projections">
+<h2>Projections<a class="headerlink" href="#projections" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-atom_0-orbital_5-spin-0&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
@@ -579,37 +584,42 @@ Total number of orbitals = 9
 <img src="../../_images/sphx_glr_plotting_ebs_003.png" srcset="../../_images/sphx_glr_plotting_ebs_003.png" alt="plotting ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 8, 1, 1, 9, 1)
 </pre></div>
 </div>
-<p>Gradients</p>
+</section>
+<section id="gradients">
+<h2>Gradients<a class="headerlink" href="#gradients" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands_gradient</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-gradients&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands_gradient</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># Use the Glyph filter to generate arrows for the vectors</span>
 <span class="n">arrows</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;band_0-gradients&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.08</span><span class="p">)</span>
 <span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
-<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span><span class="n">scalar_bar_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span><span class="s1">&#39;band_0-band_velocity&#39;</span><span class="p">})</span>
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plotting_ebs_004.png" srcset="../../_images/sphx_glr_plotting_ebs_004.png" alt="plotting ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 3, 8, 1)
 </pre></div>
 </div>
-<p>Band/Fermi velocities</p>
+</section>
+<section id="band-fermi-velocities">
+<h2>Band/Fermi velocities<a class="headerlink" href="#band-fermi-velocities" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-band_velocity&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_velocity</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-band_speed&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_speed</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="c1"># Use the Glyph filter to generate arrows for the vectors</span>
 <span class="n">arrows</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;band_0-band_velocity&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.08</span><span class="p">)</span>
 <span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
-<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="s1">&#39;band_0-band_speed&#39;</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="s1">&#39;band_0-band_speed&#39;</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">arrows</span><span class="p">,</span><span class="n">scalar_bar_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span><span class="s1">&#39;band_0-band_velocity&#39;</span><span class="p">})</span>
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plotting_ebs_005.png" srcset="../../_images/sphx_glr_plotting_ebs_005.png" alt="plotting ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 3, 8, 1)
 </pre></div>
 </div>
-<p>Effective mass</p>
+</section>
+<section id="effective-mass">
+<h2>Effective mass<a class="headerlink" href="#effective-mass" title="Permalink to this heading">#</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">harmonic_average_effective_mass</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-harmonic_average_effective_mass&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">harmonic_average_effective_mass</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
@@ -621,7 +631,7 @@ Total number of orbitals = 9
 <img src="../../_images/sphx_glr_plotting_ebs_006.png" srcset="../../_images/sphx_glr_plotting_ebs_006.png" alt="plotting ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 8, 1)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.218 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.186 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-05-other-plotting-ebs-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c8b26a195b3a9074aa8ed776deccd7bc/plotting_ebs.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plotting_ebs.py</span></code></a></p>
@@ -631,6 +641,7 @@ Total number of orbitals = 9
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
 </section>
 
 
@@ -673,6 +684,21 @@ Total number of orbitals = 9
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-properties">Other properties</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bands">Bands</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#projections">Projections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gradients">Gradients</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#band-fermi-velocities">Band/Fermi velocities</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#effective-mass">Effective mass</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">

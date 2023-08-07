@@ -47,7 +47,8 @@ arrow_density:
 arrow_size:
   description: The arrow size for the spin texture
   value: 3
-arrow_projection:
+
+spin_projection:
   description: The projection for the color scale for spin texture
   value: z^2
 
