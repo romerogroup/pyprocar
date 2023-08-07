@@ -41,7 +41,7 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 
 
 ###############################################################################
-# Initial ize the parser object and get the ElectronicBandStructure 
+# Initialize the parser object and get the ElectronicBandStructure 
 
 parser=pyprocar.io.Parser(code="vasp",dir=data_dir)
 ebs=parser.ebs
@@ -66,9 +66,11 @@ p.show()
 
 
 ###############################################################################
-# Other properties can be access as properties.
-# 
+# Other properties
+# +++++++++++++++++++++++++++
+#
 # Bands
+# +++++++++++++++++++++++++++
 kpoints=pv.PolyData(ebs.kpoints)
 kpoints['band_0']=ebs.bands[:,0,0]
 
@@ -79,6 +81,7 @@ p.show()
 
 ###############################################################################
 # Projections
+# +++++++++++++++++++++++++++
 print(ebs.projected.shape)
 kpoints['band_0-atom_0-orbital_5-spin-0']=ebs.projected[:,0,0,0,4,0]
 
@@ -88,31 +91,33 @@ p.show()
 
 ###############################################################################
 # Gradients
+# +++++++++++++++++++++++++++
 print(ebs.bands_gradient.shape)
 kpoints['band_0-gradients']=ebs.bands_gradient[:,:,0,0]
 
 # Use the Glyph filter to generate arrows for the vectors
 arrows = kpoints.glyph(orient='band_0-gradients', scale=False, factor=0.08)
 p=pv.Plotter()
-p.add_mesh(arrows)
+p.add_mesh(arrows,scalar_bar_args={'title':'band_0-band_velocity'})
 p.show()
 
 ###############################################################################
 # Band/Fermi velocities
+# +++++++++++++++++++++++++++
 print(ebs.fermi_velocity.shape)
 kpoints['band_0-band_velocity']=ebs.fermi_velocity[:,:,0,0]
 kpoints['band_0-band_speed']=ebs.fermi_speed[:,0,0]
 
-# Use the Glyph filter to generate arrows for the vectors
 arrows = kpoints.glyph(orient='band_0-band_velocity', scale=False, factor=0.08)
 p=pv.Plotter()
-p.add_mesh(kpoints, scalars='band_0-band_speed', render_points_as_spheres=True, point_size=0.1)
-p.add_mesh(arrows)
+p.add_mesh(kpoints, scalars='band_0-band_speed', render_points_as_spheres=True, point_size=0.1,show_scalar_bar=False)
+p.add_mesh(arrows,scalar_bar_args={'title':'band_0-band_velocity'})
 p.show()
 
 
 ###############################################################################
 # Effective mass
+# +++++++++++++++++++++++++++
 print(ebs.harmonic_average_effective_mass.shape)
 kpoints['band_0-harmonic_average_effective_mass']=ebs.harmonic_average_effective_mass[:,0,0]
 
