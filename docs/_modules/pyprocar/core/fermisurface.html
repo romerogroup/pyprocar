@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.core.fermisurface &#8212; PyProcar 6.1.0 documentation</title>
+    <title>pyprocar.core.fermisurface &#8212; PyProcar 6.1.1 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2ee21492"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=87a260f4"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.1 documentation</p>
   
 </a></div>
     
@@ -628,7 +628,7 @@ document.write(`
             <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">vmin</span><span class="o">=</span><span class="n">spd</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">vmax</span> <span class="o">=</span> <span class="n">spd</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>           
+                <span class="n">vmax</span><span class="o">=</span><span class="n">spd</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>           
             <span class="n">norm</span> <span class="o">=</span> <span class="n">mpcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
 
             <span class="c1"># Interpolating band energies on to new grid</span>
@@ -641,7 +641,6 @@ document.write(`
             <span class="c1"># Generates colors per band</span>
             
             <span class="n">n_bands</span> <span class="o">=</span> <span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="n">mpcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">i_spin</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">factor</span> <span class="o">=</span> <span class="mf">0.25</span>
@@ -742,7 +741,7 @@ document.write(`
             <span class="n">sy</span> <span class="o">=</span> <span class="n">sy</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">band_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
             <span class="n">sz</span> <span class="o">=</span> <span class="n">sz</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">band_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
 
-
+       
         <span class="c1"># and new, interpolated component</span>
         <span class="n">xmax</span><span class="p">,</span> <span class="n">xmin</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="n">ymax</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
@@ -756,6 +755,15 @@ document.write(`
         <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Interpolating ...&quot;</span><span class="p">)</span>
             <span class="n">bnew</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">griddata</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">band</span><span class="p">,</span> <span class="p">(</span><span class="n">xnew</span><span class="p">,</span> <span class="n">ynew</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Normalizing</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;clim&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;clim&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmin</span><span class="o">=-</span><span class="mf">0.5</span>
+        <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmax</span><span class="o">=</span><span class="mf">0.5</span>          
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">mpcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
 
 
         <span class="n">cont</span> <span class="o">=</span> <span class="p">[</span>
@@ -772,7 +780,6 @@ document.write(`
         <span class="p">]</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
-
         <span class="k">for</span> <span class="n">i_band</span><span class="p">,</span> <span class="p">(</span><span class="n">contour</span><span class="p">,</span> <span class="n">spinX</span><span class="p">,</span> <span class="n">spinY</span><span class="p">,</span> <span class="n">spinZ</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">cont</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">)):</span>
             <span class="c1"># The previous interp. yields the level curves, nothing more is</span>
             <span class="c1"># useful from there</span>
@@ -783,11 +790,9 @@ document.write(`
 
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fermi surf. points.shape: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
-
                 <span class="n">newSx</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">spinX</span><span class="p">,</span> <span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
                 <span class="n">newSy</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">spinY</span><span class="p">,</span> <span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
                 <span class="n">newSz</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">spinZ</span><span class="p">,</span> <span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
-
                 <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;newSx.shape: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">newSx</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_size&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">scale</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_size&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
@@ -798,21 +803,36 @@ document.write(`
                     <span class="n">scale_units</span> <span class="o">=</span> <span class="s2">&quot;xy&quot;</span>
                     <span class="n">angles</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span>
 
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">newSz</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">newSy</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">newSx</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x^2&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">newSx</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y^2&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">newSy</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z^2&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">newSz</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span>
+
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;no_arrow&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
                     <span class="c1"># a dictionary to select the right spin component</span>
-                    <span class="n">spinDict</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">newSx</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]],</span> 
-                                <span class="mi">1</span><span class="p">:</span> <span class="n">newSy</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]],</span> 
-                                <span class="mi">2</span><span class="p">:</span> <span class="n">newSz</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]}</span>
+                    <span class="c1"># spinDict = {0: newSx[::self.plot_opt[&#39;arrow_density&#39;][&#39;value&#39;]], </span>
+                    <span class="c1">#             1: newSy[::self.plot_opt[&#39;arrow_density&#39;][&#39;value&#39;]], </span>
+                    <span class="c1">#             2: newSz[::self.plot_opt[&#39;arrow_density&#39;][&#39;value&#39;]]}</span>
+                        
                     <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
                         <span class="n">points</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
                         <span class="n">points</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>
-                        <span class="n">c</span><span class="o">=</span><span class="n">spinDict</span><span class="p">[</span><span class="n">spin</span><span class="p">],</span>
+                        <span class="n">c</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                        <span class="c1"># spinDict[spin],</span>
                         <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
                         <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
                         <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                         <span class="n">marker</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
                         <span class="n">cmap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
-                        <span class="n">norm</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+                        <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>
                     <span class="p">)</span>
 
                 <span class="k">else</span><span class="p">:</span>
@@ -821,7 +841,6 @@ document.write(`
                             <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_colors</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_band</span><span class="p">]</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_color&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_color&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reee&#39;</span><span class="p">)</span>
                         <span class="n">plt</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span>
                             <span class="n">points</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>  <span class="c1"># Arrow position x-component</span>
                             <span class="n">points</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>  <span class="c1"># Arrow position y-component</span>
@@ -833,20 +852,7 @@ document.write(`
                             <span class="n">color</span><span class="o">=</span><span class="n">c</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span>
-                            <span class="n">color</span> <span class="o">=</span> <span class="n">newSz</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
-                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
-                            <span class="n">color</span> <span class="o">=</span> <span class="n">newSy</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
-                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
-                            <span class="n">color</span> <span class="o">=</span> <span class="n">newSx</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
-                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x^2&#39;</span><span class="p">:</span>
-                            <span class="n">color</span> <span class="o">=</span> <span class="n">newSx</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span>
-                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y^2&#39;</span><span class="p">:</span>
-                            <span class="n">color</span> <span class="o">=</span> <span class="n">newSy</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span>
-                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z^2&#39;</span><span class="p">:</span>
-                            <span class="n">color</span> <span class="o">=</span> <span class="n">newSz</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span>
-
-                        
+ 
                         <span class="n">plt</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span>
                             <span class="n">points</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>  <span class="c1"># Arrow position x-component</span>
                             <span class="n">points</span><span class="p">[::</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_density&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>  <span class="c1"># Arrow position y-component</span>
@@ -857,17 +863,17 @@ document.write(`
                             <span class="n">scale_units</span><span class="o">=</span><span class="n">scale_units</span><span class="p">,</span>
                             <span class="n">angles</span><span class="o">=</span><span class="n">angles</span><span class="p">,</span>
                             <span class="n">cmap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
-                            <span class="n">norm</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+                            <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>
                         <span class="p">)</span>
                 
             
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;plot_color_bar&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">)</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;S$_</span><span class="si">{</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">^</span><span class="si">{</span><span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">$ projection&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;arrow_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">)</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;spin_projection&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">)</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;S$_</span><span class="si">{</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">$ projection&#39;</span>
             <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>

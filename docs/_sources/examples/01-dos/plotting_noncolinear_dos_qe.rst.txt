@@ -105,14 +105,14 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002EB3DB43370>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000024576F57910>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  25.358 seconds)
+   **Total running time of the script:** ( 0 minutes  22.112 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plotting_noncolinear_dos_qe.py:

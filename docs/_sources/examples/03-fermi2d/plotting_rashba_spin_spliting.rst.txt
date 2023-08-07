@@ -74,7 +74,7 @@ energy = 0.60 sx projection no arrows
                    energy=0.60,
                    spin_texture=True,
                    no_arrow=True,
-                   arrow_projection='x',
+                   spin_projection='x',
                    plot_color_bar=True)
 
 
@@ -98,7 +98,7 @@ energy = 0.60 sx projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -160,7 +160,7 @@ energy = 0.60 sy projection no arrows
                    energy=0.60,
                    spin_texture=True,
                    no_arrow=True,
-                   arrow_projection='y',
+                   spin_projection='y',
                    plot_color_bar=True)
 
 
@@ -185,7 +185,7 @@ energy = 0.60 sy projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -247,7 +247,7 @@ energy = 0.60 sz projection no arrows
                    energy=0.60,
                    spin_texture=True,
                    no_arrow=True,
-                   arrow_projection='z',
+                   spin_projection='z',
                    plot_color_bar=True)
 
 
@@ -271,7 +271,7 @@ energy = 0.60 sz projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -333,7 +333,7 @@ energy = -0.90 sx projection no arrows
                    energy=-0.90,
                    spin_texture=True,
                    no_arrow=True,
-                   arrow_projection='x',
+                   spin_projection='x',
                    plot_color_bar=True)
 
 
@@ -357,7 +357,7 @@ energy = -0.90 sx projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -419,7 +419,7 @@ energy = -0.90 sy projection no arrows
                    energy=-0.90,
                    spin_texture=True,
                    no_arrow=True,
-                   arrow_projection='y',
+                   spin_projection='y',
                    plot_color_bar=True)
 
 
@@ -444,7 +444,7 @@ energy = -0.90 sy projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -506,7 +506,7 @@ energy = -0.90 sz projection no arrows
                    energy=-0.90,
                    spin_texture=True,
                    no_arrow=True,
-                   arrow_projection='z',
+                   spin_projection='z',
                    plot_color_bar=True)
 
 
@@ -531,7 +531,7 @@ energy = -0.90 sz projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -592,7 +592,7 @@ energy = 0.60 sx projection with arrows
                    dirname=data_dir,
                    energy=0.60,
                    spin_texture=True,
-                   arrow_projection='x',
+                   spin_projection='x',
                    arrow_size=3,
                    arrow_density=6,
                    plot_color_bar=True)
@@ -618,7 +618,7 @@ energy = 0.60 sx projection with arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -679,7 +679,7 @@ energy = -0.90 sx projection with arrows
                    dirname=data_dir,
                    energy=-0.90,
                    spin_texture=True,
-                   arrow_projection='x',
+                   spin_projection='x',
                    arrow_size=3,
                    arrow_density=6,
                    plot_color_bar=True)
@@ -704,7 +704,7 @@ energy = -0.90 sx projection with arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -753,7 +753,7 @@ energy = -0.90 sx projection with arrows
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  50.067 seconds)
+   **Total running time of the script:** ( 0 minutes  46.343 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_rashba_spin_spliting.py:

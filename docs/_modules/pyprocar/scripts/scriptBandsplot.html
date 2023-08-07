@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptBandsplot &#8212; PyProcar 6.1.0 documentation</title>
+    <title>pyprocar.scripts.scriptBandsplot &#8212; PyProcar 6.1.1 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2ee21492"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=87a260f4"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.1 documentation</p>
   
 </a></div>
     
@@ -542,7 +542,7 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fermi_level</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">EBSPlot</span><span class="p">(</span><span class="n">ebs</span><span class="p">,</span> <span class="n">kpath</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">spins</span><span class="p">)</span>
+    <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">EBSPlot</span><span class="p">(</span><span class="n">ebs</span><span class="p">,</span> <span class="n">kpath</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">spins</span> <span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
  
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
@@ -653,20 +653,13 @@ document.write(`
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">elimit</span><span class="p">)</span>
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">()</span>
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
-    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span>
-        <span class="n">fermi_level</span><span class="o">=</span><span class="n">fermi_level</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;fermi_color&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
-        <span class="n">linestyle</span><span class="o">=</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;fermi_linestyle&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
-        <span class="n">linewidth</span><span class="o">=</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;fermi_linewidth&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
-    <span class="p">)</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span><span class="n">fermi_level</span><span class="o">=</span><span class="n">fermi_level</span><span class="p">)</span>
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
-        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
-        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_title</span><span class="p">()</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">savefig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ebs_plot</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">savefig</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
