@@ -34,8 +34,7 @@ pyvista.OFF_SCREEN = True
 import os
 import pyprocar
 
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
@@ -75,8 +74,7 @@ line_width=5.0
 fermiHandler.plot_fermi_cross_section(
                               slice_normal=slice_normal,
                               slice_origin=slice_origin,
-                              line_width=line_width,
-
+                              cross_section_slice_linewidth=line_width,
                               mode="spin_texture",
                               spin_texture=True,
                               arrow_size=0.5,
@@ -88,9 +86,6 @@ fermiHandler.plot_fermi_cross_section(
 # 
 #
 
-# show_cross_section_area can show the outermost cross section area
-show_cross_section_area=True
-
 # when you run this code, you will be able to adjust the widget manually. 
 # If you want to save the position of the widget use this keyword argument to save an image.
 # This must be a string to the filename where you will save the image
@@ -99,7 +94,7 @@ save_2d_slice='2d_slice.png'
 fermiHandler.plot_fermi_cross_section(
                               slice_normal=slice_normal,
                               slice_origin=slice_origin,
-                              line_width=line_width,
+                              cross_section_slice_linewidth=line_width,
 
                               mode="spin_texture",
                               spin_texture=True,

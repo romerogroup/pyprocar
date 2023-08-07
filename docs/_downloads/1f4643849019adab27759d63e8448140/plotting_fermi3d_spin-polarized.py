@@ -34,8 +34,7 @@ pyvista.OFF_SCREEN = True
 import os
 import pyprocar
 
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}fermi"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}fermi"
 
 
 
@@ -59,7 +58,7 @@ spins =[0,1]
 fermiHandler.plot_fermi_surface(mode="plain",
                                 spins = spins,
                                 spin_colors= ['red','blue'],
-                                cmap="jet",
+                                surface_cmap="jet",
                                 show=True,)
 
 

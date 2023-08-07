@@ -7,11 +7,10 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set SOURCEDIR=.
+set SOURCEDIR=.\source
 set BUILDDIR=_build
 
-if "%1" == "" goto help
-
+REM Check for Sphinx installation
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
 	echo.
@@ -25,11 +24,54 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
+REM Check input arguments and provide custom behavior
+if "%1" == "clean" (
+	rmdir /s /q "%BUILDDIR%"
+	rmdir /s /q "%SOURCEDIR%\examples"
+	del errors.txt
+	del sphinx_warnings.txt
+	rmdir /s /q "%SOURCEDIR%\images\auto-generated"
+	del "%SOURCEDIR%\getting-started\external_examples.rst"
+	for /d /r %%x in (_autosummary) do (rmdir /s /q "%%x")
+	goto end
+)
+
+if "%1" == "clean-except-examples" (
+	rmdir /s /q "%BUILDDIR%"
+	del errors.txt
+	del sphinx_warnings.txt
+	rmdir /s /q "%SOURCEDIR%\images\auto-generated"
+	del "%SOURCEDIR%\getting-started\external_examples.rst"
+	for /d /r %%x in (_autosummary) do (rmdir /s /q "%%x")
+	goto end
+)
+
+if "%1" == "clean-autosummary" (
+	for /d /r %%x in (_autosummary) do (rmdir /s /q "%%x")
+	goto end
+)
+
+if "%1" == "phtml" (
+	%SPHINXBUILD% -M html "%SOURCEDIR%" "%BUILDDIR%" %SPHINXOPTS% -j auto
+	goto end
+)
+
+if "%1" == "deploy" (
+	:: Your deploy logic here. Remember that this script assumes it's being run with elevated permissions.
+	:: You can mirror the logic in the Makefile but would need to adapt for Windows environment.
+	@xcopy _build\html\* ..\docs\ /E /I /Y
+	goto end
+)
+
+if "%1" == "html" (
+    python "%SOURCEDIR%\generate_yml_docs.py"
+    %SPHINXBUILD% -M html "%SOURCEDIR%" "%BUILDDIR%" %SPHINXOPTS%
+	goto end
+)
+
+REM Default behavior for other cases
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
-
-:help
-%SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 
 :end
 popd

@@ -159,9 +159,13 @@ class DOSPlot:
                                         principal_q_numbers=principal_q_numbers,
                                         orbitals=orbitals,
                                         spins=spin_projections)
-                    
-        vmin=self.plot_opt['clim']['value'][0]
-        vmax=self.plot_opt['clim']['value'][1]
+
+        if self.plot_opt['clim']['value']:
+            vmin=self.plot_opt['clim']['value'][0]
+            vmax=self.plot_opt['clim']['value'][1]
+        else:
+            vmin=None
+            vmax=None
         cmap=self.plot_opt['cmap']['value']
         if vmin is None:
             vmin = (dos_projected.min() / dos_total_projected.max())
@@ -315,8 +319,12 @@ class DOSPlot:
         projections_weights = np.divide(dos_projected,dos_total_projected)
 
 
-        vmin=self.plot_opt['clim']['value'][0]
-        vmax=self.plot_opt['clim']['value'][1]
+        if self.plot_opt['clim']['value']:
+            vmin=self.plot_opt['clim']['value'][0]
+            vmax=self.plot_opt['clim']['value'][1]
+        else:
+            vmin=None
+            vmax=None
         cmap=self.plot_opt['cmap']['value']
         if vmin is None:
             vmin = (dos_projected.min() / dos_total_projected.max())

@@ -88,15 +88,15 @@ class BandStructure2DataHandler:
 
         spd = []
         if mode == "parametric":
-            if orbitals is None and self.initial_ebs.projected is not None:
-                orbitals = np.arange(self.initial_ebs.norbitals, dtype=int)
-            if atoms is None and self.initial_ebs.projected is not None:
-                atoms = np.arange(self.initial_ebs.natoms, dtype=int)
+            if orbitals is None and self.ebs.projected is not None:
+                orbitals = np.arange(self.ebs.norbitals, dtype=int)
+            if atoms is None and self.ebs.projected is not None:
+                atoms = np.arange(self.ebs.natoms, dtype=int)
 
-            if self.initial_ebs.is_non_collinear:
-                projected = self.initial_ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=True)
+            if self.ebs.is_non_collinear:
+                projected = self.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=True)
             else:
-                projected = self.initial_ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
+                projected = self.ebs.ebs_sum(spins=spins , atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
 
             for ispin in self.spin_pol:
                 spin_bands_projections = []
@@ -106,13 +106,11 @@ class BandStructure2DataHandler:
             spd = np.array(spd).T
             spins = np.arange(spd.shape[2])
         else:
-            spd = np.zeros(shape = (self.initial_ebs.nkpoints,len(bands_to_keep),len(spins)))
-
+            spd = np.zeros(shape = (self.ebs.nkpoints,len(bands_to_keep),len(spins)))
         spd_spin = []
         if spin_texture:
-            ebs = copy.deepcopy(self.initial_ebs)
+            ebs = copy.deepcopy(self.ebs)
             ebs.projected = ebs.ebs_sum(spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False)
-
             for iband in bands_to_keep:
                 spd_spin.append(
                     [ebs.projected[:,iband,[1]], ebs.projected[:,iband,[2]], ebs.projected[:,iband,[3]]]

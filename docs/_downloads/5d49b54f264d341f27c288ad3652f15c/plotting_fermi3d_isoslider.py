@@ -34,8 +34,7 @@ pyvista.OFF_SCREEN = True
 import os
 import pyprocar
 
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}fermi"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}fermi"
 
 
 
@@ -66,8 +65,6 @@ fermiHandler.plot_fermi_isoslider(
                                  iso_range=iso_range, 
                                  iso_surfaces=iso_surfaces,
                                  mode="plain",
-                                 vmin=0,
-                                 vmax=1,
                                  show=True,)
 
 

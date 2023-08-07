@@ -154,6 +154,6 @@ my_tests/
 data/
 reports/
 notebooks/
-
+venv_docs/
 
 .pypirc

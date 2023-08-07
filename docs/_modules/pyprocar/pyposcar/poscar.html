@@ -1,0 +1,961 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyprocar.pyposcar.poscar &#8212; PyProcar 6.0.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=e5fbc548" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4a2dc4d6"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyprocar/pyposcar/poscar';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">PyProcar 6.0.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">pyprocar.pyposcar.poscar</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for pyprocar.pyposcar.poscar</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<div class="viewcode-block" id="Poscar"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.html#pyprocar.pyposcar.Poscar">[docs]</a><span class="k">class</span> <span class="nc">Poscar</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;A low-level class to store a crystal structure input (tailored for</span>
+<span class="sd">    VASP). </span>
+
+<span class="sd">    If modified manually, the &#39;Cartesian&#39; and &#39;direct&#39; coords must be</span>
+<span class="sd">    updated together all the time by using `_set_cartesian` or</span>
+<span class="sd">    `_set_direct`.</span>
+
+<span class="sd">    The scaling factor, is internally set to 1.0, always. ie, the</span>
+<span class="sd">    scaling is included into the lattice.</span>
+
+<span class="sd">    The units are Angstroms.</span>
+
+<span class="sd">    Methods:</span>
+
+<span class="sd">    parse(self)                    # loads the whole file</span>
+<span class="sd">    _set_cartesian(self)           # set direct -&gt; cartesian (internal)</span>
+<span class="sd">    _set_direct(self)              # set cartesian -&gt; direct (internal)</span>
+<span class="sd">    _unparse(self, direct)         # data to string, use `write()` instead</span>
+<span class="sd">    write(self, filename, direct)  # saves the class to a POSCAR-like file</span>
+<span class="sd">    xyz(self, filename)            # saves a xyz file from the data</span>
+<span class="sd">    sort(self)                     # sorts the atoms, grouping them by element</span>
+<span class="sd">    remove()                       # removes one or more atoms from poscar</span>
+<span class="sd">    add(position, element, direct) # add one atom, only one each the time</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Poscar.__init__"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.__init__.html#pyprocar.pyposcar.Poscar.__init__">[docs]</a>  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+               <span class="n">verbose</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The file is not automatically loaded, you need to run</span>
+<span class="sd">    `self.parse()`</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    filename : str,</span>
+<span class="sd">        POSCAR-like file</span>
+<span class="sd">    verbose: bool,</span>
+<span class="sd">        verbosity level, for debugging. Default: False</span>
+
+<span class="sd">    Attributes:</span>
+
+<span class="sd">    self.verbose</span>
+<span class="sd">    self.filename</span>
+<span class="sd">    self.poscar:str str with the full POSCAR file</span>
+<span class="sd">    self.cpos: np.nadarray, Cartesian coordinates</span>
+<span class="sd">    self.dpos: np.ndarray, direct coordinates</span>
+<span class="sd">    self.lat: np.ndarray (3x3), the  lattice</span>
+<span class="sd">    self.typeSp: list, aame of atomic species, ordered</span>
+<span class="sd">    self.numberSp: np.ndarray, number of atoms per specie</span>
+<span class="sd">    self.Ntotal: int, total number of atoms in system</span>
+<span class="sd">    self.elm: list, element of each atoms one-by-one.</span>
+<span class="sd">    self.selective: bool, Selective dynamics?</span>
+<span class="sd">    self.selectFlags: None or nd.array(str), flags of selective dynamics</span>
+<span class="sd">    self.volume: float, the box product of the lattice</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># cartesian coordinates</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># direct coordinates</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># lattice</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Name of atomic species</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">:</span><span class="n">nd</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Number of atoms per specie</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Total atoms in system</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Element of each atoms one-by-one.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selective</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Selective dynamics</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># all the T,F from selective dynamics</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># was the POSCAR-file loaded? i.e. self.parse()</span>
+    <span class="k">return</span></div>
+    
+<div class="viewcode-block" id="Poscar.parse"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.parse.html#pyprocar.pyposcar.Poscar.parse">[docs]</a>  <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromString</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Loads into memory all the content of the POSCAR file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    </span>
+<span class="sd">    fromString : str </span>
+<span class="sd">      If present, instead of loading a file, it uses</span>
+<span class="sd">      this variable to populate the class. Default=None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">fromString</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fromString</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">=</span> <span class="n">fromString</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fromString</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fromString</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">=</span> <span class="n">fromString</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="c1"># getting the scale factor</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[.\d]+&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scaling factor: &#39;</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+    
+    <span class="c1"># parsing the lattice</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[-.\d]+\s+[-.\d]+\s+[-.\d]+\s*\n*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">*</span><span class="n">scale</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;lattice:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="c1"># type of atoms and number of atoms per type</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\w+)\s*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No data about the atomic species found. Correct it.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;atoms per species:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\d+)\s*&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;atomic species:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;The total is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; atoms&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># selective dynamics? setting a offset</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\s*[sS]&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span> <span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selective</span> <span class="o">=</span> <span class="kc">True</span>
+      <span class="n">offset</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;Selective Dynamics&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selective</span> <span class="o">=</span> <span class="kc">False</span>
+      <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+      
+    <span class="c1"># Direct coordinates unless otherwise</span>
+    <span class="n">direct</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\s*[Dd]&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">7</span><span class="o">+</span><span class="n">offset</span><span class="p">])</span> <span class="p">:</span>
+      <span class="n">direct</span> <span class="o">=</span> <span class="kc">False</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Positions in Cartesian coordinates&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Positions in Direct coordinates&#39;</span><span class="p">)</span>
+
+    <span class="c1"># parsing the positions</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="mi">8</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span> <span class="mi">8</span><span class="o">+</span><span class="n">offset</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;([-.\d]+)\s+([-.\d]+)\s+([-.\d]+)\s*&#39;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_set_cartesian</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_set_direct</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;Atomic positions (direct)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;Atomic positions (cartesian)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span><span class="p">)</span>
+
+    <span class="c1"># parsing selective dynamics</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selective</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="n">string</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;([TF]+)\s+([TF]+)\s+([TF]+)\s+&#39;</span>
+      <span class="n">selectFlags</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">selectFlags</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Flags of selective dynamics:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">)</span>
+      
+    <span class="c1"># setting a list of elements:</span>
+    <span class="n">elementList</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">elementList</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elements: &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
+
+    <span class="c1"># setting the volume, just as an utility</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span></div>
+
+  <span class="k">def</span> <span class="nf">_set_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;set the cartesian positions (self.cpos) from direct positions (self.dpos).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">cart</span> <span class="o">=</span> <span class="n">cart</span><span class="o">.</span><span class="n">T</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span> <span class="o">=</span> <span class="n">cart</span>
+    
+  <span class="k">def</span> <span class="nf">_set_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;set the direct positions (self.dpos) from Cartesian positions (self.cpos).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inverse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">direct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inverse</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">direct</span> <span class="o">=</span> <span class="n">direct</span><span class="o">.</span><span class="n">T</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="n">direct</span>
+    
+  <span class="k">def</span> <span class="nf">_unparse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direct</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal method to be used previously to to writing a POSCAR</span>
+<span class="sd">    file. It group together all the information in a single str,</span>
+<span class="sd">    `self.poscar`. The information is as it is. No PBC are applied,</span>
+<span class="sd">    and no checks are performed at this stage.  The scaling factor is</span>
+<span class="sd">    1.0, always.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    direct: bool</span>
+<span class="sd">        direct positons is True, Cartesian is Falsepositions. Default is True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># We will start with getting the positions</span>
+    <span class="k">if</span> <span class="n">direct</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span>
+      
+    <span class="c1"># creating a list of text lines with positions</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">line</span><span class="p">])</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">]</span>
+
+    <span class="c1"># Now we will look whether selective dynamics are used</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selective</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="c1"># a list of text lines with flags</span>
+      <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">flag</span> <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">line</span><span class="p">])</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">]</span>
+      <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">flag</span> <span class="k">for</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">flags</span><span class="p">)]</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="c1"># Creating the POSCAR text string</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">=</span> <span class="s2">&quot;poscar.py</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s2">&quot;1.0</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selective</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39;Selective Dynamics</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">if</span> <span class="n">direct</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39;Cartesian</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39;Direct</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="n">pos</span> <span class="c1"># already set with the the T, F -if needed</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"> unparsed POSCAR</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;unparse, self.poscar</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Poscar.write"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.write.html#pyprocar.pyposcar.Poscar.write">[docs]</a>  <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;POSCAR.out&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes a poscar file with the information stored in the class.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    filename : str</span>
+<span class="sd">        default=&#39;POSCAR.out&#39;, name of the output file.</span>
+<span class="sd">    direct : bool</span>
+<span class="sd">        direct positons is True, Cartesian is Falsepositions. Default is True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_unparse</span><span class="p">(</span><span class="n">direct</span><span class="o">=</span><span class="n">direct</span><span class="p">)</span>
+    <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;File &#39;</span>  <span class="o">+</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39; written.&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+      
+<div class="viewcode-block" id="Poscar.xyz"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.xyz.html#pyprocar.pyposcar.Poscar.xyz">[docs]</a>  <span class="k">def</span> <span class="nf">xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes an xyz file, the lattice is written as a comment line</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    filename: str</span>
+<span class="sd">        the name of the .xyz file, The .xyz extension is not automatically added</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xyzf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">xyzf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># The comment line has the lettice</span>
+    <span class="n">latStr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">latStr</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">latStr</span><span class="p">)</span>
+    <span class="n">xyzf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Lattice=&quot;&#39;</span>  <span class="o">+</span> <span class="n">latStr</span> <span class="o">+</span> <span class="s1">&#39;&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># continuing with the positions</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">]</span>
+    <span class="n">elm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
+    <span class="n">xyzstr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">[</span> <span class="n">x</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="p">]</span> <span class="p">)</span>
+    <span class="n">xyzf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">xyzstr</span><span class="p">)</span>
+    <span class="n">xyzf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">xyzf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39; written as xyz&#39;</span><span class="p">)</span></div>
+      
+<div class="viewcode-block" id="Poscar.sort"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.sort.html#pyprocar.pyposcar.Poscar.sort">[docs]</a>  <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method updates the internal arrays related to elements and</span>
+<span class="sd">    atoms per element. Automatically used when using `self.add`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># self.typeSp, self.elem, self.dpos</span>
+    <span class="c1"># must be present and updated (they can be disordered)</span>
+    <span class="c1">#</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+    <span class="c1"># getting the different element&#39;s names, without repetitions</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">))</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The list of elements is &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">)</span>
+    <span class="c1"># lists of ordered atoms</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;to sort: &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">)</span>
+    
+    <span class="c1"># ordering the positions accordiong to its element.</span>
+    <span class="k">for</span> <span class="n">thiselem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">:</span>
+      <span class="c1"># Joining each element with its position</span>
+      <span class="k">for</span> <span class="n">elem</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">thiselem</span> <span class="o">==</span> <span class="n">elem</span><span class="p">:</span>
+          <span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+          <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sorted: &#39;</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span> <span class="o">=</span> <span class="n">elements</span>
+    <span class="c1"># setting the position&#39;s list in direct coords.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="c1"># and in cartesian coords as well</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_cartesian</span><span class="p">()</span>
+
+    <span class="c1"># How many atoms by element?</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+    <span class="c1"># a dict of elements and its repetitions</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span> <span class="o">=</span> <span class="p">[</span><span class="n">counter</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">]</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;N atoms per specie, &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">,</span> <span class="s1">&#39;. Total: &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Poscar.remove"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.remove.html#pyprocar.pyposcar.Poscar.remove">[docs]</a>  <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span><span class="nb">list</span><span class="o">|</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove one or more atoms.</span>
+
+<span class="sd">    Parameters:</span>
+
+<span class="sd">    atoms : int|list</span>
+<span class="sd">        removes the atom(s) with given indexes (0-based)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># atoms maybe (or not) just one atom (an int, not a one-sized list)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;going to delete the following atom(s):&#39;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+      <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">atoms</span><span class="p">]</span>
+      
+    <span class="c1"># we will populate a list with the atoms to keep</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">atom</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error: atom index is larger than the atom number&#39;</span><span class="p">)</span>
+      <span class="n">keep</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># creating new arrays without the removed elements</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpos</span><span class="p">)</span>
+    
+    <span class="c1"># self.elm is a list, I am not sure why, but I will cast it back to list</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selective</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="c1"># the atoms types and their number can be modified, we need to</span>
+    <span class="c1"># count them from self.elm</span>
+    <span class="c1"># Also I want to keep the order of elements</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elements&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
+    <span class="c1"># no need to sort, deleting doesn&#39;t alters the occurence</span>
+    <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Poscar.add"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.add.html#pyprocar.pyposcar.Poscar.add">[docs]</a>  <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+          <span class="n">position</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+          <span class="n">element</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+          <span class="n">direct</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+          <span class="n">selectiveFlags</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds one atom to the class. Only one atom at the time</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    position : np.ndarray</span>
+<span class="sd">        (3 or 1x3) the positions of new atom</span>
+<span class="sd">    element : str</span>
+<span class="sd">        Name of the element of the new atom</span>
+<span class="sd">    direct : bool</span>
+<span class="sd">        are the positions given  direct (True) or Cartesian (False) </span>
+<span class="sd">        coordinates? Default is True</span>
+<span class="sd">    selectiveFlags : np.ndarray(str)</span>
+<span class="sd">        only of `self.selective == True`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">position</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;going to add an &#39;</span> <span class="o">+</span><span class="n">element</span><span class="o">+</span>  <span class="s1">&#39; atom at&#39;</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;in direct coordinates&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;in Cartesian coordiantes&#39;</span><span class="p">)</span>
+    <span class="c1"># setting the data</span>
+    <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">,</span> <span class="n">position</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">cpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">cpos</span><span class="p">,</span> <span class="n">position</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selective</span> <span class="ow">and</span> <span class="n">selectiveFlags</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;selective flag found.&#39;</span><span class="p">)</span>
+      <span class="n">selectiveFlags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">selectiveFlags</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">,</span> <span class="n">selectiveFlags</span><span class="p">)</span>
+    <span class="c1"># setting the other data</span>
+    <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_set_cartesian</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_set_direct</span><span class="p">()</span>
+    <span class="c1"># the atoms types and their number can be modified, we need to</span>
+    <span class="c1"># count them from self.elm</span>
+    <span class="c1"># Also I want to keep the order of elements</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elements&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
+    <span class="c1"># sorting the data</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">return</span></div></div>
+
+    
+        
+      
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;inputfile&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;input file&quot;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--xyz&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+  
+  <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+  <span class="n">p</span> <span class="o">=</span> <span class="n">Poscar</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+  <span class="n">p</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">xyz</span><span class="p">:</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">xyz</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span> <span class="o">+</span> <span class="s1">&#39;.xyz&#39;</span><span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2020, Romero Group.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
