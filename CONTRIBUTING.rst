@@ -31,10 +31,28 @@ running:
 
    git clone https://github.com/romerogroup/pyprocar.git
    cd pyprocar
-   python -m pip install -e .
+   
+Next, create a virtual envrionment and activate it. 
+.. code:: bash
+   python -m venv venv
+
+   # For linux
+   source venv/bin/activate
+
+   # For windowx
+   venv\Scripts/activate.bat
+
+Install the requirements and install the package in dev mode
+.. code:: bash
+   
+   pip install -r requirements_docs.txt
+   pip install -e .
+
+Change to the dev branch to add changes
+
+.. code:: bash
    git checkout dev
-
-
+   
 Updating documentation
 -----------------------------------
 
@@ -48,8 +66,18 @@ To generate the documentation you will need to run the following code from the t
    cd sphinx
    make clean & make html
 
-This will clean the sphinx/_build directory which contained the previous html, then it will generate the new documentation in sphinx/_build/html.
+This will clean the sphinx/_build directory and it will remove all aut-generated docs.
+Once make html is called it will start generating the html files and store them in sphinx/_build.
+After you have check the documentation and make sure there are no warnings or errors,
+you will need to copy the contents of sphinx/_build/html/ to docs and save over 
+everything in that directory. This can be achieved by running the below code:
 
+.. code:: bash
+
+   make deploy
+
+
+Finally, you can push the changes to github.
 
 Running tests 
 -----------------------------------

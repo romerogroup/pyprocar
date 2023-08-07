@@ -7,3 +7,6 @@ scipy
 seekpath
 spglib
 trimesh
+ase
+sympy
+PyYAML

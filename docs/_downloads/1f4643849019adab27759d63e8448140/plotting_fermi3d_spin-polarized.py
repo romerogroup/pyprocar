@@ -5,6 +5,8 @@
 Plotting fermi3d spin-polarized
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Plotting fermi3d spin-polarized example.
 
 First download the example files with the code below. Then replace data_dir below.
@@ -32,12 +34,13 @@ pyvista.OFF_SCREEN = True
 import os
 import pyprocar
 
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}fermi"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}fermi"
 
 
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+# Symmetry only works for specfic space groups currently. 
+# For the actual calculations turn off symmetry and set 'apply_symmetry'=False
 fermiHandler = pyprocar.FermiHandler(
                                     code="vasp",
                                     dirname=data_dir,
@@ -55,7 +58,7 @@ spins =[0,1]
 fermiHandler.plot_fermi_surface(mode="plain",
                                 spins = spins,
                                 spin_colors= ['red','blue'],
-                                cmap="jet",
+                                surface_cmap="jet",
                                 show=True,)
 
 

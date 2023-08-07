@@ -1,0 +1,11 @@
+
+Errors in POSCAR-7-9-B:
+likely the lattice vector shift has to be reversed
+
+Errors:
+17 {5}
+adding H at 17 [ 0.   15.    1.42] [38.0367 15.      0.71  ] [ 1.5197 15.      1.392 ]
+
+31 {46}
+adding H at 31 [ 0.   15.    2.84] [38.0367 15.      3.55  ] [ 1.5197 15.      2.868 ]
+Done

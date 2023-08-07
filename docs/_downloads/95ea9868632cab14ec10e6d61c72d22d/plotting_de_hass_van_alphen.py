@@ -5,6 +5,8 @@
 Showing how to get van alphen fequencies from the fermi surface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry
+
 Van alphen fequencies example. De has van alphen frequencies (F) in terms of extremal fermi surface areas (A) is given below.
 To compare the theoretical freuqencies we will compare with the results taken from the experimental paper
 "The Fermi surfaces of copper, silver and gold. I. The de Haas-Van alphen effect"(https://doi.org/10.1098/rsta.1962.0011).
@@ -46,11 +48,12 @@ pyvista.OFF_SCREEN = True
 import os
 import pyprocar
 
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Au{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Au{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
 
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
+# Symmetry only works for specfic space groups currently. 
+# For the actual calculations turn off symmetry and set 'apply_symmetry'=False
 fermiHandler = pyprocar.FermiHandler(
                                     code="vasp",
                                     dirname=data_dir,
@@ -67,12 +70,10 @@ fermiHandler = pyprocar.FermiHandler(
 
 
 fermiHandler.plot_fermi_cross_section_box_widget(
-                            show_cross_section_area=True,
                             bands=[5],
-                            transparent_mesh=True,
                             slice_normal=(0,0,1),
                             slice_origin=(0,0,0),
-                            line_width=5.0,
+                            surface_opacity=0.40,
                             mode="parametric",
                             show=True)
 
@@ -90,12 +91,10 @@ fermiHandler.plot_fermi_cross_section_box_widget(
 # 
 
 fermiHandler.plot_fermi_cross_section_box_widget(
-                                show_cross_section_area=True,
                                 bands=[5],
-                                transparent_mesh=True,
                                 slice_normal=(0,0,1),
                                 slice_origin=(0,0,1.25),
-                                line_width=5.0,
+                                surface_opacity=0.40,
                                 mode="parametric",
                                 show=True,)
 
@@ -114,12 +113,10 @@ fermiHandler.plot_fermi_cross_section_box_widget(
 # 
 
 fermiHandler.plot_fermi_cross_section_box_widget(
-                                show_cross_section_area=True,
                                 bands=[5],
-                                transparent_mesh=True,
                                 slice_normal=(0,1,1),
                                 slice_origin=(0,0,0),
-                                line_width=5.0,
+                                surface_opacity=0.40,
                                 mode="parametric",
                                 show=True,)
 

@@ -203,9 +203,9 @@ class Surface(pyvista.PolyData):
         vectors = np.vstack([vectors_X, vectors_Y, vectors_Z]).T
         
         
-        self[vectors_name] = vectors
+        self.point_data[vectors_name] = vectors
         
-        self[vectors_name + "_magnitude"] = mag(vectors)
+        self.point_data[vectors_name + "_magnitude"] = mag(vectors)
         # self.set_active_scalars('vectors')
         return None
 

@@ -65,7 +65,20 @@ examples_dict = {"Fe" :
 
 
                     },
+
+                "BiSb_monolayer" :
+                    {"vasp": 
+                        {
+                        'non-colinear':
+                            {
+                            'bands':'',
+                            'dos':'',
+                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF'},
+
+
+                    },
                 }
+    }
 
 
 def download_examples(save_dir=''):
@@ -87,7 +100,7 @@ def download_dev_data(examples_dirname: str = 'examples'):
 
     print('Storing development data in', data_dir)
     if not os.path.exists(data_dir):
-        os.mkdirs(data_dir) 
+        os.mkdir(data_dir) 
 
     # output = f"{data_dir}{os.sep}{examples_dirname}"
     to = f"{data_dir}{os.sep}{examples_dirname}{os.sep}{material_name}"

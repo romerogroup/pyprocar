@@ -4,6 +4,12 @@
 [![HitCount](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar.svg)](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/pyprocar)
 
+Notice
+===========
+- **New Release** We recently updated to a new version 'v6.0.0'. This update encompasses a significant overhaul of the codebase and documentation.
+- **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
+
+
 PyProcar
 ===========
 
@@ -22,7 +28,13 @@ Currently supports:
 Documentation
 -------------
 
+For versions 6.1.1 and above, the documentation is found here:
 https://romerogroup.github.io/pyprocar/
+
+
+The prior documentation is found here:
+https://romerogroup.github.io/pyprocar5.6.6/
+
 
 Developers
 ------------
@@ -94,7 +106,10 @@ Usage
 Typical use is as follows
 
     import pyprocar
-    pyprocar.bandsplot('PROCAR',outcar='OUTCAR',mode='plain',code='vasp')
+    pyprocar.bandsplot(code='vasp',mode='plain', dirname='bands')
+
+Previously, bandsplot would accept the OUTCAR and PROCAR file paths as inputs,
+in v6.0.0 we moved to specifying the directory where the bands calculation took place.
 
 Refer to the documentation for further details.
 
@@ -106,7 +121,11 @@ will bring a help menu.
 
 Changelog
 --------------
-
+v6.1.1 Aug 7th, 2023 -- Bug fix <br />
+v6.1.0 Aug 7th, 2023 -- Bug fixes, doc update, config files <br />
+v6.0.0 Jun 10th, 2023 -- Major code base changes. <br />
+v5.6.6 Mar 6th, 2022 -- QE, bandsplot, dosplot, fermi surface, and band unfolding bug fixes. Directory change, parsers are now in the io directory. <br />
+v5.6.5 Jun 10th, 2021 -- Fermi surface object and fermi surface plotter bug fixes <br />
 v5.6.4 May 6th, 2021 -- Updates to Fermi surface plotter. <br />
 v5.6.3 Mar 5th, 2021 -- QE and elk bug fixes. <br />
 v5.6.2 Jan 11th, 2021 -- Updates and bugfixes to fermi surface and dos plotter. <br />

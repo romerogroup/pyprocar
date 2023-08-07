@@ -5,6 +5,7 @@ __date__ = "March 31, 2020"
 
 from typing import List
 import os
+import yaml
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,13 +13,12 @@ import matplotlib.pyplot as plt
 from ..utils.info import orbital_names
 from .. import io
 from ..plotter import EBSPlot
-from ..utils import welcome
-from ..utils.defaults import settings
+from ..utils import welcome, ROOT
 
 
-# TODO What is the type is for projection mask?
-# TODO Needs abinit parsing
-# TODO Needs elk parsing
+with open(os.path.join(ROOT,'pyprocar','cfg','band_structure.yml'), 'r') as file:
+    plot_opt = yaml.safe_load(file)
+    
 
 def bandsplot(
     code: str,
@@ -32,16 +32,14 @@ def bandsplot(
     interpolation_factor:int=1,
     interpolation_type:str="cubic",
     projection_mask:np.ndarray=None,
-    vmax:float=None,
-    vmin:float=None,
     kticks=None,
     knames=None,
     elimit: List[float]=None,
     ax:plt.Axes=None,
-    title:str=None,
     show:bool=True,
     savefig:str=None,
-    **kwargs,
+    print_plot_opts:bool=False,
+    **kwargs
     ):
     """A function to plot the band structutre
 
@@ -69,10 +67,6 @@ def bandsplot(
         The interpolation type, by default "cubic"
     projection_mask : np.ndarray, optional
         A custom projection mask, by default None
-    vmax : float, optional
-        Value to normalize the minimum projection value., by default None, by default None
-    vmin : float, optional
-        Value to normalize the maximum projection value., by default None, by default None
     kticks : _type_, optional
         A list of kticks, by default None
     knames : _type_, optional
@@ -81,15 +75,30 @@ def bandsplot(
         A list of floats to decide the energy window, by default None
     ax : plt.Axes, optional
         A matplotlib axes, by default None
-    title : str, optional
-        String for the title name, by default None
     show : bool, optional
         Boolean if to show the plot, by default True
     savefig : str, optional
         String to save the plot, by default None
+    print_plot_opts: bool, optional
+        Boolean to print the plotting options
     """
 
-    settings.modify(kwargs)
+    modes=["plain","parametric","scatter",
+           "overlay", "overlay_species", "overlay_orbitals"]
+    modes_txt=' , '.join(modes)
+    message=f"""
+            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file. 
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
+
+            Here is a list modes : {modes_txt}
+            --------------------------------------------------------
+            """
+    print(message)
+    if print_plot_opts:
+        for key,value in plot_opt.items():
+            print(key,':',value)
 
     parser = io.Parser(code = code, dir = dirname)
     ebs = parser.ebs
@@ -162,9 +171,7 @@ def bandsplot(
                             spins=spins,
                         )
                         weights.append(w)
-        ebs_plot.plot_parameteric_overlay(
-            spins=spins, vmin=vmin, vmax=vmax, weights=weights
-        )
+        ebs_plot.plot_parameteric_overlay(spins=spins,weights=weights)
     else:
         if atoms is not None and isinstance(atoms[0], str):
             atoms_str = atoms
@@ -183,11 +190,11 @@ def bandsplot(
 
 
         weights = ebs_plot.ebs.ebs_sum(atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
-        if settings.ebs.weighted_color:
+        if plot_opt['weighted_color']['value']:
             color_weights = weights
         else:
             color_weights = None
-        if settings.ebs.weighted_width:
+        if plot_opt['weighted_width']['value']:
             width_weights = weights
         else:
             width_weights = None
@@ -199,8 +206,6 @@ def bandsplot(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                vmin=vmin,
-                vmax=vmax,
                 spins=spins
                 )
         elif mode == "scatter":
@@ -209,9 +214,7 @@ def bandsplot(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                spins=spins,
-                vmin=vmin,
-                vmax=vmax,
+                spins=spins
             )
 
         else:
@@ -223,17 +226,17 @@ def bandsplot(
     ebs_plot.set_ylim(elimit)
     ebs_plot.draw_fermi(
         fermi_level=fermi_level,
-        color=settings.ebs.fermi_color,
-        linestyle=settings.ebs.fermi_linestyle,
-        linewidth=settings.ebs.fermi_linewidth,
+        color=plot_opt['fermi_color']['value'],
+        linestyle=plot_opt['fermi_linestyle']['value'],
+        linewidth=plot_opt['fermi_linewidth']['value'],
     )
     ebs_plot.set_ylabel()
 
-    if title:
-        ebs_plot.set_title(title=title)
-    if settings.ebs.grid:
+    if plot_opt['title']['value']:
+        ebs_plot.set_title(title=plot_opt['title']['value'])
+    if plot_opt['grid']['value']:
         ebs_plot.grid()
-    if settings.ebs.legend and len(labels) != 0:
+    if plot_opt['legend']['value'] and len(labels) != 0:
         ebs_plot.legend(labels)
     if savefig is not None:
         ebs_plot.save(savefig)
