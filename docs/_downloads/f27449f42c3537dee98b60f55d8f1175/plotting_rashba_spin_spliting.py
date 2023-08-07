@@ -26,9 +26,7 @@ First download the example files with the code below. Then replace data_dir belo
 import os
 import pyprocar
 
-
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}BiSb_monolayer{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}BiSb_monolayer{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
 
 
 ###############################################################################
@@ -42,7 +40,7 @@ pyprocar.fermi2D(code = 'vasp',
                spin_texture=True,
                no_arrow=True,
                arrow_projection='x',
-               color_bar=True)
+               plot_color_bar=True)
 
 ###############################################################################
 # energy = 0.60 sy projection no arrows 
@@ -55,7 +53,7 @@ pyprocar.fermi2D(code = 'vasp',
                spin_texture=True,
                no_arrow=True,
                arrow_projection='y',
-               color_bar=True)
+               plot_color_bar=True)
 
 
 ###############################################################################
@@ -69,7 +67,7 @@ pyprocar.fermi2D(code = 'vasp',
                spin_texture=True,
                no_arrow=True,
                arrow_projection='z',
-               color_bar=True)
+               plot_color_bar=True)
 
 ###############################################################################
 # energy = -0.90 sx projection no arrows 
@@ -82,7 +80,7 @@ pyprocar.fermi2D(code = 'vasp',
                spin_texture=True,
                no_arrow=True,
                arrow_projection='x',
-               color_bar=True)
+               plot_color_bar=True)
 
 ###############################################################################
 # energy = -0.90 sy projection no arrows 
@@ -95,7 +93,7 @@ pyprocar.fermi2D(code = 'vasp',
                spin_texture=True,
                no_arrow=True,
                arrow_projection='y',
-               color_bar=True)
+               plot_color_bar=True)
 
 
 ###############################################################################
@@ -109,7 +107,7 @@ pyprocar.fermi2D(code = 'vasp',
                spin_texture=True,
                no_arrow=True,
                arrow_projection='z',
-               color_bar=True)
+               plot_color_bar=True)
 
 
 ###############################################################################
@@ -124,7 +122,7 @@ pyprocar.fermi2D(code = 'vasp',
                arrow_projection='x',
                arrow_size=3,
                arrow_density=6,
-               color_bar=True)
+               plot_color_bar=True)
 
 ###############################################################################
 # energy = -0.90 sx projection with arrows 
@@ -138,4 +136,4 @@ pyprocar.fermi2D(code = 'vasp',
                arrow_projection='x',
                arrow_size=3,
                arrow_density=6,
-               color_bar=True)
+               plot_color_bar=True)

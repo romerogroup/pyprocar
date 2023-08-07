@@ -25,9 +25,7 @@ First download the example files with the code below. Then replace data_dir belo
 import os
 import pyprocar
 
-
-project_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-data_dir = f"{project_dir}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
 
 
 ###############################################################################
@@ -57,8 +55,6 @@ pyprocar.bandsplot(
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
-                vmin=0,
-                vmax=1,
                 dirname=data_dir)
 
 ###############################################################################
@@ -79,8 +75,6 @@ pyprocar.bandsplot(
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
-                vmin=0,
-                vmax=1,
                 dirname=data_dir)
 
 
@@ -101,8 +95,6 @@ pyprocar.bandsplot(
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
-                vmin=0,
-                vmax=1,
                 dirname=data_dir)
 
 

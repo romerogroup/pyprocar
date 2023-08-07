@@ -132,7 +132,8 @@ class EBSPlot:
             if len(self.spins)==1:
                 color=self.plot_opt['color']['value']
             else:
-                color=self.plot_opt['color']['value'][ispin],
+                color=self.plot_opt['spin_colors']['value'][ispin]
+            
             for iband in range(self.ebs.nbands):
                 handle = self.ax.plot(
                     self.x, self.ebs.bands[:, iband, ispin], 
@@ -159,10 +160,6 @@ class EBSPlot:
             The width mask, by default None
         color_mask : np.ndarray, optional
             The color mask, by default None
-        vmin : float, optional
-            Value to normalize the minimum projection value., by default None
-        vmax : float, optional
-            Value to normalize the maximum projection value., by default None
         spins : List[int], optional
             A list of spins, by default None
         width_weights : np.ndarray, optional
@@ -177,9 +174,9 @@ class EBSPlot:
         
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
-            markersize = self.plot_opt['makersize']['value']
+            markersize = self.plot_opt['markersize']['value']
         else:
-            markersize =[l*30 for l in self.plot_opt['makersize']['value']]
+            markersize =[l*30 for l in self.plot_opt['markersize']['value']]
 
 
         if width_mask is not None or color_mask is not None:
@@ -195,7 +192,7 @@ class EBSPlot:
 
         if color_weights is not None:
             vmin=self.plot_opt['clim']['value'][0]
-            vmin=self.plot_opt['clim']['value'][1]
+            vmax=self.plot_opt['clim']['value'][1]
             if vmin is None: 
                 vmin = color_weights.min()
             if vmax is None:
@@ -206,7 +203,7 @@ class EBSPlot:
                 if len(self.spins)==1:
                     color=self.plot_opt['color']['value']
                 else:
-                    color=self.plot_opt['color']['value'][ispin],
+                    color=self.plot_opt['spin_colors']['value'][ispin]
                 if color_weights is None:
                     sc = self.ax.scatter(
                         self.x,
@@ -219,7 +216,7 @@ class EBSPlot:
                         cmap=self.plot_opt['cmap']['value'],
                         vmin=vmin,
                         vmax=vmax,
-                        marker=self.plot_opt['maker']['value'][ispin],
+                        marker=self.plot_opt['marker']['value'][ispin],
                         alpha=self.plot_opt['opacity']['value'][ispin],
                     )
                 else:
@@ -233,7 +230,7 @@ class EBSPlot:
                         cmap=self.plot_opt['cmap']['value'],
                         vmin=vmin,
                         vmax=vmax,
-                        marker=self.plot_opt['maker']['value'][ispin],
+                        marker=self.plot_opt['marker']['value'][ispin],
                         alpha=self.plot_opt['opacity']['value'][ispin],
                     )
         if self.plot_opt['plot_color_bar']['value'] and color_weights is not None:
@@ -254,10 +251,6 @@ class EBSPlot:
         ----------
         spins : List[int], optional
             A list of spins, by default None
-        vmin : float, optional
-            Value to normalize the minimum projection value., by default None
-        vmax : float, optional
-            Value to normalize the maximum projection value., by default None
         width_mask : np.ndarray, optional
             The width mask, by default None
         color_mask : np.ndarray, optional
@@ -305,7 +298,7 @@ class EBSPlot:
                 if len(self.spins)==1:
                     color=self.plot_opt['color']['value']
                 else:
-                    color=self.plot_opt['color']['value'][ispin],
+                    color=self.plot_opt['spin_colors']['value'][ispin]
                 points = np.array(
                     [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
@@ -337,8 +330,6 @@ class EBSPlot:
 
     def plot_parameteric_overlay(self,
                                  spins:List[int]=None,
-                                 vmin:float=None,
-                                 vmax:float=None,
                                  weights:np.ndarray=None,
                                  ):
         """A method to plot the parametric overlay
@@ -347,10 +338,6 @@ class EBSPlot:
         ----------
         spins : List[int], optional
             A list of spins, by default None
-        vmin : float, optional
-            Value to normalize the minimum projection value, by default None
-        vmax : float, optional
-            Value to normalize the maximum projection value, by default None
         weights : np.ndarray, optional
             The weights of each point, by default None
         """

@@ -5,9 +5,11 @@ surface_cmap:
 surface_color:
   value: 
   description: Controls the color of the surface
-surface_spinpol_colors:
-  value: []
-  description: Controls the colors of the spin polarized surface
+spin_colors:
+  description: The colors for the plot lines.
+  value:
+  -
+  - 
 surface_bands_colors : 
   value: []
   description: Controls the color of the surface per band
@@ -136,3 +138,7 @@ cross_section_slice_linewidth:
 cross_section_slice_show_area:
   value: False
   description:  Controls wheather to show the cross section area
+
+arrow_size:
+  description: The arrow size for the spin texture
+  value: 3

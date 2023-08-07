@@ -177,7 +177,7 @@ class FermiHandler:
 
         visualizer = FermiVisualizer(self.data_handler,**kwargs)
         
-        visualizer.add_isovalue(e_surfaces,energy_values)
+        visualizer.add_isoslider(e_surfaces,energy_values)
 
 
         # save and showing setting
@@ -312,9 +312,11 @@ class FermiHandler:
         # Process the data
         self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
-
+        print("Bands being used if bands=None: ", surface.band_index_map)
         visualizer = FermiVisualizer(self.data_handler,**kwargs)
-        visualizer.add_box_slicer(surface,show,save_2d,save_2d_slice,slice_normal,slice_origin)
+        visualizer.add_box_slicer(surface,show,save_2d,save_2d_slice,
+                                  slice_normal,
+                                  slice_origin)
 
 
     

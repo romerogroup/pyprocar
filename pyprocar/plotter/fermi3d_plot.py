@@ -178,7 +178,7 @@ class FermiDataHandler:
         spins_index=[]
         for ispin, spin in enumerate(self.spin_pol):
             ebs=copy.copy(self.ebs)
-            ebs.bands=ebs.bands[:,:,spin]
+            ebs.bands=ebs.bands[:,self.bands_to_keep,spin]
             fermi_surface3D = FermiSurface3D(
                                             ebs=ebs,
                                             fermi=fermi,
@@ -285,13 +285,13 @@ class FermiVisualizer:
     def add_surface(self,surface):
 
         surface=self._setup_band_colors(surface)
-        if self.plotting_options['surface_spinpol_colors']['value']:
+        if self.plotting_options['spin_colors']['value'] != [None,None]:
             spin_colors=[]
             for spin_index in surface.point_data['spin_index']:
                 if spin_index == 0:
-                    spin_colors.append(self.plotting_options['surface_spinpol_colors']['value'][0])
+                    spin_colors.append(self.plotting_options['spin_colors']['value'][0])
                 else:
-                    spin_colors.append(self.plotting_options['surface_spinpol_colors']['value'][1])
+                    spin_colors.append(self.plotting_options['spin_colors']['value'][1])
             surface.point_data['spin_colors']=spin_colors
             self.plotter.add_mesh(surface,
                                 scalars='spin_colors',
@@ -471,7 +471,7 @@ class FermiVisualizer:
                            cmap=self.plotting_options['texture_cmap']['value'], 
                            show_scalar_bar=False,name='arrows')
             p.add_mesh(slice_2d,
-                       line_width=self.plotting_options['cross_section_slice_line_width']['value'])
+                       line_width=self.plotting_options['cross_section_slice_linewidth']['value'])
             p.remove_scalar_bar()
             # p.set_background(background_color)
             p.view_vector(normal_vec)
@@ -523,7 +523,7 @@ class FermiVisualizer:
                            cmap=self.plotting_options['texture_cmap']['value'], 
                            show_scalar_bar=False,name='arrows')
             p.add_mesh(slice_2d,
-                       line_width=self.plotting_options['cross_section_slice_line_width']['value'])
+                       line_width=self.plotting_options['cross_section_slice_linewidth']['value'])
             p.remove_scalar_bar()
             # p.set_background(background_color)
             p.view_vector(normal_vec)
