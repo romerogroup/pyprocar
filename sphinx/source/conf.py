@@ -26,7 +26,7 @@ author = "Uthpala Herath"
 # The short X.Y version
 version = ""
 # The full version, including alpha/beta/rc tags
-release = "6.1.1"
+release = "6.1.2"
 
 
 # -- pyvista configuration ---------------------------------------------------
