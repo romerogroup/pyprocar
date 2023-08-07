@@ -95,7 +95,7 @@ Plain mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C7B8F640>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A5E44BFD0>
 
 
 
@@ -148,7 +148,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C4F4DAF0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A5E432700>
 
 
 
@@ -203,7 +203,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C686EEB0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A6039DE20>
 
 
 
@@ -255,7 +255,7 @@ Scatter mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C647FE20>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A5F37B400>
 
 
 
@@ -304,7 +304,7 @@ overlay_species mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C50C1370>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A607E5730>
 
 
 
@@ -353,7 +353,7 @@ overlay_orbtials mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C643DCD0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A5E588AC0>
 
 
 
@@ -400,7 +400,7 @@ overlay mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C6311760>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A5F2D4B50>
 
 
 
@@ -445,14 +445,14 @@ overlay mode by orbital names
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000001D2C646C6D0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000013A5E291BB0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.730 seconds)
+   **Total running time of the script:** ( 0 minutes  3.683 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plotting_colinear.py:

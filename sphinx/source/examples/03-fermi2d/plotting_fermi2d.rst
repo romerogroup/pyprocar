@@ -95,7 +95,7 @@ Plain mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.2 created on Jun 10th, 2021
+    Version 6.1.3 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -184,7 +184,7 @@ plain_bands mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.2 created on Jun 10th, 2021
+    Version 6.1.3 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -278,7 +278,7 @@ Does not work. Contact developers
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.2 created on Jun 10th, 2021
+    Version 6.1.3 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -366,7 +366,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.2 created on Jun 10th, 2021
+    Version 6.1.3 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -416,7 +416,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.545 seconds)
+   **Total running time of the script:** ( 0 minutes  7.718 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d.py:

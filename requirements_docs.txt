@@ -10,6 +10,7 @@ trimesh
 ase
 sympy
 PyYAML
+scikit-learn
 
 sphinx_design
 sphinx-copybutton
@@ -17,7 +18,6 @@ sphinx-gallery
 numpydoc
 pypandoc
 pydata-sphinx-theme
-scikit-learn
 sphinxcontrib-yaml
 sphinxcontrib-autoyaml
 wheel

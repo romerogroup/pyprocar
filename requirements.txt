@@ -10,3 +10,4 @@ trimesh
 ase
 sympy
 PyYAML
+scikit-learn

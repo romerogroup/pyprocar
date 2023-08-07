@@ -28,7 +28,7 @@ Currently supports:
 Documentation
 -------------
 
-For versions 6.1.2 and above, the documentation is found here:
+For versions 6.1.3 and above, the documentation is found here:
 https://romerogroup.github.io/pyprocar/
 
 
@@ -121,6 +121,7 @@ will bring a help menu.
 
 Changelog
 --------------
+v6.1.3 Aug 7th, 2023 -- Updated install requirements <br />
 v6.1.2 Aug 7th, 2023 -- Bug fix and doc update <br />
 v6.1.1 Aug 7th, 2023 -- Bug fix <br />
 v6.1.0 Aug 7th, 2023 -- Bug fixes, doc update, config files <br />

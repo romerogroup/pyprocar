@@ -44,6 +44,7 @@ setup(
         'numpy',
         'pyvista',
         'scikit-image',
+        'scikit-learn',
         'scipy',
         'seekpath',
         'spglib',
