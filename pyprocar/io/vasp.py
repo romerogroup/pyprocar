@@ -51,7 +51,7 @@ class Outcar(collections.abc.Mapping):
         
         self.variables: dict = {}
         self.filename: Path = Path(filename)
-                self._get_axes_nk()
+        self._get_axes_nk()
 
         with open(self.filename, "r") as rf:
             self.file_str: str = rf.read()

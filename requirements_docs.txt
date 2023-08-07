@@ -20,3 +20,4 @@ pydata-sphinx-theme
 scikit-learn
 sphinxcontrib-yaml
 sphinxcontrib-autoyaml
+wheel
