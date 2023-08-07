@@ -17,7 +17,7 @@ HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class SiestaParser():
     def __init__(self,
                     fdf_file:str = None,
-                    proj_file:str = "atom_proj.projs",
+                    proj_file:str = None,
                     efermi:float = None,
                     out_file:str = None
         ):
@@ -35,16 +35,19 @@ class SiestaParser():
         self._parse_structure()
         if efermi is None:
             self._parse_out(out_file=out_file)
+        if proj_file is None:
+            proj_file = f'{self.prefix}.projs'
 
         # parses the bands file. This will initiate the bands array
         self.dirname = os.path.dirname(self.fdf_file) or '.'
-        self._parse_bands(bands_file=f'{self.dirname}{os.sep}{self.prefix}.bands')
 
 
         # self._parse_struct_out(struct_out_file=f"{self.prefix}{os.sep}STRUCT_OUT")
         
         if os.path.exists(proj_file):
             self._parse_projections(proj_file)
+        else:
+            self._parse_bands(bands_file=f'{self.dirname}{os.sep}{self.prefix}.bands')
 
         self.ebs = ElectronicBandStructure(
             kpoints=self.kpoints,
@@ -89,6 +92,8 @@ class SiestaParser():
         is_bands_calc = len(re.findall("%block (BandLines)", fdf_text)) == 1
         if is_bands_calc:
             self._parse_kpath(fdf_text=fdf_text)
+        else:
+            self.kpath = None
 
         is_dos_calc = len(re.findall("%block (ProjectedDensityOfStates)", fdf_text)) == 1
         if is_dos_calc:
@@ -369,14 +374,20 @@ class SiestaParser():
     def _parse_projections(self, proj_file):
 
         with open(proj_file, 'r') as f:
-            file_str = f.read().replace('*', '')
+            file_str = f.read()
+            file_str = re.sub(r'.*&o.*', '', file_str).replace('&n', '')
 
         nkpoints, nbands, nspin, natoms, norbitals = [int(x) for x in file_str.split('\n')[1].split()]
 
         kpoints = re.findall(r"point:(.+)", file_str)
         kpoints = [x.split() for x in kpoints]
-        kpoints = np.array(kpoints, dtype=float)
-        self.kpoints = kpoints[:, (1, 2, 3)]
+        kpoints = np.array(kpoints)
+        self.kpoints = kpoints[:, (1, 2, 3)].astype(float)
+
+        bands = re.findall(r"Wf:(.+)", file_str)
+        bands = [x.split()[1] for x in bands]
+        bands = np.array(bands, dtype=float)
+        self.bands = bands.reshape((nkpoints, nbands, nspin%3))
 
         spd = re.findall(r"s      py.+([-.\d\seto]+)", file_str)
         spd = [x.split() for x in spd]
@@ -422,10 +433,7 @@ class SiestaParser():
 
         nbands = spd.shape[1]
         norbitals = spd.shape[4] - 2
-        if spd.shape[2] == 4:
-            nspins = 3
-        else:
-            nspins = spd.shape[2]
+        nspins = spd.shape[2]
         if nspins == 2:
             nbands = int(spd.shape[1] / 2)
         else:
