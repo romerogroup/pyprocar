@@ -108,7 +108,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -153,7 +153,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.521 seconds)
+   **Total running time of the script:** ( 0 minutes  0.411 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plotting_bandsdosplot.py:

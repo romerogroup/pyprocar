@@ -75,7 +75,7 @@ But you can change this by setting arrow_projection to one of the following
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    spin_texture=True,
-                   arrow_projection='x',
+                   spin_projection='x',
                    arrow_size=3,
                    arrow_density=10,
                    plot_color_bar=True)
@@ -102,7 +102,7 @@ But you can change this by setting arrow_projection to one of the following
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -190,7 +190,7 @@ Spin Texture single color
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -232,10 +232,6 @@ Spin Texture single color
             
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
-    reee
-    reee
-    reee
-    reee
 
 
 
@@ -284,7 +280,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.0 created on Jun 10th, 2021
+    Version 6.1.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -333,7 +329,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.104 seconds)
+   **Total running time of the script:** ( 0 minutes  18.297 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plotting_fermi2d_spin_texture.py:

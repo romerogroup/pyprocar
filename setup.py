@@ -53,7 +53,7 @@ setup(
         'PyYAML',
     ],
     data_files=[("", ["LICENSE"])],
-    package_data={"": ["setup.json", '*.ini']},
+    package_data={"": ["setup.json", '*.ini','*.yml']},
     scripts=["scripts/procar.py"],
     packages=find_packages(exclude=["scripts"]),
 )

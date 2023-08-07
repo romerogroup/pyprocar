@@ -96,8 +96,8 @@ arrow_size
 :value: 3
 
 
-arrow_projection
-----------------
+spin_projection
+---------------
 
 :description: The projection for the color scale for spin texture
 
