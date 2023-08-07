@@ -185,7 +185,6 @@ def fermi2D(
         ebsY.projected = ebsY.projected[:,:,[2]][:,:,0]
         ebsZ.projected = ebsZ.projected[:,:,[3]][:,:,0]
 
-
         stData.append(ebsX.projected )
         stData.append(ebsY.projected )
         stData.append(ebsZ.projected )

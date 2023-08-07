@@ -199,7 +199,7 @@ class FermiSurface:
             if vmin is None:
                 vmin=spd.min()
             if vmax is None:
-                vmax = spd.max()           
+                vmax=spd.max()           
             norm = mpcolors.Normalize(vmin, vmax)
 
             # Interpolating band energies on to new grid
@@ -212,7 +212,6 @@ class FermiSurface:
             # Generates colors per band
             
             n_bands = bands.shape[0]
-            norm = mpcolors.Normalize(vmin=0, vmax=1)
             cmap = cm.get_cmap(self.plot_opt['cmap']['value'])
             if i_spin == 1:
                 factor = 0.25
@@ -313,7 +312,7 @@ class FermiSurface:
             sy = sy[:,self.band_indices[0]].transpose()
             sz = sz[:,self.band_indices[0]].transpose()
 
-
+       
         # and new, interpolated component
         xmax, xmin = x.max(), x.min()
         ymax, ymin = y.max(), y.min()
@@ -327,6 +326,15 @@ class FermiSurface:
         for band in bands:
             self.log.debug("Interpolating ...")
             bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
+
+        # Normalizing
+        vmin=self.plot_opt['clim']['value'][0]
+        vmax=self.plot_opt['clim']['value'][1]
+        if vmin is None:
+            vmin=-0.5
+        if vmax is None:
+            vmax=0.5          
+        norm = mpcolors.Normalize(vmin, vmax)
 
 
         cont = [
@@ -343,7 +351,6 @@ class FermiSurface:
         ]
 
         plt.axis("equal")
-
         for i_band, (contour, spinX, spinY, spinZ) in enumerate(zip(cont, sx, sy, sz)):
             # The previous interp. yields the level curves, nothing more is
             # useful from there
@@ -354,11 +361,9 @@ class FermiSurface:
 
 
                 self.log.debug("Fermi surf. points.shape: " + str(points.shape))
-
                 newSx = griddata((x, y), spinX, (points[:, 0], points[:, 1]))
                 newSy = griddata((x, y), spinY, (points[:, 0], points[:, 1]))
                 newSz = griddata((x, y), spinZ, (points[:, 0], points[:, 1]))
-
                 self.log.info("newSx.shape: " + str(newSx.shape))
                 if self.plot_opt['arrow_size']['value'] is not None:
                     scale  = self.plot_opt['arrow_size']['value']
@@ -369,21 +374,36 @@ class FermiSurface:
                     scale_units = "xy"
                     angles="xy"
 
+                if self.plot_opt['spin_projection']['value'] == 'z':
+                    color = newSz[::self.plot_opt['arrow_density']['value']]
+                elif self.plot_opt['spin_projection']['value'] == 'y':
+                    color = newSy[::self.plot_opt['arrow_density']['value']]
+                elif self.plot_opt['spin_projection']['value'] == 'x':
+                    color = newSx[::self.plot_opt['arrow_density']['value']]
+                elif self.plot_opt['spin_projection']['value'] == 'x^2':
+                    color = newSx[::self.plot_opt['arrow_density']['value']]**2
+                elif self.plot_opt['spin_projection']['value'] == 'y^2':
+                    color = newSy[::self.plot_opt['arrow_density']['value']]**2
+                elif self.plot_opt['spin_projection']['value'] == 'z^2':
+                    color = newSz[::self.plot_opt['arrow_density']['value']]**2
+
                 if self.plot_opt['no_arrow']['value']:
                     # a dictionary to select the right spin component
-                    spinDict = {0: newSx[::self.plot_opt['arrow_density']['value']], 
-                                1: newSy[::self.plot_opt['arrow_density']['value']], 
-                                2: newSz[::self.plot_opt['arrow_density']['value']]}
+                    # spinDict = {0: newSx[::self.plot_opt['arrow_density']['value']], 
+                    #             1: newSy[::self.plot_opt['arrow_density']['value']], 
+                    #             2: newSz[::self.plot_opt['arrow_density']['value']]}
+                        
                     plt.scatter(
                         points[::self.plot_opt['arrow_density']['value'], 0],
                         points[::self.plot_opt['arrow_density']['value'], 1],
-                        c=spinDict[spin],
+                        c=color,
+                        # spinDict[spin],
                         s=50,
                         edgecolor="none",
                         alpha=1.0,
                         marker=self.plot_opt['marker']['value'],
                         cmap=self.plot_opt['cmap']['value'],
-                        norm=colors.Normalize(-0.5, 0.5),
+                        norm=norm,
                     )
 
                 else:
@@ -392,7 +412,6 @@ class FermiSurface:
                             c = self.band_colors[0][i_band]
                         if self.plot_opt['arrow_color']['value'] is not None:
                             c = self.plot_opt['arrow_color']['value']
-                            print('reee')
                         plt.quiver(
                             points[::self.plot_opt['arrow_density']['value'], 0],  # Arrow position x-component
                             points[::self.plot_opt['arrow_density']['value'], 1],  # Arrow position y-component
@@ -404,20 +423,7 @@ class FermiSurface:
                             color=c
                         )
                     else:
-                        if self.plot_opt['arrow_projection']['value'] == 'z':
-                            color = newSz[::self.plot_opt['arrow_density']['value']]
-                        elif self.plot_opt['arrow_projection']['value'] == 'y':
-                            color = newSy[::self.plot_opt['arrow_density']['value']]
-                        elif self.plot_opt['arrow_projection']['value'] == 'x':
-                            color = newSx[::self.plot_opt['arrow_density']['value']]
-                        elif self.plot_opt['arrow_projection']['value'] == 'x^2':
-                            color = newSx[::self.plot_opt['arrow_density']['value']]**2
-                        elif self.plot_opt['arrow_projection']['value'] == 'y^2':
-                            color = newSy[::self.plot_opt['arrow_density']['value']]**2
-                        elif self.plot_opt['arrow_projection']['value'] == 'z^2':
-                            color = newSz[::self.plot_opt['arrow_density']['value']]**2
-
-                        
+ 
                         plt.quiver(
                             points[::self.plot_opt['arrow_density']['value'], 0],  # Arrow position x-component
                             points[::self.plot_opt['arrow_density']['value'], 1],  # Arrow position y-component
@@ -428,17 +434,17 @@ class FermiSurface:
                             scale_units=scale_units,
                             angles=angles,
                             cmap=self.plot_opt['cmap']['value'],
-                            norm=colors.Normalize(-0.5, 0.5),
+                            norm=norm,
                         )
                 
             
         if self.plot_opt['plot_color_bar']['value']:
             cbar = plt.colorbar()
-            if len(self.plot_opt['arrow_projection']['value'].split('^')) == 2:
-                tmp = self.plot_opt['arrow_projection']['value'].split('^')
+            if len(self.plot_opt['spin_projection']['value'].split('^')) == 2:
+                tmp = self.plot_opt['spin_projection']['value'].split('^')
                 label = f'S$_{tmp[0]}^{tmp[1]}$ projection'
             else:
-                tmp = self.plot_opt['arrow_projection']['value'].split('^')
+                tmp = self.plot_opt['spin_projection']['value'].split('^')
                 label = f'S$_{tmp[0]}$ projection'
             cbar.ax.set_ylabel(label, rotation=270)
         plt.axis("equal")
