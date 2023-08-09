@@ -85,7 +85,8 @@ def poscarDiff(poscar1 : Poscar | str,
 class poscar_modify:
   """ High-level class to change properties of a Poscar-object.
 
-  Methods:
+  Methods
+  -------
 
   write(filename, cartesian, xyz)   # write the poscar with `filename`, in `cartesian`?
   pos_multiply(factor, cartesian)   # multiply the position of each atoms by `factor`

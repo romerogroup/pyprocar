@@ -99,13 +99,13 @@ class Poscar:
       self.poscar = self.poscar.readlines()
 
     # getting the scale factor
-    scale = re.findall(r'[.\d]+', self.poscar[1])
+    scale = re.findall(r'[.\deE]+', self.poscar[1])
     scale = float(scale[0])
     if self.verbose:
       print('scaling factor: ', scale)
     
     # parsing the lattice
-    self.lat = re.findall(r'[-.\d]+\s+[-.\d]+\s+[-.\d]+\s*\n*', ''.join(self.poscar[2:5]))
+    self.lat = re.findall(r'[-.\deE]+\s+[-.\deE]+\s+[-.\deE]+\s*\n*', ''.join(self.poscar[2:5]))
     self.lat = np.array([x.split() for x in self.lat], dtype=float)*scale
     if self.verbose:
       print( 'lattice:\n', self.lat)
@@ -145,7 +145,7 @@ class Poscar:
 
     # parsing the positions
     start, end = 8+offset, 8+offset+ self.Ntotal
-    string = r'([-.\d]+)\s+([-.\d]+)\s+([-.\d]+)\s*'
+    string = r'([-.\deE]+)\s+([-.\deE]+)\s+([-.\deE]+)\s*'
     pos = re.findall(string, ''.join(self.poscar[start:end]))
     if direct:
       self.dpos = np.array(pos, dtype=float)

@@ -10,18 +10,36 @@ add RDF here
 import numpy as np
 from . import db
 from . import rdf
+from .poscar import Poscar
+from typing import Union, List
 np.set_printoptions(precision=4, linewidth=160, suppress=True)
 
 
-def distances(positions, lattice=None, allow_self=True, verbose=False):
+def distances(positions:np.ndarray,
+              lattice: Union[np.ndarray, None] = None,
+              allow_self:bool=True,
+              verbose:bool=False) -> np.ndarray: 
   """Calculates all the pasirwise distances. The `positions` have to be
   in cartesian coordinates, size Nx3. The lattice should be a 3x3
   array-like.
 
-  `allow_self`: it allows to an atom to be its own neighbor, in
-  another lattice
+  Parameters
+  ----------
 
-  return: a NxN array with distances.
+  positions : np.ndarray
+      Cartesian positions, shape (N,3).
+  lattice: Union[np.ndarray, None]
+      3x3 lattice array. Default is None, a non-periodic system.
+  allow_self : bool = True
+      If True an atom can be its own neighbor, but in another lattice. Default is False
+  verbose : bool
+      verbosity. Default is False
+
+  Returns
+  -------
+
+  np.ndarray:
+      NxN array with distances. The main diagonal will be zero unless you set `allow_self=True`
 
   """ 
   
@@ -91,7 +109,32 @@ def distances(positions, lattice=None, allow_self=True, verbose=False):
   return dist
 
 class Neighbors:
-  def __init__(self, poscar, verbose=False):
+  """Class to detect neighbors of each atom.  the neighbors are stored
+    in `self.nn_list`, and the corresponding elements in
+    `self.nn_elem`.
+
+  Methods
+  -------
+
+  estimateMaxBondDist
+
+  """
+
+  def __init__(self, poscar:Poscar,
+               verbose:bool=False):
+    """
+    It estimates the nearest neighbors of a poscar-class. They are element-dependent!
+
+    Parameters
+    ----------
+    
+    poscar : Poscar
+        A poscar instance, to claculate its neighbors
+    verbose : bool
+        verbosity. Defaults to False
+    
+    """
+    
     self.poscar = poscar
     self.verbose = verbose
     self.nn_list = None # a list of N lists with neighbor indexes
@@ -107,7 +150,7 @@ class Neighbors:
                       # dict, for all interactions)
     return
 
-  def estimateMaxBondDist(self):
+  def estimateMaxBondDist(self)-> np.ndarray:
     """Based on the covalent radii, it estimates (crudely) the maximum
     distance to be regarded as a first neighbor.
 
@@ -119,7 +162,11 @@ class Neighbors:
     
     which is half way between the first and second neighbors in a FCC lattice
 
-    It returns a Natoms x Natoms matrix with d_Max for each pair of atoms
+    Returns
+    -------
+
+    np.ndarray:
+        Natoms x Natoms matrix with d_Max for each pair of atoms.
 
     """
     if self.verbose:
@@ -146,17 +193,29 @@ class Neighbors:
       print(self.d_Max)
     return self.d_Max
 
-  def set_neighbors(self,allow_self=True):
-    """setting the nearest neighbors by using self.d_Max as cutoff
-    distance
+  def set_neighbors(self, allow_self : bool = True) -> List[List[int]]:
+    """It updates the reference distance for nearest neighbor according to
+    the the lower between:
 
-     Arguments: 
+    (i) first minimum of the radial density function (RDF) 
+    (ii) estimated value of bonding distance (see `self.estimateMaxBondDist`)
 
-     `allow_self`: allows to an atom to be its own neighbor, likely
-    to be useless in a large supercell.  Beware, if the
-    self-distance is zero, this could be troublesome
+    Then it creates the nearest neighbor list, stored in `self.nn_list`
 
-     """
+    Parameters
+    ----------
+
+    allow_self : bool
+        If True an atom can be its own neighbor, likely to be useless in a large supercell.
+        Beware, if the self-distance is zero, this could be troublesome.
+
+    Returns
+    -------
+
+    List[List[int]]:
+        0-based indexes of nearest neighbors
+
+    """
     self.nn_list = []
     N = self.poscar.Ntotal
     
@@ -167,9 +226,6 @@ class Neighbors:
     if self.verbose:
       print(self.d_Max)
       
-    ### Añadir MIS minimos
-    
-    
     for i in range(N):
       # to store all defects
       temp = []
@@ -190,7 +246,7 @@ class Neighbors:
     return self.nn_list
     
   def _set_nn_elem(self):
-    """ sets the elements of the list of nearest neighbors  """
+    """ sets the elements of the list of nearest neighbors.  """
     nn_elem = []
     for nns in self.nn_list:
       temp = [self.poscar.elm[x] for x in nns]
