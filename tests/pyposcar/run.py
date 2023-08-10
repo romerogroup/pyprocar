@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-import poscarUtils
-import poscar
+import pyprocar.pyposcar as pp
 import os
 
 
-executable = '../analize.py'
+executable = '../../scripts/poscar.py'
 auxdir = 'aux/'
 resultsdir = 'results/'
 
@@ -93,11 +92,11 @@ for task in tasks:
     # third, comparing the output with curated results
     path_p1 = auxdir + filename + task['suffix']
     path_p2 = resultsdir + filename + task['suffix']
-    p1 = poscar.Poscar(path_p1)
+    p1 = pp.poscar.Poscar(path_p1)
     p1.parse()
-    p2 = poscar.Poscar(path_p2)
+    p2 = pp.poscar.Poscar(path_p2)
     p2.parse()
-    comparison = poscarUtils.poscarDiff(p1, p2)
+    comparison = pp.poscarUtils.poscarDiff(p1, p2)
 
     if not comparison:
       print('ok')
