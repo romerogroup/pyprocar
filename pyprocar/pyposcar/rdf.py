@@ -15,15 +15,23 @@ from . import db
 class RDF:
     #Add distances as optional argument
     def __init__(self, poscar = None):
-        """ This Class mainly obtains cutoff values for first neighbor criteria by utilizing KernelDensity
-        It can obtain a single cutoff value for the whole distance matrix 
-        Or a cutoff value for each type of interaction (Ex = C-H) 
+        """This Class mainly obtains cutoff values for first neighbor
+        criteria by utilizing KernelDensity It can obtain a single
+        cutoff value for the whole distance matrix Or a cutoff value
+        for each type of interaction (Ex = C-H).
+
+        If there is no minimum of the KDE, I will take a very large
+        value as cutoff.
 
         """
-        self.distances = latticeUtils.distances(poscar.cpos, lattice=poscar.lat, allow_self=False)
+        self.distances = latticeUtils.distances(poscar.cpos,
+                                                lattice=poscar.lat,
+                                                allow_self=True)
         self.species = poscar.numberSp
         self.species_name = poscar.typeSp
         self.spDict = dict(zip(self.species_name,self.species))
+
+        # print('self.spDict', self.spDict)
         # x-axis space for KDE calculations
         self.KDE_space = np.arange(0,6, 0.05)
 
@@ -97,8 +105,10 @@ class RDF:
         kde_curveSp = np.array(kde_curveSp)
         interactions = np.array(interactions)
 
+        
         self.interactions = interactions
-
+        #print('kde_curveSp', kde_curveSp)
+      
         return kde_curveSp
 
     def KDE_Curve(self):
@@ -145,22 +155,27 @@ class RDF:
         neighborsSp = []
         temp_min_interaction = np.zeros(self.distances.shape)
         for kde, interaction in zip(KDE,self.interactions):
-            
-            #Here we check that the amount of data from the interactions is enough to use Kernel Density
-            #If not, we use the only distances available from the interaction
+            # Here we check that the amount of data from the
+            # interactions is enough to use Kernel Density If not, we
+            # use the only distances available from the interaction
             data = self._findBlock(Interaction_X = interaction[0],Interaction_Y= interaction[1])
             if ((data.shape == (2,2))):
                 min = data[0][1]*1.01
             elif((data.shape == (1,1))):
                 min = data[0][0]*1.01
             else:
-                #Here we make sure that there isn't any flat points that could
-                #hide local minimums
+                # Here we make sure that there isn't any flat points
+                # that could hide local minimums
                 KDE_space, kde_aux = generalUtils.remove_flat_points(self.KDE_space , kde)
+
                 min_index = scipy.signal.argrelextrema(kde_aux,np.less)[0]
-                
+                # If the method do not find any minimum, I will take the larger distance
+                if len(min_index) == 0:
+                  min_index = [-1]
+                # print('min_index', min_index)
+                  
                 min = KDE_space[min_index][0]
-            
+                # print('min', min)
             mins.append(min)
 
             #Here we make the cutoff value matrix 

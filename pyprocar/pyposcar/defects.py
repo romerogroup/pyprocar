@@ -7,10 +7,10 @@ FindDefect
 
 
 """
-import latticeUtils
-import poscarUtils
+from .latticeUtils import Neighbors
+from  .poscarUtils import poscar_modify
 import copy
-import generalUtils
+from .generalUtils import remove_flat_points
 import itertools
 import numpy as np
 try:
@@ -24,9 +24,27 @@ import matplotlib.pyplot as plt
 
 
 class FindDefect:
-  """Tries to identify a defect
+  """Tries to identify a defect from statistics of the crystal strcuture
+
+  Methods
+  -------
+
+  self.__init__(self, poscar, verbose):
+      it already invokes the other methods. The results are in `self.defects` and `self.all_defects`
+  self.find_forgein_atoms:
+      finds atoms from different species (e.g. substitutions)
+  self.nearest_neighbors_environment:
+      finds atoms with different environment (e.g. edges)
+  
+
   """
   def __init__(self, poscar, verbose=False):
+    """It searches for defects atoms, that is atoms which are
+    statistically different from the others. This only is valid when
+    the simulation cell is big enough to get statistics.
+
+
+    """
     # avoiding to modify the original poscar
     self.p = copy.deepcopy(poscar)
     self.verbose = verbose
@@ -34,7 +52,7 @@ class FindDefect:
                       # should be here. It is a dictionary of lists
     self.all_defects = [] # a simple list with all the defects found
     self.nn_elem = [] #a descriptive list of all nearest neighbors clusters
-    self.neighbors = latticeUtils.Neighbors(self.p, verbose=False)
+    self.neighbors = Neighbors(self.p, verbose=False)
     self.find_forgein_atoms()
     self.nearest_neighbors_environment()
 
@@ -90,7 +108,7 @@ class FindDefect:
     #Comparing each cluster type with itself
     print("Cluster types ", self.nn_elem)
     Cluster_set = list(set(self.nn_elem))
-    print("Cluster set ", Cluster_set)
+    # print("Cluster set ", Cluster_set)
     Cluster_group_index = []
     for group in Cluster_set:
       indexes = []
@@ -136,7 +154,7 @@ class FindDefect:
       #Dont remember the idea of Delta in last implementation
       samples = np.linspace(np.min(norm_array)*0.9, np.max(norm_array)*1.1)
       scores = kde.score_samples(samples.reshape(-1,1))
-      samples, scores = generalUtils.remove_flat_points(samples, scores)
+      samples, scores = remove_flat_points(samples, scores)
       maxima = argrelextrema(scores, np.greater)[0]
       minima = argrelextrema(scores, np.less)[0]
       print("Cluster Tipo ", type)
@@ -192,16 +210,16 @@ class FindDefect:
     delta = max(int(self.p.Ntotal*0.1),10) # to have a local maximum at start/end
     samples = np.linspace(-delta, max(numberSp.flatten())+delta)
     scores = kde.score_samples(samples.reshape(-1,1))
-    samples, scores = generalUtils.remove_flat_points(samples, scores)
-    print(scores)
-    #plt.plot(samples, scores)
-    #plt.show()
+    samples, scores = remove_flat_points(samples, scores)
+    # print(scores)
+    # plt.plot(samples, scores)
+    # plt.show()
     self.verbose = True
     #
     # The local minima of the scores denotes the groups. argrelextrema
     # returns a tuple, only first entry is useful
     minima = argrelextrema(scores, np.less)[0]
-    print(argrelextrema(scores, np.less))
+    # print(argrelextrema(scores, np.less))
     maxima = argrelextrema(scores, np.greater)[0]
     if self.verbose:
       print('local max:',maxima,'  localmin:', minima)
@@ -357,7 +375,7 @@ class FindDefect:
     N = len(indexes)
     newElements = ['D']*N
     
-    newP = poscarUtils.poscar_modify(self.p, verbose=False)
+    newP = poscar_modify(self.p, verbose=False)
     newP.change_elements(indexes=indexes, newElements=newElements)
     newP.write(filename=filename)
     # print(indexes)

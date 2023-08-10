@@ -1,11 +1,11 @@
 
 
 import numpy as np
-import poscar
-import latticeUtils
-import poscarUtils
+from .poscar import Poscar
+from .latticeUtils import Neighbors
+from  .poscarUtils  import poscar_modify
 import copy
-import db
+from .db import DB
 import warnings
 
 
@@ -26,17 +26,19 @@ class Clusters:
     # has info about the underlying lattice. Any 'changes' are
     # virtual, in 'self.marked'
     self.p = copy.deepcopy(poscar)
-    self.db = db.DB()
+    self.db = DB()
     self.clusters = [] # it a list of lists. One list by each cluster
     self.verbose = verbose
     self.disable_warning = False
     # calculating the neighbors can be demanding, using them if given
     self.neighbors = neighbors
     if self.neighbors is None:
-      self.neighbors = latticeUtils.Neighbors(self.p, verbose=False)
-    self.marked = set(marked)
-    if self.marked is None:
+      self.neighbors = Neighbors(self.p, verbose=False)
+    if marked is None:
       self.marked = set(range(self.p.Ntotal))
+    else:
+      self.marked = set(marked)
+      
     # the initial_marked atoms should not be removed by
     # 'smooth_edges'
     self.initial_marked = set(self.marked)
@@ -106,7 +108,7 @@ class Clusters:
 
   def write(self, filename):
     # the poscar object should not be modified
-    pu = poscarUtils.poscar_modify(copy.deepcopy(self.p), verbose=False)
+    pu = poscar_modify(copy.deepcopy(self.p), verbose=False)
     # a set with all atoms
     to_remove = set(list(range(pu.p.Ntotal)))
     to_remove = list(to_remove - self.marked)
@@ -252,6 +254,7 @@ class Clusters:
         p1 = self.p.cpos[ma]
         shift = np.dot(shift, self.p.lat)
         delta = p1 - p0 + shift
+        # print('p0', p0, 'p1', p1, 'shift', shift, 'delta', delta)
         # if shifted:
         #   print('shift cart', shift)
         #   print('p1', p1)
@@ -262,6 +265,7 @@ class Clusters:
         # bond_length
         bond_length = 1.08 #self.db.estimateBond(self.p.elm[atom], self.p.elm[ma])
         new_H_pos = p0 + delta*bond_length
+        # print('new_H_pos',new_H_pos )
         # if shifted:
         #   print('adding H at', atom, p0,p1, new_H_pos)
         # only left to add a 'H' atom to the poscar, and mark it
@@ -278,13 +282,13 @@ class Clusters:
       print('missing atoms usage', Counter(missing_used))
       warnings.warn('At least one atom was replaced twice (or more times)'
                     ' by an H. Check wether this makes sense')
-    pu = poscarUtils.poscar_modify(copy.deepcopy(self.p), verbose=False)
+    pu = poscar_modify(copy.deepcopy(self.p), verbose=False)
     # a set with all atoms, then removing all non-marked atoms
     to_remove = set(list(range(pu.p.Ntotal)))
     to_remove = list(to_remove - self.marked)
     pu.remove(to_remove)
     #adding the new H atoms
-    [pu.add('H', x) for x in new_H_atoms]
+    [pu.add('H', x, cartesian=True) for x in new_H_atoms]
     if filename:
       pu.write(filename)
     return pu.p
