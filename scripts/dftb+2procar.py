@@ -459,8 +459,10 @@ class DFTB_input:
     """
     string2 = r'^\s*(' + string + r'\s*=\s*\{.*)'
     occurences = re.findall(string2 , self.finput, re.MULTILINE)
-    print(occurences)
-    print('DFTB_input._find_block:', len(occurences), ' blocks found')
+    if self.verbose:
+      print('searching string:', string2, occurences)
+    if self.verbose:
+      print('DFTB_input._find_block:', len(occurences), ' blocks found')
     if len(occurences) > 1:
       raise RuntimeError('More than one block: ' + string)
     if len(occurences) == 0:
@@ -471,8 +473,9 @@ class DFTB_input:
     
     # from the block to EOF, I will isolate the block later
     block = re.findall(string2 + r'.*', self.finput, re.DOTALL | re.MULTILINE)[0]
-    print('\n\n\n Block')
-    print(block)
+    # if self.verbose:
+    #   print('\n\n\n Block')
+    #   print(block)
 
     # counting {,}, to know where to close the block
     pattern = re.compile(r'(\{)|(\})')
@@ -504,26 +507,30 @@ class DFTB_input:
       self.finput += '\n' + blockName + ' = {\n}\n'
       # now the block does exist, I need to update the variable
       block = self._find_block(blockName)
-    print('Block:')
-    print(block)
-    print('------------')
     # I need to find/create the tag
     #
     # the tag pattern could be as simple as 'foo = ' or more
     # complicated 'foo [qux] = bar'
     tagPattern = tagName+r'\W+.*'
     tag = re.findall(tagPattern, block)
-    print('does the tag exists?')
-    print(tag)
-    print('---------')
+    if self.verbose:
+      print('does the tag exists?')
+      print(tag)
     if len(tag) > 1:
       raise RuntimeError('More than one occurrence of ' + tagName + ' found: ' + str(tag))
     elif len(tag) == 0:
+      if self.verbose:
+        print('The tag does not exist, I am going to create it')
+        print('---------')
       # no tag, just create it
       pattern = '('+blockName+r'\s*=\s*\{.*)'
       newTag = r'\1\n    ' + tagName + ' = ' + re.escape(value)
       newBlock = re.sub(pattern, newTag, block)
     else:
+      if self.verbose:
+        print('The tag exist')
+        print('---------')
+
       # there is one tag, I need to isolate it. Can be a complex
       # multiline matrix-like field foo = bar { baz = {}, quux = {} }
       # I will analyze the all line below `tag` (including it)
@@ -531,7 +538,8 @@ class DFTB_input:
       # does the tag have any { within its first line?
       if len(re.findall(r'\{', tag.split('\n')[0])) == 0:
         tag = tag.split('\n')[0]
-        print('The tag is just one line:', tag,'\n')
+        if self.verbose:
+          print('The tag is just one line:', tag,'\n')
         newTag = tagName + ' = ' + value
         # avoid re.sub(), the unescaped {} are troublesome
         newBlock = block.replace(tag, newTag)
@@ -548,9 +556,10 @@ class DFTB_input:
           if isopen == 0:
             break
         tag = tag[ : m.start(0)+1 ]
-        print('tag (complex)')
-        print(tag)
-        print('------------')
+        if self.verbose:
+          print('tag (complex)')
+          print(tag)
+          print('------------')
       # if tag was found
       newTag = tagName + ' = ' + value
       newBlock = block.replace(tag, newTag)
@@ -593,10 +602,25 @@ class DFTB_input:
     #
     if self.verbose:
       print("DFTB_inout.add_pyprocar_tags: searching tags")
+
+    if self.verbose:
+      print("    self._set_tag('WriteBandOut', 'Analysis', value='Yes')")
     self._set_tag('WriteBandOut', 'Analysis', value='Yes')
+    
+    if self.verbose:
+      print("    self._set_tag('WriteEigenvectors', 'Analysis', value='Yes')")
     self._set_tag('WriteEigenvectors', 'Analysis', value='Yes')
+    
+    if self.verbose:
+      print("    self._set_tag('EigenvectorsAsText', 'Analysis', value='Yes')")
     self._set_tag('EigenvectorsAsText', 'Analysis', value='Yes')
+
+    if self.verbose:
+      print("    self._set_tag('WriteDetailedXML', 'Options', value='Yes')")      
     self._set_tag('WriteDetailedXML', 'Options', value='Yes')
+
+    if self.verbose:
+      print("    self._set_tag('WriteDetailedOut', 'Options', value='Yes')")
     self._set_tag('WriteDetailedOut', 'Options', value='Yes')
     print(self.finput)
 
