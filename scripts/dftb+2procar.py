@@ -336,8 +336,8 @@ class DFTB_utils:
     lat = re.findall(r'-?\d+\.\d+', lat)
     lat = np.array(lat, dtype=float)
     lat.shape = (3,3)
-    if self.verbose:
-      print('Lattice: ', lat)
+    # Bohr to Angstroms
+    lat = lat*0.529177249 
     return lat
 
   
@@ -347,16 +347,19 @@ class DFTB_utils:
     f.write('E-fermi : ' + str(efermi) + ' \n')
     
     lat = self.find_lattice(args.kpointsfile)
-    b0 = np.cross(lat[1], lat[2])/np.det(lat)
-    b1 = np.cross(lat[2], lat[0])/np.det(lat)
-    b2 = np.cross(lat[0], lat[1])/np.det(lat)
+    # print('lat', lat)
+    vol = np.dot( lat[0], np.cross(lat[1], lat[2]) )
+    b0 = np.cross(lat[1], lat[2])/vol
+    b1 = np.cross(lat[2], lat[0])/vol
+    b2 = np.cross(lat[0], lat[1])/vol
     
-    f.write('reciprocal lattice vectors \n')
-    f.write(str(lat[0,0]) + ' ' + str(lat[0,1]) + ' ' +  str(lat[0,2]) + ' ' )
+    f.write('\nreciprocal lattice vectors \n')
+    # print('foo')
+    f.write(str(lat[0,0]) + ' ' + str(lat[0,1]) + ' ' +  str(lat[0,2]) + '  ' )
     f.write(str(b0[0])    + ' ' + str(b0[1])    + ' ' +  str(b0[2])    + '\n')
-    f.write(str(lat[1,0]) + ' ' + str(lat[1,1]) + ' ' +  str(lat[1,2]) + ' ' )
+    f.write(str(lat[1,0]) + ' ' + str(lat[1,1]) + ' ' +  str(lat[1,2]) + '  ' )
     f.write(str(b1[0])    + ' ' + str(b1[1])    + ' ' +  str(b1[2])    + '\n')
-    f.write(str(lat[2,0]) + ' ' + str(lat[2,1]) + ' ' +  str(lat[2,2]) + ' ' )
+    f.write(str(lat[2,0]) + ' ' + str(lat[2,1]) + ' ' +  str(lat[2,2]) + '  ' )
     f.write(str(b2[0])    + ' ' + str(b2[1])    + ' ' +  str(b2[2])    + '\n')
     f.close()
 
@@ -653,7 +656,6 @@ def f_evec(args):
     print('\nInput parsed, going to write a PROCAR file')
 
   evec.writeProcar()
-
   utils.writeOutcar()
   
 
