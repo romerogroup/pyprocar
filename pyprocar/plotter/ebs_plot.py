@@ -116,7 +116,7 @@ class EBSPlot:
                     )
                 pos += distance
         else :
-            x = np.arange(0, self.ebs.nkpoints)
+            x = np.arange(0, self.ebs.kpoints.shape[0])
 
         return np.array(x).reshape(-1,)
 
@@ -295,7 +295,7 @@ class EBSPlot:
                 vmax = color_weights.max()
                 
             norm = mpl.colors.Normalize(vmin, vmax)
-
+        # print(self.ebs.nbands)
         for ispin in spins:
             for iband in range(self.ebs.nbands):
                 if len(self.spins)==1:
@@ -387,6 +387,48 @@ class EBSPlot:
             if self.config['plot_color_bar']['value']:
                 cb = self.fig.colorbar(lc, ax=self.ax)
                 cb.ax.tick_params(labelsize=20)
+
+    def plot_atomic_levels(self,
+        spins:List[int]=None,
+        width_mask:np.ndarray=None,
+        color_mask:np.ndarray=None,
+        width_weights:np.ndarray=None,
+        color_weights:np.ndarray=None
+        ):
+        """A method to plot a scatter plot
+
+        Parameters
+        ----------
+        spins : List[int], optional
+            A list of spins, by default None
+        width_mask : np.ndarray, optional
+            The width mask, by default None
+        color_mask : np.ndarray, optional
+            The color mask, by default None
+        width_weights : np.ndarray, optional
+            The width weight of each point, by default None
+        color_weights : np.ndarray, optional
+            The color weights at each point, by default None
+        """
+        self.ebs.bands = np.vstack((self.ebs.bands, self.ebs.bands))
+        self.ebs.projected = np.vstack((self.ebs.projected, self.ebs.projected))
+        self.ebs.kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
+        self.ebs.kpoints[0][-1] += 1
+        self.x=self._get_x()
+        print("Atomic plot: bands.shape  :", self.ebs.bands.shape)
+        print("Atomic plot: spd.shape    :", self.ebs.projected.shape)
+        print("Atomic plot: kpoints.shape:", self.ebs.kpoints.shape)
+        self.ax.xaxis.set_major_locator(plt.NullLocator())
+        # labels on each band
+        for i in range(len(self.ebs.bands[0,:, 0])):
+            print(self.ebs.bands[0,i,0])
+            self.ax.text(0, self.ebs.bands[0,i,0], str(i + 1))
+
+        self.plot_parameteric(color_weights=color_weights,
+                            width_weights=width_weights,
+                            color_mask=color_mask,
+                            width_mask=width_mask,
+                            spins=spins)
 
     def set_xticks(self, 
         tick_positions:List[int]=None, 

@@ -215,6 +215,17 @@ def bandsplot(
                 width_mask=width_mask,
                 spins=spins
             )
+        elif mode == "atomic":
+            if color_weights is not None:
+                color_weights = np.vstack((color_weights, color_weights))
+            ebs_plot.plot_atomic_levels(
+                color_weights=color_weights,
+                width_weights=width_weights,
+                color_mask=color_mask,
+                width_mask=width_mask,
+                spins=spins)
+            
+            ebs_plot.set_xlabel(label='')
 
         else:
             print("Selected mode %s not valid. Please check the spelling " % mode)

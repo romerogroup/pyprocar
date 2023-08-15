@@ -110,9 +110,7 @@ class ElectronicBandStructure:
         self._effective_mass=None
         self._fermi_speed=None
         self._harmonic_average_effective_mass=None
-        
-
-            
+          
     @property
     def n_kx(self):
         """The number of unique kpoints in kx direction in the reduced basis
