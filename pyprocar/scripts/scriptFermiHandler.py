@@ -3,20 +3,12 @@ __maintainer__ = "Logan Lang"
 __email__ = "lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-import sys
-import functools
-import copy
-from typing import List, Tuple
 import os
+import sys
+from typing import List, Tuple
 import yaml
-
 import numpy as np
-from matplotlib import colors as mpcolors
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import pyvista as pv
 
-from pyprocar.core import FermiSurface3D
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
 from pyprocar.utils import ROOT
 
@@ -34,7 +26,8 @@ class FermiHandler:
             code:str,
             dirname:str="",
             repair:bool=False,
-            apply_symmetry:bool=True,):
+            apply_symmetry:bool=True,
+            ):
         """
         This class handles the plotting of the fermi surface. Initialize by specifying the code and directory name where the data is stored. 
         Then call one of the plotting methods provided.
@@ -62,11 +55,21 @@ class FermiHandler:
         if self.structure.rotations is not None:
             self.ebs.ibz2fbz(self.structure.rotations)
 
-        self.data_handler = FermiDataHandler(self.ebs)
+        modes=["plain","parametric","spin_texture", "overlay" ]
+        props=["fermi_speed","fermi_velocity","harmonic_effective_mass"]
+        modes_txt=' , '.join(modes)
+        props_txt=' , '.join(props)
+        self.notification_message=f"""
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
 
-    def process_data(self, mode, bands=None, atoms=None, orbitals=None, spins=None, spin_texture=False):
-        self.data_handler.process_data(mode, bands, atoms, orbitals, spins, spin_texture)
-
+                Here is a list modes : {modes_txt}
+                Here is a list of properties: {props_txt}
+                --------------------------------------------------------
+                """
+    
     def plot_fermi_surface(self, mode, 
                            bands=None, 
                            atoms=None, 
@@ -79,6 +82,7 @@ class FermiHandler:
                            save_gif=None,
                            save_mp4=None,
                            save_3d=None,
+                           print_plot_opts:bool=False,
                            **kwargs):
         """A method to plot the 3d fermi surface
 
@@ -96,10 +100,18 @@ class FermiHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
+        print_plot_opts: bool, optional
+            Boolean to print the plotting options
         """
+        print(self.notification_message)
+        if print_plot_opts:
+            self.print_default_settings()
+        
         # Process the data
-        self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
-        fermi_surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
+        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
+        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        fermi_surface=self.data_handler.get_surface_data(fermi=self.e_fermi,
+                                                         property_name=property_name)
 
         visualizer = FermiVisualizer(self.data_handler,**kwargs)
         visualizer.add_brillouin_zone(fermi_surface)
@@ -137,6 +149,7 @@ class FermiHandler:
                             property_name=None,
                             show=True,
                             save_2d=None,
+                            print_plot_opts:bool=False,
                             **kwargs):
         """A method to plot the 3d fermi surface
 
@@ -160,9 +173,15 @@ class FermiHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
+        print_plot_opts: bool, optional
+            Boolean to print the plotting options
         """
+        print(self.notification_message)
+        if print_plot_opts:
+            self.print_default_settings()
         # Process the data
-        self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
+        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         
         if iso_surfaces is not None:
             energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
@@ -194,8 +213,8 @@ class FermiHandler:
                             spins=None, 
                             spin_texture=False,
                             property_name=None,
-                            show=True,
                             save_gif=None,
+                            print_plot_opts:bool=False,
                             **kwargs):
         """A method to plot the 3d fermi surface
 
@@ -219,9 +238,15 @@ class FermiHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
+        print_plot_opts: bool, optional
+            Boolean to print the plotting options
         """
+        print(self.notification_message)
+        if print_plot_opts:
+            self.print_default_settings()
         # Process the data
-        self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
+        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         
         if iso_surfaces is not None:
             energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
@@ -251,6 +276,7 @@ class FermiHandler:
                             show=True,
                             save_2d=None,
                             save_2d_slice=None,
+                            print_plot_opts:bool=False,
                             **kwargs):
         """A method to plot the 3d fermi surface
 
@@ -269,9 +295,15 @@ class FermiHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
+        print_plot_opts: bool, optional
+            Boolean to print the plotting options
         """
+        print(self.notification_message)
+        if print_plot_opts:
+            self.print_default_settings()
         # Process the data
-        self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
+        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
 
         visualizer = FermiVisualizer(self.data_handler,**kwargs)
@@ -290,6 +322,7 @@ class FermiHandler:
                             show=True,
                             save_2d=None,
                             save_2d_slice=None,
+                            print_plot_opts:bool=False,
                             **kwargs):
         """A method to plot the 3d fermi surface
 
@@ -308,26 +341,28 @@ class FermiHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
+        print_plot_opts: bool, optional
+            Boolean to print the plotting options
         """
+
+        print(self.notification_message)
+        if print_plot_opts:
+            self.print_default_settings()
         # Process the data
-        self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
+        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
         print("Bands being used if bands=None: ", surface.band_index_map)
         visualizer = FermiVisualizer(self.data_handler,**kwargs)
         visualizer.add_box_slicer(surface,show,save_2d,save_2d_slice,
                                   slice_normal,
                                   slice_origin)
-
-
     
-    def default_settings(self):
+    def print_default_settings(self):
         with open(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_3d.yml'), 'r') as file:
             plotting_options = yaml.safe_load(file)
+        
         for key,value in plotting_options.items():
-                print(key,':',value)
+            print(key,':',value)
 
-
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return idx
+   

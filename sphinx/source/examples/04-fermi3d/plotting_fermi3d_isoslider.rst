@@ -136,13 +136,28 @@ Plain mode
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                    --------------------------------------------------------
+                    There are additional plot options that are defined in a configuration file. 
+                    You can change these configurations by passing the keyword argument to the function
+                    To print a list of plot options set print_plot_opts=True
+
+                    Here is a list modes : plain , parametric , spin_texture , overlay
+                    Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+                    --------------------------------------------------------
+                
+
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  31.566 seconds)
+   **Total running time of the script:** ( 0 minutes  34.672 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_isoslider.py:

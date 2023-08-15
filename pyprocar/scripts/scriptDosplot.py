@@ -226,6 +226,9 @@ def dosplot(
 
         e.g. ``plt_show=True``
 
+    print_plot_opts: bool, optional
+        Boolean to print the plotting options
+
 
     Returns
     -------

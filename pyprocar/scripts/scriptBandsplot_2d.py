@@ -14,11 +14,6 @@ from ..plotter import EBSPlot
 from ..utils import welcome
 from ..utils.defaults import settings
 
-
-# TODO What is the type is for projection mask?
-# TODO Needs abinit parsing
-# TODO Needs elk parsing
-
 def bandsplot_2d(
     code="vasp",
     dirname:str=None,

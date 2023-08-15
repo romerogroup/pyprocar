@@ -48,6 +48,38 @@ surface_clim
 :description: Controls the color scale on the surface
 
 
+extended_zone_directions
+------------------------
+
+:value: None
+
+:description: Controls how many zone to generate. This is a list of directions to generates. Ex: [[1,0,0],[0,0,1]]
+
+
+supercell
+---------
+
+:value: [1, 1, 1]
+
+:description: Controls how many the supercell size used to generate the fermi surface
+
+
+projection_accuracy
+-------------------
+
+:value: high
+
+:description: Controls the projection algorithmuse. Either high or normal
+
+
+interpolation_factor
+--------------------
+
+:value: 1
+
+:description: Controls the interpolation factor used on the fermi surface
+
+
 brillouin_zone_style
 --------------------
 

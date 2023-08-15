@@ -58,7 +58,21 @@ class BandStructure2DHandler:
             self.ebs.ibz2fbz(self.structure.rotations)
 
         self._find_bands_near_fermi()
-        self.data_handler = BandStructure2DataHandler(self.ebs)
+
+        modes=["plain","parametric","spin_texture", "overlay" ]
+        props=["fermi_speed","fermi_velocity","harmonic_effective_mass"]
+        modes_txt=' , '.join(modes)
+        props_txt=' , '.join(props)
+        self.notification_message=f"""
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : {modes_txt}
+                Here is a list of properties: {props_txt}
+                --------------------------------------------------------
+                """
 
     def process_data(self, mode, bands=None, atoms=None, orbitals=None, spins=None, spin_texture=False):
         self.data_handler.process_data(mode, bands, atoms, orbitals, spins, spin_texture)
@@ -77,6 +91,7 @@ class BandStructure2DHandler:
                             save_gif=None,
                             save_mp4=None,
                             save_3d=None,
+                            print_plot_opts:bool=False,
                             **kwargs):
         """A method to plot the 3d fermi surface
 
@@ -94,10 +109,16 @@ class BandStructure2DHandler:
             A list of spins, by default None
         spin_texture : bool, optional
             Boolean to plot spin texture, by default False
+        print_plot_opts: bool, optional
+            Boolean to print the plotting options
         """
-        self._reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
+        print(self.notification_message)
+        if print_plot_opts:
+            self.print_default_settings()
         # Process the data
-        self.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = BandStructure2DataHandler(self.ebs, **kwargs)
+        self._reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
+        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         band_structure_surface=self.data_handler.get_surface_data(property_name=property_name)
 
         visualizer = BandStructure2DVisualizer(self.data_handler,**kwargs)
@@ -124,11 +145,12 @@ class BandStructure2DHandler:
         if save_3d:
             visualizer.save_mesh(filename=save_3d,surface=band_structure_surface)
 
-    def default_settings(self):
-        with open(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_3d.yml'), 'r') as file:
+    def print_default_settings(self):
+        with open(os.path.join(ROOT,'pyprocar','cfg','band_structure_2d.yml'), 'r') as file:
             plotting_options = yaml.safe_load(file)
+        
         for key,value in plotting_options.items():
-                print(key,':',value)
+            print(key,':',value)
 
     def _find_bands_near_fermi(self,energy_tolerance=0.7):
         energy_level = 0

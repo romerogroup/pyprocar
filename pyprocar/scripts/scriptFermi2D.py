@@ -212,7 +212,8 @@ def fermi2D(
 
     fs = FermiSurface(symm.kpoints, symm.bands, symm.character,  
                       band_indices=band_indices, 
-                      band_colors=band_colors,**kwargs)
+                      band_colors=band_colors,
+                      **kwargs)
     fs.find_energy(energy)
 
     if not spin_texture:
@@ -223,19 +224,15 @@ def fermi2D(
                         sz=symm.sz, 
                         spin=spins[0])
 
-    if plot_opt['add_axes_labels']['value']:
-        fs.add_axes_labels()
-
-    if plot_opt['add_legend']['value']:
-        fs.add_legend()
-
+    fs.add_axes_labels()
+    fs.add_legend()
+    
     if exportplt:
         return plt
 
     else:
         if savefig:
-            plt.savefig(savefig,dpi=plot_opt['dpi']['value'], bbox_inches="tight")
-            plt.close()  # Added by Nicholas Pike to close memory issue of looping and creating many figures
+            fs.savefig(savefig)  
         else:
-            plt.show()
+            fs.show()
         return

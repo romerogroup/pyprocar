@@ -19,7 +19,6 @@ from ..utils import welcome, ROOT
 with open(os.path.join(ROOT,'pyprocar','cfg','band_structure.yml'), 'r') as file:
     plot_opt = yaml.safe_load(file)
     
-
 def bandsplot(
     code: str,
     dirname: str,

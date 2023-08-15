@@ -19,7 +19,7 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 from matplotlib.collections import LineCollection
 
-from pyprocar.utils import ROOT
+from pyprocar.utils import ROOT,ConfigManager
 
 class FermiSurface:
     """This object is used to help plot the 2d fermi surface
@@ -49,7 +49,6 @@ class FermiSurface:
         loglevel=logging.WARNING,
         **kwargs):
         
-        
         # Since some time ago Kpoints are in cartesian coords (ready to use)
         self.kpoints = kpoints
         self.bands = bands
@@ -75,9 +74,9 @@ class FermiSurface:
         self.log.info("spd.shape     : " + str(self.spd.shape))
         self.log.debug("FermiSurface.init: ...Done")
 
-        with open(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_2d.yml'), 'r') as file:
-            self.plot_opt = yaml.safe_load(file)
-        self.update_config(kwargs) 
+        config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_2d.yml'))
+        config_manager.update_config(kwargs)  
+        self.config=config_manager.get_config()
         return None
 
     def find_energy(self, energy):
@@ -194,8 +193,8 @@ class FermiSurface:
                 continue
 
             # Normalizing
-            vmin=self.plot_opt['clim']['value'][0]
-            vmax=self.plot_opt['clim']['value'][1]
+            vmin=self.config['clim']['value'][0]
+            vmax=self.config['clim']['value'][1]
             if vmin is None:
                 vmin=spd.min()
             if vmax is None:
@@ -212,7 +211,7 @@ class FermiSurface:
             # Generates colors per band
             
             n_bands = bands.shape[0]
-            cmap = cm.get_cmap(self.plot_opt['cmap']['value'])
+            cmap = cm.get_cmap(self.config['cmap']['value'])
             if i_spin == 1:
                 factor = 0.25
             else:
@@ -227,9 +226,9 @@ class FermiSurface:
                     segments = np.concatenate([points[:-1], points[1:]], axis=1)
                     if mode=='plain':
                         lc = LineCollection(segments, 
-                                            colors=self.plot_opt['color']['value'][i_spin], 
-                                            linestyle=self.plot_opt['linestyle']['value'][i_spin])
-                        lc.set_linestyle(self.plot_opt['linestyle']['value'][i_spin])
+                                            colors=self.config['color']['value'][i_spin], 
+                                            linestyle=self.config['linestyle']['value'][i_spin])
+                        lc.set_linestyle(self.config['linestyle']['value'][i_spin])
                     if mode=='plain_bands':
                         if self.band_colors is None:
                             c = band_colors[i_band]
@@ -245,7 +244,7 @@ class FermiSurface:
                             lc.set_label(label)
                     if mode=='parametric':
                         c = griddata((x, y), spd[i_band,:], (contour[:, 0], contour[:, 1]), method="nearest")
-                        lc = LineCollection(segments, cmap=plt.get_cmap(self.plot_opt['cmap']['value']), norm=norm)
+                        lc = LineCollection(segments, cmap=plt.get_cmap(self.config['cmap']['value']), norm=norm)
                         lc.set_array(c)
 
                     plt.gca().add_collection(lc)
@@ -328,8 +327,8 @@ class FermiSurface:
             bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
 
         # Normalizing
-        vmin=self.plot_opt['clim']['value'][0]
-        vmax=self.plot_opt['clim']['value'][1]
+        vmin=self.config['clim']['value'][0]
+        vmax=self.config['clim']['value'][1]
         if vmin is None:
             vmin=-0.5
         if vmax is None:
@@ -343,7 +342,7 @@ class FermiSurface:
                 ynew,
                 z,
                 [self.energy],
-                linewidths=self.plot_opt['linewidth']['value'],
+                linewidths=self.config['linewidth']['value'],
                 colors="k",
                 linestyles="solid",
             )
@@ -365,8 +364,8 @@ class FermiSurface:
                 newSy = griddata((x, y), spinY, (points[:, 0], points[:, 1]))
                 newSz = griddata((x, y), spinZ, (points[:, 0], points[:, 1]))
                 self.log.info("newSx.shape: " + str(newSx.shape))
-                if self.plot_opt['arrow_size']['value'] is not None:
-                    scale  = self.plot_opt['arrow_size']['value']
+                if self.config['arrow_size']['value'] is not None:
+                    scale  = self.config['arrow_size']['value']
                     scale_units = "xy"
                     angles="xy"
                 else:
@@ -374,49 +373,49 @@ class FermiSurface:
                     scale_units = "xy"
                     angles="xy"
 
-                if self.plot_opt['spin_projection']['value'] == 'z':
-                    color = newSz[::self.plot_opt['arrow_density']['value']]
-                elif self.plot_opt['spin_projection']['value'] == 'y':
-                    color = newSy[::self.plot_opt['arrow_density']['value']]
-                elif self.plot_opt['spin_projection']['value'] == 'x':
-                    color = newSx[::self.plot_opt['arrow_density']['value']]
-                elif self.plot_opt['spin_projection']['value'] == 'x^2':
-                    color = newSx[::self.plot_opt['arrow_density']['value']]**2
-                elif self.plot_opt['spin_projection']['value'] == 'y^2':
-                    color = newSy[::self.plot_opt['arrow_density']['value']]**2
-                elif self.plot_opt['spin_projection']['value'] == 'z^2':
-                    color = newSz[::self.plot_opt['arrow_density']['value']]**2
+                if self.config['spin_projection']['value'] == 'z':
+                    color = newSz[::self.config['arrow_density']['value']]
+                elif self.config['spin_projection']['value'] == 'y':
+                    color = newSy[::self.config['arrow_density']['value']]
+                elif self.config['spin_projection']['value'] == 'x':
+                    color = newSx[::self.config['arrow_density']['value']]
+                elif self.config['spin_projection']['value'] == 'x^2':
+                    color = newSx[::self.config['arrow_density']['value']]**2
+                elif self.config['spin_projection']['value'] == 'y^2':
+                    color = newSy[::self.config['arrow_density']['value']]**2
+                elif self.config['spin_projection']['value'] == 'z^2':
+                    color = newSz[::self.config['arrow_density']['value']]**2
 
-                if self.plot_opt['no_arrow']['value']:
+                if self.config['no_arrow']['value']:
                     # a dictionary to select the right spin component
-                    # spinDict = {0: newSx[::self.plot_opt['arrow_density']['value']], 
-                    #             1: newSy[::self.plot_opt['arrow_density']['value']], 
-                    #             2: newSz[::self.plot_opt['arrow_density']['value']]}
+                    # spinDict = {0: newSx[::self.config['arrow_density']['value']], 
+                    #             1: newSy[::self.config['arrow_density']['value']], 
+                    #             2: newSz[::self.config['arrow_density']['value']]}
                         
                     plt.scatter(
-                        points[::self.plot_opt['arrow_density']['value'], 0],
-                        points[::self.plot_opt['arrow_density']['value'], 1],
+                        points[::self.config['arrow_density']['value'], 0],
+                        points[::self.config['arrow_density']['value'], 1],
                         c=color,
                         # spinDict[spin],
                         s=50,
                         edgecolor="none",
                         alpha=1.0,
-                        marker=self.plot_opt['marker']['value'],
-                        cmap=self.plot_opt['cmap']['value'],
+                        marker=self.config['marker']['value'],
+                        cmap=self.config['cmap']['value'],
                         norm=norm,
                     )
 
                 else:
-                    if self.plot_opt['arrow_color']['value'] is not None or self.band_colors is not None:
+                    if self.config['arrow_color']['value'] is not None or self.band_colors is not None:
                         if self.band_colors is not None:
                             c = self.band_colors[0][i_band]
-                        if self.plot_opt['arrow_color']['value'] is not None:
-                            c = self.plot_opt['arrow_color']['value']
+                        if self.config['arrow_color']['value'] is not None:
+                            c = self.config['arrow_color']['value']
                         plt.quiver(
-                            points[::self.plot_opt['arrow_density']['value'], 0],  # Arrow position x-component
-                            points[::self.plot_opt['arrow_density']['value'], 1],  # Arrow position y-component
-                            newSx[::self.plot_opt['arrow_density']['value']],      # Arrow direction x-component
-                            newSy[::self.plot_opt['arrow_density']['value']],      # Arrow direction y-component
+                            points[::self.config['arrow_density']['value'], 0],  # Arrow position x-component
+                            points[::self.config['arrow_density']['value'], 1],  # Arrow position y-component
+                            newSx[::self.config['arrow_density']['value']],      # Arrow direction x-component
+                            newSy[::self.config['arrow_density']['value']],      # Arrow direction y-component
                             scale=scale,
                             scale_units=scale_units,
                             angles=angles,
@@ -425,26 +424,26 @@ class FermiSurface:
                     else:
  
                         plt.quiver(
-                            points[::self.plot_opt['arrow_density']['value'], 0],  # Arrow position x-component
-                            points[::self.plot_opt['arrow_density']['value'], 1],  # Arrow position y-component
-                            newSx[::self.plot_opt['arrow_density']['value']],      # Arrow direction x-component
-                            newSy[::self.plot_opt['arrow_density']['value']],      # Arrow direction y-component
+                            points[::self.config['arrow_density']['value'], 0],  # Arrow position x-component
+                            points[::self.config['arrow_density']['value'], 1],  # Arrow position y-component
+                            newSx[::self.config['arrow_density']['value']],      # Arrow direction x-component
+                            newSy[::self.config['arrow_density']['value']],      # Arrow direction y-component
                             color,                           # Color for each arrow
                             scale=scale,
                             scale_units=scale_units,
                             angles=angles,
-                            cmap=self.plot_opt['cmap']['value'],
+                            cmap=self.config['cmap']['value'],
                             norm=norm,
                         )
                 
             
-        if self.plot_opt['plot_color_bar']['value']:
+        if self.config['plot_color_bar']['value']:
             cbar = plt.colorbar()
-            if len(self.plot_opt['spin_projection']['value'].split('^')) == 2:
-                tmp = self.plot_opt['spin_projection']['value'].split('^')
+            if len(self.config['spin_projection']['value'].split('^')) == 2:
+                tmp = self.config['spin_projection']['value'].split('^')
                 label = f'S$_{tmp[0]}^{tmp[1]}$ projection'
             else:
-                tmp = self.plot_opt['spin_projection']['value'].split('^')
+                tmp = self.config['spin_projection']['value'].split('^')
                 label = f'S$_{tmp[0]}$ projection'
             cbar.ax.set_ylabel(label, rotation=270)
         plt.axis("equal")
@@ -458,16 +457,28 @@ class FermiSurface:
         """
         Method to add labels to matplotlib plot
         """
-
-        plt.ylabel(self.plot_opt['y_label']['value'])
-        plt.xlabel(self.plot_opt['x_label']['value'])
+        if self.config['add_axes_labels']['value']:
+            plt.ylabel(self.config['y_label']['value'])
+            plt.xlabel(self.config['x_label']['value'])
 
     def add_legend(self):
         """
         Method to add labels to matplotlib plot
         """
-        plt.legend()
+        if self.config['add_legend']['value']:
+            plt.legend()
 
-    def update_config(self, config_dict):
-        for key,value in config_dict.items():
-            self.plot_opt[key]['value']=value
+    def savefig(self,savefig):
+        """
+        Method to save plot
+        """
+        plt.savefig(savefig,
+                    dpi=self.config['dpi']['value'],
+                    bbox_inches="tight")
+        plt.close()
+
+    def show(self):
+        """
+        Method show th plot
+        """
+        plt.show()

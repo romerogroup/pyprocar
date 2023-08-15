@@ -14,6 +14,7 @@ from . import mathematics
 from . import defaults
 from . import elements 
 from . import sorting
+from .config import ConfigManager
 
 
 

@@ -13,11 +13,14 @@ import matplotlib.pylab as plt
 from matplotlib.collections import LineCollection
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 
-from pyprocar.utils import ROOT
+from pyprocar.utils import ROOT,ConfigManager
 from ..utils.defaults import settings
 from ..core import Structure, DensityOfStates
 
 np.seterr(divide="ignore", invalid="ignore")
+
+
+
 
 # TODO Generalize orientation to remove if statments
 
@@ -47,17 +50,16 @@ class DOSPlot:
                     structure:Structure=None, 
                     ax:mpl.axes.Axes=None, 
                     **kwargs):
-        
-        with open(os.path.join(ROOT,'pyprocar','cfg','dos.yml'), 'r') as file:
-            self.plot_opt = yaml.safe_load(file)
-        self.update_config(kwargs)  
+        config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','dos.yml'))
+        config_manager.update_config(kwargs)  
+        self.config=config_manager.get_config()
 
         self.dos = dos
         self.structure = structure
         self.handles = []
         self.labels = []
         if ax is None:
-            self.fig = plt.figure(figsize=tuple(self.plot_opt['figure_size']['value']),)
+            self.fig = plt.figure(figsize=tuple(self.config['figure_size']['value']),)
             self.ax = self.fig.add_subplot(111)
         else:
             self.fig = plt.gcf()
@@ -94,30 +96,30 @@ class DOSPlot:
         # plots over the different dos energies for spin polarized
         for ispin in spins:
             if orientation == 'horizontal':
-                self.set_xlabel(self.plot_opt['x_label']['value'])
-                self.set_ylabel(self.plot_opt['y_label']['value'])
+                self.set_xlabel(self.config['x_label']['value'])
+                self.set_ylabel(self.config['y_label']['value'])
                 self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
                 self.set_ylim([self.dos.total.min(),self.dos.total.max()])
                 handle = self.ax.plot(
                     self.dos.energies, self.dos.total[ispin, :], 
-                    color=self.plot_opt['spin_colors']['value'][ispin], 
-                    alpha=self.plot_opt['opacity']['value'][ispin], 
-                    linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                    label=self.plot_opt['spin_labels']['value'][ispin], 
-                    linewidth=self.plot_opt['linewidth']['value'][ispin],
+                    color=self.config['spin_colors']['value'][ispin], 
+                    alpha=self.config['opacity']['value'][ispin], 
+                    linestyle=self.config['linestyle']['value'][ispin], 
+                    label=self.config['spin_labels']['value'][ispin], 
+                    linewidth=self.config['linewidth']['value'][ispin],
                 )
             elif orientation == 'vertical':
-                self.set_xlabel(self.plot_opt['y_label']['value'])
-                self.set_ylabel(self.plot_opt['x_label']['value'])
+                self.set_xlabel(self.config['y_label']['value'])
+                self.set_ylabel(self.config['x_label']['value'])
                 self.set_xlim([self.dos.total.min(),self.dos.total.max()])
                 self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
                 handle = self.ax.plot(
                         self.dos.total[ispin, :], self.dos.energies, 
-                        color=self.plot_opt['spin_colors']['value'][ispin], 
-                        alpha=self.plot_opt['opacity']['value'][ispin], 
-                        linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                        label=self.plot_opt['spin_labels']['value'][ispin], 
-                        linewidth=self.plot_opt['linewidth']['value'][ispin],
+                        color=self.config['spin_colors']['value'][ispin], 
+                        alpha=self.config['opacity']['value'][ispin], 
+                        linestyle=self.config['linestyle']['value'][ispin], 
+                        label=self.config['spin_labels']['value'][ispin], 
+                        linewidth=self.config['linewidth']['value'][ispin],
                 )
             self.handles.append(handle)
 
@@ -160,27 +162,27 @@ class DOSPlot:
                                         orbitals=orbitals,
                                         spins=spin_projections)
 
-        if self.plot_opt['clim']['value']:
-            vmin=self.plot_opt['clim']['value'][0]
-            vmax=self.plot_opt['clim']['value'][1]
+        if self.config['clim']['value']:
+            vmin=self.config['clim']['value'][0]
+            vmax=self.config['clim']['value'][1]
         else:
             vmin=None
             vmax=None
-        cmap=self.plot_opt['cmap']['value']
+        cmap=self.config['cmap']['value']
         if vmin is None:
             vmin = (dos_projected.min() / dos_total_projected.max())
         if vmax is None:
             vmax = (dos_projected.max() / dos_total_projected.max())
 
         cmap = mpl.cm.get_cmap(cmap)
-        if self.plot_opt['plot_bar']['value']:
+        if self.config['plot_bar']['value']:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
             self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
 
 
         if orientation == 'horizontal':
-            self.set_xlabel(self.plot_opt['x_label']['value'])
-            self.set_ylabel(self.plot_opt['y_label']['value'])
+            self.set_xlabel(self.config['x_label']['value'])
+            self.set_ylabel(self.config['y_label']['value'])
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
 
             if len(spins) == 2:
@@ -210,27 +212,27 @@ class DOSPlot:
                                     [y_total[idos], y_total[idos + 1]],
                                     color=bar_color[idos])
                 
-                if self.plot_opt['plot_total']['value'] == True:
+                if self.config['plot_total']['value'] == True:
                     if spins_index == 0:
                         self.ax.plot(
                                 self.dos.energies, self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin], 
-                                linewidth=self.plot_opt['linewidth']['value'][ispin], 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin], 
+                                linewidth=self.config['linewidth']['value'][ispin], 
                             )
                     else:
                         self.ax.plot(
                                 self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin], 
-                                linewidth=self.plot_opt['linewidth']['value'][ispin], 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin], 
+                                linewidth=self.config['linewidth']['value'][ispin], 
                             )
 
         elif orientation == 'vertical':
-            self.set_xlabel(self.plot_opt['y_label']['value'])
-            self.set_ylabel(self.plot_opt['x_label']['value'])
+            self.set_xlabel(self.config['y_label']['value'])
+            self.set_ylabel(self.config['x_label']['value'])
 
             if len(spins) == 2:
                 self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
@@ -259,22 +261,22 @@ class DOSPlot:
                                     [y_total[idos], y_total[idos + 1]],
                                     color=bar_color[idos])
 
-                if self.plot_opt['plot_total']['value'] == True:
+                if self.config['plot_total']['value'] == True:
                     if spins_index == 0:
                         self.ax.plot(
                                 self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin], 
-                                linewidth=self.plot_opt['linewidth']['value'][ispin], 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin], 
+                                linewidth=self.config['linewidth']['value'][ispin], 
                             )
                     else:
                         self.ax.plot(
                                 -self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin], 
-                                linewidth=self.plot_opt['linewidth']['value'][ispin], 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin], 
+                                linewidth=self.config['linewidth']['value'][ispin], 
                             )
                     
     def plot_parametric_line(self,
@@ -319,25 +321,25 @@ class DOSPlot:
         projections_weights = np.divide(dos_projected,dos_total_projected)
 
 
-        if self.plot_opt['clim']['value']:
-            vmin=self.plot_opt['clim']['value'][0]
-            vmax=self.plot_opt['clim']['value'][1]
+        if self.config['clim']['value']:
+            vmin=self.config['clim']['value'][0]
+            vmax=self.config['clim']['value'][1]
         else:
             vmin=None
             vmax=None
-        cmap=self.plot_opt['cmap']['value']
+        cmap=self.config['cmap']['value']
         if vmin is None:
             vmin = (dos_projected.min() / dos_total_projected.max())
         if vmax is None:
             vmax = (dos_projected.max() / dos_total_projected.max())
-        if self.plot_opt['plot_bar']['value']:
+        if self.config['plot_bar']['value']:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
             self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
 
         if orientation == 'horizontal':
 
-            self.set_xlabel(self.plot_opt['x_label']['value'])
-            self.set_ylabel(self.plot_opt['y_label']['value'])
+            self.set_xlabel(self.config['x_label']['value'])
+            self.set_ylabel(self.config['y_label']['value'])
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             if len(spins) == 2:
                 self.set_ylim([-self.dos.total.max(),self.dos.total.max()])
@@ -351,18 +353,18 @@ class DOSPlot:
                     points = np.array( [self.dos.energies, self.dos.total[ispin, :]]).T.reshape(-1, 1, 2)
 
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                lc = LineCollection(segments, cmap=plt.get_cmap(self.plot_opt['cmap']['value']), norm=norm)
+                lc = LineCollection(segments, cmap=plt.get_cmap(self.config['cmap']['value']), norm=norm)
                 lc.set_array(projections_weights[ispin,:])
                 handle = self.ax.add_collection(lc)
                 
-                lc.set_linewidth(self.plot_opt['linewidth']['value'][ispin])
-                lc.set_linestyle(self.plot_opt['linestyle']['value'][ispin])
+                lc.set_linewidth(self.config['linewidth']['value'][ispin])
+                lc.set_linestyle(self.config['linestyle']['value'][ispin])
 
                 self.handles.append(handle)
 
         elif orientation == 'vertical':
-            self.set_xlabel(self.plot_opt['y_label']['value'])
-            self.set_ylabel(self.plot_opt['x_label']['value'])
+            self.set_xlabel(self.config['y_label']['value'])
+            self.set_ylabel(self.config['x_label']['value'])
 
             if len(spins) == 2:
                 self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
@@ -376,12 +378,12 @@ class DOSPlot:
                     points = np.array( [self.dos.total[ispin, :], self.dos.energies]).T.reshape(-1, 1, 2)
 
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                lc = LineCollection(segments, cmap=plt.get_cmap(self.plot_opt['cmap']['value']), norm=norm)
+                lc = LineCollection(segments, cmap=plt.get_cmap(self.config['cmap']['value']), norm=norm)
                 lc.set_array(projections_weights[ispin,:])
                 handle = self.ax.add_collection(lc)
                 
-                lc.set_linewidth(self.plot_opt['linewidth']['value'][ispin])
-                lc.set_linestyle(self.plot_opt['linestyle']['value'][ispin])
+                lc.set_linewidth(self.config['linewidth']['value'][ispin])
+                lc.set_linestyle(self.config['linestyle']['value'][ispin])
                 self.handles.append(handle)
 
     def plot_stack_species(
@@ -464,8 +466,8 @@ class DOSPlot:
 
 
         if orientation == 'horizontal':
-            self.set_xlabel(self.plot_opt['x_label']['value'])
-            self.set_ylabel(self.plot_opt['stack_y_label']['value'])
+            self.set_xlabel(self.config['x_label']['value'])
+            self.set_ylabel(self.config['stack_y_label']['value'])
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
             if len(spins) == 1:
@@ -493,42 +495,42 @@ class DOSPlot:
                         handle = self.ax.fill_between(x,
                                         bottom + y,
                                         bottom,
-                                        color=self.plot_opt['colors']['value'][specie],
+                                        color=self.config['colors']['value'][specie],
                                         )
                     else:
                         handle = self.ax.fill_between(
                             x,
                             bottom + y,
                             bottom,
-                            color=self.plot_opt['colors']['value'][specie],
+                            color=self.config['colors']['value'][specie],
                         )
                     self.handles.append(handle)
-                    label=self.structure.species[specie] + label + self.plot_opt['spin_labels']['value'][ispin]
+                    label=self.structure.species[specie] + label + self.config['spin_labels']['value'][ispin]
                     self.labels.append(label)
                     bottom += y
 
                     if spins_index == 0:
                         self.ax.plot(
                                 self.dos.energies, self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
                     else:
                         self.ax.plot(
                                 self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
 
 
 
         elif orientation == 'vertical':
-            self.set_xlabel(self.plot_opt['stack_y_label']['value'])
-            self.set_ylabel(self.plot_opt['x_label']['value'])
+            self.set_xlabel(self.config['stack_y_label']['value'])
+            self.set_ylabel(self.config['x_label']['value'])
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
             if len(spins) == 1:
                 self.set_xlim([0,self.dos.total.max()])
@@ -556,35 +558,35 @@ class DOSPlot:
                         handle = self.ax.fill_betweenx(x,
                                         bottom + y,
                                         bottom,
-                                        color=self.plot_opt['colors']['value'][specie],
+                                        color=self.config['colors']['value'][specie],
                                         )
                     else:
                          handle = self.ax.fill_betweenx(x,
                                         bottom + y,
                                         bottom,
-                                        color=self.plot_opt['colors']['value'][specie],
+                                        color=self.config['colors']['value'][specie],
                                         )
                     self.handles.append(handle)
-                    label=self.structure.species[specie] + label + self.plot_opt['spin_labels']['value'][ispin]
+                    label=self.structure.species[specie] + label + self.config['spin_labels']['value'][ispin]
                     self.labels.append(label)     
                     bottom += y 
 
-                if self.plot_opt['plot_total']['value'] == True:
+                if self.config['plot_total']['value'] == True:
                     if spins_index == 0:
                         self.ax.plot(
                                 self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
                     else:
                         self.ax.plot(
                                 -self.dos.total[ispin, :], self.dos.energies,color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
 
     def plot_stack_orbitals(self,
@@ -644,8 +646,8 @@ class DOSPlot:
         dos_projected_total = self.dos.dos_sum()
 
         if  orientation == 'horizontal':
-            self.set_xlabel(self.plot_opt['x_label']['value'])
-            self.set_ylabel(self.plot_opt['stack_y_label']['value'])
+            self.set_xlabel(self.config['x_label']['value'])
+            self.set_ylabel(self.config['stack_y_label']['value'])
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
             if len(spins) == 1:
@@ -671,36 +673,36 @@ class DOSPlot:
                         handle =  self.ax.fill_between(x,
                                         bottom + y,
                                         bottom,
-                                        color=self.plot_opt['colors']['value'][iorb])
+                                        color=self.config['colors']['value'][iorb])
                         
                     else:
                         handle = self.ax.fill_between(
                             x,
                             bottom + y,
                             bottom,
-                            color=self.plot_opt['colors']['value'][iorb],
+                            color=self.config['colors']['value'][iorb],
                         )
                         
 
-                    self.labels.append(atom_names + orb_names[iorb] + self.plot_opt['spin_labels']['value'][ispin])
+                    self.labels.append(atom_names + orb_names[iorb] + self.config['spin_labels']['value'][ispin])
                     self.handles.append(handle)
                     bottom += y
-            if self.plot_opt['plot_total']['value'] == True:
+            if self.config['plot_total']['value'] == True:
                 if ispin == 0:
                     self.ax.plot(
                             self.dos.energies, self.dos.total[ispin, :], color= 'black', 
-                            alpha=self.plot_opt['opacity']['value'][ispin], 
-                            linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                            label=self.plot_opt['spin_labels']['value'][ispin],
-                            linewidth=self.plot_opt['linewidth']['value'][ispin],
+                            alpha=self.config['opacity']['value'][ispin], 
+                            linestyle=self.config['linestyle']['value'][ispin], 
+                            label=self.config['spin_labels']['value'][ispin],
+                            linewidth=self.config['linewidth']['value'][ispin],
                         )
                 else:
                     self.ax.plot(
                             self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
-                            alpha=self.plot_opt['opacity']['value'][ispin], 
-                            linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                            label=self.plot_opt['spin_labels']['value'][ispin],
-                            linewidth=self.plot_opt['linewidth']['value'][ispin],
+                            alpha=self.config['opacity']['value'][ispin], 
+                            linestyle=self.config['linestyle']['value'][ispin], 
+                            label=self.config['spin_labels']['value'][ispin],
+                            linewidth=self.config['linewidth']['value'][ispin],
                         )
 
         elif orientation == 'vertical':
@@ -731,36 +733,36 @@ class DOSPlot:
                         handle =  self.ax.fill_betweenx(x,
                                         bottom + y,
                                         bottom,
-                                        color=self.plot_opt['colors']['value'][iorb])
+                                        color=self.config['colors']['value'][iorb])
                         
                     else:
                         handle = self.ax.fill_betweenx(
                             x,
                             bottom + y,
                             bottom,
-                            color=self.plot_opt['colors']['value'][iorb],
+                            color=self.config['colors']['value'][iorb],
                         )
                         
 
-                    self.labels.append(atom_names + orb_names[iorb] + self.plot_opt['spin_labels']['value'][ispin])
+                    self.labels.append(atom_names + orb_names[iorb] + self.config['spin_labels']['value'][ispin])
                     self.handles.append(handle)
                     bottom += y
-            if self.plot_opt['plot_total']['value'] == True:
+            if self.config['plot_total']['value'] == True:
                 if ispin == 0:
                     self.ax.plot(
                             self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                            alpha=self.plot_opt['opacity']['value'][ispin], 
-                            linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                            label=self.plot_opt['spin_labels']['value'][ispin],
-                            linewidth=self.plot_opt['linewidth']['value'][ispin],
+                            alpha=self.config['opacity']['value'][ispin], 
+                            linestyle=self.config['linestyle']['value'][ispin], 
+                            label=self.config['spin_labels']['value'][ispin],
+                            linewidth=self.config['linewidth']['value'][ispin],
                         )
                 else:
                     self.ax.plot(
                             -self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                            alpha=self.plot_opt['opacity']['value'][ispin], 
-                            linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                            label=self.plot_opt['spin_labels']['value'][ispin],
-                            linewidth=self.plot_opt['linewidth']['value'][ispin],
+                            alpha=self.config['opacity']['value'][ispin], 
+                            linestyle=self.config['linestyle']['value'][ispin], 
+                            label=self.config['spin_labels']['value'][ispin],
+                            linewidth=self.config['linewidth']['value'][ispin],
                         )
             
     def plot_stack(self,
@@ -814,7 +816,7 @@ class DOSPlot:
         counter = 0
         colors_dict = {}
         for specie in items:
-            colors_dict[specie] = self.plot_opt['colors']['value'][counter]
+            colors_dict[specie] = self.config['colors']['value'][counter]
             counter += 1
         
         
@@ -822,8 +824,8 @@ class DOSPlot:
         dos_projected_total = self.dos.dos_sum()
 
         if orientation=='horizontal':
-            self.set_xlabel(self.plot_opt['x_label']['value'])
-            self.set_ylabel(self.plot_opt['stack_y_label']['value'])
+            self.set_xlabel(self.config['x_label']['value'])
+            self.set_ylabel(self.config['stack_y_label']['value'])
             self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
             self.set_ylim([self.dos.total.min(),self.dos.total.max()])
             if self.dos.n_spins == 2:
@@ -889,29 +891,29 @@ class DOSPlot:
                                 color=colors_dict[specie],
                             )
                     self.handles.append(handle)
-                    self.labels.append(specie + label + self.plot_opt['spin_labels']['value'][ispin])
+                    self.labels.append(specie + label + self.config['spin_labels']['value'][ispin])
                     bottom += y
                 if plot_total == True:
                     if ispin == 0:
                         self.ax.plot(
                                 self.dos.energies, self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
                     else:
                         self.ax.plot(
                                     self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
-                                    alpha=self.plot_opt['opacity']['value'][ispin], 
-                                    linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                    label=self.plot_opt['spin_labels']['value'][ispin],
-                                    linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                    alpha=self.config['opacity']['value'][ispin], 
+                                    linestyle=self.config['linestyle']['value'][ispin], 
+                                    label=self.config['spin_labels']['value'][ispin],
+                                    linewidth=self.config['linewidth']['value'][ispin],
                                 )
 
         elif orientation=='vertical':
-            self.set_xlabel(self.plot_opt['stack_y_label']['value'])
-            self.set_ylabel(self.plot_opt['x_label']['value'])
+            self.set_xlabel(self.config['stack_y_label']['value'])
+            self.set_ylabel(self.config['x_label']['value'])
             self.set_xlim([self.dos.total.min(),self.dos.total.max()])
             if self.dos.n_spins == 2:
                 self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
@@ -975,28 +977,28 @@ class DOSPlot:
                                 x,
                                 bottom + y,
                                 bottom,
-                                color=self.plot_opt['colors']['value'][specie],
+                                color=self.config['colors']['value'][specie],
                             )
                     self.handles.append(handle)
-                    self.labels.append(specie + label + self.plot_opt['spin_labels']['value'][ispin])
+                    self.labels.append(specie + label + self.config['spin_labels']['value'][ispin])
                     bottom += y
 
                 if plot_total == True:
                     if ispin == 0:
                         self.ax.plot(
                                 self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
                     else:
                         self.ax.plot(
                                 -self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.plot_opt['opacity']['value'][ispin], 
-                                linestyle=self.plot_opt['linestyle']['value'][ispin], 
-                                label=self.plot_opt['spin_labels']['value'][ispin],
-                                linewidth=self.plot_opt['linewidth']['value'][ispin],
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
                             )
         return None
 
@@ -1153,11 +1155,11 @@ class DOSPlot:
             None
         """
         self.ax.grid(
-            self.plot_opt['grid']['value'],
-            which=self.plot_opt['grid_which']['value'],
-            color=self.plot_opt['grid_color']['value'],
-            linestyle=self.plot_opt['grid_linestyle']['value'],
-            linewidth=self.plot_opt['grid_linewidth']['value'])
+            self.config['grid']['value'],
+            which=self.config['grid_which']['value'],
+            color=self.config['grid_color']['value'],
+            linestyle=self.config['grid_linestyle']['value'],
+            linewidth=self.config['grid_linewidth']['value'])
         return None
 
     def show(self):
@@ -1186,12 +1188,12 @@ class DOSPlot:
             None
         """
 
-        plt.savefig(filename,dpi=self.plot_opt['dpi']['value'], bbox_inches="tight")
+        plt.savefig(filename,dpi=self.config['dpi']['value'], bbox_inches="tight")
         plt.clf()
         return None
     
     def update_config(self, config_dict):
         for key,value in config_dict.items():
-            self.plot_opt[key]['value']=value
+            self.config[key]['value']=value
      
 

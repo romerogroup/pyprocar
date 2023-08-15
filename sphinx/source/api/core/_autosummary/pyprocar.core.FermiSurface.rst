@@ -40,12 +40,17 @@
       
       
         
+          FermiSurface.savefig
+        
+      
+      
+        
+          FermiSurface.show
+        
+      
+      
+        
           FermiSurface.spin_texture
-        
-      
-      
-        
-          FermiSurface.update_config
         
       
    
