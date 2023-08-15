@@ -421,7 +421,6 @@ class EBSPlot:
         self.ax.xaxis.set_major_locator(plt.NullLocator())
         # labels on each band
         for i in range(len(self.ebs.bands[0,:, 0])):
-            print(self.ebs.bands[0,i,0])
             self.ax.text(0, self.ebs.bands[0,i,0], str(i + 1))
 
         self.plot_parameteric(color_weights=color_weights,

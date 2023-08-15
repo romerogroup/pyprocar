@@ -82,7 +82,7 @@ def bandsplot(
         Boolean to print the plotting options
     """
 
-    modes=["plain","parametric","scatter",
+    modes=["plain","parametric","scatter","atomic",
            "overlay", "overlay_species", "overlay_orbitals"]
     modes_txt=' , '.join(modes)
     message=f"""
@@ -216,6 +216,8 @@ def bandsplot(
                 spins=spins
             )
         elif mode == "atomic":
+            if ebs.kpoints.shape[0]!=1:
+                raise Value('Must use a single kpoint')
             if color_weights is not None:
                 color_weights = np.vstack((color_weights, color_weights))
             ebs_plot.plot_atomic_levels(
