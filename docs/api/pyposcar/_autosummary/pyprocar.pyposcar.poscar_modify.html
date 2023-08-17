@@ -473,8 +473,9 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.add_legend.html">add_legend</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.find_energy.html">find_energy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.savefig.html">savefig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.show.html">show</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.spin_texture.html">spin_texture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -703,6 +704,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.draw_fermi.html">draw_fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.grid.html">grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.legend.html">legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_atomic_levels.html">plot_atomic_levels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_bands.html">plot_bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric.html">plot_parameteric</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html">plot_parameteric_overlay</a></li>
@@ -796,12 +798,11 @@ document.write(`
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.html">pyprocar.scripts.FermiHandler</a><input class="toctree-checkbox" id="toctree-checkbox-57" name="toctree-checkbox-57" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-57"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.default_settings.html">default_settings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html">plot_fermi_cross_section_box_widget</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.process_data.html">process_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.print_default_settings.html">print_default_settings</a></li>
 </ul>
 </li>
 </ul>
@@ -929,14 +930,41 @@ document.write(`
 <dt class="sig sig-object py" id="pyprocar.pyposcar.poscar_modify">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.pyposcar.</span></span><span class="sig-name descname"><span class="pre">poscar_modify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyprocar.pyposcar.Poscar.html#pyprocar.pyposcar.Poscar" title="pyprocar.pyposcar.Poscar"><span class="pre">Poscar</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/pyposcar/poscarUtils.html#poscar_modify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.pyposcar.poscar_modify" title="Permalink to this definition">#</a></dt>
 <dd><p>High-level class to change properties of a Poscar-object.</p>
-<p>Methods:</p>
-<p>write(filename, cartesian, xyz)   # write the poscar with <cite>filename</cite>, in <cite>cartesian</cite>?
-pos_multiply(factor, cartesian)   # multiply the position of each atoms by <cite>factor</cite>
-pos_sum(factor, cartesian)        # sums <cite>factor</cite> to each position
-remove(self, atoms, human)        # removes a list of <cite>atoms</cite>
-add(element, position, cartesian) # add a single atom with  <cite>element</cite> at <cite>position</cite>
-shift(amount, cartesian)          # shift all the positions by <cite>amount</cite>
-scale_lattice(factor, cartesian)  # scale the lattice by <cite>factor</cite>. are <cite>cartesian</cite> fixed?</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">write(filename,</span> <span class="pre">cartesian,</span> <span class="pre">xyz)</span>&#160;&#160; <span class="pre">#</span> <span class="pre">write</span> <span class="pre">the</span> <span class="pre">poscar</span> <span class="pre">with</span> <span class="pre">`filename`,</span> <span class="pre">in</span> <span class="pre">`cartesian`?</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pos_multiply(factor,</span> <span class="pre">cartesian)</span>&#160;&#160; <span class="pre">#</span> <span class="pre">multiply</span> <span class="pre">the</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">atoms</span> <span class="pre">by</span> <span class="pre">`factor`</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pos_sum(factor,</span> <span class="pre">cartesian)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">sums</span> <span class="pre">`factor`</span> <span class="pre">to</span> <span class="pre">each</span> <span class="pre">position</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">remove(self,</span> <span class="pre">atoms,</span> <span class="pre">human)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">removes</span> <span class="pre">a</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">`atoms`</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">add(element,</span> <span class="pre">position,</span> <span class="pre">cartesian)</span> <span class="pre">#</span> <span class="pre">add</span> <span class="pre">a</span> <span class="pre">single</span> <span class="pre">atom</span> <span class="pre">with</span>&#160; <span class="pre">`element`</span> <span class="pre">at</span> <span class="pre">`position`</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">shift(amount,</span> <span class="pre">cartesian)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">shift</span> <span class="pre">all</span> <span class="pre">the</span> <span class="pre">positions</span> <span class="pre">by</span> <span class="pre">`amount`</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">scale_lattice(factor,</span> <span class="pre">cartesian)</span>&#160; <span class="pre">#</span> <span class="pre">scale</span> <span class="pre">the</span> <span class="pre">lattice</span> <span class="pre">by</span> <span class="pre">`factor`.</span> <span class="pre">are</span> <span class="pre">`cartesian`</span> <span class="pre">fixed?</span></span></dt>
+<dd></dd></dl>
+
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>

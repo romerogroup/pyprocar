@@ -641,7 +641,8 @@ document.write(`
 
     <span class="n">fs</span> <span class="o">=</span> <span class="n">FermiSurface</span><span class="p">(</span><span class="n">symm</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">symm</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="n">symm</span><span class="o">.</span><span class="n">character</span><span class="p">,</span>  
                       <span class="n">band_indices</span><span class="o">=</span><span class="n">band_indices</span><span class="p">,</span> 
-                      <span class="n">band_colors</span><span class="o">=</span><span class="n">band_colors</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                      <span class="n">band_colors</span><span class="o">=</span><span class="n">band_colors</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">fs</span><span class="o">.</span><span class="n">find_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">spin_texture</span><span class="p">:</span>
@@ -652,21 +653,17 @@ document.write(`
                         <span class="n">sz</span><span class="o">=</span><span class="n">symm</span><span class="o">.</span><span class="n">sz</span><span class="p">,</span> 
                         <span class="n">spin</span><span class="o">=</span><span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;add_axes_labels&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
-        <span class="n">fs</span><span class="o">.</span><span class="n">add_axes_labels</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;add_legend&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
-        <span class="n">fs</span><span class="o">.</span><span class="n">add_legend</span><span class="p">()</span>
-
+    <span class="n">fs</span><span class="o">.</span><span class="n">add_axes_labels</span><span class="p">()</span>
+    <span class="n">fs</span><span class="o">.</span><span class="n">add_legend</span><span class="p">()</span>
+    
     <span class="k">if</span> <span class="n">exportplt</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">plt</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">savefig</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig</span><span class="p">,</span><span class="n">dpi</span><span class="o">=</span><span class="n">plot_opt</span><span class="p">[</span><span class="s1">&#39;dpi&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># Added by Nicholas Pike to close memory issue of looping and creating many figures</span>
+            <span class="n">fs</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig</span><span class="p">)</span>  
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="n">fs</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="k">return</span></div>
 </pre></div>
 

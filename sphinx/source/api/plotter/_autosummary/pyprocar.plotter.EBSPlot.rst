@@ -35,6 +35,11 @@
       
       
         
+          EBSPlot.plot_atomic_levels
+        
+      
+      
+        
           EBSPlot.plot_bands
         
       

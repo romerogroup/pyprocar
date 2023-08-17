@@ -420,8 +420,14 @@ class EBSPlot:
         print("Atomic plot: kpoints.shape:", self.ebs.kpoints.shape)
         self.ax.xaxis.set_major_locator(plt.NullLocator())
         # labels on each band
-        for i in range(len(self.ebs.bands[0,:, 0])):
-            self.ax.text(0, self.ebs.bands[0,i,0], str(i + 1))
+
+        if spins is None:
+            spins = range(self.ebs.nspins)
+        if self.ebs.is_non_collinear:
+            spins = [0]
+        for ispin in spins:
+            for i in range(len(self.ebs.bands[0,:,ispin])):
+                self.ax.text(0, self.ebs.bands[0,i,ispin], f"spin-{ispin} : "+"band-"+str(i + 1))
 
         self.plot_parameteric(color_weights=color_weights,
                             width_weights=width_weights,

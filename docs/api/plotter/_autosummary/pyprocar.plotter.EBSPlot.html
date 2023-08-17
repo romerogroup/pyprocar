@@ -473,8 +473,9 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.add_legend.html">add_legend</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.find_energy.html">find_energy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.savefig.html">savefig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.show.html">show</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.spin_texture.html">spin_texture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -703,6 +704,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.draw_fermi.html">draw_fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.grid.html">grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.legend.html">legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_atomic_levels.html">plot_atomic_levels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_bands.html">plot_bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_parameteric.html">plot_parameteric</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html">plot_parameteric_overlay</a></li>
@@ -796,12 +798,11 @@ document.write(`
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.html">pyprocar.scripts.FermiHandler</a><input class="toctree-checkbox" id="toctree-checkbox-57" name="toctree-checkbox-57" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-57"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.default_settings.html">default_settings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html">plot_fermi_cross_section_box_widget</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.process_data.html">process_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.print_default_settings.html">print_default_settings</a></li>
 </ul>
 </li>
 </ul>
@@ -959,46 +960,49 @@ The default is None.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.legend.html#pyprocar.plotter.EBSPlot.legend" title="pyprocar.plotter.EBSPlot.legend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.legend</span></code></a>([labels])</p></td>
 <td><p>A methdo to plot the legend</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_bands.html#pyprocar.plotter.EBSPlot.plot_bands" title="pyprocar.plotter.EBSPlot.plot_bands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_bands</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_atomic_levels.html#pyprocar.plotter.EBSPlot.plot_atomic_levels" title="pyprocar.plotter.EBSPlot.plot_atomic_levels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_atomic_levels</span></code></a>([spins, ...])</p></td>
+<td><p>A method to plot a scatter plot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_bands.html#pyprocar.plotter.EBSPlot.plot_bands" title="pyprocar.plotter.EBSPlot.plot_bands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_bands</span></code></a>()</p></td>
 <td><p>Plot the plain band structure.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_parameteric.html#pyprocar.plotter.EBSPlot.plot_parameteric" title="pyprocar.plotter.EBSPlot.plot_parameteric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_parameteric</span></code></a>([spins, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_parameteric.html#pyprocar.plotter.EBSPlot.plot_parameteric" title="pyprocar.plotter.EBSPlot.plot_parameteric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_parameteric</span></code></a>([spins, ...])</p></td>
 <td><p>A method to plot a scatter plot</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html#pyprocar.plotter.EBSPlot.plot_parameteric_overlay" title="pyprocar.plotter.EBSPlot.plot_parameteric_overlay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_parameteric_overlay</span></code></a>([spins, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html#pyprocar.plotter.EBSPlot.plot_parameteric_overlay" title="pyprocar.plotter.EBSPlot.plot_parameteric_overlay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_parameteric_overlay</span></code></a>([spins, ...])</p></td>
 <td><p>A method to plot the parametric overlay</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_scatter.html#pyprocar.plotter.EBSPlot.plot_scatter" title="pyprocar.plotter.EBSPlot.plot_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_scatter</span></code></a>([width_mask, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.plot_scatter.html#pyprocar.plotter.EBSPlot.plot_scatter" title="pyprocar.plotter.EBSPlot.plot_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.plot_scatter</span></code></a>([width_mask, ...])</p></td>
 <td><p>A method to plot a scatter plot</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.save.html#pyprocar.plotter.EBSPlot.save" title="pyprocar.plotter.EBSPlot.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.save</span></code></a>([filename])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.save.html#pyprocar.plotter.EBSPlot.save" title="pyprocar.plotter.EBSPlot.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.save</span></code></a>([filename])</p></td>
 <td><p>A method to save the plot</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_title.html#pyprocar.plotter.EBSPlot.set_title" title="pyprocar.plotter.EBSPlot.set_title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_title</span></code></a>([title])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_title.html#pyprocar.plotter.EBSPlot.set_title" title="pyprocar.plotter.EBSPlot.set_title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_title</span></code></a>([title])</p></td>
 <td><p>A method to set the title</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_xlabel.html#pyprocar.plotter.EBSPlot.set_xlabel" title="pyprocar.plotter.EBSPlot.set_xlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_xlabel</span></code></a>([label])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_xlabel.html#pyprocar.plotter.EBSPlot.set_xlabel" title="pyprocar.plotter.EBSPlot.set_xlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_xlabel</span></code></a>([label])</p></td>
 <td><p>A method to set the x label</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_xlim.html#pyprocar.plotter.EBSPlot.set_xlim" title="pyprocar.plotter.EBSPlot.set_xlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_xlim</span></code></a>([interval])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_xlim.html#pyprocar.plotter.EBSPlot.set_xlim" title="pyprocar.plotter.EBSPlot.set_xlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_xlim</span></code></a>([interval])</p></td>
 <td><p>A method to set the x limit</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_xticks.html#pyprocar.plotter.EBSPlot.set_xticks" title="pyprocar.plotter.EBSPlot.set_xticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_xticks</span></code></a>([tick_positions, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_xticks.html#pyprocar.plotter.EBSPlot.set_xticks" title="pyprocar.plotter.EBSPlot.set_xticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_xticks</span></code></a>([tick_positions, ...])</p></td>
 <td><p>A method to set the x ticks</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_ylabel.html#pyprocar.plotter.EBSPlot.set_ylabel" title="pyprocar.plotter.EBSPlot.set_ylabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_ylabel</span></code></a>([label])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_ylabel.html#pyprocar.plotter.EBSPlot.set_ylabel" title="pyprocar.plotter.EBSPlot.set_ylabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_ylabel</span></code></a>([label])</p></td>
 <td><p>A method to set the y label</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_ylim.html#pyprocar.plotter.EBSPlot.set_ylim" title="pyprocar.plotter.EBSPlot.set_ylim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_ylim</span></code></a>([interval])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_ylim.html#pyprocar.plotter.EBSPlot.set_ylim" title="pyprocar.plotter.EBSPlot.set_ylim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_ylim</span></code></a>([interval])</p></td>
 <td><p>A method to set the y limit</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_yticks.html#pyprocar.plotter.EBSPlot.set_yticks" title="pyprocar.plotter.EBSPlot.set_yticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_yticks</span></code></a>([major, minor, interval])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.set_yticks.html#pyprocar.plotter.EBSPlot.set_yticks" title="pyprocar.plotter.EBSPlot.set_yticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.set_yticks</span></code></a>([major, minor, interval])</p></td>
 <td><p>A method to set the y ticks</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.show.html#pyprocar.plotter.EBSPlot.show" title="pyprocar.plotter.EBSPlot.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.show</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.show.html#pyprocar.plotter.EBSPlot.show" title="pyprocar.plotter.EBSPlot.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.show</span></code></a>()</p></td>
 <td><p>A method to show the plot</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.update_config.html#pyprocar.plotter.EBSPlot.update_config" title="pyprocar.plotter.EBSPlot.update_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.update_config</span></code></a>(config_dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.EBSPlot.update_config.html#pyprocar.plotter.EBSPlot.update_config" title="pyprocar.plotter.EBSPlot.update_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EBSPlot.update_config</span></code></a>(config_dict)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

@@ -473,8 +473,9 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.add_legend.html">add_legend</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.find_energy.html">find_energy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.savefig.html">savefig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.show.html">show</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.spin_texture.html">spin_texture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.FermiSurface.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -703,6 +704,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.draw_fermi.html">draw_fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.grid.html">grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.legend.html">legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_atomic_levels.html">plot_atomic_levels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_bands.html">plot_bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric.html">plot_parameteric</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html">plot_parameteric_overlay</a></li>
@@ -796,12 +798,11 @@ document.write(`
 <li class="toctree-l3 has-children"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.html">pyprocar.scripts.FermiHandler</a><input class="toctree-checkbox" id="toctree-checkbox-57" name="toctree-checkbox-57" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-57"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.default_settings.html">default_settings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html">plot_fermi_cross_section_box_widget</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.process_data.html">process_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../scripts/_autosummary/pyprocar.scripts.FermiHandler.print_default_settings.html">print_default_settings</a></li>
 </ul>
 </li>
 </ul>
@@ -983,6 +984,50 @@ document.write(`
 </dd>
 <dt class="field-even">description<span class="colon">:</span></dt>
 <dd class="field-even"><p>Controls the color scale on the surface</p>
+</dd>
+</dl>
+</section>
+<section id="extended-zone-directions">
+<h2>extended_zone_directions<a class="headerlink" href="#extended-zone-directions" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls how many zone to generate. This is a list of directions to generates. Ex: [[1,0,0],[0,0,1]]</p>
+</dd>
+</dl>
+</section>
+<section id="supercell">
+<h2>supercell<a class="headerlink" href="#supercell" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[1, 1, 1]</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls how many the supercell size used to generate the fermi surface</p>
+</dd>
+</dl>
+</section>
+<section id="projection-accuracy">
+<h2>projection_accuracy<a class="headerlink" href="#projection-accuracy" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>high</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls the projection algorithmuse. Either high or normal</p>
+</dd>
+</dl>
+</section>
+<section id="interpolation-factor">
+<h2>interpolation_factor<a class="headerlink" href="#interpolation-factor" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls the interpolation factor used on the fermi surface</p>
 </dd>
 </dl>
 </section>
@@ -1448,6 +1493,10 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-bands-colors">surface_bands_colors</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-opacity">surface_opacity</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-clim">surface_clim</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extended-zone-directions">extended_zone_directions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supercell">supercell</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#projection-accuracy">projection_accuracy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interpolation-factor">interpolation_factor</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-style">brillouin_zone_style</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-line-width">brillouin_zone_line_width</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-color">brillouin_zone_color</a></li>

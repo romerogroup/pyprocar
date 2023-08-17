@@ -473,8 +473,9 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.add_legend.html">add_legend</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.find_energy.html">find_energy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.savefig.html">savefig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.show.html">show</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.spin_texture.html">spin_texture</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.FermiSurface.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -703,6 +704,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.draw_fermi.html">draw_fermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.grid.html">grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.legend.html">legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_atomic_levels.html">plot_atomic_levels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_bands.html">plot_bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric.html">plot_parameteric</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html">plot_parameteric_overlay</a></li>
@@ -796,12 +798,11 @@ document.write(`
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">pyprocar.scripts.FermiHandler</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-57" name="toctree-checkbox-57" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-57"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.default_settings.html">default_settings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html">plot_fermi_cross_section_box_widget</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.process_data.html">process_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.scripts.FermiHandler.print_default_settings.html">print_default_settings</a></li>
 </ul>
 </li>
 </ul>
@@ -937,22 +938,19 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.create_isovalue_gif.html#pyprocar.scripts.FermiHandler.create_isovalue_gif" title="pyprocar.scripts.FermiHandler.create_isovalue_gif"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.create_isovalue_gif</span></code></a>(mode[, ...])</p></td>
 <td><p>A method to plot the 3d fermi surface</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.default_settings.html#pyprocar.scripts.FermiHandler.default_settings" title="pyprocar.scripts.FermiHandler.default_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.default_settings</span></code></a>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section" title="pyprocar.scripts.FermiHandler.plot_fermi_cross_section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_cross_section</span></code></a>(mode)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section" title="pyprocar.scripts.FermiHandler.plot_fermi_cross_section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_cross_section</span></code></a>(mode)</p></td>
 <td><p>A method to plot the 3d fermi surface</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget" title="pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_cross_section_box_widget</span></code></a>(mode)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget" title="pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_cross_section_box_widget</span></code></a>(mode)</p></td>
 <td><p>A method to plot the 3d fermi surface</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html#pyprocar.scripts.FermiHandler.plot_fermi_isoslider" title="pyprocar.scripts.FermiHandler.plot_fermi_isoslider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_isoslider</span></code></a>(mode[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html#pyprocar.scripts.FermiHandler.plot_fermi_isoslider" title="pyprocar.scripts.FermiHandler.plot_fermi_isoslider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_isoslider</span></code></a>(mode[, ...])</p></td>
 <td><p>A method to plot the 3d fermi surface</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html#pyprocar.scripts.FermiHandler.plot_fermi_surface" title="pyprocar.scripts.FermiHandler.plot_fermi_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_surface</span></code></a>(mode[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.plot_fermi_surface.html#pyprocar.scripts.FermiHandler.plot_fermi_surface" title="pyprocar.scripts.FermiHandler.plot_fermi_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.plot_fermi_surface</span></code></a>(mode[, ...])</p></td>
 <td><p>A method to plot the 3d fermi surface</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.process_data.html#pyprocar.scripts.FermiHandler.process_data" title="pyprocar.scripts.FermiHandler.process_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.process_data</span></code></a>(mode[, bands, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.scripts.FermiHandler.print_default_settings.html#pyprocar.scripts.FermiHandler.print_default_settings" title="pyprocar.scripts.FermiHandler.print_default_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermiHandler.print_default_settings</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

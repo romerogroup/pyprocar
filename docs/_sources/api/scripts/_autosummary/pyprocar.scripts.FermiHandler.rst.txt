@@ -25,11 +25,6 @@
       
       
         
-          FermiHandler.default_settings
-        
-      
-      
-        
           FermiHandler.plot_fermi_cross_section
         
       
@@ -50,7 +45,7 @@
       
       
         
-          FermiHandler.process_data
+          FermiHandler.print_default_settings
         
       
    

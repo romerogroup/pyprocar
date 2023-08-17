@@ -193,7 +193,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.022 seconds)
+   **Total running time of the script:** ( 0 minutes  17.672 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plotting_fermi3d_plain.py:

@@ -84,6 +84,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to plot atomic energy levels for the compound hBN-CNCN at the GAMM...">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_atomic_levels_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plotting_atomic_levels.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting Atomic Levels</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting spin polarized band structures.">
 
 .. only:: html
