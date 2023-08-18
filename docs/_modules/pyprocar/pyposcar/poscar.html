@@ -430,6 +430,7 @@ document.write(`
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
@@ -499,7 +500,7 @@ document.write(`
     <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># direct coordinates</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># lattice</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Name of atomic species</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">:</span><span class="n">nd</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Number of atoms per specie</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Number of atoms per specie</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Total atoms in system</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Element of each atoms one-by-one.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selective</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Selective dynamics</span>

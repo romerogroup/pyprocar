@@ -49,8 +49,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/03-fermi2d/index';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Plotting fermi2d noncolinear" href="plotting_fermi2d_spin_texture.html" />
-    <link rel="prev" title="Plotting bandsdosplot" href="../02-bands_dos/plotting_bandsdosplot.html" />
+    <link rel="next" title="Plotting fermi2d noncolinear" href="plot_fermi2d_spin_texture.html" />
+    <link rel="prev" title="Plotting bandsdosplot" href="../02-bands_dos/plot_bandsdosplot_configurations.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -387,46 +387,59 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_atomic_levels.html">Plotting Atomic Levels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_spin_polarized.html">Plotting spin polarized band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plotting_colinear.html">Plotting band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../01-dos/index.html">Density of States</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_colinear_dos.html">Plotting density of states</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plotting_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_colinear_dos.html">Plotting density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../02-bands_dos/plotting_bandsdosplot.html">Plotting bandsdosplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02-bands_dos/plot_bandsdosplot.html">Plotting bandsdosplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02-bands_dos/plot_bandsdosplot_configurations.html">Plotting bandsdosplot</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Fermi 2D</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="plotting_fermi2d_spin_texture.html">Plotting fermi2d noncolinear</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting_fermi2d.html">Plotting fermi2d</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting_rashba_spin_spliting.html">Plotting rashba spin splitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_fermi2d_spin_texture.html">Plotting fermi2d noncolinear</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_fermi2d.html">Plotting fermi2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_fermi2d_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_rashba_spin_spliting.html">Plotting rashba spin splitting</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../04-fermi3d/index.html">Fermi 3D</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_plain.html">Plotting fermi3d plain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_de_hass_van_alphen.html">Showing how to get van alphen fequencies from the fermi surface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plotting_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_plain.html">Plotting fermi3d plain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_de_hass_van_alphen.html">Showing how to get van alphen fequencies from the fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../05-other/index.html">Other</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../05-other/plotting_bandgap.html">Example of finding the bandgap</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../05-other/plotting_2dkmesh_generation.html">Example of kmesh_generator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../05-other/plotting_kpath_generation.html">Example of kpath_generator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../05-other/plotting_ebs.html">Example of finding the bandgap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05-other/plot_bandgap.html">Example of finding the bandgap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05-other/plot_2dkmesh_generation.html">Example of kmesh_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05-other/plot_kpath_generation.html">Example of kpath_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05-other/plot_ebs.html">Example of finding the bandgap</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../06-PyPoscar/index.html">PyPoscar</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_clusters_pyposcar.html">Visualizing Clusters in Bi2Se3 Slab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_rdf_cutoff_pyposcar.html">Analyzing Radial Distribution Functions (RDF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_subsitution_pyposcar.html">Substituting Atoms in a POSCAR File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_utils_pyposcar.html">Modifying a POSCAR File: Scaling, Supercells, and Defects</a></li>
 </ul>
 </li>
 </ul>
@@ -489,14 +502,17 @@ document.write(`
   <section id="fermi-2d">
 <span id="sphx-glr-examples-03-fermi2d"></span><h1>Fermi 2D<a class="headerlink" href="#fermi-2d" title="Permalink to this heading">#</a></h1>
 <p>These examples demonstrate the Fermi2D plotting capabilities.</p>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi2d noncolinear example. For more information about fermi2d refer to fermi2d"><img alt="" src="../../_images/sphx_glr_plotting_fermi2d_spin_texture_thumb.png" />
-<p><a class="reference internal" href="plotting_fermi2d_spin_texture.html#sphx-glr-examples-03-fermi2d-plotting-fermi2d-spin-texture-py"><span class="std std-ref">Plotting fermi2d noncolinear</span></a></p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi2d noncolinear example. For more information about fermi2d refer to fermi2d"><img alt="" src="../../_images/sphx_glr_plot_fermi2d_spin_texture_thumb.png" />
+<p><a class="reference internal" href="plot_fermi2d_spin_texture.html#sphx-glr-examples-03-fermi2d-plot-fermi2d-spin-texture-py"><span class="std std-ref">Plotting fermi2d noncolinear</span></a></p>
   <div class="sphx-glr-thumbnail-title">Plotting fermi2d noncolinear</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi2d example."><img alt="" src="../../_images/sphx_glr_plotting_fermi2d_thumb.png" />
-<p><a class="reference internal" href="plotting_fermi2d.html#sphx-glr-examples-03-fermi2d-plotting-fermi2d-py"><span class="std std-ref">Plotting fermi2d</span></a></p>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Plotting fermi2d example."><img alt="" src="../../_images/sphx_glr_plot_fermi2d_thumb.png" />
+<p><a class="reference internal" href="plot_fermi2d.html#sphx-glr-examples-03-fermi2d-plot-fermi2d-py"><span class="std std-ref">Plotting fermi2d</span></a></p>
   <div class="sphx-glr-thumbnail-title">Plotting fermi2d</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the dif..."><img alt="" src="../../_images/sphx_glr_plotting_rashba_spin_spliting_thumb.png" />
-<p><a class="reference internal" href="plotting_rashba_spin_spliting.html#sphx-glr-examples-03-fermi2d-plotting-rashba-spin-spliting-py"><span class="std std-ref">Plotting rashba spin splitting</span></a></p>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 2D Fermi surfac..."><img alt="" src="../../_images/sphx_glr_plot_fermi2d_configurations_thumb.png" />
+<p><a class="reference internal" href="plot_fermi2d_configurations.html#sphx-glr-examples-03-fermi2d-plot-fermi2d-configurations-py"><span class="std std-ref">Plotting with Configurations in pyprocar</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the dif..."><img alt="" src="../../_images/sphx_glr_plot_rashba_spin_spliting_thumb.png" />
+<p><a class="reference internal" href="plot_rashba_spin_spliting.html#sphx-glr-examples-03-fermi2d-plot-rashba-spin-spliting-py"><span class="std std-ref">Plotting rashba spin splitting</span></a></p>
   <div class="sphx-glr-thumbnail-title">Plotting rashba spin splitting</div>
 </div></div><div class="toctree-wrapper compound">
 </div>
@@ -514,7 +530,7 @@ document.write(`
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../02-bands_dos/plotting_bandsdosplot.html"
+       href="../02-bands_dos/plot_bandsdosplot_configurations.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
@@ -523,7 +539,7 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="plotting_fermi2d_spin_texture.html"
+       href="plot_fermi2d_spin_texture.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>

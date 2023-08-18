@@ -518,7 +518,7 @@ document.write(`
     <span class="n">dos_settings</span><span class="p">[</span><span class="s1">&#39;show&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># parses old elements</span>
-    <span class="n">bands_settings</span><span class="p">,</span> <span class="n">dos_settings</span> <span class="o">=</span> <span class="n">parse_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span><span class="n">bands_settings</span><span class="p">,</span> <span class="n">dos_settings</span><span class="p">)</span>
+    <span class="c1"># bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)</span>
 
     <span class="c1">#plots bandsplot and dosplot</span>
     <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">bandsplot</span><span class="p">(</span><span class="o">**</span><span class="n">bands_settings</span><span class="p">)</span>
@@ -616,19 +616,8 @@ document.write(`
             <span class="n">dos_settings</span><span class="p">[</span><span class="s2">&quot;dirname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;bands_dirname&quot;</span><span class="p">:</span>
             <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;dirname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;procar&quot;</span><span class="p">:</span>
-            <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;procar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="n">dos_settings</span><span class="p">[</span><span class="s2">&quot;procar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;outcar&quot;</span><span class="p">:</span>
-            <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;outcar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="n">dos_settings</span><span class="p">[</span><span class="s2">&quot;outcar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;poscar&quot;</span><span class="p">:</span>
-            <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;poscar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="n">dos_settings</span><span class="p">[</span><span class="s2">&quot;poscar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;kpoints&quot;</span><span class="p">:</span>
             <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;kpoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;abinit_output&quot;</span><span class="p">:</span>
-            <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;abinit_output&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;bands_mode&quot;</span><span class="p">:</span>
             <span class="n">bands_settings</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;dos_mode&quot;</span><span class="p">:</span>
