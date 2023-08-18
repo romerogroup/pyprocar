@@ -7,7 +7,7 @@ import re
 import numpy as np
 from ..core.dos import DensityOfStates
 from pathlib import Path
-from typing import Union, List, Tuple, Optional
+from typing import Union, List, Tuple, Optional, Dict
 
 def parse_dos_block(dos_block: str) -> Tuple[np.array, np.array]:
     """Parse the DOS block from elk output file.
@@ -85,6 +85,49 @@ def read_dos(path: Union[str, Path]) -> DensityOfStates:
                     dos_projected[i_atom-1, 0, i_orbital, i_spin, :] = pdos[f"S{i_spc:02d}"][f"A{i_atom:04d}"][i_orbital + i_spin * n_orbitals]
                     
     return  DensityOfStates(energies, dos_total, dos_projected)
+
+def read_elkin(elkin_path: str = "elk.in") -> Dict[str, str]:
+    """
+    Reads and parses the elk.in file.
+
+    Parameters
+    ----------
+    elkin_path : str, optional
+        Path to the elk.in file, by default "elk.in"
+
+    Returns
+    -------
+    Dict[str, str]
+        A dictionary containing the parsed key-value pairs from the elk.in file.
+
+    Examples
+    --------
+    >>> parsed_data = read_elkin("path/to/elk.in")
+    >>> print(parsed_data['some_key'])
+    'some_value'
+    """
+
+    # Initialize a dictionary to store the parsed data
+    parsed_data = {}
+
+    # Open the elk.in file for reading
+    with open(elkin_path, 'r') as rf:
+        # Iterate through each line in the file
+        for line in rf:
+            # Remove leading and trailing whitespace
+            line = line.strip()
+
+            # Skip empty lines or comments
+            if not line or line.startswith('#'):
+                continue
+
+            # Split the line into key and value
+            key, value = line.split('=')
+
+            # Store the key-value pair in the parsed_data dictionary
+            parsed_data[key.strip()] = value.strip()
+
+    return parsed_data
 
 
 # class ElkParser:
