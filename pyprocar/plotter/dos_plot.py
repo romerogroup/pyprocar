@@ -238,7 +238,7 @@ class DOSPlot:
                 self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
             else:
                 self.set_xlim([0,self.dos.total.max()])
-
+            
             for spins_index , ispin in enumerate(spins):
                 x = []
                 y_total = []
@@ -1114,14 +1114,12 @@ class DOSPlot:
         """
         if labels == None:
             labels = self.labels
-        self.ax.legend(self.handles, labels)
+        if self.config['legend']['value'] and len(labels) != 0:
+            self.ax.legend(self.handles, labels)
         return None
 
     def draw_fermi(self, 
-                orientation:str='horizontal',
-                color:str="blue", 
-                linestyle:str="dotted", 
-                linewidth:float=1):
+                orientation:str='horizontal'):
         """A method to draw the fermi surface
 
         Parameters
@@ -1141,9 +1139,13 @@ class DOSPlot:
             None
         """
         if orientation == 'horizontal':
-            self.ax.axvline(x=0, color=color, linestyle=linestyle, linewidth=linewidth)
+            self.ax.axvline(x=0, color=self.config['fermi_color']['value'], 
+                                linestyle=self.config['fermi_linestyle']['value'], 
+                                linewidth=self.config['fermi_linewidth']['value'])
         elif orientation == 'vertical':
-            self.ax.axhline(y=0, color=color, linestyle=linestyle, linewidth=linewidth)
+            self.ax.axhline(y=0, color=self.config['fermi_color']['value'], 
+                        linestyle=self.config['fermi_linestyle']['value'], 
+                        linewidth=self.config['fermi_linewidth']['value'])
         return None
     
     def grid(self):
@@ -1154,12 +1156,13 @@ class DOSPlot:
         None
             None
         """
-        self.ax.grid(
-            self.config['grid']['value'],
-            which=self.config['grid_which']['value'],
-            color=self.config['grid_color']['value'],
-            linestyle=self.config['grid_linestyle']['value'],
-            linewidth=self.config['grid_linewidth']['value'])
+        if self.config['grid']['value']:
+            self.ax.grid(
+                self.config['grid']['value'],
+                which=self.config['grid_which']['value'],
+                color=self.config['grid_color']['value'],
+                linestyle=self.config['grid_linestyle']['value'],
+                linewidth=self.config['grid_linewidth']['value'])
         return None
 
     def show(self):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 import sys
+from typing import List
 import re
 import numpy as np
 import argparse
@@ -70,7 +71,7 @@ class Poscar:
     self.dpos:np.ndarray = None # direct coordinates
     self.lat:np.ndarray = None # lattice
     self.typeSp:List[str] = None # Name of atomic species
-    self.numberSp:nd.array = None # Number of atoms per specie
+    self.numberSp:np.ndarray = None # Number of atoms per specie
     self.Ntotal:int = None # Total atoms in system
     self.elm:List[str] = None # Element of each atoms one-by-one.
     self.selective:bool = None # Selective dynamics

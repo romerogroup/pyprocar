@@ -18,9 +18,6 @@ from ..utils import ROOT, ConfigManager
 from ..core import ElectronicBandStructure, KPath
 
 
-
-CONFIG_MANAGER=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','band_structure.yml'))
-
 class EBSPlot:
     """
     A class to plot an electronic band structure.

@@ -89,7 +89,7 @@ def bandsdosplot(
     dos_settings['show'] = False
 
     # parses old elements
-    bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)
+    # bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)
 
     #plots bandsplot and dosplot
     ebs_plot = bandsplot(**bands_settings)
@@ -187,19 +187,8 @@ def parse_kwargs(kwargs,bands_settings, dos_settings):
             dos_settings["dirname"] = value
         if key == "bands_dirname":
             bands_settings["dirname"] = value
-        if key == "procar":
-            bands_settings["procar"] = value
-            dos_settings["procar"] = value
-        if key == "outcar":
-            bands_settings["outcar"] = value
-            dos_settings["outcar"] = value
-        if key == "poscar":
-            bands_settings["poscar"] = value
-            dos_settings["poscar"] = value
         if key == "kpoints":
             bands_settings["kpoints"] = value
-        if key == "abinit_output":
-            bands_settings["abinit_output"] = value
         if key == "bands_mode":
             bands_settings["mode"] = value
         if key == "dos_mode":
