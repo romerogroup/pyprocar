@@ -6,7 +6,7 @@
 
 Notice
 ===========
-- **New Release** We recently updated to a new version 'v6.0.0'. This update encompasses a significant overhaul of the codebase and documentation.
+- **New Release** We recently updated to a new version 'v6.0.4'. This update encompasses a significant overhaul of the codebase and documentation.
 - **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
 
 
@@ -28,7 +28,7 @@ Currently supports:
 Documentation
 -------------
 
-For versions 6.1.3 and above, the documentation is found here:
+For versions 6.1.4 and above, the documentation is found here:
 https://romerogroup.github.io/pyprocar/
 
 
@@ -121,6 +121,7 @@ will bring a help menu.
 
 Changelog
 --------------
+v6.1.4 Aug 18th, 2023 -- Bug fixes, example gallery additions, and doc updates <br />
 v6.1.3 Aug 7th, 2023 -- Updated install requirements <br />
 v6.1.2 Aug 7th, 2023 -- Bug fix and doc update <br />
 v6.1.1 Aug 7th, 2023 -- Bug fix <br />
