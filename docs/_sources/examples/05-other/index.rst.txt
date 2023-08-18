@@ -19,10 +19,10 @@ These examples demonstrate other capabilities.
 
 .. only:: html
 
-  .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_bandgap_thumb.png
+  .. image:: /examples/05-other/images/thumb/sphx_glr_plot_bandgap_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_05-other_plotting_bandgap.py`
+  :ref:`sphx_glr_examples_05-other_plot_bandgap.py`
 
 .. raw:: html
 
@@ -36,10 +36,10 @@ These examples demonstrate other capabilities.
 
 .. only:: html
 
-  .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_2dkmesh_generation_thumb.png
+  .. image:: /examples/05-other/images/thumb/sphx_glr_plot_2dkmesh_generation_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_05-other_plotting_2dkmesh_generation.py`
+  :ref:`sphx_glr_examples_05-other_plot_2dkmesh_generation.py`
 
 .. raw:: html
 
@@ -53,10 +53,10 @@ These examples demonstrate other capabilities.
 
 .. only:: html
 
-  .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_kpath_generation_thumb.png
+  .. image:: /examples/05-other/images/thumb/sphx_glr_plot_kpath_generation_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_05-other_plotting_kpath_generation.py`
+  :ref:`sphx_glr_examples_05-other_plot_kpath_generation.py`
 
 .. raw:: html
 
@@ -70,10 +70,10 @@ These examples demonstrate other capabilities.
 
 .. only:: html
 
-  .. image:: /examples/05-other/images/thumb/sphx_glr_plotting_ebs_thumb.png
+  .. image:: /examples/05-other/images/thumb/sphx_glr_plot_ebs_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_05-other_plotting_ebs.py`
+  :ref:`sphx_glr_examples_05-other_plot_ebs.py`
 
 .. raw:: html
 
@@ -89,8 +89,8 @@ These examples demonstrate other capabilities.
 .. toctree::
    :hidden:
 
-   /examples/05-other/plotting_bandgap
-   /examples/05-other/plotting_2dkmesh_generation
-   /examples/05-other/plotting_kpath_generation
-   /examples/05-other/plotting_ebs
+   /examples/05-other/plot_bandgap
+   /examples/05-other/plot_2dkmesh_generation
+   /examples/05-other/plot_kpath_generation
+   /examples/05-other/plot_ebs
 

@@ -20,6 +20,7 @@ with open(os.path.join(ROOT,'pyprocar','cfg','dos.yml'), 'r') as file:
     plot_opts = yaml.safe_load(file)
 
 def dosplot(
+        code:str="vasp",
         dirname:str=None,
         mode:str="plain",
         interpolation_factor:int=1,
@@ -31,14 +32,12 @@ def dosplot(
         fermi:float=None,
         elimit:List[float]=None,
         dos_limit:List[float]=None,
-        grid:bool=False,
         savefig:str=None,
         projection_mask=None,
-        code:str="vasp",
         ax:plt.Axes=None,
         verbose:bool=True,
-        print_plot_opts:bool=False,
         show:bool=True,
+        print_plot_opts:bool=False,
         **kwargs
     ):
 
@@ -337,12 +336,8 @@ def dosplot(
     else:
         raise ValueError("The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]")
 
-    edos_plot.draw_fermi(
-            orientation = orientation,
-            color=plot_opts['fermi_color']['value'],
-            linestyle=plot_opts['fermi_linestyle']['value'],
-            linewidth=plot_opts['fermi_linewidth']['value'],
-        )
+    edos_plot.draw_fermi(orientation = orientation)
+
     if orientation == 'horizontal':
         if elimit is not None:
             edos_plot.set_xlim(elimit)
@@ -354,10 +349,8 @@ def dosplot(
         if dos_limit is not None:
             edos_plot.set_xlim(dos_limit)
 
-    if plot_opts['grid']['value']:
-        edos_plot.grid()
-    if plot_opts['legend']['value'] and len(edos_plot.labels) != 0:
-        edos_plot.legend(edos_plot.labels)
+    edos_plot.grid()
+    edos_plot.legend(edos_plot.labels)
     if savefig is not None:
         edos_plot.save(savefig)
     if show:

@@ -19,10 +19,27 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/02-bands_dos/images/thumb/sphx_glr_plotting_bandsdosplot_thumb.png
+  .. image:: /examples/02-bands_dos/images/thumb/sphx_glr_plot_bandsdosplot_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_02-bands_dos_plotting_bandsdosplot.py`
+  :ref:`sphx_glr_examples_02-bands_dos_plot_bandsdosplot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting bandsdosplot</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting both band structure...">
+
+.. only:: html
+
+  .. image:: /examples/02-bands_dos/images/thumb/sphx_glr_plot_bandsdosplot_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_02-bands_dos_plot_bandsdosplot_configurations.py`
 
 .. raw:: html
 
@@ -38,5 +55,6 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 .. toctree::
    :hidden:
 
-   /examples/02-bands_dos/plotting_bandsdosplot
+   /examples/02-bands_dos/plot_bandsdosplot
+   /examples/02-bands_dos/plot_bandsdosplot_configurations
 

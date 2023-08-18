@@ -19,10 +19,10 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_noncolinear_vasp_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_vasp_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plotting_noncolinear_vasp.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py`
 
 .. raw:: html
 
@@ -36,10 +36,10 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_compare_bands_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_compare_bands_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plotting_compare_bands.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py`
 
 .. raw:: html
 
@@ -53,10 +53,10 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_noncolinear_qe_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_qe_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plotting_noncolinear_qe.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py`
 
 .. raw:: html
 
@@ -70,10 +70,10 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_atomic_levels_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_atomic_levels_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plotting_atomic_levels.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_atomic_levels.py`
 
 .. raw:: html
 
@@ -87,10 +87,10 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_spin_polarized_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_spin_polarized_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plotting_spin_polarized.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py`
 
 .. raw:: html
 
@@ -104,14 +104,31 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plotting_colinear_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_colinear_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plotting_colinear.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_colinear.py`
 
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting band structure</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures usi...">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_bandsplot_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
     </div>
 
 
@@ -123,10 +140,11 @@ These examples demonstrate the band structure plotting capabilities.
 .. toctree::
    :hidden:
 
-   /examples/00-band_structure/plotting_noncolinear_vasp
-   /examples/00-band_structure/plotting_compare_bands
-   /examples/00-band_structure/plotting_noncolinear_qe
-   /examples/00-band_structure/plotting_atomic_levels
-   /examples/00-band_structure/plotting_spin_polarized
-   /examples/00-band_structure/plotting_colinear
+   /examples/00-band_structure/plot_noncolinear_vasp
+   /examples/00-band_structure/plot_compare_bands
+   /examples/00-band_structure/plot_noncolinear_qe
+   /examples/00-band_structure/plot_atomic_levels
+   /examples/00-band_structure/plot_spin_polarized
+   /examples/00-band_structure/plot_colinear
+   /examples/00-band_structure/plot_bandsplot_configurations
 

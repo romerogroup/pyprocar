@@ -21,10 +21,10 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_spin_texture_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_spin_texture_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_spin_texture.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin_texture.py`
 
 .. raw:: html
 
@@ -38,10 +38,10 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_plain_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_plain_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_plain.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_plain.py`
 
 .. raw:: html
 
@@ -55,10 +55,10 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_isoslider_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_isoslider_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_isoslider.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_isoslider.py`
 
 .. raw:: html
 
@@ -72,10 +72,10 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_isovalue_gif_thumb.gif
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_isovalue_gif_thumb.gif
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_isovalue_gif.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_isovalue_gif.py`
 
 .. raw:: html
 
@@ -89,10 +89,10 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_spin-polarized_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_spin-polarized_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_spin-polarized.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin-polarized.py`
 
 .. raw:: html
 
@@ -106,10 +106,10 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_de_hass_van_alphen_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_de_hass_van_alphen_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_de_hass_van_alphen.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_de_hass_van_alphen.py`
 
 .. raw:: html
 
@@ -119,14 +119,31 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 3D Fermi surfac...">
+
+.. only:: html
+
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plotting_fermi3d_cross_section_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_cross_section_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plotting_fermi3d_cross_section.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_cross_section.py`
 
 .. raw:: html
 
@@ -142,11 +159,12 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 .. toctree::
    :hidden:
 
-   /examples/04-fermi3d/plotting_fermi3d_spin_texture
-   /examples/04-fermi3d/plotting_fermi3d_plain
-   /examples/04-fermi3d/plotting_fermi3d_isoslider
-   /examples/04-fermi3d/plotting_fermi3d_isovalue_gif
-   /examples/04-fermi3d/plotting_fermi3d_spin-polarized
-   /examples/04-fermi3d/plotting_de_hass_van_alphen
-   /examples/04-fermi3d/plotting_fermi3d_cross_section
+   /examples/04-fermi3d/plot_fermi3d_spin_texture
+   /examples/04-fermi3d/plot_fermi3d_plain
+   /examples/04-fermi3d/plot_fermi3d_isoslider
+   /examples/04-fermi3d/plot_fermi3d_isovalue_gif
+   /examples/04-fermi3d/plot_fermi3d_spin-polarized
+   /examples/04-fermi3d/plot_de_hass_van_alphen
+   /examples/04-fermi3d/plot_fermi3d_configurations
+   /examples/04-fermi3d/plot_fermi3d_cross_section
 

@@ -19,10 +19,10 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_fermi2d_spin_texture_thumb.png
+  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plot_fermi2d_spin_texture_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_03-fermi2d_plotting_fermi2d_spin_texture.py`
+  :ref:`sphx_glr_examples_03-fermi2d_plot_fermi2d_spin_texture.py`
 
 .. raw:: html
 
@@ -36,10 +36,10 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. only:: html
 
-  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_fermi2d_thumb.png
+  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plot_fermi2d_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_03-fermi2d_plotting_fermi2d.py`
+  :ref:`sphx_glr_examples_03-fermi2d_plot_fermi2d.py`
 
 .. raw:: html
 
@@ -49,14 +49,31 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 2D Fermi surfac...">
+
+.. only:: html
+
+  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plot_fermi2d_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_03-fermi2d_plot_fermi2d_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the dif...">
 
 .. only:: html
 
-  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plotting_rashba_spin_spliting_thumb.png
+  .. image:: /examples/03-fermi2d/images/thumb/sphx_glr_plot_rashba_spin_spliting_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_03-fermi2d_plotting_rashba_spin_spliting.py`
+  :ref:`sphx_glr_examples_03-fermi2d_plot_rashba_spin_spliting.py`
 
 .. raw:: html
 
@@ -72,7 +89,8 @@ These examples demonstrate the Fermi2D plotting capabilities.
 .. toctree::
    :hidden:
 
-   /examples/03-fermi2d/plotting_fermi2d_spin_texture
-   /examples/03-fermi2d/plotting_fermi2d
-   /examples/03-fermi2d/plotting_rashba_spin_spliting
+   /examples/03-fermi2d/plot_fermi2d_spin_texture
+   /examples/03-fermi2d/plot_fermi2d
+   /examples/03-fermi2d/plot_fermi2d_configurations
+   /examples/03-fermi2d/plot_rashba_spin_spliting
 
