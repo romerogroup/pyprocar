@@ -10,6 +10,7 @@ add RDF here
 import numpy as np
 from . import db
 from . import rdf
+from .poscarUtils import poscar_supercell
 from .poscar import Poscar
 from typing import Union, List
 np.set_printoptions(precision=4, linewidth=160, suppress=True)
@@ -18,6 +19,7 @@ np.set_printoptions(precision=4, linewidth=160, suppress=True)
 def distances(positions:np.ndarray,
               lattice: Union[np.ndarray, None] = None,
               allow_self:bool=True,
+              full_pbc_matrix:bool=False,
               verbose:bool=False) -> np.ndarray: 
   """Calculates all the pasirwise distances. The `positions` have to be
   in cartesian coordinates, size Nx3. The lattice should be a 3x3
@@ -32,6 +34,10 @@ def distances(positions:np.ndarray,
       3x3 lattice array. Default is None, a non-periodic system.
   allow_self : bool = True
       If True an atom can be its own neighbor, but in another lattice. Default is False
+  full_pbc_matrix : bool + False
+      If True, and lattice != None, it returns the whole distance matrix, 
+      including all distances with neighbor cells. For instance, one atom 
+      in a FCC lattice should be 12 times its own neighbor. It is pretty big.
   verbose : bool
       verbosity. Default is False
 
@@ -83,6 +89,10 @@ def distances(positions:np.ndarray,
       # calculating the distance
     d.append( np.linalg.norm(rows-columns, axis=2) )
     
+  # no further processing if `full_pbc_matrix` is set
+  if full_pbc_matrix == True:
+    return np.array(d)
+  
   # lets assume the first distance is the minimum distance
   dist = d.pop(0)
   for matrix in d:
@@ -141,8 +151,8 @@ class Neighbors:
     self.nn_elem = None # the atomic elements of the nn_list
 
     self.db = db.atomicDB # database with atomic info
-    self.distances = distances(positions=self.poscar.cpos,
-                               lattice=self.poscar.lat)
+    self.distances = None # set when needed
+    
     # Maximum distance of a nearest neighbor NxN matrix
     self.estimateMaxBondDist()
     self.nn_list = self.set_neighbors()
@@ -218,27 +228,72 @@ class Neighbors:
     """
     self.nn_list = []
     N = self.poscar.Ntotal
+
+    # if a lattice vector is too small, smaller than twice
+    # `self.d_Max` from `self.estimateMaxBondDist()`, we should make a
+    # supercell before calculating the rdf
+    a = b = c = 1
+    if np.linalg.norm(self.poscar.lat[0]) < 2*np.max(self.d_Max):
+      a = 2
+    if np.linalg.norm(self.poscar.lat[1]) < 2*np.max(self.d_Max):
+      b = 2
+    if np.linalg.norm(self.poscar.lat[2]) < 2*np.max(self.d_Max):
+      c = 2
+    if a*b*c > 1:
+      if self.verbose:
+        print('The unit cell is too small, going to use a larger one for the RDF.')
+        print('Supercell size: a,b,c = ', a,b,c)
+      sposcar = poscar_supercell(self.poscar)
+      sposcar = sposcar.supercell(np.diag([a,b,c]))
+      my_RDF = rdf.RDF(sposcar)
+      
+      # the RDF matrix is of the size of the supercell, I need a new
+      # one of original cell size
+      elements = self.poscar.elm
+      # 'H-B' is the same as 'B-H', just compare them sorted and concatenated ('BH')
+      interactions = [str(x[0]+x[1]) for x in np.sort(my_RDF.interactions)]
+      cutoff_d = my_RDF.neighbor_thresholdSp
+      dict_dmax = dict(zip(interactions, cutoff_d))
+      d_max = [[dict_dmax[''.join(sorted([x,y]))] for x in elements] for y in elements]
+      d_max = np.array(d_max)
+    else:
+      my_RDF = rdf.RDF(self.poscar)
+      d_max = my_RDF.CutoffMatrix
     
-    my_RDF = rdf.RDF(self.poscar)
-    
-    self.d_Max = np.minimum(my_RDF.CutoffMatrix, self.d_Max)
+    self.d_Max = np.minimum(d_max, self.d_Max)
     
     if self.verbose:
       print(self.d_Max)
-      
-    for i in range(N):
-      # to store all defects
-      temp = []
-      for j in range(N):
-        if self.distances[i,j] < self.d_Max[i,j]:
-          # The self-neighbors may/maynot be included
-          if i!=j:
-            temp.append(j)
-            # if allow_self is True, also accept
-          elif 'allow_self':
-            temp.append(j)
-      self.nn_list.append(temp)
 
+    if allow_self is False:
+      self.distances = distances(positions=self.poscar.cpos,
+                                 lattice=self.poscar.lat,
+                                 full_pbc_matrix=False)
+      for i in range(N):
+        # to store all neighbors
+        temp = []
+        for j in range(N):
+          if self.distances[i,j] < self.d_Max[i,j]:
+            if i!=j:
+              temp.append(j)
+        self.nn_list.append(temp)
+
+    else:
+      self.distances = distances(positions=self.poscar.cpos,
+                                 lattice=self.poscar.lat,
+                                 full_pbc_matrix=True)
+      # print('self.distances.shape', self.distances.shape)
+      for i in range(N):
+        temp = []
+        for j in range(N):
+          for k in range(27): # there are 3x3x3 cells.
+            if self.distances[k,i,j] < self.d_Max[i,j]:
+              if self.distances[k,i,j] > 0:
+                temp.append(j)
+              elif i != j:
+                temp.append(j)
+        self.nn_list.append(temp)
+        
     self._set_nn_elem()
     if self.verbose:
       print('list of first neighbors:')

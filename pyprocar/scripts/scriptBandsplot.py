@@ -83,7 +83,7 @@ def bandsplot(
     """
 
     modes=["plain","parametric","scatter","atomic",
-           "overlay", "overlay_species", "overlay_orbitals"]
+           "overlay", "overlay_species", "overlay_orbitals", "ipr"]
     modes_txt=' , '.join(modes)
     message=f"""
             --------------------------------------------------------
@@ -119,6 +119,28 @@ def bandsplot(
     if mode == "plain":
         ebs_plot.plot_bands()
 
+    elif mode == "ipr":
+      weights = ebs_plot.ebs.ebs_ipr()
+      if plot_opt['weighted_color']['value']:
+        color_weights = weights
+      else:
+        color_weights = None
+      if plot_opt['weighted_width']['value']:
+        width_weights = weights
+      else:
+        width_weights = None
+      color_mask = projection_mask
+      width_mask = projection_mask
+
+      ebs_plot.plot_parameteric(
+        color_weights=color_weights,
+        width_weights=width_weights,
+        color_mask=color_mask,
+        width_mask=width_mask,
+        spins=spins
+        )
+      
+        
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
         

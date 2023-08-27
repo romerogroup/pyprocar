@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
 import sys
-from typing import List
 import re
 import numpy as np
 import argparse
@@ -47,7 +46,8 @@ class Poscar:
     verbose: bool,
         verbosity level, for debugging. Default: False
 
-    Attributes:
+    Attributes
+    ----------
 
     self.verbose
     self.filename
@@ -61,7 +61,9 @@ class Poscar:
     self.elm: list, element of each atoms one-by-one.
     self.selective: bool, Selective dynamics?
     self.selectFlags: None or nd.array(str), flags of selective dynamics
+    self.flags: dict, list of flags. Not used here just for convenience
     self.volume: float, the box product of the lattice
+
 
     """
     self.verbose = verbose
@@ -71,11 +73,12 @@ class Poscar:
     self.dpos:np.ndarray = None # direct coordinates
     self.lat:np.ndarray = None # lattice
     self.typeSp:List[str] = None # Name of atomic species
-    self.numberSp:np.ndarray = None # Number of atoms per specie
+    self.numberSp:nd.array = None # Number of atoms per specie
     self.Ntotal:int = None # Total atoms in system
     self.elm:List[str] = None # Element of each atoms one-by-one.
     self.selective:bool = None # Selective dynamics
     self.selectFlags:np.ndarray = None # all the T,F from selective dynamics
+    self.flags:dict = {} # list of flags, not used here just for convenience
     self.volume:float = None
     self.loaded:bool = False # was the POSCAR-file loaded? i.e. self.parse()
     return
@@ -174,6 +177,9 @@ class Poscar:
     # setting the volume, just as an utility
     self.volume = np.linalg.det(self.lat)
     self.loaded = True
+    # empty list as flags, one per atom
+    for i in range(self.Ntotal):
+      self.flags[i] = {}
     return
 
   def _set_cartesian(self):

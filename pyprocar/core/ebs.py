@@ -782,6 +782,33 @@ class ElectronicBandStructure:
                     tmp_array[index,...]=mesh[...,i,j,k]
         return tmp_array
 
+
+
+    def ebs_ipr(self):
+        """_summary_
+
+        Returns
+        -------
+        ret : list float
+            The IPR projections
+        """
+        orbitals = np.arange(self.norbitals, dtype=int)
+        # sum over orbitals
+        proj = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
+        # keepinh only the last principal quantum number
+        proj = proj[:, :, :, -1, :]
+        # selecting all atoms:
+        atoms = np.arange(self.natoms, dtype=int)
+        # the ipr is \frac{\sum_i |c_i|^4}{(\sum_i |c_i^2|)^2}
+        # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
+        num = np.absolute(proj)**4
+        num = np.sum(num[:, :, atoms, :], axis=-2)
+        den = np.absolute(proj)**2
+        den = np.sum(den[:, :, atoms, :], axis=-2)**2
+        IPR = num/den
+        return IPR
+
+
     def ebs_sum(self, 
                 atoms:List[int]=None, 
                 principal_q_numbers:List[int]=[-1], 
@@ -810,6 +837,7 @@ class ElectronicBandStructure:
         """
 
         principal_q_numbers = np.array(principal_q_numbers)
+        print(self.projected.shape)
         if atoms is None:
             atoms = np.arange(self.natoms, dtype=int)
         if spins is None:
@@ -828,6 +856,7 @@ class ElectronicBandStructure:
             ret = np.sum(ret[:, :, spins], axis=-1).reshape(
                 self.nkpoints, self.nbands, 1
             )
+        print('ret.shape', ret.shape)
         return ret
 
     def unfold(self, transformation_matrix=None, structure=None):
