@@ -267,7 +267,6 @@ class EBSPlot:
         # levels will be called to fake another kpoint and then
         # exit. `plot_atomic_levels` will invoke this method again to
         # get the actual plot
-        print('self.ebs.kpoints', self.ebs.kpoints)
         if len(self.ebs.kpoints) == 1:
           self.plot_atomic_levels(color_weights=color_weights,
                                   width_weights=width_weights,
