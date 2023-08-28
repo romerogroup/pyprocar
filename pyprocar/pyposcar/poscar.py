@@ -109,7 +109,7 @@ class Poscar:
       print('scaling factor: ', scale)
     
     # parsing the lattice
-    self.lat = re.findall(r'[-.\deE]+\s+[-.\deE]+\s+[-.\deE]+\s*\n*', ''.join(self.poscar[2:5]))
+    self.lat = re.findall(r'[-.\deE]+\s+[-.\deE]+\s+[-.\deE]+\s*\n*', ' '.join(self.poscar[2:5]))
     self.lat = np.array([x.split() for x in self.lat], dtype=float)*scale
     if self.verbose:
       print( 'lattice:\n', self.lat)
@@ -150,7 +150,7 @@ class Poscar:
     # parsing the positions
     start, end = 8+offset, 8+offset+ self.Ntotal
     string = r'([-.\deE]+)\s+([-.\deE]+)\s+([-.\deE]+)\s*'
-    pos = re.findall(string, ''.join(self.poscar[start:end]))
+    pos = re.findall(string, ' '.join(self.poscar[start:end]))
     if direct:
       self.dpos = np.array(pos, dtype=float)
       self._set_cartesian()
@@ -164,7 +164,7 @@ class Poscar:
     # parsing selective dynamics
     if self.selective == True:
       string = r'([TF]+)\s+([TF]+)\s+([TF]+)\s+'
-      selectFlags = re.findall(string, ''.join(self.poscar[start:end]))
+      selectFlags = re.findall(string, ' '.join(self.poscar[start:end]))
       self.selectFlags = np.array(selectFlags)
       print('Flags of selective dynamics:\n', self.selectFlags)
       

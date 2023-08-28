@@ -267,14 +267,19 @@ class Parser:
         return None
 
     def parse_dftbplus(self):
-        """parses vasp files
+        """parses DFTB+ files, these files do not have an array-like
+        structure, and the process is *slow* . 
+
+        Then, they are converted to VASP-like files and parsed by the
+        standard `parse_vasp`
 
         Returns
         -------
         None
             None
-        """
 
+        """
+        # This creates the vasp files, if needed
         parser = dftbplus.DFTBParser(dirname = self.dir,
                                      eigenvec_filename = 'eigenvec.out',
                                      bands_filename = 'band.out',
@@ -282,10 +287,7 @@ class Parser:
                                      detailed_xml = 'detailed.xml'
                                      )
         
-        self.ebs = parser.ebs
-        self.kpath = parser.kpath
-        self.structure = parser.structure
-        self.dos = parser.dos
+        self.parse_vasp()
         
         return None
 
