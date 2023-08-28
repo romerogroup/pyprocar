@@ -801,9 +801,9 @@ class ElectronicBandStructure:
         atoms = np.arange(self.natoms, dtype=int)
         # the ipr is \frac{\sum_i |c_i|^4}{(\sum_i |c_i^2|)^2}
         # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
-        num = np.absolute(proj)**4
+        num = np.absolute(proj)**2
         num = np.sum(num[:, :, atoms, :], axis=-2)
-        den = np.absolute(proj)**2
+        den = np.absolute(proj)**1
         den = np.sum(den[:, :, atoms, :], axis=-2)**2
         IPR = num/den
         return IPR
