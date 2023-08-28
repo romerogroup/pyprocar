@@ -21,7 +21,7 @@ class DFTB_evec:
                     # ignored.
     self.orbDict = None # An ordered dictionary assigning an index to
                         # each orbital
-    self.complex = None # Is the data complex or real?
+    self.is_complex = None # Is the data complex or real?
                         # Nkpoint=1->real, Nkpoints>1->complex
     self.bands = None # The eigenvalues (Nkpoints, Nbands) to be set
                       # externally, the file with eigenvectors doesn't
@@ -47,11 +47,11 @@ class DFTB_evec:
     if self.verbose:
       print('Number of k-points: ', self.Nkpoints)
     if self.Nkpoints == 1:
-      self.complex = False
+      self.is_complex = False
     else:
-      self.complex = True
+      self.is_complex = True
     if self.verbose:
-      print('Looking for complex data?', self.complex)
+      print('Looking for complex data?', self.is_complex)
 
     # How many eigenvectors?
     band_list = re.findall(r'Eigenvector\s*:\s*\d+', self.f)
@@ -73,8 +73,9 @@ class DFTB_evec:
       # print(atoms_list)
       
     # How many orbitals?
-    orb_list = re.findall(r'[ ]+([_a-zA-Z]+)[ ]+[.(\d\-]+', self.f)
+    orb_list = re.findall(r'[ ]+([a-zA-Z]+[-_a-zA-z\d]*)[ ]+[.(\d\-]+', self.f)
     self.Norbs = len(set(orb_list))
+    print(set(orb_list))
     if self.verbose:
       print('Number of orbitals: ', self.Norbs)
 
@@ -95,7 +96,7 @@ class DFTB_evec:
     # Creating a big array with all the info. It needs to be
     # initialized to zero, since not all fields are present in the
     # file
-    if self.complex:
+    if self.is_complex:
       self.spd = np.zeros([self.Nkpoints, self.Nbands, self.Natoms,
                            self.Norbs], dtype=complex)
     else:
@@ -139,17 +140,16 @@ class DFTB_evec:
         cAtom = 0 # a counter of atoms
         for atom in evec:
           # next we search for the orbitals involved
-          orbNames = (re.findall(r'[a-zA-Z_]+', atom))
+          orbNames = (re.findall(r'[a-zA-Z_]+[-_a-zA-z\d]*', atom))
           # what is the index of each orbital? 
           orbIndexes = [self.orbDict[x] for x in orbNames]
           #print(orbNames, orbIndexes)
-          
           # getting all the floating numbers
           numbers = re.findall('[\-0-9]+\.\d+', atom)
           numbers = np.array(numbers, dtype=float)
           # if they are complex, we need to cast them. The last column
           # nneds to be ignored.
-          if self.complex:
+          if self.is_complex:
             numbers.shape = (len(orbIndexes), 3) # Re, Im, Mulliken
             numbers = numbers[:,0] + 1j*numbers[:,1]
           else:
