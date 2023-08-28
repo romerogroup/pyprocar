@@ -277,7 +277,7 @@ class Parser:
 
         parser = dftbplus.DFTBParser(dirname = self.dir,
                                      eigenvec_filename = 'eigenvec.out',
-                                     bands_filename = 'eigenvec.out',
+                                     bands_filename = 'band.out',
                                      detailed_out = 'detailed.out',
                                      detailed_xml = 'detailed.xml'
                                      )

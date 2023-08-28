@@ -480,7 +480,7 @@ class DFTBParser:
         #       
         self.dos = None
 
-        reciprocal_lattice = np.zeros_like(self.lattice)
+        reciprocal_lattice = np.zeros_like(lat)
         a = lat[0, :]
         b = lat[1, :]
         c = lat[2, :]
@@ -491,14 +491,34 @@ class DFTBParser:
         reciprocal_lattice[0, :] = a_star
         reciprocal_lattice[1, :] = b_star
         reciprocal_lattice[2, :] = c_star
+
+
+
+        spd = self.evecs.spd
+        shape = spd.shape
+        spd.shape = (shape[0], # kpoints
+                     shape[1], # bands
+                     shape[2], # atoms
+                     1,        # unknown  
+                     shape[3], # orbitals
+                     1)        # spin
+        phase = self.evecs.phase
+        phase.shape = (shape[0],
+                       shape[1],
+                       shape[2],
+                       1,
+                       shape[3],
+                       1)
+        print('spd shape, ', self.evecs.spd.shape)
+        print('phase shape, ', self.evecs.phase.shape)
         
         self.ebs = ElectronicBandStructure(
-            kpoints=self.evec.kpoints,
-            bands=self.evec.bands,
-            projected=self.evec.spd,
+            kpoints=self.evecs.kpoints,
+            bands=self.evecs.bands,
+            projected=spd,
             efermi=efermi,
             kpath=None,
-            projected_phase=self.evec.phase,
+            projected_phase=phase,
             reciprocal_lattice=reciprocal_lattice,
         )
 

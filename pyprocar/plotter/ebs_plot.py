@@ -297,7 +297,6 @@ class EBSPlot:
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
-
         if color_weights is not None:
             vmin=self.config['clim']['value'][0]
             vmax=self.config['clim']['value'][1]
