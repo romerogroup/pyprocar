@@ -7,7 +7,7 @@ import random
 import math
 import sys
 import copy
-import itertools
+from itertools import product
 from typing import List, Tuple
 
 import numpy as np
@@ -46,21 +46,22 @@ class BandStructure2D(Surface):
         interpolation_factor: int=1,
         projection_accuracy: str="Normal",
         supercell: List[int]=[1, 1, 1],
+        zlim=None
         ):
 
         self.ebs = copy.copy(ebs)
         self.ispin=ispin
-        # Shifts kpoints between [0.5,0.5)
-        self.ebs.kpoints = -np.fmod(self.ebs.kpoints + 6.5, 1 ) + 0.5
+
         self.n_bands=self.ebs.bands.shape[1]
         self.supercell = np.array(supercell)
         self.interpolation_factor = interpolation_factor
         self.projection_accuracy = projection_accuracy
 
-        self.brillouin_zone = self._get_brilloin_zone(self.supercell)
+        self.brillouin_zone = self._get_brilloin_zone(self.supercell,zlim=zlim)
 
-        grid_cart_x=ebs.kpoints_cartesian_mesh[0,:,:,0]
-        grid_cart_y=ebs.kpoints_cartesian_mesh[1,:,:,0]
+        grid_cart_x=self.ebs.kpoints_cartesian_mesh[0,:,:,0]
+        grid_cart_y=self.ebs.kpoints_cartesian_mesh[1,:,:,0]
+
         
         self.band_surfaces = self._generate_band_structure_2d(grid_cart_x,grid_cart_y)
         self.surface = self._combine_band_surfaces()
@@ -70,6 +71,7 @@ class BandStructure2D(Surface):
 
         return None
     
+
     def _combine_band_surfaces(self):
         band_surfaces=copy.deepcopy(self.band_surfaces)
         band_indices=[]
@@ -227,14 +229,14 @@ class BandStructure2D(Surface):
         vectors_array = spd_spin
         self._create_vector_texture(vectors_array = vectors_array, vectors_name = "spin" )
 
-    def project_fermi_velocity(self,fermi_velocity):
+    def project_band_velocity(self,band_velocity):
         """
-        Method to calculate fermi velocity of the surface.
+        Method to calculate band velocity of the surface.
         """
-        vectors_array = fermi_velocity.swapaxes(1, 2)
-        self._create_vector_texture(vectors_array = vectors_array, vectors_name = "Fermi Velocity Vector" )
+        vectors_array = band_velocity.swapaxes(1, 2)
+        self._create_vector_texture(vectors_array = vectors_array, vectors_name = "Band Velocity Vector" )
 
-    def project_fermi_speed(self,fermi_speed):
+    def project_band_speed(self,band_speed):
         """
         Method to calculate the fermi speed of the surface.
         """
@@ -242,9 +244,9 @@ class BandStructure2D(Surface):
         count = 0
         for iband in range(self.n_bands):
             count+=1
-            scalars_array.append(fermi_speed[:,iband])
+            scalars_array.append(band_speed[:,iband])
         scalars_array = np.vstack(scalars_array).T
-        self._project_color(scalars_array = scalars_array, scalar_name = "Fermi Speed")
+        self._project_color(scalars_array = scalars_array, scalar_name = "Band Speed")
 
     def project_harmonic_effective_mass(self,harmonic_effective_mass):
         """
@@ -278,9 +280,10 @@ class BandStructure2D(Surface):
                 self += surface.translate(np.dot(direction, self.ebs.reciprocal_lattice), inplace=True)
             # Clearing unneeded surface from memory
             del surface
-    
+
     def _get_brilloin_zone(self, 
-                        supercell: List[int]):
+                        supercell: List[int],
+                        zlim=None):
 
         """Returns the BrillouinZone of the material
 
@@ -289,8 +292,12 @@ class BandStructure2D(Surface):
         pyprocar.core.BrillouinZone
             The BrillouinZone of the material
         """
-        e_min=self.ebs.bands.min()
-        e_max=self.ebs.bands.max()
+        if zlim:
+            e_min=zlim[0]
+            e_max=zlim[1]
+        else:
+            e_min=self.ebs.bands.min()
+            e_max=self.ebs.bands.max()
         return BrillouinZone2D(e_min,e_max,self.ebs.reciprocal_lattice, supercell)
     
     

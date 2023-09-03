@@ -10,7 +10,6 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 from PIL import Image
 
-import vtk
 from pyvista.core.filters import _get_output  # avoids circular import
 
 
@@ -135,39 +134,35 @@ class BandStructure2DataHandler:
         self.mode=mode
         return spd, spd_spin, bands_to_keep, spins
 
-    def get_surface_data(self,
-                    property_name=None,
-                    interpolation_factor: int=1,
-                    projection_accuracy: str="high",
-                    supercell: List[int]=[1, 1, 1],
-                    extended_zone_directions:List[List[int] or Tuple[int,int,int]]=None,):
+    def get_surface_data(self,property_name=None):
         
         if self.mode is None:
             raise "You must call process data function before get_surface"
         if property_name:
-            current_emplemented_properties = ['fermi_velocity', 'fermi_speed' ,'harmonic_effective_mass']
+            current_emplemented_properties = ['band_velocity', 'band_speed' ,'harmonic_effective_mass']
             if property_name not in current_emplemented_properties:
                 tmp=f"You must choose one of the following properies : {current_emplemented_properties}"
                 raise ValueError(tmp)
                 
-        fermi_surfaces = []
+        band_surfaces = []
         spins_band_index=[]
         spins_index=[]
         for ispin, spin in enumerate(self.spin_pol):
             ebs=copy.copy(self.ebs)
-            
+
             band_structure_2D = BandStructure2D(
                                             ebs,
                                             spin,
                                             interpolation_factor=self.config['interpolation_factor']['value'],
                                             projection_accuracy=self.config['projection_accuracy']['value'],
                                             supercell=self.config['supercell']['value'],
+                                            zlim=self.config['energy_lim']['value']
                                         )
             self.property_name=property_name
-            if self.property_name=='fermi_speed':
-                band_structure_2D.project_fermi_speed(fermi_speed=ebs.fermi_speed[...,ispin])
-            elif self.property_name=='fermi_velocity':
-                band_structure_2D.project_fermi_velocity(fermi_velocity=ebs.fermi_velocity[...,ispin])
+            if self.property_name=='band_speed':
+                band_structure_2D.project_band_speed(band_speed=ebs.fermi_speed[...,ispin])
+            elif self.property_name=='band_velocity':
+                band_structure_2D.project_band_velocity(band_velocity=ebs.fermi_velocity[...,ispin])
             elif self.property_name=='harmonic_effective_mass':
                 band_structure_2D.project_harmonic_effective_mass(harmonic_effective_mass=ebs.harmonic_average_effective_mass[...,ispin])
 
@@ -179,7 +174,7 @@ class BandStructure2DataHandler:
 
             if self.config['extended_zone_directions']['value']:
                 band_structure_2D.extend_surface(extended_zone_directions=self.config['extended_zone_directions']['value'])
-            fermi_surfaces.append(band_structure_2D)
+            band_surfaces.append(band_structure_2D)
 
                 
             if ispin==1:
@@ -201,18 +196,18 @@ class BandStructure2DataHandler:
         spins_band_index.reverse()
         spins_index.reverse()
 
-        fermi_surface=None
-        for i,surface in enumerate(fermi_surfaces):
+        band_surface=None
+        for i,surface in enumerate(band_surfaces):
             if i == 0:
-                fermi_surface=surface
+                band_surface=surface
             else:
-                fermi_surface+=surface
+                band_surface+=surface
 
-        fermi_surface.point_data['band_index']= np.array(spins_band_index)
-        fermi_surface.point_data['spin_index']= np.array(spins_index)
+        band_surface.point_data['band_index']= np.array(spins_band_index)
+        band_surface.point_data['spin_index']= np.array(spins_index)
         
-        self.fermi_surface=fermi_surface
-        return self.fermi_surface
+        self.band_surface=band_surface
+        return self.band_surface
     
 class BandStructure2DVisualizer:
 
@@ -250,9 +245,9 @@ class BandStructure2DVisualizer:
                     line_width=self.config['axes_line_width']['value'],
                 labels_off=False)
 
-    def add_brillouin_zone(self,fermi_surface):
+    def add_brillouin_zone(self,surface):
        self.plotter.add_mesh(
-                fermi_surface.brillouin_zone,
+                surface.brillouin_zone,
                 style=self.config['brillouin_zone_style']['value'],
                 line_width=self.config['brillouin_zone_line_width']['value'],
                 color=self.config['brillouin_zone_color']['value'],
@@ -301,7 +296,7 @@ class BandStructure2DVisualizer:
                     vector_name):
         
         arrows=None
-        if scalars_name=="spin_magnitude" or scalars_name=="Fermi Velocity Vector_magnitude":
+        if scalars_name=="spin_magnitude" or scalars_name=="Band Velocity Vector_magnitude":
             arrows = surface.glyph(orient=vector_name,
                                          scale=self.config['texture_scale']['value'] ,
                                          factor=self.config['texture_size']['value'])
@@ -417,6 +412,30 @@ class BandStructure2DVisualizer:
             p.view_vector(normal_vec)
             p.show(screenshot=save_2d_slice,interactive=False)
 
+    def add_grid(self):
+        if self.config['grid']['value']:
+
+            self.plotter.show_grid(
+                                ytitle=self.config['grid_ytitle']['value'],
+                                xtitle=self.config['grid_xtitle']['value'],
+                                ztitle=self.config['grid_ztitle']['value'])
+
+    def add_fermi_plane(self):
+        if self.config['add_fermi_plane']['value']:
+            plane = pv.Plane(center=(0,0,0),
+                            i_size=self.config['fermi_plane_size']['value'],
+                            j_size=self.config['fermi_plane_size']['value'])
+
+            self.plotter.add_mesh(plane,#.extract_feature_edges(),
+                                  color=self.config['fermi_plane_color']['value'],
+                                  render_lines_as_tubes=True,
+                                  opacity=self.config['fermi_plane_opacity']['value'],
+                                  line_width=5)
+            if self.config['fermi_plane_opacity']['value']:
+                poly = pv.PolyData(np.array(self.config['fermi_text_position']['value']))
+                poly['labels']=['E$_{F}$' for i in range(poly.n_points)]
+                self.plotter.add_point_labels(poly, "labels",font_size=36,show_points=False)
+            
     def set_background_color(self):
         self.plotter.set_background(self.config['background_color']['value'])
 
@@ -508,14 +527,14 @@ class BandStructure2DVisualizer:
             
             use_rgba = False
 
-            if self.data_handler.property_name == 'fermi_speed':
-                scalars = "Fermi Speed"
-                text = "Fermi Speed"
+            if self.data_handler.property_name == 'band_speed':
+                scalars = "Band Speed"
+                text = "Band Speed"
                 vector_name=None
-            elif self.data_handler.property_name == 'fermi_velocity':
-                scalars = "Fermi Velocity Vector_magnitude"
-                vector_name = "Fermi Velocity Vector"
-                text = "Fermi Speed"
+            elif self.data_handler.property_name == 'band_velocity':
+                scalars = "Band Velocity Vector_magnitude"
+                vector_name = "Band Velocity Vector"
+                text = "Band Speed"
             elif self.data_handler.property_name == 'harmonic_effective_mass':
                 scalars = "Harmonic Effective Mass"
                 text = "Harmonic Effective Mass"
@@ -543,8 +562,13 @@ class BandStructure2DVisualizer:
         return x_norm
 
     def clip_broullin_zone(self,surface):
-        for normal,center in zip(surface.brillouin_zone.face_normals, surface.brillouin_zone.centers):
-            surface.clip(origin=center, normal=normal, inplace=True)
+        if self.config['clip_brillouin_zone']['value']:
+            for normal,center in zip(surface.brillouin_zone.face_normals, surface.brillouin_zone.centers):
+                
+                center_with_factor = center
+                center_with_factor[0] = center_with_factor[0]*self.config['clip_brillouin_zone_factor']['value']
+                center_with_factor[1] = center_with_factor[1]*self.config['clip_brillouin_zone_factor']['value']
+                surface.clip(origin=center_with_factor, normal=normal, inplace=True)
         return surface
     
     def update_config(self, config_dict):

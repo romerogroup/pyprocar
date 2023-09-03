@@ -343,7 +343,17 @@ class FermiVisualizer:
         self.energy_values=energy_values
         self.e_surfaces=e_surfaces
         for i,surface in enumerate(self.e_surfaces):
-            self.e_surfaces[i]=self._setup_band_colors(surface)
+
+            if self.config['spin_colors']['value'] != [None,None]:
+                spin_colors=[]
+                for spin_index in surface.point_data['spin_index']:
+                    if spin_index == 0:
+                        spin_colors.append(self.config['spin_colors']['value'][0])
+                    else:
+                        spin_colors.append(self.config['spin_colors']['value'][1])
+                self.e_surfaces[i].point_data['spin_colors']=spin_colors
+            else:
+                self.e_surfaces[i]=self._setup_band_colors(surface)
 
         self.plotter.add_slider_widget(self._custom_isoslider_callback, 
                                 [np.amin(energy_values), np.amax(energy_values)], 
@@ -430,11 +440,11 @@ class FermiVisualizer:
         self.plotter.close()
     
     def add_slicer(self,surface,
-                                 show=True,
-                                 save_2d=None,
-                                 save_2d_slice=None,
-                                 slice_normal=(1,0,0),
-                                 slice_origin=(0,0,0)):
+                        show=True,
+                        save_2d=None,
+                        save_2d_slice=None,
+                        slice_normal=(1,0,0),
+                        slice_origin=(0,0,0)):
         
         self.add_brillouin_zone(surface)
         self.add_axes()
@@ -451,8 +461,16 @@ class FermiVisualizer:
         self._add_custom_mesh_slice(mesh=surface,normal=slice_normal,origin=slice_origin)
         
         if show:
-            self.plotter.show(cpos=self.config['plotter_camera_pos']['value'], 
-                         screenshot=save_2d)
+            if self.config['plotter_offscreen']:
+                self.plotter.off_screen = True
+                self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],auto_close=False)  
+                self.plotter.show(screenshot=save_2d)
+            else:
+                image=self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],screenshot=True)  
+                im = Image.fromarray(image)
+                im.save(save_2d)
+            # self.plotter.show(cpos=self.config['plotter_camera_pos']['value'], 
+            #              screenshot=save_2d)
         if save_2d_slice:
             slice_2d = self.plotter.plane_sliced_meshes[0]
             self.plotter.close()
@@ -462,7 +480,9 @@ class FermiVisualizer:
             p = pv.Plotter()
 
             if self.data_handler.vector_name:
-                arrows = slice_2d.glyph(orient=self.data_handler.vector_name, scale=False, factor=0.1)
+                arrows = slice_2d.glyph(orient=self.data_handler.vector_name, 
+                                        scale=self.config['texture_scale']['value'],
+                                        factor=self.config['texture_size']['value'])
             if self.config['texture_color']['value'] is not None:
                 p.add_mesh(arrows, color=self.config['texture_color']['value'], show_scalar_bar=False,name='arrows')
             else:
@@ -658,13 +678,21 @@ class FermiVisualizer:
         return x_norm
 
     def _custom_isoslider_callback(self, value):
-            res = int(value)
+            res = float(value)
             closest_idx = find_nearest(self.energy_values, res)
             surface=self.e_surfaces[closest_idx]
             if self.config['surface_color']['value']:
                 self.plotter.add_mesh(surface,
                                     name='iso_surface',
                                     color=self.config['surface_color']['value'],
+                                    opacity=self.config['surface_opacity']['value'],)
+            elif self.config['spin_colors']['value'] != [None,None]:
+                self.plotter.add_mesh(surface,
+                                    name='iso_surface',
+                                    scalars='spin_colors',
+                                    cmap=self.config['surface_cmap']['value'],
+                                    clim=self.config['surface_clim']['value'],
+                                    show_scalar_bar=False,
                                     opacity=self.config['surface_opacity']['value'],)
             else:
                 if self.config['surface_clim']['value']:

@@ -121,7 +121,7 @@ def bandsdosplot(
         
 
     if savefig:
-        plt.savefig(savefig, bbox_inches="tight")
+        plt.savefig(savefig)#), bbox_inches="tight")
         plt.clf()
     if show:
         plt.show()

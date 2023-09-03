@@ -373,7 +373,6 @@ class ElectronicBandStructure:
             n_ky = len(ky_unique)
             n_kz = len(kz_unique)
             self._index_mesh = np.zeros((n_kx,n_ky,n_kz),dtype=int)
-
             for k in range(n_kz):
                 for j in range(n_ky):
                     for i in range(n_kx):
@@ -392,7 +391,7 @@ class ElectronicBandStructure:
                         where_xyz_true_points = where_xy_true_points[where_xyz_true_indices]
 
                         original_index = where_x_true_indices[where_xy_true_indices[where_xyz_true_indices]]
-                        # print(original_index)
+
                         self._index_mesh[i,j,k] = original_index
         return self._index_mesh
     

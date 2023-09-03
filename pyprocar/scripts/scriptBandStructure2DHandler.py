@@ -8,6 +8,7 @@ import copy
 from typing import List, Tuple
 import os
 import yaml
+from itertools import product
 
 import numpy as np
 from matplotlib import colors as mpcolors
@@ -20,7 +21,7 @@ from pyprocar.plotter import BandStructure2DataHandler, BandStructure2DVisualize
 from pyprocar.utils import ROOT
 from .. import io
 
-
+pv.global_theme.font.size = 10
 np.set_printoptions(threshold=sys.maxsize)
 # 
 class BandStructure2DHandler:
@@ -57,7 +58,8 @@ class BandStructure2DHandler:
         if self.structure.rotations is not None:
             self.ebs.ibz2fbz(self.structure.rotations)
 
-        self._find_bands_near_fermi()
+
+        # self._find_bands_near_fermi()
 
         modes=["plain","parametric","spin_texture", "overlay" ]
         props=["fermi_speed","fermi_velocity","harmonic_effective_mass"]
@@ -116,6 +118,9 @@ class BandStructure2DHandler:
         if print_plot_opts:
             self.print_default_settings()
         # Process the data
+
+        self._find_bands_near_fermi(bands=bands)
+        self._expand_kpoints_to_supercell()
         self.data_handler = BandStructure2DataHandler(self.ebs, **kwargs)
         self._reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
         self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
@@ -131,8 +136,10 @@ class BandStructure2DHandler:
         visualizer.add_surface(band_structure_surface)
         if mode != "plain" or spin_texture:
             visualizer.add_scalar_bar(name=visualizer.data_handler.scalars_name)
-
+        
+        visualizer.add_grid()
         visualizer.add_axes()
+        visualizer.add_fermi_plane()
         visualizer.set_background_color()
         
         # save and showing setting
@@ -152,7 +159,7 @@ class BandStructure2DHandler:
         for key,value in plotting_options.items():
             print(key,':',value)
 
-    def _find_bands_near_fermi(self,energy_tolerance=0.7):
+    def _find_bands_near_fermi(self,bands=None,energy_tolerance=0.7):
         energy_level = 0
         full_band_index = []
         for iband in range(len(self.ebs.bands[0,:,0])):
@@ -160,16 +167,39 @@ class BandStructure2DHandler:
             if fermi_surface_test != 0:
                 full_band_index.append(iband)
         
+        if bands:
+            full_band_index=bands
         self.ebs.bands=self.ebs.bands[:,full_band_index,:]
         self.ebs.projected=self.ebs.projected[:,full_band_index,:,:,:]
         print("Bands near the fermi level : " , full_band_index )
 
+    def _expand_kpoints_to_supercell(self):
+        supercell_directions=list(list(product([1, 0,-1], repeat=2)))
+        
+        initial_kpoints=copy.copy(self.ebs.kpoints )
+        initial_bands=copy.copy(self.ebs.bands )
+        initial_projected=copy.copy(self.ebs.projected )
+
+        for supercell_direction in supercell_directions:
+            # print(initial_kpoints.shape)
+            new_kpoints=copy.copy(initial_kpoints)
+            if supercell_direction != (0,0):
+
+                new_kpoints[:,0] = new_kpoints[:,0] + supercell_direction[0]
+                new_kpoints[:,1] = new_kpoints[:,1] + supercell_direction[1]
+
+                self.ebs.kpoints=np.append(self.ebs.kpoints, new_kpoints,  axis=0)
+                self.ebs.bands=np.append(self.ebs.bands, initial_bands,  axis=0)
+                self.ebs.projected=np.append(self.ebs.projected, initial_projected,  axis=0)
+
     def _reduce_kpoints_to_plane(self,k_z_plane,k_z_plane_tol):
         i_kpoints_near_z_0 = np.where(np.logical_and(self.data_handler.ebs.kpoints_cartesian[:,2] < k_z_plane + k_z_plane_tol, 
                                                      self.data_handler.ebs.kpoints_cartesian[:,2] > k_z_plane - k_z_plane_tol) )
+
         self.data_handler.ebs.kpoints = self.data_handler.ebs.kpoints[i_kpoints_near_z_0,:][0]
         self.data_handler.ebs.bands = self.data_handler.ebs.bands[i_kpoints_near_z_0,:][0]
         self.data_handler.ebs.projected = self.data_handler.ebs.projected[i_kpoints_near_z_0,:][0]
+
 
 # def find_nearest(array, value):
 #     array = np.asarray(array)
