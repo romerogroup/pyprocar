@@ -333,13 +333,19 @@ class Poscar(collections.abc.Mapping):
             for x in composition[i] * [species[i]]:
                 atoms.append(x)
         natom = sum(composition)
-        if lines[6 + shift][0].lower() == "s":
-            shift = 2
-        if lines[6 + shift][0].lower() == "d":
+        # if lines[6 + shift][0].lower() == "s":
+        line = lines[6 + shift]
+        if re.findall(r'\w+|$', line)[0].lower()[0] == "s":
+            # shift = 2
+            shift += 1
+        match = re.findall(r'\w+|$', lines[6 + shift])[0].lower()
+        if match[0] == "d":
             direct = True
-        elif lines[6 + shift][0].lower() == "c":
-            print("havn't implemented conversion to cartesian yet")
+        elif match[0] == "c":
+            print("haven't implemented conversion to cartesian yet")
             direct = False
+        else:
+            raise RuntimeError('The POSCAR is not in Direct or Cartesian coordinates ')
         coordinates = np.zeros(shape=(natom, 3))
         for i in range(natom):
             coordinates[i, :] = [float(x)

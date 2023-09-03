@@ -7,7 +7,7 @@ from ..core import DensityOfStates
 from ..core import Structure
 from ..utils import UtilsProcar
 
-from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf, elk
+from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf, elk, dftbplus
 
 class Parser:
     """
@@ -51,6 +51,9 @@ class Parser:
         elif self.code == "elk":
             self.parse_elk()
 
+        elif self.code == "dftb+":
+            self.parse_dftbplus()
+            
         if self.ebs:
             self.ebs.bands += self.ebs.efermi
 
@@ -262,4 +265,29 @@ class Parser:
             self.dos = None
 
         return None
+
+    def parse_dftbplus(self):
+        """parses DFTB+ files, these files do not have an array-like
+        structure, and the process is *slow* . 
+
+        Then, they are converted to VASP-like files and parsed by the
+        standard `parse_vasp`
+
+        Returns
+        -------
+        None
+            None
+
+        """
+        # This creates the vasp files, if needed
+        parser = dftbplus.DFTBParser(dirname = self.dir,
+                                     eigenvec_filename = 'eigenvec.out',
+                                     bands_filename = 'band.out',
+                                     detailed_out = 'detailed.out',
+                                     detailed_xml = 'detailed.xml'
+                                     )
         
+        self.parse_vasp()
+        
+        return None
+

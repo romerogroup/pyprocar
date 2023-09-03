@@ -50,7 +50,6 @@ class EBSPlot:
         config_manager.update_config(kwargs)  
         self.config=config_manager.get_config()
 
-
         self.ebs = ebs
         self.kpath = kpath
         self.spins = spins
@@ -193,10 +192,13 @@ class EBSPlot:
         if color_weights is not None:
             vmin=self.config['clim']['value'][0]
             vmax=self.config['clim']['value'][1]
-            if vmin is None: 
-                vmin = color_weights.min()
+            if vmin is None:
+                # only the actual spin values are to be used (i.e. we
+                # are plotting the density, then negative values from
+                # spin projections are nonsense )
+                vmin = color_weights[:,:,spins].min()
             if vmax is None:
-                vmax = color_weights.max()
+                vmax = color_weights[:,:,spins].max()
 
         for ispin in spins:
             for iband in range(self.ebs.nbands):
@@ -260,6 +262,19 @@ class EBSPlot:
         color_weights : np.ndarray, optional
             The color weights at each point, by default None
         """
+
+        # if there is only a single k-point the method for atomic
+        # levels will be called to fake another kpoint and then
+        # exit. `plot_atomic_levels` will invoke this method again to
+        # get the actual plot
+        if len(self.ebs.kpoints) == 1:
+          self.plot_atomic_levels(color_weights=color_weights,
+                                  width_weights=width_weights,
+                                  color_mask=color_mask,
+                                  width_mask=width_mask,
+                                  spins=spins)
+          return
+        
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
             linewidth = self.config['linewidth']['value']
@@ -282,15 +297,13 @@ class EBSPlot:
         else:
             # Faking a mask, all elemtnet are included
             mbands = np.ma.masked_array(self.ebs.bands, False)
-
         if color_weights is not None:
             vmin=self.config['clim']['value'][0]
             vmax=self.config['clim']['value'][1]
             if vmin is None:
-                vmin = color_weights.min()
+                vmin = color_weights[:,:,spins].min()
             if vmax is None:
-                vmax = color_weights.max()
-                
+                vmax = color_weights[:,:,spins].max()
             norm = mpl.colors.Normalize(vmin, vmax)
         # print(self.ebs.nbands)
         for ispin in spins:

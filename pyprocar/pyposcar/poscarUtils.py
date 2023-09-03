@@ -416,7 +416,8 @@ class poscar_supercell:
     if isinstance(poscar, str):
       self.poscar = Poscar(poscar)
     else:
-      self.poscar = poscar
+      import copy
+      self.poscar = copy.deepcopy(poscar)
     if self.poscar.loaded is False:
       self.poscar.parse()
 
@@ -444,7 +445,8 @@ class poscar_supercell:
 
     Poscar
         A Poscar object with the desired supercell. It is the same instance 
-        stored in this class
+        stored in this class. Note, the creation of `poscar_supercell` makes 
+        a deep copy of the `Poscar` instance provided
 
     """
     lat = self.poscar.lat

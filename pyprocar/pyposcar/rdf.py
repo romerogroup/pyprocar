@@ -52,7 +52,7 @@ class RDF:
         returns the sum of all atom Species up until the species especified"""
 
         index = self.species_name.index(Species)
-        add_up = np.sum(self.species[0:index])
+        add_up = int(np.sum(self.species[0:index]))
 
         return add_up
             

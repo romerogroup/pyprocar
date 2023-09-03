@@ -127,7 +127,7 @@ class FindDefect:
     Delta_General_Norms = []
     #Here will be all norms separated by type of cluster
     All_type_norms = []
-    print("Cluster_total ", Total_ClusterDistanceMatrix)
+    # print("Cluster_total ", Total_ClusterDistanceMatrix)
     for type, idxs in zip(Cluster_set, Cluster_group_index):
       Delta_type_Norms = []
       idx_to_compare = itertools.combinations(idxs, 2)
@@ -214,7 +214,6 @@ class FindDefect:
     # print(scores)
     # plt.plot(samples, scores)
     # plt.show()
-    self.verbose = True
     #
     # The local minima of the scores denotes the groups. argrelextrema
     # returns a tuple, only first entry is useful
@@ -233,7 +232,8 @@ class FindDefect:
     try: # perhaps there is no minumum
       lower_min = minima[0]
     except IndexError:
-      print('\n\ndefects.FindDefect.find_forgein_atoms(): No defect found')
+      if self.verbose:
+        print('\n\ndefects.FindDefect.find_forgein_atoms(): No defect found')
       self.defects['find_forgein_atoms'] = []
       self._set_all_defects()
       return
@@ -326,7 +326,8 @@ class FindDefect:
     try:
       lower_min = minima[0]
     except IndexError:
-      print('\n\ndefects.FindDefect.nearest_neighbors_environment(): No defect found')
+      if self.verbose:
+        print('\n\ndefects.FindDefect.nearest_neighbors_environment(): No defect found')
       self.defects['nearest_neighbors_environment'] = []
       self._set_all_defects()
       return

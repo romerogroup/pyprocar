@@ -3,7 +3,9 @@
 import re
 import argparse
 import numpy as np
+import os
 
+from ..pyposcar.poscar import Poscar
 
 class DFTB_evec:
   def __init__(self, filename, verbose): # , normalize=False):
@@ -75,7 +77,7 @@ class DFTB_evec:
     # How many orbitals?
     orb_list = re.findall(r'[ ]+([a-zA-Z]+[-_a-zA-z\d]*)[ ]+[.(\d\-]+', self.f)
     self.Norbs = len(set(orb_list))
-    print(set(orb_list))
+    print('Orbitals found:', set(orb_list))
     if self.verbose:
       print('Number of orbitals: ', self.Norbs)
 
@@ -209,8 +211,9 @@ class DFTB_evec:
     tot_orbs = np.sum(self.spd, axis=3)
     tot_atoms = np.sum(self.spd, axis=2)
     tot_oa = np.sum(tot_orbs, axis=2) # already summed over axis=3
-    print('sum over orbitals.shape: ', tot_orbs.shape)
-    print('sum over atoms.shape: ', tot_atoms.shape)
+    if self.verbose:
+      print('sum over orbitals.shape: ', tot_orbs.shape)
+      print('sum over atoms.shape: ', tot_atoms.shape)
 
     # casting to strings
     if self.verbose:
@@ -340,13 +343,62 @@ class DFTB_utils:
     lat = lat*0.529177249 
     return lat
 
+  def find_atoms(self, filename):
+    # The positions are in Cartesian coordiantes and in Bohr!
+    from xml.dom import minidom
+
+    dom = minidom.parse(filename)    
+    typenames = dom.getElementsByTagName('typenames')[0].firstChild.data
+    typesandcoordinates = dom.getElementsByTagName('typesandcoordinates')[0].firstChild.data
+
+    typenames = re.findall(r'"([\w]+)"\s+', typenames)
+    ntypes = re.findall(r'\s(\d+)\s', typesandcoordinates)
+    # I need the number of elements per type
+    n = len(typenames)
+    types_dict = dict(zip(typenames, range(1,n+1)))
+    occurences = [ntypes.count(str(types_dict[x])) for x in typenames]
+    positions = re.findall(r'([-\d]+\.[-\d]+)', typesandcoordinates)
+    positions = np.array(positions, dtype=float)
+    positions.shape = (sum(occurences), 3)
+    # Bohr to Angstrom
+    positions = positions*0.529177249 
+    return typenames, occurences, positions
+
+
+  def writePoscar(self, detailed_xml):
+    # the positions are written in Bohrs and Cartesain coordinates
+    
+    
+    poscarStr = 'automatically created to speedup pyProcar\n'
+    poscarStr += '1.0\n'
+    lat = self.find_lattice(detailed_xml)
+    lat = np.array(lat, dtype=str)
+    lat = '\n'.join([' '.join(x) for x in lat])
+    poscarStr += lat + '\n'
+
+    typenames, occurences, positions = self.find_atoms(detailed_xml)
+    
+    poscarStr += ' '.join(typenames) + '\n'
+    poscarStr += ' '.join([str(x) for x in occurences]) + '\n'
+    poscarStr += ' C \n'
+
+    positions = np.array(positions, dtype=str)
+    poscarStr += '\n'.join([' '.join(x) for x in positions])
+    poscarStr += '\n'
+
+    #print(poscarStr)
+    
+    p = Poscar('', verbose=False)
+    p.parse(fromString=poscarStr)
+    p.write('POSCAR', direct=True)
+    return
   
-  def writeOutcar(self):
+  def writeOutcar(self, detailed_out, detailed_xml):
     f = open('OUTCAR', 'w')
-    efermi = self.find_fermi(args.detailed)
+    efermi = self.find_fermi(detailed_out)
     f.write('E-fermi : ' + str(efermi) + ' \n')
     
-    lat = self.find_lattice(args.kpointsfile)
+    lat = self.find_lattice(detailed_xml)
     # print('lat', lat)
     vol = np.dot( lat[0], np.cross(lat[1], lat[2]) )
     b0 = np.cross(lat[1], lat[2])/vol
@@ -635,98 +687,84 @@ class DFTB_input:
     return
 
 
+class DFTBParser:
+  """The class parses the input form DFTB+.
+    
+    Parameters
+    ----------
+  
+    dirname : str, optional
+        Directory path to where calculation took place, by default ""
+    eigenvec_filename : str, optional
+        The (plain-text) eigenvectors, by default 'eigenvec.out'
+    bands_filename : str, optional
+        The file with the bands, by default 'band.out'
+    detailed_out : str, optional 
+        The file with the Fermi energy, by default 'detailed.out'
+    detailed_xml : str, optional
+        The file with the list of kpoints, by default 'detailed.xml'
+  """
+  def __init__(self,
+               dirname:str = '',
+               eigenvec_filename:str = 'eigenvec.out',
+               bands_filename:str = 'band.out',
+               detailed_out:str = 'detailed.out',
+               detailed_xml:str = 'detailed.xml'
+               ):
+
     
     
-def f_evec(args):
-  # The idea is to get all the data needed to build a PROCAR file it
-  # needs to be done in several steps (different files)
-  
-  if args.verbose:
-    print('Eigenvector-related utilities\n')
-    print('eigenvectors:', args.eigenvectors)
-    print('bands :      ', args.bands)
-    print('fermi :      ', args.fermi)
-    print('detailed :   ', args.detailed)
-    print('kpointsfile: ', args.kpointsfile)
-    # print('nomalize:    ', args.normalize)
+    # Searching for the Fermi level
+    utils = DFTB_utils(verbose=False)
     
-  # Loading the eigenvector data
-  evec = DFTB_evec(filename=args.eigenvectors, verbose=args.verbose) #, normalize=args.normalize)
-  evec.load()
-  
-  # Searching for the Fermi level
-  utils = DFTB_utils(verbose=args.verbose)
-  efermi = utils.find_fermi(args.detailed)
-
-  # Loading the bands
-  bands = DFTB_bands(filename=args.bands, verbose=args.verbose) #, eFermi=efermi)
-  bands.load()
-
-  # Loading the kpoints
-  if args.kpointsfile:
-    kpoints = utils.get_kpoints(args.kpointsfile)
-  # otherwise, a plain set of kpoints is spanned. Physically meaningless
-  else:
-    Nkpoints = evec.Nkpoints
-    kpoints = np.linspace(0,1, num=Nkpoints)
-    print('A list of k-points was not provided. Creating a fake and meaningless '
-          'of K-points')
+    # Loading the bands
+    bands = DFTB_bands(filename=bands_filename, verbose=False)
+    bands.load()
     
-  # setting the bands and kpoints to the class with eigenvectors
-  evec.set_bands(bands.Bands, bands.Occupancies)
-  evec.set_kpoints(kpoints)
+    # Loading the kpoints
+    if detailed_xml:
+      kpoints = utils.get_kpoints(detailed_xml)
+      # otherwise, a plain set of kpoints is spanned. Physically meaningless
+    else:
+      Nkpoints = evec.Nkpoints
+      kpoints = np.linspace(0,1, num=Nkpoints)
+      print('A list of k-points was not provided. Creating a fake and meaningless '
+            'of K-points')
+    
+    utils.writeOutcar(detailed_out=detailed_out, detailed_xml=detailed_xml)
 
-  if args.verbose:
-    print('\nInput parsed, going to write a PROCAR file')
+    utils.writePoscar(detailed_xml=detailed_xml)
 
-  evec.writeProcar()
-  utils.writeOutcar()
+
+
+    # I need to find if I need to create the VASP files, just the
+    # PROCAR, the other are trivial
+
+    create_procar = True
+    try:
+      mtime_procar = os.path.getmtime('PROCAR')
+      mtime_evec = os.path.getmtime(eigenvec_filename)
+      if mtime_evec > mtime_procar:
+        create_procar = True        
+      else:
+        create_procar = False
+    except OSError:
+      # Handle file not found or other errors
+      create_procar = True
+    if create_procar == False:
+      return
+
+    print('Going to create a PROCAR file from eigenvec.txt, it migth take a'
+          ' while but will be done done just once')
+    
+    evec = DFTB_evec(filename = eigenvec_filename,
+                           verbose = False)
+    evec .load()
+
+    # setting the bands and kpoints to the class with eigenvectors
+    evec.set_bands(bands.Bands, bands.Occupancies)
+    evec.set_kpoints(kpoints)
+    
+    evec.writeProcar()
   
-
-def f_input(args):
-  # This functions deals with changing the DFTB+ inputs to be used
-  # with pyprocar. It is required
-  #
-  # - bandstructure (bands.out)
-  # - kpoints (detailed.xml)
-  # - Fermi energy (detailed.out)
-  # - wavefunctions (eigenvectors.out)
-  
-  dftb_in = DFTB_input(args.input, args.verbose)
-  dftb_in.add_pyprocar_tags(output=args.output)
-  
-  
-if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description='Utilities to manipulate DFTB outputs.')
-  subparsers = parser.add_subparsers(help='sub-command')
-  
-  p_evec = subparsers.add_parser('evec', help='Converts the DFTB+ Eigenvectors (text-file) '
-                                 'into a vasp PROCAR file.')
-  p_evec.set_defaults(func=f_evec)
-
-  p_evec.add_argument('--eigenvectors', '-e', default='eigenvec.out', help='eigenvec.out')
-  p_evec.add_argument('-v', '--verbose', action='store_true')
-
-  p_evec.add_argument('--bands', '-b', default='band.out', help='File with the bands (band.out)')
-  p_evec.add_argument('--fermi', default=0.0, type=float,
-                      help='Supersedes the extracted from `detailed.out`')
-  p_evec.add_argument('--detailed', '-d', default='detailed.out', help=
-                      'The file with the Fermi energy (detailed.out)' )
-  p_evec.add_argument('-k', '--kpointsfile', help='file with the explicit list of K-points'
-                      ' used (detailed.xml)`', default='detailed.xml')
-  # p_evec.add_argument('--normalize', action='store_true', help='If the overlap between '
-  #                     'orbitals is not zero, their norm can vary wildly. Set this option'
-  #                     ' to have normalized')
-
-
-  p_input = subparsers.add_parser('input', help='add the tags needed for pyprocar to a dftb+ input')
-  p_input.set_defaults(func=f_input)
-  p_input.add_argument('-v', '--verbose', action='store_true')
-  p_input.add_argument('input', help='the input file of DFTB+.')
-  p_input.add_argument('-o', '--output', default='dftb_in.hsd', help='output file. Default: dftb_in.hsd')
-  
-  args = parser.parse_args()
-  try:
-    args.func(args)
-  except AttributeError:
-    parser.error("too few arguments")
+    return
