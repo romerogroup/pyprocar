@@ -8,6 +8,7 @@ from pyprocar.pyposcar.generalUtils import remove_flat_points
 from pyprocar.pyposcar.poscar import Poscar
 from pyprocar.pyposcar.defects import FindDefect 
 from pyprocar.pyposcar.clusters import Clusters
+import pyprocar.scripts.scriptBandsplot as sbp
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,11 +21,10 @@ except:
 from scipy.signal import argrelextrema
 
 class AutoBandsPlot:
-    def __init__(self, code='vasp', dir='.'):
-        self.IPR = None
-        self.pIPR = None
-        self.parser = io.Parser(code = 'vasp', dir = '.')
+    def __init__(self, code='vasp', dirname='.'):
+        self.parser = io.Parser(code = 'vasp', dir = dirname)
         self.ebs = self.parser.ebs
+        self.dirname = dirname
         self.structure = self.parser.structure
         self.kpath = self.parser.kpath
         self.ispin = self.ebs.bands.shape[-1]
@@ -34,29 +34,46 @@ class AutoBandsPlot:
             self.bands_down = self.ebs.bands[:,:,1] - self.ebs.efermi
 
         self.IPR = self.ebs.ebs_ipr()
+        self.pIPR = self.ebs.ebs_ipr_atom()
+       
+        #
+        # Setting the energy window for plotting
+        #
         
-
-        # hard boundaries on the energy, the enegy window must lie
-        # within
+        # hard boundaries on the energy, the enegy window must lie within
         self.eBoundaries = self.get_energy_boundaries()
         # Estimation of plotting window
         self.eLim = self.simple_energy_window()
-        # Estimation of the window to include bulk states
+        # Estimation of the window to include bulk states in conduction and valence regions
         self.ipr_threshold = self.ipr_energy_window()
 
+        #
+        # Guessing relevant atoms
+        #
+        self.poscar = Poscar('POSCAR')
+        self.code = code
+        if code == 'vasp':
+            self.poscar.parse()
+        else:
+            # load from pyChemia??
+            self.poscar.loaded = True
+            raise RuntimeError('currently only vasp is supported')
+        
         self.defects = self.get_defects()
         # van der Waals layers perhaps?
         self.clusters = self.get_clusters()
-
-        self.defect_states()
+        #
+        # correlating defects with electronic structure within the
+        # energy window
+        #
+        self.defect_states = self.find_defect_states(defects = self.defects)
+        self.cluster_states = self.find_defect_states(defects = self.clusters)
         
-        # self.plot()
-
-
-
+        self.write_report(verbosity=False, filename='report.txt')
+        
+        self.plot()
         
         return
-    
     
 
     def simple_energy_window(self, delta=1.0):
@@ -69,7 +86,7 @@ class AutoBandsPlot:
         # bands need to have the Fermi energy set to zero
         #
         # Finding the lowest occupied / highest unocuppied  energies
-        print(self.bands_up.shape)
+        # print(self.bands_up.shape)
         emin_up = []
         emax_up = []
         emin_down = []
@@ -86,9 +103,9 @@ class AutoBandsPlot:
         emin = min(emin_up)
         emax = max(emax_up)
         if self.ispin == 2:
-            emin = min(emin, emin_down)
-            emax = max(emax, emax_down)
-        print('(without delta) emin, emax', emin, emax)
+            emin = min(emin, min(emin_down))
+            emax = max(emax, min(emax_down))
+        # print('(without delta) emin, emax', emin, emax)
         # adding a little bit of space to the window
         emax = emax + delta
         emin = emin - delta
@@ -96,7 +113,7 @@ class AutoBandsPlot:
             emin = self.eBoundaries[0]
         if emax > self.eBoundaries[1]:
             emax = self.eBoundaries[1]
-        print('(with delta) emin, emax', emin, emax)
+        # print('(with delta) emin, emax', emin, emax)
         return emin, emax
 
 
@@ -119,7 +136,7 @@ class AutoBandsPlot:
             min_energy_down = np.max(min_energy_down)
             max_energy = min(max_energy_up, max_energy_down)
             min_energy = max(min_energy_up, min_energy_down)
-        print('Boundaries,' , min_energy, max_energy)
+        # print('Boundaries,' , min_energy, max_energy)
         return min_energy, max_energy
     
 
@@ -133,7 +150,7 @@ class AutoBandsPlot:
             ipr_down = self.IPR[:,:,1]
             threshold_down = np.percentile(ipr_down, 90)
             threshold = max(threshold_up, threshold_down)
-        print('IPR threshold', threshold)
+        # print('IPR threshold', threshold)
 
         for kpoint in range(self.bands_up.shape[0]):
             # searching at least one bulk band in valence
@@ -171,17 +188,12 @@ class AutoBandsPlot:
                 if emax > self.eLim[1] and emax < self.eBoundaries[1]:
                     self.eLim = self.eLim[0], min(emax+0.5, self.eBoundaries[1])
                     
-        print('self.eLim (IPR)', self.eLim)
+        # print('self.eLim (IPR)', self.eLim)
         return threshold
 
     def get_defects(self):
-        self.poscar = Poscar('POSCAR')
-        # If loading from other source -such as pychemia do not
-        # `parse()` it-, just load the attributes, and set
-        # `poscar.loaded = True`
-        self.poscar.parse()
         d = FindDefect(self.poscar)
-        print('\ndefects:', d.defects)
+        # print('\ndefects:', d.defects)
         # are the defects in a same cluster if extended a little bit?
         c = Clusters(self.poscar, marked = d.all_defects)
         # These are the individual atoms marked as defects. Are part
@@ -199,7 +211,6 @@ class AutoBandsPlot:
             def_cluster = cluster_1
         else:
             def_cluster = cluster_0
-        print('\ndefects:', def_cluster)
         # if all atoms are a single defect, there is no defect
         if len(def_cluster) == 1:
             if len(def_cluster[0]) == self.poscar.Ntotal:
@@ -209,44 +220,221 @@ class AutoBandsPlot:
         
         
     def get_clusters(self):
-        self.poscar = Poscar('POSCAR')
-        # If loading from other source -such as pychemia do not
-        # `parse()` it-, just load the attributes, and set
-        # `poscar.loaded = True`
-        self.poscar.parse()
         c = Clusters(self.poscar)
         # only one cluster but it amount the whole cell, there is no cluster.
         if len(c.clusters) == 1:
-            if len(c.cluster[0]) == self.poscar.Ntotal:
+            if len(c.clusters[0]) == self.poscar.Ntotal:
                 return []
         print('clusters', c.clusters)
         return c.clusters
     
 
-    def defect_states(self):
-        p_ipr = self.ebs.ebs_ipr_atom()
-        print('p_ipr.shape', p_ipr.shape)
+    def find_defect_states(self,
+                           defects=None,
+                           factor=0.70,
+                           IPR_threshold=None,
+                           k_threshold=0.25):
+        """Find those localized states which correlate with any given defect.
 
-        # spin up first
-        p_ipr = p_ipr[:,:,:,0]
-        for defect in self.defects:
+        Returns
+        -------
+
+        list : It has one entry for each defect, each entry is a tuple
+        (spin_up, spin_down). Inside there is a Nx2 numpy array, with
+        [kpoint_index, band_index] for each defect state. If there is
+        only spin_up, the spin_down contents are []. All values are
+        zero-based
+
+        """
+        if defects == None:
+            defects = self.defects
+        if IPR_threshold == None:
+            IPR_threshold = self.ipr_threshold
+        
+        print('pIPR.shape', self.pIPR.shape)
+        # are the defects active within the desired region?
+        defect_states_up = []
+        defect_states_down = []
+        for defect in defects:
             print('defect', defect)
-    
-    def plot(self):
-        if self.bands_up.shape[0] == 1:
-            b_up = np.concatenate((self.bands_up,self.bands_up), axis = 0)
-            if self.ispin == 2:
-                b_down = np.concatenate((self.bands_down,self.bands_down), axis = 0)
-        else:
-            b_up = self.bands_up
-            if self.ispin == 2:
-                b_up = self.bands_up
+            Natoms = self.poscar.Ntotal
+            Ndefect = len(defect)
+            Nratio = Ndefect/Natoms
+            # spin up first
+            pipr = self.pIPR[:,:,:,0]
+            ipr = self.IPR[:,:,0]
+            bands = self.bands_up
+            pipr = np.sum(pipr[:,:,defect], axis=-1)
+            #print(ipr.shape, pipr.shape)
+            # for the defect to be regarded as localized within the
+            # energy window, it must
+            # 1) be more localized than its size.
+            # 2) that should be within the energy window
+            # 3) be a localized state (IPR_threshhold)
+            localized_def = pipr/ipr > factor
+            within_energy = (bands < self.eLim[1]) & (bands > self.eLim[0])
+            above_th = ipr > IPR_threshold
+            indexes = np.argwhere(localized_def & within_energy & above_th)
+            # as a final requirement is to need to cover a finite
+            # region of the K-space.
+            k_fraction = len(indexes)/bands.shape[0]
+            if k_fraction < k_threshold:
+                indexes = []
+            defect_states_up.append(indexes)
                 
-        plt.plot(b_up, '-r')
+            if self.ispin == 2:
+                pipr = self.pIPR[:,:,:,1]
+                ipr = self.IPR[:,:,1]
+                bands = self.bands_down
+                pipr = np.sum(pipr[:,:,defect], axis=-1)
+                localized_def = pipr/ipr > Nratio*factor
+                within_energy = (bands < self.eLim[1]) & (bands > self.eLim[0])
+                above_th = ipr > IPR_threshold
+                indexes = np.argwhere(localized_def & within_energy & above_th)
+                k_fraction = len(indexes)/bands.shape[0]
+                if k_fraction < k_threshold:
+                    indexes = []
+                defect_states_down.append(indexes)
+            else:
+                defect_states_down.append([])
+            if len(defect_states_up[-1]) or len(defect_states_down[-1]):
+                print('Defect states found')
+        defect_states = list(zip(defect_states_up, defect_states_down))
+        # print('defect_states', defect_states)
+        return defect_states
+
+    def write_report(self, verbosity=False, filename='report.txt'):
+        f = open(filename, 'w')
+        f.write('code = ' +  self.code + '\n' )
         if self.ispin == 2:
-            plt.plot(b_down, '-b')
-        plt.ylim(self.eLim)
-        plt.show()
+            f.write('Spin polarized (collinear) = Yes\n' )
+        else:
+            f.write('Spin polarized (collinear) = No\n' )
+        f.write('Energy window (guessed): ' + str(self.eLim) +  '\n')
+        f.write('-----\n\n')
+        f.write('Defects?\n')
+        for i in range(len(self.defects)):
+            f.write(str(i) + ' ' + str(self.defects[i]) + '\n')
+        if len(self.defects) == 0:
+            f.write('None\n')
+        f.write('\nClusters? (including van der Waals layers)\n')
+        for i in range(len(self.clusters)):
+            f.write(str(i) + ' ' + str(self.clusters[i]) + '\n')
+        if len(self.clusters) == 0:
+            f.write('None\n')
+
+        f.write('----\n\n')
+        f.write('Defects states within the energy window\n\n')
+        for i in range(len(self.defects)):
+            states_up = self.defect_states[i][0]
+            if len(states_up) > 0:
+                f.write('Spin 0, defect ' + str(i) + ' ' + str(self.defects[i]) + ' \n')
+                if verbosity:
+                    f.write('[kpoint index, band_index]\n')
+                    f.write(str(states_up) + '\n\n')
+                else:
+                    states_up= sorted(set(states_up[:,1]))
+                    f.write('band_indexes ' + str(states_up) +'\n\n')
+            if self.ispin == 2:
+                states_down = self.defect_states[i][0]
+                if len(states_down) > 0:
+                    f.write('Spin 1, defect ' + str(i) + ' ' + str(self.defects[i]) + ' \n')
+                    if verbosity:
+                        f.write('[kpoint index, band_index]\n')
+                        f.write(str(states_down) + '\n\n')
+                    else:
+                        states_down= sorted(set(states_down[:,1]))
+                        f.write('band_indexes ' + str(states_down) + '\n\n')
+        f.write('----\n\n')
+
+        f.write('Clusters states within the energy window\n\n')
+        for i in range(len(self.clusters)):
+            states_up = self.cluster_states[i][0]
+            if len(states_up) > 0:
+                f.write('Spin 0, cluster ' + str(i) + ' ' + str(self.clusters[i]) + ' \n')
+                if verbosity:
+                    f.write('[kpoint index, band_index]\n')
+                    f.write(str(states_up) + '\n\n')
+                else:
+                    states_up= sorted(set(states_up[:,1]))
+                    f.write('band_indexes ' + str(states_up) + '\n\n')
+            if self.ispin == 2:
+                states_down = self.cluster_states[i][0]
+                if len(states_down) > 0:
+                    f.write('Spin 1, cluster ' + str(i) +' '+ str(self.clusters[i]) + ' \n')
+                    if verbosity:
+                        f.write('[kpoint index, band_index]\n')
+                        f.write(str(states_down) + '\n\n')
+                    else:
+                        states_down= sorted(set(states_down[:,1]))
+                        f.write('band_indexes ' + str(states_down)  + '\n\n')
+        f.write('----\n\n')
+
+        f.close()
+
+    def plot(self):
+        spins = [0]
+        if self.ispin == 2:
+            spins = [0,1]
+
+        active_clusters = []
+        for i in range(len(self.clusters)):
+            cs = self.cluster_states[i]
+            if len(cs[0]) > 0 or len(cs[1]) > 0:
+                active_clusters.append(i)
+
+        active_defects = []
+        for i in range(len(self.defects)):
+            cs = self.defect_states[i]
+            if len(cs[0]) > 0 or len(cs[1]) > 0:
+                active_defects.append(i)
+
+        if len(active_clusters) == 0 and len(active_defects) == 0:        
+            sbp.bandsplot(code = self.code,
+                          dirname = self.dirname,
+                          mode = 'plain',
+                          spins = spins,
+                          elimit = self.eLim
+                          )
+            return
+
+        for index in  active_defects:
+            atoms = self.defects[index]
+            sbp.bandsplot(code = self.code,
+                          dirname = self.dirname,
+                          mode = 'parametric',
+                          spins = spins,
+                          elimit = self.eLim,
+                          atoms = atoms,
+                          title = 'Defect ' + str(index) 
+                          )
+        for index in  active_clusters:
+            atoms = self.clusters[index]
+            sbp.bandsplot(code = self.code,
+                          dirname = self.dirname,
+                          mode = 'parametric',
+                          spins = spins,
+                          elimit = self.eLim,
+                          atoms = atoms,
+                          title = 'Cluster ' + str(index) 
+                          )
+            
+    
+    # def plot(self):
+    #     if self.bands_up.shape[0] == 1:
+    #         b_up = np.concatenate((self.bands_up,self.bands_up), axis = 0)
+    #         if self.ispin == 2:
+    #             b_down = np.concatenate((self.bands_down,self.bands_down), axis = 0)
+    #     else:
+    #         b_up = self.bands_up
+    #         if self.ispin == 2:
+    #             b_up = self.bands_up
+                
+    #     plt.plot(b_up, '-r')
+    #     if self.ispin == 2:
+    #         plt.plot(b_down, '-b')
+    #     plt.ylim(self.eLim)
+    #     plt.show()
         
     
 # # getting the atom resolved IPR
