@@ -794,7 +794,7 @@ class ElectronicBandStructure:
         orbitals = np.arange(self.norbitals, dtype=int)
         # sum over orbitals
         proj = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
-        # keepinh only the last principal quantum number
+        # keeping only the last principal quantum number
         proj = proj[:, :, :, -1, :]
         # selecting all atoms:
         atoms = np.arange(self.natoms, dtype=int)
@@ -807,6 +807,44 @@ class ElectronicBandStructure:
         IPR = num/den
         return IPR
 
+    def ebs_ipr_atom(self):
+        """_summary_
+        
+        It returns the atom-resolved , pIPR:
+        
+        pIPR_j =  \frac{|c_j|^4}{(\sum_i |c_i^2|)^2}
+
+        clearly \sum_j pIPR_j = IPR.
+
+        Mind: c_i is the wavefunction c(n,k)_i, in pyprocar we already
+        have density projections, c_i^2
+        
+        *THIS QUANTITY IS NOT READY FOR PLOTTING*, please prefer `self.ebs_ipr()`
+        
+        Returns
+        -------
+        ret : list float
+            The IPR projections
+
+        """
+        orbitals = np.arange(self.norbitals, dtype=int)
+        # sum over orbitals
+        proj = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
+        # keeping only the last principal quantum number
+        proj = proj[:, :, :, -1, :]
+        # selecting all atoms:
+        atoms = np.arange(self.natoms, dtype=int)
+
+        # the partial pIPR is \frac{|c_j|^4}{(\sum_i |c_i^2|)^2}
+        # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
+        num = np.absolute(proj)**2
+        den = np.absolute(proj)
+        den = np.sum(den[:, :, atoms, :], axis=-2)**2
+        pIPR = num/den[:,:,np.newaxis,:]
+        # print('pIPR', pIPR.shape)
+        return pIPR
+        
+    
 
     def ebs_sum(self, 
                 atoms:List[int]=None, 
