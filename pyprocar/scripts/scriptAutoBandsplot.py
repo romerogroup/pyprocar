@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
-import pyprocar.io as io
-from pyprocar.utils.info import orbital_names
-from pyprocar.plotter import EBSPlot
-from pyprocar.utils import welcome, ROOT
-from pyprocar.pyposcar.generalUtils import remove_flat_points
-from pyprocar.pyposcar.poscar import Poscar
-from pyprocar.pyposcar.defects import FindDefect 
-from pyprocar.pyposcar.clusters import Clusters
-import pyprocar.scripts.scriptBandsplot as sbp
+from .. import io
+from ..pyposcar.generalUtils import remove_flat_points
+from ..pyposcar.poscar import Poscar
+from ..pyposcar.defects import FindDefect 
+from ..pyposcar.clusters import Clusters
+from ..scripts.scriptBandsplot import bandsplot
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -68,6 +65,14 @@ class AutoBandsPlot:
         #
         self.defect_states = self.find_defect_states(defects = self.defects)
         self.cluster_states = self.find_defect_states(defects = self.clusters)
+        
+        # getting an estimation of clim (actually the max value). One
+        # value for each defect and cluster
+        self.defect_clim = self.get_clim(self.defects)
+        self.cluster_clim = self.get_clim(self.clusters)
+        print(self.defect_clim)
+        print(self.cluster_clim)
+        
         
         self.write_report(verbosity=False, filename='report.txt')
         
@@ -215,7 +220,7 @@ class AutoBandsPlot:
         if len(def_cluster) == 1:
             if len(def_cluster[0]) == self.poscar.Ntotal:
                 return []
-        print('\ndefects:', def_cluster)
+        # print('\ndefects:', def_cluster)
         return def_cluster
         
         
@@ -225,7 +230,7 @@ class AutoBandsPlot:
         if len(c.clusters) == 1:
             if len(c.clusters[0]) == self.poscar.Ntotal:
                 return []
-        print('clusters', c.clusters)
+        # print('clusters', c.clusters)
         return c.clusters
     
 
@@ -251,12 +256,12 @@ class AutoBandsPlot:
         if IPR_threshold == None:
             IPR_threshold = self.ipr_threshold
         
-        print('pIPR.shape', self.pIPR.shape)
+        # print('pIPR.shape', self.pIPR.shape)
         # are the defects active within the desired region?
         defect_states_up = []
         defect_states_down = []
         for defect in defects:
-            print('defect', defect)
+            # print('defect', defect)
             Natoms = self.poscar.Ntotal
             Ndefect = len(defect)
             Nratio = Ndefect/Natoms
@@ -297,8 +302,8 @@ class AutoBandsPlot:
                 defect_states_down.append(indexes)
             else:
                 defect_states_down.append([])
-            if len(defect_states_up[-1]) or len(defect_states_down[-1]):
-                print('Defect states found')
+            # if len(defect_states_up[-1]) or len(defect_states_down[-1]):
+            #     print('Defect states found')
         defect_states = list(zip(defect_states_up, defect_states_down))
         # print('defect_states', defect_states)
         return defect_states
@@ -372,6 +377,25 @@ class AutoBandsPlot:
 
         f.close()
 
+    def get_clim(self, atoms_list):
+        emin, emax = self.eLim
+        clim = []
+        
+        for atoms in atoms_list:
+            p_up = self.ebs.ebs_sum(atoms=atoms)[:,:,0]
+            values = p_up[(self.bands_up > emin) & (self.bands_up < emax)]
+            vmax_up = np.max(values)
+            vmax_down = 0
+            if self.ispin == 2:
+                p_down = self.ebs.ebs_sum(atoms=atoms)[:,:,1]
+                values = p_down[(self.bands_down > emin) & (self.bands_down < emax)]
+                vmax_down = np.max(values)
+            vmax = max(vmax_up, vmax_down)
+                
+            clim.append([0,vmax])
+        return clim
+            
+        
     def plot(self):
         spins = [0]
         if self.ispin == 2:
@@ -390,7 +414,7 @@ class AutoBandsPlot:
                 active_defects.append(i)
 
         if len(active_clusters) == 0 and len(active_defects) == 0:        
-            sbp.bandsplot(code = self.code,
+            bandsplot(code = self.code,
                           dirname = self.dirname,
                           mode = 'plain',
                           spins = spins,
@@ -398,89 +422,33 @@ class AutoBandsPlot:
                           )
             return
 
-        for index in  active_defects:
+        for index in active_defects:
             atoms = self.defects[index]
-            sbp.bandsplot(code = self.code,
-                          dirname = self.dirname,
-                          mode = 'parametric',
-                          spins = spins,
-                          elimit = self.eLim,
-                          atoms = atoms,
-                          title = 'Defect ' + str(index) 
-                          )
+            clim = self.defect_clim[index]
+            bandsplot(code = self.code,
+                      dirname = self.dirname,
+                      mode = 'parametric',
+                      spins = spins,
+                      elimit = self.eLim,
+                      atoms = atoms,
+                      title = 'Defect ' + str(index) ,
+                      clim = clim,
+                      cmap = 'plasma_r'
+                      )
         for index in  active_clusters:
             atoms = self.clusters[index]
-            sbp.bandsplot(code = self.code,
-                          dirname = self.dirname,
-                          mode = 'parametric',
-                          spins = spins,
-                          elimit = self.eLim,
-                          atoms = atoms,
-                          title = 'Cluster ' + str(index) 
-                          )
-            
-    
-    # def plot(self):
-    #     if self.bands_up.shape[0] == 1:
-    #         b_up = np.concatenate((self.bands_up,self.bands_up), axis = 0)
-    #         if self.ispin == 2:
-    #             b_down = np.concatenate((self.bands_down,self.bands_down), axis = 0)
-    #     else:
-    #         b_up = self.bands_up
-    #         if self.ispin == 2:
-    #             b_up = self.bands_up
-                
-    #     plt.plot(b_up, '-r')
-    #     if self.ispin == 2:
-    #         plt.plot(b_down, '-b')
-    #     plt.ylim(self.eLim)
-    #     plt.show()
-        
-    
-# # getting the atom resolved IPR
-# pIPR = ebs.ebs_ipr_atom()
-# shape = pIPR.shape
-# if shape[-1] == 2:
-#     ispin = 2
-#     pIPR_up = pIPR[:,:,:,0]
-#     pIPR_down = pIPR[:,:,:,1]
-# else:
-#     ispin = 1
-#     pIPR_up = pIPR[:,:,:,0]
-#     pIPR_down = None
-# print('pIPR_up', pIPR_up.shape)
-# print('Any nan?', np.isnan(pIPR_up).any(), np.isnan(pIPR_down).any())
+            clim = self.cluster_clim[index]
+            bandsplot(code = self.code,
+                      dirname = self.dirname,
+                      mode = 'parametric',
+                      spins = spins,
+                      elimit = self.eLim,
+                      atoms = atoms,
+                      title = 'Cluster ' + str(index),
+                      clim = clim,
+                      cmap = 'plasma_r'
+                      )
 
-# # I need an energy window to work. The data from the higher
-# # eigenvalues is nonsense (unless exact diagonalization was used in
-# # DFT)
-# if ispin == 2:
-#     b_up = ebs.bands[:,:,0] - ebs.efermi
-#     b_down = ebs.bands[:,:,1] - ebs.efermi
-# else:
-#     b_up = ebs.bands[:,:,0] - ebs.efermi
-#     b_down = 0
 
-# e_min_up, e_max_up = get_energy_window(b_up)
-# if ispin == 2:
-#     e_min_down, e_max_down = get_energy_window(b_down)
-# e_min = min(e_min_up, e_min_down)
-# e_max = max(e_max_up, e_max_down)
-
-# plt.plot(np.concatenate((b_up, b_up), axis=0), '-r')
-# plt.plot(np.concatenate((b_down, b_down), axis=0), '-b')
-# plt.ylim(e_min, e_max)
-# plt.show()
-    
-# Looking for pIPR values within the desired energy window
-# w_ipr_up = pIPR[b_up<e_max and b_up>e_max]
-# print('ipr_window.shape', ipr_window.shape)
-# samples = np.linspace(0, np.max(pIPR), 100)
-# kde = KernelDensity(kernel='gaussian', bandwidth=0.5).fit(X.reshape(-1, 1))
-# scores = kde.score_samples(samples.reshape(-1,1))
-
-# print(scores.shape)
-# plt.plot(samples, scores)
-# plt.show()
-
-a = AutoBandsPlot()
+def autobandsplot(code='vasp', dirname='.'):
+    a = AutoBandsPlot()

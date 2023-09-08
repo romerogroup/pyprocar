@@ -802,7 +802,7 @@ class ElectronicBandStructure:
         # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
         num = np.absolute(proj)**2
         num = np.sum(num[:, :, atoms, :], axis=-2)
-        den = np.absolute(proj)**1
+        den = np.absolute(proj)**1 + 0.0001 # avoiding zero
         den = np.sum(den[:, :, atoms, :], axis=-2)**2
         IPR = num/den
         return IPR

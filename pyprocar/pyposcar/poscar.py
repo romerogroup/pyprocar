@@ -166,7 +166,8 @@ class Poscar:
       string = r'([TF]+)\s+([TF]+)\s+([TF]+)\s+'
       selectFlags = re.findall(string, ' '.join(self.poscar[start:end]))
       self.selectFlags = np.array(selectFlags)
-      print('Flags of selective dynamics:\n', self.selectFlags)
+      if self.verbose:
+          print('Flags of selective dynamics:\n', self.selectFlags)
       
     # setting a list of elements:
     elementList = zip(self.typeSp, self.numberSp)
