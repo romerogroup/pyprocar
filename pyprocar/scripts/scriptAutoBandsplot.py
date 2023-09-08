@@ -20,6 +20,7 @@ from scipy.signal import argrelextrema
 class AutoBandsPlot:
     def __init__(self, code='vasp', dirname='.'):
         self.parser = io.Parser(code = 'vasp', dir = dirname)
+        self.code = code
         self.ebs = self.parser.ebs
         self.dirname = dirname
         self.structure = self.parser.structure
@@ -47,14 +48,10 @@ class AutoBandsPlot:
         #
         # Guessing relevant atoms
         #
-        self.poscar = Poscar('POSCAR')
-        self.code = code
-        if code == 'vasp':
-            self.poscar.parse()
-        else:
-            # load from pyChemia??
-            self.poscar.loaded = True
-            raise RuntimeError('currently only vasp is supported')
+        self.poscar = Poscar()
+        self.poscar.load_from_data(direct_positions = self.structure.fractional_coordinates,
+                                   lattice = self.structure.lattice,
+                                   elements = self.structure.atoms)
         
         self.defects = self.get_defects()
         # van der Waals layers perhaps?
