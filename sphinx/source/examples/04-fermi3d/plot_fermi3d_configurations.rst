@@ -213,6 +213,8 @@ Before diving into plotting, we need to download the example files. Use the foll
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    (3375, 8, 1, 1, 9, 1)
+    ret.shape (3375, 8, 1)
 
 
 
@@ -220,7 +222,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.150 seconds)
+   **Total running time of the script:** ( 0 minutes  20.861 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py:

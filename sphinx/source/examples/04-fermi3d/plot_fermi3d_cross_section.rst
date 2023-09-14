@@ -161,6 +161,8 @@ Cross section
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    (3375, 20, 1, 1, 9, 4)
+    ret.shape (3375, 20, 4)
 
 
 
@@ -229,6 +231,8 @@ Cross section. Save slice
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    (3375, 20, 1, 1, 9, 4)
+    ret.shape (3375, 20, 4)
 
 
 
@@ -236,7 +240,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  11.086 seconds)
+   **Total running time of the script:** ( 2 minutes  29.990 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_cross_section.py:

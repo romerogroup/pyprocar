@@ -6,20 +6,22 @@
 
 Computation times
 =================
-**00:14.513** total execution time for **examples_00-band_structure** files:
+**00:48.119** total execution time for **examples_00-band_structure** files:
 
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_colinear.py` (``plot_colinear.py``)                                 | 00:03.058 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py` (``plot_ipr.py``)                                           | 00:29.392 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py` (``plot_bandsplot_configurations.py``) | 00:02.566 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_colinear.py` (``plot_colinear.py``)                                 | 00:04.281 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py` (``plot_spin_polarized.py``)                     | 00:02.477 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py` (``plot_bandsplot_configurations.py``) | 00:03.340 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py` (``plot_noncolinear_vasp.py``)                 | 00:02.325 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py` (``plot_spin_polarized.py``)                     | 00:03.213 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_atomic_levels.py` (``plot_atomic_levels.py``)                       | 00:01.790 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py` (``plot_noncolinear_vasp.py``)                 | 00:02.787 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py` (``plot_noncolinear_qe.py``)                     | 00:01.643 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_atomic_levels.py` (``plot_atomic_levels.py``)                       | 00:02.351 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py` (``plot_compare_bands.py``)                       | 00:00.654 | 0.0 MB |
+| :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py` (``plot_noncolinear_qe.py``)                     | 00:01.967 | 0.0 MB |
++--------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py` (``plot_compare_bands.py``)                       | 00:00.789 | 0.0 MB |
 +--------------------------------------------------------------------------------------------------------------------+-----------+--------+

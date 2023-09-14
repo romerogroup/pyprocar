@@ -96,7 +96,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.3 created on Jun 10th, 2021
+    Version 6.1.4 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -155,6 +155,8 @@ Before diving into plotting, we need to download the example files. Use the foll
     y_label : {'description': 'The x label of the plot', 'value': '$k_{y}$  ($\\AA^{-1}$)'}
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
 
 
 
@@ -203,7 +205,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.3 created on Jun 10th, 2021
+    Version 6.1.4 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -245,6 +247,14 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
 
 
 
@@ -293,7 +303,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.3 created on Jun 10th, 2021
+    Version 6.1.4 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -335,6 +345,14 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
+    (225, 20, 1, 1, 9, 4)
+    ret.shape (225, 20, 4)
 
 
 
@@ -342,7 +360,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.521 seconds)
+   **Total running time of the script:** ( 0 minutes  23.561 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_configurations.py:

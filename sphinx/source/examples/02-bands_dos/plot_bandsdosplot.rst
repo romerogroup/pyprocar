@@ -108,7 +108,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.3 created on Jun 10th, 2021
+    Version 6.1.4 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -134,7 +134,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
 
@@ -153,7 +153,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.417 seconds)
+   **Total running time of the script:** ( 0 minutes  0.582 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot.py:

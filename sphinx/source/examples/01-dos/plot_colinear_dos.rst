@@ -95,7 +95,7 @@ Plain mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002AF9710CAF0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002135D1A1490>
 
 
 
@@ -148,7 +148,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002AF94A22670>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000021370CD2BE0>
 
 
 
@@ -203,7 +203,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002AFA0BFD550>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000021372EFC340>
 
 
 
@@ -253,7 +253,7 @@ stack_species mode
             
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002AFA1515B50>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000021370CD2D30>
 
 
 
@@ -303,7 +303,7 @@ stack_orbtials mode
             
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002AFA1302F40>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002135C1E2F70>
 
 
 
@@ -350,14 +350,14 @@ overlay mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002AF93688640>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000213737CE700>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.475 seconds)
+   **Total running time of the script:** ( 0 minutes  32.627 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_colinear_dos.py:

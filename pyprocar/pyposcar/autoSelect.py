@@ -1,3 +1,4 @@
+from typing import List
 
 from .poscar import Poscar
 from .defects import FindDefect
@@ -16,13 +17,13 @@ class autoPlot:
     self.defects = None
     self.clusters = None
 
-  def get_defects(self) -> list[int]:
+  def get_defects(self) -> List[int]:
     d = FindDefect(self.poscar)
     if self.verbose:
       print(d.all_defects)
     self.defects = d.all_defects
 
-  def get_clusters(self) -> list[list[int]]:
+  def get_clusters(self) -> List[List[int]]:
     c = Clusters(self.poscar, marked = self.defects)
     # These are the individual atoms marked as defects. Are part of a
     # single cluster? I just need to add nearest neighbors and test

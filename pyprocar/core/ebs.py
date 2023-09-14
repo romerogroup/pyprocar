@@ -836,7 +836,6 @@ class ElectronicBandStructure:
         """
 
         principal_q_numbers = np.array(principal_q_numbers)
-        print(self.projected.shape)
         if atoms is None:
             atoms = np.arange(self.natoms, dtype=int)
         if spins is None:

@@ -97,27 +97,29 @@ This object has information about the band structure and has matplotlib.axes.Axe
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    (300, 10, 1, 1, 9, 1)
+    ret.shape (300, 10, 1)
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF936E2820>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D957EE0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.654 seconds)
+   **Total running time of the script:** ( 0 minutes  0.789 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:

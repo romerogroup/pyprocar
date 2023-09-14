@@ -118,6 +118,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Often it is needed to search for        extit{localized} modes within the band structure, typic...">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_ipr_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting Inverse participation ratio</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting band structure example.">
 
 .. only:: html

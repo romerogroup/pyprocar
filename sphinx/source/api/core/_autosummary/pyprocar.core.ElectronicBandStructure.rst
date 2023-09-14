@@ -45,6 +45,11 @@
       
       
         
+          ElectronicBandStructure.ebs_ipr
+        
+      
+      
+        
           ElectronicBandStructure.ebs_sum
         
       

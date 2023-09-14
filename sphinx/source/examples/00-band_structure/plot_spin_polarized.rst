@@ -94,11 +94,11 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF91E91070>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D320730>
 
 
 
@@ -138,11 +138,11 @@ The keyword spins can also be used to select which spin bands to plot
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF970F8D30>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135CD99F70>
 
 
 
@@ -190,11 +190,13 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    (300, 12, 1, 1, 9, 2)
+    ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF91B3D940>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000021359F31220>
 
 
 
@@ -241,18 +243,20 @@ Scatter mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    (300, 12, 1, 1, 9, 2)
+    ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF94D55040>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D285160>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.477 seconds)
+   **Total running time of the script:** ( 0 minutes  3.213 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_spin_polarized.py:
