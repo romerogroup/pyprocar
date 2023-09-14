@@ -526,8 +526,7 @@ class poscar_supercell:
     if self.verbose:
       print( temp.shape)
     npos = temp[:]
-    
-    elem = elem*len(nuseful)
+    elem = list(elem)*len(nuseful)
     #print elem
     self.poscar.elm = elem
     self.poscar.lat = np.dot(scell, lat)

@@ -33,7 +33,7 @@ class Poscar:
   """
 
   def __init__(self,
-               filename:str,
+               filename:str='POSCAR',
                verbose:bool=False):
     """The file is not automatically loaded, you need to run
     `self.parse()`
@@ -166,7 +166,8 @@ class Poscar:
       string = r'([TF]+)\s+([TF]+)\s+([TF]+)\s+'
       selectFlags = re.findall(string, ' '.join(self.poscar[start:end]))
       self.selectFlags = np.array(selectFlags)
-      print('Flags of selective dynamics:\n', self.selectFlags)
+      if self.verbose:
+          print('Flags of selective dynamics:\n', self.selectFlags)
       
     # setting a list of elements:
     elementList = zip(self.typeSp, self.numberSp)
@@ -182,6 +183,46 @@ class Poscar:
       self.flags[i] = {}
     return
 
+  def load_from_data(self,
+                     direct_positions : np.ndarray,
+                     lattice : np.ndarray,
+                     elements : List[str]
+                     ):
+    """
+    It loades the Poscar class with essencial data. 
+
+    Parameters
+    ----------
+    direct_pos : np.ndarray
+      atomic positions in direct (fractional) coordiantes. Size [Natoms:3]
+    lattice : np.ndarray
+      Lattice vectors [3:3], in *Angstroms*
+    elements : List[str]
+      A list of atomic symbols, with the same order as the `direct_positions`
+    
+    """
+    self.lat = lattice
+    self.dpos = direct_positions
+    self.elm = elements
+
+    self._set_cartesian()
+    typeSp = []
+    elements = list(elements)
+    for element in elements:
+      if element not in typeSp:
+        typeSp.append(element)
+    self.typeSp = typeSp
+    numberSp = []
+    for item in typeSp:
+      N = elements.count(item)
+      numberSp.append(N)
+    self.numberSp = numberSp
+    self.Ntotal = sum(numberSp)
+    
+    self.volume = np.linalg.det(self.lat)
+    self.loaded = True
+    return
+    
   def _set_cartesian(self):
     """set the cartesian positions (self.cpos) from direct positions (self.dpos).
     """

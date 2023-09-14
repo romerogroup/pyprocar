@@ -21,6 +21,6 @@ from .scriptUnfold_old import unfold as unfold_old
 from .scriptUnfold_new import unfold as unfold_new
 from .depreciated_scriptVector import Vector
 from .scriptBandGap import bandgap
-
+from .scriptAutoBandsplot import autobandsplot
 
 
