@@ -448,4 +448,4 @@ class AutoBandsPlot:
 
 
 def autobandsplot(code='vasp', dirname='.'):
-    a = AutoBandsPlot()
+    a = AutoBandsPlot(code=code, dirname=dirname)

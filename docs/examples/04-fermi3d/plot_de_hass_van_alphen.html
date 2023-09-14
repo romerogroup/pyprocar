@@ -388,10 +388,12 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_autobands.html">Autobands plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
@@ -571,6 +573,7 @@ To compare the theoretical freuqencies we will compare with the results taken fr
                 Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                 --------------------------------------------------------
 
+ret.shape (3375, 20, 1)
 Bands being used if bands=None:  [0]
 </pre></div>
 </div>
@@ -598,6 +601,7 @@ Bands being used if bands=None:  [0]
                 Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                 --------------------------------------------------------
 
+ret.shape (3375, 20, 1)
 Bands being used if bands=None:  [0]
 </pre></div>
 </div>
@@ -625,13 +629,14 @@ Bands being used if bands=None:  [0]
                 Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                 --------------------------------------------------------
 
+ret.shape (3375, 20, 1)
 Bands being used if bands=None:  [0]
 </pre></div>
 </div>
 <p>In the above figure we can see the cross section area is <span class="math notranslate nohighlight">\(A = 4.3956 Ang^{-2} = 4.3956e^{16} cm^{-2} (cgs)\)</span>.</p>
 <p><span class="math notranslate nohighlight">\(F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G\)</span></p>
 <p><span class="math notranslate nohighlight">\(F_{exp} = 4.85e^8 G\)</span></p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.630 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.629 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plot-de-hass-van-alphen-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5fedb2be60051531080cdede30af99e0/plot_de_hass_van_alphen.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_de_hass_van_alphen.py</span></code></a></p>

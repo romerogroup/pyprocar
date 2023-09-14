@@ -141,7 +141,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     y_label : {'description': 'The label for the y-axis.', 'value': 'DOS'}
     dpi : {'description': "The resolution in dots per inch. If 'figure', use the figure's dpi value.", 'value': 'figure'}
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002135A01D670>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026B95AC8970>
 
 
 
@@ -193,7 +193,7 @@ Before diving into plotting, we need to download the example files. Use the foll
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002135A198D30>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026B92D02430>
 
 
 
@@ -241,14 +241,14 @@ Before diving into plotting, we need to download the example files. Use the foll
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002135A09B340>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026B8E8820D0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.089 seconds)
+   **Total running time of the script:** ( 0 minutes  1.793 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_dosplot_configurations.py:

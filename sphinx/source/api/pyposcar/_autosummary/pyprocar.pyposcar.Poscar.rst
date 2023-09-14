@@ -25,6 +25,11 @@
       
       
         
+          Poscar.load_from_data
+        
+      
+      
+        
           Poscar.parse
         
       

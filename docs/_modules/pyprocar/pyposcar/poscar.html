@@ -430,7 +430,6 @@ document.write(`
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
@@ -463,7 +462,7 @@ document.write(`
 <span class="sd">  &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Poscar.__init__"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.__init__.html#pyprocar.pyposcar.Poscar.__init__">[docs]</a>  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-               <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+               <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">,</span>
                <span class="n">verbose</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The file is not automatically loaded, you need to run</span>
 <span class="sd">    `self.parse()`</span>
@@ -476,7 +475,8 @@ document.write(`
 <span class="sd">    verbose: bool,</span>
 <span class="sd">        verbosity level, for debugging. Default: False</span>
 
-<span class="sd">    Attributes:</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
 
 <span class="sd">    self.verbose</span>
 <span class="sd">    self.filename</span>
@@ -490,7 +490,9 @@ document.write(`
 <span class="sd">    self.elm: list, element of each atoms one-by-one.</span>
 <span class="sd">    self.selective: bool, Selective dynamics?</span>
 <span class="sd">    self.selectFlags: None or nd.array(str), flags of selective dynamics</span>
+<span class="sd">    self.flags: dict, list of flags. Not used here just for convenience</span>
 <span class="sd">    self.volume: float, the box product of the lattice</span>
+
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
@@ -500,11 +502,12 @@ document.write(`
     <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># direct coordinates</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># lattice</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Name of atomic species</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Number of atoms per specie</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">:</span><span class="n">nd</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Number of atoms per specie</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Total atoms in system</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">elm</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Element of each atoms one-by-one.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selective</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Selective dynamics</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># all the T,F from selective dynamics</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">:</span><span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># list of flags, not used here just for convenience</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># was the POSCAR-file loaded? i.e. self.parse()</span>
     <span class="k">return</span></div>
@@ -535,7 +538,7 @@ document.write(`
       <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scaling factor: &#39;</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
     
     <span class="c1"># parsing the lattice</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[-.\deE]+\s+[-.\deE]+\s+[-.\deE]+\s*\n*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[-.\deE]+\s+[-.\deE]+\s+[-.\deE]+\s*\n*&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">*</span><span class="n">scale</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
       <span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;lattice:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
@@ -576,7 +579,7 @@ document.write(`
     <span class="c1"># parsing the positions</span>
     <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="mi">8</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span> <span class="mi">8</span><span class="o">+</span><span class="n">offset</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span>
     <span class="n">string</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;([-.\deE]+)\s+([-.\deE]+)\s+([-.\deE]+)\s*&#39;</span>
-    <span class="n">pos</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
     <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_set_cartesian</span><span class="p">()</span>
@@ -590,9 +593,10 @@ document.write(`
     <span class="c1"># parsing selective dynamics</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selective</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
       <span class="n">string</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;([TF]+)\s+([TF]+)\s+([TF]+)\s+&#39;</span>
-      <span class="n">selectFlags</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+      <span class="n">selectFlags</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">selectFlags</span><span class="p">)</span>
-      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Flags of selective dynamics:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Flags of selective dynamics:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectFlags</span><span class="p">)</span>
       
     <span class="c1"># setting a list of elements:</span>
     <span class="n">elementList</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span><span class="p">)</span>
@@ -603,8 +607,51 @@ document.write(`
     <span class="c1"># setting the volume, just as an utility</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># empty list as flags, one per atom</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">return</span></div>
 
+<div class="viewcode-block" id="Poscar.load_from_data"><a class="viewcode-back" href="../../../api/pyposcar/_autosummary/pyprocar.pyposcar.Poscar.load_from_data.html#pyprocar.pyposcar.Poscar.load_from_data">[docs]</a>  <span class="k">def</span> <span class="nf">load_from_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">direct_positions</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                     <span class="n">lattice</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                     <span class="n">elements</span> <span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+                     <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It loades the Poscar class with essencial data. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    direct_pos : np.ndarray</span>
+<span class="sd">      atomic positions in direct (fractional) coordiantes. Size [Natoms:3]</span>
+<span class="sd">    lattice : np.ndarray</span>
+<span class="sd">      Lattice vectors [3:3], in *Angstroms*</span>
+<span class="sd">    elements : List[str]</span>
+<span class="sd">      A list of atomic symbols, with the same order as the `direct_positions`</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">lattice</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dpos</span> <span class="o">=</span> <span class="n">direct_positions</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">elm</span> <span class="o">=</span> <span class="n">elements</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_cartesian</span><span class="p">()</span>
+    <span class="n">typeSp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">element</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">typeSp</span><span class="p">:</span>
+        <span class="n">typeSp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">typeSp</span> <span class="o">=</span> <span class="n">typeSp</span>
+    <span class="n">numberSp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">typeSp</span><span class="p">:</span>
+      <span class="n">N</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+      <span class="n">numberSp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSp</span> <span class="o">=</span> <span class="n">numberSp</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Ntotal</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">numberSp</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span></div>
+    
   <span class="k">def</span> <span class="nf">_set_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;set the cartesian positions (self.cpos) from direct positions (self.dpos).</span>
 <span class="sd">    &quot;&quot;&quot;</span>

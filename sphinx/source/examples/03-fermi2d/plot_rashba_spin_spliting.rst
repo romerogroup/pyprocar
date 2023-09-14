@@ -140,13 +140,9 @@ energy = 0.60 sx projection no arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [20 21]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -235,13 +231,9 @@ energy = 0.60 sy projection no arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [20 21]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -329,13 +321,9 @@ energy = 0.60 sz projection no arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [20 21]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -423,13 +411,9 @@ energy = -0.90 sx projection no arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [16 17 18 19]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -518,13 +502,9 @@ energy = -0.90 sy projection no arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [16 17 18 19]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -613,13 +593,9 @@ energy = -0.90 sz projection no arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [16 17 18 19]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -708,13 +684,9 @@ energy = 0.60 sx projection with arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [20 21]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -802,13 +774,9 @@ energy = -0.90 sx projection with arrows
             
     _____________________________________________________
     Useful band indices for spin-0 : [16 17 18 19]
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
-    (961, 32, 2, 1, 9, 4)
     ret.shape (961, 32, 4)
 
 
@@ -817,7 +785,7 @@ energy = -0.90 sx projection with arrows
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  59.304 seconds)
+   **Total running time of the script:** ( 0 minutes  49.926 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_rashba_spin_spliting.py:

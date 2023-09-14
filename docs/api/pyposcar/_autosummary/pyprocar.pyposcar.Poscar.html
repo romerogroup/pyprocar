@@ -426,6 +426,8 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_nd_mesh.html">create_nd_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html">create_scaler_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_vector_mesh.html">create_vector_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
@@ -826,6 +828,7 @@ document.write(`
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">pyprocar.pyposcar.Poscar</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-63" name="toctree-checkbox-63" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-63"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.add.html">add</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.load_from_data.html">load_from_data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.parse.html">parse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.remove.html">remove</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.sort.html">sort</a></li>
@@ -928,7 +931,7 @@ document.write(`
 <h1>pyprocar.pyposcar.Poscar<a class="headerlink" href="#pyprocar-pyposcar-poscar" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyprocar.pyposcar.Poscar">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.pyposcar.</span></span><span class="sig-name descname"><span class="pre">Poscar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/pyposcar/poscar.html#Poscar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.pyposcar.Poscar" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.pyposcar.</span></span><span class="sig-name descname"><span class="pre">Poscar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'POSCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/pyposcar/poscar.html#Poscar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.pyposcar.Poscar" title="Permalink to this definition">#</a></dt>
 <dd><p>A low-level class to store a crystal structure input (tailored for
 VASP).</p>
 <p>If modified manually, the ‘Cartesian’ and ‘direct’ coords must be
@@ -950,25 +953,28 @@ add(position, element, direct) # add one atom, only one each the time</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.__init__.html#pyprocar.pyposcar.Poscar.__init__" title="pyprocar.pyposcar.Poscar.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.__init__</span></code></a>(filename[, verbose])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.__init__.html#pyprocar.pyposcar.Poscar.__init__" title="pyprocar.pyposcar.Poscar.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.__init__</span></code></a>([filename, verbose])</p></td>
 <td><p>The file is not automatically loaded, you need to run <cite>self.parse()</cite></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.add.html#pyprocar.pyposcar.Poscar.add" title="pyprocar.pyposcar.Poscar.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.add</span></code></a>(position, element[, direct, ...])</p></td>
 <td><p>Adds one atom to the class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.parse.html#pyprocar.pyposcar.Poscar.parse" title="pyprocar.pyposcar.Poscar.parse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.parse</span></code></a>([fromString])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.load_from_data.html#pyprocar.pyposcar.Poscar.load_from_data" title="pyprocar.pyposcar.Poscar.load_from_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.load_from_data</span></code></a>(direct_positions, ...)</p></td>
+<td><p>It loades the Poscar class with essencial data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.parse.html#pyprocar.pyposcar.Poscar.parse" title="pyprocar.pyposcar.Poscar.parse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.parse</span></code></a>([fromString])</p></td>
 <td><p>Loads into memory all the content of the POSCAR file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.remove.html#pyprocar.pyposcar.Poscar.remove" title="pyprocar.pyposcar.Poscar.remove"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.remove</span></code></a>(atoms)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.remove.html#pyprocar.pyposcar.Poscar.remove" title="pyprocar.pyposcar.Poscar.remove"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.remove</span></code></a>(atoms)</p></td>
 <td><p>Remove one or more atoms.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.sort.html#pyprocar.pyposcar.Poscar.sort" title="pyprocar.pyposcar.Poscar.sort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.sort</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.sort.html#pyprocar.pyposcar.Poscar.sort" title="pyprocar.pyposcar.Poscar.sort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.sort</span></code></a>()</p></td>
 <td><p>This method updates the internal arrays related to elements and atoms per element.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.write.html#pyprocar.pyposcar.Poscar.write" title="pyprocar.pyposcar.Poscar.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.write</span></code></a>([filename, direct])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.write.html#pyprocar.pyposcar.Poscar.write" title="pyprocar.pyposcar.Poscar.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.write</span></code></a>([filename, direct])</p></td>
 <td><p>Writes a poscar file with the information stored in the class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.xyz.html#pyprocar.pyposcar.Poscar.xyz" title="pyprocar.pyposcar.Poscar.xyz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.xyz</span></code></a>(filename)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.pyposcar.Poscar.xyz.html#pyprocar.pyposcar.Poscar.xyz" title="pyprocar.pyposcar.Poscar.xyz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Poscar.xyz</span></code></a>(filename)</p></td>
 <td><p>Writes an xyz file, the lattice is written as a comment line</p></td>
 </tr>
 </tbody>

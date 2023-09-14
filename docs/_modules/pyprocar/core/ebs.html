@@ -802,7 +802,6 @@ document.write(`
             <span class="n">n_ky</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ky_unique</span><span class="p">)</span>
             <span class="n">n_kz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">kz_unique</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_kx</span><span class="p">,</span><span class="n">n_ky</span><span class="p">,</span><span class="n">n_kz</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_kz</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ky</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_kx</span><span class="p">):</span>
@@ -821,7 +820,7 @@ document.write(`
                         <span class="n">where_xyz_true_points</span> <span class="o">=</span> <span class="n">where_xy_true_points</span><span class="p">[</span><span class="n">where_xyz_true_indices</span><span class="p">]</span>
 
                         <span class="n">original_index</span> <span class="o">=</span> <span class="n">where_x_true_indices</span><span class="p">[</span><span class="n">where_xy_true_indices</span><span class="p">[</span><span class="n">where_xyz_true_indices</span><span class="p">]]</span>
-                        <span class="c1"># print(original_index)</span>
+
                         <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_index</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_mesh</span>
     
@@ -1211,6 +1210,70 @@ document.write(`
                     <span class="n">tmp_array</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">=</span><span class="n">mesh</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">tmp_array</span></div>
 
+
+
+<div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html#pyprocar.core.ElectronicBandStructure.ebs_ipr">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_ipr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ret : list float</span>
+<span class="sd">            The IPR projections</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1"># sum over orbitals</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">orbitals</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># keeping only the last principal quantum number</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">proj</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># selecting all atoms:</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1"># the ipr is \frac{\sum_i |c_i|^4}{(\sum_i |c_i^2|)^2}</span>
+        <span class="c1"># mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">num</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">atoms</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span><span class="o">**</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.0001</span> <span class="c1"># avoiding zero</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">den</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">atoms</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">IPR</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">den</span>
+        <span class="k">return</span> <span class="n">IPR</span></div>
+
+<div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr_atom"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html#pyprocar.core.ElectronicBandStructure.ebs_ipr_atom">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_ipr_atom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        It returns the atom-resolved , pIPR:</span>
+
+<span class="sd">        pIPR_j =  \\frac{\|c_j\|^4}{(\\sum_i \|c_i^2\|)^2}</span>
+
+<span class="sd">        Clearly, \\( \\sum_j pIPR_j = IPR \\).</span>
+
+<span class="sd">        Mind: \( c_i \) is the wavefunction \( c(n,k)_i \), in pyprocar we already</span>
+<span class="sd">        have density projections, \( c_i^2 \).</span>
+
+<span class="sd">        *THIS QUANTITY IS NOT READY FOR PLOTTING*, please prefer `self.ebs_ipr()`</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ret : list float</span>
+<span class="sd">            The IPR projections</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">orbitals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1"># sum over orbitals</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">orbitals</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># keeping only the last principal quantum number</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">proj</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># selecting all atoms:</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># the partial pIPR is \frac{|c_j|^4}{(\sum_i |c_i^2|)^2}</span>
+        <span class="c1"># mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">den</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">atoms</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">pIPR</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">den</span><span class="p">[:,:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+        <span class="c1"># print(&#39;pIPR&#39;, pIPR.shape)</span>
+        <span class="k">return</span> <span class="n">pIPR</span></div>
+        
+    
+
 <div class="viewcode-block" id="ElectronicBandStructure.ebs_sum"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                 <span class="n">principal_q_numbers</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
@@ -1257,6 +1320,7 @@ document.write(`
             <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ret</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">spins</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nkpoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">,</span> <span class="mi">1</span>
             <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ret.shape&#39;</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="ElectronicBandStructure.unfold"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold">[docs]</a>    <span class="k">def</span> <span class="nf">unfold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

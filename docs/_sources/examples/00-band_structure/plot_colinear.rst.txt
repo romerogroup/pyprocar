@@ -91,11 +91,11 @@ Plain mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF95083250>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B9200B070>
 
 
 
@@ -144,11 +144,12 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF93059AC0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B920C4040>
 
 
 
@@ -199,11 +200,12 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF93079790>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B92C10D30>
 
 
 
@@ -251,11 +253,12 @@ Scatter mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF94EABD30>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B954D00A0>
 
 
 
@@ -300,11 +303,12 @@ overlay_species mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF93079790>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B922A9610>
 
 
 
@@ -349,11 +353,14 @@ overlay_orbtials mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
+    ret.shape (300, 10, 1)
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF970F9520>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8D75DBE0>
 
 
 
@@ -396,11 +403,12 @@ overlay mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF934FA640>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B95A5F1C0>
 
 
 
@@ -441,18 +449,19 @@ overlay mode by orbital names
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF94DD76A0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BA087BDF0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.058 seconds)
+   **Total running time of the script:** ( 0 minutes  3.238 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_colinear.py:

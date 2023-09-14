@@ -98,7 +98,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D320730>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B953BB040>
 
 
 
@@ -142,7 +142,7 @@ The keyword spins can also be used to select which spin bands to plot
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135CD99F70>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B922A9D00>
 
 
 
@@ -193,10 +193,9 @@ For details on the meaning of the indices of the atomic projection please refer 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 12, 1, 1, 9, 2)
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000021359F31220>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BB72C81C0>
 
 
 
@@ -246,17 +245,16 @@ Scatter mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 12, 1, 1, 9, 2)
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D285160>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8DA9D4F0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.213 seconds)
+   **Total running time of the script:** ( 0 minutes  2.555 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_spin_polarized.py:

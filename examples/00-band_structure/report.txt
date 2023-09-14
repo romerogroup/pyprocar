@@ -1,0 +1,27 @@
+code = vasp
+Spin polarized (collinear) = No
+Energy window (guessed): (-1.50272841, 1.48125909)
+-----
+
+Defects?
+0 [0]
+1 [33]
+
+Clusters? (including van der Waals layers)
+None
+----
+
+Defects states within the energy window
+
+Spin 0, defect 0 [0] 
+band_indexes [159, 161, 163, 165, 169, 170, 171, 173, 175]
+
+Spin 0, defect 1 [33] 
+band_indexes [158, 160, 162, 164, 168, 169, 170, 172, 174]
+
+----
+
+Clusters states within the energy window
+
+----
+

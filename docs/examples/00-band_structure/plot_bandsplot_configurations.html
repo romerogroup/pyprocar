@@ -387,10 +387,12 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_autobands.html">Autobands plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear.html">Plotting band structure</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting with Configurations in <cite>pyprocar</cite></a></li>
@@ -559,7 +561,7 @@ to download the full example code</p>
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
 spin_colors : {&#39;description&#39;: &#39;The colors for the plot lines.&#39;, &#39;value&#39;: [&#39;blue&#39;, &#39;red&#39;]}
@@ -590,7 +592,7 @@ weighted_width : {&#39;description&#39;: &#39;If true, the width of the lines wi
 figure_size : {&#39;description&#39;: &#39;The size of the figure (width, height) in inches.&#39;, &#39;value&#39;: [9, 6]}
 dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;figure&#39;, use the figure&#39;s dpi value.&quot;, &#39;value&#39;: &#39;figure&#39;}
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF935C8CA0&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8E8B52E0&gt;
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 2: Changing cmap, clim, and Fermi line properties in Parametric Mode</span>
@@ -619,11 +621,12 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
+ret.shape (300, 12, 2)
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF93527A00&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B920B1F10&gt;
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 3: Setting Marker and Marker Size in Scatter Mode</span>
@@ -648,11 +651,12 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
+ret.shape (300, 12, 2)
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF94D93460&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8C1863A0&gt;
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 4: Setting the Figure Size and DPI</span>
@@ -677,14 +681,15 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
+ret.shape (300, 12, 2)
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF9492DC70&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BE39A5F70&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.566 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.663 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-bandsplot-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/42a7aa17c794954244d9b4ffa5a2ac60/plot_bandsplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsplot_configurations.py</span></code></a></p>

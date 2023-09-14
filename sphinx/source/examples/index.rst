@@ -33,6 +33,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="One of the most powerful capabilities of PyProcar is allowing to correlate real space with elec...">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_autobands_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_autobands.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Autobands plotting</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in VASP.">
 
 .. only:: html
@@ -101,6 +118,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Often it is needed to search for localized modes within the band structure, typical examples ar...">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_ipr_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting Inverse participation ratio</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting spin polarized band structures.">
 
 .. only:: html
@@ -113,23 +147,6 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting spin polarized band structures</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Often it is needed to search for        extit{localized} modes within the band structure, typic...">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_ipr_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting Inverse participation ratio</div>
     </div>
 
 

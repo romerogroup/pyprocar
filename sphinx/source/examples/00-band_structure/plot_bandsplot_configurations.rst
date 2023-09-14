@@ -133,7 +133,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     figure_size : {'description': 'The size of the figure (width, height) in inches.', 'value': [9, 6]}
     dpi : {'description': "The resolution in dots per inch. If 'figure', use the figure's dpi value.", 'value': 'figure'}
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D6013A0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8E8B52E0>
 
 
 
@@ -185,10 +185,9 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 12, 1, 1, 9, 2)
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135CF07190>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B920B1F10>
 
 
 
@@ -235,10 +234,9 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 12, 1, 1, 9, 2)
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135A0704C0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8C1863A0>
 
 
 
@@ -285,17 +283,16 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 12, 1, 1, 9, 2)
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135C8F33D0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BE39A5F70>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.340 seconds)
+   **Total running time of the script:** ( 0 minutes  2.663 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:

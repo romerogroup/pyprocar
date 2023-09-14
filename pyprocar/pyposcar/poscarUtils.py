@@ -392,7 +392,7 @@ class poscar_modify:
       self.p._set_cartesian()
     return
 
-  
+
 
 class poscar_supercell:
   """ class to generate a supercell by providing a supercell matrix.

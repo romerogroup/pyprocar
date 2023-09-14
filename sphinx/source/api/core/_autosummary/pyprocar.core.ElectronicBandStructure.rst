@@ -50,6 +50,11 @@
       
       
         
+          ElectronicBandStructure.ebs_ipr_atom
+        
+      
+      
+        
           ElectronicBandStructure.ebs_sum
         
       

@@ -155,24 +155,14 @@ Finding defects
  .. code-block:: none
 
     Loading an AGNR with a defect in it
-    local max: [ 7 15 42]   localmin: [12 29]
 
 
     WARNING: in FindDefect.find_forgein_atoms() more than two sets of atoms were found. Cluster delimited by `minima`=  [12 29] , `maxima=` [ 7 15 42]
     Only elements with less than  12 atoms are regarded as defects
-    list of defects: 
-    [(52, 'H'), (53, 'H'), (54, 'H'), (55, 'H'), (56, 'H'), (57, 'H'), (58, 'H'), (59, 'H'), (60, 'H'), (61, 'H'), (62, 'H'), (63, 'H'), (64, 'B'), (65, 'N')]
-
-    FindDefect.nearest_neighbors_environment()
-    Atomic environments and their frequency:
-    [('CCCC', 36), ('CCCH', 12), ('CBCC', 2), ('CCCN', 2), ('HC', 12), ('BCCN', 1), ('NBCC', 1)]
-    local max: [10 19 40]   localmin: [15 30]
 
 
     WARNING: in FindDefect.nearest_neighbors_environment() more than two sets of atoms were found. Cluster delimited by `minima`=  [15 30] , `maxima=` [10 19 40]
     Only elements with environments less abundant than  15  are regarded as defects
-    list of defects: 
-    [(1, 'C'), (2, 'C'), (16, 'C'), (17, 'C'), (19, 'C'), (20, 'C'), (22, 'C'), (25, 'C'), (26, 'C'), (27, 'C'), (32, 'C'), (33, 'C'), (35, 'C'), (36, 'C'), (50, 'C'), (51, 'C'), (52, 'H'), (53, 'H'), (54, 'H'), (55, 'H'), (56, 'H'), (57, 'H'), (58, 'H'), (59, 'H'), (60, 'H'), (61, 'H'), (62, 'H'), (63, 'H'), (64, 'B'), (65, 'N')]
     The defects are:
     [1, 2, 16, 17, 19, 20, 22, 25, 26, 27, 32, 33, 35, 36, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65]
 
@@ -187,7 +177,7 @@ Finding defects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.782 seconds)
+   **Total running time of the script:** ( 0 minutes  8.049 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_finding_defects_pyposcar.py:

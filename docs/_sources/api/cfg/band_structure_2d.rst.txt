@@ -160,6 +160,14 @@ add_axes
 :description: Controls if there should be direction axes
 
 
+energy_lim
+----------
+
+:value: [None, None]
+
+:description: Controls the limits of the energy axis
+
+
 x_axes_label
 ------------
 
@@ -310,6 +318,102 @@ orbit_mp4_step
 :value: 0.05
 
 :description: Controls the step size of the orbit
+
+
+clip_brillouin_zone
+-------------------
+
+:value: True
+
+:description: Control to show a grid
+
+
+clip_brillouin_zone_factor
+--------------------------
+
+:value: 1.5
+
+:description: Control how large the clipping is in terms of brillouin zones
+
+
+grid
+----
+
+:value: True
+
+:description: Control to show a grid
+
+
+grid_xtitle
+-----------
+
+:value: k$_{x}$ ($\AA^{-1}$)
+
+:description: Controls x axis of the grid
+
+
+grid_ytitle
+-----------
+
+:value: k$_{y}$ ($\AA^{-1}$)
+
+:description: Controls y axis of the grid
+
+
+grid_ztitle
+-----------
+
+:value: Energy (eV)
+
+:description: Controls x axis of the grid
+
+
+add_fermi_plane
+---------------
+
+:value: False
+
+:description: Adds a plane at the fermi level
+
+
+fermi_plane_opacity
+-------------------
+
+:value: 0.25
+
+:description: Opacity of the fermi plane
+
+
+fermi_plane_color
+-----------------
+
+:value: black
+
+:description: The fermi plane color
+
+
+fermi_plane_size
+----------------
+
+:value: 0.5
+
+:description: The fermi plane color
+
+
+show_fermi_plane_text
+---------------------
+
+:value: True
+
+:description: Shows the Fermi plane text
+
+
+fermi_text_position
+-------------------
+
+:value: [0, 2, 0]
+
+:description: Position of the fermi text
 
 
 plotter_offscreen

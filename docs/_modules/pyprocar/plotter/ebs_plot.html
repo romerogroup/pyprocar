@@ -479,7 +479,6 @@ document.write(`
         <span class="n">config_manager</span><span class="o">.</span><span class="n">update_config</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">=</span><span class="n">config_manager</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
 
-
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span> <span class="o">=</span> <span class="n">ebs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="o">=</span> <span class="n">kpath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spins</span> <span class="o">=</span> <span class="n">spins</span>
@@ -622,10 +621,13 @@ document.write(`
         <span class="k">if</span> <span class="n">color_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;clim&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">vmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;clim&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
-                <span class="n">vmin</span> <span class="o">=</span> <span class="n">color_weights</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># only the actual spin values are to be used (i.e. we</span>
+                <span class="c1"># are plotting the density, then negative values from</span>
+                <span class="c1"># spin projections are nonsense )</span>
+                <span class="n">vmin</span> <span class="o">=</span> <span class="n">color_weights</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">vmax</span> <span class="o">=</span> <span class="n">color_weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="n">vmax</span> <span class="o">=</span> <span class="n">color_weights</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">nbands</span><span class="p">):</span>
@@ -689,6 +691,19 @@ document.write(`
 <span class="sd">        color_weights : np.ndarray, optional</span>
 <span class="sd">            The color weights at each point, by default None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if there is only a single k-point the method for atomic</span>
+        <span class="c1"># levels will be called to fake another kpoint and then</span>
+        <span class="c1"># exit. `plot_atomic_levels` will invoke this method again to</span>
+        <span class="c1"># get the actual plot</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">plot_atomic_levels</span><span class="p">(</span><span class="n">color_weights</span><span class="o">=</span><span class="n">color_weights</span><span class="p">,</span>
+                                  <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
+                                  <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
+                                  <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
+                                  <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
+          <span class="k">return</span>
+        
         <span class="k">if</span> <span class="n">width_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">width_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">)</span>
             <span class="n">linewidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;linewidth&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
@@ -711,15 +726,13 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Faking a mask, all elemtnet are included</span>
             <span class="n">mbands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">color_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">vmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;clim&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">vmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;clim&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">vmin</span> <span class="o">=</span> <span class="n">color_weights</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">vmin</span> <span class="o">=</span> <span class="n">color_weights</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">vmax</span> <span class="o">=</span> <span class="n">color_weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-                
+                <span class="n">vmax</span> <span class="o">=</span> <span class="n">color_weights</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
             <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
         <span class="c1"># print(self.ebs.nbands)</span>
         <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>

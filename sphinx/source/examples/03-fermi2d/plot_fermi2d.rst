@@ -138,7 +138,6 @@ Plain mode
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
-    (225, 12, 1, 1, 9, 2)
     ret.shape (225, 12, 2)
 
 
@@ -229,7 +228,6 @@ plain_bands mode
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
-    (225, 12, 1, 1, 9, 2)
     ret.shape (225, 12, 2)
 
 
@@ -325,7 +323,6 @@ Does not work. Contact developers
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
-    (225, 12, 1, 1, 9, 2)
     ret.shape (225, 12, 2)
 
 
@@ -415,7 +412,6 @@ Also you can specify the colors of the bands as well with band_colors
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
-    (225, 12, 1, 1, 9, 2)
     ret.shape (225, 12, 2)
 
 
@@ -424,7 +420,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  8.684 seconds)
+   **Total running time of the script:** ( 0 minutes  7.134 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py:

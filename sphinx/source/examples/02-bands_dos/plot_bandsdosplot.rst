@@ -153,7 +153,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.582 seconds)
+   **Total running time of the script:** ( 0 minutes  0.388 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot.py:

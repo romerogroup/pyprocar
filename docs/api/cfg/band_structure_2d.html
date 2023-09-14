@@ -426,6 +426,8 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_nd_mesh.html">create_nd_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html">create_scaler_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_vector_mesh.html">create_vector_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
@@ -826,6 +828,7 @@ document.write(`
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.html">pyprocar.pyposcar.Poscar</a><input class="toctree-checkbox" id="toctree-checkbox-63" name="toctree-checkbox-63" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-63"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.add.html">add</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.load_from_data.html">load_from_data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.parse.html">parse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.remove.html">remove</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.sort.html">sort</a></li>
@@ -1141,6 +1144,17 @@ document.write(`
 </dd>
 </dl>
 </section>
+<section id="energy-lim">
+<h2>energy_lim<a class="headerlink" href="#energy-lim" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[None, None]</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls the limits of the energy axis</p>
+</dd>
+</dl>
+</section>
 <section id="x-axes-label">
 <h2>x_axes_label<a class="headerlink" href="#x-axes-label" title="Permalink to this heading">#</a></h2>
 <dl class="field-list simple">
@@ -1350,6 +1364,138 @@ document.write(`
 </dd>
 </dl>
 </section>
+<section id="clip-brillouin-zone">
+<h2>clip_brillouin_zone<a class="headerlink" href="#clip-brillouin-zone" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Control to show a grid</p>
+</dd>
+</dl>
+</section>
+<section id="clip-brillouin-zone-factor">
+<h2>clip_brillouin_zone_factor<a class="headerlink" href="#clip-brillouin-zone-factor" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.5</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Control how large the clipping is in terms of brillouin zones</p>
+</dd>
+</dl>
+</section>
+<section id="grid">
+<h2>grid<a class="headerlink" href="#grid" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Control to show a grid</p>
+</dd>
+</dl>
+</section>
+<section id="grid-xtitle">
+<h2>grid_xtitle<a class="headerlink" href="#grid-xtitle" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>k$_{x}$ ($AA^{-1}$)</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls x axis of the grid</p>
+</dd>
+</dl>
+</section>
+<section id="grid-ytitle">
+<h2>grid_ytitle<a class="headerlink" href="#grid-ytitle" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>k$_{y}$ ($AA^{-1}$)</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls y axis of the grid</p>
+</dd>
+</dl>
+</section>
+<section id="grid-ztitle">
+<h2>grid_ztitle<a class="headerlink" href="#grid-ztitle" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Energy (eV)</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Controls x axis of the grid</p>
+</dd>
+</dl>
+</section>
+<section id="add-fermi-plane">
+<h2>add_fermi_plane<a class="headerlink" href="#add-fermi-plane" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>False</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Adds a plane at the fermi level</p>
+</dd>
+</dl>
+</section>
+<section id="fermi-plane-opacity">
+<h2>fermi_plane_opacity<a class="headerlink" href="#fermi-plane-opacity" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0.25</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Opacity of the fermi plane</p>
+</dd>
+</dl>
+</section>
+<section id="fermi-plane-color">
+<h2>fermi_plane_color<a class="headerlink" href="#fermi-plane-color" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>black</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>The fermi plane color</p>
+</dd>
+</dl>
+</section>
+<section id="fermi-plane-size">
+<h2>fermi_plane_size<a class="headerlink" href="#fermi-plane-size" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0.5</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>The fermi plane color</p>
+</dd>
+</dl>
+</section>
+<section id="show-fermi-plane-text">
+<h2>show_fermi_plane_text<a class="headerlink" href="#show-fermi-plane-text" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shows the Fermi plane text</p>
+</dd>
+</dl>
+</section>
+<section id="fermi-text-position">
+<h2>fermi_text_position<a class="headerlink" href="#fermi-text-position" title="Permalink to this heading">#</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[0, 2, 0]</p>
+</dd>
+<dt class="field-even">description<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position of the fermi text</p>
+</dd>
+</dl>
+</section>
 <section id="plotter-offscreen">
 <h2>plotter_offscreen<a class="headerlink" href="#plotter-offscreen" title="Permalink to this heading">#</a></h2>
 <dl class="field-list simple">
@@ -1496,6 +1642,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-scale">texture_scale</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-opacity">texture_opacity</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#add-axes">add_axes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#energy-lim">energy_lim</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#x-axes-label">x_axes_label</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#y-axes-label">y_axes_label</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#z-axes-label">z_axes_label</a></li>
@@ -1515,6 +1662,18 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-gif-step">orbit_gif_step</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-mp4-n-points">orbit_mp4_n_points</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-mp4-step">orbit_mp4_step</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clip-brillouin-zone">clip_brillouin_zone</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clip-brillouin-zone-factor">clip_brillouin_zone_factor</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid">grid</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-xtitle">grid_xtitle</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-ytitle">grid_ytitle</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-ztitle">grid_ztitle</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#add-fermi-plane">add_fermi_plane</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-plane-opacity">fermi_plane_opacity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-plane-color">fermi_plane_color</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-plane-size">fermi_plane_size</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#show-fermi-plane-text">show_fermi_plane_text</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-text-position">fermi_text_position</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotter-offscreen">plotter_offscreen</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotter-camera-pos">plotter_camera_pos</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#isoslider-title">isoslider_title</a></li>

@@ -808,17 +808,16 @@ class ElectronicBandStructure:
         return IPR
 
     def ebs_ipr_atom(self):
-        """_summary_
-        
+        """
         It returns the atom-resolved , pIPR:
-        
-        pIPR_j =  \frac{|c_j|^4}{(\sum_i |c_i^2|)^2}
 
-        clearly \sum_j pIPR_j = IPR.
+        pIPR_j =  \\frac{\|c_j\|^4}{(\\sum_i \|c_i^2\|)^2}
 
-        Mind: c_i is the wavefunction c(n,k)_i, in pyprocar we already
-        have density projections, c_i^2
-        
+        Clearly, \\( \\sum_j pIPR_j = IPR \\).
+
+        Mind: \( c_i \) is the wavefunction \( c(n,k)_i \), in pyprocar we already
+        have density projections, \( c_i^2 \).
+
         *THIS QUANTITY IS NOT READY FOR PLOTTING*, please prefer `self.ebs_ipr()`
         
         Returns

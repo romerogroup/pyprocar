@@ -100,7 +100,6 @@ This object has information about the band structure and has matplotlib.axes.Axe
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 10, 1, 1, 9, 1)
     ret.shape (300, 10, 1)
 
                 --------------------------------------------------------
@@ -112,14 +111,14 @@ This object has information about the band structure and has matplotlib.axes.Axe
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135D957EE0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BB72E8250>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.789 seconds)
+   **Total running time of the script:** ( 0 minutes  0.476 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:

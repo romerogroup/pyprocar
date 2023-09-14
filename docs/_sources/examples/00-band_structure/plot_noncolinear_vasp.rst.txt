@@ -92,11 +92,11 @@ Plain mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF91BC0280>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8DAC9520>
 
 
 
@@ -145,18 +145,19 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
+    ret.shape (300, 20, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF954D0FA0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8D713610>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.325 seconds)
+   **Total running time of the script:** ( 0 minutes  2.046 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_noncolinear_vasp.py:

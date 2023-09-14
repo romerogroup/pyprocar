@@ -115,20 +115,19 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
             
     z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:547: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
       self.ax.set_xlim(interval)
-    (1, 246, 98, 1, 9, 2)
     ret.shape (1, 246, 2)
     Atomic plot: bands.shape  : (2, 246, 2)
     Atomic plot: spd.shape    : (2, 246, 98, 1, 9, 2)
     Atomic plot: kpoints.shape: (2, 3)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002135BADD880>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8D718250>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.351 seconds)
+   **Total running time of the script:** ( 0 minutes  1.694 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py:

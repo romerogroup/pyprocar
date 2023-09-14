@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Comparing band structures" href="plot_compare_bands.html" />
-    <link rel="prev" title="Band Structure" href="index.html" />
+    <link rel="prev" title="Autobands plotting" href="plot_autobands.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -387,10 +387,12 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_autobands.html">Autobands plotting</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear.html">Plotting band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
@@ -541,11 +543,11 @@ to download the full example code</p>
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF91BC0280&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8DAC9520&gt;
 </pre></div>
 </div>
 </section>
@@ -570,14 +572,15 @@ to download the full example code</p>
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
+ret.shape (300, 20, 1)
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF954D0FA0&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8D713610&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.325 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.046 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-noncolinear-vasp-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d71df43ce9ea3d07c48301fa4fb2d1df/plot_noncolinear_vasp.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_noncolinear_vasp.py</span></code></a></p>
@@ -602,12 +605,12 @@ to download the full example code</p>
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="plot_autobands.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Band Structure</p>
+        <p class="prev-next-title">Autobands plotting</p>
       </div>
     </a>
     <a class="right-next"

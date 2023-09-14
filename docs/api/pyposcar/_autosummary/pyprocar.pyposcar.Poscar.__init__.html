@@ -426,6 +426,8 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_nd_mesh.html">create_nd_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html">create_scaler_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_vector_mesh.html">create_vector_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../core/_autosummary/pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
@@ -826,6 +828,7 @@ document.write(`
 <li class="toctree-l3 current active has-children"><a class="reference internal" href="pyprocar.pyposcar.Poscar.html">pyprocar.pyposcar.Poscar</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-63" name="toctree-checkbox-63" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-63"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l4 current active"><a class="current reference internal" href="#">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.add.html">add</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.load_from_data.html">load_from_data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.parse.html">parse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.remove.html">remove</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.pyposcar.Poscar.sort.html">sort</a></li>
@@ -928,7 +931,7 @@ document.write(`
 <h1>__init__<a class="headerlink" href="#init" title="Permalink to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyprocar.pyposcar.Poscar.__init__">
-<span class="sig-prename descclassname"><span class="pre">Poscar.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/pyposcar/poscar.html#Poscar.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.pyposcar.Poscar.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Poscar.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'POSCAR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/pyposcar/poscar.html#Poscar.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.pyposcar.Poscar.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>The file is not automatically loaded, you need to run
 <cite>self.parse()</cite></p>
 <dl class="field-list simple">
@@ -936,23 +939,139 @@ document.write(`
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em><em>,</em>) – POSCAR-like file</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>,</em>) – verbosity level, for debugging. Default: False</p></li>
-<li><p><strong>Attributes</strong> – </p></li>
-<li><p><strong>self.verbose</strong> – </p></li>
-<li><p><strong>self.filename</strong> – </p></li>
-<li><p><strong>self.poscar</strong> (<em>str str with the full POSCAR file</em>) – </p></li>
-<li><p><strong>self.cpos</strong> (<em>np.nadarray</em><em>, </em><em>Cartesian coordinates</em>) – </p></li>
-<li><p><strong>self.dpos</strong> (<em>np.ndarray</em><em>, </em><em>direct coordinates</em>) – </p></li>
-<li><p><strong>self.lat</strong> (<em>np.ndarray</em><em> (</em><em>3x3</em><em>)</em><em>, </em><em>the  lattice</em>) – </p></li>
-<li><p><strong>self.typeSp</strong> (<em>list</em><em>, </em><em>aame</em><em> of </em><em>atomic species</em><em>, </em><em>ordered</em>) – </p></li>
-<li><p><strong>self.numberSp</strong> (<em>np.ndarray</em><em>, </em><em>number</em><em> of </em><em>atoms per specie</em>) – </p></li>
-<li><p><strong>self.Ntotal</strong> (<em>int</em><em>, </em><em>total number</em><em> of </em><em>atoms in system</em>) – </p></li>
-<li><p><strong>self.elm</strong> (<em>list</em><em>, </em><em>element</em><em> of </em><em>each atoms one-by-one.</em>) – </p></li>
-<li><p><strong>self.selective</strong> (<em>bool</em><em>, </em><em>Selective dynamics?</em>) – </p></li>
-<li><p><strong>self.selectFlags</strong> (<em>None</em><em> or </em><em>nd.array</em><em>(</em><em>str</em><em>)</em><em>, </em><em>flags</em><em> of </em><em>selective dynamics</em>) – </p></li>
-<li><p><strong>self.volume</strong> (<em>float</em><em>, </em><em>the box product</em><em> of </em><em>the lattice</em>) – </p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.Poscar.self.verbose">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#pyprocar.pyposcar.Poscar.self.verbose" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.filename">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.filename" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.poscar">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">poscar</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.poscar" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str str with the full POSCAR file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.cpos">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">cpos</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.cpos" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.nadarray, Cartesian coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.dpos">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">dpos</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.dpos" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray, direct coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.lat">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">lat</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.lat" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray (3x3), the  lattice</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.typeSp">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">typeSp</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.typeSp" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list, aame of atomic species, ordered</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.numberSp">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">numberSp</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.numberSp" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray, number of atoms per specie</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.Ntotal">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">Ntotal</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.Ntotal" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, total number of atoms in system</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.elm">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">elm</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.elm" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list, element of each atoms one-by-one.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.selective">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">selective</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.selective" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool, Selective dynamics?</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.selectFlags">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">selectFlags</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.selectFlags" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None or nd.array(str), flags of selective dynamics</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.flags">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">flags</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.flags" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict, list of flags. Not used here just for convenience</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.pyposcar.self.volume">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#pyprocar.pyposcar.self.volume" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float, the box product of the lattice</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -1005,6 +1124,20 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.Poscar.__init__"><code class="docutils literal notranslate"><span class="pre">Poscar.__init__()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.Poscar.self.verbose"><code class="docutils literal notranslate"><span class="pre">Poscar.self.verbose</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.filename"><code class="docutils literal notranslate"><span class="pre">self.filename</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.poscar"><code class="docutils literal notranslate"><span class="pre">self.poscar</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.cpos"><code class="docutils literal notranslate"><span class="pre">self.cpos</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.dpos"><code class="docutils literal notranslate"><span class="pre">self.dpos</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.lat"><code class="docutils literal notranslate"><span class="pre">self.lat</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.typeSp"><code class="docutils literal notranslate"><span class="pre">self.typeSp</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.numberSp"><code class="docutils literal notranslate"><span class="pre">self.numberSp</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.Ntotal"><code class="docutils literal notranslate"><span class="pre">self.Ntotal</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.elm"><code class="docutils literal notranslate"><span class="pre">self.elm</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.selective"><code class="docutils literal notranslate"><span class="pre">self.selective</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.selectFlags"><code class="docutils literal notranslate"><span class="pre">self.selectFlags</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.flags"><code class="docutils literal notranslate"><span class="pre">self.flags</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.pyposcar.self.volume"><code class="docutils literal notranslate"><span class="pre">self.volume</span></code></a></li>
 </ul>
   </nav></div>
 

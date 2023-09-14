@@ -239,7 +239,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 10, 1, 1, 9, 1)
     ret.shape (300, 10, 1)
 
                 --------------------------------------------------------
@@ -332,7 +331,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    (300, 10, 1, 1, 9, 1)
     ret.shape (300, 10, 1)
 
                 --------------------------------------------------------
@@ -350,7 +348,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.211 seconds)
+   **Total running time of the script:** ( 0 minutes  2.518 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot_configurations.py:

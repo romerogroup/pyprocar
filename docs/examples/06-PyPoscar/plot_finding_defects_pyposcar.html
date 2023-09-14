@@ -387,10 +387,12 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_autobands.html">Autobands plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
@@ -589,24 +591,14 @@ to download the full example code</p>
 <li><img src="../../_images/sphx_glr_plot_finding_defects_pyposcar_002.gif" srcset="../../_images/sphx_glr_plot_finding_defects_pyposcar_002.gif" alt="plot finding defects pyposcar" class = "sphx-glr-multi-img"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Loading an AGNR with a defect in it
-local max: [ 7 15 42]   localmin: [12 29]
 
 
 WARNING: in FindDefect.find_forgein_atoms() more than two sets of atoms were found. Cluster delimited by `minima`=  [12 29] , `maxima=` [ 7 15 42]
 Only elements with less than  12 atoms are regarded as defects
-list of defects:
-[(52, &#39;H&#39;), (53, &#39;H&#39;), (54, &#39;H&#39;), (55, &#39;H&#39;), (56, &#39;H&#39;), (57, &#39;H&#39;), (58, &#39;H&#39;), (59, &#39;H&#39;), (60, &#39;H&#39;), (61, &#39;H&#39;), (62, &#39;H&#39;), (63, &#39;H&#39;), (64, &#39;B&#39;), (65, &#39;N&#39;)]
-
-FindDefect.nearest_neighbors_environment()
-Atomic environments and their frequency:
-[(&#39;CCCC&#39;, 36), (&#39;CCCH&#39;, 12), (&#39;CBCC&#39;, 2), (&#39;CCCN&#39;, 2), (&#39;HC&#39;, 12), (&#39;BCCN&#39;, 1), (&#39;NBCC&#39;, 1)]
-local max: [10 19 40]   localmin: [15 30]
 
 
 WARNING: in FindDefect.nearest_neighbors_environment() more than two sets of atoms were found. Cluster delimited by `minima`=  [15 30] , `maxima=` [10 19 40]
 Only elements with environments less abundant than  15  are regarded as defects
-list of defects:
-[(1, &#39;C&#39;), (2, &#39;C&#39;), (16, &#39;C&#39;), (17, &#39;C&#39;), (19, &#39;C&#39;), (20, &#39;C&#39;), (22, &#39;C&#39;), (25, &#39;C&#39;), (26, &#39;C&#39;), (27, &#39;C&#39;), (32, &#39;C&#39;), (33, &#39;C&#39;), (35, &#39;C&#39;), (36, &#39;C&#39;), (50, &#39;C&#39;), (51, &#39;C&#39;), (52, &#39;H&#39;), (53, &#39;H&#39;), (54, &#39;H&#39;), (55, &#39;H&#39;), (56, &#39;H&#39;), (57, &#39;H&#39;), (58, &#39;H&#39;), (59, &#39;H&#39;), (60, &#39;H&#39;), (61, &#39;H&#39;), (62, &#39;H&#39;), (63, &#39;H&#39;), (64, &#39;B&#39;), (65, &#39;N&#39;)]
 The defects are:
 [1, 2, 16, 17, 19, 20, 22, 25, 26, 27, 32, 33, 35, 36, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65]
 
@@ -616,7 +608,7 @@ saving a file with the defects, defects.vasp
 Inspection of the file defects.vasp shows that the first type of defects are subtitutionals (0D), and the second are the AGRN edges (1D)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.782 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  8.049 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-06-pyposcar-plot-finding-defects-pyposcar-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8e32f8b02dacec58ffde230c0b261eb8/plot_finding_defects_pyposcar.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_finding_defects_pyposcar.py</span></code></a></p>

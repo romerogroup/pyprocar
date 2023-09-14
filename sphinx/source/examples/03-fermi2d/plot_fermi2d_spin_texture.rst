@@ -144,13 +144,9 @@ But you can change this by setting arrow_projection to one of the following
             
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
 
 
@@ -240,13 +236,9 @@ Spin Texture single color
             
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
 
 
@@ -338,13 +330,9 @@ Also you can specify the colors of the bands as well with band_colors
             
     _____________________________________________________
     Useful band indices for spin-0 : [4 5 6 7 8 9]
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
-    (225, 20, 1, 1, 9, 4)
     ret.shape (225, 20, 4)
 
 
@@ -353,7 +341,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.108 seconds)
+   **Total running time of the script:** ( 0 minutes  19.575 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_spin_texture.py:

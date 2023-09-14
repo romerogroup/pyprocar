@@ -387,10 +387,12 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_autobands.html">Autobands plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
@@ -642,17 +644,19 @@ arrow_size : {&#39;description&#39;: &#39;The arrow size for the spin texture&#3
                               <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" srcset="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" alt="plot fermi3d configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>--------------------------------------------------------
-There are additional plot options that are defined in a configuration file.
-You can change these configurations by passing the keyword argument to the function
-To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" srcset="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" alt="plot fermi3d configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file.
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
 
-Here is a list modes : plain , parametric , spin_texture , overlay
-Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
---------------------------------------------------------
+                Here is a list modes : plain , parametric , spin_texture , overlay
+                Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+                --------------------------------------------------------
+
+ret.shape (3375, 8, 1)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  17.150 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  16.984 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plot-fermi3d-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1c19089d986386276f0b2d4704368c54/plot_fermi3d_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi3d_configurations.py</span></code></a></p>

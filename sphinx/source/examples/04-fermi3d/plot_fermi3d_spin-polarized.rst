@@ -215,7 +215,6 @@ Parametric mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    (3375, 12, 1, 1, 9, 2)
     ret.shape (3375, 12, 2)
 
                     --------------------------------------------------------
@@ -227,7 +226,6 @@ Parametric mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    (3375, 12, 1, 1, 9, 2)
     ret.shape (3375, 12, 2)
 
 
@@ -236,7 +234,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  31.006 seconds)
+   **Total running time of the script:** ( 0 minutes  23.953 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_spin-polarized.py:

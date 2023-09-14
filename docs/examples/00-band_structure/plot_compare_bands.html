@@ -387,10 +387,12 @@ document.write(`
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_autobands.html">Autobands plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear.html">Plotting band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
@@ -546,23 +548,24 @@ This object has information about the band structure and has matplotlib.axes.Axe
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
+ret.shape (300, 10, 1)
 
             --------------------------------------------------------
             There are additional plot options that are defined in a configuration file.
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002AF936E2820&gt;
+&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BB72E8250&gt;
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.654 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.476 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-compare-bands-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/4c96c34eae3806b1f0b68a4b273c321f/plot_compare_bands.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_compare_bands.py</span></code></a></p>
