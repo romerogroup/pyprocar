@@ -18,7 +18,9 @@ Usage::
 PyProcar is capable of labeling the :math:`k`-path names automatically, however, the user can manually input them as desired.
 
 
-One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` corresponds to the labels and the number of grid points between the high symmetry points in the :math:`k`-path used for the band structure calculation. Usage::
+One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` corresponds to the labels and the number of grid points between the high symmetry points in the :math:`k`-path used for the band structure calculation. 
+
+Usage::
 
 	pyprocar.bandsplot(code='vasp',dirname='bands',elimit=[-2,2],mode='plain',color='blue',kticks=[0,39,79,119,159],knames=['G','X','M','G','R'])
 
@@ -29,34 +31,27 @@ One may manually label the :math:`k`-path as well. ``knames`` and ``kticks`` cor
 
 For collinear spin polarized and non-collinear spin calculations of DFT codes, PyProcar is able to plot the bands considering spin density (magnitude), spin magnetization and spin channels separately.
 
-For non-collinear spin calculations, ``spins=[0]`` plots the spin density (magnitude) and ``spins=[1,2,3]`` corresponds to spins oriented in :math:`S_x`, :math:`S_y` and :math:`S_z` directions respectively. Setting ``spin='st'`` plots the spin texture perpendicular in the plane (:math:`k_x`, :math:`k_y`) to each (:math:`k_x`,i :math:`k_y`) vector. This is useful for Rashba-like states in surfaces. For parametric plots such as spin, atom and orbitals, the user should set ``mode=`parametric'``. ``cmap`` refers to the matplotlib color map used for the parametric plotting and can be modified by using the same color maps used in matplotlib. ``cmap='seismic'`` is recommended for parametric spin band structure plots.  For colinear spin calculations setting ``spins=[0]`` plots the spin density (magnitude) and ``spins=[1]`` plots the spin magnetization. Spin channels can also be plot separately (see below).
-
-
-Usage::
-
-	pyprocar.bandsplot(code='vasp',dirname='bands',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet',mode='parametric',spin=1)
+For non-collinear spin calculations, ``spins=[0]`` plots the spin density (magnitude) and ``spins=[1,2,3]`` 
+corresponds to spins oriented in :math:`S_x`, :math:`S_y` and :math:`S_z` directions respectively. Setting ``spin='st'`` 
+plots the spin texture perpendicular in the plane (:math:`k_x`, :math:`k_y`) to each (:math:`k_x`,i :math:`k_y`) vector. 
+This is useful for Rashba-like states in surfaces. For parametric plots such as spin, atom and orbitals, 
+the user should set ``mode=`parametric'``. ``cmap`` refers to the matplotlib color map used for the parametric plotting 
+and can be modified by using the same color maps used in matplotlib. ``cmap='seismic'`` is recommended for parametric spin band structure plots. 
+For colinear spin calculations setting ``spins=[0]`` plots the spin density (magnitude) and ``spins=[1]`` plots the spin magnetization. 
+Spin channels can also be plot separately (see below).
 
 If spin-up and spin-down bands are to be plot separately (for colinear calculations), there are two methods one can follow.
 
-1. The ``pyprocar.filter()`` function can be used to create two PROCARs for each spin direction and be plot individually. An example is given below::
+Usage::
 
-	pyprocar.filter('PROCAR','PROCAR-up',spin=[0])
-	pyprocar.filter('PROCAR','PROCAR-down',spin=[1])
-	pyprocar.bandsplot('PROCAR-up',...)
-	pyprocar.bandsplot('PROCAR-down',...)
-
-2. Setting the ``separate=True`` parameter in ``pyprocar.bandsplot()`` plots spin up bands and spin down bands with ``spin=0`` and ``spin=1``, respectively.  
-
-E.g.::
-
-    pyprocar.bandsplot('PROCAR',mode='parametric',separate=True,spin=0,...)
+	pyprocar.bandsplot(code='vasp',dirname='bands',mode='plain', spins=[0]) # plots the spin up channel
+	pyprocar.bandsplot(code='vasp',dirname='bands',mode='plain', spins=[1]) # plots the spin down channel
 
 These methods can be used for both plain and parametric modes. If a comparison of spin up and spin down bands is required on the same plot, the following syntax can be used.
 
-E.g.::
+Usage::
 
-    fig, ax = pyprocar.bandsplot(code='vasp',dirname='bands_up',,show=False,color='red',mode='plain')
-    pyprocar.bandsplot(code='vasp',dirname='bands',color='blue',mode='plain',ax=ax)
+	pyprocar.bandsplot(code='vasp',dirname='bands',mode='plain', spins=[0,1]) # plots both the spin up and spin down channels
     
 
 Note:
@@ -89,7 +84,7 @@ In Elk, the :math:`Y_{lm}` projections of the atomic site resolved DOS are arran
 
 Usage: To project all five :math:`d`-orbitals::
 
-	pyprocar.bandsplot('PROCAR',outcar='OUTCAR',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet',mode='parametric',orbitals=[4,5,6,7,8])
+	pyprocar.bandsplot(code='vasp',dirname='bands',mode='parametric',elimit=[-5,5],kticks=[0,39,79,119,159],knames=['G','X','M','G','R'],cmap='jet',orbitals=[4,5,6,7,8])
 
 One or many of the above can be combined together to allow the user to probe into more specific queries such as a collinear spin projection of a certain orbital of a certain atom.
 
