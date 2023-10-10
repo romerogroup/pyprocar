@@ -314,12 +314,13 @@ class Poscar(collections.abc.Mapping):
             shift = 1
         else:
             shift = 0
-            if os.path.exists("POTCAR"):
-                base_dir = self.filename.replace(
-                    self.filename.split(os.sep)[-1], "")
-                if base_dir == "":
-                    base_dir = "."
-                
+
+            base_dir = self.filename.replace(
+                self.filename.split(os.sep)[-1], "")
+            if base_dir == "":
+                base_dir = "."
+            potcar=os.path.join(base_dir,"POTCAR")
+            if os.path.exists(potcar):
                 with open(base_dir + os.sep + "POTCAR", "r") as rf:
                     potcar = rf.read()
 
@@ -327,6 +328,8 @@ class Poscar(collections.abc.Mapping):
                     "\s*PAW[PBE_\s]*([A-Z][a-z]*)[_a-z]*[0-9]*[a-zA-Z]*[0-9]*.*\s[0-9.]*",
                     potcar,
                 )[::2]
+
+                print(species)
         composition = [int(x) for x in lines[5 + shift].split()]
         atoms = []
         for i in range(len(composition)):
@@ -350,9 +353,12 @@ class Poscar(collections.abc.Mapping):
         for i in range(natom):
             coordinates[i, :] = [float(x)
                                  for x in lines[i + 7 + shift].split()[:3]]
-
+        # print(direct)
         if direct:
             return atoms, coordinates, lattice
+        # else:
+        #     direct_coords=np.dot(coordinates, lattice)
+        #     print(direct_coords)
 
     def __contains__(self, x):
         return x in self.variables

@@ -5,7 +5,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..utils import UtilsProcar
+from pyprocar.utils.utilsprocar import UtilsProcar
 
 
 class ProcarSelect:

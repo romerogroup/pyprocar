@@ -8,17 +8,12 @@ import yaml
 
 from .utilsprocar import UtilsProcar
 from .procarfilefilter import ProcarFileFilter
-from .unfolder import Unfolder
 from .splash import welcome
 from . import mathematics
 from . import defaults
 from . import elements 
 from . import sorting
 from .config import ConfigManager
-
-
-
-
 
 # Other Constants
 FILE = Path(__file__).resolve()

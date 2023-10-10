@@ -11,9 +11,9 @@ import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ..utils import welcome, ROOT
+from pyprocar.utils import welcome, ROOT
+from pyprocar.utils.info import orbital_names
 from .. import io
-from ..utils.info import orbital_names
 from ..plotter import DOSPlot
 
 with open(os.path.join(ROOT,'pyprocar','cfg','dos.yml'), 'r') as file:

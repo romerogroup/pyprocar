@@ -17,8 +17,6 @@ from .scriptKmesh2D import generate2dkmesh
 from .scriptKpath import kpath
 from .scriptRepair import repair
 from .scriptUnfold import unfold
-from .scriptUnfold_old import unfold as unfold_old
-from .scriptUnfold_new import unfold as unfold_new
 from .depreciated_scriptVector import Vector
 from .scriptBandGap import bandgap
 from .scriptAutoBandsplot import autobandsplot

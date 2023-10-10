@@ -19,7 +19,7 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 from matplotlib.collections import LineCollection
 
-from pyprocar.utils import ROOT,ConfigManager
+from pyprocar.utils import ROOT, ConfigManager
 
 class FermiSurface:
     """This object is used to help plot the 2d fermi surface

@@ -89,7 +89,7 @@ class FermiDataHandler:
             if fermi_surface_test != 0:
                 self.band_near_fermi.append(iband)
 
-        
+        print("Bands Near Fermi : ",self.band_near_fermi)
         if spins is None:
             if self.initial_ebs.bands.shape[2] == 1 or np.all(self.initial_ebs.bands[:,:,1]==0):
                 spins = [0]

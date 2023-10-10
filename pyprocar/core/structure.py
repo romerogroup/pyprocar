@@ -8,8 +8,8 @@ import spglib
 import numpy as np
 from scipy.spatial import ConvexHull
 
-from ..utils import elements
-from .surface import Surface
+from pyprocar.utils import elements
+from pyprocar.core.surface import Surface
 
 # TODO add __str__ method 
 

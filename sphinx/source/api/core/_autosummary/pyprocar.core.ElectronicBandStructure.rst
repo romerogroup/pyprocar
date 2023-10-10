@@ -88,6 +88,11 @@
           ElectronicBandStructure.unfold
         
       
+      
+        
+          ElectronicBandStructure.update_weights
+        
+      
    
    
 

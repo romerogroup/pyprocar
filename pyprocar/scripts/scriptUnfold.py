@@ -1,31 +1,31 @@
+import os
+import yaml
+
 import numpy as np
-import matplotlib.pyplot as plt
-from ..utils import welcome
+
+from ..utils import welcome,ROOT
 from ..utils.defaults import settings
 from ..utils.info import orbital_names
 from ..plotter import EBSPlot
 from .. import io
 
 
+with open(os.path.join(ROOT,'pyprocar','cfg','unfold.yml'), 'r') as file:
+    plot_opt = yaml.safe_load(file)
+
 def unfold(
-        procar="PROCAR",
-        poscar="POSCAR",
-        outcar="OUTCAR",
-        vaspxml=None,
-        abinit_output="abinit.out",
-        dirname= None,
-        transformation_matrix=np.diag([2, 2, 2]),
-        kpoints=None,
-        elkin="elk.in",
         code="vasp",
+        dirname=".",
         mode="plain",
         unfold_mode="both",
+        transformation_matrix=np.diag([2, 2, 2]),
         spins=None,
         atoms=None,
         orbitals=None,
         items=None,
         projection_mask=None,
         unfold_mask=None,
+
         fermi=None,
         interpolation_factor=1,
         interpolation_type="cubic",
@@ -40,6 +40,7 @@ def unfold(
         savefig=None,
         old=False,
         savetab="unfold_result.csv",
+        print_plot_opts:bool=False,
         **kwargs,
 ):
     """
@@ -66,67 +67,59 @@ def unfold(
 
         """
     welcome()
+    modes=["plain","parametric","scatter","atomic",
+           "overlay", "overlay_species", "overlay_orbitals", "ipr"]
+    modes_txt=' , '.join(modes)
+    message=f"""
+            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file. 
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
 
-    structure = None
-    reciprocal_lattice = None
-    kpath = None
-    ebs = None
-    kpath = None
-    structure = None
-    labels=None
-    settings.general.modify(kwargs)
-
-    settings.unfold.modify(kwargs)
-    settings.ebs.modify(settings.unfold.config)
-
-    # if code == "vasp":
-    #     if outcar is not None:
-    #         outcar = io.vasp.Outcar(outcar)
-    #         if fermi is None:
-    #             fermi = outcar.efermi
-    #         reciprocal_lattice = outcar.reciprocal_lattice
-    #     elif vaspxml is not None:
-    #         vasprun = io.vasp.VaspXML(vaspxml)
-    #         fermi = vasprun.fermi
-            
-    #     if poscar is not None:
-    #         poscar = io.vasp.Poscar(poscar)
-    #         structure = poscar.structure
-    #         if reciprocal_lattice is None:
-    #             reciprocal_lattice = poscar.structure.reciprocal_lattice
-
-    #     if kpoints is not None:
-    #         kpoints = io.vasp.Kpoints(kpoints)
-    #         kpath = kpoints.kpath
-
-    #     procar = io.vasp.Procar(
-    #         procar,
-    #         structure,
-    #         reciprocal_lattice,
-    #         kpath,
-    #         fermi,
-    #         interpolation_factor=interpolation_factor,
-    #     )
+            Here is a list modes : {modes_txt}
+            --------------------------------------------------------
+            """
+    print(message)
+    if print_plot_opts:
+        for key,value in plot_opt.items():
+            print(key,':',value)
+    
     parser = io.Parser(code = code, dir = dirname)
     ebs = parser.ebs
+    structure = parser.structure
+    kpath = parser.kpath
+
+    # shifting fermi to 0
+    ebs.bands -= ebs.efermi
+    if fermi:
+        ebs.bands += fermi
+        fermi_level = fermi
+    else:
+        fermi_level = 0
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
+    
+    labels=None
 
+    
 
     if mode is not None:
-        if not procar.has_phase :
+        if ebs.projected_phase is None :
             raise ValueError("The provided electronic band structure file does not include phases")
-        ebs_plot.ebs.unfold(
-            transformation_matrix=transformation_matrix, structure=structure)
+        ebs_plot.ebs.unfold(transformation_matrix=transformation_matrix, structure=structure)
     if unfold_mode == 'both':
         width_weights = ebs_plot.ebs.weights
         width_mask = unfold_mask
         color_weights = ebs_plot.ebs.weights
         color_mask = unfold_mask
     elif unfold_mode == 'thickness':
-        width_weight = ebs_plot.ebs.weights
+        width_weights = ebs_plot.ebs.weights
         width_mask = unfold_mask
+        color_weights = None
+        color_mask = None
     elif unfold_mode == 'color':
+        width_weights=None
+        width_mask=None
         color_weights = ebs_plot.ebs.weights
         color_mask = unfold_mask
     else :
@@ -134,12 +127,11 @@ def unfold(
 
     if mode == "plain":
         ebs_plot.plot_bands()
-        ebs_plot.plot_parameteric(color_weights=ebs_plot.ebs.weights,
-                                  width_weights=ebs_plot.ebs.weights,
-                                  color_mask=unfold_mask,
-                                  width_mask=unfold_mask,
-                                  vmin=vmin,
-                                  vmax=vmax)
+        ebs_plot.plot_parameteric(color_weights=color_weights,
+                width_weights=width_weights,
+                color_mask=color_mask,
+                width_mask=width_mask,
+                spins=spins)
         ebs_plot.handles = ebs_plot.handles[:ebs_plot.nspins]
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
@@ -234,8 +226,7 @@ def unfold(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                vmin=vmin,
-                vmax=vmax,
+                spins=spins
             )
         elif mode == "scatter":
             ebs_plot.plot_scatter(
@@ -243,8 +234,7 @@ def unfold(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                vmin=vmin,
-                vmax=vmax,
+                spins=spins
             )
 
         else:
@@ -254,16 +244,10 @@ def unfold(
     ebs_plot.set_yticks(interval=elimit)
     ebs_plot.set_xlim()
     ebs_plot.set_ylim(elimit)
-    ebs_plot.draw_fermi(
-        color=settings.ebs.fermi_color,
-        linestyle=settings.ebs.fermi_linestyle,
-        linewidth=settings.ebs.fermi_linewidth,
-    )
+    ebs_plot.draw_fermi(fermi_level=fermi_level)
     ebs_plot.set_ylabel()
-    if settings.ebs.grid:
-        ebs_plot.grid()
-    if settings.ebs.legend:
-        ebs_plot.legend(labels)
+    ebs_plot.grid()
+    ebs_plot.legend(labels)
     if savefig is not None:
         ebs_plot.save(savefig)
     if show:

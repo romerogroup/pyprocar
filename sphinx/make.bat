@@ -69,6 +69,12 @@ if "%1" == "html" (
 	goto end
 )
 
+
+if "%1" == "pdf" (
+    %SPHINXBUILD% -M latexpdf "%SOURCEDIR%" "%BUILDDIR%" %SPHINXOPTS%
+    goto end
+)
+
 REM Default behavior for other cases
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end

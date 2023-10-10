@@ -20,7 +20,8 @@ import pyvista
 
 from .kpath import KPath
 from .brillouin_zone import BrillouinZone
-from ..utils import Unfolder, mathematics
+from ..utils import  mathematics
+from pyprocar.utils.unfolder import Unfolder
 
 HBAR_EV = 6.582119 *10**(-16) #eV*s
 HBAR_J = 1.0545718 *10**(-34) #eV*s
@@ -781,8 +782,6 @@ class ElectronicBandStructure:
                     tmp_array[index,...]=mesh[...,i,j,k]
         return tmp_array
 
-
-
     def ebs_ipr(self):
         """_summary_
 
@@ -843,8 +842,6 @@ class ElectronicBandStructure:
         # print('pIPR', pIPR.shape)
         return pIPR
         
-    
-
     def ebs_sum(self, 
                 atoms:List[int]=None, 
                 principal_q_numbers:List[int]=[-1], 
@@ -917,6 +914,10 @@ class ElectronicBandStructure:
 
         return None
 
+    def update_weights(self, weights):
+        self.weights = weights
+        return
+    
     def plot_kpoints(
         self,
         reduced=False,

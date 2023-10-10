@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .fermisurface import FermiSurface
+from pyprocar.core.fermisurface import FermiSurface
 from .structure import Structure
 from .dos import DensityOfStates
 from .surface import Surface, boolean_add

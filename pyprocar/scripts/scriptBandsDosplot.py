@@ -14,7 +14,7 @@ from .scriptDosplot import dosplot
 from .scriptBandsplot import bandsplot
 from ..utils import welcome
 from ..io import vasp, qe 
-from ..utils.info import orbital_names
+from pyprocar.utils.info import orbital_names
 from ..plotter import DOSPlot, EBSPlot
 from ..utils.defaults import settings
 
