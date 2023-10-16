@@ -1119,14 +1119,14 @@ class Procar(collections.abc.Mapping):
             # ispin = 1 for a while, we will made the distinction
             up = up.reshape(
                 self.kpointsCount,
-                int(self.bandsCount / 2),
+                self.bandsCount,
                 1,
                 self.ionsCount+1,
                 self.orbitalCount * 2,
             )
             down = down.reshape(
                 self.kpointsCount,
-                int(self.bandsCount / 2),
+                self.bandsCount,
                 1,
                 self.ionsCount+1,
                 self.orbitalCount * 2,
