@@ -133,7 +133,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     figure_size : {'description': 'The size of the figure (width, height) in inches.', 'value': [9, 6]}
     dpi : {'description': "The resolution in dots per inch. If 'figure', use the figure's dpi value.", 'value': 'figure'}
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8E8B52E0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225939C64F0>
 
 
 
@@ -187,7 +187,7 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B920B1F10>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225803E9D00>
 
 
 
@@ -236,7 +236,7 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8C1863A0>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022587843FD0>
 
 
 
@@ -285,14 +285,14 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BE39A5F70>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022582B9AD30>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.663 seconds)
+   **Total running time of the script:** ( 0 minutes  2.565 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:

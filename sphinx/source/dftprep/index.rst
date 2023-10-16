@@ -12,6 +12,7 @@ This guide is here to help you prepare Density Functional Theory Calculations
    qe
    vasp
    abinit
+   dftb+
    elk
    siesta
    lobster

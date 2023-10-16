@@ -32,5 +32,6 @@ PyProcar has the following data types:
    band_structure
    band_structure_2d
    dos
+   unfold
    fermi_surface_3d
    fermi_surface_2d

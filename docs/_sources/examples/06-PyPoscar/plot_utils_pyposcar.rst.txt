@@ -343,7 +343,7 @@ Introducing Defects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.571 seconds)
+   **Total running time of the script:** ( 0 minutes  19.552 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_utils_pyposcar.py:

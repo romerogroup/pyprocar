@@ -96,7 +96,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026BA4558520>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002259778E7F0>
 
 
 
@@ -140,7 +140,7 @@ The keyword spins can also be used to select which spin bands to plot
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026BA44D4E20>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022597753040>
 
 
 
@@ -193,7 +193,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026BA454A070>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002258610F8B0>
 
 
 
@@ -248,7 +248,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026B8DACC880>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022596B38580>
 
 
 
@@ -298,7 +298,7 @@ stack_species mode
             
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026B8C0D4190>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022580714D30>
 
 
 
@@ -349,7 +349,7 @@ stack_orbtials mode
             
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026BB72D3550>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022580702F40>
 
 
 
@@ -397,14 +397,14 @@ stack mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000026B92014EB0>
+    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000225CCC29FD0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.921 seconds)
+   **Total running time of the script:** ( 0 minutes  3.554 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_spin_polarized_dos.py:

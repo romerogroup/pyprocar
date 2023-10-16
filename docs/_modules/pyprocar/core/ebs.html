@@ -449,7 +449,8 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">.kpath</span> <span class="kn">import</span> <span class="n">KPath</span>
 <span class="kn">from</span> <span class="nn">.brillouin_zone</span> <span class="kn">import</span> <span class="n">BrillouinZone</span>
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">Unfolder</span><span class="p">,</span> <span class="n">mathematics</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span>  <span class="n">mathematics</span>
+<span class="kn">from</span> <span class="nn">pyprocar.utils.unfolder</span> <span class="kn">import</span> <span class="n">Unfolder</span>
 
 <span class="n">HBAR_EV</span> <span class="o">=</span> <span class="mf">6.582119</span> <span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">16</span><span class="p">)</span> <span class="c1">#eV*s</span>
 <span class="n">HBAR_J</span> <span class="o">=</span> <span class="mf">1.0545718</span> <span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">34</span><span class="p">)</span> <span class="c1">#eV*s</span>
@@ -1210,8 +1211,6 @@ document.write(`
                     <span class="n">tmp_array</span><span class="p">[</span><span class="n">index</span><span class="p">,</span><span class="o">...</span><span class="p">]</span><span class="o">=</span><span class="n">mesh</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">tmp_array</span></div>
 
-
-
 <div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html#pyprocar.core.ElectronicBandStructure.ebs_ipr">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_ipr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 
@@ -1272,8 +1271,6 @@ document.write(`
         <span class="c1"># print(&#39;pIPR&#39;, pIPR.shape)</span>
         <span class="k">return</span> <span class="n">pIPR</span></div>
         
-    
-
 <div class="viewcode-block" id="ElectronicBandStructure.ebs_sum"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                 <span class="n">principal_q_numbers</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
@@ -1346,6 +1343,10 @@ document.write(`
 
         <span class="k">return</span> <span class="kc">None</span></div>
 
+<div class="viewcode-block" id="ElectronicBandStructure.update_weights"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="k">return</span></div>
+    
 <div class="viewcode-block" id="ElectronicBandStructure.plot_kpoints"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">plot_kpoints</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">reduced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>

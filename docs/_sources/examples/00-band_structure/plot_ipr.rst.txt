@@ -132,7 +132,7 @@ The PyProcar code is:
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000019ECAD9B580>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225864ECF40>
 
 
 
@@ -189,14 +189,14 @@ The pyprocar code is:
     Atomic plot: spd.shape    : (2, 540, 215, 1, 9, 2)
     Atomic plot: kpoints.shape: (2, 3)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000019ECDF8EF40>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225806835E0>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  25.608 seconds)
+   **Total running time of the script:** ( 0 minutes  24.290 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_ipr.py:

@@ -120,14 +120,14 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
     Atomic plot: spd.shape    : (2, 246, 98, 1, 9, 2)
     Atomic plot: kpoints.shape: (2, 3)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026B8D718250>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225807BB970>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.694 seconds)
+   **Total running time of the script:** ( 0 minutes  1.706 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py:

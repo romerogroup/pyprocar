@@ -111,14 +111,14 @@ This object has information about the band structure and has matplotlib.axes.Axe
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000026BB72E8250>
+    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225F6B55490>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.476 seconds)
+   **Total running time of the script:** ( 0 minutes  0.491 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:

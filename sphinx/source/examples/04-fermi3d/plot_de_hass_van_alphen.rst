@@ -158,6 +158,7 @@ Maximal cross sectional area along the (0,0,1)
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    Bands Near Fermi :  [5]
     ret.shape (3375, 20, 1)
     Bands being used if bands=None:  [0]
 
@@ -215,6 +216,7 @@ Minimal cross sectional area along the (0,0,1)
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    Bands Near Fermi :  [5]
     ret.shape (3375, 20, 1)
     Bands being used if bands=None:  [0]
 
@@ -274,6 +276,7 @@ Extremal cross sectional area along the (0,1,1)
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    Bands Near Fermi :  [5]
     ret.shape (3375, 20, 1)
     Bands being used if bands=None:  [0]
 
@@ -291,7 +294,7 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.629 seconds)
+   **Total running time of the script:** ( 0 minutes  12.685 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_de_hass_van_alphen.py:

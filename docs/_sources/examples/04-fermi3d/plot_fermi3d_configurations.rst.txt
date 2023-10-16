@@ -166,6 +166,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     cross_section_slice_linewidth : {'value': 5.0, 'description': 'Controls the linewidth of the slice\\'}
     cross_section_slice_show_area : {'value': False, 'description': 'Controls wheather to show the cross section area'}
     arrow_size : {'description': 'The arrow size for the spin texture', 'value': 3}
+    Bands Near Fermi :  [2, 3, 4, 5]
 
 
 
@@ -213,6 +214,7 @@ Before diving into plotting, we need to download the example files. Use the foll
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    Bands Near Fermi :  [2, 3, 4, 5]
     ret.shape (3375, 8, 1)
 
 
@@ -221,7 +223,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.984 seconds)
+   **Total running time of the script:** ( 0 minutes  15.954 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py:

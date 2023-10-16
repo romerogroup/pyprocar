@@ -117,6 +117,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Unfolding Band Structure example.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_unfolding_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_unfolding.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Unfolding Band Structure</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting spin polarized band structures.">
 
 .. only:: html
@@ -180,6 +197,7 @@ These examples demonstrate the band structure plotting capabilities.
    /examples/00-band_structure/plot_noncolinear_qe
    /examples/00-band_structure/plot_atomic_levels
    /examples/00-band_structure/plot_ipr
+   /examples/00-band_structure/plot_unfolding
    /examples/00-band_structure/plot_spin_polarized
    /examples/00-band_structure/plot_colinear
    /examples/00-band_structure/plot_bandsplot_configurations
