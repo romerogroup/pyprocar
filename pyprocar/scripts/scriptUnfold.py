@@ -218,8 +218,10 @@ def unfold(
             width_weights = weights
         else:
             width_weights = None
+
         color_mask = projection_mask
-        width_mask = projection_mask
+        width_mask = unfold_mask
+        width_weights = ebs_plot.ebs.weights
         if mode == "parametric":
             ebs_plot.plot_parameteric(
                 color_weights=color_weights,
