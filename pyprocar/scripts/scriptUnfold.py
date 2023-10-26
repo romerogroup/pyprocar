@@ -254,7 +254,7 @@ def unfold(
         ebs_plot.save(savefig)
     if show:
         ebs_plot.show()
-    return ebs_plot
+    return ebs_plot.fig, ebs_plot.ax
 
 
 

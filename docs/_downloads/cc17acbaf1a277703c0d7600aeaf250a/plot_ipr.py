@@ -36,6 +36,14 @@ Use the following code to do this. Once downloaded, specify the `data_dir` to po
                               spin_calc_type='spin-polarized-colinear',
                               calc_type='bands'
                               )
+
+  C_data_dir = pyprocar.download_example(
+                              save_dir='', 
+                              material='NV-center',
+                              code='vasp', 
+                              spin_calc_type='spin-polarized-colinear',
+                              calc_type='bands'
+                              )
 """
 
 ###############################################################################

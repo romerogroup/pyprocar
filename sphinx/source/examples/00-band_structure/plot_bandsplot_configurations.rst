@@ -133,7 +133,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     figure_size : {'description': 'The size of the figure (width, height) in inches.', 'value': [9, 6]}
     dpi : {'description': "The resolution in dots per inch. If 'figure', use the figure's dpi value.", 'value': 'figure'}
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225939C64F0>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -187,7 +187,7 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225803E9D00>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -236,7 +236,7 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022587843FD0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -285,14 +285,14 @@ Before diving into plotting, we need to download the example files. Use the foll
             
     ret.shape (300, 12, 2)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022582B9AD30>
+    (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.565 seconds)
+   **Total running time of the script:** ( 0 minutes  2.895 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:

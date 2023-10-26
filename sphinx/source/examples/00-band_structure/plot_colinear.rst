@@ -95,7 +95,7 @@ Plain mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225F6B3BCD0>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -149,7 +149,7 @@ For details on the meaning of the indices of the atomic projection please refer 
             
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022582B899D0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -205,7 +205,7 @@ For details on the meaning of the indices of the atomic projection please refer 
             
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225803761C0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -258,7 +258,7 @@ Scatter mode
             
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225FA370310>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -308,7 +308,7 @@ overlay_species mode
             
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002258511F9D0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -360,7 +360,7 @@ overlay_orbtials mode
     ret.shape (300, 10, 1)
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225CCC322B0>
+    (<Figure size 900x600 with 4 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -408,7 +408,7 @@ overlay mode
             
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x000002258170B340>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -454,14 +454,14 @@ overlay mode by orbital names
             
     ret.shape (300, 10, 1)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022585269B80>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.194 seconds)
+   **Total running time of the script:** ( 0 minutes  3.390 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_colinear.py:

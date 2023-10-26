@@ -106,7 +106,7 @@ Plotting primitive bands
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022582B71FA0>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -154,7 +154,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.4 created on Jun 10th, 2021
+    Version 6.1.5 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -188,14 +188,14 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
     See: https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html#controlling-the-legend-entries
       self.ax.legend(self.handles, labels)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x0000022582BBD460>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.473 seconds)
+   **Total running time of the script:** ( 0 minutes  23.498 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:

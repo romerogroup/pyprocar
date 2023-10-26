@@ -23,7 +23,6 @@ def dosplot(
         code:str="vasp",
         dirname:str=None,
         mode:str="plain",
-        interpolation_factor:int=1,
         orientation:str="horizontal",
         spins:List[int]=None,
         atoms:List[int]=None,
@@ -35,7 +34,6 @@ def dosplot(
         savefig:str=None,
         projection_mask=None,
         ax:plt.Axes=None,
-        verbose:bool=True,
         show:bool=True,
         print_plot_opts:bool=False,
         **kwargs
@@ -71,12 +69,6 @@ def dosplot(
 
         e.g. ``mode='stack'``
 
-    interpolation_factor : int, optional (default ``None``)
-        Number of points in energy axis is multiplied by this factor
-        and interpolated using cubic
-        spline.
-
-        e.g. ``interpolation_factor=3``
 
     orientation : str, optional (default ``horizontal'``)
         The orientation of the DOS plot.  options are
@@ -278,7 +270,7 @@ def dosplot(
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
     
-    edos_plot = DOSPlot(dos = dos, structure = structure, **kwargs)
+    edos_plot = DOSPlot(dos = dos, structure = structure, ax=ax, **kwargs)
     
     if mode == "plain":
         edos_plot.plot_dos(spins=spins, orientation = orientation)
@@ -355,4 +347,4 @@ def dosplot(
         edos_plot.save(savefig)
     if show:
         edos_plot.show()
-    return edos_plot
+    return edos_plot.fig, edos_plot.ax

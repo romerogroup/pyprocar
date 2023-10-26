@@ -341,7 +341,7 @@ Effective mass
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.323 seconds)
+   **Total running time of the script:** ( 0 minutes  4.915 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_ebs.py:

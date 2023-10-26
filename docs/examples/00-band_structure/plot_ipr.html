@@ -540,6 +540,14 @@ Use the following code to do this. Once downloaded, specify the <cite>data_dir</
                             <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;spin-polarized-colinear&#39;</span><span class="p">,</span>
                             <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;bands&#39;</span>
                             <span class="p">)</span>
+
+<span class="n">C_data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span>
+                            <span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                            <span class="n">material</span><span class="o">=</span><span class="s1">&#39;NV-center&#39;</span><span class="p">,</span>
+                            <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+                            <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;spin-polarized-colinear&#39;</span><span class="p">,</span>
+                            <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;bands&#39;</span>
+                            <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -582,7 +590,7 @@ The PyProcar code is:</p>
             --------------------------------------------------------
 
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225864ECF40&gt;
+(&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
 </section>
@@ -618,10 +626,10 @@ Atomic plot: bands.shape  : (2, 540, 2)
 Atomic plot: spd.shape    : (2, 540, 215, 1, 9, 2)
 Atomic plot: kpoints.shape: (2, 3)
 
-&lt;pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225806835E0&gt;
+(&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.290 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.654 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-ipr-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/cc17acbaf1a277703c0d7600aeaf250a/plot_ipr.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ipr.py</span></code></a></p>

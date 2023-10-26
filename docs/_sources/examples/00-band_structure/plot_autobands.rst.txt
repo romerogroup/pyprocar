@@ -165,7 +165,7 @@ and the associated localized states.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.575 seconds)
+   **Total running time of the script:** ( 0 minutes  27.777 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_autobands.py:

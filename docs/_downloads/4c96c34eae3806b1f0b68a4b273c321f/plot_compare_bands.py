@@ -38,9 +38,8 @@ qe_data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.s
 
 
 ###############################################################################
-# When show is equal to False, bandsplot will return a EBSPlot object. 
-# This object has information about the band structure and has matplotlib.axes.Axes object as an attribute.
+# When show is equal to False, bandsplot will return a maplotlib.Figure and maplotlib.axes.Axes object
 #
 
-ebs_plot = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric', elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
-pyprocar.bandsplot(code='qe', dirname = qe_data_dir, mode='plain', elimit=[-5,5], color='k',ax=ebs_plot.ax, show =True)
+fig, ax = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric', elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
+pyprocar.bandsplot(code='qe', dirname = qe_data_dir, mode='plain', elimit=[-5,5], color='k',ax=ax, show =True)

@@ -6,7 +6,7 @@
 
 Notice
 ===========
-- **New Release** We recently updated to a new version 'v6.0.5'. This update encompasses a significant overhaul of the codebase, updated documentation, and .
+- **New Release** We recently updated to a new version 'v6.1.6'. This update encompasses a significant overhaul of the codebase, updated documentation, and .
 - **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
 
 
@@ -121,6 +121,7 @@ will bring a help menu.
 
 Changelog
 --------------
+v6.1.6 Oct 10th, 2023 -- bandsplot,dosplot,bandsdosplot chnages, bug fixes, doc updates <br />
 v6.1.5 Oct 10th, 2023 -- Feature additions, example gallery additions, and doc updates <br />
 v6.1.4 Aug 18th, 2023 -- Bug fixes, example gallery additions, and doc updates <br />
 v6.1.3 Aug 7th, 2023 -- Updated install requirements <br />

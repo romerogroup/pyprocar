@@ -107,7 +107,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.4 created on Jun 10th, 2021
+    Version 6.1.5 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -146,6 +146,7 @@ Before diving into plotting, we need to download the example files. Use the foll
                 --------------------------------------------------------
             
 
+    (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
@@ -210,7 +211,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.4 created on Jun 10th, 2021
+    Version 6.1.5 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -250,6 +251,7 @@ Before diving into plotting, we need to download the example files. Use the foll
                 --------------------------------------------------------
             
 
+    (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
@@ -302,7 +304,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.4 created on Jun 10th, 2021
+    Version 6.1.5 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -342,13 +344,14 @@ Before diving into plotting, we need to download the example files. Use the foll
                 --------------------------------------------------------
             
 
+    (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.421 seconds)
+   **Total running time of the script:** ( 0 minutes  2.470 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot_configurations.py:

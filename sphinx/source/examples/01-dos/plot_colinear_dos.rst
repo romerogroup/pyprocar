@@ -95,7 +95,7 @@ Plain mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000225F6E02CD0>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -148,7 +148,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022582B78310>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -203,7 +203,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022596B168E0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -253,7 +253,7 @@ stack_species mode
             
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000225F6E1A670>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -303,7 +303,7 @@ stack_orbtials mode
             
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002259725FA60>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -350,14 +350,14 @@ overlay mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022597269040>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.502 seconds)
+   **Total running time of the script:** ( 0 minutes  27.759 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_colinear_dos.py:

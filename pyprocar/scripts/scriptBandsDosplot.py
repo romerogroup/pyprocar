@@ -92,14 +92,14 @@ def bandsdosplot(
     # bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)
 
     #plots bandsplot and dosplot
-    ebs_plot = bandsplot(**bands_settings)
-    edos_plot = dosplot(**dos_settings)
+    ebs_plot_fig, ebs_plot_ax = bandsplot(**bands_settings)
+    edos_plot_fig, edos_plot_ax = dosplot(**dos_settings)
 
     plt.close('all')
     fig = plt.figure(figsize = (16.5,5.5), clear = True)
 
     # combines bandsplot and dos plot
-    ax_ebs,ax_dos = combine_axes(ebs_plot.fig,edos_plot.fig,fig, plot_color_bar = plot_color_bar)
+    ax_ebs,ax_dos = combine_axes(ebs_plot_fig, edos_plot_fig, fig, plot_color_bar = plot_color_bar)
 
     # axes opitions
     if elimit is not None:
@@ -125,6 +125,8 @@ def bandsdosplot(
         plt.clf()
     if show:
         plt.show()
+
+    return fig, ax_ebs, ax_dos
 
 def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
 

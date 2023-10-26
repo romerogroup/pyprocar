@@ -56,13 +56,21 @@ Use the following code to do this. Once downloaded, specify the `data_dir` to po
                               calc_type='bands'
                               )
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-45
+  C_data_dir = pyprocar.download_example(
+                              save_dir='', 
+                              material='NV-center',
+                              code='vasp', 
+                              spin_calc_type='spin-polarized-colinear',
+                              calc_type='bands'
+                              )
+
+.. GENERATED FROM PYTHON SOURCE LINES 50-53
 
 Setting up the environment
 --------------------------
 First, we will import the necessary libraries and set up our data directory path.
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-56
+.. GENERATED FROM PYTHON SOURCE LINES 53-64
 
 .. code-block:: default
 
@@ -84,7 +92,7 @@ First, we will import the necessary libraries and set up our data directory path
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-65
+.. GENERATED FROM PYTHON SOURCE LINES 65-73
 
 Topologically-protected surface states in :math:`Bi_2Se_3`
 -----------------------------------------------------------
@@ -95,7 +103,7 @@ in contrast a extended state cover the six quintuple layers.
 The ratio between the localization of both types of states is 1 to 3, and the $IPR$ has enough resolution to provide a clear visual identification. 
 The PyProcar code is:
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-75
+.. GENERATED FROM PYTHON SOURCE LINES 73-83
 
 .. code-block:: default
 
@@ -132,11 +140,11 @@ The PyProcar code is:
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225864ECF40>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-87
+.. GENERATED FROM PYTHON SOURCE LINES 84-95
 
 :math:`NV^-` defect in diamond
 ---------------------------------
@@ -150,7 +158,7 @@ of the spin channel labelled `spin-1`. The calculation of the main emission line
 which can be simulated by fixing the occupations of the mentioned levels, **i.e.** the :math:`\Delta` SCFmethod.[Jin2021]
 The pyprocar code is:
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-94
+.. GENERATED FROM PYTHON SOURCE LINES 95-102
 
 .. code-block:: default
 
@@ -189,14 +197,14 @@ The pyprocar code is:
     Atomic plot: spd.shape    : (2, 540, 215, 1, 9, 2)
     Atomic plot: kpoints.shape: (2, 3)
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225806835E0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.290 seconds)
+   **Total running time of the script:** ( 0 minutes  24.654 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_ipr.py:

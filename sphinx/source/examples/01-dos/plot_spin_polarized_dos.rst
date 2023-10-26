@@ -96,7 +96,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002259778E7F0>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -140,7 +140,7 @@ The keyword spins can also be used to select which spin bands to plot
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022597753040>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -193,7 +193,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x000002258610F8B0>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -248,7 +248,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022596B38580>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -298,7 +298,7 @@ stack_species mode
             
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022580714D30>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -349,7 +349,7 @@ stack_orbtials mode
             
     The plot only considers atoms ['Fe']
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x0000022580702F40>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -397,14 +397,14 @@ stack mode
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.dos_plot.DOSPlot object at 0x00000225CCC29FD0>
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.554 seconds)
+   **Total running time of the script:** ( 0 minutes  3.244 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_spin_polarized_dos.py:

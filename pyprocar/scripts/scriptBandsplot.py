@@ -270,4 +270,4 @@ def bandsplot(
     if show:
         ebs_plot.show()
         
-    return ebs_plot
+    return ebs_plot.fig, ebs_plot.ax

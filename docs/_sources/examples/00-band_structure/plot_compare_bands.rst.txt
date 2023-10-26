@@ -66,19 +66,18 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 41-43
 
-When show is equal to False, bandsplot will return a EBSPlot object. 
-This object has information about the band structure and has matplotlib.axes.Axes object as an attribute.
+When show is equal to False, bandsplot will return a maplotlib.Figure and maplotlib.axes.Axes object
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-46
+.. GENERATED FROM PYTHON SOURCE LINES 43-45
 
 .. code-block:: default
 
 
-    ebs_plot = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric', elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
-    pyprocar.bandsplot(code='qe', dirname = qe_data_dir, mode='plain', elimit=[-5,5], color='k',ax=ebs_plot.ax, show =True)
+    fig, ax = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric', elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
+    pyprocar.bandsplot(code='qe', dirname = qe_data_dir, mode='plain', elimit=[-5,5], color='k',ax=ax, show =True)
 
 
 .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_compare_bands_001.png
@@ -111,14 +110,14 @@ This object has information about the band structure and has matplotlib.axes.Axe
                 --------------------------------------------------------
             
 
-    <pyprocar.plotter.ebs_plot.EBSPlot object at 0x00000225F6B55490>
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.491 seconds)
+   **Total running time of the script:** ( 0 minutes  0.515 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:

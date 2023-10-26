@@ -48,19 +48,19 @@ examples_dict = {"Fe" :
                         {
                         'non-colinear':
                             {
-                            'bands':'',
-                            'dos':'',
-                            'fermi':''},
+                            'bands':'1OgQSeyfa54fQ2QfUACA6tWlPPtys9sfU',
+                            'dos':'1N_LeMUiOfPIM6eiMzhp4vKfSuxJ3sJjA',
+                            'fermi':'1N_LeMUiOfPIM6eiMzhp4vKfSuxJ3sJjA'},
                         'non-spin-polarized':
                             {
                             'bands':'1Re6N2rj9AnzefmJOYLeUecMHbH2eMRWu',
-                            'dos':'',
-                            'fermi':''},
+                            'dos':'1QSlfRP7s3C14Kr2NAOr_MvXgBbfHCKPc',
+                            'fermi':'1QSlfRP7s3C14Kr2NAOr_MvXgBbfHCKPc'},
                         'spin-polarized-colinear':
                             {
-                            'bands':'',
-                            'dos':'',
-                            'fermi':''}
+                            'bands':'1M9z1EXRdghrTo9nIArHnSMRXExK77N-E',
+                            'dos':'1L5dq7BOEEege88BeLY89Sl5MN0VmpTY9',
+                            'fermi':'1L5dq7BOEEege88BeLY89Sl5MN0VmpTY9'}
                         }
 
 
@@ -71,13 +71,97 @@ examples_dict = {"Fe" :
                         {
                         'non-colinear':
                             {
-                            'bands':'',
-                            'dos':'',
-                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF'},
+                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF'
+                            },
 
 
                     },
-                }
+                },
+
+                "auto" :
+                    {"vasp": 
+                        {
+                        'non-spin-polarized':
+                            {
+                            'bands':'1AM-Tzu58hiTs8TetuAQEqWvdR1sPaTKx',
+                            },
+
+
+                    },
+                },
+
+                "hBN-CNN" :
+                    {"vasp": 
+                        {
+                        'spin-polarized-colinear':
+                            {
+                            'gamma':'1K6VivyRJS4i-7BXv8yQBlrFYkcjAn28o',
+                            },
+
+
+                    },
+                },
+
+                "Bi2Se3-spinorbit-surface" :
+                    {"vasp": 
+                        {
+                        'spin-polarized-colinear':
+                            {
+                            'bands':'1kfyM9Zm0ccel3BevEbiGr2oSkqmJzt_P',
+                            },
+
+
+                    },
+                },
+
+                "NV-center" :
+                    {"vasp": 
+                        {
+                        'spin-polarized-colinear':
+                            {
+                            'bands':'1vLIpdsfSbmJTmskFjcqM3m6l-P__hBOT',
+                            },
+
+
+                    },
+                },
+
+                "MgB2" :
+                    {"vasp": 
+                        {
+                        'non-spin-polarized':
+                            {
+                            'primitive_bands':'1YSzbw7eluTyTjWZp5XqrRWmLEszBsQUZ',
+                            'supercell_bands':'1CK_aY7YrxtwX6II0lvtj5K_1BcEdt202',
+                            },
+
+
+                    },
+                },
+
+                "BiSb_monolayer" :
+                    {"vasp": 
+                        {
+                        'non-colinear':
+                            {
+                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF',
+                            },
+
+
+                    },
+                },
+
+                "Au" :
+                    {"vasp": 
+                        {
+                        'non-spin-polarized':
+                            {
+                            'fermi':'1JsBV203UazBd4s1wO3LW2YYRBMuLKsWO',
+                            },
+
+
+                    },
+                },
     }
 
 
@@ -129,8 +213,8 @@ def download_example(material: str,
         raise Exception(f"code must be in {codes}")
     if spin_calc_type not in spin_calc_types:
         raise Exception(f"spin_calc_type must be in {spin_calc_types}")
-    if calc_type not in calc_types:
-        raise Exception(f"calc_type must be in {calc_types}")
+    # if calc_type not in calc_types:
+    #     raise Exception(f"calc_type must be in {calc_types}")
 
     url  = f'https://drive.google.com/drive/folders/{examples_dict[material][code][spin_calc_type][calc_type]}'
 
