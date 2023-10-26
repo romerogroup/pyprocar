@@ -279,7 +279,12 @@ class Poscar(collections.abc.Mapping):
         
         self.variables = {}
         self.filename = filename
-        self.atoms, self.coordinates, self.lattice = self._parse_poscar()
+        # The poscar fails to load if in cartesian coordinates, if so better try to open the 'CONTCAR'
+        try:
+          self.atoms, self.coordinates, self.lattice = self._parse_poscar()
+        except TypeError:
+          self.filename = 'CONTCAR'
+          self.atoms, self.coordinates, self.lattice = self._parse_poscar()
         self.structure = Structure(
             atoms=self.atoms, fractional_coordinates=self.coordinates, lattice=self.lattice,rotations=rotations
         )
