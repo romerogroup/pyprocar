@@ -220,6 +220,13 @@ class ProcarFileFilter:
       -The output has a dummy atom index, without any intrisic meaning
 
     """
+        # if the user forgot the [...], i.e. [0,[1,2]], we need to add them
+        for i in range(len(atomsGroups)):
+            try:
+                iter(atomsGroups[i])
+            except TypeError:
+                atomsGroups[i] = [atomsGroups[i]]
+        
         # setting iostuff, this method -and class- should not made any
         # checking about IO, that is the job of the caller
         self.log.info("In File: " + self.infile)
