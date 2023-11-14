@@ -282,7 +282,7 @@ class FermiVisualizer:
             )
     
     def add_surface(self,surface):
-
+        
         surface=self._setup_band_colors(surface)
         if self.config['spin_colors']['value'] != [None,None]:
             spin_colors=[]
@@ -526,21 +526,24 @@ class FermiVisualizer:
             self.plotter.show(cpos=self.config['plotter_camera_pos']['value'], 
                          screenshot=save_2d)
         if save_2d_slice:
+
             slice_2d = self.plotter.plane_sliced_meshes[0]
+            
             self.plotter.close()
             point1 = slice_2d.points[0,:]
-            point2 = slice_2d.points[1,:]
-            normal_vec = np.cross(point1,point2)
+            point2=slice_2d.points[1,:]
+            point3= slice_2d.points[3,:]
+            normal_vec = np.cross(point1-point3,point2-point3)
             p = pv.Plotter()
 
             if self.data_handler.vector_name:
                 arrows = slice_2d.glyph(orient=self.data_handler.vector_name, scale=False, factor=0.1)
-            if self.config['texture_color']['value'] is not None:
-                p.add_mesh(arrows, color=self.config['texture_color']['value'], show_scalar_bar=False,name='arrows')
-            else:
-                p.add_mesh(arrows, 
-                           cmap=self.config['texture_cmap']['value'], 
-                           show_scalar_bar=False,name='arrows')
+                if self.config['texture_color']['value'] is not None:
+                    p.add_mesh(arrows, color=self.config['texture_color']['value'], show_scalar_bar=False,name='arrows')
+                else:
+                    p.add_mesh(arrows, 
+                            cmap=self.config['texture_cmap']['value'], 
+                            show_scalar_bar=False,name='arrows')
             p.add_mesh(slice_2d,
                        line_width=self.config['cross_section_slice_linewidth']['value'])
             p.remove_scalar_bar()
@@ -592,9 +595,10 @@ class FermiVisualizer:
 
     def _apply_fermi_surface_band_colors(self,fermi_surface,band_colors):
         unique_band_index = np.unique(fermi_surface.point_data['band_index'])
-    
+
         if len(band_colors) != len(unique_band_index):
-            raise "You need to list the number of colors as there are bands that make up the surface"
+            print("Number of bands : ", len(unique_band_index))
+            raise "You need to list the number of colors as there are bands that make up the surface."
         
         surface_band_colors=[]
         for band_color in band_colors:
