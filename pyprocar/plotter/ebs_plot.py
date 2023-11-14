@@ -44,7 +44,8 @@ class EBSPlot:
                     ebs:ElectronicBandStructure, 
                     kpath:KPath=None, 
                     ax:mpl.axes.Axes=None, 
-                    spins:List[int]=None, 
+                    spins:List[int]=None,
+                    kdirect:bool=True,
                     **kwargs):
         config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','band_structure.yml'))
         config_manager.update_config(kwargs)  
@@ -53,6 +54,7 @@ class EBSPlot:
         self.ebs = ebs
         self.kpath = kpath
         self.spins = spins
+        self.kdirect=kdirect
         if self.spins is None:
             self.spins = range(self.ebs.nspins)
         self.nspins = len(self.spins)
@@ -96,8 +98,12 @@ class EBSPlot:
         """
         pos = 0
         if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
+  
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
+                if self.kdirect is False:
+                    kstart=np.dot(self.ebs.reciprocal_lattice,kstart)
+                    kend=np.dot(self.ebs.reciprocal_lattice,kend)
 
                 distance = np.linalg.norm(kend - kstart)
                 if isegment == 0:
@@ -305,7 +311,7 @@ class EBSPlot:
             if vmax is None:
                 vmax = color_weights[:,:,spins].max()
             norm = mpl.colors.Normalize(vmin, vmax)
-        # print(self.ebs.nbands)
+            
         for ispin in spins:
             for iband in range(self.ebs.nbands):
                 if len(self.spins)==1:

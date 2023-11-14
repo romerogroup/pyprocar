@@ -33,6 +33,7 @@ def bandsplot(
     projection_mask:np.ndarray=None,
     kticks=None,
     knames=None,
+    kdirect:bool=True,
     elimit: List[float]=None,
     ax:plt.Axes=None,
     show:bool=True,
@@ -112,7 +113,7 @@ def bandsplot(
     else:
         fermi_level = 0
 
-    ebs_plot = EBSPlot(ebs, kpath, ax, spins ,**kwargs)
+    ebs_plot = EBSPlot(ebs, kpath, ax, spins, kdirect=kdirect ,**kwargs)
 
  
     labels = []
