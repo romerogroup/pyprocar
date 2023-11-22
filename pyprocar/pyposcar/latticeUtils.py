@@ -15,6 +15,7 @@ from .poscar import Poscar
 from typing import Union, List
 np.set_printoptions(precision=4, linewidth=160, suppress=True)
 
+import copy
 
 def distances(positions:np.ndarray,
               lattice: Union[np.ndarray, None] = None,
@@ -131,7 +132,11 @@ class Neighbors:
   """
 
   def __init__(self, poscar:Poscar,
-               verbose:bool=False):
+               verbose:bool=False,
+               custom_nn_dist:dict = None,
+               customDB:dict = None,
+               FCC_Scaling:bool = True,
+               RDF:bool = True):
     """
     It estimates the nearest neighbors of a poscar-class. They are element-dependent!
 
@@ -142,7 +147,18 @@ class Neighbors:
         A poscar instance, to claculate its neighbors
     verbose : bool
         verbosity. Defaults to False
-    
+       custon_nn_dist: dict
+        Allows the user to input custom cutoff distances values for determining NN's 
+    customDB : dict
+        Allows the user to input custom atomic radii for the data base as a dictionary eg: {"H":0.31}
+        Defaults to None
+    FCC_Scaling : bool
+        If True, re-scales to allow intermidiate distances between atoms (FCC-like)
+        Defaults to True
+    RDF : bool
+        If True, allows for the radial density function (RDF) to assist in the calculation of Neighbors
+        Defaults to True
+
     """
     
     self.poscar = poscar
@@ -150,14 +166,23 @@ class Neighbors:
     self.nn_list = None # a list of N lists with neighbor indexes
     self.nn_elem = None # the atomic elements of the nn_list
 
-    self.db = db.atomicDB # database with atomic info
+    self.custom_nn_dist = custom_nn_dist
+
+    if(customDB != None):
+      self.db = db.DB(customRadii=customDB)
+    else:
+      self.db = db.atomicDB # database with atomic info
+    self.fcc = FCC_Scaling
+    self.rdf = RDF
+
     self.distances = None # set when needed
     
     # Maximum distance of a nearest neighbor NxN matrix
-    self.estimateMaxBondDist()
-    self.nn_list = self.set_neighbors()
     self.d_Max = None # maximum distance for a nearest neighbor (a
                       # dict, for all interactions)
+    self.estimateMaxBondDist()
+    self.nn_list = self.set_neighbors()
+    
     return
 
   def estimateMaxBondDist(self)-> np.ndarray:
@@ -189,14 +214,43 @@ class Neighbors:
     if self.verbose:
       print('elements to use:', nelems)
     names = [x+y for x in nelems for y in nelems]
+    
     values = [self.db.estimateBond(x,y) for x in nelems for y in nelems]
+    
     max_dist = dict(zip(names, values))
+    
+    
+    if(self.custom_nn_dist != None):
+      #Clean max_dists values
+      for key,value in max_dist.items():
+        max_dist[key] = 0
+      #Replace with informed values
+      for interaction , value in self.custom_nn_dist.items():
+        elems = interaction.split('-')
+        max_dist[elems[0]+elems[1]] = value
+        max_dist[elems[1]+elems[0]] = value
+
+
+      d_Max = [[max_dist[x+y] for x in elements] for y in elements]
+
+      d_Max = np.array(d_Max)
+
+      self.d_Max = d_Max
+
+      return  self.d_Max
+
     if self.verbose:
       print('Estimated covalent radius (not maximum yet) ', max_dist)
     
     d_Max = [[max_dist[x+y] for x in elements] for y in elements]
     # rescaling to allow intermediate distances (FCC-like)
-    d_Max = np.array(d_Max)*(1+np.sqrt(2))/2
+
+    if(self.fcc):
+      d_Max = np.array(d_Max)*(1+np.sqrt(2))/2
+
+
+    d_Max = np.array(d_Max)
+
     self.d_Max = d_Max
     if self.verbose:
       print('Estimation of the Maximum bond length:')
@@ -259,9 +313,13 @@ class Neighbors:
     else:
       my_RDF = rdf.RDF(self.poscar)
       d_max = my_RDF.CutoffMatrix
-    
-    self.d_Max = np.minimum(d_max, self.d_Max)
-    
+
+      
+    if(self.rdf):
+      self.d_Max = np.minimum(d_max, self.d_Max)
+
+
+      
     if self.verbose:
       print(self.d_Max)
 
@@ -308,3 +366,27 @@ class Neighbors:
       nn_elem.append(temp)
     self.nn_elem = nn_elem
     
+  def _filter_exclusiveSpNeighbors(self):
+    #Mask
+    elem_mask = copy.deepcopy(self.nn_list)
+    #Copy for not modifying
+    new_list = copy.deepcopy(self.nn_list)
+
+    #Creating a Mask to only allow for different species neighbors
+    for i, elem in enumerate(self.nn_elem):
+      for j, index in enumerate(self.nn_list[i]):
+        if(self.poscar.elm[i] != self.poscar.elm[index]):
+          elem_mask[i][j] = True
+        else:
+          elem_mask[i][j] = False
+    #Filtering
+    result = []
+    for value, mask in zip(new_list, elem_mask):
+      temp = []
+      for v,m in zip(value, mask):
+        if(m):
+          temp.append(v)
+      result.append(temp)
+
+    self.nn_list = result
+    self._set_nn_elem()
