@@ -210,6 +210,7 @@ class FermiDataHandler:
             else:
                 spin_band_index = list(fermi_surface3D.point_data['band_index'])
                 spin_band_index.reverse()
+                
             spins_band_index.extend(spin_band_index)
 
             spin_index=[ispin]*len(fermi_surface3D.points)
@@ -217,7 +218,7 @@ class FermiDataHandler:
             spins_index.extend(spin_index)
 
 
-        # These reverese are used 
+        # These revereses are used 
         # because when you combine two meshes the point_data 
         # and points are prepended to each other, so extend would be backwards
         spins_band_index.reverse()
@@ -228,7 +229,8 @@ class FermiDataHandler:
             if i == 0:
                 fermi_surface=surface
             else:
-                fermi_surface+=surface
+                fermi_surface.merge(surface, merge_points=False, inplace=True)
+
 
         fermi_surface.point_data['band_index']= np.array(spins_band_index)
         fermi_surface.point_data['spin_index']= np.array(spins_index)
