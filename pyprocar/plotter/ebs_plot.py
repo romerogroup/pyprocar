@@ -449,7 +449,7 @@ class EBSPlot:
             emin, emax = elimit[0], elimit[1]
         else:
             emin, emax = np.min(self.ebs.bands), np.max(self.ebs.bands)
-        print('Energy range', emin, emax)
+        # print('Energy range', emin, emax)
         
         if spins is None:
             spins = range(self.ebs.nspins)
@@ -478,7 +478,7 @@ class EBSPlot:
         bbox_data = self.ax.transData.inverted().transform_bbox(bbox)
         w, h = bbox_data.width, bbox_data.height
         txt.remove()
-        print('Width, ', w, '. Height,', h)
+        # print('Width, ', w, '. Height,', h)
         
         shift = 0
         txt = texts[0]
@@ -489,7 +489,7 @@ class EBSPlot:
             y, y0 = txt[1], last[1]
             # if there there is vertical overlap
             if y < y0 + h:
-                print('overlap', y, y0+h)
+                # print('overlap', y, y0+h)
                 # I shift it laterally (the shift can be 0)
                 shift +=1
                 if shift == 2:
@@ -499,7 +499,7 @@ class EBSPlot:
             else:
                 shift = 0    
                 
-            print(txt)
+            # print(txt)
             self.ax.text(*txt)            
                 
         self.plot_parameteric(color_weights=color_weights,
