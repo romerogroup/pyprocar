@@ -242,8 +242,7 @@ class EBSPlot:
                         alpha=self.config['opacity']['value'][ispin],
                     )
         if self.config['plot_color_bar']['value'] and color_weights is not None:
-            cb = self.fig.colorbar(sc, ax=self.ax)
-            cb.ax.tick_params(labelsize=20)
+            self.cb = self.fig.colorbar(lc, ax=self.ax)
 
     def plot_parameteric(
         self,
@@ -344,9 +343,8 @@ class EBSPlot:
             self.handles.append(handle)
 
         if self.config['plot_color_bar']['value'] and color_weights is not None:
-            cb = self.fig.colorbar(lc, ax=self.ax)
-            cb.ax.tick_params(labelsize=20)
-
+            self.cb = self.fig.colorbar(lc, ax=self.ax)
+            
     def plot_parameteric_overlay(self,
                                  spins:List[int]=None,
                                  weights:np.ndarray=None,
@@ -401,8 +399,7 @@ class EBSPlot:
             self.handles.append(handle)
 
             if self.config['plot_color_bar']['value']:
-                cb = self.fig.colorbar(lc, ax=self.ax)
-                cb.ax.tick_params(labelsize=20)
+                self.cb = self.fig.colorbar(lc, ax=self.ax)
 
     def plot_atomic_levels(self,
         spins:List[int]=None,
@@ -596,6 +593,25 @@ class EBSPlot:
         if self.config['title']['value']:
             self.ax.set_title(label=self.config['title']['value'])
 
+    def set_colorbar_title(self, title:str=None):
+        """A method to set the title of the color bar
+
+        Parameters
+        ----------
+        title : str, optional
+            String for the title, by default "Atomic Orbital Projections"
+        """
+        if title:
+            title=title
+        else:
+            title=self.config['colorbar_title']['value']
+        self.cb.ax.tick_params(labelsize=self.config['colorbar_tick_labelsize']['value'])
+        self.cb.set_label(title, 
+                        size=self.config['colorbar_title_size']['value'],
+                        rotation=270,
+                        labelpad=self.config['colorbar_title_padding']['value'])
+    
+    
     def legend(self, labels:List[str]=None):
         """A methdo to plot the legend
 

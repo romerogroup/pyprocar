@@ -177,8 +177,12 @@ class DOSPlot:
         cmap = mpl.cm.get_cmap(cmap)
         if self.config['plot_bar']['value']:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-            self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
-
+            cb = self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
+            cb.ax.tick_params(labelsize=self.config['colorbar_tick_labelsize']['value'])
+            cb.set_label(self.config['colorbar_title']['value'], 
+                         size=self.config['colorbar_title_size']['value'],
+                         rotation=270,
+                         labelpad=self.config['colorbar_title_padding']['value'])
 
         if orientation == 'horizontal':
             self.set_xlabel(self.config['x_label']['value'])
@@ -334,7 +338,12 @@ class DOSPlot:
             vmax = (dos_projected.max() / dos_total_projected.max())
         if self.config['plot_bar']['value']:
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-            self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
+            cb = self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
+            cb.ax.tick_params(labelsize=self.config['colorbar_tick_labelsize']['value'])
+            cb.set_label(self.config['colorbar_title']['value'], 
+                         size=self.config['colorbar_title_size']['value'],
+                         rotation=270,
+                         labelpad=self.config['colorbar_title_padding']['value'])
 
         if orientation == 'horizontal':
 

@@ -176,7 +176,7 @@ def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
         dos_position = list(fig.axes[1].get_position().bounds)
         color_bar_position = list(fig.axes[2].get_position().bounds)
 
-        color_bar_position[0] = dos_position[0] + dos_position[3]  + 0.025
+        color_bar_position[0] = dos_position[0] + dos_position[3]  - 0.1
         fig.axes[2].set_position(color_bar_position)
 
     return fig.axes[0],fig.axes[1]

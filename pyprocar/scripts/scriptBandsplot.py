@@ -140,6 +140,7 @@ def bandsplot(
         width_mask=width_mask,
         spins=spins
         )
+      ebs_plot.set_colorbar_title(title='Inverse Participation Ratio')
       
         
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
@@ -230,6 +231,7 @@ def bandsplot(
                 width_mask=width_mask,
                 spins=spins
                 )
+            ebs_plot.set_colorbar_title()
         elif mode == "scatter":
             ebs_plot.plot_scatter(
                 color_weights=color_weights,
@@ -238,6 +240,7 @@ def bandsplot(
                 width_mask=width_mask,
                 spins=spins
             )
+            ebs_plot.set_colorbar_title()
         elif mode == "atomic":
             if ebs.kpoints.shape[0]!=1:
                 raise Value('Must use a single kpoint')
@@ -251,6 +254,7 @@ def bandsplot(
                 spins=spins)
             
             ebs_plot.set_xlabel(label='')
+            ebs_plot.set_colorbar_title()
 
         else:
             print("Selected mode %s not valid. Please check the spelling " % mode)

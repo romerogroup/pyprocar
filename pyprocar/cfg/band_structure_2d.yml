@@ -87,6 +87,9 @@ axes_line_width:
 add_scalar_bar:
   value: True
   description: Controls if there is a colorbar
+scalar_bar_title: 
+  value:
+  description: Controls scalar bar title font size
 scalar_bar_labels: 
   value: 6
   description: Controls the scalar bar labels

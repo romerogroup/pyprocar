@@ -94,9 +94,13 @@ scalar_bar_italic:
 scalar_bar_bold:
   value: False
   description: Controls the label bold style
+scalar_bar_title: 
+  value:
+  description: Controls scalar bar title font size
 scalar_bar_title_font_size: 
   value:
   description: Controls scalar bar title font size
+
 scalar_bar_label_font_size: 
   value:
   description: Controls scalar bar label font size

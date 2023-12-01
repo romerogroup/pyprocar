@@ -223,6 +223,11 @@ class BandStructure2DVisualizer:
         self._setup_plotter()
 
     def add_scalar_bar(self,name):
+        if self.config['scalar_bar_title']['value']:
+            name=self.config['scalar_bar_title']['value']
+        else:
+            name=name
+            
         if self.config['add_scalar_bar']['value']:
             self.plotter.add_scalar_bar(
                     title=name,
