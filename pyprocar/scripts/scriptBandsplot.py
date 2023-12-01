@@ -1,4 +1,4 @@
-__author__ = "Pedram Tavadze and Logan Lang"
+_author__ = "Pedram Tavadze and Logan Lang"
 __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
@@ -138,7 +138,8 @@ def bandsplot(
         width_weights=width_weights,
         color_mask=color_mask,
         width_mask=width_mask,
-        spins=spins
+        spins=spins,
+        elimit=elimit,  
         )
       ebs_plot.set_colorbar_title(title='Inverse Participation Ratio')
       
@@ -251,7 +252,8 @@ def bandsplot(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                spins=spins)
+                spins=spins,
+                elimit=elimit)
             
             ebs_plot.set_xlabel(label='')
             ebs_plot.set_colorbar_title()

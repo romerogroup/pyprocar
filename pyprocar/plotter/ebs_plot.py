@@ -251,6 +251,7 @@ class EBSPlot:
         color_mask:np.ndarray=None,
         width_weights:np.ndarray=None,
         color_weights:np.ndarray=None,
+        elimit:List[float]=None
         ):
         """A method to plot a scatter plot
 
@@ -266,6 +267,8 @@ class EBSPlot:
             The width weight of each point, by default None
         color_weights : np.ndarray, optional
             The color weights at each point, by default None
+        elimit : List[float], optional
+            Energy range to plot. Only useful if the band index is written
         """
 
         # if there is only a single k-point the method for atomic
@@ -277,7 +280,8 @@ class EBSPlot:
                                   width_weights=width_weights,
                                   color_mask=color_mask,
                                   width_mask=width_mask,
-                                  spins=spins)
+                                  spins=spins,
+                                  elimit=elimit)
           return
         
         if width_weights is None:
@@ -406,7 +410,8 @@ class EBSPlot:
         width_mask:np.ndarray=None,
         color_mask:np.ndarray=None,
         width_weights:np.ndarray=None,
-        color_weights:np.ndarray=None
+        color_weights:np.ndarray=None,
+        elimit:List[float]=None                   
         ):
         """A method to plot a scatter plot
 
@@ -422,6 +427,8 @@ class EBSPlot:
             The width weight of each point, by default None
         color_weights : np.ndarray, optional
             The color weights at each point, by default None
+        elimit : List[float], optional
+            The energy range to plot. 
         """
         self.ebs.bands = np.vstack((self.ebs.bands, self.ebs.bands))
         self.ebs.projected = np.vstack((self.ebs.projected, self.ebs.projected))
@@ -434,14 +441,64 @@ class EBSPlot:
         self.ax.xaxis.set_major_locator(plt.NullLocator())
         # labels on each band
 
+
+        if elimit:
+            emin, emax = elimit[0], elimit[1]
+        else:
+            emin, emax = np.min(self.ebs.bands), np.max(self.ebs.bands)
+        # print('Energy range', emin, emax)
+        
         if spins is None:
             spins = range(self.ebs.nspins)
         if self.ebs.is_non_collinear:
             spins = [0]
+        # cointainers for the bounding boxes of the text elements
+        Nspin = len(spins)
+        texts = []
         for ispin in spins:
             for i in range(len(self.ebs.bands[0,:,ispin])):
-                self.ax.text(0, self.ebs.bands[0,i,ispin], f"spin-{ispin} : "+"band-"+str(i + 1))
+                energy = self.ebs.bands[0,i,ispin]
+                if energy > emin and energy < emax:
+                    txt = [0, energy, f"s-{ispin} : "+"b-"+str(i + 1)]
+                    texts.append(txt)
+        # sorting the texts
+        texts.sort(key=lambda x: x[1])
 
+        # I need to set the energy limits
+        self.set_ylim(elimit)
+        self.set_xlim()
+        
+        # knowing the text size
+        txt = texts[-1]
+        txt = plt.text(*txt)
+        bbox = txt.get_window_extent()
+        bbox_data = self.ax.transData.inverted().transform_bbox(bbox)
+        w, h = bbox_data.width, bbox_data.height
+        txt.remove()
+        # print('Width, ', w, '. Height,', h)
+        
+        shift = 0
+        txt = texts[0]
+        self.ax.text(*txt)            
+        for i in range(1, len(texts)):
+            txt = texts[i]
+            last = texts[i-1]
+            y, y0 = txt[1], last[1]
+            # if there there is vertical overlap
+            if y < y0 + h:
+                # print('overlap', y, y0+h)
+                # I shift it laterally (the shift can be 0)
+                shift +=1
+                if shift == 2:
+                    shift = 0
+
+                txt[0] = txt[0] + w*1.5*shift
+            else:
+                shift = 0    
+                
+            # print(txt)
+            self.ax.text(*txt)            
+                
         self.plot_parameteric(color_weights=color_weights,
                             width_weights=width_weights,
                             color_mask=color_mask,
