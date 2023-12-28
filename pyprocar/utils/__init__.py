@@ -13,6 +13,7 @@ from . import mathematics
 from . import defaults
 from . import elements 
 from . import sorting
+from . import strings
 from .config import ConfigManager
 
 # Other Constants

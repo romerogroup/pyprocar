@@ -6,12 +6,13 @@ import gzip
 from typing import List, Tuple, Union, Dict, Any, Optional
 from pathlib import Path
 from functools import cached_property
+import warnings
 
 import numpy as np
 from numpy import array
 
 from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
-
+from ..utils.strings import remove_comment
 
 class Outcar(collections.abc.Mapping):
     """
@@ -275,21 +276,16 @@ class Poscar(collections.abc.Mapping):
     filename : str, optional
         The POSCAR filename, by default "POSCAR"
     """
-    def __init__(self, filename="POSCAR",rotations = None):
+    def __init__(self, filename="POSCAR", rotations = None):
         
         self.variables = {}
         self.filename = filename
-        # The poscar fails to load if in cartesian coordinates, if so better try to open the 'CONTCAR'
-        try:
-          self.atoms, self.coordinates, self.lattice = self._parse_poscar()
-        except TypeError:
-          self.filename = 'CONTCAR'
-          self.atoms, self.coordinates, self.lattice = self._parse_poscar()
+        self.atoms, self.coordinates, self.lattice = self._parse_poscar()
         self.structure = Structure(
             atoms=self.atoms, fractional_coordinates=self.coordinates, lattice=self.lattice,rotations=rotations
         )
 
-
+        
     def _parse_poscar(self):
         """
         Reads VASP POSCAR file-type and returns the pyprocar structure
@@ -309,10 +305,11 @@ class Poscar(collections.abc.Mapping):
 
         comment = lines[0]
         self.comment = comment
-        scale = float(lines[1])
+        scale = float(remove_comment(lines[1]))
+        
         lattice = np.zeros(shape=(3, 3))
         for i in range(3):
-            lattice[i, :] = [float(x) for x in lines[i + 2].split()[:3]]
+            lattice[i, :] = [float(x) for x in remove_comment(lines[i + 2]).split()[:3]]
         lattice *= scale
         if any([char.isalpha() for char in lines[5]]):
             species = [x for x in lines[5].split()]
@@ -335,7 +332,7 @@ class Poscar(collections.abc.Mapping):
                 )[::2]
 
                 print(species)
-        composition = [int(x) for x in lines[5 + shift].split()]
+        composition = [int(x) for x in remove_comment(lines[5 + shift]).split()]
         atoms = []
         for i in range(len(composition)):
             for x in composition[i] * [species[i]]:
@@ -350,20 +347,15 @@ class Poscar(collections.abc.Mapping):
         if match[0] == "d":
             direct = True
         elif match[0] == "c":
-            print("haven't implemented conversion to cartesian yet")
+            warnings.warn("Warning the POSCAR is not in Direct coordinates.")
             direct = False
         else:
-            raise RuntimeError('The POSCAR is not in Direct or Cartesian coordinates ')
+            raise RuntimeError('The POSCAR is not in Direct or Cartesian coordinates.')
         coordinates = np.zeros(shape=(natom, 3))
         for i in range(natom):
             coordinates[i, :] = [float(x)
                                  for x in lines[i + 7 + shift].split()[:3]]
-        # print(direct)
-        if direct:
-            return atoms, coordinates, lattice
-        # else:
-        #     direct_coords=np.dot(coordinates, lattice)
-        #     print(direct_coords)
+        return atoms, coordinates, lattice
 
     def __contains__(self, x):
         return x in self.variables
