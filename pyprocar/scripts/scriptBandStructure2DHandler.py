@@ -51,9 +51,15 @@ class BandStructure2DHandler:
         self.dirname=dirname
         self.repair = repair
         self.apply_symmetry = apply_symmetry
+        
         parser = io.Parser(code = code, dir = dirname)
         self.ebs = parser.ebs
         self.e_fermi=self.ebs.efermi
+
+        # Shifting fermi to zero
+        self.ebs.bands -= self.ebs.efermi
+
+        # Applying symmetry to kmesh if they exists
         self.structure = parser.structure
         if self.structure.rotations is not None:
             self.ebs.ibz2fbz(self.structure.rotations)

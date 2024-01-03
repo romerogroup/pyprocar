@@ -604,7 +604,7 @@ class FermiVisualizer:
 
         if len(band_colors) != len(unique_band_index):
             print("Number of bands : ", len(unique_band_index))
-            raise "You need to list the number of colors as there are bands that make up the surface."
+            raise "You need to list colors as there are bands that make up the surface."
         
         surface_band_colors=[]
         for band_color in band_colors:
