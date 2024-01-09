@@ -65,6 +65,11 @@
       
       
         
+          EBSPlot.set_colorbar_title
+        
+      
+      
+        
           EBSPlot.set_title
         
       

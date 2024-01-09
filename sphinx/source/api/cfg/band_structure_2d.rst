@@ -216,6 +216,14 @@ add_scalar_bar
 :description: Controls if there is a colorbar
 
 
+scalar_bar_title
+----------------
+
+:value: None
+
+:description: Controls scalar bar title font size
+
+
 scalar_bar_labels
 -----------------
 

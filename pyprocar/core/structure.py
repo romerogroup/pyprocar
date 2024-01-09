@@ -42,7 +42,7 @@ class Structure:
         fractional_coordinates=None,
         lattice=None,
         rotations=None
-    ):
+        ):
         
         if fractional_coordinates is not None:
             self.fractional_coordinates = np.array(fractional_coordinates)

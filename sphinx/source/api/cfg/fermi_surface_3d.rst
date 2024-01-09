@@ -232,6 +232,14 @@ scalar_bar_bold
 :description: Controls the label bold style
 
 
+scalar_bar_title
+----------------
+
+:value: None
+
+:description: Controls scalar bar title font size
+
+
 scalar_bar_title_font_size
 --------------------------
 

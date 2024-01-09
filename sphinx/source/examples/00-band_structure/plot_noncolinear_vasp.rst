@@ -75,28 +75,29 @@ Plain mode
 
 
 
-
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_noncolinear_vasp_001.png
-   :alt: plot noncolinear vasp
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_noncolinear_vasp_001.png
-   :class: sphx-glr-single-img
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
+    Traceback (most recent call last):
+      File "Z:\Research Projects\pyprocar\examples\00-band_structure\plot_noncolinear_vasp.py", line 37, in <module>
+        pyprocar.bandsplot(
+      File "z:\research projects\pyprocar\pyprocar\scripts\scriptBandsplot.py", line 103, in bandsplot
+        parser = io.Parser(code = code, dir = dirname)
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
+        self.parse()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
+        self.parse_vasp()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
+        poscar = vasp.Poscar(poscar,rotations = None)
+      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
+        self.structure = Structure(
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
+        self.get_wyckoff_positions()
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
+        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
+    TypeError: 'NoneType' object is not subscriptable
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -128,36 +129,9 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_noncolinear_vasp_002.png
-   :alt: plot noncolinear vasp
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_noncolinear_vasp_002.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    ret.shape (300, 20, 1)
-
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
-
-
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.164 seconds)
+   **Total running time of the script:** ( 0 minutes  0.277 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_noncolinear_vasp.py:

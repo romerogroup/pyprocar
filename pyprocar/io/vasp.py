@@ -331,7 +331,6 @@ class Poscar(collections.abc.Mapping):
                     potcar,
                 )[::2]
 
-                print(species)
         composition = [int(x) for x in remove_comment(lines[5 + shift]).split()]
         atoms = []
         for i in range(len(composition)):

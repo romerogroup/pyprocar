@@ -88,65 +88,31 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-
-.. image-sg:: /examples/02-bands_dos/images/sphx_glr_plot_bandsdosplot_configurations_001.png
-   :alt: plot bandsdosplot configurations
-   :srcset: /examples/02-bands_dos/images/sphx_glr_plot_bandsdosplot_configurations_001.png
-   :class: sphx-glr-single-img
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
-     ____        ____
-    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
-    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
-    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
-    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
-           |___/
-    A Python library for electronic structure pre/post-processing.
+    Traceback (most recent call last):
+      File "Z:\Research Projects\pyprocar\examples\02-bands_dos\plot_bandsdosplot_configurations.py", line 51, in <module>
+        pyprocar.bandsdosplot(code='vasp',
+      File "z:\research projects\pyprocar\pyprocar\scripts\scriptBandsDosplot.py", line 95, in bandsdosplot
+        ebs_plot_fig, ebs_plot_ax = bandsplot(**bands_settings)
+      File "z:\research projects\pyprocar\pyprocar\scripts\scriptBandsplot.py", line 103, in bandsplot
+        parser = io.Parser(code = code, dir = dirname)
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
+        self.parse()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
+        self.parse_vasp()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
+        poscar = vasp.Poscar(poscar,rotations = None)
+      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
+        self.structure = Structure(
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
+        self.get_wyckoff_positions()
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
+        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
+    TypeError: 'NoneType' object is not subscriptable
 
-    Version 6.1.5 created on Jun 10th, 2021
-
-    Please cite:
-     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
-     PyProcar: A Python library for electronic structure pre/post-processing.,
-     Computer Physics Communications 251 (2020):107080.
-
-
-    Developers:
-    - Francisco Muñoz
-    - Aldo Romero
-    - Sobhit Singh
-    - Uthpala Herath
-    - Pedram Tavadze
-    - Eric Bousquet
-    - Xu He
-    - Reese Boucher
-    - Logan Lang
-    - Freddy Farah
-    
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
-                --------------------------------------------------------
-            
-
-    (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
@@ -191,70 +157,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                     )
 
 
-
-
-.. image-sg:: /examples/02-bands_dos/images/sphx_glr_plot_bandsdosplot_configurations_002.png
-   :alt: plot bandsdosplot configurations
-   :srcset: /examples/02-bands_dos/images/sphx_glr_plot_bandsdosplot_configurations_002.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-     ____        ____
-    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
-    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
-    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
-    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
-           |___/
-    A Python library for electronic structure pre/post-processing.
-
-    Version 6.1.5 created on Jun 10th, 2021
-
-    Please cite:
-     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
-     PyProcar: A Python library for electronic structure pre/post-processing.,
-     Computer Physics Communications 251 (2020):107080.
-
-
-    Developers:
-    - Francisco Muñoz
-    - Aldo Romero
-    - Sobhit Singh
-    - Uthpala Herath
-    - Pedram Tavadze
-    - Eric Bousquet
-    - Xu He
-    - Reese Boucher
-    - Logan Lang
-    - Freddy Farah
-    
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    ret.shape (300, 10, 1)
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
-                --------------------------------------------------------
-            
-
-    (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 94-118
 
 .. code-block:: default
@@ -285,73 +187,9 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-
-.. image-sg:: /examples/02-bands_dos/images/sphx_glr_plot_bandsdosplot_configurations_003.png
-   :alt: plot bandsdosplot configurations
-   :srcset: /examples/02-bands_dos/images/sphx_glr_plot_bandsdosplot_configurations_003.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-     ____        ____
-    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
-    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
-    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
-    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
-           |___/
-    A Python library for electronic structure pre/post-processing.
-
-    Version 6.1.5 created on Jun 10th, 2021
-
-    Please cite:
-     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
-     PyProcar: A Python library for electronic structure pre/post-processing.,
-     Computer Physics Communications 251 (2020):107080.
-
-
-    Developers:
-    - Francisco Muñoz
-    - Aldo Romero
-    - Sobhit Singh
-    - Uthpala Herath
-    - Pedram Tavadze
-    - Eric Bousquet
-    - Xu He
-    - Reese Boucher
-    - Logan Lang
-    - Freddy Farah
-    
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    ret.shape (300, 10, 1)
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
-                --------------------------------------------------------
-            
-
-    (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
-
-
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.470 seconds)
+   **Total running time of the script:** ( 0 minutes  0.053 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot_configurations.py:

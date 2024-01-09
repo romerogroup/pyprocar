@@ -75,13 +75,28 @@ importing pyprocar and specifying local data_dir
     band_gap = pyprocar.bandgap(dirname=data_dir, code="vasp")
 
 
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
-    Band Gap = 0 eV 
+    Traceback (most recent call last):
+      File "Z:\Research Projects\pyprocar\examples\05-other\plot_bandgap.py", line 40, in <module>
+        band_gap = pyprocar.bandgap(dirname=data_dir, code="vasp")
+      File "z:\research projects\pyprocar\pyprocar\scripts\scriptBandGap.py", line 35, in bandgap
+        parser = io.Parser(code = code, dir = dirname)
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
+        self.parse()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
+        self.parse_vasp()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
+        poscar = vasp.Poscar(poscar,rotations = None)
+      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
+        self.structure = Structure(
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
+        self.get_wyckoff_positions()
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
+        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
+    TypeError: 'NoneType' object is not subscriptable
 
 
 
@@ -89,7 +104,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.138 seconds)
+   **Total running time of the script:** ( 0 minutes  0.045 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_bandgap.py:

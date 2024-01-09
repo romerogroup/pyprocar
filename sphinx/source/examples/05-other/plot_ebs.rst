@@ -101,7 +101,26 @@ Initialize the parser object and get the ElectronicBandStructure
 
 
 
+.. rst-class:: sphx-glr-script-out
 
+.. code-block:: pytb
+
+    Traceback (most recent call last):
+      File "Z:\Research Projects\pyprocar\examples\05-other\plot_ebs.py", line 46, in <module>
+        parser=pyprocar.io.Parser(code="vasp",dir=data_dir)
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
+        self.parse()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
+        self.parse_vasp()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
+        poscar = vasp.Poscar(poscar,rotations = None)
+      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
+        self.structure = Structure(
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
+        self.get_wyckoff_positions()
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
+        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
+    TypeError: 'NoneType' object is not subscriptable
 
 
 
@@ -119,24 +138,6 @@ You can print the object to see some information about the Band Structure
 
 
 
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    Enectronic Band Structure     
-    ------------------------     
-    Total number of kpoints  = 3375
-    Total number of bands    = 8
-    Total number of atoms    = 1
-    Total number of orbitals = 9
-
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 61-62
 
 Let's plot the kpoints
@@ -149,17 +150,6 @@ Let's plot the kpoints
     p=pv.Plotter()
     p.add_mesh(ebs.kpoints, color='blue', render_points_as_spheres=True)
     p.show()
-
-
-
-
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_001.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_001.png
-   :class: sphx-glr-single-img
-
-
 
 
 
@@ -184,17 +174,6 @@ Bands
 
 
 
-
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_002.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_002.png
-   :class: sphx-glr-single-img
-
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 83-85
 
 Projections
@@ -210,23 +189,6 @@ Projections
     p=pv.Plotter()
     p.add_mesh(kpoints, color='blue', scalars='band_0-atom_0-orbital_5-spin-0', render_points_as_spheres=True, point_size=10)
     p.show()
-
-
-
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_003.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_003.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    (3375, 8, 1, 1, 9, 1)
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 93-95
@@ -246,23 +208,6 @@ Gradients
     p=pv.Plotter()
     p.add_mesh(arrows,scalar_bar_args={'title':'band_0-band_velocity'})
     p.show()
-
-
-
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_004.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_004.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    (3375, 3, 8, 1)
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 105-107
@@ -286,23 +231,6 @@ Band/Fermi velocities
 
 
 
-
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_005.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_005.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    (3375, 3, 8, 1)
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 Effective mass
@@ -322,26 +250,9 @@ Effective mass
 
 
 
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_006.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_006.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    (3375, 8, 1)
-
-
-
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.915 seconds)
+   **Total running time of the script:** ( 0 minutes  0.026 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_ebs.py:

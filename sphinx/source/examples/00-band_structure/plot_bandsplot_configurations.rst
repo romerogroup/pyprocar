@@ -84,56 +84,29 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_001.png
-   :alt: plot bandsplot configurations
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_001.png
-   :class: sphx-glr-single-img
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
-    Configuration files are located at: z:\research projects\pyprocar\pyprocar\cfg
+    Traceback (most recent call last):
+      File "Z:\Research Projects\pyprocar\examples\00-band_structure\plot_bandsplot_configurations.py", line 50, in <module>
+        pyprocar.bandsplot(code=code,dirname=data_dir,print_plot_opts=True)
+      File "z:\research projects\pyprocar\pyprocar\scripts\scriptBandsplot.py", line 103, in bandsplot
+        parser = io.Parser(code = code, dir = dirname)
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
+        self.parse()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
+        self.parse_vasp()
+      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
+        poscar = vasp.Poscar(poscar,rotations = None)
+      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
+        self.structure = Structure(
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
+        self.get_wyckoff_positions()
+      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
+        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
+    TypeError: 'NoneType' object is not subscriptable
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    spin_colors : {'description': 'The colors for the plot lines.', 'value': ['blue', 'red']}
-    color : {'description': 'The colors for the plot lines.', 'value': 'black'}
-    cmap : {'description': 'The colormap used for the plot.', 'value': 'jet'}
-    clim : {'description': 'The color scale for the color bar', 'value': [None, None]}
-    fermi_color : {'description': 'The color of the Fermi line.', 'value': 'blue'}
-    fermi_linestyle : {'description': 'The linestyle of the Fermi line.', 'value': 'dotted'}
-    fermi_linewidth : {'description': 'The linewidth of the Fermi line.', 'value': 1}
-    grid : {'description': 'If true, a grid will be shown on the plot.', 'value': False}
-    grid_axis : {'description': 'Which axis (or both) the grid lines should be drawn on.', 'value': 'both'}
-    grid_color : {'description': 'The color of the grid lines.', 'value': 'grey'}
-    grid_linestyle : {'description': 'The linestyle of the grid lines.', 'value': 'solid'}
-    grid_linewidth : {'description': 'The linewidth of the grid lines.', 'value': 1}
-    grid_which : {'description': 'Which grid lines to draw (major, minor or both).', 'value': 'major'}
-    label : {'description': 'The labels for the plot lines.', 'value': ['$\\uparrow$', '$\\downarrow$']}
-    legend : {'description': 'If true, a legend will be shown on the plot.', 'value': True}
-    linestyle : {'description': 'The linestyles for the plot lines.', 'value': ['solid', 'dashed']}
-    linewidth : {'description': 'The linewidths for the plot lines.', 'value': [1.0, 1.0]}
-    marker : {'description': 'The marker styles for the plot points.', 'value': ['o', 'v', '^', 'D']}
-    markersize : {'description': 'The size of the markers for the plot points.', 'value': [0.2, 0.2]}
-    opacity : {'description': 'The opacities for the plot lines.', 'value': [1.0, 1.0]}
-    plot_color_bar : {'description': 'If true, a color bar will be shown on the plot.', 'value': True}
-    savefig : {'description': 'The file name to save the figure. If null, the figure will not be saved.', 'value': None}
-    title : {'description': 'The title for the plot. If null, no title will be displayed.', 'value': None}
-    weighted_color : {'description': 'If true, the color of the lines will be weighted.', 'value': True}
-    weighted_width : {'description': 'If true, the width of the lines will be weighted.', 'value': False}
-    figure_size : {'description': 'The size of the figure (width, height) in inches.', 'value': [9, 6]}
-    dpi : {'description': "The resolution in dots per inch. If 'figure', use the figure's dpi value.", 'value': 'figure'}
-
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -164,33 +137,6 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-
-
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_002.png
-   :alt: plot bandsplot configurations
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_002.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    ret.shape (300, 12, 2)
-
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 76-93
 
 .. code-block:: default
@@ -211,33 +157,6 @@ Before diving into plotting, we need to download the example files. Use the foll
         marker=['v','o'],  # Marker style
         markersize=[10,5]  # Marker size list for the 2 spin plots
     )
-
-
-
-
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_003.png
-   :alt: plot bandsplot configurations
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_003.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    ret.shape (300, 12, 2)
-
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 94-111
@@ -263,36 +182,9 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_004.png
-   :alt: plot bandsplot configurations
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_bandsplot_configurations_004.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
-
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
-            
-    ret.shape (300, 12, 2)
-
-    (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
-
-
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.895 seconds)
+   **Total running time of the script:** ( 0 minutes  0.096 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:

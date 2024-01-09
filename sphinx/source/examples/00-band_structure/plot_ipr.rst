@@ -191,7 +191,7 @@ The pyprocar code is:
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:547: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:607: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
       self.ax.set_xlim(interval)
     Atomic plot: bands.shape  : (2, 540, 2)
     Atomic plot: spd.shape    : (2, 540, 215, 1, 9, 2)
@@ -204,7 +204,7 @@ The pyprocar code is:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.654 seconds)
+   **Total running time of the script:** ( 0 minutes  25.076 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_ipr.py:
