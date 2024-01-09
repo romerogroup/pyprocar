@@ -276,10 +276,10 @@ class Poscar(collections.abc.Mapping):
     filename : str, optional
         The POSCAR filename, by default "POSCAR"
     """
-    def __init__(self, filename="POSCAR", rotations = None):
+    def __init__(self, filename:Union[str, Path]="POSCAR", rotations = None):
         
         self.variables = {}
-        self.filename = filename
+        self.filename = Path(filename)
         self.atoms, self.coordinates, self.lattice = self._parse_poscar()
         self.structure = Structure(
             atoms=self.atoms, fractional_coordinates=self.coordinates, lattice=self.lattice,rotations=rotations
@@ -317,13 +317,10 @@ class Poscar(collections.abc.Mapping):
         else:
             shift = 0
 
-            base_dir = self.filename.replace(
-                self.filename.split(os.sep)[-1], "")
-            if base_dir == "":
-                base_dir = "."
-            potcar=os.path.join(base_dir,"POTCAR")
-            if os.path.exists(potcar):
-                with open(base_dir + os.sep + "POTCAR", "r") as rf:
+            base_dir = self.filename.parent
+            potcar_path = base_dir/"POTCAR"
+            if potcar_path.exists():
+                with open(potcar_path, "r") as rf:
                     potcar = rf.read()
 
                 species = re.findall(
@@ -331,7 +328,7 @@ class Poscar(collections.abc.Mapping):
                     potcar,
                 )[::2]
 
-        composition = [int(x) for x in remove_comment(lines[5 + shift]).split()]
+        composition = [int(x) for x in remove_comment(lines[5 + shift].strip()).split()]
         atoms = []
         for i in range(len(composition)):
             for x in composition[i] * [species[i]]:
