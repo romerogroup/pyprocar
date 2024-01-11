@@ -1133,6 +1133,7 @@ class ElectronicBandStructure:
         
         if self.projected is not None:
             print('old projected.shape', self.projected.shape)
+            self.projected[... , -1] = -self.projected[... , -1]
             shape = list(self.projected.shape)
             shape[1] = shape[1]*2
             shape[-1] = 1
