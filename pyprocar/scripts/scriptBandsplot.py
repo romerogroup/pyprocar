@@ -113,6 +113,12 @@ def bandsplot(
     else:
         fermi_level = 0
 
+
+    # fixing the spin, to plot two channels into one (down is negative)
+    if np.array_equal(spins, [-1,1]) or np.array_equal(spins, [1,-1]):
+        if ebs.fix_collinear_spin():
+          spins = [0]
+        
     ebs_plot = EBSPlot(ebs, kpath, ax, spins, kdirect=kdirect ,**kwargs)
 
  

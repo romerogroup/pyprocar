@@ -48,7 +48,7 @@ class ElectronicBandStructure:
         weights : np.ndarray, optional
             The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
         labels : List, optional
-            A list of orbital names, defaults to None
+
         reciprocal_lattice : np.ndarray, optional
             The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
         shifted_to_efermi : bool, optional
@@ -1108,6 +1108,40 @@ class ElectronicBandStructure:
         ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
         return ret
 
+
+    def fix_collinear_spin(self):
+        """It changes from two spin channels to just one.  The spin down will
+        have negatives values in the projection. This is ussually done to plot the DOS
+        
+        Return:
+        ------
+
+        True: the function changed the data
+        False: the function didn't change the data
+
+        """
+
+        print('old bands.shape', self.bands.shape)
+        if self.bands.shape[2] != 2:
+            return False
+        shape = list(self.bands.shape)
+        shape[1] = shape[1]*2
+        shape[-1] = 1
+        self.bands.shape = shape
+        print('new bands.shape', self.bands.shape)
+        
+        
+        if self.projected is not None:
+            print('old projected.shape', self.projected.shape)
+            shape = list(self.projected.shape)
+            shape[1] = shape[1]*2
+            shape[-1] = 1
+            self.projected.shape = shape
+            print('new projected.shape', self.projected.shape)
+
+        
+        return True
+      
 def harmonic_average_effective_mass(tensor):
     inv_effective_mass_tensor = tensor
     e_mass = 3*(inv_effective_mass_tensor[0,0] + inv_effective_mass_tensor[1,1] + inv_effective_mass_tensor[2,2])**-1 /FREE_ELECTRON_MASS
@@ -1253,4 +1287,4 @@ def harmonic_average_effective_mass(tensor):
                 
     #     # # self.bands = new_bands
     #     # # self.projected = new_projected
-    #     return 
+    #     return
