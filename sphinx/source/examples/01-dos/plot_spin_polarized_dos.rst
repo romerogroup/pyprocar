@@ -75,29 +75,28 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 
 
 
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_001.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_001.png
+   :class: sphx-glr-single-img
+
+
 .. rst-class:: sphx-glr-script-out
 
-.. code-block:: pytb
+ .. code-block:: none
 
-    Traceback (most recent call last):
-      File "Z:\Research Projects\pyprocar\examples\01-dos\plot_spin_polarized_dos.py", line 36, in <module>
-        pyprocar.dosplot(
-      File "z:\research projects\pyprocar\pyprocar\scripts\scriptDosplot.py", line 266, in dosplot
-        parser = io.Parser(code = code, dir = dirname)
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
-        self.parse()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
-        self.parse_vasp()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
-        poscar = vasp.Poscar(poscar,rotations = None)
-      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
-        self.structure = Structure(
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
-        self.get_wyckoff_positions()
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
-        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
-    TypeError: 'NoneType' object is not subscriptable
 
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
 
 
 
@@ -117,6 +116,32 @@ The keyword spins can also be used to select which spin bands to plot
                     mode='plain',
                     spins=spins,
                     dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_002.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_002.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 53-60
@@ -144,6 +169,32 @@ For details on the meaning of the indices of the atomic projection please refer 
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_003.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_003.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 73-80
@@ -175,6 +226,32 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_004.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_004.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 95-100
 
 stack_species mode
@@ -196,6 +273,33 @@ stack_species mode
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_005.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_005.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+    The plot only considers orbitals [4, 5, 6, 7, 8]
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 111-116
@@ -222,6 +326,33 @@ stack_orbtials mode
 
 
 
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_006.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_006.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+    The plot only considers atoms ['Fe']
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 128-133
 
 stack mode
@@ -245,9 +376,35 @@ stack mode
                     dirname=data_dir)
 
 
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_007.png
+   :alt: plot spin polarized dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_spin_polarized_dos_007.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.091 seconds)
+   **Total running time of the script:** ( 0 minutes  4.501 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_spin_polarized_dos.py:

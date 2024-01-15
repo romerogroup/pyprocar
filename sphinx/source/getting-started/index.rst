@@ -53,9 +53,9 @@ the `Anaconda Distribution <https://www.anaconda.com/>`_.
 Paper
 -------------------------------
 
-.. grid:: 1
+.. grid:: 2
 
-   .. grid-item-card:: Authors & Citation
+   .. grid-item-card:: 1st Publication
       :link: authors_ref
       :link-type: ref
       :class-title: pyprocar-card-title
@@ -65,6 +65,18 @@ Paper
 
       .. image:: ../images/1st_publication.png
          :target: https://www.sciencedirect.com/science/article/abs/pii/S0010465519303935?via%3Dihub
+
+   .. grid-item-card:: 2nd Publication
+      :link: authors_ref
+      :link-type: ref
+      :class-title: pyprocar-card-title
+
+      Using PyProcar in your research? Please consider citing or acknowledging
+      us.  We have a Elsevier Publication!
+
+      .. image:: ../images/2nd_publication.png
+         :target: https://www.sciencedirect.com/science/article/abs/pii/S0010465523004083
+
 
 
 
@@ -77,7 +89,7 @@ If you want to support the PyProcar please see the `Contributing page <https://g
 Citing PyProcar
 -------------------------------
 
-There is a `paper about PyProcar <https://doi.org/10.1016/j.cpc.2019.107080>`_!
+There are two papers about PyProcar: `1st Paper <https://doi.org/10.1016/j.cpc.2019.107080>`_ and `2nd Paper <https://doi.org/10.1016/j.cpc.2023.109063>`_.
 
 If you are using PyProcar in your scientific research, please help our scientific
 visibility by citing our work! Head over to :ref:`citation_ref` to learn more

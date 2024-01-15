@@ -175,11 +175,11 @@ class BrillouinZone2D(Surface):
 
         for vert in verts:
             vert_z=vert[2]
-            if np.isclose(vert_z,min_val):
+            if np.isclose(vert_z,min_val,atol=1e-2):
                 vert[2]=e_min
-            if np.isclose(vert_z,max_val):
+            if np.isclose(vert_z,max_val,atol=1e-2):
                 vert[2]=e_max
-        
+
         new_faces = []
         for iface in faces:
             new_faces.append(len(iface))

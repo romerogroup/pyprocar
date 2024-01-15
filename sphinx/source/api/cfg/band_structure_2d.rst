@@ -163,7 +163,7 @@ add_axes
 energy_lim
 ----------
 
-:value: [None, None]
+:value: [-2, 2]
 
 :description: Controls the limits of the energy axis
 
@@ -333,7 +333,7 @@ clip_brillouin_zone
 
 :value: True
 
-:description: Control to show a grid
+:description: Control clip the brillouin zone
 
 
 clip_brillouin_zone_factor

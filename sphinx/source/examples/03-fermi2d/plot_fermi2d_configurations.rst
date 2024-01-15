@@ -76,28 +76,85 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plot_fermi2d_configurations_001.png
+   :alt: plot fermi2d configurations
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plot_fermi2d_configurations_001.png
+   :class: sphx-glr-single-img
+
+
 .. rst-class:: sphx-glr-script-out
 
-.. code-block:: pytb
+ .. code-block:: none
 
-    Traceback (most recent call last):
-      File "Z:\Research Projects\pyprocar\examples\03-fermi2d\plot_fermi2d_configurations.py", line 42, in <module>
-        pyprocar.fermi2D(code='vasp', dirname=data_dir, print_plot_opts=True)
-      File "z:\research projects\pyprocar\pyprocar\scripts\scriptFermi2D.py", line 133, in fermi2D
-        parser = io.Parser(code = code, dir = dirname)
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
-        self.parse()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
-        self.parse_vasp()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
-        poscar = vasp.Poscar(poscar,rotations = None)
-      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
-        self.structure = Structure(
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
-        self.get_wyckoff_positions()
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
-        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
-    TypeError: 'NoneType' object is not subscriptable
+    Configuration files are located at: z:\research projects\pyprocar\pyprocar\cfg
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 6.1.6 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    bands           :  None
+    atoms           :  None
+    orbitals        :  None
+    spin comp.      :  None
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  False
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , plain_bands , parametric
+                --------------------------------------------------------
+            
+    add_axes_labels : {'description': 'Boolean to add axes labels', 'value': True}
+    add_legend : {'description': 'Boolean to add legend', 'value': False}
+    plot_color_bar : {'description': 'Boolean to plot the color bar', 'value': False}
+    cmap : {'description': 'The colormap used for the plot.', 'value': 'jet'}
+    clim : {'description': 'The color scale for the color bar', 'value': [None, None]}
+    color : {'description': 'The colors for the spin plot lines.', 'value': ['blue', 'red']}
+    linestyle : {'description': 'The linestyles for the spin plot lines.', 'value': ['solid', 'dashed']}
+    linewidth : {'description': 'The linewidth of the fermi surface', 'value': 0.2}
+    no_arrow : {'description': 'Boolean to use no arrows to represent the spin texture', 'value': False}
+    arrow_color : {'description': 'The linestyles for the spin plot lines.', 'value': None}
+    arrow_density : {'description': 'The arrow density for the spin texture', 'value': 10}
+    arrow_size : {'description': 'The arrow size for the spin texture', 'value': 3}
+    spin_projection : {'description': 'The projection for the color scale for spin texture', 'value': 'z^2'}
+    marker : {'description': 'Controls the marker used for the spin plot', 'value': '.'}
+    dpi : {'description': 'The dpi value to save the image as', 'value': 'figure'}
+    x_label : {'description': 'The x label of the plot', 'value': '$k_{x}$  ($\\AA^{-1}$)'}
+    y_label : {'description': 'The x label of the plot', 'value': '$k_{y}$  ($\\AA^{-1}$)'}
+    _____________________________________________________
+    Useful band indices for spin-0 : [4 5 6 7 8 9]
 
 
 
@@ -126,6 +183,72 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
+
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plot_fermi2d_configurations_002.png
+   :alt: plot fermi2d configurations
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plot_fermi2d_configurations_002.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 6.1.6 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    bands           :  None
+    atoms           :  None
+    orbitals        :  None
+    spin comp.      :  None
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  True
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , plain_bands , parametric
+                --------------------------------------------------------
+            
+    _____________________________________________________
+    Useful band indices for spin-0 : [4 5 6 7 8 9]
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 65-84
 
 .. code-block:: default
@@ -151,9 +274,75 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
+
+.. image-sg:: /examples/03-fermi2d/images/sphx_glr_plot_fermi2d_configurations_003.png
+   :alt: plot fermi2d configurations
+   :srcset: /examples/03-fermi2d/images/sphx_glr_plot_fermi2d_configurations_003.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
+
+    Version 6.1.6 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    bands           :  None
+    atoms           :  None
+    orbitals        :  None
+    spin comp.      :  None
+    energy          :  None
+    rot. symmetry   :  1
+    origin (trasl.) :  [0, 0, 0]
+    rotation        :  [0, 0, 0, 1]
+    save figure     :  None
+    spin_texture    :  True
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , plain_bands , parametric
+                --------------------------------------------------------
+            
+    _____________________________________________________
+    Useful band indices for spin-0 : [4 5 6 7 8 9]
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.665 seconds)
+   **Total running time of the script:** ( 0 minutes  20.442 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_configurations.py:

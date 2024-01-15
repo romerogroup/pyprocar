@@ -95,28 +95,7 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. rst-class:: sphx-glr-script-out
 
-.. code-block:: pytb
-
-    Traceback (most recent call last):
-      File "Z:\Research Projects\pyprocar\examples\04-fermi3d\plot_fermi3d_cross_section.py", line 43, in <module>
-        fermiHandler = pyprocar.FermiHandler(
-      File "z:\research projects\pyprocar\pyprocar\scripts\scriptFermiHandler.py", line 51, in __init__
-        parser = io.Parser(code = code, dir = dirname)
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
-        self.parse()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
-        self.parse_vasp()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
-        poscar = vasp.Poscar(poscar,rotations = None)
-      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
-        self.structure = Structure(
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
-        self.get_wyckoff_positions()
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
-        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
-    TypeError: 'NoneType' object is not subscriptable
 
 
 
@@ -160,6 +139,33 @@ Cross section
                                   show=True,)
 
 
+
+
+.. image-sg:: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_cross_section_001.png
+   :alt: plot fermi3d cross section
+   :srcset: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_cross_section_001.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                    --------------------------------------------------------
+                    There are additional plot options that are defined in a configuration file. 
+                    You can change these configurations by passing the keyword argument to the function
+                    To print a list of plot options set print_plot_opts=True
+
+                    Here is a list modes : plain , parametric , spin_texture , overlay
+                    Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+                    --------------------------------------------------------
+                
+    Bands Near Fermi :  [4, 5, 6, 7, 8, 9]
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 84-88
 
 Cross section. Save slice
@@ -191,9 +197,48 @@ Cross section. Save slice
 
 
 
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_cross_section_002.png
+          :alt: plot fermi3d cross section
+          :srcset: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_cross_section_002.png
+          :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_cross_section_003.png
+          :alt: plot fermi3d cross section
+          :srcset: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_cross_section_003.png
+          :class: sphx-glr-multi-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                    --------------------------------------------------------
+                    There are additional plot options that are defined in a configuration file. 
+                    You can change these configurations by passing the keyword argument to the function
+                    To print a list of plot options set print_plot_opts=True
+
+                    Here is a list modes : plain , parametric , spin_texture , overlay
+                    Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+                    --------------------------------------------------------
+                
+    Bands Near Fermi :  [4, 5, 6, 7, 8, 9]
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.693 seconds)
+   **Total running time of the script:** ( 2 minutes  14.053 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_cross_section.py:

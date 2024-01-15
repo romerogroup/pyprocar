@@ -107,7 +107,7 @@ class BandStructure2D(Surface):
             n_points+=surface.points.shape[0]
             
             band_index_list=[iband]*surface.points.shape[0]
-            surface.point_data['bandindex']=np.array(band_index_list)
+            surface.point_data['band_index']=np.array(band_index_list)
             surfaces.append(surface)
 
         return surfaces
@@ -283,7 +283,7 @@ class BandStructure2D(Surface):
 
     def _get_brilloin_zone(self, 
                         supercell: List[int],
-                        zlim=None):
+                        zlim=[-2,2]):
 
         """Returns the BrillouinZone of the material
 
@@ -292,12 +292,10 @@ class BandStructure2D(Surface):
         pyprocar.core.BrillouinZone
             The BrillouinZone of the material
         """
-        if zlim:
-            e_min=zlim[0]
-            e_max=zlim[1]
-        else:
-            e_min=self.ebs.bands.min()
-            e_max=self.ebs.bands.max()
+
+        e_min=zlim[0]
+        e_max=zlim[1]
+
         return BrillouinZone2D(e_min,e_max,self.ebs.reciprocal_lattice, supercell)
     
     

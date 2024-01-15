@@ -135,31 +135,67 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
         
         
 
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_unfolding_002.png
+   :alt: plot unfolding
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_unfolding_002.png
+   :class: sphx-glr-single-img
+
+
 .. rst-class:: sphx-glr-script-out
 
-.. code-block:: pytb
+ .. code-block:: none
 
-    Traceback (most recent call last):
-      File "Z:\Research Projects\pyprocar\examples\00-band_structure\plot_unfolding.py", line 59, in <module>
-        pyprocar.unfold(
-      File "z:\research projects\pyprocar\pyprocar\scripts\scriptUnfold.py", line 109, in unfold
-        ebs_plot.ebs.unfold(transformation_matrix=transformation_matrix, structure=structure)
-      File "z:\research projects\pyprocar\pyprocar\core\ebs.py", line 913, in unfold
-        self.update_weights(uf.weights)
-      File "z:\research projects\pyprocar\pyprocar\utils\unfolder.py", line 162, in weights
-        weights[iqpt, ifreq, ispin] = self._get_weight(
-      File "z:\research projects\pyprocar\pyprocar\utils\unfolder.py", line 145, in _get_weight
-        np.vdot(evec, evec[ind])
-      File "<__array_function__ internals>", line 200, in vdot
-    ValueError: cannot reshape array of size 81 into shape (216,)
+     ____        ____
+    |  _ \ _   _|  _ \ _ __ ___   ___ __ _ _ __ 
+    | |_) | | | | |_) | '__/ _ \ / __/ _` | '__|
+    |  __/| |_| |  __/| | | (_) | (_| (_| | |   
+    |_|    \__, |_|   |_|  \___/ \___\__,_|_|
+           |___/
+    A Python library for electronic structure pre/post-processing.
 
+    Version 6.1.6 created on Jun 10th, 2021
+
+    Please cite:
+     Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
+     PyProcar: A Python library for electronic structure pre/post-processing.,
+     Computer Physics Communications 251 (2020):107080.
+
+
+    Developers:
+    - Francisco Muñoz
+    - Aldo Romero
+    - Sobhit Singh
+    - Uthpala Herath
+    - Pedram Tavadze
+    - Eric Bousquet
+    - Xu He
+    - Reese Boucher
+    - Logan Lang
+    - Freddy Farah
+    
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:684: UserWarning: Legend does not support handles for list instances.
+    A proxy artist may be used instead.
+    See: https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html#controlling-the-legend-entries
+      self.ax.legend(self.handles, labels)
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.254 seconds)
+   **Total running time of the script:** ( 0 minutes  23.457 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:

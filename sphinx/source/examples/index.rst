@@ -186,6 +186,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting 2D band structure example.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_2d_bands_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_2d_bands.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting 2D band structure</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures usi...">
 
 .. only:: html

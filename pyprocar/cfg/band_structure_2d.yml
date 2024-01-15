@@ -65,8 +65,8 @@ add_axes :
   description: Controls if there should be direction axes
 energy_lim: 
   value: 
-  -
-  -
+  - -2
+  - 2
   description: Controls the limits of the energy axis
 x_axes_label: 
   value: "Kx"
@@ -134,7 +134,7 @@ orbit_mp4_step:
 
 clip_brillouin_zone:
   value: True
-  description: Control to show a grid
+  description: Control clip the brillouin zone
 clip_brillouin_zone_factor:
   value: 1.5
   description: Control how large the clipping is in terms of brillouin zones

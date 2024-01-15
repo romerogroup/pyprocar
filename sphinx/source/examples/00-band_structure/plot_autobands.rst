@@ -109,10 +109,22 @@ and the associated localized states.
 
 
 
-.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_autobands_001.png
-   :alt: plot autobands
-   :srcset: /examples/00-band_structure/images/sphx_glr_plot_autobands_001.png
-   :class: sphx-glr-single-img
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_autobands_001.png
+         :alt: Defect 0
+         :srcset: /examples/00-band_structure/images/sphx_glr_plot_autobands_001.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_autobands_002.png
+         :alt: Defect 1
+         :srcset: /examples/00-band_structure/images/sphx_glr_plot_autobands_002.png
+         :class: sphx-glr-multi-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -120,8 +132,18 @@ and the associated localized states.
  .. code-block:: none
 
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
+    [[0, 0.953], [0, 0.956]]
     []
-    []
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+    2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
@@ -139,7 +161,7 @@ and the associated localized states.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  17.355 seconds)
+   **Total running time of the script:** ( 0 minutes  26.997 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_autobands.py:

@@ -131,7 +131,6 @@ class BandStructure2DHandler:
         self._reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
         self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         band_structure_surface=self.data_handler.get_surface_data(property_name=property_name)
-
         visualizer = BandStructure2DVisualizer(self.data_handler,**kwargs)
         visualizer.add_brillouin_zone(band_structure_surface)
         band_structure_surface=visualizer.clip_broullin_zone(band_structure_surface)
@@ -158,6 +157,8 @@ class BandStructure2DHandler:
         if save_3d:
             visualizer.save_mesh(filename=save_3d,surface=band_structure_surface)
 
+        visualizer.close()
+
     def print_default_settings(self):
         with open(os.path.join(ROOT,'pyprocar','cfg','band_structure_2d.yml'), 'r') as file:
             plotting_options = yaml.safe_load(file)
@@ -177,7 +178,7 @@ class BandStructure2DHandler:
             full_band_index=bands
         self.ebs.bands=self.ebs.bands[:,full_band_index,:]
         self.ebs.projected=self.ebs.projected[:,full_band_index,:,:,:]
-        print("Bands near the fermi level : " , full_band_index )
+        print("Bands used in the plotting: " , full_band_index )
 
     def _expand_kpoints_to_supercell(self):
         supercell_directions=list(list(product([1, 0,-1], repeat=2)))
@@ -187,7 +188,6 @@ class BandStructure2DHandler:
         initial_projected=copy.copy(self.ebs.projected )
 
         for supercell_direction in supercell_directions:
-            # print(initial_kpoints.shape)
             new_kpoints=copy.copy(initial_kpoints)
             if supercell_direction != (0,0):
 

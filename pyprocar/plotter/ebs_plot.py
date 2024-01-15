@@ -242,7 +242,7 @@ class EBSPlot:
                         alpha=self.config['opacity']['value'][ispin],
                     )
         if self.config['plot_color_bar']['value'] and color_weights is not None:
-            self.cb = self.fig.colorbar(lc, ax=self.ax)
+            self.cb = self.fig.colorbar(sc,ax=self.ax)
 
     def plot_parameteric(
         self,

@@ -23,7 +23,7 @@ class BandStructure2DataHandler:
 
     def __init__(self, ebs, fermi_tolerance=0.1, **kwargs):
         self.initial_ebs=copy.copy(ebs)
-        self.ebs = ebs
+        self.ebs = copy.copy(ebs)
         self.fermi_tolerance = fermi_tolerance
         self.mode=None
         # Other instance variables...
@@ -444,6 +444,9 @@ class BandStructure2DVisualizer:
     def set_background_color(self):
         self.plotter.set_background(self.config['background_color']['value'])
 
+    def close(self):
+        self.plotter.close()
+
     def show(self,filename=None):
         if filename:
             file_extentions = filename.split()
@@ -481,11 +484,11 @@ class BandStructure2DVisualizer:
 
     def _apply_fermi_surface_band_colors(self,fermi_surface,band_colors):
         unique_band_index = np.unique(fermi_surface.point_data['band_index'])
-    
         if len(band_colors) != len(unique_band_index):
             raise "You need to list the number of colors as there are bands that make up the surface"
         
         surface_band_colors=[]
+        band_colors_index_map={unique_index:i for i,unique_index in enumerate(unique_band_index)}
         for band_color in band_colors:
             if isinstance(band_color,str):
                 surface_color = mpcolors.to_rgba_array(band_color, alpha =1 )[0,:]
@@ -497,6 +500,7 @@ class BandStructure2DVisualizer:
         band_colors=[]
         band_surface_indices=fermi_surface.point_data['band_index']
         for band_surface_index in band_surface_indices:
+            band_surface_index=band_colors_index_map[band_surface_index]
             band_color = surface_band_colors[band_surface_index]
             band_colors.append(band_color)
         fermi_surface.point_data['bands']=band_colors

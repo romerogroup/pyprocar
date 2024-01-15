@@ -888,7 +888,6 @@ class ElectronicBandStructure:
             ret = np.sum(ret[:, :, spins], axis=-1).reshape(
                 self.nkpoints, self.nbands, 1
             )
-        print('ret.shape', ret.shape)
         return ret
 
     def unfold(self, transformation_matrix=None, structure=None):

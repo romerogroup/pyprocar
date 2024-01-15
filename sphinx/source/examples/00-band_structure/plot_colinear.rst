@@ -74,29 +74,28 @@ Plain mode
 
 
 
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_001.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_001.png
+   :class: sphx-glr-single-img
+
+
 .. rst-class:: sphx-glr-script-out
 
-.. code-block:: pytb
+ .. code-block:: none
 
-    Traceback (most recent call last):
-      File "Z:\Research Projects\pyprocar\examples\00-band_structure\plot_colinear.py", line 35, in <module>
-        pyprocar.bandsplot(
-      File "z:\research projects\pyprocar\pyprocar\scripts\scriptBandsplot.py", line 103, in bandsplot
-        parser = io.Parser(code = code, dir = dirname)
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 27, in __init__
-        self.parse()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 49, in parse
-        self.parse_vasp()
-      File "z:\research projects\pyprocar\pyprocar\io\parser.py", line 232, in parse_vasp
-        poscar = vasp.Poscar(poscar,rotations = None)
-      File "z:\research projects\pyprocar\pyprocar\io\vasp.py", line 284, in __init__
-        self.structure = Structure(
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 73, in __init__
-        self.get_wyckoff_positions()
-      File "z:\research projects\pyprocar\pyprocar\core\structure.py", line 340, in get_wyckoff_positions
-        spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
-    TypeError: 'NoneType' object is not subscriptable
 
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
@@ -125,6 +124,32 @@ For details on the meaning of the indices of the atomic projection please refer 
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_002.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_002.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 61-68
@@ -156,6 +181,32 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
+
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_003.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_003.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 83-88
 
 Scatter mode
@@ -182,6 +233,32 @@ Scatter mode
 
 
 
+
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_004.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_004.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 102-107
 
 overlay_species mode
@@ -203,6 +280,32 @@ overlay_species mode
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_005.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_005.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 118-123
@@ -228,6 +331,32 @@ overlay_orbtials mode
 
 
 
+
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_006.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_006.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 4 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 134-139
 
 overlay mode
@@ -247,6 +376,32 @@ overlay mode
                     mode='overlay',
                     items=items,
                     dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_007.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_007.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 148-153
@@ -269,9 +424,35 @@ overlay mode by orbital names
                     items=items,
                     dirname=data_dir)
 
+
+.. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_008.png
+   :alt: plot colinear
+   :srcset: /examples/00-band_structure/images/sphx_glr_plot_colinear_008.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                --------------------------------------------------------
+            
+
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.045 seconds)
+   **Total running time of the script:** ( 0 minutes  3.591 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_colinear.py:
