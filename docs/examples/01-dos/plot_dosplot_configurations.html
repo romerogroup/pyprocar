@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.5 documentation</title>
+    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -396,6 +396,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_2d_bands.html">Plotting 2D band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
@@ -567,6 +568,10 @@ to download the full example code</p>
 
 cmap : {&#39;description&#39;: &#39;The colormap used for the plot.&#39;, &#39;value&#39;: &#39;jet&#39;}
 colors : {&#39;description&#39;: &#39;List of colors for the plot lines.&#39;, &#39;value&#39;: [&#39;red&#39;, &#39;green&#39;, &#39;blue&#39;, &#39;cyan&#39;, &#39;magenta&#39;, &#39;yellow&#39;, &#39;orange&#39;, &#39;purple&#39;, &#39;brown&#39;, &#39;navy&#39;, &#39;maroon&#39;, &#39;olive&#39;]}
+colorbar_title : {&#39;description&#39;: &#39;Title of the colorbar.&#39;, &#39;value&#39;: &#39;Atomic Orbital Projections&#39;}
+colorbar_title_size : {&#39;description&#39;: &#39;Font size of the title of the colorbar.&#39;, &#39;value&#39;: 15}
+colorbar_title_padding : {&#39;description&#39;: &#39;Padding of the title of the colorbar.&#39;, &#39;value&#39;: 20}
+colorbar_tick_labelsize : {&#39;description&#39;: &#39;Size of the title of the colorbar ticks&#39;, &#39;value&#39;: 10}
 fermi_color : {&#39;description&#39;: &#39;The color of the Fermi line.&#39;, &#39;value&#39;: &#39;black&#39;}
 fermi_linestyle : {&#39;description&#39;: &#39;The linestyle of the Fermi line.&#39;, &#39;value&#39;: &#39;dotted&#39;}
 fermi_linewidth : {&#39;description&#39;: &#39;The linewidth of the Fermi line.&#39;, &#39;value&#39;: 1}
@@ -667,7 +672,7 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
 (&lt;Figure size 1000x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.731 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.965 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plot-dosplot-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/44002a32a2c12b63ac956f30ab9fbeca/plot_dosplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dosplot_configurations.py</span></code></a></p>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptCat &#8212; PyProcar 6.1.5 documentation</title>
+    <title>pyprocar.scripts.scriptCat &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -442,7 +442,7 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">welcome</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">UtilsProcar</span>
-<span class="kn">from</span> <span class="nn">..io</span> <span class="kn">import</span> <span class="n">AbinitParser</span>
+<span class="kn">from</span> <span class="nn">..io.abinit</span> <span class="kn">import</span> <span class="n">Output</span>
 
 <div class="viewcode-block" id="cat"><a class="viewcode-back" href="../../../user-guide/cat.html#pyprocar.scripts.cat">[docs]</a><span class="k">def</span> <span class="nf">cat</span><span class="p">(</span>
     <span class="n">inFiles</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -528,7 +528,7 @@ document.write(`
 
     <span class="c1"># creating an instance of the AbinitParser class</span>
     <span class="k">if</span> <span class="n">abinit_output</span><span class="p">:</span>
-        <span class="n">abinitparserobject</span> <span class="o">=</span> <span class="n">AbinitParser</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">abinit_output</span><span class="p">)</span>
+        <span class="n">abinitparserobject</span> <span class="o">=</span> <span class="n">Output</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">abinit_output</span><span class="p">)</span>
         <span class="n">nspin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">abinitparserobject</span><span class="o">.</span><span class="n">nspin</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">nspin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nspin</span><span class="p">)</span>

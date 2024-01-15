@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.plotter.ebs_plot &#8212; PyProcar 6.1.5 documentation</title>
+    <title>pyprocar.plotter.ebs_plot &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -473,7 +473,8 @@ document.write(`
                     <span class="n">ebs</span><span class="p">:</span><span class="n">ElectronicBandStructure</span><span class="p">,</span> 
                     <span class="n">kpath</span><span class="p">:</span><span class="n">KPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                     <span class="n">ax</span><span class="p">:</span><span class="n">mpl</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                    <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                    <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">kdirect</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">config_manager</span><span class="o">=</span><span class="n">ConfigManager</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;pyprocar&#39;</span><span class="p">,</span><span class="s1">&#39;cfg&#39;</span><span class="p">,</span><span class="s1">&#39;band_structure.yml&#39;</span><span class="p">))</span>
         <span class="n">config_manager</span><span class="o">.</span><span class="n">update_config</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>  
@@ -482,6 +483,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span> <span class="o">=</span> <span class="n">ebs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="o">=</span> <span class="n">kpath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spins</span> <span class="o">=</span> <span class="n">spins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kdirect</span><span class="o">=</span><span class="n">kdirect</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spins</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">nspins</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nspins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spins</span><span class="p">)</span>
@@ -525,8 +527,12 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="o">.</span><span class="n">nsegments</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="o">.</span><span class="n">ngrids</span><span class="p">):</span>
+  
             <span class="k">for</span> <span class="n">isegment</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="o">.</span><span class="n">nsegments</span><span class="p">):</span>
                 <span class="n">kstart</span><span class="p">,</span> <span class="n">kend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="o">.</span><span class="n">special_kpoints</span><span class="p">[</span><span class="n">isegment</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kdirect</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">kstart</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span><span class="n">kstart</span><span class="p">)</span>
+                    <span class="n">kend</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span><span class="n">kend</span><span class="p">)</span>
 
                 <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kend</span> <span class="o">-</span> <span class="n">kstart</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">isegment</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -665,8 +671,7 @@ document.write(`
                         <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;opacity&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="n">ispin</span><span class="p">],</span>
                     <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;plot_color_bar&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">color_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
-            <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EBSPlot.plot_parameteric"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric.html#pyprocar.plotter.EBSPlot.plot_parameteric">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parameteric</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -675,6 +680,7 @@ document.write(`
         <span class="n">color_mask</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">width_weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">color_weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to plot a scatter plot</span>
 
@@ -690,6 +696,8 @@ document.write(`
 <span class="sd">            The width weight of each point, by default None</span>
 <span class="sd">        color_weights : np.ndarray, optional</span>
 <span class="sd">            The color weights at each point, by default None</span>
+<span class="sd">        elimit : List[float], optional</span>
+<span class="sd">            Energy range to plot. Only useful if the band index is written</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># if there is only a single k-point the method for atomic</span>
@@ -701,7 +709,8 @@ document.write(`
                                   <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
                                   <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
                                   <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
-                                  <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
+                                  <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                                  <span class="n">elimit</span><span class="o">=</span><span class="n">elimit</span><span class="p">)</span>
           <span class="k">return</span>
         
         <span class="k">if</span> <span class="n">width_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -734,7 +743,7 @@ document.write(`
             <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">vmax</span> <span class="o">=</span> <span class="n">color_weights</span><span class="p">[:,:,</span><span class="n">spins</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
             <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
-        <span class="c1"># print(self.ebs.nbands)</span>
+            
         <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">iband</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">nbands</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spins</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
@@ -767,9 +776,8 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;plot_color_bar&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">color_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
-            <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span></div>
+            
 <div class="viewcode-block" id="EBSPlot.plot_parameteric_overlay"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html#pyprocar.plotter.EBSPlot.plot_parameteric_overlay">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parameteric_overlay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                  <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -824,15 +832,15 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;plot_color_bar&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
-                <span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
-                <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EBSPlot.plot_atomic_levels"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_atomic_levels.html#pyprocar.plotter.EBSPlot.plot_atomic_levels">[docs]</a>    <span class="k">def</span> <span class="nf">plot_atomic_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">width_mask</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">color_mask</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">width_weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">color_weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">color_weights</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>                   
         <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to plot a scatter plot</span>
 
@@ -848,6 +856,8 @@ document.write(`
 <span class="sd">            The width weight of each point, by default None</span>
 <span class="sd">        color_weights : np.ndarray, optional</span>
 <span class="sd">            The color weights at each point, by default None</span>
+<span class="sd">        elimit : List[float], optional</span>
+<span class="sd">            The energy range to plot. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">))</span>
@@ -860,14 +870,64 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">NullLocator</span><span class="p">())</span>
         <span class="c1"># labels on each band</span>
 
+
+        <span class="k">if</span> <span class="n">elimit</span><span class="p">:</span>
+            <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span> <span class="o">=</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">elimit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">emin</span><span class="p">,</span> <span class="n">emax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">)</span>
+        <span class="c1"># print(&#39;Energy range&#39;, emin, emax)</span>
+        
         <span class="k">if</span> <span class="n">spins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spins</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">nspins</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">is_non_collinear</span><span class="p">:</span>
             <span class="n">spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># cointainers for the bounding boxes of the text elements</span>
+        <span class="n">Nspin</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span>
+        <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="n">spins</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,</span><span class="n">ispin</span><span class="p">])):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ispin</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;spin-</span><span class="si">{</span><span class="n">ispin</span><span class="si">}</span><span class="s2"> : &quot;</span><span class="o">+</span><span class="s2">&quot;band-&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ispin</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">energy</span> <span class="o">&gt;</span> <span class="n">emin</span> <span class="ow">and</span> <span class="n">energy</span> <span class="o">&lt;</span> <span class="n">emax</span><span class="p">:</span>
+                    <span class="n">txt</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;s-</span><span class="si">{</span><span class="n">ispin</span><span class="si">}</span><span class="s2"> : &quot;</span><span class="o">+</span><span class="s2">&quot;b-&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+                    <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+        <span class="c1"># sorting the texts</span>
+        <span class="n">texts</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
+        <span class="c1"># I need to set the energy limits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">()</span>
+        
+        <span class="c1"># knowing the text size</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">txt</span><span class="p">)</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get_window_extent</span><span class="p">()</span>
+        <span class="n">bbox_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span><span class="o">.</span><span class="n">transform_bbox</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">bbox_data</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">bbox_data</span><span class="o">.</span><span class="n">height</span>
+        <span class="n">txt</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="c1"># print(&#39;Width, &#39;, w, &#39;. Height,&#39;, h)</span>
+        
+        <span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">txt</span><span class="p">)</span>            
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">)):</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">txt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">last</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># if there there is vertical overlap</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">h</span><span class="p">:</span>
+                <span class="c1"># print(&#39;overlap&#39;, y, y0+h)</span>
+                <span class="c1"># I shift it laterally (the shift can be 0)</span>
+                <span class="n">shift</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="n">shift</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">txt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">txt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">w</span><span class="o">*</span><span class="mf">1.5</span><span class="o">*</span><span class="n">shift</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span>    
+                
+            <span class="c1"># print(txt)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">txt</span><span class="p">)</span>            
+                
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_parameteric</span><span class="p">(</span><span class="n">color_weights</span><span class="o">=</span><span class="n">color_weights</span><span class="p">,</span>
                             <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
                             <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
@@ -1019,6 +1079,25 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span></div>
 
+<div class="viewcode-block" id="EBSPlot.set_colorbar_title"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.set_colorbar_title.html#pyprocar.plotter.EBSPlot.set_colorbar_title">[docs]</a>    <span class="k">def</span> <span class="nf">set_colorbar_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A method to set the title of the color bar</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        title : str, optional</span>
+<span class="sd">            String for the title, by default &quot;Atomic Orbital Projections&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;colorbar_title&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;colorbar_tick_labelsize&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> 
+                        <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;colorbar_title_size&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
+                        <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">,</span>
+                        <span class="n">labelpad</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;colorbar_title_padding&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span></div>
+    
+    
 <div class="viewcode-block" id="EBSPlot.legend"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.EBSPlot.legend.html#pyprocar.plotter.EBSPlot.legend">[docs]</a>    <span class="k">def</span> <span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A methdo to plot the legend</span>
 

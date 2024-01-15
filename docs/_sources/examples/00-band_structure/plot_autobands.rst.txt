@@ -132,8 +132,6 @@ and the associated localized states.
  .. code-block:: none
 
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
-    ret.shape (100, 206, 1)
-    ret.shape (100, 206, 1)
     [[0, 0.953], [0, 0.956]]
     []
 
@@ -146,7 +144,6 @@ and the associated localized states.
                 --------------------------------------------------------
             
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
-    ret.shape (100, 206, 1)
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
@@ -157,7 +154,6 @@ and the associated localized states.
                 --------------------------------------------------------
             
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
-    ret.shape (100, 206, 1)
 
 
 
@@ -165,7 +161,7 @@ and the associated localized states.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  27.777 seconds)
+   **Total running time of the script:** ( 0 minutes  26.997 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_autobands.py:

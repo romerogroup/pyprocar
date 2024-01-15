@@ -162,7 +162,6 @@ Cross section
                     --------------------------------------------------------
                 
     Bands Near Fermi :  [4, 5, 6, 7, 8, 9]
-    ret.shape (3375, 20, 4)
 
 
 
@@ -232,7 +231,6 @@ Cross section. Save slice
                     --------------------------------------------------------
                 
     Bands Near Fermi :  [4, 5, 6, 7, 8, 9]
-    ret.shape (3375, 20, 4)
 
 
 
@@ -240,7 +238,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  7.134 seconds)
+   **Total running time of the script:** ( 2 minutes  14.053 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_cross_section.py:

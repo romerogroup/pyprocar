@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.core.brillouin_zone &#8212; PyProcar 6.1.5 documentation</title>
+    <title>pyprocar.core.brillouin_zone &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -441,7 +441,6 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">.surface</span> <span class="kn">import</span> <span class="n">Surface</span>
 
-
 <span class="k">class</span> <span class="nc">Lines</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">verts</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
@@ -604,11 +603,11 @@ document.write(`
 
         <span class="k">for</span> <span class="n">vert</span> <span class="ow">in</span> <span class="n">verts</span><span class="p">:</span>
             <span class="n">vert_z</span><span class="o">=</span><span class="n">vert</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_z</span><span class="p">,</span><span class="n">min_val</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_z</span><span class="p">,</span><span class="n">min_val</span><span class="p">,</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
                 <span class="n">vert</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">e_min</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_z</span><span class="p">,</span><span class="n">max_val</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_z</span><span class="p">,</span><span class="n">max_val</span><span class="p">,</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
                 <span class="n">vert</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">e_max</span>
-        
+
         <span class="n">new_faces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">iface</span> <span class="ow">in</span> <span class="n">faces</span><span class="p">:</span>
             <span class="n">new_faces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">iface</span><span class="p">))</span>

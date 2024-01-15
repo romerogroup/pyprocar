@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting band structure &#8212; PyProcar 6.1.5 documentation</title>
+    <title>Plotting band structure &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/00-band_structure/plot_colinear';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Plotting with Configurations in pyprocar" href="plot_bandsplot_configurations.html" />
+    <link rel="next" title="Plotting 2D band structure" href="plot_2d_bands.html" />
     <link rel="prev" title="Plotting spin polarized band structures" href="plot_spin_polarized.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -396,6 +396,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_2d_bands.html">Plotting 2D band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
@@ -576,7 +577,6 @@ to download the full example code</p>
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -606,7 +606,6 @@ ret.shape (300, 10, 1)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -635,7 +634,6 @@ ret.shape (300, 10, 1)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -662,7 +660,6 @@ ret.shape (300, 10, 1)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -688,9 +685,6 @@ ret.shape (300, 10, 1)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
-ret.shape (300, 10, 1)
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 4 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -714,7 +708,6 @@ ret.shape (300, 10, 1)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -737,12 +730,11 @@ ret.shape (300, 10, 1)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 10, 1)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.390 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.591 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-colinear-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/72b1997c4cbf791739731e36013071ec/plot_colinear.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_colinear.py</span></code></a></p>
@@ -777,11 +769,11 @@ ret.shape (300, 10, 1)
       </div>
     </a>
     <a class="right-next"
-       href="plot_bandsplot_configurations.html"
+       href="plot_2d_bands.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Plotting with Configurations in <cite>pyprocar</cite></p>
+        <p class="prev-next-title">Plotting 2D band structure</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

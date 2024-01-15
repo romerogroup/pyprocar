@@ -148,6 +148,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     scalar_bar_labels : {'value': 6, 'description': 'Controls the scalar bar labels'}
     scalar_bar_italic : {'value': False, 'description': 'Controls the label italic style'}
     scalar_bar_bold : {'value': False, 'description': 'Controls the label bold style'}
+    scalar_bar_title : {'value': None, 'description': 'Controls scalar bar title font size'}
     scalar_bar_title_font_size : {'value': None, 'description': 'Controls scalar bar title font size'}
     scalar_bar_label_font_size : {'value': None, 'description': 'Controls scalar bar label font size'}
     scalar_bar_position_x : {'value': 0.4, 'description': 'Controls scalar bar x position'}
@@ -215,7 +216,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                     --------------------------------------------------------
                 
     Bands Near Fermi :  [2, 3, 4, 5]
-    ret.shape (3375, 8, 1)
 
 
 
@@ -223,7 +223,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.685 seconds)
+   **Total running time of the script:** ( 0 minutes  17.454 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py:

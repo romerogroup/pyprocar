@@ -113,9 +113,8 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
                 --------------------------------------------------------
             
-    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:547: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:607: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
       self.ax.set_xlim(interval)
-    ret.shape (1, 246, 2)
     Atomic plot: bands.shape  : (2, 246, 2)
     Atomic plot: spd.shape    : (2, 246, 98, 1, 9, 2)
     Atomic plot: kpoints.shape: (2, 3)
@@ -127,7 +126,7 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.900 seconds)
+   **Total running time of the script:** ( 0 minutes  1.468 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py:

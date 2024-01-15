@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.5 documentation</title>
+    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Density of States" href="../01-dos/index.html" />
-    <link rel="prev" title="Plotting band structure" href="plot_colinear.html" />
+    <link rel="prev" title="Plotting 2D band structure" href="plot_2d_bands.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -396,6 +396,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear.html">Plotting band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_2d_bands.html">Plotting 2D band structure</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
@@ -567,6 +568,10 @@ to download the full example code</p>
 
 spin_colors : {&#39;description&#39;: &#39;The colors for the plot lines.&#39;, &#39;value&#39;: [&#39;blue&#39;, &#39;red&#39;]}
 color : {&#39;description&#39;: &#39;The colors for the plot lines.&#39;, &#39;value&#39;: &#39;black&#39;}
+colorbar_title : {&#39;description&#39;: &#39;Title of the colorbar.&#39;, &#39;value&#39;: &#39;Atomic Orbital Projections&#39;}
+colorbar_title_size : {&#39;description&#39;: &#39;Font size of the title of the colorbar.&#39;, &#39;value&#39;: 15}
+colorbar_title_padding : {&#39;description&#39;: &#39;Padding of the title of the colorbar.&#39;, &#39;value&#39;: 20}
+colorbar_tick_labelsize : {&#39;description&#39;: &#39;Size of the title of the colorbar ticks&#39;, &#39;value&#39;: 10}
 cmap : {&#39;description&#39;: &#39;The colormap used for the plot.&#39;, &#39;value&#39;: &#39;jet&#39;}
 clim : {&#39;description&#39;: &#39;The color scale for the color bar&#39;, &#39;value&#39;: [None, None]}
 fermi_color : {&#39;description&#39;: &#39;The color of the Fermi line.&#39;, &#39;value&#39;: &#39;blue&#39;}
@@ -625,7 +630,6 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 12, 2)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -655,7 +659,6 @@ ret.shape (300, 12, 2)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 12, 2)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
@@ -685,12 +688,11 @@ ret.shape (300, 12, 2)
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
             --------------------------------------------------------
 
-ret.shape (300, 12, 2)
 
 (&lt;Figure size 1000x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.895 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.839 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-bandsplot-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/42a7aa17c794954244d9b4ffa5a2ac60/plot_bandsplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsplot_configurations.py</span></code></a></p>
@@ -715,12 +717,12 @@ ret.shape (300, 12, 2)
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_colinear.html"
+       href="plot_2d_bands.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Plotting band structure</p>
+        <p class="prev-next-title">Plotting 2D band structure</p>
       </div>
     </a>
     <a class="right-next"

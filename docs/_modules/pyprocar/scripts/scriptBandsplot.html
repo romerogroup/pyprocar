@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptBandsplot &#8212; PyProcar 6.1.5 documentation</title>
+    <title>pyprocar.scripts.scriptBandsplot &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -427,7 +427,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for pyprocar.scripts.scriptBandsplot</h1><div class="highlight"><pre>
-<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze and Logan Lang&quot;</span>
+<span></span><span class="n">_author__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze and Logan Lang&quot;</span>
 <span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Pedram Tavadze and Logan Lang&quot;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;petavazohi@mail.wvu.edu, lllang@mix.wvu.edu&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;March 31, 2020&quot;</span>
@@ -462,6 +462,7 @@ document.write(`
     <span class="n">projection_mask</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">knames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kdirect</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">elimit</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">ax</span><span class="p">:</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">show</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -541,7 +542,13 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fermi_level</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">EBSPlot</span><span class="p">(</span><span class="n">ebs</span><span class="p">,</span> <span class="n">kpath</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">spins</span> <span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># fixing the spin, to plot two channels into one (down is negative)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">ebs</span><span class="o">.</span><span class="n">fix_collinear_spin</span><span class="p">():</span>
+          <span class="n">spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+    <span class="n">ebs_plot</span> <span class="o">=</span> <span class="n">EBSPlot</span><span class="p">(</span><span class="n">ebs</span><span class="p">,</span> <span class="n">kpath</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">spins</span><span class="p">,</span> <span class="n">kdirect</span><span class="o">=</span><span class="n">kdirect</span> <span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
  
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
@@ -566,8 +573,10 @@ document.write(`
         <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
         <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
         <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
-        <span class="n">spins</span><span class="o">=</span><span class="n">spins</span>
+        <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+        <span class="n">elimit</span><span class="o">=</span><span class="n">elimit</span><span class="p">,</span>  
         <span class="p">)</span>
+      <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_colorbar_title</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Inverse Participation Ratio&#39;</span><span class="p">)</span>
       
         
     <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;overlay&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_species&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_orbitals&quot;</span><span class="p">]:</span>
@@ -658,6 +667,7 @@ document.write(`
                 <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span>
                 <span class="p">)</span>
+            <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_colorbar_title</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;scatter&quot;</span><span class="p">:</span>
             <span class="n">ebs_plot</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
                 <span class="n">color_weights</span><span class="o">=</span><span class="n">color_weights</span><span class="p">,</span>
@@ -666,6 +676,7 @@ document.write(`
                 <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span>
             <span class="p">)</span>
+            <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_colorbar_title</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;atomic&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">Value</span><span class="p">(</span><span class="s1">&#39;Must use a single kpoint&#39;</span><span class="p">)</span>
@@ -676,9 +687,11 @@ document.write(`
                 <span class="n">width_weights</span><span class="o">=</span><span class="n">width_weights</span><span class="p">,</span>
                 <span class="n">color_mask</span><span class="o">=</span><span class="n">color_mask</span><span class="p">,</span>
                 <span class="n">width_mask</span><span class="o">=</span><span class="n">width_mask</span><span class="p">,</span>
-                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
+                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                <span class="n">elimit</span><span class="o">=</span><span class="n">elimit</span><span class="p">)</span>
             
             <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_colorbar_title</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected mode </span><span class="si">%s</span><span class="s2"> not valid. Please check the spelling &quot;</span> <span class="o">%</span> <span class="n">mode</span><span class="p">)</span>

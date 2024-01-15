@@ -16,6 +16,38 @@ color
 :value: black
 
 
+colorbar_title
+--------------
+
+:description: Title of the colorbar.
+
+:value: Atomic Orbital Projections
+
+
+colorbar_title_size
+-------------------
+
+:description: Font size of the title of the colorbar.
+
+:value: 15
+
+
+colorbar_title_padding
+----------------------
+
+:description: Padding of the title of the colorbar.
+
+:value: 20
+
+
+colorbar_tick_labelsize
+-----------------------
+
+:description: Size of the title of the colorbar ticks
+
+:value: 10
+
+
 cmap
 ----
 

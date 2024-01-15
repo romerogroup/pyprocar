@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.core.ElectronicBandStructure &#8212; PyProcar 6.1.5 documentation</title>
+    <title>pyprocar.core.ElectronicBandStructure &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -430,6 +430,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html">fix_collinear_spin</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html">mesh_to_array</a></li>
@@ -714,6 +715,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html">plot_parameteric_overlay</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_scatter.html">plot_scatter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.save.html">save</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_colorbar_title.html">set_colorbar_title</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_title.html">set_title</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_xlabel.html">set_xlabel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_xlim.html">set_xlim</a></li>
@@ -945,7 +947,7 @@ document.write(`
 <li><p><strong>projected_phase</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</p></li>
 <li><p><strong>kpath</strong> (<a class="reference internal" href="pyprocar.core.KPath.html#pyprocar.core.KPath" title="pyprocar.core.KPath"><em>KPath</em></a><em>, </em><em>optional</em>) – The kpath for band structure claculation, defaults to None</p></li>
 <li><p><strong>weights</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None</p></li>
-<li><p><strong>labels</strong> (<em>List</em><em>, </em><em>optional</em>) – A list of orbital names, defaults to None</p></li>
+<li><p><strong>labels</strong> (<em>List</em><em>, </em><em>optional</em>) – </p></li>
 <li><p><strong>reciprocal_lattice</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None</p></li>
 <li><p><strong>shifted_to_efermi</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to determine if the fermi energy is shifted, defaults to False</p></li>
 </ul>
@@ -981,25 +983,28 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum" title="pyprocar.core.ElectronicBandStructure.ebs_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ebs_sum</span></code></a>([atoms, ...])</p></td>
 <td><p>_summary_</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz" title="pyprocar.core.ElectronicBandStructure.ibz2fbz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ibz2fbz</span></code></a>(rotations)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html#pyprocar.core.ElectronicBandStructure.fix_collinear_spin" title="pyprocar.core.ElectronicBandStructure.fix_collinear_spin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fix_collinear_spin</span></code></a>()</p></td>
+<td><p>Converts data from two spin channels to a single channel, adjusting the spin down values to negatives.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz" title="pyprocar.core.ElectronicBandStructure.ibz2fbz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ibz2fbz</span></code></a>(rotations)</p></td>
 <td><p>Applys symmetry operations to the kpoints, bands, and projections</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html#pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid" title="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.interpolate_mesh_grid</span></code></a>(...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html#pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid" title="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.interpolate_mesh_grid</span></code></a>(...)</p></td>
 <td><p>This function will interpolate an Nd, 3d mesh grid [...,nx,ny,nz]</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html#pyprocar.core.ElectronicBandStructure.mesh_to_array" title="pyprocar.core.ElectronicBandStructure.mesh_to_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.mesh_to_array</span></code></a>(mesh)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html#pyprocar.core.ElectronicBandStructure.mesh_to_array" title="pyprocar.core.ElectronicBandStructure.mesh_to_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.mesh_to_array</span></code></a>(mesh)</p></td>
 <td><p>Converts a mesh to a list that corresponds to ebs.kpoints</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints" title="pyprocar.core.ElectronicBandStructure.plot_kpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.plot_kpoints</span></code></a>([...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints" title="pyprocar.core.ElectronicBandStructure.plot_kpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.plot_kpoints</span></code></a>([...])</p></td>
 <td><p>This needs to be moved to core.KPath and updated new implementation of pyvista PolyData</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ravel_array.html#pyprocar.core.ElectronicBandStructure.ravel_array" title="pyprocar.core.ElectronicBandStructure.ravel_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ravel_array</span></code></a>(mesh_grid)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ravel_array.html#pyprocar.core.ElectronicBandStructure.ravel_array" title="pyprocar.core.ElectronicBandStructure.ravel_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ravel_array</span></code></a>(mesh_grid)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold" title="pyprocar.core.ElectronicBandStructure.unfold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.unfold</span></code></a>([...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold" title="pyprocar.core.ElectronicBandStructure.unfold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.unfold</span></code></a>([...])</p></td>
 <td><p>The method helps unfold the bands.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights" title="pyprocar.core.ElectronicBandStructure.update_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.update_weights</span></code></a>(weights)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights" title="pyprocar.core.ElectronicBandStructure.update_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.update_weights</span></code></a>(weights)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

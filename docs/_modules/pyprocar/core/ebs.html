@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.core.ebs &#8212; PyProcar 6.1.5 documentation</title>
+    <title>pyprocar.core.ebs &#8212; PyProcar 6.1.7 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4f30bbaf"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.5 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
   
 </a></div>
     
@@ -436,7 +436,6 @@ document.write(`
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># from . import Structure</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -477,7 +476,7 @@ document.write(`
 <span class="sd">        weights : np.ndarray, optional</span>
 <span class="sd">            The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None</span>
 <span class="sd">        labels : List, optional</span>
-<span class="sd">            A list of orbital names, defaults to None</span>
+
 <span class="sd">        reciprocal_lattice : np.ndarray, optional</span>
 <span class="sd">            The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None</span>
 <span class="sd">        shifted_to_efermi : bool, optional</span>
@@ -1317,7 +1316,6 @@ document.write(`
             <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ret</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">spins</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">nkpoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">,</span> <span class="mi">1</span>
             <span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ret.shape&#39;</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="ElectronicBandStructure.unfold"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold">[docs]</a>    <span class="k">def</span> <span class="nf">unfold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1535,8 +1533,44 @@ document.write(`
         <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of bands    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of atoms    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of orbitals = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="k">return</span> <span class="n">ret</span>
 
+<div class="viewcode-block" id="ElectronicBandStructure.fix_collinear_spin"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html#pyprocar.core.ElectronicBandStructure.fix_collinear_spin">[docs]</a>    <span class="k">def</span> <span class="nf">fix_collinear_spin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts data from two spin channels to a single channel, adjusting the spin down values to negatives. This is typically used for plotting the Density of States (DOS).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        No parameters are required for this function.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Returns True if the function changed the data, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;old bands.shape&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span>
+        <span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;new bands.shape&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;old projected.shape&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="o">...</span> <span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="o">...</span> <span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span>
+            <span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;new projected.shape&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+      
 <span class="k">def</span> <span class="nf">harmonic_average_effective_mass</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
     <span class="n">inv_effective_mass_tensor</span> <span class="o">=</span> <span class="n">tensor</span>
     <span class="n">e_mass</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">inv_effective_mass_tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">inv_effective_mass_tensor</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">inv_effective_mass_tensor</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span><span class="o">**-</span><span class="mi">1</span> <span class="o">/</span><span class="n">FREE_ELECTRON_MASS</span>
@@ -1682,7 +1716,7 @@ document.write(`
                 
     <span class="c1">#     # # self.bands = new_bands</span>
     <span class="c1">#     # # self.projected = new_projected</span>
-    <span class="c1">#     return </span>
+    <span class="c1">#     return</span>
 </pre></div>
 
                 </article>
