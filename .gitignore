@@ -133,7 +133,13 @@ ENV/
 .mypy_cache/
 
 #sphinx
-_build/
+sphinx/_build/
+sphinx/source/api/core/_autosummary/
+sphinx/source/api/io/_autosummary/
+sphinx/source/api/plotter/_autosummary/
+sphinx/source/api/pyposcar/_autosummary/
+sphinx/source/api/scripts/_autosummary/
+sphinx/source/examples/
 
 #mac
 .DS_Store

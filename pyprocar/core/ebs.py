@@ -1113,7 +1113,7 @@ class ElectronicBandStructure:
         have negatives values in the projection. This is ussually done to plot the DOS
         
         Return:
-        ------
+        -------
 
         True: the function changed the data
         False: the function didn't change the data
