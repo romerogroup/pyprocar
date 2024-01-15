@@ -60,6 +60,11 @@
       
       
         
+          ElectronicBandStructure.fix_collinear_spin
+        
+      
+      
+        
           ElectronicBandStructure.ibz2fbz
         
       
