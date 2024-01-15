@@ -211,6 +211,7 @@ class FindDefect:
         
     
     # reshaping the data for machine learning
+    numberSp = np.array(numberSp)
     numberSp = numberSp.reshape(-1, 1)
     # print(numberSp)
     #
