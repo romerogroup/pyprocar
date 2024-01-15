@@ -1106,17 +1106,18 @@ class ElectronicBandStructure:
         ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
         return ret
 
-
     def fix_collinear_spin(self):
-        """It changes from two spin channels to just one.  The spin down will
-        have negatives values in the projection. This is ussually done to plot the DOS
-        
-        Return:
+        """
+        Converts data from two spin channels to a single channel, adjusting the spin down values to negatives. This is typically used for plotting the Density of States (DOS).
+
+        Parameters
+        ----------
+        No parameters are required for this function.
+
+        Returns
         -------
-
-        True: the function changed the data
-        False: the function didn't change the data
-
+        bool
+            Returns True if the function changed the data, False otherwise.
         """
 
         print('old bands.shape', self.bands.shape)

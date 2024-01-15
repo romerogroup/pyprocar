@@ -13,7 +13,7 @@ import numpy as np
 
 from ..utils import welcome
 from ..utils import UtilsProcar
-from ..io import AbinitParser
+from ..io.abinit import Output
 
 def cat(
     inFiles:List[str]=None,
@@ -99,7 +99,7 @@ def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None
 
     # creating an instance of the AbinitParser class
     if abinit_output:
-        abinitparserobject = AbinitParser(abinit_output=abinit_output)
+        abinitparserobject = Output(abinit_output=abinit_output)
         nspin = int(abinitparserobject.nspin)
     else:
         nspin = int(nspin)
