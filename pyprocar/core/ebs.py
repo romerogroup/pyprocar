@@ -7,7 +7,6 @@ Created on Sat Jan 16 2021
 
 """
 
-# from . import Structure
 from typing import List
 import itertools
 import copy

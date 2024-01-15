@@ -1,14 +1,14 @@
 import re
-from numpy import array
-from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
-from ..utils import elements
-from .vasp import Procar, Kpoints
-import numpy as np
 import glob
 import collections
 import os
-import sys
 
+from numpy import array
+import numpy as np
+
+from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
+from ..utils import elements
+from .vasp import Procar, Kpoints
 
 class Output(collections.abc.Mapping):
     """This class contains methods to parse the fermi energy, reciprocal

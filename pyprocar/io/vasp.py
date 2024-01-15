@@ -1,6 +1,5 @@
 import os
 import re
-import xml.etree.ElementTree as ET
 import collections
 import gzip
 from typing import List, Tuple, Union, Dict, Any, Optional
@@ -10,6 +9,7 @@ import warnings
 
 import numpy as np
 from numpy import array
+import xml.etree.ElementTree as ET
 
 from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
 from ..utils.strings import remove_comment

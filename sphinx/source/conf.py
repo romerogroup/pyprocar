@@ -15,6 +15,8 @@
 import os
 import sys
 
+from pyprocar.version import version
+
 sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
@@ -23,10 +25,9 @@ project = "PyProcar"
 copyright = "2020, Romero Group"
 author = "Uthpala Herath"
 
-# The short X.Y version
-version = ""
+
 # The full version, including alpha/beta/rc tags
-release = "6.1.7"
+release = version
 
 
 # -- pyvista configuration ---------------------------------------------------

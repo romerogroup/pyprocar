@@ -6,7 +6,7 @@
 
 Notice
 ===========
-- **New Release** We recently updated to a new version 'v6.1.6'. This update encompasses a significant overhaul of the codebase, updated documentation, and .
+- **New Release** We recently updated to a new version 'v6.1.7'. This update encompasses a significant overhaul of the codebase, updated documentation, and .
 - **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
 
 
@@ -73,6 +73,20 @@ BibTex:
     keywords = "DFT, Bandstructure, Electronic properties, Fermi-surface, Spin texture, Python, Condensed matter",
     }
 
+    @article{LANG2024109063,
+    title = {Expanding PyProcar for new features, maintainability, and reliability},
+    journal = {Computer Physics Communications},
+    volume = {297},
+    pages = {109063},
+    year = {2024},
+    issn = {0010-4655},
+    doi = {https://doi.org/10.1016/j.cpc.2023.109063},
+    url = {https://www.sciencedirect.com/science/article/pii/S0010465523004083},
+    author = {Logan Lang and Pedram Tavadze and Andres Tellez and Eric Bousquet and He Xu and Francisco Muñoz and Nicolas Vasquez and Uthpala Herath and Aldo H. Romero},
+    keywords = {Electronic structure, DFT, Post-processing},
+    }
+    
+
 Mailing list
 -------------
 Please post your questions on our forum.
@@ -121,7 +135,8 @@ will bring a help menu.
 
 Changelog
 --------------
-v6.1.6 Oct 10th, 2023 -- bandsplot,dosplot,bandsdosplot chnages, bug fixes, doc updates <br />
+v6.1.7 Jan 15th, 2024 -- Bug fixes and doc updates <br />
+v6.1.6 Oct 10th, 2023 -- Bandsplot, dosplot, bandsdosplot chnages, bug fixes, doc updates <br />
 v6.1.5 Oct 10th, 2023 -- Feature additions, example gallery additions, and doc updates <br />
 v6.1.4 Aug 18th, 2023 -- Bug fixes, example gallery additions, and doc updates <br />
 v6.1.3 Aug 7th, 2023 -- Updated install requirements <br />

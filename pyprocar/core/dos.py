@@ -12,12 +12,9 @@ __status__ = "Production"
 
 from typing import List
 
-from typing import List
-
-from scipy.interpolate import CubicSpline
 import numpy as np
 import numpy.typing as npt
-
+from scipy.interpolate import CubicSpline
 from sympy.physics.quantum.cg import CG
 
 

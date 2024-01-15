@@ -6,8 +6,8 @@ Created on Wed Oct 14 23:54:16 2020
 """
 
 import re
-import numpy as np
 
+import numpy as np
 
 class FrmsfParser:
     def __init__(self, infile = "in.frmsf"):

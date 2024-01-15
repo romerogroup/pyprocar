@@ -7,7 +7,6 @@ import numpy as np
 
 from pyprocar.utils.utilsprocar import UtilsProcar
 
-
 class ProcarSelect:
     """
   Reduces the dimensionality of the data making it uselful to

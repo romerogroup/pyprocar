@@ -6,7 +6,6 @@ from ..core import ElectronicBandStructure
 from ..core import DensityOfStates
 from ..core import Structure
 from ..utils import UtilsProcar
-
 from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf, elk, dftbplus
 
 class Parser:

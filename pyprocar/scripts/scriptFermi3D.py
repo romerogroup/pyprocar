@@ -18,9 +18,6 @@ from pyvista.core.utilities import NORMALS, generate_plane, get_array, try_callb
 from ..core import FermiSurface3D
 from ..utils import welcome
 from ..utils import UtilsProcar
-from ..io.procarparser import ProcarParser
-from ..io.lobsterparser import LobsterFermiParser
-from ..io.abinitparser import AbinitParser
 from .. import io
 
 np.set_printoptions(threshold=sys.maxsize)

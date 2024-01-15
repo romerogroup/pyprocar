@@ -3,15 +3,12 @@ import copy
 import yaml
 from typing import List, Tuple
 
-
 import numpy as np
 import pyvista as pv
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 from PIL import Image
-
 from pyvista.core.filters import _get_output  # avoids circular import
-
 
 from pyprocar import io
 from pyprocar.core import BandStructure2D

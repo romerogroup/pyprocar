@@ -3,8 +3,8 @@ import re
 import logging
 import matplotlib.pyplot as plt
 import sys
-from ...utils import UtilsProcar
 
+from ..utils import UtilsProcar
 
 class ProcarParser:
     """Parses a PROCAR file and store it in memory. It only deals with

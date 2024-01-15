@@ -4,10 +4,13 @@ __email__ = "petavazohi@mix.wvu.edu"
 __date__ = "March 29, 2023"
 
 import re
-import numpy as np
-from ..core.dos import DensityOfStates
+
 from pathlib import Path
 from typing import Union, List, Tuple, Optional
+
+import numpy as np
+
+from ..core.dos import DensityOfStates
 
 def parse_dos_block(dos_block: str) -> Tuple[np.array, np.array]:
     """Parse the DOS block from elk output file.

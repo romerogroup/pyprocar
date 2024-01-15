@@ -7,9 +7,10 @@ import re
 import copy
 import os 
 import math
-import xml.etree.ElementTree as ET
 
+import xml.etree.ElementTree as ET
 import numpy as np
+
 from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
 
 

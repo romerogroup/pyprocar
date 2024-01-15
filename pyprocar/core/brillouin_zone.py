@@ -12,7 +12,6 @@ from scipy.spatial import Voronoi
 
 from .surface import Surface
 
-
 class Lines:
     def __init__(self, 
                 verts:np.ndarray=None, 

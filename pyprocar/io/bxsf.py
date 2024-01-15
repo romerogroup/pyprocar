@@ -5,6 +5,7 @@ __date__ = "March 31, 2020"
 
 import re
 import numpy as np
+
 from pyprocar.core import ElectronicBandStructure
 
 class BxsfParser:
