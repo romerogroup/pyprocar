@@ -646,9 +646,12 @@ class DOSPlot:
         if self.dos.is_non_collinear and len(self.dos.projected[0][0]) == 2 + 2 + 4 + 4 + 6:
             orb_names = ["s-j=0.5", "p-j=0.5", "p-j=1.5", "d-j=1.5", "d-j=2.5"]
             orb_l = [[0,1], [2,3], [4, 5, 6, 7], [8,9,10,11], [12,13,14,15,16,17]]
-        else:
+        elif len(self.dos.projected[0][0]) == 1 + 3 + 5:
             orb_names = ["s", "p", "d"]
             orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8]]
+        elif len(self.dos.projected[0][0]) == 1 + 3 + 5 + 7:
+            orb_names = ["s", "p", "d", "f"]
+            orb_l = [[0], [1, 2, 3], [4, 5, 6, 7, 8], [9, 10, 11, 12, 13, 14, 15]]
 
 
         dos_total = self.dos.total
@@ -696,6 +699,7 @@ class DOSPlot:
                     self.labels.append(atom_names + orb_names[iorb] + self.config['spin_labels']['value'][ispin])
                     self.handles.append(handle)
                     bottom += y
+
             if self.config['plot_total']['value'] == True:
                 if ispin == 0:
                     self.ax.plot(

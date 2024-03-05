@@ -163,3 +163,6 @@ notebooks/
 venv_docs/
 
 .pypirc
+
+api_token.txt
+pypi_info.txt
