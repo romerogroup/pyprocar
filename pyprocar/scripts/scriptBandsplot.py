@@ -112,6 +112,11 @@ def bandsplot(
     # shifting fermi to 0
     if fermi is None:
         fermi=ebs.efermi
+        print("""
+            WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
+            --------------------------------------------------------
+            """
+        )
     ebs.bands -= fermi
 
     ebs.bands += fermi_shift
