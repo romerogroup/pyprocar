@@ -33,6 +33,7 @@ def dosplot(
         elimit:List[float]=None,
         dos_limit:List[float]=None,
         savefig:str=None,
+        labels:List[str]=None,
         projection_mask=None,
         ax:plt.Axes=None,
         show:bool=True,
@@ -157,6 +158,12 @@ def dosplot(
        maximum of density of states in the specified energy window.
 
        e.g. ``dos_limit=[0, 30]``
+
+    labels : list str, optional
+        ``labels`` is a list of strings that will be used as the
+        legend of the plot. The length of the list should be equal to
+        the number of curves being plotted. If not provided the
+        default labels will be used.
 
     savefig : str , optional (default None)
         ``savefig`` defines the file that the plot is going to be
@@ -329,19 +336,38 @@ def dosplot(
             orbitals=orbitals,
             orientation=orientation,
         )
-
     elif mode == "stack_orbitals":
         edos_plot.plot_stack_orbitals(
             spins=spins,
             atoms=atoms,
             orientation=orientation,
         )
-
     elif mode == "stack":
         edos_plot.plot_stack(
             spins=spins,
             items=items,
             orientation=orientation,
+        )
+    elif mode == "overlay_species":
+        edos_plot.plot_stack_species(
+            spins=spins,
+            orbitals=orbitals,
+            orientation=orientation,
+            overlay_mode=True
+        )
+    elif mode == "overlay_orbitals":
+        edos_plot.plot_stack_orbitals(
+            spins=spins,
+            atoms=atoms,
+            orientation=orientation,
+            overlay_mode=True
+        )
+    elif mode == "overlay":
+        edos_plot.plot_stack(
+            spins=spins,
+            items=items,
+            orientation=orientation,
+            overlay_mode=True
         )
     else:
         raise ValueError("The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]")
@@ -360,7 +386,13 @@ def dosplot(
             edos_plot.set_xlim(dos_limit)
 
     edos_plot.grid()
-    edos_plot.legend(edos_plot.labels)
+
+    if labels:
+        labels=labels
+    else:
+        labels=edos_plot.labels
+    edos_plot.legend(labels)
+
     if savefig is not None:
         edos_plot.save(savefig)
     if show:

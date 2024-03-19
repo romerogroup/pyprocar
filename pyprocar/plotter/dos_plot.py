@@ -400,6 +400,7 @@ class DOSPlot:
             principal_q_numbers:List[int]=[-1],
             orbitals:List[int]=None,
             spins:List[int]=None,
+            overlay_mode:bool=False,
             orientation:str="horizontal",
         ):
         """A method to plot the dos with the species contribution stacked on eachother
@@ -498,27 +499,37 @@ class DOSPlot:
 
                     x = self.dos.energies
                     y = (dos_projected[ispin]  / dos_projected_total[ispin] ) * dos_total[ispin]
-
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        handle = self.ax.fill_between(x,
-                                        bottom + y,
-                                        bottom,
-                                        color=self.config['colors']['value'][specie],
-                                        )
+                    # replace very large values above a threshold with 0. 
+                    # These are artifacts from the division of samll total values.
+                    y = np.nan_to_num(y, 0)
+                    threshold=50
+                    y[np.abs(y) > threshold] = 0
+                    if overlay_mode:
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle, = self.ax.plot(x,y,color=self.config['colors']['value'][specie])
+                        else:
+                            handle, = self.ax.plot(x,y,color=self.config['colors']['value'][specie])
                     else:
-                        handle = self.ax.fill_between(
-                            x,
-                            bottom + y,
-                            bottom,
-                            color=self.config['colors']['value'][specie],
-                        )
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle = self.ax.fill_between(x,
+                                            bottom + y,
+                                            bottom,
+                                            color=self.config['colors']['value'][specie],
+                                            )
+                        else:
+                            handle = self.ax.fill_between(
+                                x,
+                                bottom + y,
+                                bottom,
+                                color=self.config['colors']['value'][specie],
+                            )
                     self.handles.append(handle)
-                    label=self.structure.species[specie] + label + self.config['spin_labels']['value'][ispin]
-                    self.labels.append(label)
+                    self.labels.append(self.structure.species[specie] + label + self.config['spin_labels']['value'][ispin])
                     bottom += y
 
-                    if spins_index == 0:
+                    if ispin == 0:
                         self.ax.plot(
                                 self.dos.energies, self.dos.total[ispin, :], color= 'black', 
                                 alpha=self.config['opacity']['value'][ispin], 
@@ -562,26 +573,37 @@ class DOSPlot:
                     x = self.dos.energies
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
 
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        handle = self.ax.fill_betweenx(x,
-                                        bottom + y,
-                                        bottom,
-                                        color=self.config['colors']['value'][specie],
-                                        )
+                    # replace very large values above a threshold with 0. 
+                    # These are artifacts from the division of samll total values.
+                    y = np.nan_to_num(y, 0)
+                    threshold=50
+                    y[np.abs(y) > threshold] = 0
+                    if overlay_mode:
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle, = self.ax.plot(y,x,color=self.config['colors']['value'][specie])
+                        else:
+                            handle, = self.ax.plot(y,x,color=self.config['colors']['value'][specie])
                     else:
-                         handle = self.ax.fill_betweenx(x,
-                                        bottom + y,
-                                        bottom,
-                                        color=self.config['colors']['value'][specie],
-                                        )
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle = self.ax.fill_betweenx(x,
+                                            bottom + y,
+                                            bottom,
+                                            color=self.config['colors']['value'][specie],
+                                            )
+                        else:
+                            handle = self.ax.fill_betweenx(x,
+                                            bottom + y,
+                                            bottom,
+                                            color=self.config['colors']['value'][specie],
+                                            )
                     self.handles.append(handle)
-                    label=self.structure.species[specie] + label + self.config['spin_labels']['value'][ispin]
-                    self.labels.append(label)     
+                    self.labels.append(self.structure.species[specie] + label + self.config['spin_labels']['value'][ispin])     
                     bottom += y 
 
                 if self.config['plot_total']['value'] == True:
-                    if spins_index == 0:
+                    if ispin == 0:
                         self.ax.plot(
                                 self.dos.total[ispin, :], self.dos.energies, color= 'black', 
                                 alpha=self.config['opacity']['value'][ispin], 
@@ -602,6 +624,7 @@ class DOSPlot:
             atoms:List[int]=None,
             spins:List[int]=None,
             principal_q_numbers:List[int]=[-1],
+            overlay_mode:bool=False,
             orientation:str="horizontal",
         ):
         """A method to plot dos orbitals contribution stacked.
@@ -678,45 +701,57 @@ class DOSPlot:
 
                     x = self.dos.energies
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
+                    # replace very large values above a threshold with 0. 
+                    # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
+                    threshold=50
+                    y[np.abs(y) > threshold] = 0
 
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        handle =  self.ax.fill_between(x,
-                                        bottom + y,
-                                        bottom,
-                                        color=self.config['colors']['value'][iorb])
-                        
+                    if overlay_mode:
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle, =  self.ax.plot(x,y,color=self.config['colors']['value'][iorb])
+                        else:
+                            handle, = self.ax.plot(x,y,color=self.config['colors']['value'][iorb],)
+
                     else:
-                        handle = self.ax.fill_between(
-                            x,
-                            bottom + y,
-                            bottom,
-                            color=self.config['colors']['value'][iorb],
-                        )
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle =  self.ax.fill_between(x,
+                                            bottom + y,
+                                            bottom,
+                                            color=self.config['colors']['value'][iorb])
+                            
+                        else:
+                            handle = self.ax.fill_between(
+                                x,
+                                bottom + y,
+                                bottom,
+                                color=self.config['colors']['value'][iorb],
+                            )
                         
 
                     self.labels.append(atom_names + orb_names[iorb] + self.config['spin_labels']['value'][ispin])
                     self.handles.append(handle)
                     bottom += y
 
-            if self.config['plot_total']['value'] == True:
-                if ispin == 0:
-                    self.ax.plot(
-                            self.dos.energies, self.dos.total[ispin, :], color= 'black', 
-                            alpha=self.config['opacity']['value'][ispin], 
-                            linestyle=self.config['linestyle']['value'][ispin], 
-                            label=self.config['spin_labels']['value'][ispin],
-                            linewidth=self.config['linewidth']['value'][ispin],
-                        )
-                else:
-                    self.ax.plot(
-                            self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
-                            alpha=self.config['opacity']['value'][ispin], 
-                            linestyle=self.config['linestyle']['value'][ispin], 
-                            label=self.config['spin_labels']['value'][ispin],
-                            linewidth=self.config['linewidth']['value'][ispin],
-                        )
+                if self.config['plot_total']['value'] == True:
+                    if ispin == 0:
+                        self.ax.plot(
+                                self.dos.energies, self.dos.total[ispin, :], color= 'black', 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
+                            )
+                    else:
+                        self.ax.plot(
+                                self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
+                            )
 
         elif orientation == 'vertical':
             self.set_xlabel('DOS Cumlative')
@@ -739,8 +774,18 @@ class DOSPlot:
 
                     x = self.dos.energies
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
+                    # replace very large values above a threshold with 0. 
+                    # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
+                    threshold=50
+                    y[np.abs(y) > threshold] = 0
 
+                    if overlay_mode:
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle, =  self.ax.plot(y,x,color=self.config['colors']['value'][iorb])
+                        else:
+                            handle, = self.ax.plot(y,x,color=self.config['colors']['value'][iorb])
                     if ispin > 0 and len(spins) > 1:
                         y *= -1
                         handle =  self.ax.fill_betweenx(x,
@@ -760,28 +805,29 @@ class DOSPlot:
                     self.labels.append(atom_names + orb_names[iorb] + self.config['spin_labels']['value'][ispin])
                     self.handles.append(handle)
                     bottom += y
-            if self.config['plot_total']['value'] == True:
-                if ispin == 0:
-                    self.ax.plot(
-                            self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                            alpha=self.config['opacity']['value'][ispin], 
-                            linestyle=self.config['linestyle']['value'][ispin], 
-                            label=self.config['spin_labels']['value'][ispin],
-                            linewidth=self.config['linewidth']['value'][ispin],
-                        )
-                else:
-                    self.ax.plot(
-                            -self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                            alpha=self.config['opacity']['value'][ispin], 
-                            linestyle=self.config['linestyle']['value'][ispin], 
-                            label=self.config['spin_labels']['value'][ispin],
-                            linewidth=self.config['linewidth']['value'][ispin],
-                        )
+                if self.config['plot_total']['value'] == True:
+                    if ispin == 0:
+                        self.ax.plot(
+                                self.dos.total[ispin, :], self.dos.energies, color= 'black', 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
+                            )
+                    else:
+                        self.ax.plot(
+                                -self.dos.total[ispin, :], self.dos.energies, color= 'black', 
+                                alpha=self.config['opacity']['value'][ispin], 
+                                linestyle=self.config['linestyle']['value'][ispin], 
+                                label=self.config['spin_labels']['value'][ispin],
+                                linewidth=self.config['linewidth']['value'][ispin],
+                            )
             
     def plot_stack(self,
                 items:dict=None,
                 spins:List[int]=None,
                 plot_total:bool= True,
+                overlay_mode=False,
                 orientation:str='horizontal',
         ):
         """A method to plot dos contributions stacked.
@@ -888,23 +934,40 @@ class DOSPlot:
                             label = ""
                 
                     x = self.dos.energies
+
+                    
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
 
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        handle = self.ax.fill_between(x,
-                                        bottom + y,
-                                        bottom,
-                                        color=colors_dict[specie])
-                    else:
-                        handle = self.ax.fill_between(
-                                x,
-                                bottom + y,
-                                bottom,
-                                color=colors_dict[specie],
-                            )
-                    self.handles.append(handle)
+                    # replace very large values above a threshold with 0. 
+                    # These are artifacts from the division of samll total values.
+                    y = np.nan_to_num(y, 0)
+                    threshold=50
+                    y[np.abs(y) > threshold] = 0
+                    
+                    if overlay_mode:
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle, = self.ax.plot(x,y,color=colors_dict[specie])
+                        else:
+                            handle, = self.ax.plot(x,y,color=colors_dict[specie])
+                    else: 
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle = self.ax.fill_between(x,
+                                            bottom + y,
+                                            bottom,
+                                            color=colors_dict[specie])
+                        else:
+                            handle = self.ax.fill_between(
+                                    x,
+                                    bottom + y,
+                                    bottom,
+                                    color=colors_dict[specie],
+                                )
+                    
                     self.labels.append(specie + label + self.config['spin_labels']['value'][ispin])
+                    self.handles.append(handle)
+                        
                     bottom += y
                 if plot_total == True:
                     if ispin == 0:
@@ -978,20 +1041,31 @@ class DOSPlot:
                 
                     x = self.dos.energies
                     y = (dos[ispin] * dos_total[ispin]) / dos_projected_total[ispin]
-
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        handle = self.ax.fill_betweenx(x,
-                                        bottom + y,
-                                        bottom,
-                                        color=colors_dict[specie])
+                    # replace very large values above a threshold with 0. 
+                    # These are artifacts from the division of samll total values.
+                    y = np.nan_to_num(y, 0)
+                    threshold=50
+                    y[np.abs(y) > threshold] = 0
+                    if overlay_mode:
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle, = self.ax.plot(y,x,color=colors_dict[specie])
+                        else:
+                            handle, = self.ax.plot(y,x,color=colors_dict[specie])
                     else:
-                        handle = self.ax.fill_betweenx(
-                                x,
-                                bottom + y,
-                                bottom,
-                                color=self.config['colors']['value'][specie],
-                            )
+                        if ispin > 0 and len(spins) > 1:
+                            y *= -1
+                            handle = self.ax.fill_betweenx(x,
+                                            bottom + y,
+                                            bottom,
+                                            color=colors_dict[specie])
+                        else:
+                            handle = self.ax.fill_betweenx(
+                                    x,
+                                    bottom + y,
+                                    bottom,
+                                    color=self.config['colors']['value'][specie],
+                                )
                     self.handles.append(handle)
                     self.labels.append(specie + label + self.config['spin_labels']['value'][ispin])
                     bottom += y
@@ -1128,6 +1202,8 @@ class DOSPlot:
         if labels == None:
             labels = self.labels
         if self.config['legend']['value'] and len(labels) != 0:
+            if len(self.handles) != len(labels):
+                raise ValueError(f"The number of labels and handles should be the same, currently there are {len(self.handles)} handles and {len(labels)} labels")
             self.ax.legend(self.handles, labels)
         return None
 
