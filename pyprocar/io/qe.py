@@ -208,6 +208,7 @@ class QEParser():
         # print(projected_labels)
         dos = DensityOfStates(energies=energies,
                             total=total_dos,
+                            efermi=self.efermi,
                             projected=projected_dos, 
                             interpolation_factor = 1)
         return dos    

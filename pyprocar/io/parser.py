@@ -56,6 +56,8 @@ class Parser:
         if self.ebs:
             self.ebs.bands += self.ebs.efermi
 
+        if self.dos:
+            self.dos.energies += self.dos.efermi
         return None
 
     def parse_abinit(self):

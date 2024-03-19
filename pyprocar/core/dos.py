@@ -30,6 +30,8 @@ class DensityOfStates:
             Points on energy spectrum. shape = (n_dos, )
         total : np.ndarray
             Densities at each point. shape = (n_dos, )
+        efermi : float
+            Fermi energy of the system.
         projected : np.ndarray, optional
             Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
             ``i_principal`` works like the principal quantum number n. The last
@@ -49,15 +51,17 @@ class DensityOfStates:
         self, 
         energies: npt.NDArray[np.float64],
         total: npt.NDArray[np.float64], 
+        efermi: float,
         projected: npt.NDArray[np.float64] = None, 
         interpolation_factor: int = 1,
         # interpolation_kind: str = 'cubic',
         ):
                 
 
-
+        
         self.energies = energies
         self.total = total
+        self.efermi = efermi
         self.projected = projected
         if interpolation_factor not in [1, 0]:
             interpolated = []

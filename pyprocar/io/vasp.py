@@ -1601,6 +1601,7 @@ class VaspXML(collections.abc.Mapping):
         return DensityOfStates(
             energies=energies,
             total=total,
+            efermi=self.fermi,
             projected=self.dos_projected,
             interpolation_factor=self.dos_interpolation_factor,
         )

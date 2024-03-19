@@ -1131,8 +1131,7 @@ class DOSPlot:
             self.ax.legend(self.handles, labels)
         return None
 
-    def draw_fermi(self, 
-                orientation:str='horizontal'):
+    def draw_fermi(self,value, orientation:str='horizontal'):
         """A method to draw the fermi surface
 
         Parameters
@@ -1152,11 +1151,11 @@ class DOSPlot:
             None
         """
         if orientation == 'horizontal':
-            self.ax.axvline(x=0, color=self.config['fermi_color']['value'], 
+            self.ax.axvline(x=value, color=self.config['fermi_color']['value'], 
                                 linestyle=self.config['fermi_linestyle']['value'], 
                                 linewidth=self.config['fermi_linewidth']['value'])
         elif orientation == 'vertical':
-            self.ax.axhline(y=0, color=self.config['fermi_color']['value'], 
+            self.ax.axhline(y=value, color=self.config['fermi_color']['value'], 
                         linestyle=self.config['fermi_linestyle']['value'], 
                         linewidth=self.config['fermi_linewidth']['value'])
         return None

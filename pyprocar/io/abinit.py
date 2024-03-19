@@ -464,6 +464,7 @@ class AbinitDOSParser:
         self.dos = DensityOfStates(
             energies=self.energies,
             total=self.dos_total,
+            efermi=self.fermi,
             projected=self.projected,
             interpolation_factor=1,
         )

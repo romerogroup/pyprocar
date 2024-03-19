@@ -29,7 +29,7 @@ def dosplot(
         orbitals:List[int]=None,
         items:dict={},
         fermi:float=None,
-        fermri_shift:float=None,
+        fermi_shift:float=0,
         elimit:List[float]=None,
         dos_limit:List[float]=None,
         savefig:str=None,
@@ -255,8 +255,7 @@ def dosplot(
             To print a list of plot options set print_plot_opts=True
 
             Here is a list modes : {modes_txt}
-            --------------------------------------------------------
-            """
+            --------------------------------------------------------"""
     print(message)
     if print_plot_opts:
         for key,value in plot_opts.items():
@@ -272,6 +271,19 @@ def dosplot(
     parser = io.Parser(code = code, dir = dirname)
     dos = parser.dos
     structure = parser.structure
+
+    
+    if fermi is None:
+        print("""
+            WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting bands by fermi energy found in current directory.
+            --------------------------------------------------------
+            """
+        )
+        fermi=dos.efermi
+    dos.energies -= fermi
+
+    dos.energies += fermi_shift
+    fermi_level = fermi_shift
 
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
@@ -334,7 +346,7 @@ def dosplot(
     else:
         raise ValueError("The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]")
 
-    edos_plot.draw_fermi(orientation = orientation)
+    edos_plot.draw_fermi(fermi_level, orientation = orientation)
 
     if orientation == 'horizontal':
         if elimit is not None:
