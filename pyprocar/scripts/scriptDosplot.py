@@ -29,6 +29,7 @@ def dosplot(
         orbitals:List[int]=None,
         items:dict={},
         fermi:float=None,
+        fermri_shift:float=None,
         elimit:List[float]=None,
         dos_limit:List[float]=None,
         savefig:str=None,
@@ -196,6 +197,11 @@ def dosplot(
         d orbitals in V.
         The default is set to take every atom and every orbital. Which
         will be equivalent to ``mode='stack_species'``
+    
+    fermi : float, optional
+        ``fermi`` defines the fermi energy. If not provided the
+        fermi energy will be read from the calculation directory
+
 
     ax : matplotlib ax object, optional
         ``ax`` is a matplotlib axes. In case one wants to put plot

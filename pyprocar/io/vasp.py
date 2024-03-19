@@ -619,7 +619,6 @@ class Procar(collections.abc.Mapping):
         if self.has_phase:
             self.carray = self.spd_phase[:, :, :, :-1, 1:-1]
 
-        # self.bands -= efermi
         self.ebs = ElectronicBandStructure(
             kpoints=self.kpoints,
             bands=self.bands,

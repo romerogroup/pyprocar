@@ -28,6 +28,7 @@ def bandsplot(
     orbitals:List[int]=None,
     items:dict={},
     fermi:float=None,
+    fermi_shift:float=0,
     interpolation_factor:int=1,
     interpolation_type:str="cubic",
     projection_mask:np.ndarray=None,
@@ -60,7 +61,10 @@ def bandsplot(
     items : dict, optional
         A dictionary where the keys are the atoms and the values a list of orbitals, by default {}
     fermi : float, optional
-        Float for the fermi energy, by default None
+        Float for the fermi energy, by default None. By default the fermi energy will be shifted by the fermi value that is found in the directory. 
+        For band structure calculations, due to convergence issues, this fermi energy might not be accurate. If so add the fermi energy from the self-consistent calculation. 
+    fermi_shift : float, optional
+        Float to shift the fermi energy, by default 0.
     interpolation_factor : int, optional
         The interpolation_factor, by default 1
     interpolation_type : str, optional
@@ -106,12 +110,12 @@ def bandsplot(
     kpath = parser.kpath
 
     # shifting fermi to 0
-    ebs.bands -= ebs.efermi
-    if fermi:
-        ebs.bands += fermi
-        fermi_level = fermi
-    else:
-        fermi_level = 0
+    if fermi is None:
+        fermi=ebs.efermi
+    ebs.bands -= fermi
+
+    ebs.bands += fermi_shift
+    fermi_level = fermi_shift
 
 
     # fixing the spin, to plot two channels into one (down is negative)
