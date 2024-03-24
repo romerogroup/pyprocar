@@ -48,7 +48,8 @@ class DOSPlot:
     def __init__(self, 
                     dos:DensityOfStates=None, 
                     structure:Structure=None, 
-                    ax:mpl.axes.Axes=None, 
+                    ax:mpl.axes.Axes=None,
+                    orientation:str='horizontal',
                     **kwargs):
         config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','dos.yml'))
         config_manager.update_config(kwargs)  
@@ -56,16 +57,54 @@ class DOSPlot:
 
         self.dos = dos
         self.structure = structure
+        self.orientation = orientation
+
         self.handles = []
         self.labels = []
+        self.initialize_plot(ax=ax)
+        
+
+        return None
+    
+    def initialize_plot(self, ax=None):
         if ax is None:
             self.fig = plt.figure(figsize=tuple(self.config['figure_size']['value']),)
             self.ax = self.fig.add_subplot(111)
         else:
             self.fig = plt.gcf()
             self.ax = ax
-    
-        return None
+        pass
+
+    # A method that will set the x and y variables depending on what the orientation is.
+    def set_orientation(self, orientation:str, energies:np.array, dos:np.array,  spins, mode:str='plain'):
+        if orientation == 'horizontal':
+            self.x=energies
+            self.x_lim= [energies.min(),energies.max()]
+            self.x_label=self.config['x_label']['value']
+
+            self.y=dos 
+            self.y_lim= [dos.min(),dos.max()]
+            self.y_label=self.config['y_label']['value']
+
+            
+
+        elif orientation == 'vertical':
+            self.y=energies
+            self.y_lim= [energies.min(),energies.max()]
+            self.y_label=self.config['x_label']['value']
+
+            self.x=dos
+            self.x_lim= [dos.min(),dos.max()]
+
+            if len(spins) == 2:
+                self.x_lim=[-dos.max(),dos.max()]
+            else:
+                self.x_lim=[0,dos.max()]
+
+            self.x_label=self.config['y_label']['value']
+            
+        else:
+            raise ValueError("Orientation must be either horizontal or vertical")
 
     def plot_dos(self,
                 spins:List[int]=None, 
@@ -93,36 +132,31 @@ class DOSPlot:
         if self.dos.is_non_collinear:
             spins = [0]
 
+
+        self.set_orientation(orientation=orientation,spins=spins, mode='plain')
+
+        dos_total = np.array(self.dos.total)
+        print("DOS Total Shape : ", dos_total.shape)
+        print("Energies Shape : ", self.dos.energies.shape)
+
+        # self.set_orientation(orientation, energies=energies, dos=parametric_dos, spins=spins, mode='parametric')
         # plots over the different dos energies for spin polarized
         for ispin in spins:
-            if orientation == 'horizontal':
-                self.set_xlabel(self.config['x_label']['value'])
-                self.set_ylabel(self.config['y_label']['value'])
-                self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
-                self.set_ylim([self.dos.total.min(),self.dos.total.max()])
-                handle = self.ax.plot(
-                    self.dos.energies, self.dos.total[ispin, :], 
-                    color=self.config['spin_colors']['value'][ispin], 
-                    alpha=self.config['opacity']['value'][ispin], 
-                    linestyle=self.config['linestyle']['value'][ispin], 
-                    label=self.config['spin_labels']['value'][ispin], 
-                    linewidth=self.config['linewidth']['value'][ispin],
-                )
-            elif orientation == 'vertical':
-                self.set_xlabel(self.config['y_label']['value'])
-                self.set_ylabel(self.config['x_label']['value'])
-                self.set_xlim([self.dos.total.min(),self.dos.total.max()])
-                self.set_ylim([self.dos.energies.min(),self.dos.energies.max()])
-                handle = self.ax.plot(
-                        self.dos.total[ispin, :], self.dos.energies, 
-                        color=self.config['spin_colors']['value'][ispin], 
-                        alpha=self.config['opacity']['value'][ispin], 
-                        linestyle=self.config['linestyle']['value'][ispin], 
-                        label=self.config['spin_labels']['value'][ispin], 
-                        linewidth=self.config['linewidth']['value'][ispin],
-                )
-            self.handles.append(handle)
+            self.set_xlabel(self.x_label)
+            self.set_ylabel(self.y_label)
+            self.set_xlim(self.x_lim)
+            self.set_ylim(self.y_lim)
+            handle = self.ax.plot(
+                self.x[ispin,:], self.y[ispin,:], 
+                color=self.config['spin_colors']['value'][ispin], 
+                alpha=self.config['opacity']['value'][ispin], 
+                linestyle=self.config['linestyle']['value'][ispin], 
+                label=self.config['spin_labels']['value'][ispin], 
+                linewidth=self.config['linewidth']['value'][ispin],
+            )
 
+            self.handles.append(handle)
+        
     def plot_parametric(self,
                         atoms:List[int]=None,
                         orbitals:List[int]=None,
@@ -162,6 +196,91 @@ class DOSPlot:
                                         orbitals=orbitals,
                                         spins=spin_projections)
 
+        vmin, vmax, cmap = self.initialize_cmap(dos_total_projected, dos_projected)
+        cmap = mpl.cm.get_cmap(cmap)
+        if self.config['plot_bar']['value']:
+            self.set_colorbar(vmin, vmax, cmap)
+        
+
+        print("DOS Projected Shape : ", dos_projected.shape)
+        print("Dos Total Projected Shape : ", dos_total_projected.shape)
+        print("DOS Total Shape : ", dos_total.shape)
+        print("Energies Shape : ", self.dos.energies.shape)
+        
+        energies,parametric_dos,bar_colors = self.process_parametric_dos(spins, dos_total, dos_total_projected, dos_projected, cmap)
+        n_energies=energies.shape[1]
+
+        self.set_orientation(orientation, energies=energies, dos=parametric_dos, spins=spins, mode='parametric')
+        self.set_xlabel(self.x_label)
+        self.set_ylabel(self.y_label)
+        self.set_xlim(self.x_lim)
+        self.set_ylim(self.y_lim)
+
+        for spins_index, ispin in enumerate(spins):
+            for idos in range(n_energies - 1):
+                if orientation=='horizontal':
+                    self.ax.fill_between([self.x[ispin,idos], self.x[ispin,idos + 1]],
+                                    [self.y[ispin,idos], self.y[ispin,idos + 1]],
+                                    color=bar_colors[ispin][idos])
+                # else:
+                #     self.ax.fill_betweenx([energies[ispin,idos], energies[ispin,idos + 1]],
+                #                     [parametric_dos[ispin,idos], parametric_dos[ispin,idos + 1]],
+                #                     color=bar_colors[ispin][idos])
+            
+            if self.config['plot_total']['value'] == True:
+                
+                if spins_index == 0:
+                    self.ax.plot(
+                            self.x[ispin,:], self.y[ispin,:], color= 'black', 
+                            alpha=self.config['opacity']['value'][ispin], 
+                            linestyle=self.config['linestyle']['value'][ispin], 
+                            label=self.config['spin_labels']['value'][ispin], 
+                            linewidth=self.config['linewidth']['value'][ispin], 
+                        )
+                else:
+                    self.ax.plot(
+                            self.x[ispin,:], -self.y[ispin,:], color= 'black', 
+                            alpha=self.config['opacity']['value'][ispin], 
+                            linestyle=self.config['linestyle']['value'][ispin], 
+                            label=self.config['spin_labels']['value'][ispin], 
+                            linewidth=self.config['linewidth']['value'][ispin], 
+                        )
+
+
+    def process_parametric_dos(self, spins, dos_total, dos_total_projected, dos_projected, cmap):
+        energies=np.zeros(shape=(2,len(self.dos.energies)))
+        processed_dos=np.zeros(shape=(2,dos_projected.shape[1]))
+        bar_colors=[]
+        for spins_index , ispin in enumerate(spins):
+            y_total = []
+            bar_color=[]
+            for idos in range(len(self.dos.energies)):
+
+                y = dos_projected[ispin][idos]
+                y_total_projected = dos_total_projected[ispin][idos]
+                if ispin > 0 and len(spins) > 1:
+                    y *= -1
+                    y_total[-1] *= -1
+                    y_total_projected *= -1
+
+                bar_color.append(cmap(y / (y_total_projected )))
+                energies[ispin,idos]=self.dos.energies[idos]
+                processed_dos[ispin,idos]=dos_total[ispin][idos]
+
+            bar_colors.append(bar_color)
+
+        return energies,processed_dos,bar_colors
+
+    def set_colorbar(self, vmin, vmax, cmap):
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        cb = self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
+        cb.ax.tick_params(labelsize=self.config['colorbar_tick_labelsize']['value'])
+        cb.set_label(self.config['colorbar_title']['value'], 
+                         size=self.config['colorbar_title_size']['value'],
+                         rotation=270,
+                         labelpad=self.config['colorbar_title_padding']['value'])
+
+    def initialize_cmap(self, dos_total_projected, dos_projected):
         if self.config['clim']['value']:
             vmin=self.config['clim']['value'][0]
             vmax=self.config['clim']['value'][1]
@@ -173,115 +292,8 @@ class DOSPlot:
             vmin = (dos_projected.min() / dos_total_projected.max())
         if vmax is None:
             vmax = (dos_projected.max() / dos_total_projected.max())
+        return vmin,vmax,cmap
 
-        cmap = mpl.cm.get_cmap(cmap)
-        if self.config['plot_bar']['value']:
-            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-            cb = self.fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=self.ax)
-            cb.ax.tick_params(labelsize=self.config['colorbar_tick_labelsize']['value'])
-            cb.set_label(self.config['colorbar_title']['value'], 
-                         size=self.config['colorbar_title_size']['value'],
-                         rotation=270,
-                         labelpad=self.config['colorbar_title_padding']['value'])
-
-        if orientation == 'horizontal':
-            self.set_xlabel(self.config['x_label']['value'])
-            self.set_ylabel(self.config['y_label']['value'])
-            self.set_xlim([self.dos.energies.min(),self.dos.energies.max()])
-
-            if len(spins) == 2:
-                self.set_ylim([-self.dos.total.max(),self.dos.total.max()])
-            else:
-                self.set_ylim([0,self.dos.total.max()])
-
-
-            for spins_index , ispin in enumerate(spins):
-                x = []
-                y_total = []
-                bar_color = []
-                for idos in range(len(self.dos.energies)):
-                    x.append(self.dos.energies[idos])
-                    y = dos_projected[ispin][idos]
-                    y_total.append(dos_total[ispin][idos])
-                    y_total_projected = dos_total_projected[ispin][idos]
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        y_total[-1] *= -1
-                        y_total_projected *= -1
-
-                    bar_color.append(cmap(y / (y_total_projected )))#* (vmax - vmin))))
-
-                for idos in range(len(x) - 1):
-                    self.ax.fill_between([x[idos], x[idos + 1]],
-                                    [y_total[idos], y_total[idos + 1]],
-                                    color=bar_color[idos])
-                
-                if self.config['plot_total']['value'] == True:
-                    if spins_index == 0:
-                        self.ax.plot(
-                                self.dos.energies, self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.config['opacity']['value'][ispin], 
-                                linestyle=self.config['linestyle']['value'][ispin], 
-                                label=self.config['spin_labels']['value'][ispin], 
-                                linewidth=self.config['linewidth']['value'][ispin], 
-                            )
-                    else:
-                        self.ax.plot(
-                                self.dos.energies, -self.dos.total[ispin, :], color= 'black', 
-                                alpha=self.config['opacity']['value'][ispin], 
-                                linestyle=self.config['linestyle']['value'][ispin], 
-                                label=self.config['spin_labels']['value'][ispin], 
-                                linewidth=self.config['linewidth']['value'][ispin], 
-                            )
-
-        elif orientation == 'vertical':
-            self.set_xlabel(self.config['y_label']['value'])
-            self.set_ylabel(self.config['x_label']['value'])
-
-            if len(spins) == 2:
-                self.set_xlim([-self.dos.total.max(),self.dos.total.max()])
-            else:
-                self.set_xlim([0,self.dos.total.max()])
-            
-            for spins_index , ispin in enumerate(spins):
-                x = []
-                y_total = []
-                bar_color = []
-                for idos in range(len(self.dos.energies)):
-                    x.append(self.dos.energies[idos])
-                    y = dos_projected[ispin][idos]
-                    y_total.append(dos_total[ispin][idos])
-                    y_total_projected = dos_total_projected[ispin][idos]
-                    if ispin > 0 and len(spins) > 1:
-                        y *= -1
-                        y_total[-1] *= -1
-                        y_total_projected *= -1
-
-                    bar_color.append(cmap(y / (y_total_projected )))
-
-
-                for idos in range(len(x) - 1):
-                    self.ax.fill_betweenx([x[idos], x[idos + 1]],
-                                    [y_total[idos], y_total[idos + 1]],
-                                    color=bar_color[idos])
-
-                if self.config['plot_total']['value'] == True:
-                    if spins_index == 0:
-                        self.ax.plot(
-                                self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.config['opacity']['value'][ispin], 
-                                linestyle=self.config['linestyle']['value'][ispin], 
-                                label=self.config['spin_labels']['value'][ispin], 
-                                linewidth=self.config['linewidth']['value'][ispin], 
-                            )
-                    else:
-                        self.ax.plot(
-                                -self.dos.total[ispin, :], self.dos.energies, color= 'black', 
-                                alpha=self.config['opacity']['value'][ispin], 
-                                linestyle=self.config['linestyle']['value'][ispin], 
-                                label=self.config['spin_labels']['value'][ispin], 
-                                linewidth=self.config['linewidth']['value'][ispin], 
-                            )
                     
     def plot_parametric_line(self,
                              atoms:List[int]=None,
