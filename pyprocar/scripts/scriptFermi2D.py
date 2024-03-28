@@ -23,6 +23,8 @@ def fermi2D(
     code:str,
     dirname:str,
     mode:str='plain',
+    fermi:float=None,
+    fermi_shift:float=0.0,
     band_indices:List[List]=None,
     band_colors:List[List]=None,
     spins:List[int]=None,
@@ -48,6 +50,10 @@ def fermi2D(
         This parameter sets the code to parse, by default "vasp"
     dirname : str, optional
         This parameter is the directory of the calculation, by default ''
+    fermi : float, optional
+        The fermi energy. If none is given, the fermi energy in the directory will be used, by default None
+    fermi_shift : float, optional
+        The fermi energy shift, by default 0.0
     lobster : bool, optional
         A boolean value to determine to use lobster, by default False
     band_indices : List[List]
@@ -133,7 +139,22 @@ def fermi2D(
     parser = io.Parser(code = code, dir = dirname)
     ebs = parser.ebs
     structure = parser.structure
-    ebs.bands -= ebs.efermi
+
+
+    # shifting fermi to 0
+    if fermi is None:
+        fermi=ebs.efermi
+        print("""
+            WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
+            --------------------------------------------------------
+            """
+        )
+
+    ebs.bands -= fermi
+    ebs.bands += fermi_shift
+    fermi_level = fermi_shift
+
+
 
     if structure.rotations is not None:
         ebs.ibz2fbz(structure.rotations)

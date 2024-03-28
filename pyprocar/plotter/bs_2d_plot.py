@@ -422,9 +422,10 @@ class BandStructure2DVisualizer:
                                 xtitle=self.config['grid_xtitle']['value'],
                                 ztitle=self.config['grid_ztitle']['value'])
 
-    def add_fermi_plane(self):
+    def add_fermi_plane(self, value:float):
+   
         if self.config['add_fermi_plane']['value']:
-            plane = pv.Plane(center=(0,0,0),
+            plane = pv.Plane(center=(0,0,value),
                             i_size=self.config['fermi_plane_size']['value'],
                             j_size=self.config['fermi_plane_size']['value'])
 

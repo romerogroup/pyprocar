@@ -25,6 +25,7 @@ class FermiHandler:
     def __init__(self, 
             code:str,
             dirname:str="",
+            fermi:float=None,
             repair:bool=False,
             apply_symmetry:bool=True,
             ):
@@ -38,6 +39,8 @@ class FermiHandler:
             The code name
         dirname : str, optional
             the directory name where the calculation is, by default ""
+        fermi : float, optional
+            The fermi energy. This will overide the default fermi value used found in the given directory, by default None
         repair : bool, optional
             Boolean to repair the PROCAR file, by default False
         apply_symmetry : bool, optional
@@ -50,7 +53,18 @@ class FermiHandler:
         self.apply_symmetry = apply_symmetry
         parser = io.Parser(code = code, dir = dirname)
         self.ebs = parser.ebs
-        self.e_fermi = parser.ebs.efermi
+
+        # shifting fermi to 0
+        if fermi is None:
+            self.e_fermi=self.ebs.efermi
+            print("""
+                WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
+                --------------------------------------------------------
+                """
+            )
+        else:
+            self.e_fermi=fermi
+
         self.structure = parser.structure
         if self.structure.rotations is not None:
             self.ebs.ibz2fbz(self.structure.rotations)

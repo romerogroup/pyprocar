@@ -29,6 +29,8 @@ class BandStructure2DHandler:
     def __init__(self, 
             code:str,
             dirname:str="",
+            fermi:float=None,
+            fermi_shift:float=0,
             repair:bool=False,
             apply_symmetry:bool=True,):
         """
@@ -41,31 +43,17 @@ class BandStructure2DHandler:
             The code name
         dirname : str, optional
             the directory name where the calculation is, by default ""
+        fermi : float, optional
+            The fermi energy. This will overide the default fermi value used found in the given directory, by default None
+        fermi_shift : float, optional
+            The fermi energy shift, by default 0
         repair : bool, optional
             Boolean to repair the PROCAR file, by default False
         apply_symmetry : bool, optional
             Boolean to apply symmetry to the fermi sruface.
             This is used when only symmetry reduced kpoints used in the calculation, by default True
         """
-        self.code = code
-        self.dirname=dirname
-        self.repair = repair
-        self.apply_symmetry = apply_symmetry
-        
-        parser = io.Parser(code = code, dir = dirname)
-        self.ebs = parser.ebs
-        self.e_fermi=self.ebs.efermi
 
-        # Shifting fermi to zero
-        self.ebs.bands -= self.ebs.efermi
-
-        # Applying symmetry to kmesh if they exists
-        self.structure = parser.structure
-        if self.structure.rotations is not None:
-            self.ebs.ibz2fbz(self.structure.rotations)
-
-
-        # self._find_bands_near_fermi()
 
         modes=["plain","parametric","spin_texture", "overlay" ]
         props=["fermi_speed","fermi_velocity","harmonic_effective_mass"]
@@ -81,6 +69,36 @@ class BandStructure2DHandler:
                 Here is a list of properties: {props_txt}
                 --------------------------------------------------------
                 """
+        
+
+        self.code = code
+        self.dirname=dirname
+        self.repair = repair
+        self.apply_symmetry = apply_symmetry
+        
+        parser = io.Parser(code = code, dir = dirname)
+        self.ebs = parser.ebs
+
+
+        # shifting fermi to 0
+        if fermi is None:
+            fermi=self.ebs.efermi
+            print("""
+                WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
+                --------------------------------------------------------
+                """
+            )
+
+
+        self.ebs.bands -= fermi
+
+        self.ebs.bands += fermi_shift
+        self.fermi_level = fermi_shift
+
+        # Applying symmetry to kmesh if they exists
+        self.structure = parser.structure
+        if self.structure.rotations is not None:
+            self.ebs.ibz2fbz(self.structure.rotations)
 
     def process_data(self, mode, bands=None, atoms=None, orbitals=None, spins=None, spin_texture=False):
         self.data_handler.process_data(mode, bands, atoms, orbitals, spins, spin_texture)
@@ -144,7 +162,7 @@ class BandStructure2DHandler:
         
         visualizer.add_grid()
         visualizer.add_axes()
-        visualizer.add_fermi_plane()
+        visualizer.add_fermi_plane(value=self.fermi_level)
         visualizer.set_background_color()
         
         # save and showing setting

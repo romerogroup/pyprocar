@@ -3,11 +3,9 @@
 from .scriptBandsDosplot import bandsdosplot
 from .scriptBandsplot import bandsplot
 from .scriptDosplot import dosplot
-from .scriptBandsplot_2d import bandsplot_2d
 from .scriptCat import cat
 
 from .scriptFermi2D import fermi2D
-from .scriptFermi3D import fermi3D
 from .scriptFermiHandler import FermiHandler
 from .scriptBandStructure2DHandler import BandStructure2DHandler
 
