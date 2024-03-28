@@ -61,6 +61,7 @@ pyprocar.dosplot(code=code, dirname=data_dir, print_plot_opts=True)
 pyprocar.dosplot(
     code=code,
     dirname=data_dir,
+    fermi=5.590136,
     atoms=[0],
     orbitals=[4,5,6,7,8],
     mode='parametric',
@@ -82,6 +83,7 @@ pyprocar.dosplot(
 pyprocar.dosplot(
     code=code,
     dirname=data_dir,
+    fermi=5.590136,
     atoms=[0],
     orbitals=[4,5,6,7,8],
     mode='parametric_line',

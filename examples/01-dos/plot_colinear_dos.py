@@ -112,7 +112,7 @@ pyprocar.dosplot(
 
 
 ###############################################################################
-# overlay mode
+# stack mode
 # +++++++++++++++++++++++++++++++++++++++
 #
 # 
@@ -125,3 +125,49 @@ pyprocar.dosplot(
                 items=items,
                 dirname=data_dir)
 
+
+###############################################################################
+# overlay_species mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+# 
+#
+orbitals=[4,5,6,7,8]
+spins=[0]
+
+pyprocar.dosplot(
+                code='qe', 
+                mode='overlay_species',
+                orbitals=orbitals,
+                spins=spins,
+                dirname=data_dir)
+
+###############################################################################
+# overlay_orbtials mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+# 
+#
+atoms=[0]
+spins=[0]
+pyprocar.dosplot(
+                code='qe', 
+                mode='overlay_orbitals',
+                atoms=atoms,
+                spins=spins,
+                dirname=data_dir)
+
+
+###############################################################################
+# overlay mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+# 
+#
+
+items={'Fe':[4,5,6,7,8]}
+pyprocar.dosplot(
+                code='qe', 
+                mode='overlay',
+                items=items,
+                dirname=data_dir)

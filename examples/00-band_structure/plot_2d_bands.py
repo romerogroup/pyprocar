@@ -34,7 +34,11 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}graphene{o
 # Plain mode
 # +++++++++++++++++++++++++++++++++++++++
 spins=[0]
-handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+handler = pyprocar.BandStructure2DHandler(code='vasp',
+                                          dirname=data_dir,
+                                          fermi=-0.795619,
+                                          apply_symmetry=False,
+                                          )
 handler.plot_band_structure(mode='plain',
                             add_fermi_plane=True,
                             bands=[3,4],
