@@ -60,14 +60,14 @@ class BandStructure2DHandler:
         modes_txt=' , '.join(modes)
         props_txt=' , '.join(props)
         self.notification_message=f"""
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
                 Here is a list modes : {modes_txt}
                 Here is a list of properties: {props_txt}
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
                 """
         
 
@@ -79,21 +79,19 @@ class BandStructure2DHandler:
         parser = io.Parser(code = code, dir = dirname)
         self.ebs = parser.ebs
 
-
-        # shifting fermi to 0
-        if fermi is None:
-            fermi=self.ebs.efermi
-            print("""
-                WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
-                --------------------------------------------------------
+        if fermi is not None:
+            self.ebs.bands -= fermi
+            self.ebs.bands += fermi_shift
+            self.fermi_level = fermi_shift
+            self.energy_label=r"E - E$_F$ (eV)"
+            self.fermi_message=None
+        else:
+            self.energy_label=r"E (eV)"
+            self.fermi_level=None
+            self.fermi_message="""
+                WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+                ----------------------------------------------------------------------------------------------------------
                 """
-            )
-
-
-        self.ebs.bands -= fermi
-
-        self.ebs.bands += fermi_shift
-        self.fermi_level = fermi_shift
 
         # Applying symmetry to kmesh if they exists
         self.structure = parser.structure
@@ -141,8 +139,16 @@ class BandStructure2DHandler:
         print(self.notification_message)
         if print_plot_opts:
             self.print_default_settings()
-        # Process the data
+        if self.fermi_message:
+            print(self.fermi_message)
+        print(
+        f"""
+            WARNING : Make sure the kmesh has kz points with kz={k_z_plane} +- {k_z_plane_tol}
+            ----------------------------------------------------------------------------------------------------------
+            """
+    )
 
+        # Process the data
         self._find_bands_near_fermi(bands=bands)
         self._expand_kpoints_to_supercell()
         self.data_handler = BandStructure2DataHandler(self.ebs, **kwargs)
@@ -160,9 +166,12 @@ class BandStructure2DHandler:
         if mode != "plain" or spin_texture:
             visualizer.add_scalar_bar(name=visualizer.data_handler.scalars_name)
         
-        visualizer.add_grid()
+        visualizer.add_grid(z_label=self.energy_label)
         visualizer.add_axes()
-        visualizer.add_fermi_plane(value=self.fermi_level)
+
+        if self.fermi_level is not None:
+            visualizer.add_fermi_plane(value=self.fermi_level)
+
         visualizer.set_background_color()
         
         # save and showing setting

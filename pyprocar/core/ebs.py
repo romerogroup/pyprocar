@@ -2,6 +2,7 @@
 """
 Created on Sat Jan 16 2021
 
+@author: Logan Lang
 @author: Pedram Tavadze
 @author: Freddy Farah
 
@@ -1056,13 +1057,17 @@ class ElectronicBandStructure:
         if self.n_kx:
             if nk != self.n_kx*self.n_ky*self.n_kz:
 
-                err_text="""
+                err_text=f"""
                         nkpoints != n_kx*n_ky*n_kz
                         Error trying to symmetrize the irreducible kmesh. 
                         This is issue is most likely related to 
                         how the DFT code using symmetry operations to reduce the kmesh.
                         Check the recommendations for k-mesh type for the crystal system.
                         If all else fails turn off symmetry.
+                        n_kx={self.n_kx}
+                        n_ky={self.n_ky}
+                        n_kz={self.n_kz}
+                        nk={nk}
                         """
                 raise ValueError(err_text)
 

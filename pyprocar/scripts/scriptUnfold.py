@@ -27,6 +27,7 @@ def unfold(
         unfold_mask=None,
 
         fermi=None,
+        fermi_shift=0,
         interpolation_factor=1,
         interpolation_type="cubic",
         vmax=None,
@@ -53,7 +54,8 @@ def unfold(
         supercell_matrix: supercell matrix from primitive cell to supercell
         ispin: For non-spin polarized system, ispin=None.
            For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.
-        efermi: Fermi energy
+        fermi: Fermi energy
+        fermi_shift: Shift the bands by the Fermi energy.
         elimit: range of energy to be plotted.
         kticks: the indices of K points which has labels given in knames.
         knames: see kticks
@@ -89,13 +91,17 @@ def unfold(
     structure = parser.structure
     kpath = parser.kpath
 
-    # shifting fermi to 0
-    ebs.bands -= ebs.efermi
-    if fermi:
-        ebs.bands += fermi
-        fermi_level = fermi
+    if fermi is not None:
+        ebs.bands -= fermi
+        ebs.bands += fermi_shift
+        fermi_level = fermi_shift
+        y_label=r"E - E$_F$ (eV)"
     else:
-        fermi_level = 0
+        y_label=r"E (eV)"
+        print("""
+            WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+            ----------------------------------------------------------------------------------------------------------
+            """)
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins)
     
@@ -246,8 +252,10 @@ def unfold(
     ebs_plot.set_yticks(interval=elimit)
     ebs_plot.set_xlim()
     ebs_plot.set_ylim(elimit)
-    ebs_plot.draw_fermi(fermi_level=fermi_level)
-    ebs_plot.set_ylabel()
+    if fermi is not None:
+        ebs_plot.draw_fermi(fermi_level=fermi_level)
+    ebs_plot.set_ylabel(label=y_label)
+
     ebs_plot.grid()
     ebs_plot.legend(labels)
     if savefig is not None:

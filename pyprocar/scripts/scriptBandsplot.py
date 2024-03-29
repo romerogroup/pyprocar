@@ -91,13 +91,13 @@ def bandsplot(
            "overlay", "overlay_species", "overlay_orbitals", "ipr"]
     modes_txt=' , '.join(modes)
     message=f"""
-            --------------------------------------------------------
-            There are additional plot options that are defined in a configuration file. 
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
+            ----------------------------------------------------------------------------------------------------------
+            There are additional plot options that are defined in the configuration file. 
+            You can change these configurations by passing the keyword argument to the function.
+            To print a list of all plot options set `print_plot_opts=True`
 
             Here is a list modes : {modes_txt}
-            --------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------
             """
     print(message)
     if print_plot_opts:
@@ -109,19 +109,20 @@ def bandsplot(
     structure = parser.structure
     kpath = parser.kpath
 
-    # shifting fermi to 0
-    if fermi is None:
-        fermi=ebs.efermi
+    if fermi is not None:
+        ebs.bands -= fermi
+        ebs.bands += fermi_shift
+        fermi_level = fermi_shift
+        y_label=r"E - E$_F$ (eV)"
+    else:
+        y_label=r"E (eV)"
         print("""
-            WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
-            --------------------------------------------------------
-            """
-        )
-    ebs.bands -= fermi
+            WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+            ----------------------------------------------------------------------------------------------------------
+            """)
+    
 
-    ebs.bands += fermi_shift
-    fermi_level = fermi_shift
-
+    
 
     # fixing the spin, to plot two channels into one (down is negative)
     if np.array_equal(spins, [-1,1]) or np.array_equal(spins, [1,-1]):
@@ -280,8 +281,11 @@ def bandsplot(
     ebs_plot.set_yticks(interval=elimit)
     ebs_plot.set_xlim()
     ebs_plot.set_ylim(elimit)
-    ebs_plot.draw_fermi(fermi_level=fermi_level)
-    ebs_plot.set_ylabel()
+    ebs_plot.set_ylabel(label=y_label)
+
+    if fermi is not None:
+        ebs_plot.draw_fermi(fermi_level=fermi_level)
+    
 
 
     ebs_plot.set_title()

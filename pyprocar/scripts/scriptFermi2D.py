@@ -140,19 +140,21 @@ def fermi2D(
     ebs = parser.ebs
     structure = parser.structure
 
-
-    # shifting fermi to 0
-    if fermi is None:
-        fermi=ebs.efermi
+    if fermi is not None:
+        ebs.bands -= fermi
+        ebs.bands += fermi_shift
+        fermi_level = fermi_shift
+    else:
         print("""
-            WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
-            --------------------------------------------------------
+            WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+            ----------------------------------------------------------------------------------------------------------
+            """)
+    print(
+        f"""
+            WARNING : Make sure the kmesh has kz points with kz={k_z_plane} +- {k_z_plane_tol}
+            ----------------------------------------------------------------------------------------------------------
             """
-        )
-
-    ebs.bands -= fermi
-    ebs.bands += fermi_shift
-    fermi_level = fermi_shift
+    )
 
 
 

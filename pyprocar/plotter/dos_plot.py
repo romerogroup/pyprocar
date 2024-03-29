@@ -1167,7 +1167,10 @@ class DOSPlot:
         None
             None
         """
-        self.ax.set_xlabel(label)
+        if self.config['x_label']['value']:
+            self.ax.set_xlabel(self.config['x_label']['value'])
+        else:
+            self.ax.set_xlabel(label)
         return None
 
     def set_ylabel(self, label:str):
@@ -1183,7 +1186,10 @@ class DOSPlot:
         None
             None
         """
-        self.ax.set_ylabel(label)
+        if self.config['y_label']['value']:
+            self.ax.set_ylabel(self.config['y_label']['value'])
+        else:
+            self.ax.set_ylabel(label)
     
     def legend(self, 
                 labels:List[str]=None):

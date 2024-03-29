@@ -279,18 +279,18 @@ def dosplot(
     dos = parser.dos
     structure = parser.structure
 
-    
-    if fermi is None:
+    if fermi is not None:
+        dos.energies -= fermi
+        dos.energies += fermi_shift
+        fermi_level = fermi_shift
+        energy_label=r"Energy - E$_F$ (eV)"
+    else:
+        energy_label=r"Energy (eV)"
         print("""
-            WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting bands by fermi energy found in current directory.
-            --------------------------------------------------------
-            """
-        )
-        fermi=dos.efermi
-    dos.energies -= fermi
+            WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy.
+            ----------------------------------------------------------------------------------------------------------
+            """)
 
-    dos.energies += fermi_shift
-    fermi_level = fermi_shift
 
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
@@ -372,14 +372,21 @@ def dosplot(
     else:
         raise ValueError("The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]")
 
-    edos_plot.draw_fermi(fermi_level, orientation = orientation)
+    if fermi is not None:
+        edos_plot.draw_fermi(fermi_level, orientation = orientation)
 
+    
     if orientation == 'horizontal':
+        edos_plot.set_xlabel(label=energy_label)
+        edos_plot.set_ylabel(label="DOS")
         if elimit is not None:
             edos_plot.set_xlim(elimit)
         if dos_limit is not None:
             edos_plot.set_ylim(dos_limit)
-    elif orientation == 'vertical' :
+
+    elif orientation == 'vertical':
+        edos_plot.set_xlabel(label="DOS")
+        edos_plot.set_ylabel(label=energy_label)
         if elimit is not None:
             edos_plot.set_ylim(elimit)
         if dos_limit is not None:

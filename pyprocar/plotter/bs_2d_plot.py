@@ -146,7 +146,7 @@ class BandStructure2DataHandler:
         spins_index=[]
         for ispin, spin in enumerate(self.spin_pol):
             ebs=copy.copy(self.ebs)
-
+            
             band_structure_2D = BandStructure2D(
                                             ebs,
                                             spin,
@@ -414,16 +414,19 @@ class BandStructure2DVisualizer:
             p.view_vector(normal_vec)
             p.show(screenshot=save_2d_slice,interactive=False)
 
-    def add_grid(self):
+    def add_grid(self,z_label=None):
         if self.config['grid']['value']:
+            
+            if z_label is None:
+                z_label=self.config['grid_ztitle']['value']
 
             self.plotter.show_grid(
                                 ytitle=self.config['grid_ytitle']['value'],
                                 xtitle=self.config['grid_xtitle']['value'],
-                                ztitle=self.config['grid_ztitle']['value'])
+                                ztitle=z_label,
+                                font_size=self.config['grid_font_size']['value'])
 
     def add_fermi_plane(self, value:float):
-   
         if self.config['add_fermi_plane']['value']:
             plane = pv.Plane(center=(0,0,value),
                             i_size=self.config['fermi_plane_size']['value'],

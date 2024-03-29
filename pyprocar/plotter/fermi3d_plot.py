@@ -399,8 +399,7 @@ class FermiVisualizer:
 
         self.plotter.show(auto_close=False)
         
-
-         # Run through each frame
+        # Run through each frame  
         for e_surface,evalues in zip(e_surfaces,energy_values):
 
             surface.copy_from(e_surface)
@@ -409,7 +408,7 @@ class FermiVisualizer:
             surface.set_active_scalars(name=self.data_handler.scalars_name)
 
             text = f'Energy Value : {evalues:.4f} eV'
-            self.plotter.textActor.SetText(2, text)
+            self.plotter.text.SetText(2, text)
 
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
                 e_arrows = e_surface.glyph(orient=self.data_handler.vector_name,
@@ -430,7 +429,7 @@ class FermiVisualizer:
             surface.set_active_scalars(name=self.data_handler.scalars_name)
 
             text = f'Energy Value : {evalues:.4f} eV'
-            self.plotter.textActor.SetText(2, text)
+            self.plotter.text.SetText(2, text)
 
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
                 e_arrows = e_surface.glyph(orient=self.data_handler.vector_name,
@@ -969,7 +968,7 @@ class FermiVisualizer:
                 surface = user_slice.delaunay_2d()
                 text = f"Cross sectional area : {surface.area:.4f}"+" Ang^-2"
 
-                self.plotter.textActor.SetText(2, text)
+                self.plotter.text.SetText(2, text)
 
 
         self.plotter.add_plane_widget(callback=callback_plane, bounds=mesh.bounds,

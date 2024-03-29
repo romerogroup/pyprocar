@@ -54,16 +54,18 @@ class FermiHandler:
         parser = io.Parser(code = code, dir = dirname)
         self.ebs = parser.ebs
 
-        # shifting fermi to 0
+
         if fermi is None:
             self.e_fermi=self.ebs.efermi
             print("""
-                WARNING : Fermi Energy not set! Set `fermi={value}`. By default, shifting by fermi energy found in current directory.
-                --------------------------------------------------------
+                WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
+                ---------------------------------------------------------------------------------------------------------------
                 """
             )
         else:
             self.e_fermi=fermi
+
+
 
         self.structure = parser.structure
         if self.structure.rotations is not None:

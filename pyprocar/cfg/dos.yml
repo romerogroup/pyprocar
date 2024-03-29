@@ -142,10 +142,10 @@ stack_y_label:
   value: DOS
 x_label:
   description: The label for the x-axis.
-  value: Energy (eV)
+  value:
 y_label:
   description: The label for the y-axis.
-  value: DOS
+  value:
 dpi:
   description: The resolution in dots per inch. If 'figure', use the figure's dpi value.
   value: 'figure'
