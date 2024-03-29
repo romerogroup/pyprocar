@@ -35,6 +35,7 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 pyprocar.dosplot(
                 code='qe', 
                 mode='plain',
+                fermi=5.599480,
                 dirname=data_dir)
 
 ###############################################################################
@@ -52,6 +53,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='qe', 
                 mode='parametric',
+                fermi=5.599480,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -72,6 +74,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='qe', 
                 mode='parametric_line',
+                fermi=5.599480,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -91,6 +94,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='qe', 
                 mode='stack_species',
+                fermi=5.599480,
                 orbitals=orbitals,
                 spins=spins,
                 dirname=data_dir)
@@ -106,6 +110,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='qe', 
                 mode='stack_orbitals',
+                fermi=5.599480,
                 atoms=atoms,
                 spins=spins,
                 dirname=data_dir)
@@ -122,6 +127,7 @@ items={'Fe':[4,5,6,7,8]}
 pyprocar.dosplot(
                 code='qe', 
                 mode='stack',
+                fermi=5.599480,
                 items=items,
                 dirname=data_dir)
 
@@ -138,6 +144,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='qe', 
                 mode='overlay_species',
+                fermi=5.599480,
                 orbitals=orbitals,
                 spins=spins,
                 dirname=data_dir)
@@ -153,6 +160,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='qe', 
                 mode='overlay_orbitals',
+                fermi=5.599480,
                 atoms=atoms,
                 spins=spins,
                 dirname=data_dir)
@@ -169,5 +177,6 @@ items={'Fe':[4,5,6,7,8]}
 pyprocar.dosplot(
                 code='qe', 
                 mode='overlay',
+                fermi=5.599480,
                 items=items,
                 dirname=data_dir)

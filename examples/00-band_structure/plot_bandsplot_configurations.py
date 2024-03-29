@@ -47,7 +47,7 @@ config_path = os.path.join(pyprocar.__path__[0], 'cfg')
 print(f"Configuration files are located at: {config_path}")
 
 # Print the configurations
-pyprocar.bandsplot(code=code,dirname=data_dir,print_plot_opts=True)
+pyprocar.bandsplot(code=code,dirname=data_dir,fermi=5.590136,print_plot_opts=True)
 
 ###############################################################################
 

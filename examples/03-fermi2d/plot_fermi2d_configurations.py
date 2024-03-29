@@ -39,7 +39,7 @@ config_path = os.path.join(pyprocar.__path__[0], 'cfg')
 print(f"Configuration files are located at: {config_path}")
 
 # Print the configurations
-pyprocar.fermi2D(code='vasp', dirname=data_dir, print_plot_opts=True)
+pyprocar.fermi2D(code='vasp', dirname=data_dir,fermi=5.599480, print_plot_opts=True)
 
 ###############################################################################
 
@@ -51,6 +51,7 @@ pyprocar.fermi2D(code='vasp', dirname=data_dir, print_plot_opts=True)
 #
 
 pyprocar.fermi2D(code='vasp',
+               fermi=5.599480,
                dirname=data_dir,
                spin_texture=True,
                spin_projection='x',
@@ -72,6 +73,7 @@ pyprocar.fermi2D(code='vasp',
 
 pyprocar.fermi2D(code='vasp',
                 dirname=data_dir,
+                fermi=5.599480,
                 spin_texture=True,
                 spin_projection='z',
                 arrow_size=3,
