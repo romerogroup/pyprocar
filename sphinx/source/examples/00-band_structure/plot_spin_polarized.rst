@@ -66,13 +66,14 @@ Plain mode
 When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do. 
 The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-44
+.. GENERATED FROM PYTHON SOURCE LINES 39-45
 
 .. code-block:: default
 
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='plain',
+                    fermi=5.590136,
                     dirname=data_dir)
 
 
@@ -89,26 +90,26 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-48
+.. GENERATED FROM PYTHON SOURCE LINES 46-49
 
 The line-styles or line-colors, these may be changed in the ebs section in the :doc:'pyprocar/utils/default_settings.ini' file.
 
 The keyword spins can also be used to select which spin bands to plot
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-55
+.. GENERATED FROM PYTHON SOURCE LINES 49-57
 
 .. code-block:: default
 
@@ -116,6 +117,7 @@ The keyword spins can also be used to select which spin bands to plot
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='plain',
+                    fermi=5.590136,
                     spins=spins,
                     dirname=data_dir)
 
@@ -133,20 +135,20 @@ The keyword spins can also be used to select which spin bands to plot
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-61
+.. GENERATED FROM PYTHON SOURCE LINES 58-63
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -154,7 +156,7 @@ Parametric mode
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-74
+.. GENERATED FROM PYTHON SOURCE LINES 63-77
 
 .. code-block:: default
 
@@ -166,6 +168,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='parametric',
+                    fermi=5.590136,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -185,20 +188,20 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-80
+.. GENERATED FROM PYTHON SOURCE LINES 78-83
 
 Scatter mode
 +++++++++++++++++++++++++++++++++++++++
@@ -206,7 +209,7 @@ Scatter mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-92
+.. GENERATED FROM PYTHON SOURCE LINES 83-96
 
 .. code-block:: default
 
@@ -217,6 +220,7 @@ Scatter mode
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='scatter',
+                    fermi=5.590136,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -236,13 +240,13 @@ Scatter mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
@@ -252,7 +256,7 @@ Scatter mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.518 seconds)
+   **Total running time of the script:** ( 0 minutes  2.439 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_spin_polarized.py:

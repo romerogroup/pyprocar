@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.8 documentation</title>
+    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=64b6a465"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,8 +49,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/00-band_structure/plot_bandsplot_configurations';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Density of States" href="../01-dos/index.html" />
-    <link rel="prev" title="Plotting 2D band structure" href="plot_2d_bands.html" />
+    <link rel="next" title="Plotting 2D band structure" href="plot_2d_bands.html" />
+    <link rel="prev" title="Plotting band structure" href="plot_colinear.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.8 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -388,24 +388,24 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_autobands.html">Autobands plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear.html">Plotting band structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_2d_bands.html">Plotting 2D band structure</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting with Configurations in <cite>pyprocar</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_2d_bands.html">Plotting 2D band structure</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../01-dos/index.html">Density of States</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_colinear_dos.html">Plotting density of states</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -553,18 +553,18 @@ to download the full example code</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration files are located at: </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="c1"># Print the configurations</span>
-<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span><span class="n">print_plot_opts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span><span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span><span class="n">print_plot_opts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_bandsplot_configurations_001.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_001.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Configuration files are located at: z:\research projects\pyprocar\pyprocar\cfg
 
-            --------------------------------------------------------
-            There are additional plot options that are defined in a configuration file.
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
+            ----------------------------------------------------------------------------------------------------------
+            There are additional plot options that are defined in the configuration file.
+            You can change these configurations by passing the keyword argument to the function.
+            To print a list of all plot options set `print_plot_opts=True`
 
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-            --------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------
 
 spin_colors : {&#39;description&#39;: &#39;The colors for the plot lines.&#39;, &#39;value&#39;: [&#39;blue&#39;, &#39;red&#39;]}
 color : {&#39;description&#39;: &#39;The colors for the plot lines.&#39;, &#39;value&#39;: &#39;black&#39;}
@@ -612,6 +612,7 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
     <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
+    <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
     <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
     <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
     <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span>  <span class="c1"># Colormap</span>
@@ -622,13 +623,13 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
 <span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_bandsplot_configurations_002.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_002.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            --------------------------------------------------------
-            There are additional plot options that are defined in a configuration file.
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_bandsplot_configurations_002.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_002.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            ----------------------------------------------------------------------------------------------------------
+            There are additional plot options that are defined in the configuration file.
+            You can change these configurations by passing the keyword argument to the function.
+            To print a list of all plot options set `print_plot_opts=True`
 
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-            --------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------
 
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
@@ -644,6 +645,7 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
     <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span>
+    <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
     <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
     <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
     <span class="n">marker</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">],</span>  <span class="c1"># Marker style</span>
@@ -651,13 +653,13 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
 <span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_bandsplot_configurations_003.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_003.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            --------------------------------------------------------
-            There are additional plot options that are defined in a configuration file.
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_bandsplot_configurations_003.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_003.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            ----------------------------------------------------------------------------------------------------------
+            There are additional plot options that are defined in the configuration file.
+            You can change these configurations by passing the keyword argument to the function.
+            To print a list of all plot options set `print_plot_opts=True`
 
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-            --------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------
 
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
@@ -673,6 +675,7 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
     <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
     <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span>
+    <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
     <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
     <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
     <span class="n">figure_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>  <span class="c1"># Figure size (width, height)</span>
@@ -680,19 +683,19 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
 <span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_bandsplot_configurations_004.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_004.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            --------------------------------------------------------
-            There are additional plot options that are defined in a configuration file.
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_bandsplot_configurations_004.png" srcset="../../_images/sphx_glr_plot_bandsplot_configurations_004.png" alt="plot bandsplot configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            ----------------------------------------------------------------------------------------------------------
+            There are additional plot options that are defined in the configuration file.
+            You can change these configurations by passing the keyword argument to the function.
+            To print a list of all plot options set `print_plot_opts=True`
 
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-            --------------------------------------------------------
+            ----------------------------------------------------------------------------------------------------------
 
 
 (&lt;Figure size 1000x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.839 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.716 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-bandsplot-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/42a7aa17c794954244d9b4ffa5a2ac60/plot_bandsplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsplot_configurations.py</span></code></a></p>
@@ -717,20 +720,20 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_2d_bands.html"
+       href="plot_colinear.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Plotting 2D band structure</p>
+        <p class="prev-next-title">Plotting band structure</p>
       </div>
     </a>
     <a class="right-next"
-       href="../01-dos/index.html"
+       href="plot_2d_bands.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Density of States</p>
+        <p class="prev-next-title">Plotting 2D band structure</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

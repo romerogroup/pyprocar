@@ -39,6 +39,7 @@ spins=[0,1]
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='plain',
+                fermi=5.590136,
                 dirname=data_dir)
 
 ###############################################################################
@@ -49,6 +50,7 @@ spins = [1]
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='plain',
+                fermi=5.590136,
                 spins=spins,
                 dirname=data_dir)
 
@@ -66,6 +68,7 @@ spins=[0,1]
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='parametric',
+                fermi=5.590136,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -84,6 +87,7 @@ spins=[0,1]
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='scatter',
+                fermi=5.590136,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,

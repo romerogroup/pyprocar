@@ -71,7 +71,7 @@ importing pyprocar and specifying local data_dir
 Plotting primitive bands
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-50
+.. GENERATED FROM PYTHON SOURCE LINES 42-51
 
 .. code-block:: default
 
@@ -79,6 +79,7 @@ Plotting primitive bands
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='plain',
+                    fermi=4.993523,
                     elimit=[-15,5],
                     dirname=primitive_dir)
 
@@ -97,20 +98,20 @@ Plotting primitive bands
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-58
+.. GENERATED FROM PYTHON SOURCE LINES 52-59
 
 Unfolding of the supercell bands
 +++++++++++++++++++++++++++++++++++++++
@@ -120,7 +121,7 @@ the POSCAR and KPOINTS will be different from the primitive cell
 For the POSCAR, we create a 2 2 2 supercell from the primitive.
 For the KPOINTS, the paths need to be changed to reflect the change in the unitcell
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-67
+.. GENERATED FROM PYTHON SOURCE LINES 59-69
 
 .. code-block:: default
 
@@ -129,6 +130,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
             code='vasp',
             mode='plain',
             unfold_mode='both',
+            fermi=5.033090,
             dirname= supercell_dir,
             elimit=[-15,5],
             supercell_matrix=np.diag([2, 2, 2]))
@@ -154,7 +156,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -195,7 +197,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.457 seconds)
+   **Total running time of the script:** ( 0 minutes  21.979 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:

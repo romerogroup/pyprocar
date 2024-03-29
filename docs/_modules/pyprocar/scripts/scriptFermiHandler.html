@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptFermiHandler &#8212; PyProcar 6.1.7 documentation</title>
+    <title>pyprocar.scripts.scriptFermiHandler &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -454,6 +454,7 @@ document.write(`
 <div class="viewcode-block" id="FermiHandler.__init__"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html#pyprocar.scripts.FermiHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
             <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
             <span class="n">dirname</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">repair</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">apply_symmetry</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">):</span>
@@ -467,6 +468,8 @@ document.write(`
 <span class="sd">            The code name</span>
 <span class="sd">        dirname : str, optional</span>
 <span class="sd">            the directory name where the calculation is, by default &quot;&quot;</span>
+<span class="sd">        fermi : float, optional</span>
+<span class="sd">            The fermi energy. This will overide the default fermi value used found in the given directory, by default None</span>
 <span class="sd">        repair : bool, optional</span>
 <span class="sd">            Boolean to repair the PROCAR file, by default False</span>
 <span class="sd">        apply_symmetry : bool, optional</span>
@@ -479,7 +482,20 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_symmetry</span> <span class="o">=</span> <span class="n">apply_symmetry</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
+
+
+        <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                WARNING : Fermi Energy not set! Set `fermi=</span><span class="si">{value}</span><span class="s2">`. By default, using fermi energy found in given directory.</span>
+<span class="s2">                ---------------------------------------------------------------------------------------------------------------</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">=</span><span class="n">fermi</span>
+
+
+
         <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">rotations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">ibz2fbz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">rotations</span><span class="p">)</span>

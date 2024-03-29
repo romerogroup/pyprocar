@@ -63,12 +63,16 @@ importing pyprocar and specifying local data_dir
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-46
+.. GENERATED FROM PYTHON SOURCE LINES 36-50
 
 .. code-block:: default
 
     spins=[0]
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+    handler = pyprocar.BandStructure2DHandler(code='vasp',
+                                              dirname=data_dir,
+                                              fermi=-0.795606,
+                                              apply_symmetry=False,
+                                              )
     handler.plot_band_structure(mode='plain',
                                 add_fermi_plane=True,
                                 bands=[3,4],
@@ -91,14 +95,14 @@ Plain mode
  .. code-block:: none
 
 
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
                     You can change these configurations by passing the keyword argument to the function
                     To print a list of plot options set print_plot_opts=True
 
                     Here is a list modes : plain , parametric , spin_texture , overlay
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                 
     Bands used in the plotting:  [3, 4]
     Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
@@ -107,12 +111,12 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-49
+.. GENERATED FROM PYTHON SOURCE LINES 51-53
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-59
+.. GENERATED FROM PYTHON SOURCE LINES 53-63
 
 .. code-block:: default
 
@@ -120,7 +124,7 @@ Parametric mode
     atoms=[0,1]
     orbitals=[1,2,3]
     spins=[0]
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
     handler.plot_band_structure(mode='parametric',
                                atoms=atoms,
                                orbitals=orbitals,
@@ -140,30 +144,30 @@ Parametric mode
  .. code-block:: none
 
 
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
                     You can change these configurations by passing the keyword argument to the function
                     To print a list of plot options set print_plot_opts=True
 
                     Here is a list modes : plain , parametric , spin_texture , overlay
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                 
     Bands used in the plotting:  [3, 4]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-62
+.. GENERATED FROM PYTHON SOURCE LINES 64-66
 
 Property Projection mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-72
+.. GENERATED FROM PYTHON SOURCE LINES 66-76
 
 .. code-block:: default
 
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
     handler.plot_band_structure(mode='property_projection',
                                property_name='band_velocity',
                                bands=[3,4],
@@ -187,14 +191,14 @@ Property Projection mode
  .. code-block:: none
 
 
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
                     You can change these configurations by passing the keyword argument to the function
                     To print a list of plot options set print_plot_opts=True
 
                     Here is a list modes : plain , parametric , spin_texture , overlay
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                 
     Bands used in the plotting:  [3, 4]
     Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
@@ -203,12 +207,12 @@ Property Projection mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-75
+.. GENERATED FROM PYTHON SOURCE LINES 77-79
 
 Spin Texture mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-95
+.. GENERATED FROM PYTHON SOURCE LINES 79-99
 
 .. code-block:: default
 
@@ -218,7 +222,7 @@ Spin Texture mode
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-1.1904,apply_symmetry=False)
     handler.plot_band_structure(mode='spin_texture',
                                spin_texture=True,
                                atoms=atoms,
@@ -246,14 +250,14 @@ Spin Texture mode
  .. code-block:: none
 
 
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
                     You can change these configurations by passing the keyword argument to the function
                     To print a list of plot options set print_plot_opts=True
 
                     Here is a list modes : plain , parametric , spin_texture , overlay
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                    --------------------------------------------------------
+                    ----------------------------------------------------------------------------------------------------------
                 
     Bands used in the plotting:  [16, 17, 18, 19, 20, 21]
 
@@ -263,7 +267,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  31.780 seconds)
+   **Total running time of the script:** ( 3 minutes  13.652 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_2d_bands.py:

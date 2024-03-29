@@ -40,11 +40,17 @@ dos_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}v
 # These keyword arguments can be set in bands_settings and dos_settings as done below.
 #
 
-bands_settings = {'mode':'plain',
-                'dirname': bands_dir}
+bands_settings = {
+                  'mode':'plain',
+                  'fermi':5.599480, # This will overide the default fermi value found in bands directory
+                  'dirname': bands_dir
+                  }
 
-dos_settings = {'mode':'plain',
-                'dirname': dos_dir}
+dos_settings = {
+               'mode':'plain',
+               'fermi':5.599480,   # This will overide the default fermi value found in dos directory
+               'dirname': dos_dir
+                }
 
 pyprocar.bandsdosplot(code='vasp',
                 bands_settings=bands_settings,

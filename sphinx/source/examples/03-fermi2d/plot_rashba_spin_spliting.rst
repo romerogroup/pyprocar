@@ -64,7 +64,7 @@ energy = 0.60 sx projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-45
+.. GENERATED FROM PYTHON SOURCE LINES 36-46
 
 .. code-block:: default
 
@@ -72,6 +72,7 @@ energy = 0.60 sx projection no arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=0.60,
+                   fermi=-1.1904,
                    spin_texture=True,
                    no_arrow=True,
                    spin_projection='x',
@@ -98,7 +99,7 @@ energy = 0.60 sx projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -144,13 +145,13 @@ energy = 0.60 sx projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-49
+.. GENERATED FROM PYTHON SOURCE LINES 47-50
 
 energy = 0.60 sy projection no arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-59
+.. GENERATED FROM PYTHON SOURCE LINES 50-61
 
 .. code-block:: default
 
@@ -158,6 +159,7 @@ energy = 0.60 sy projection no arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=0.60,
+                   fermi=-1.1904,
                    spin_texture=True,
                    no_arrow=True,
                    spin_projection='y',
@@ -185,7 +187,7 @@ energy = 0.60 sy projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -231,13 +233,13 @@ energy = 0.60 sy projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-63
+.. GENERATED FROM PYTHON SOURCE LINES 62-65
 
 energy = 0.60 sz projection no arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-72
+.. GENERATED FROM PYTHON SOURCE LINES 65-75
 
 .. code-block:: default
 
@@ -245,6 +247,7 @@ energy = 0.60 sz projection no arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=0.60,
+                   fermi=-1.1904,
                    spin_texture=True,
                    no_arrow=True,
                    spin_projection='z',
@@ -271,7 +274,7 @@ energy = 0.60 sz projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -317,13 +320,13 @@ energy = 0.60 sz projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-76
+.. GENERATED FROM PYTHON SOURCE LINES 76-79
 
 energy = -0.90 sx projection no arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-85
+.. GENERATED FROM PYTHON SOURCE LINES 79-89
 
 .. code-block:: default
 
@@ -331,6 +334,7 @@ energy = -0.90 sx projection no arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=-0.90,
+                   fermi=-1.1904,
                    spin_texture=True,
                    no_arrow=True,
                    spin_projection='x',
@@ -357,7 +361,7 @@ energy = -0.90 sx projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -403,13 +407,13 @@ energy = -0.90 sx projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-89
+.. GENERATED FROM PYTHON SOURCE LINES 90-93
 
 energy = -0.90 sy projection no arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-99
+.. GENERATED FROM PYTHON SOURCE LINES 93-104
 
 .. code-block:: default
 
@@ -417,6 +421,7 @@ energy = -0.90 sy projection no arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=-0.90,
+                   fermi=-1.1904,
                    spin_texture=True,
                    no_arrow=True,
                    spin_projection='y',
@@ -444,7 +449,7 @@ energy = -0.90 sy projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -490,13 +495,13 @@ energy = -0.90 sy projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-103
+.. GENERATED FROM PYTHON SOURCE LINES 105-108
 
 energy = -0.90 sz projection no arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-113
+.. GENERATED FROM PYTHON SOURCE LINES 108-119
 
 .. code-block:: default
 
@@ -504,6 +509,7 @@ energy = -0.90 sz projection no arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=-0.90,
+                   fermi=-1.1904,
                    spin_texture=True,
                    no_arrow=True,
                    spin_projection='z',
@@ -531,7 +537,7 @@ energy = -0.90 sz projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -577,13 +583,13 @@ energy = -0.90 sz projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-117
+.. GENERATED FROM PYTHON SOURCE LINES 120-123
 
 energy = 0.60 sx projection with arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-127
+.. GENERATED FROM PYTHON SOURCE LINES 123-134
 
 .. code-block:: default
 
@@ -591,6 +597,7 @@ energy = 0.60 sx projection with arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=0.60,
+                   fermi=-1.1904,
                    spin_texture=True,
                    spin_projection='x',
                    arrow_size=3,
@@ -618,7 +625,7 @@ energy = 0.60 sx projection with arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -664,13 +671,13 @@ energy = 0.60 sx projection with arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-131
+.. GENERATED FROM PYTHON SOURCE LINES 135-138
 
 energy = -0.90 sx projection with arrows 
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-140
+.. GENERATED FROM PYTHON SOURCE LINES 138-148
 
 .. code-block:: default
 
@@ -678,6 +685,7 @@ energy = -0.90 sx projection with arrows
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
                    energy=-0.90,
+                   fermi=-1.1904,
                    spin_texture=True,
                    spin_projection='x',
                    arrow_size=3,
@@ -704,7 +712,7 @@ energy = -0.90 sx projection with arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -753,7 +761,7 @@ energy = -0.90 sx projection with arrows
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  51.878 seconds)
+   **Total running time of the script:** ( 0 minutes  47.411 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_rashba_spin_spliting.py:

@@ -67,7 +67,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-48
+.. GENERATED FROM PYTHON SOURCE LINES 38-49
 
 .. code-block:: default
 
@@ -78,6 +78,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.dosplot(
                     code='vasp', 
                     mode='parametric',
+                    fermi=5.5962,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -102,16 +103,15 @@ For details on the meaning of the indices of the atomic projection please refer 
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.803 seconds)
+   **Total running time of the script:** ( 0 minutes  5.196 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_noncolinear_dos_vasp.py:

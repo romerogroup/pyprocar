@@ -62,7 +62,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-56
+.. GENERATED FROM PYTHON SOURCE LINES 36-63
 
 .. code-block:: default
 
@@ -75,11 +75,18 @@ Before diving into plotting, we need to download the example files. Use the foll
     # These keyword arguments can be set in `bands_settings` and `dos_settings` as demonstrated below.
     #
 
-    bands_settings = {'mode':'plain',
-                    'dirname': bands_dir}
 
-    dos_settings = {'mode':'plain',
-                    'dirname': dos_dir}
+    bands_settings = {
+                      'mode':'plain',
+                      'fermi':5.599480, # This will overide the default fermi value found in bands directory
+                      'dirname': bands_dir
+                      }
+
+    dos_settings = {
+                   'mode':'plain',
+                   'fermi':5.599480,   # This will overide the default fermi value found in dos directory
+                   'dirname': dos_dir
+                    }
 
     pyprocar.bandsdosplot(code='vasp',
                     bands_settings=bands_settings,
@@ -107,7 +114,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -128,13 +135,13 @@ Before diving into plotting, we need to download the example files. Use the foll
     - Freddy Farah
     
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
                 --------------------------------------------------------
@@ -144,13 +151,12 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
     (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-93
+.. GENERATED FROM PYTHON SOURCE LINES 64-102
 
 .. code-block:: default
 
@@ -165,6 +171,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     bands_settings = {
         'mode': 'scatter',
         'dirname': bands_dir,
+        'fermi':5.599480, # This will overide the default fermi value found in bands directory
         'atoms':[0],
         'orbitals':[4,5,6,7,8],
         'cmap': 'viridis',
@@ -177,6 +184,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     dos_settings = {
         'mode': 'parametric',
         'dirname': dos_dir,
+        'fermi':5.599480,   # This will overide the default fermi value found in dos directory
         'atoms':[0],
         'orbitals':[4,5,6,7,8],
         'cmap': 'viridis',
@@ -211,7 +219,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -232,13 +240,13 @@ Before diving into plotting, we need to download the example files. Use the foll
     - Freddy Farah
     
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
                 --------------------------------------------------------
@@ -248,13 +256,12 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
     (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-118
+.. GENERATED FROM PYTHON SOURCE LINES 103-127
 
 .. code-block:: default
 
@@ -303,7 +310,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -324,13 +331,17 @@ Before diving into plotting, we need to download the example files. Use the foll
     - Freddy Farah
     
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
+            
+
+                WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+                ----------------------------------------------------------------------------------------------------------
             
 
                 --------------------------------------------------------
@@ -340,16 +351,19 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
+
+                WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy.
+                ----------------------------------------------------------------------------------------------------------
             
 
-    (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
+    (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.862 seconds)
+   **Total running time of the script:** ( 0 minutes  2.275 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot_configurations.py:

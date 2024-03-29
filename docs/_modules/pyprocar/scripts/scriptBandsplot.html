@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptBandsplot &#8212; PyProcar 6.1.7 documentation</title>
+    <title>pyprocar.scripts.scriptBandsplot &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -457,6 +457,7 @@ document.write(`
     <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">items</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{},</span>
     <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fermi_shift</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">interpolation_factor</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">interpolation_type</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
     <span class="n">projection_mask</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -489,7 +490,10 @@ document.write(`
 <span class="sd">    items : dict, optional</span>
 <span class="sd">        A dictionary where the keys are the atoms and the values a list of orbitals, by default {}</span>
 <span class="sd">    fermi : float, optional</span>
-<span class="sd">        Float for the fermi energy, by default None</span>
+<span class="sd">        Float for the fermi energy, by default None. By default the fermi energy will be shifted by the fermi value that is found in the directory. </span>
+<span class="sd">        For band structure calculations, due to convergence issues, this fermi energy might not be accurate. If so add the fermi energy from the self-consistent calculation. </span>
+<span class="sd">    fermi_shift : float, optional</span>
+<span class="sd">        Float to shift the fermi energy, by default 0.</span>
 <span class="sd">    interpolation_factor : int, optional</span>
 <span class="sd">        The interpolation_factor, by default 1</span>
 <span class="sd">    interpolation_type : str, optional</span>
@@ -516,13 +520,13 @@ document.write(`
            <span class="s2">&quot;overlay&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_species&quot;</span><span class="p">,</span> <span class="s2">&quot;overlay_orbitals&quot;</span><span class="p">,</span> <span class="s2">&quot;ipr&quot;</span><span class="p">]</span>
     <span class="n">modes_txt</span><span class="o">=</span><span class="s1">&#39; , &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">modes</span><span class="p">)</span>
     <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            --------------------------------------------------------</span>
-<span class="s2">            There are additional plot options that are defined in a configuration file. </span>
-<span class="s2">            You can change these configurations by passing the keyword argument to the function</span>
-<span class="s2">            To print a list of plot options set print_plot_opts=True</span>
+<span class="s2">            ----------------------------------------------------------------------------------------------------------</span>
+<span class="s2">            There are additional plot options that are defined in the configuration file. </span>
+<span class="s2">            You can change these configurations by passing the keyword argument to the function.</span>
+<span class="s2">            To print a list of all plot options set `print_plot_opts=True`</span>
 
 <span class="s2">            Here is a list modes : </span><span class="si">{</span><span class="n">modes_txt</span><span class="si">}</span>
-<span class="s2">            --------------------------------------------------------</span>
+<span class="s2">            ----------------------------------------------------------------------------------------------------------</span>
 <span class="s2">            &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
@@ -534,14 +538,20 @@ document.write(`
     <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
     <span class="n">kpath</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">kpath</span>
 
-    <span class="c1"># shifting fermi to 0</span>
-    <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">-=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
-    <span class="k">if</span> <span class="n">fermi</span><span class="p">:</span>
-        <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">+=</span> <span class="n">fermi</span>
-        <span class="n">fermi_level</span> <span class="o">=</span> <span class="n">fermi</span>
+    <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">-=</span> <span class="n">fermi</span>
+        <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">+=</span> <span class="n">fermi_shift</span>
+        <span class="n">fermi_level</span> <span class="o">=</span> <span class="n">fermi_shift</span>
+        <span class="n">y_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;E - E$_F$ (eV)&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">fermi_level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">y_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;E (eV)&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            WARNING : `fermi` is not set! Set `fermi=</span><span class="si">{value}</span><span class="s2">`. The plot did not shift the bands by the Fermi energy.</span>
+<span class="s2">            ----------------------------------------------------------------------------------------------------------</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+    
 
+    
 
     <span class="c1"># fixing the spin, to plot two channels into one (down is negative)</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
@@ -700,8 +710,11 @@ document.write(`
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">elimit</span><span class="p">)</span>
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">()</span>
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
-    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span><span class="n">fermi_level</span><span class="o">=</span><span class="n">fermi_level</span><span class="p">)</span>
-    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">()</span>
+    <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">y_label</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ebs_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span><span class="n">fermi_level</span><span class="o">=</span><span class="n">fermi_level</span><span class="p">)</span>
+    
 
 
     <span class="n">ebs_plot</span><span class="o">.</span><span class="n">set_title</span><span class="p">()</span>

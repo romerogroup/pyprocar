@@ -73,20 +73,20 @@ This mode will use color coding to illustrate the projection of atoms and orbita
 3. ``mode='parametric_line'``
 =============================
 
-This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(``orbitals=[1,2,3]``) of O(``atoms=[2,3,4]``) in SrVO\ :sub:`3`\
+This mode will use curves to plot the projected density of states. The following will plot shows the projection of d orbitals(``orbitals=[4,5,6,7,8]``) of Fe(``atoms=[0]``) in Fe.
 
 
->>>  pyprocar.bandsdosplot(code='vasp',
-...                        dirname='vasp_dir',
-...                        mode='parametric_line',
-...                        orbitals=[1, 2, 3],
-...                        atoms=[2, 3, 4],
-...                        elimit=[-4, 4],
-...                        labels=['O-up', 'O-down'],
-...                        plot_total=True)
+>>>  pyprocar.dosplot(
+...                  code='qe', 
+...                  mode='parametric_line',
+...                  fermi=5.599480,
+...                  atoms=[0],
+...                  orbitals=[4,5,6,7,8],
+...                  spins=[0],
+...                  dirname=data_dir)
 
 
-.. image:: ../images/dos_parameteric_line.png
+.. image:: ../images/dos_parametric_line.png
 
 
 4. ``mode='stack'``
@@ -137,7 +137,48 @@ This mode is another variation of ``mode=='stack'``, This mode will plot the sel
 ...                   elimit=[-4, 4],
 ...                   plot_total=True)
 
-.. image:: ../images/dos_stack_orbitals.png
+
+7. ``mode='overlay'``
+============================
+
+This mode is another variation of ``mode=='overlay'``. This mode will plot the selected atoms and orbitals. The following will plot shows the projection of d orbitals(``orbitals=[4,5,6,7,8]``) of Fe(``atoms=[0]``) in Fe.
+
+>>>  pyprocar.dosplot(
+...                  code='qe',
+...                  mode='overlay',
+...                  fermi=5.599480,
+...                  items=items,
+...                  dirname=data_dir)
+
+.. image:: ../images/dos_overlay.png
+
+8. ``mode='overlay_species'``
+===============================
+
+This mode is another variation of ``mode=='overlay_species'``. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if ``orbitals=[4,5,6,7,8]``, PyProcar will plot all the d orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)
+
+>>>  pyprocar.dosplot(
+...                  code='qe',
+...                  mode='overlay_species',
+...                  fermi=5.599480,
+...                  orbitals=[4,5,6,7,8],
+...                  dirname=data_dir)
+
+.. image:: ../images/dos_overlay_species.png
+
+9. ``mode='overlay_orbitals'``
+===============================
+
+This mode is another variation of ``mode=='overlay_orbitals'``. This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following will plot shows all the orbitals for Fe(``atoms=[0]``).
+
+>>>  pyprocar.dosplot(
+...                  code='qe',
+...                  mode='overlay',
+...                  fermi=5.599480,
+...                  atoms=[0],
+...                  dirname=data_dir)
+
+.. image:: ../images/dos_overlay_orbitals.png
 
 .. automodule:: pyprocar.scriptDosplot
 	:members:

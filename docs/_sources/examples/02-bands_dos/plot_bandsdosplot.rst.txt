@@ -70,16 +70,22 @@ The keywords that works for bandsplot and dosplot will work in bandsdosplot.
 These keyword arguments can be set in bands_settings and dos_settings as done below.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-55
+.. GENERATED FROM PYTHON SOURCE LINES 42-61
 
 .. code-block:: default
 
 
-    bands_settings = {'mode':'plain',
-                    'dirname': bands_dir}
+    bands_settings = {
+                      'mode':'plain',
+                      'fermi':5.599480, # This will overide the default fermi value found in bands directory
+                      'dirname': bands_dir
+                      }
 
-    dos_settings = {'mode':'plain',
-                    'dirname': dos_dir}
+    dos_settings = {
+                   'mode':'plain',
+                   'fermi':5.599480,   # This will overide the default fermi value found in dos directory
+                   'dirname': dos_dir
+                    }
 
     pyprocar.bandsdosplot(code='vasp',
                     bands_settings=bands_settings,
@@ -108,7 +114,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -129,13 +135,13 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
     - Freddy Farah
     
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
                 --------------------------------------------------------
@@ -145,7 +151,6 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
     (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
@@ -154,7 +159,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.509 seconds)
+   **Total running time of the script:** ( 0 minutes  0.385 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot.py:

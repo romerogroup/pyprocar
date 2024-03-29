@@ -135,25 +135,33 @@ and the associated localized states.
     [[0, 0.953], [0, 0.956]]
     []
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+                ----------------------------------------------------------------------------------------------------------
+            
+
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
+
+                WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
+                ----------------------------------------------------------------------------------------------------------
+            
 
 
 
@@ -161,7 +169,7 @@ and the associated localized states.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  26.997 seconds)
+   **Total running time of the script:** ( 0 minutes  25.670 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_autobands.py:

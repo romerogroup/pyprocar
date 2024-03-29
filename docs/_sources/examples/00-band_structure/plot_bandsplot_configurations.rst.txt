@@ -80,7 +80,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     print(f"Configuration files are located at: {config_path}")
 
     # Print the configurations
-    pyprocar.bandsplot(code=code,dirname=data_dir,print_plot_opts=True)
+    pyprocar.bandsplot(code=code,dirname=data_dir,fermi=5.590136,print_plot_opts=True)
 
 
 
@@ -97,13 +97,13 @@ Before diving into plotting, we need to download the example files. Use the foll
 
     Configuration files are located at: z:\research projects\pyprocar\pyprocar\cfg
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
     spin_colors : {'description': 'The colors for the plot lines.', 'value': ['blue', 'red']}
     color : {'description': 'The colors for the plot lines.', 'value': 'black'}
@@ -141,7 +141,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-75
+.. GENERATED FROM PYTHON SOURCE LINES 53-76
 
 .. code-block:: default
 
@@ -157,6 +157,7 @@ Before diving into plotting, we need to download the example files. Use the foll
         code=code,
         dirname=data_dir,
         mode='parametric',
+        fermi=5.590136,
         atoms=[0],
         orbitals=[4,5,6,7,8],
         cmap='viridis',  # Colormap
@@ -181,20 +182,20 @@ Before diving into plotting, we need to download the example files. Use the foll
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-93
+.. GENERATED FROM PYTHON SOURCE LINES 77-95
 
 .. code-block:: default
 
@@ -209,6 +210,7 @@ Before diving into plotting, we need to download the example files. Use the foll
         code=code,
         dirname=data_dir,
         mode='scatter',
+        fermi=5.590136,
         atoms=[0],
         orbitals=[4,5,6,7,8],
         marker=['v','o'],  # Marker style
@@ -229,20 +231,20 @@ Before diving into plotting, we need to download the example files. Use the foll
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-111
+.. GENERATED FROM PYTHON SOURCE LINES 96-114
 
 .. code-block:: default
 
@@ -257,6 +259,7 @@ Before diving into plotting, we need to download the example files. Use the foll
         code=code,
         dirname=data_dir,
         mode='scatter',
+        fermi=5.590136,
         atoms=[0],
         orbitals=[4,5,6,7,8],
         figure_size=(10, 6),  # Figure size (width, height)
@@ -277,13 +280,13 @@ Before diving into plotting, we need to download the example files. Use the foll
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
@@ -293,7 +296,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.839 seconds)
+   **Total running time of the script:** ( 0 minutes  2.716 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:

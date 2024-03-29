@@ -38,6 +38,7 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 pyprocar.bandsplot(
                 code='qe', 
                 mode='plain',
+                fermi=18.0536,
                 dirname=data_dir)
 
 ###############################################################################
@@ -55,6 +56,7 @@ orbitals=[8,9,10,11,12,13,14,15,16,17]
 pyprocar.bandsplot(
                 code='qe', 
                 mode='parametric',
+                fermi=18.0536,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,

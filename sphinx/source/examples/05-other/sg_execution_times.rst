@@ -6,14 +6,14 @@
 
 Computation times
 =================
-**00:05.968** total execution time for **examples_05-other** files:
+**00:05.617** total execution time for **examples_05-other** files:
 
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_05-other_plot_ebs.py` (``plot_ebs.py``)                               | 00:04.765 | 0.0 MB |
+| :ref:`sphx_glr_examples_05-other_plot_ebs.py` (``plot_ebs.py``)                               | 00:04.394 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_05-other_plot_kpath_generation.py` (``plot_kpath_generation.py``)     | 00:00.599 | 0.0 MB |
+| :ref:`sphx_glr_examples_05-other_plot_kpath_generation.py` (``plot_kpath_generation.py``)     | 00:00.573 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_05-other_plot_2dkmesh_generation.py` (``plot_2dkmesh_generation.py``) | 00:00.466 | 0.0 MB |
+| :ref:`sphx_glr_examples_05-other_plot_2dkmesh_generation.py` (``plot_2dkmesh_generation.py``) | 00:00.521 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_05-other_plot_bandgap.py` (``plot_bandgap.py``)                       | 00:00.138 | 0.0 MB |
+| :ref:`sphx_glr_examples_05-other_plot_bandgap.py` (``plot_bandgap.py``)                       | 00:00.129 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+

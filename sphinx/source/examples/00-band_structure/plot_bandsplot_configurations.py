@@ -47,7 +47,7 @@ config_path = os.path.join(pyprocar.__path__[0], 'cfg')
 print(f"Configuration files are located at: {config_path}")
 
 # Print the configurations
-pyprocar.bandsplot(code=code,dirname=data_dir,print_plot_opts=True)
+pyprocar.bandsplot(code=code,dirname=data_dir,fermi=5.590136,print_plot_opts=True)
 
 ###############################################################################
 
@@ -62,6 +62,7 @@ pyprocar.bandsplot(
     code=code,
     dirname=data_dir,
     mode='parametric',
+    fermi=5.590136,
     atoms=[0],
     orbitals=[4,5,6,7,8],
     cmap='viridis',  # Colormap
@@ -84,6 +85,7 @@ pyprocar.bandsplot(
     code=code,
     dirname=data_dir,
     mode='scatter',
+    fermi=5.590136,
     atoms=[0],
     orbitals=[4,5,6,7,8],
     marker=['v','o'],  # Marker style
@@ -102,6 +104,7 @@ pyprocar.bandsplot(
     code=code,
     dirname=data_dir,
     mode='scatter',
+    fermi=5.590136,
     atoms=[0],
     orbitals=[4,5,6,7,8],
     figure_size=(10, 6),  # Figure size (width, height)

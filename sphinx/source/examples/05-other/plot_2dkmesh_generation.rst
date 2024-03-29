@@ -108,7 +108,7 @@ importing pyprocar and specifying local data_dir
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -135,7 +135,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.466 seconds)
+   **Total running time of the script:** ( 0 minutes  0.521 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_2dkmesh_generation.py:

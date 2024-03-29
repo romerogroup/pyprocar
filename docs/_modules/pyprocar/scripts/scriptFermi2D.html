@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptFermi2D &#8212; PyProcar 6.1.7 documentation</title>
+    <title>pyprocar.scripts.scriptFermi2D &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -448,10 +448,12 @@ document.write(`
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;pyprocar&#39;</span><span class="p">,</span><span class="s1">&#39;cfg&#39;</span><span class="p">,</span><span class="s1">&#39;fermi_surface_2d.yml&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
     <span class="n">plot_opt</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
-<div class="viewcode-block" id="fermi2D"><a class="viewcode-back" href="../../../user-guide/fermi2d.html#pyprocar.scripts.fermi2D">[docs]</a><span class="k">def</span> <span class="nf">fermi2D</span><span class="p">(</span>
+<div class="viewcode-block" id="fermi2D"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.fermi2D.html#pyprocar.scripts.fermi2D">[docs]</a><span class="k">def</span> <span class="nf">fermi2D</span><span class="p">(</span>
     <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
     <span class="n">dirname</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
     <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
+    <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fermi_shift</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
     <span class="n">band_indices</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">band_colors</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">spins</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -477,6 +479,10 @@ document.write(`
 <span class="sd">        This parameter sets the code to parse, by default &quot;vasp&quot;</span>
 <span class="sd">    dirname : str, optional</span>
 <span class="sd">        This parameter is the directory of the calculation, by default &#39;&#39;</span>
+<span class="sd">    fermi : float, optional</span>
+<span class="sd">        The fermi energy. If none is given, the fermi energy in the directory will be used, by default None</span>
+<span class="sd">    fermi_shift : float, optional</span>
+<span class="sd">        The fermi energy shift, by default 0.0</span>
 <span class="sd">    lobster : bool, optional</span>
 <span class="sd">        A boolean value to determine to use lobster, by default False</span>
 <span class="sd">    band_indices : List[List]</span>
@@ -562,7 +568,24 @@ document.write(`
     <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
     <span class="n">ebs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
-    <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">-=</span> <span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
+
+    <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">-=</span> <span class="n">fermi</span>
+        <span class="n">ebs</span><span class="o">.</span><span class="n">bands</span> <span class="o">+=</span> <span class="n">fermi_shift</span>
+        <span class="n">fermi_level</span> <span class="o">=</span> <span class="n">fermi_shift</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            WARNING : `fermi` is not set! Set `fermi=</span><span class="si">{value}</span><span class="s2">`. The plot did not shift the bands by the Fermi energy.</span>
+<span class="s2">            ----------------------------------------------------------------------------------------------------------</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            WARNING : Make sure the kmesh has kz points with kz=</span><span class="si">{</span><span class="n">k_z_plane</span><span class="si">}</span><span class="s2"> +- </span><span class="si">{</span><span class="n">k_z_plane_tol</span><span class="si">}</span>
+<span class="s2">            ----------------------------------------------------------------------------------------------------------</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+    <span class="p">)</span>
+
+
 
     <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">rotations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ebs</span><span class="o">.</span><span class="n">ibz2fbz</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rotations</span><span class="p">)</span>

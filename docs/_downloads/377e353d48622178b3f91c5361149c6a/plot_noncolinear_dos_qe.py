@@ -43,6 +43,7 @@ orbitals=[8,9,10,11,12,13,14,15,16,17]
 pyprocar.dosplot(
                 code='qe', 
                 mode='parametric',
+                fermi=18.0536,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,

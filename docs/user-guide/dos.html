@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Density of States &#8212; PyProcar 6.1.8 documentation</title>
+    <title>Density of States &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=64b6a465"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.8 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -510,18 +510,18 @@ The following will be the change in usage of <code class="docutils literal notra
 </section>
 <section id="mode-parametric-line">
 <h2>3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code><a class="headerlink" href="#mode-parametric-line" title="Permalink to this heading">#</a></h2>
-<p>This mode might be the most familiar mode to the users. This mode will use curves to plot the projected density of states. The following will plot shows the projection of p orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>) of O(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>) in SrVO<sub>3</sub></p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsdosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
-<span class="gp">... </span>                       <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
-<span class="gp">... </span>                       <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
-<span class="gp">... </span>                       <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-<span class="gp">... </span>                       <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
-<span class="gp">... </span>                       <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
-<span class="gp">... </span>                       <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;O-up&#39;</span><span class="p">,</span> <span class="s1">&#39;O-down&#39;</span><span class="p">],</span>
-<span class="gp">... </span>                       <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<p>This mode will use curves to plot the projected density of states. The following will plot shows the projection of d orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code>) of Fe(<code class="docutils literal notranslate"><span class="pre">atoms=[0]</span></code>) in Fe.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/dos_parameteric_line.png" src="../_images/dos_parameteric_line.png" />
+<img alt="../_images/dos_parametric_line.png" src="../_images/dos_parametric_line.png" />
 </section>
 <section id="mode-stack">
 <h2>4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code><a class="headerlink" href="#mode-stack" title="Permalink to this heading">#</a></h2>
@@ -563,7 +563,45 @@ The following will be the change in usage of <code class="docutils literal notra
 <span class="gp">... </span>                  <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/dos_stack_orbitals.png" src="../_images/dos_stack_orbitals.png" />
+</section>
+<section id="mode-overlay">
+<h2>7. <code class="docutils literal notranslate"><span class="pre">mode='overlay'</span></code><a class="headerlink" href="#mode-overlay" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='overlay'</span></code>. This mode will plot the selected atoms and orbitals. The following will plot shows the projection of d orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code>) of Fe(<code class="docutils literal notranslate"><span class="pre">atoms=[0]</span></code>) in Fe.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_overlay.png" src="../_images/dos_overlay.png" />
+</section>
+<section id="mode-overlay-species">
+<h2>8. <code class="docutils literal notranslate"><span class="pre">mode='overlay_species'</span></code><a class="headerlink" href="#mode-overlay-species" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='overlay_species'</span></code>. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if <code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code>, PyProcar will plot all the d orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_species&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_overlay_species.png" src="../_images/dos_overlay_species.png" />
+</section>
+<section id="mode-overlay-orbitals">
+<h2>9. <code class="docutils literal notranslate"><span class="pre">mode='overlay_orbitals'</span></code><a class="headerlink" href="#mode-overlay-orbitals" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='overlay_orbitals'</span></code>. This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following will plot shows all the orbitals for Fe(<code class="docutils literal notranslate"><span class="pre">atoms=[0]</span></code>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_overlay_orbitals.png" src="../_images/dos_overlay_orbitals.png" />
 <span class="target" id="module-pyprocar.scriptDosplot"></span></section>
 </section>
 
@@ -620,6 +658,9 @@ The following will be the change in usage of <code class="docutils literal notra
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-stack">4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-stack-species">5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-stack-orbitals">6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-overlay">7. <code class="docutils literal notranslate"><span class="pre">mode='overlay'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-overlay-species">8. <code class="docutils literal notranslate"><span class="pre">mode='overlay_species'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-overlay-orbitals">9. <code class="docutils literal notranslate"><span class="pre">mode='overlay_orbitals'</span></code></a></li>
 </ul>
   </nav></div>
 

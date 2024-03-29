@@ -37,6 +37,7 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='plain',
+                fermi=5.596151,
                 dirname=data_dir)
 
 ###############################################################################
@@ -53,6 +54,7 @@ spins=[0]
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='parametric',
+                fermi=5.596151,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,

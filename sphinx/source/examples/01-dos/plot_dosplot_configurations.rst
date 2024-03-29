@@ -80,7 +80,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     print(f"Configuration files are located at: {config_path}")
 
     # Print the configurations
-    pyprocar.dosplot(code=code, dirname=data_dir, print_plot_opts=True)
+    pyprocar.dosplot(code=code, dirname=data_dir,fermi=5.599480, print_plot_opts=True)
 
 
 
@@ -104,7 +104,6 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
     cmap : {'description': 'The colormap used for the plot.', 'value': 'jet'}
     colors : {'description': 'List of colors for the plot lines.', 'value': ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'orange', 'purple', 'brown', 'navy', 'maroon', 'olive']}
     colorbar_title : {'description': 'Title of the colorbar.', 'value': 'Atomic Orbital Projections'}
@@ -141,15 +140,15 @@ Before diving into plotting, we need to download the example files. Use the foll
     weighted_width : {'description': 'If true, the width of the lines will be weighted.', 'value': False}
     clim : {'description': 'Value range to scale the colorbar', 'value': None}
     stack_y_label : {'description': 'The label for the y-axis for stack mode', 'value': 'DOS'}
-    x_label : {'description': 'The label for the x-axis.', 'value': 'Energy (eV)'}
-    y_label : {'description': 'The label for the y-axis.', 'value': 'DOS'}
+    x_label : {'description': 'The label for the x-axis.', 'value': None}
+    y_label : {'description': 'The label for the y-axis.', 'value': None}
     dpi : {'description': "The resolution in dots per inch. If 'figure', use the figure's dpi value.", 'value': 'figure'}
 
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-74
+.. GENERATED FROM PYTHON SOURCE LINES 53-75
 
 .. code-block:: default
 
@@ -164,6 +163,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     pyprocar.dosplot(
         code=code,
         dirname=data_dir,
+        fermi=5.599480,
         atoms=[0],
         orbitals=[4,5,6,7,8],
         mode='parametric',
@@ -195,13 +195,12 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
-
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-92
+
+.. GENERATED FROM PYTHON SOURCE LINES 76-94
 
 .. code-block:: default
 
@@ -215,6 +214,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     pyprocar.dosplot(
         code=code,
         dirname=data_dir,
+        fermi=5.599480,
         atoms=[0],
         orbitals=[4,5,6,7,8],
         mode='parametric_line',
@@ -243,16 +243,15 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+    (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.965 seconds)
+   **Total running time of the script:** ( 0 minutes  1.736 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_dosplot_configurations.py:

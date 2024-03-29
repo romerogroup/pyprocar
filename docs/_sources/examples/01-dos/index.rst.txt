@@ -49,6 +49,23 @@ These examples demonstrate the density of states plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of stat...">
+
+.. only:: html
+
+  .. image:: /examples/01-dos/images/thumb/sphx_glr_plot_dosplot_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting density example.">
 
 .. only:: html
@@ -83,23 +100,6 @@ These examples demonstrate the density of states plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of stat...">
-
-.. only:: html
-
-  .. image:: /examples/01-dos/images/thumb/sphx_glr_plot_dosplot_configurations_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
-    </div>
-
-
-.. raw:: html
-
     </div>
 
 
@@ -108,7 +108,7 @@ These examples demonstrate the density of states plotting capabilities.
 
    /examples/01-dos/plot_noncolinear_dos_vasp
    /examples/01-dos/plot_noncolinear_dos_qe
+   /examples/01-dos/plot_dosplot_configurations
    /examples/01-dos/plot_colinear_dos
    /examples/01-dos/plot_spin_polarized_dos
-   /examples/01-dos/plot_dosplot_configurations
 

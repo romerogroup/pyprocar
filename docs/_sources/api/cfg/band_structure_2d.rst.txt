@@ -187,7 +187,7 @@ y_axes_label
 z_axes_label
 ------------
 
-:value: Kz
+:value: E
 
 :description: Controls kz axis label
 
@@ -374,6 +374,14 @@ grid_ztitle
 :value: Energy (eV)
 
 :description: Controls x axis of the grid
+
+
+grid_font_size
+--------------
+
+:value: 10
+
+:description: Controls the font size of the grid
 
 
 add_fermi_plane

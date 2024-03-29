@@ -62,7 +62,7 @@ importing pyprocar and specifying local data_dir
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-40
+.. GENERATED FROM PYTHON SOURCE LINES 34-41
 
 .. code-block:: default
 
@@ -70,6 +70,7 @@ Plain mode
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='plain',
+                    fermi=5.599480,
                     dirname=data_dir)
 
 
@@ -86,20 +87,20 @@ Plain mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-48
+.. GENERATED FROM PYTHON SOURCE LINES 42-49
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -109,7 +110,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-60
+.. GENERATED FROM PYTHON SOURCE LINES 49-62
 
 .. code-block:: default
 
@@ -120,6 +121,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='parametric',
+                    fermi=5.599480,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -139,20 +141,20 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-68
+.. GENERATED FROM PYTHON SOURCE LINES 63-70
 
 parametric_linemode
 +++++++++++++++++++++++++++++++++++++++
@@ -162,7 +164,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-82
+.. GENERATED FROM PYTHON SOURCE LINES 70-85
 
 .. code-block:: default
 
@@ -173,6 +175,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='parametric',
+                    fermi=5.599480,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -194,20 +197,20 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-88
+.. GENERATED FROM PYTHON SOURCE LINES 86-91
 
 Scatter mode
 +++++++++++++++++++++++++++++++++++++++
@@ -215,7 +218,7 @@ Scatter mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-101
+.. GENERATED FROM PYTHON SOURCE LINES 91-105
 
 .. code-block:: default
 
@@ -226,6 +229,7 @@ Scatter mode
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='scatter',
+                    fermi=5.599480,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -246,20 +250,20 @@ Scatter mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-107
+.. GENERATED FROM PYTHON SOURCE LINES 106-111
 
 overlay_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -267,7 +271,7 @@ overlay_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-117
+.. GENERATED FROM PYTHON SOURCE LINES 111-122
 
 .. code-block:: default
 
@@ -277,6 +281,7 @@ overlay_species mode
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='overlay_species',
+                    fermi=5.599480,
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
@@ -295,20 +300,20 @@ overlay_species mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-123
+.. GENERATED FROM PYTHON SOURCE LINES 123-128
 
 overlay_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -316,7 +321,7 @@ overlay_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-133
+.. GENERATED FROM PYTHON SOURCE LINES 128-139
 
 .. code-block:: default
 
@@ -325,6 +330,7 @@ overlay_orbtials mode
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='overlay_orbitals',
+                    fermi=5.599480,
                     atoms=atoms,
                     spins=spins,
                     dirname=data_dir)
@@ -344,20 +350,20 @@ overlay_orbtials mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 4 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-139
+.. GENERATED FROM PYTHON SOURCE LINES 140-145
 
 overlay mode
 +++++++++++++++++++++++++++++++++++++++
@@ -365,7 +371,7 @@ overlay mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-147
+.. GENERATED FROM PYTHON SOURCE LINES 145-154
 
 .. code-block:: default
 
@@ -374,6 +380,7 @@ overlay mode
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='overlay',
+                    fermi=5.599480,
                     items=items,
                     dirname=data_dir)
 
@@ -391,20 +398,20 @@ overlay mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-153
+.. GENERATED FROM PYTHON SOURCE LINES 155-160
 
 overlay mode by orbital names
 =============================
@@ -412,7 +419,7 @@ overlay mode by orbital names
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 153-159
+.. GENERATED FROM PYTHON SOURCE LINES 160-167
 
 .. code-block:: default
 
@@ -421,6 +428,7 @@ overlay mode by orbital names
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='overlay',
+                    fermi=5.599480,
                     items=items,
                     dirname=data_dir)
 
@@ -436,13 +444,13 @@ overlay mode by orbital names
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
@@ -452,7 +460,7 @@ overlay mode by orbital names
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.591 seconds)
+   **Total running time of the script:** ( 0 minutes  3.212 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_colinear.py:

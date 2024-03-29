@@ -64,13 +64,14 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-42
+.. GENERATED FROM PYTHON SOURCE LINES 37-43
 
 .. code-block:: default
 
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='plain',
+                    fermi=5.596151,
                     dirname=data_dir)
 
 
@@ -87,20 +88,20 @@ Plain mode
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-48
+.. GENERATED FROM PYTHON SOURCE LINES 44-49
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -108,7 +109,7 @@ Parametric mode
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-62
+.. GENERATED FROM PYTHON SOURCE LINES 49-64
 
 .. code-block:: default
 
@@ -120,6 +121,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.bandsplot(
                     code='vasp', 
                     mode='parametric',
+                    fermi=5.596151,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -140,13 +142,13 @@ For details on the meaning of the indices of the atomic projection please refer 
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
@@ -156,7 +158,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.116 seconds)
+   **Total running time of the script:** ( 0 minutes  1.975 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_noncolinear_vasp.py:

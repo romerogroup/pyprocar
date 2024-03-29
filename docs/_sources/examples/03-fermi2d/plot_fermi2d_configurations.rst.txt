@@ -72,7 +72,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     print(f"Configuration files are located at: {config_path}")
 
     # Print the configurations
-    pyprocar.fermi2D(code='vasp', dirname=data_dir, print_plot_opts=True)
+    pyprocar.fermi2D(code='vasp', dirname=data_dir,fermi=5.599480, print_plot_opts=True)
 
 
 
@@ -96,7 +96,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -159,7 +159,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-64
+.. GENERATED FROM PYTHON SOURCE LINES 45-65
 
 .. code-block:: default
 
@@ -172,6 +172,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     #
 
     pyprocar.fermi2D(code='vasp',
+                   fermi=5.599480,
                    dirname=data_dir,
                    spin_texture=True,
                    spin_projection='x',
@@ -203,7 +204,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -249,7 +250,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-84
+.. GENERATED FROM PYTHON SOURCE LINES 66-86
 
 .. code-block:: default
 
@@ -263,6 +264,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
     pyprocar.fermi2D(code='vasp',
                     dirname=data_dir,
+                    fermi=5.599480,
                     spin_texture=True,
                     spin_projection='z',
                     arrow_size=3,
@@ -293,7 +295,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -342,7 +344,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.442 seconds)
+   **Total running time of the script:** ( 0 minutes  17.872 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_configurations.py:

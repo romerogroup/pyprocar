@@ -237,7 +237,7 @@ Visualizing the Results
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.719 seconds)
+   **Total running time of the script:** ( 0 minutes  0.630 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_rdf_cutoff_pyposcar.py:

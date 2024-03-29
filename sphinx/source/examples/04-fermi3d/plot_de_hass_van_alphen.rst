@@ -110,6 +110,15 @@ importing pyprocar and specifying local data_dir
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                    WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
+                    ---------------------------------------------------------------------------------------------------------------
+                
+
 
 
 
@@ -291,7 +300,7 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.452 seconds)
+   **Total running time of the script:** ( 0 minutes  11.543 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_de_hass_van_alphen.py:

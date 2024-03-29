@@ -293,7 +293,7 @@ x_label
 
 :description: The label for the x-axis.
 
-:value: Energy (eV)
+:value: None
 
 
 y_label
@@ -301,7 +301,7 @@ y_label
 
 :description: The label for the y-axis.
 
-:value: DOS
+:value: None
 
 
 dpi

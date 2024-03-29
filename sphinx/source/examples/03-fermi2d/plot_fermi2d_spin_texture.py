@@ -39,6 +39,7 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 
 pyprocar.fermi2D(code = 'vasp',
                dirname=data_dir,
+               fermi=5.5962,
                spin_texture=True,
                spin_projection='x',
                arrow_size=3,
@@ -54,6 +55,7 @@ pyprocar.fermi2D(code = 'vasp',
 
 pyprocar.fermi2D(code = 'vasp',
                dirname=data_dir,
+               fermi=5.5962,
                spin_texture=True,
                arrow_color = 'blue',
                arrow_size=3,
@@ -73,6 +75,7 @@ band_indices = [[6,7]]
 band_colors = [['blue','red']]
 pyprocar.fermi2D(code = 'vasp', 
                mode='plain_bands',
+               fermi=5.5962,
                band_indices = band_indices,
                band_colors=band_colors,
                spin_texture=True,

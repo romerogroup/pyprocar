@@ -62,7 +62,7 @@ importing pyprocar and specifying local data_dir
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-40
+.. GENERATED FROM PYTHON SOURCE LINES 34-41
 
 .. code-block:: default
 
@@ -70,6 +70,7 @@ Plain mode
     pyprocar.dosplot(
                     code='qe', 
                     mode='plain',
+                    fermi=5.599480,
                     dirname=data_dir)
 
 
@@ -93,13 +94,12 @@ Plain mode
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
-
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-48
+
+.. GENERATED FROM PYTHON SOURCE LINES 42-49
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -109,7 +109,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-60
+.. GENERATED FROM PYTHON SOURCE LINES 49-62
 
 .. code-block:: default
 
@@ -120,6 +120,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.dosplot(
                     code='qe', 
                     mode='parametric',
+                    fermi=5.599480,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -146,13 +147,12 @@ For details on the meaning of the indices of the atomic projection please refer 
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
-
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-68
+
+.. GENERATED FROM PYTHON SOURCE LINES 63-70
 
 parametric_line mode
 +++++++++++++++++++++++++++++++++++++++
@@ -162,7 +162,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-82
+.. GENERATED FROM PYTHON SOURCE LINES 70-85
 
 .. code-block:: default
 
@@ -173,6 +173,7 @@ For details on the meaning of the indices of the atomic projection please refer 
     pyprocar.dosplot(
                     code='qe', 
                     mode='parametric_line',
+                    fermi=5.599480,
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
@@ -201,13 +202,12 @@ For details on the meaning of the indices of the atomic projection please refer 
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
-
+    (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-88
+
+.. GENERATED FROM PYTHON SOURCE LINES 86-91
 
 stack_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -215,7 +215,7 @@ stack_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-98
+.. GENERATED FROM PYTHON SOURCE LINES 91-102
 
 .. code-block:: default
 
@@ -225,6 +225,7 @@ stack_species mode
     pyprocar.dosplot(
                     code='qe', 
                     mode='stack_species',
+                    fermi=5.599480,
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
@@ -250,14 +251,13 @@ stack_species mode
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-104
+.. GENERATED FROM PYTHON SOURCE LINES 103-108
 
 stack_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -265,7 +265,7 @@ stack_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-114
+.. GENERATED FROM PYTHON SOURCE LINES 108-119
 
 .. code-block:: default
 
@@ -274,6 +274,7 @@ stack_orbtials mode
     pyprocar.dosplot(
                     code='qe', 
                     mode='stack_orbitals',
+                    fermi=5.599480,
                     atoms=atoms,
                     spins=spins,
                     dirname=data_dir)
@@ -300,22 +301,21 @@ stack_orbtials mode
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
     The plot only considers atoms ['Fe']
 
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-120
+.. GENERATED FROM PYTHON SOURCE LINES 120-125
 
-overlay mode
+stack mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-128
+.. GENERATED FROM PYTHON SOURCE LINES 125-135
 
 .. code-block:: default
 
@@ -324,8 +324,10 @@ overlay mode
     pyprocar.dosplot(
                     code='qe', 
                     mode='stack',
+                    fermi=5.599480,
                     items=items,
                     dirname=data_dir)
+
 
 
 
@@ -348,16 +350,161 @@ overlay mode
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-            
 
-    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy (eV)', ylabel='DOS'>)
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 136-141
+
+overlay_species mode
++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 141-152
+
+.. code-block:: default
+
+    orbitals=[4,5,6,7,8]
+    spins=[0]
+
+    pyprocar.dosplot(
+                    code='qe', 
+                    mode='overlay_species',
+                    fermi=5.599480,
+                    orbitals=orbitals,
+                    spins=spins,
+                    dirname=data_dir)
+
+
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_colinear_dos_007.png
+   :alt: plot colinear dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_colinear_dos_007.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+    The plot only considers orbitals [4, 5, 6, 7, 8]
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 153-158
+
+overlay_orbtials mode
++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 158-169
+
+.. code-block:: default
+
+    atoms=[0]
+    spins=[0]
+    pyprocar.dosplot(
+                    code='qe', 
+                    mode='overlay_orbitals',
+                    fermi=5.599480,
+                    atoms=atoms,
+                    spins=spins,
+                    dirname=data_dir)
+
+
+
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_colinear_dos_008.png
+   :alt: plot colinear dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_colinear_dos_008.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+    The plot only considers atoms ['Fe']
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 170-175
+
+overlay mode
++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 175-183
+
+.. code-block:: default
+
+
+    items={'Fe':[4,5,6,7,8]}
+    pyprocar.dosplot(
+                    code='qe', 
+                    mode='overlay',
+                    fermi=5.599480,
+                    items=items,
+                    dirname=data_dir)
+
+
+
+.. image-sg:: /examples/01-dos/images/sphx_glr_plot_colinear_dos_009.png
+   :alt: plot colinear dos
+   :srcset: /examples/01-dos/images/sphx_glr_plot_colinear_dos_009.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file. 
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
+
+                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                --------------------------------------------------------
+
+    (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  29.245 seconds)
+   **Total running time of the script:** ( 0 minutes  28.883 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_colinear_dos.py:

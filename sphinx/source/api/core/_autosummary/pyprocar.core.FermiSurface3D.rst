@@ -173,28 +173,10 @@
       
       
         
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
           FermiSurface3D.extend_surface
+        
+      
+      
         
       
       
@@ -555,6 +537,12 @@
       
         
       
+      
+        
+      
+      
+        
+      
    
    
 
@@ -565,6 +553,9 @@
    .. autosummary::
       :toctree:
    
+      
+      
+      
       
       
       

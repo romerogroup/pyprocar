@@ -64,13 +64,14 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-42
+.. GENERATED FROM PYTHON SOURCE LINES 36-43
 
 .. code-block:: default
 
 
     pyprocar.fermi2D(code = 'vasp', 
                    mode='plain',
+                   fermi=5.590136,
                    dirname=data_dir)
 
 
@@ -95,7 +96,7 @@ Plain mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -142,14 +143,14 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-47
+.. GENERATED FROM PYTHON SOURCE LINES 44-48
 
 plain_bands mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-57
+.. GENERATED FROM PYTHON SOURCE LINES 48-59
 
 .. code-block:: default
 
@@ -157,6 +158,7 @@ plain_bands mode
     pyprocar.fermi2D(code = 'vasp', 
                    mode='plain_bands',
                    add_legend=True,
+                   fermi=5.590136,
                    dirname=data_dir)
 
 
@@ -184,7 +186,7 @@ plain_bands mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -231,7 +233,7 @@ plain_bands mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-63
+.. GENERATED FROM PYTHON SOURCE LINES 60-65
 
 parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -239,7 +241,7 @@ parametric mode
 Does not work. Contact developers
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-77
+.. GENERATED FROM PYTHON SOURCE LINES 65-80
 
 .. code-block:: default
 
@@ -252,7 +254,8 @@ Does not work. Contact developers
                     atoms=atoms,
                     orbitals=orbitals,
                     spins=spins,
-                    dirname=data_dir, 
+                    dirname=data_dir,
+                    fermi=5.590136,
                     spin_texture=False)
 
 
@@ -278,7 +281,7 @@ Does not work. Contact developers
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -325,7 +328,7 @@ Does not work. Contact developers
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-84
+.. GENERATED FROM PYTHON SOURCE LINES 81-87
 
 Selecting band indices
 +++++++++++++++++++++++++++++++++++++++
@@ -334,7 +337,7 @@ You can specify specfic bands with the band indices keyword.
 band_indices will be a list of list that contain band indices to plot for a given spin. Below I only plot bands 6 and 7 for spin 0
 Also you can specify the colors of the bands as well with band_colors
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-91
+.. GENERATED FROM PYTHON SOURCE LINES 87-95
 
 .. code-block:: default
 
@@ -345,6 +348,7 @@ Also you can specify the colors of the bands as well with band_colors
                    band_indices = band_indices,
                    band_colors=band_colors,
                    add_legend=True,
+                   fermi=5.590136,
                    dirname=data_dir)
 
 
@@ -366,7 +370,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -416,7 +420,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.541 seconds)
+   **Total running time of the script:** ( 0 minutes  6.615 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py:

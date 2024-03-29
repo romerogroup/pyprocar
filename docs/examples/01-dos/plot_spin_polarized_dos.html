@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting spin-polarized density of states &#8212; PyProcar 6.1.8 documentation</title>
+    <title>Plotting spin-polarized density of states &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=64b6a465"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -49,7 +49,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/01-dos/plot_spin_polarized_dos';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Plotting with Configurations in pyprocar" href="plot_dosplot_configurations.html" />
+    <link rel="next" title="Bands and Dos plot" href="../02-bands_dos/index.html" />
     <link rel="prev" title="Plotting density of states" href="plot_colinear_dos.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.8 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -388,24 +388,24 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_autobands.html">Autobands plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_2d_bands.html">Plotting 2D band structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_2d_bands.html">Plotting 2D band structure</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Density of States</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear_dos.html">Plotting density of states</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Plotting spin-polarized density of states</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -539,6 +539,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -550,8 +551,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
 
-
-(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
 <p>The line-styles or line-colors, these may be changed in the ebs section in the :doc:’pyprocar/utils/default_settings.ini’ file.</p>
@@ -560,6 +560,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -572,8 +573,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
 
-
-(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
 </section>
@@ -587,6 +587,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
@@ -601,8 +602,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
 
-
-(&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
 </section>
@@ -616,6 +616,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
@@ -630,8 +631,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
 
-
-(&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
 </section>
@@ -643,6 +643,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_species&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -655,10 +656,9 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
-
 The plot only considers orbitals [4, 5, 6, 7, 8]
 
-(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
 </section>
@@ -669,6 +669,7 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -681,10 +682,9 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
-
 The plot only considers atoms [&#39;Fe&#39;]
 
-(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
 </section>
@@ -695,6 +695,7 @@ The plot only considers atoms [&#39;Fe&#39;]
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -708,11 +709,88 @@ The plot only considers atoms [&#39;Fe&#39;]
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
 
-
-(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.501 seconds)</p>
+</section>
+<section id="overlay-species-mode">
+<h2>overlay_species mode<a class="headerlink" href="#overlay-species-mode" title="Permalink to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_species&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
+                <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_spin_polarized_dos_008.png" srcset="../../_images/sphx_glr_plot_spin_polarized_dos_008.png" alt="plot spin polarized dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file.
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
+
+            Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+            --------------------------------------------------------
+The plot only considers orbitals [4, 5, 6, 7, 8]
+
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+</pre></div>
+</div>
+</section>
+<section id="overlay-orbtials-mode">
+<h2>overlay_orbtials mode<a class="headerlink" href="#overlay-orbtials-mode" title="Permalink to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_orbitals&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
+                <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
+                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_spin_polarized_dos_009.png" srcset="../../_images/sphx_glr_plot_spin_polarized_dos_009.png" alt="plot spin polarized dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file.
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
+
+            Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+            --------------------------------------------------------
+The plot only considers atoms [&#39;Fe&#39;]
+
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+</pre></div>
+</div>
+</section>
+<section id="overlay-mode">
+<h2>overlay mode<a class="headerlink" href="#overlay-mode" title="Permalink to this heading">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
+                <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+                <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_spin_polarized_dos_010.png" srcset="../../_images/sphx_glr_plot_spin_polarized_dos_010.png" alt="plot spin polarized dos" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>            --------------------------------------------------------
+            There are additional plot options that are defined in a configuration file.
+            You can change these configurations by passing the keyword argument to the function
+            To print a list of plot options set print_plot_opts=True
+
+            Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+            --------------------------------------------------------
+
+(&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.899 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plot-spin-polarized-dos-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0ae4717a2ffa80a361725a23ff73d2e0/plot_spin_polarized_dos.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_spin_polarized_dos.py</span></code></a></p>
@@ -746,11 +824,11 @@ The plot only considers atoms [&#39;Fe&#39;]
       </div>
     </a>
     <a class="right-next"
-       href="plot_dosplot_configurations.html"
+       href="../02-bands_dos/index.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Plotting with Configurations in <cite>pyprocar</cite></p>
+        <p class="prev-next-title">Bands and Dos plot</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -778,6 +856,9 @@ The plot only considers atoms [&#39;Fe&#39;]
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stack-species-mode">stack_species mode</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stack-orbtials-mode">stack_orbtials mode</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stack-mode">stack mode</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overlay-species-mode">overlay_species mode</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overlay-orbtials-mode">overlay_orbtials mode</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overlay-mode">overlay mode</a></li>
 </ul>
   </nav></div>
 

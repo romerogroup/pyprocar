@@ -170,28 +170,10 @@
       
       
         
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
-      
-      
-        
           Surface.export
+        
+      
+      
         
       
       
@@ -447,6 +429,12 @@
       
         
           Surface.set_vectors
+        
+      
+      
+        
+      
+      
         
       
       
@@ -805,6 +793,7 @@
       
       
       
+      
         
           Surface.centers
         
@@ -815,6 +804,8 @@
         
           Surface.faces_array
         
+      
+      
       
       
       

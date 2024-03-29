@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.scripts.scriptDosplot &#8212; PyProcar 6.1.7 documentation</title>
+    <title>pyprocar.scripts.scriptDosplot &#8212; PyProcar 6.1.9 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c6c15522"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=cdf6d003"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.7 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
   
 </a></div>
     
@@ -458,9 +458,11 @@ document.write(`
         <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">items</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">fermi</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fermi_shift</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">elimit</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dos_limit</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">savefig</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">labels</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">projection_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">ax</span><span class="p">:</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">show</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -586,6 +588,12 @@ document.write(`
 
 <span class="sd">       e.g. ``dos_limit=[0, 30]``</span>
 
+<span class="sd">    labels : list str, optional</span>
+<span class="sd">        ``labels`` is a list of strings that will be used as the</span>
+<span class="sd">        legend of the plot. The length of the list should be equal to</span>
+<span class="sd">        the number of curves being plotted. If not provided the</span>
+<span class="sd">        default labels will be used.</span>
+
 <span class="sd">    savefig : str , optional (default None)</span>
 <span class="sd">        ``savefig`` defines the file that the plot is going to be</span>
 <span class="sd">        saved in. ``savefig`` accepts all the formats accepted by</span>
@@ -625,6 +633,11 @@ document.write(`
 <span class="sd">        d orbitals in V.</span>
 <span class="sd">        The default is set to take every atom and every orbital. Which</span>
 <span class="sd">        will be equivalent to ``mode=&#39;stack_species&#39;``</span>
+<span class="sd">    </span>
+<span class="sd">    fermi : float, optional</span>
+<span class="sd">        ``fermi`` defines the fermi energy. If not provided the</span>
+<span class="sd">        fermi energy will be read from the calculation directory</span>
+
 
 <span class="sd">    ax : matplotlib ax object, optional</span>
 <span class="sd">        ``ax`` is a matplotlib axes. In case one wants to put plot</span>
@@ -678,8 +691,7 @@ document.write(`
 <span class="s2">            To print a list of plot options set print_plot_opts=True</span>
 
 <span class="s2">            Here is a list modes : </span><span class="si">{</span><span class="n">modes_txt</span><span class="si">}</span>
-<span class="s2">            --------------------------------------------------------</span>
-<span class="s2">            &quot;&quot;&quot;</span>
+<span class="s2">            --------------------------------------------------------&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">plot_opts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -695,6 +707,19 @@ document.write(`
     <span class="n">parser</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">)</span>
     <span class="n">dos</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">dos</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
+
+    <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">-=</span> <span class="n">fermi</span>
+        <span class="n">dos</span><span class="o">.</span><span class="n">energies</span> <span class="o">+=</span> <span class="n">fermi_shift</span>
+        <span class="n">fermi_level</span> <span class="o">=</span> <span class="n">fermi_shift</span>
+        <span class="n">energy_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Energy - E$_F$ (eV)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">energy_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Energy (eV)&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            WARNING : `fermi` is not set! Set `fermi=</span><span class="si">{value}</span><span class="s2">`. The plot did not shift the energy by the Fermi energy.</span>
+<span class="s2">            ----------------------------------------------------------------------------------------------------------</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+
 
     <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
@@ -740,38 +765,70 @@ document.write(`
             <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
             <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
-
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack_orbitals&quot;</span><span class="p">:</span>
         <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_orbitals</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
             <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
-
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack&quot;</span><span class="p">:</span>
         <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
             <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay_species&quot;</span><span class="p">:</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_species</span><span class="p">(</span>
+            <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+            <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+            <span class="n">overlay_mode</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay_orbitals&quot;</span><span class="p">:</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_orbitals</span><span class="p">(</span>
+            <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+            <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+            <span class="n">overlay_mode</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay&quot;</span><span class="p">:</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span>
+            <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+            <span class="n">overlay_mode</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The mode needs to be in the List [plain,parametric,parametric_line,stack_species,stack_orbitals,stack]&quot;</span><span class="p">)</span>
 
-    <span class="n">edos_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fermi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">draw_fermi</span><span class="p">(</span><span class="n">fermi_level</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">)</span>
 
+    
     <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;horizontal&#39;</span><span class="p">:</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">energy_label</span><span class="p">)</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;DOS&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dos_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">dos_limit</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span> <span class="p">:</span>
+
+    <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;DOS&quot;</span><span class="p">)</span>
+        <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">energy_label</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">elimit</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dos_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">edos_plot</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">dos_limit</span><span class="p">)</span>
 
     <span class="n">edos_plot</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
-    <span class="n">edos_plot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">edos_plot</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">labels</span><span class="p">:</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">edos_plot</span><span class="o">.</span><span class="n">labels</span>
+    <span class="n">edos_plot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">savefig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">edos_plot</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">savefig</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">show</span><span class="p">:</span>

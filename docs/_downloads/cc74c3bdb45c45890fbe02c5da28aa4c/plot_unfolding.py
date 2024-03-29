@@ -43,6 +43,7 @@ primitive_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}MgB2_
 pyprocar.bandsplot(
                 code='vasp', 
                 mode='plain',
+                fermi=4.993523,
                 elimit=[-15,5],
                 dirname=primitive_dir)
 
@@ -60,6 +61,7 @@ pyprocar.unfold(
         code='vasp',
         mode='plain',
         unfold_mode='both',
+        fermi=5.033090,
         dirname= supercell_dir,
         elimit=[-15,5],
         supercell_matrix=np.diag([2, 2, 2]))

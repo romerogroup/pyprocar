@@ -36,6 +36,7 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 pyprocar.dosplot(
                 code='vasp', 
                 mode='plain',
+                fermi=5.590136,
                 dirname=data_dir)
 
 ###############################################################################
@@ -46,6 +47,7 @@ spins = [1]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='plain',
+                fermi=5.590136,
                 spins=spins,
                 dirname=data_dir)
 
@@ -64,6 +66,7 @@ spins=[0,1]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='parametric',
+                fermi=5.590136,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -84,6 +87,7 @@ spins=[0,1]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='parametric_line',
+                fermi=5.590136,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,
@@ -103,6 +107,7 @@ spins=[0,1]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='stack_species',
+                fermi=5.590136,
                 orbitals=orbitals,
                 spins=spins,
                 dirname=data_dir)
@@ -118,6 +123,7 @@ spins=[0,1]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='stack_orbitals',
+                fermi=5.590136,
                 atoms=atoms,
                 spins=spins,
                 dirname=data_dir)
@@ -136,6 +142,60 @@ spins=[0,1]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='stack',
+                fermi=5.590136,
+                items=items,
+                spins=spins,
+                dirname=data_dir)
+
+
+###############################################################################
+# overlay_species mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+# 
+#
+orbitals=[4,5,6,7,8]
+spins=[0,1]
+
+pyprocar.dosplot(
+                code='vasp', 
+                mode='overlay_species',
+                fermi=5.590136,
+                orbitals=orbitals,
+                spins=spins,
+                dirname=data_dir)
+
+###############################################################################
+# overlay_orbtials mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+# 
+#
+atoms=[0]
+spins=[0,1]
+pyprocar.dosplot(
+                code='vasp', 
+                mode='overlay_orbitals',
+                fermi=5.590136,
+                atoms=atoms,
+                spins=spins,
+                dirname=data_dir)
+
+
+
+###############################################################################
+# overlay mode
+# +++++++++++++++++++++++++++++++++++++++
+#
+# 
+#
+
+items={'Fe':[4,5,6,7,8]}
+spins=[0,1]
+pyprocar.dosplot(
+                code='vasp', 
+                mode='overlay',
+                fermi=5.590136,
                 items=items,
                 spins=spins,
                 dirname=data_dir)

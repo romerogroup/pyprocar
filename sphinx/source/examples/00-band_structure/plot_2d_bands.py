@@ -34,7 +34,11 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}graphene{o
 # Plain mode
 # +++++++++++++++++++++++++++++++++++++++
 spins=[0]
-handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+handler = pyprocar.BandStructure2DHandler(code='vasp',
+                                          dirname=data_dir,
+                                          fermi=-0.795606,
+                                          apply_symmetry=False,
+                                          )
 handler.plot_band_structure(mode='plain',
                             add_fermi_plane=True,
                             bands=[3,4],
@@ -50,7 +54,7 @@ handler.plot_band_structure(mode='plain',
 atoms=[0,1]
 orbitals=[1,2,3]
 spins=[0]
-handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
 handler.plot_band_structure(mode='parametric',
                            atoms=atoms,
                            orbitals=orbitals,
@@ -59,7 +63,7 @@ handler.plot_band_structure(mode='parametric',
 ###############################################################################
 # Property Projection mode
 # +++++++++++++++++++++++++++++++++++++++
-handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
 handler.plot_band_structure(mode='property_projection',
                            property_name='band_velocity',
                            bands=[3,4],
@@ -78,7 +82,7 @@ data_dir =  os.path.join(pyprocar.utils.ROOT,'data','examples','BiSb_monolayer',
 
 atoms=[0]
 orbitals=[4,5,6,7,8]
-handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,apply_symmetry=False)
+handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-1.1904,apply_symmetry=False)
 handler.plot_band_structure(mode='spin_texture',
                            spin_texture=True,
                            atoms=atoms,

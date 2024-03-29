@@ -66,7 +66,7 @@ By default the projected values of the arrows will be s_z.
 But you can change this by setting arrow_projection to one of the following
 'x','y','z','x^2','y^2','z^2'
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-49
+.. GENERATED FROM PYTHON SOURCE LINES 38-50
 
 .. code-block:: default
 
@@ -74,6 +74,7 @@ But you can change this by setting arrow_projection to one of the following
 
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
+                   fermi=5.5962,
                    spin_texture=True,
                    spin_projection='x',
                    arrow_size=3,
@@ -102,7 +103,7 @@ But you can change this by setting arrow_projection to one of the following
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -148,13 +149,13 @@ But you can change this by setting arrow_projection to one of the following
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-53
+.. GENERATED FROM PYTHON SOURCE LINES 51-54
 
 Spin Texture single color
 +++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-64
+.. GENERATED FROM PYTHON SOURCE LINES 54-66
 
 .. code-block:: default
 
@@ -162,6 +163,7 @@ Spin Texture single color
 
     pyprocar.fermi2D(code = 'vasp',
                    dirname=data_dir,
+                   fermi=5.5962,
                    spin_texture=True,
                    arrow_color = 'blue',
                    arrow_size=3,
@@ -190,7 +192,7 @@ Spin Texture single color
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -236,7 +238,7 @@ Spin Texture single color
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-71
+.. GENERATED FROM PYTHON SOURCE LINES 67-73
 
 Selecting band indices
 +++++++++++++++++++++++++++++++++++++++
@@ -245,7 +247,7 @@ You can specify specfic bands with the band indices keyword.
 band_indices will be a list of list that contain band indices. Below I only plot bands 14,15
 Also you can specify the colors of the bands as well with band_colors
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-81
+.. GENERATED FROM PYTHON SOURCE LINES 73-84
 
 .. code-block:: default
 
@@ -254,6 +256,7 @@ Also you can specify the colors of the bands as well with band_colors
     band_colors = [['blue','red']]
     pyprocar.fermi2D(code = 'vasp', 
                    mode='plain_bands',
+                   fermi=5.5962,
                    band_indices = band_indices,
                    band_colors=band_colors,
                    spin_texture=True,
@@ -280,7 +283,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.6 created on Jun 10th, 2021
+    Version 6.1.9 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -329,7 +332,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.464 seconds)
+   **Total running time of the script:** ( 0 minutes  17.939 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_spin_texture.py:

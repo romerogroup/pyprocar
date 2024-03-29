@@ -50,23 +50,6 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in VASP.">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_vasp_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in VASP</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="Comparing band structures example.">
 
 .. only:: html
@@ -84,23 +67,6 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_qe_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to plot atomic energy levels for the compound hBN-CNCN at the GAMM...">
 
 .. only:: html
@@ -113,6 +79,40 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting Atomic Levels</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in VASP.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_vasp_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in VASP</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_qe_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
     </div>
 
 
@@ -186,23 +186,6 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting 2D band structure example.">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_2d_bands_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_2d_bands.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting 2D band structure</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures usi...">
 
 .. only:: html
@@ -215,6 +198,23 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting 2D band structure example.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_2d_bands_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_2d_bands.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting 2D band structure</div>
     </div>
 
 
@@ -269,6 +269,23 @@ These examples demonstrate the density of states plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of stat...">
+
+.. only:: html
+
+  .. image:: /examples/01-dos/images/thumb/sphx_glr_plot_dosplot_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting density example.">
 
 .. only:: html
@@ -298,23 +315,6 @@ These examples demonstrate the density of states plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting spin-polarized density of states</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of stat...">
-
-.. only:: html
-
-  .. image:: /examples/01-dos/images/thumb/sphx_glr_plot_dosplot_configurations_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
     </div>
 
 

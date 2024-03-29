@@ -14,11 +14,6 @@ PyProcar has the following data types:
     Depending on the mode, the user may have to provide more information. 
     For instance is mode='parametric', the user must provide the atoms, orbitald, and spins to include
 
-- :func:`pyprocar.bandsplot_2d` plots the 2d band structure.
-    The user must provide the directory where the calculation takes place and some case specific files used. 
-    Depending on the mode, the user may have to provide more information. 
-    For instance is mode='parametric', the user must provide the atoms, orbitald, and spins to include
-
 - :func:`pyprocar.dosplot` plots the density of states.
     The user must provide the directory where the calculation takes place and some case specific files used. 
     Depending on the mode, the user may have to provide more information. 
@@ -29,8 +24,6 @@ PyProcar has the following data types:
     The user is expected to input the bands_setting and dos_setting, which are dictionaries of keyword arguments of dosplot and bandsplot.
 
 - :func:`pyprocar.fermi2d` plots the 2d fermi surface.
-
-- :func:`pyprocar.fermi3d` plots the 3d fermi surface.
 
 - :class:`pyprocar.FermiHandler` plots 3d fermi surface
 
@@ -45,12 +38,10 @@ PyProcar has the following data types:
 
     bandgap
     bandsplot
-    bandsplot_2d
     bandsdosplot
     cat
     dosplot
     fermi2d
-    fermi3d
     fermihandler
     generate2dkmesh
     kpath

@@ -42,6 +42,7 @@ spins=[0]
 pyprocar.dosplot(
                 code='vasp', 
                 mode='parametric',
+                fermi=5.5962,
                 atoms=atoms,
                 orbitals=orbitals,
                 spins=spins,

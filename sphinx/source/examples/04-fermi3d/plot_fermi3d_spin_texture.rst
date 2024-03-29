@@ -97,6 +97,15 @@ importing pyprocar and specifying local data_dir
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+                    WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
+                    ---------------------------------------------------------------------------------------------------------------
+                
+
 
 
 
@@ -148,7 +157,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  10.996 seconds)
+   **Total running time of the script:** ( 1 minutes  2.304 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_spin_texture.py:

@@ -76,8 +76,8 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
 .. code-block:: default
 
 
-    fig, ax = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric', elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
-    pyprocar.bandsplot(code='qe', dirname = qe_data_dir, mode='plain', elimit=[-5,5], color='k',ax=ax, show =True)
+    fig, ax = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric',fermi=5.599480, elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
+    pyprocar.bandsplot(code='qe', dirname = qe_data_dir, mode='plain',fermi=18.2398, elimit=[-5,5], color='k',ax=ax, show =True)
 
 
 .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_compare_bands_001.png
@@ -91,22 +91,22 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
  .. code-block:: none
 
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
-                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file. 
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+                ----------------------------------------------------------------------------------------------------------
+                There are additional plot options that are defined in the configuration file. 
+                You can change these configurations by passing the keyword argument to the function.
+                To print a list of all plot options set `print_plot_opts=True`
 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
-                --------------------------------------------------------
+                ----------------------------------------------------------------------------------------------------------
             
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
@@ -116,7 +116,7 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.747 seconds)
+   **Total running time of the script:** ( 0 minutes  1.631 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:
