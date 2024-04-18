@@ -365,7 +365,9 @@ class FermiSurface:
                 newSz = griddata((x, y), spinZ, (points[:, 0], points[:, 1]))
                 self.log.info("newSx.shape: " + str(newSx.shape))
                 if self.config['arrow_size']['value'] is not None:
-                    scale  = self.config['arrow_size']['value']
+                    # This is so the density scales the way you think. increasing number means increasing density. 
+                    # The number in the numerator is so it scales reasonable with 0-20
+                    scale  = 10/self.config['arrow_size']['value']
                     scale_units = "xy"
                     angles="xy"
                 else:
@@ -373,18 +375,21 @@ class FermiSurface:
                     scale_units = "xy"
                     angles="xy"
 
+                # This is so the density scales the way you think. increasing number means increasing density. 
+                # The number in the numerator is so it scales reasonable with 0-20
+                arrow_density = 50//self.config['arrow_density']['value']   
                 if self.config['spin_projection']['value'] == 'z':
-                    color = newSz[::self.config['arrow_density']['value']]
+                    color = newSz[::arrow_density]
                 elif self.config['spin_projection']['value'] == 'y':
-                    color = newSy[::self.config['arrow_density']['value']]
+                    color = newSy[::arrow_density]
                 elif self.config['spin_projection']['value'] == 'x':
-                    color = newSx[::self.config['arrow_density']['value']]
+                    color = newSx[::arrow_density]
                 elif self.config['spin_projection']['value'] == 'x^2':
-                    color = newSx[::self.config['arrow_density']['value']]**2
+                    color = newSx[::arrow_density]**2
                 elif self.config['spin_projection']['value'] == 'y^2':
-                    color = newSy[::self.config['arrow_density']['value']]**2
+                    color = newSy[::arrow_density]**2
                 elif self.config['spin_projection']['value'] == 'z^2':
-                    color = newSz[::self.config['arrow_density']['value']]**2
+                    color = newSz[::arrow_density]**2
 
                 if self.config['no_arrow']['value']:
                     # a dictionary to select the right spin component
@@ -393,8 +398,8 @@ class FermiSurface:
                     #             2: newSz[::self.config['arrow_density']['value']]}
                         
                     plt.scatter(
-                        points[::self.config['arrow_density']['value'], 0],
-                        points[::self.config['arrow_density']['value'], 1],
+                        points[::arrow_density, 0],
+                        points[::arrow_density, 1],
                         c=color,
                         # spinDict[spin],
                         s=50,
@@ -412,10 +417,10 @@ class FermiSurface:
                         if self.config['arrow_color']['value'] is not None:
                             c = self.config['arrow_color']['value']
                         plt.quiver(
-                            points[::self.config['arrow_density']['value'], 0],  # Arrow position x-component
-                            points[::self.config['arrow_density']['value'], 1],  # Arrow position y-component
-                            newSx[::self.config['arrow_density']['value']],      # Arrow direction x-component
-                            newSy[::self.config['arrow_density']['value']],      # Arrow direction y-component
+                            points[::arrow_density, 0],  # Arrow position x-component
+                            points[::arrow_density, 1],  # Arrow position y-component
+                            newSx[::arrow_density],      # Arrow direction x-component
+                            newSy[::arrow_density],      # Arrow direction y-component
                             scale=scale,
                             scale_units=scale_units,
                             angles=angles,
@@ -424,10 +429,10 @@ class FermiSurface:
                     else:
  
                         plt.quiver(
-                            points[::self.config['arrow_density']['value'], 0],  # Arrow position x-component
-                            points[::self.config['arrow_density']['value'], 1],  # Arrow position y-component
-                            newSx[::self.config['arrow_density']['value']],      # Arrow direction x-component
-                            newSy[::self.config['arrow_density']['value']],      # Arrow direction y-component
+                            points[::arrow_density, 0],  # Arrow position x-component
+                            points[::arrow_density, 1],  # Arrow position y-component
+                            newSx[::arrow_density],      # Arrow direction x-component
+                            newSy[::arrow_density],      # Arrow direction y-component
                             color,                           # Color for each arrow
                             scale=scale,
                             scale_units=scale_units,
