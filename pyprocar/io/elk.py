@@ -16,6 +16,8 @@ from pyprocar.core.ebs import ElectronicBandStructure
 from pyprocar.core.structure import Structure
 from pyprocar.core.kpath import KPath
 
+HARTREE_TO_EV = 27.211386245988
+
 def parse_dos_block(dos_block: str) -> Tuple[np.array, np.array]:
     """Parse the DOS block from elk output file.
 
@@ -76,12 +78,17 @@ def read_dos(path: Union[str, Path]) -> DensityOfStates:
                 _, dos_projected = parse_dos_block(block)
                 if dos_projected is not None:
                     pdos[spc][atm][i] = dos_projected
-    energies = edos
+    energies = edos*HARTREE_TO_EV
     n_spins =  len(tdos)
+
     
     dos_total = np.zeros((n_spins, len(energies)))
     for i_spin in range(n_spins):
         dos_total[i_spin, :] = tdos[i_spin]
+
+    if n_spins == 2:
+        dos_total[1, :] = -1 * dos_total[1, : ]
+        
     n_orbitals = 16
     n_principals = 1
     dos_projected = np.zeros((n_atoms, n_principals, n_orbitals, n_spins, len(energies)))
@@ -89,9 +96,12 @@ def read_dos(path: Union[str, Path]) -> DensityOfStates:
         for i_atom in range(1,len(pdos[f"S{i_spc:02d}"])+1):
             for i_orbital in range(n_orbitals):
                 for i_spin in range(n_spins):
-                    dos_projected[i_atom-1, 0, i_orbital, i_spin, :] = pdos[f"S{i_spc:02d}"][f"A{i_atom:04d}"][i_orbital + i_spin * n_orbitals]
-                    
-    return  DensityOfStates(energies, dos_total, dos_projected)
+                    dos_projected[i_atom-1, 0, i_orbital, i_spin, :] = pdos[f"S{i_spc:02d}"][f"A{i_atom:04d}"][i_orbital + i_spin * n_orbitals]  
+    rf = open(os.path.join(path,"EFERMI.OUT"), "r")
+    fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
+    rf.close()
+
+    return  DensityOfStates(energies, dos_total,fermi, dos_projected)
 
 
 class ElkParser:
@@ -384,7 +394,7 @@ class ElkParser:
                     iline += 1
                 if ikpoint == self.nkpoints - 1:
                     iline += 1
-            raw_bands *= 27.21138386
+            raw_bands *= HARTREE_TO_EV
 
             if self.nspin == 1:
                 self.nbands = raw_nbands
@@ -397,6 +407,7 @@ class ElkParser:
             elif self.nspin == 2:
                 self.bands[:,:,0] = raw_bands[:, : self.nbands]
                 self.bands[:,:,1] =  raw_bands[:, self.nbands :]
+            self.bands += self.fermi
 
             self.norbital = 16
             self.spd = np.zeros(
@@ -461,7 +472,7 @@ class ElkParser:
         Returns the fermi energy read from FERMI.OUT
         """
         rf = open(os.path.join(self.dir,"EFERMI.OUT"), "r")
-        fermi = float(rf.readline().split()[0])
+        fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         rf.close()
         return fermi
 
