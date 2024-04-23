@@ -118,20 +118,34 @@ class Parser:
         None
             None
         """
-        try:
-            dos = elk.read_dos(path = self.dir)
-            self.dos = dos
-        except:
-            self.dos = None
+        # try:
+        #     dos = elk.read_dos(path = self.dir)
+        #     self.dos = dos
+        # except:
+        #     self.dos = None
+
         try:
             parser=elk.ElkParser(path=self.dir)
-            self.ebs = parser.ebs
-            self.kpath = parser.kpath
+            self.dos = parser.dos
             self.structure = parser.structure
+            
         except Exception as e:
-            self.ebs = None
-            self.kpath = None
+
+            self.dos = None
             self.structure = None
+
+        
+        if not self.dos:
+
+            try:
+                parser=elk.ElkParser(path=self.dir)
+                self.ebs = parser.ebs
+                self.kpath = parser.kpath
+                self.structure = parser.structure
+            except Exception as e:
+                self.ebs = None
+                self.kpath = None
+                self.structure = None
         return None
     
     def parse_frmsf(self):

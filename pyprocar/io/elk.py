@@ -36,74 +36,6 @@ def parse_dos_block(dos_block: str) -> Tuple[np.array, np.array]:
         return None, None
     return X[:, 0], X[:, 1]
 
-
-def read_dos(path: Union[str, Path]) -> DensityOfStates:
-    """Read the DOS from elk output files. TDOS.OUT and PDOS_*.OUT
-
-    Parameters
-    ----------
-    path : Union[str, Path]
-        Path to the elk calculation.
-
-    Returns
-    -------
-    DesityOfStates
-        Returns a DensityOfStates object from pyprocar.core.dos
-    """    
-    tdos = []
-    pdos = {}
-    n_atoms = 0
-    for i_file in Path(path).iterdir():
-        if i_file.name == 'TDOS.OUT':
-            with open(i_file, 'r') as f:
-                data = f.read()
-            blocks = re.split(r'\n\s*\n', data)
-            for i, block in enumerate(blocks):
-                energies, dos_total = parse_dos_block(block)
-                if dos_total is not None:
-                    tdos.append(dos_total)
-                    edos = energies
-
-        if 'PDOS' in i_file.stem:
-            spc, atm = i_file.stem.split('_')[1:]
-            if spc not in pdos:
-                pdos[spc] = {}
-            if atm not in pdos[spc]:
-                pdos[spc][atm] = {}
-            with open(i_file, 'r') as f:
-                data = f.read()
-            blocks = re.split(r'\n\s*\n', data)
-            n_atoms += 1
-            for i, block in enumerate(blocks):
-                _, dos_projected = parse_dos_block(block)
-                if dos_projected is not None:
-                    pdos[spc][atm][i] = dos_projected
-    energies = edos*HARTREE_TO_EV
-    n_spins =  len(tdos)
-
-    
-    dos_total = np.zeros((n_spins, len(energies)))
-    for i_spin in range(n_spins):
-        dos_total[i_spin, :] = tdos[i_spin]
-
-    if n_spins == 2:
-        dos_total[1, :] = -1 * dos_total[1, : ]
-        
-    n_orbitals = 16
-    n_principals = 1
-    dos_projected = np.zeros((n_atoms, n_principals, n_orbitals, n_spins, len(energies)))
-    for i_spc in range(1,len(pdos)+1):
-        for i_atom in range(1,len(pdos[f"S{i_spc:02d}"])+1):
-            for i_orbital in range(n_orbitals):
-                for i_spin in range(n_spins):
-                    dos_projected[i_atom-1, 0, i_orbital, i_spin, :] = pdos[f"S{i_spc:02d}"][f"A{i_atom:04d}"][i_orbital + i_spin * n_orbitals]  
-    rf = open(os.path.join(path,"EFERMI.OUT"), "r")
-    fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
-    rf.close()
-
-    return  DensityOfStates(energies, dos_total,fermi, dos_projected)
-
-
 class ElkParser:
     def __init__(self, path, kdirect=True):
 
@@ -127,6 +59,8 @@ class ElkParser:
 
         # spin polarized parameters
         self.spinpol = None
+
+        self.is_bands_calculation=False
 
         self.orbital_names = [
             "Y00",
@@ -155,42 +89,41 @@ class ElkParser:
         # NOTE: before calling to `self._readOrbital` the case '4'
         # is marked as '1'
 
+        self._read_reclat()
+        self._read_fermi()
         self._read_elkin()
         self._read_structure()
-        self._read_kpoints_info()
-        self._read_bands()
+        if self.is_bands_calculation:
+            self._read_kpoints_info()
+            self._read_bands()
+        self._read_dos()
         
         
         has_time_reversal=True
         
-        self.kpath = KPath(
-                        knames=self.knames,
-                        special_kpoints=self.special_kpoints,
-                        kticks = self.kticks,
-                        ngrids=self.ngrids,
-                        has_time_reversal=has_time_reversal,
-                    )
 
-        self.ebs = ElectronicBandStructure(
-                                kpoints=self.kpoints,
-                                bands=self.bands,
-                                projected=self._spd2projected(self.spd),
-                                efermi=self.fermi,
-                                kpath=self.kpath,
-                                projected_phase=None,
-                                labels=self.orbital_names[:-1],
-                                reciprocal_lattice=self.reclat,
-                            )
+        # Checks if file_names exists, if not it is not a bands calculation
+        if self.is_bands_calculation:
+            self.kpath = KPath(
+                            knames=self.knames,
+                            special_kpoints=self.special_kpoints,
+                            kticks = self.kticks,
+                            ngrids=self.ngrids,
+                            has_time_reversal=has_time_reversal,
+                        )
+            
+            self.ebs = ElectronicBandStructure(
+                                    kpoints=self.kpoints,
+                                    bands=self.bands,
+                                    projected=self._spd2projected(self.spd),
+                                    efermi=self.fermi,
+                                    kpath=self.kpath,
+                                    projected_phase=None,
+                                    labels=self.orbital_names[:-1],
+                                    reciprocal_lattice=self.reclat,
+                                )
 
         return
-
-    #    @property
-    #    def nspin(self):
-    #        """
-    #        number of spin, default is 1.
-    #        """
-    #        nspindict = {1: 1, 2: 2, 4: 2, None: 1}
-    #        return nspindict[self.ispin]
 
     @property
     def spd_orb(self):
@@ -199,37 +132,12 @@ class ElkParser:
         return self.spd[:, :, :, 1:-1]
 
     @property
-    def nkpoints(self):
-        """
-        Returns total number of kpoints
-        """
-        return int(re.findall("plot1d\n\s*[0-9]*\s*([0-9]*)", self.elkin)[0])
-
-    @property
     def tasks(self):
         """
         Returns the tasks calculated by elk
         """
         return [int(x) for x in re.findall("tasks\s*([0-9\s\n]*)", self.elkin)[0].split()]
 
-
-    @property
-    def nspecies(self):
-        """
-        Returns number of species
-        """
-
-        return int(re.findall("atoms\n\s*([0-9]*)", self.elkin)[0])
-    
-    @property
-    def composition(self):
-        """
-        Returns the composition of the structure
-        """
-        composition = {}
-        for ispc in re.findall("'([A-Za-z]*).in'.*\n\s*([0-9]*)", self.elkin):
-            composition[ispc[0]] = int(ispc[1])
-        return composition
 
     def _read_structure(self):
         raw_species = re.findall("'([A-Za-z]*).in'.*\n.*\n\s*([0-9.\s]*)", self.elkin)
@@ -254,10 +162,24 @@ class ElkParser:
             self.lattice[i, :] = [float(coord) for coord in vec.strip().split()]
         self.lattice_constant=float(re.findall(r"scale\s*\n(.*)", self.elkin)[0])
         self.lattice*=self.lattice_constant
+        self.structure=Structure(
+            atoms=self.atoms,
+            lattice=self.lattice,
+            fractional_coordinates=self.frac_coords,
+        )
 
+        self.nspecies=int(re.findall("atoms\n\s*([0-9]*)", self.elkin)[0])
+
+        self.composition = {}
+        for ispc in re.findall("'([A-Za-z]*).in'.*\n\s*([0-9]*)", self.elkin):
+             self.composition[ispc[0]] = int(ispc[1])
         return (self.atoms,self.frac_coords,self.lattice)
     
     def _read_kpoints_info(self):
+        
+        self.nkpoints=int(re.findall("plot1d\n\s*[0-9]*\s*([0-9]*)", self.elkin)[0])
+
+
         raw_ticks = re.findall("plot1d\n\s*([0-9]*)\s*([0-9]*)", self.elkin)[0]
         self.nhigh_sym = int(raw_ticks[0])
         n_segments = self.nhigh_sym - 1
@@ -302,8 +224,10 @@ class ElkParser:
         rf.close()
 
         if 20 in self.tasks:
+            self.is_bands_calculation=True
             self.file_names.append(os.path.join(self.dir,"BANDS.OUT"))
         if 21 in self.tasks or 22 in self.tasks:
+            self.is_bands_calculation=True
             ispc = 1
             for spc in self.composition:
                 for iatom in range(self.composition[spc]):
@@ -406,7 +330,7 @@ class ElkParser:
                 self.bands[:,:,0]=raw_bands
             elif self.nspin == 2:
                 self.bands[:,:,0] = raw_bands[:, : self.nbands]
-                self.bands[:,:,1] =  raw_bands[:, self.nbands :]
+                self.bands[:,:,1] = raw_bands[:, self.nbands :]
             self.bands += self.fermi
 
             self.norbital = 16
@@ -466,41 +390,99 @@ class ElkParser:
                 # spin up and spin down block for spin = 0
                 # spd2[:, :, 0, :, :] = self.spd[:, :, 0, :, :]
 
-    @property
-    def fermi(self):
+    def _read_dos(self):
+        """Read the DOS from elk output files. TDOS.OUT and PDOS_*.OUT
+
+        Parameters
+        ----------
+        path : Union[str, Path]
+            Path to the elk calculation.
+
+        Returns
+        -------
+        DesityOfStates
+            Returns a DensityOfStates object from pyprocar.core.dos
+        """ 
+        if not os.path.exists(os.path.join(self.dir,"TDOS.OUT")):
+            
+            return None
+        tdos = []
+        pdos = {}
+        n_atoms = 0
+        for i_file in Path(self.dir).iterdir():
+            if i_file.name == 'TDOS.OUT':
+                with open(i_file, 'r') as f:
+                    data = f.read()
+                blocks = re.split(r'\n\s*\n', data)
+                for i, block in enumerate(blocks):
+                    energies, dos_total = parse_dos_block(block)
+                    if dos_total is not None:
+                        tdos.append(dos_total)
+                        edos = energies
+
+            if 'PDOS' in i_file.stem:
+                spc, atm = i_file.stem.split('_')[1:]
+                if spc not in pdos:
+                    pdos[spc] = {}
+                if atm not in pdos[spc]:
+                    pdos[spc][atm] = {}
+                with open(i_file, 'r') as f:
+                    data = f.read()
+                # parse all the blocks. Should be 16 * self.nspins. 
+                # Remove last element as it is empty string
+                blocks = re.split(r'\n\s*\n', data)[:-1]
+                n_atoms += 1
+                for i, block in enumerate(blocks):
+                    _, dos_projected = parse_dos_block(block)
+                    if dos_projected is not None:
+                        pdos[spc][atm][i] = dos_projected
+
+        energies = edos*HARTREE_TO_EV
+        n_spins =  len(tdos)
+
+        
+        dos_total = np.zeros((n_spins, len(energies)))
+        for i_spin in range(n_spins):
+            dos_total[i_spin, :] = tdos[i_spin]
+
+        if n_spins == 2:
+            dos_total[1, :] = -1 * dos_total[1, : ]
+            
+        n_orbitals = 16
+        n_principals = 1
+        dos_projected = np.zeros((n_atoms, n_principals, n_orbitals, n_spins, len(energies)))
+        iatom=-1
+        for i_spc in range(1,len(pdos)+1):
+            for i_atom_for_specie in range(1,len(pdos[f"S{i_spc:02d}"])+1):
+                # print(i_atom)
+                iatom+=1
+                for i_orbital in range(n_orbitals):
+                    for i_spin in range(n_spins):
+                        dos_projected[iatom, 0, i_orbital, i_spin, :] = pdos[f"S{i_spc:02d}"][f"A{i_atom_for_specie:04d}"][i_orbital + i_spin * n_orbitals]  
+
+        self.dos= DensityOfStates(energies, dos_total,self.fermi, dos_projected)
+        return self.dos
+
+    def _read_fermi(self):
         """
         Returns the fermi energy read from FERMI.OUT
         """
-        rf = open(os.path.join(self.dir,"EFERMI.OUT"), "r")
-        fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
-        rf.close()
-        return fermi
+        with open(os.path.join(self.dir,"EFERMI.OUT"), "r") as rf:
+            self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
+        return self.fermi
 
-    @property
-    def reclat(self):
+    def _read_reclat(self):
         """
         Returns the reciprocal lattice read from LATTICE.OUT
         """
-        rf = open(os.path.join(self.dir,"LATTICE.OUT"), "r")
-        data = rf.read()
-        rf.close()
+        with open(os.path.join(self.dir,"LATTICE.OUT"), "r") as rf:
+            data = rf.read()
+
         lattice_block = re.findall(r"matrix\s*:([-+\s0-9.]*)Inverse", data)
         lattice_array = np.array(lattice_block[1].split(), dtype=float)
-        reclat = lattice_array.reshape((3, 3))
-        return reclat
+        self.reclat = lattice_array.reshape((3, 3))
+        return self.reclat
     
-    @property
-    def structure(self):
-        """
-        Returns the reciprocal lattice read from LATTICE.OUT
-        """
-        st = Structure(
-                    atoms=self.atoms, 
-                    lattice=self.lattice, 
-                    fractional_coordinates=self.frac_coords, 
-                    rotations=None
-                    )
-        return st
     
     def _spd2projected(self, spd, nprinciples=1):
         """

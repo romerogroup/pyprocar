@@ -502,7 +502,8 @@ class DOSPlot:
                     # replace very large values above a threshold with 0. 
                     # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
-                    threshold=50
+
+                    threshold=max(abs(dos_total[ispin]))+1
                     y[np.abs(y) > threshold] = 0
                     if overlay_mode:
                         if ispin > 0 and len(spins) > 1:
@@ -576,7 +577,7 @@ class DOSPlot:
                     # replace very large values above a threshold with 0. 
                     # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
-                    threshold=50
+                    threshold=max(abs(dos_total[ispin]))+1
                     y[np.abs(y) > threshold] = 0
                     if overlay_mode:
                         if ispin > 0 and len(spins) > 1:
@@ -704,9 +705,9 @@ class DOSPlot:
                     # replace very large values above a threshold with 0. 
                     # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
-                    threshold=50
-                    y[np.abs(y) > threshold] = 0
 
+                    threshold=max(abs(dos_total[ispin]))+1
+                    y[np.abs(y) > threshold] = 0
                     if overlay_mode:
                         if ispin > 0 and len(spins) > 1:
                             y *= -1
@@ -777,9 +778,9 @@ class DOSPlot:
                     # replace very large values above a threshold with 0. 
                     # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
-                    threshold=50
-                    y[np.abs(y) > threshold] = 0
 
+                    threshold=max(abs(dos_total[ispin]))+1
+                    y[np.abs(y) > threshold] = 0
                     if overlay_mode:
                         if ispin > 0 and len(spins) > 1:
                             y *= -1
@@ -941,9 +942,9 @@ class DOSPlot:
                     # replace very large values above a threshold with 0. 
                     # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
-                    threshold=50
+
+                    threshold=max(abs(dos_total[ispin]))+1
                     y[np.abs(y) > threshold] = 0
-                    
                     if overlay_mode:
                         if ispin > 0 and len(spins) > 1:
                             y *= -1
@@ -1044,7 +1045,7 @@ class DOSPlot:
                     # replace very large values above a threshold with 0. 
                     # These are artifacts from the division of samll total values.
                     y = np.nan_to_num(y, 0)
-                    threshold=50
+                    threshold=max(abs(dos_total[ispin]))+1
                     y[np.abs(y) > threshold] = 0
                     if overlay_mode:
                         if ispin > 0 and len(spins) > 1:
