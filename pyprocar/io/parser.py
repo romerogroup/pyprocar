@@ -259,10 +259,11 @@ class Parser:
         try:
             kpoints = vasp.Kpoints(kpoints)
             self.kpath = kpoints.kpath
-        except:
+        except Exception as e:
+            print(e)
             self.kpath=None
 
-        
+    
 
         procar = vasp.Procar(
                             filename=procar,
@@ -282,6 +283,8 @@ class Parser:
             pass
         
         self.ebs = procar.ebs
+
+        print(self.ebs.kpoints.shape)
         self.structure = poscar.structure
 
         try:

@@ -82,6 +82,9 @@ class QEParser():
         # self.bands -= self.efermi
         self.ebs = ElectronicBandStructure(
                                 kpoints=self.kpoints,
+                                n_kx=self.nkx,
+                                n_ky=self.nky,
+                                n_kz=self.nkz,
                                 bands=self.bands,
                                 projected=self._spd2projected(self.spd),
                                 efermi=self.efermi,
@@ -879,14 +882,16 @@ class QEParser():
         None
             None
         """
-        if 'monkhorst_pack' in main_xml_root.findall(".//output/band_structure/starting_k_points")[0].tag:
-            self.nk1 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['nk1']
-            self.nk2 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['nk2']
-            self.nk3 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['nk3']
+   
+        monkhorst_tag=main_xml_root.findall(".//output/band_structure/starting_k_points")[0][0]
+        if 'monkhorst_pack' in monkhorst_tag.tag:
+            self.nkx = monkhorst_tag.attrib['nk1']
+            self.nky = monkhorst_tag.attrib['nk2']
+            self.nkz = monkhorst_tag.attrib['nk3']
             
-            self.nk1 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['k1']
-            self.nk2 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['k2']
-            self.nk3 = main_xml_root.findall(".//output/band_structure/starting_k_points/monkhorst_pack").attrib['k3']
+            self.nk1 = monkhorst_tag.attrib['k1']
+            self.nk2 = monkhorst_tag.attrib['k2']
+            self.nk3 = monkhorst_tag.attrib['k3']
 
         
         self.nks = int(main_xml_root.findall(".//output/band_structure/nks")[0].text)
