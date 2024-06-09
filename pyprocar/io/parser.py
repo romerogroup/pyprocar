@@ -260,7 +260,6 @@ class Parser:
             kpoints = vasp.Kpoints(kpoints)
             self.kpath = kpoints.kpath
         except Exception as e:
-            print(e)
             self.kpath=None
 
     
@@ -284,7 +283,6 @@ class Parser:
         
         self.ebs = procar.ebs
 
-        print(self.ebs.kpoints.shape)
         self.structure = poscar.structure
 
         try:
