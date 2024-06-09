@@ -116,7 +116,7 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.631 seconds)
+   **Total running time of the script:** ( 0 minutes  1.695 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:

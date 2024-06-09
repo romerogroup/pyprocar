@@ -882,16 +882,23 @@ class QEParser():
         None
             None
         """
-   
+
+        self.nkx=None
+        self.nky=None
+        self.nkz=None
+        self.nk1=None
+        self.nk2=None
+        self.nk3=None
         monkhorst_tag=main_xml_root.findall(".//output/band_structure/starting_k_points")[0][0]
         if 'monkhorst_pack' in monkhorst_tag.tag:
-            self.nkx = monkhorst_tag.attrib['nk1']
-            self.nky = monkhorst_tag.attrib['nk2']
-            self.nkz = monkhorst_tag.attrib['nk3']
+            self.nkx = float(monkhorst_tag.attrib['nk1'])
+            self.nky = float(monkhorst_tag.attrib['nk2'])
+            self.nkz = float(monkhorst_tag.attrib['nk3'])
             
-            self.nk1 = monkhorst_tag.attrib['k1']
-            self.nk2 = monkhorst_tag.attrib['k2']
-            self.nk3 = monkhorst_tag.attrib['k3']
+            self.nk1 = float(monkhorst_tag.attrib['k1'])
+            self.nk2 = float(monkhorst_tag.attrib['k2'])
+            self.nk3 = float(monkhorst_tag.attrib['k3'])
+        
 
         
         self.nks = int(main_xml_root.findall(".//output/band_structure/nks")[0].text)

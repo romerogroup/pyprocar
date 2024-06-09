@@ -114,7 +114,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -219,7 +219,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -310,7 +310,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -363,7 +363,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.275 seconds)
+   **Total running time of the script:** ( 0 minutes  2.474 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot_configurations.py:

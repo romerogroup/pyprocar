@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.io.qe &#8212; PyProcar 6.1.9 documentation</title>
+    <title>pyprocar.io.qe &#8212; PyProcar 6.1.10 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=cdf6d003"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
   
 </a></div>
     
@@ -511,6 +511,9 @@ document.write(`
         <span class="c1"># self.bands -= self.efermi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ebs</span> <span class="o">=</span> <span class="n">ElectronicBandStructure</span><span class="p">(</span>
                                 <span class="n">kpoints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+                                <span class="n">n_kx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nkx</span><span class="p">,</span>
+                                <span class="n">n_ky</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nky</span><span class="p">,</span>
+                                <span class="n">n_kz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nkz</span><span class="p">,</span>
                                 <span class="n">bands</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">,</span>
                                 <span class="n">projected</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_spd2projected</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spd</span><span class="p">),</span>
                                 <span class="n">efermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">efermi</span><span class="p">,</span>
@@ -1308,14 +1311,23 @@ document.write(`
 <span class="sd">        None</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;monkhorst_pack&#39;</span> <span class="ow">in</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nk1</span> <span class="o">=</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points/monkhorst_pack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;nk1&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nk2</span> <span class="o">=</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points/monkhorst_pack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;nk2&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nk3</span> <span class="o">=</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points/monkhorst_pack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;nk3&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nkx</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nky</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nkz</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nk1</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nk2</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nk3</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">monkhorst_tag</span><span class="o">=</span><span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;monkhorst_pack&#39;</span> <span class="ow">in</span> <span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nkx</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;nk1&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nky</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;nk2&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nkz</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;nk3&#39;</span><span class="p">])</span>
             
-            <span class="bp">self</span><span class="o">.</span><span class="n">nk1</span> <span class="o">=</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points/monkhorst_pack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;k1&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nk2</span> <span class="o">=</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points/monkhorst_pack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;k2&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nk3</span> <span class="o">=</span> <span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/starting_k_points/monkhorst_pack&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;k3&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nk1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;k1&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nk2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;k2&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nk3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monkhorst_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;k3&#39;</span><span class="p">])</span>
+        
 
         
         <span class="bp">self</span><span class="o">.</span><span class="n">nks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">main_xml_root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//output/band_structure/nks&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>

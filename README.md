@@ -6,7 +6,7 @@
 
 Notice
 ===========
-- **New Release** We recently updated to a new version 'v6.1.9'. This update encompasses a significant overhaul of the codebase, updated documentation, and .
+- **New Release** We recently updated to a new version 'v6.1.10'.
 - **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
 
 
@@ -135,6 +135,7 @@ will bring a help menu.
 
 Changelog
 --------------
+v6.1.10 Jun 09th, 2024 -- Bug fix to dos, qe parser changes, elk parser changes, fermisurface changes  <br />
 v6.1.9 Mar 28th, 2024 -- Changed default fermi level behavior, updated dos implementation, and doc updates <br />
 v6.1.8 Mar 5th, 2024 -- Bug fixes to stack_orbital in dosplot <br />
 v6.1.7 Jan 15th, 2024 -- Bug fixes and doc updates <br />

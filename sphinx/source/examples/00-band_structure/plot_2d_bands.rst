@@ -104,6 +104,10 @@ Plain mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     ----------------------------------------------------------------------------------------------------------
                 
+
+                WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
+                ----------------------------------------------------------------------------------------------------------
+            
     Bands used in the plotting:  [3, 4]
     Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
       warnings.warn(
@@ -153,6 +157,10 @@ Parametric mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     ----------------------------------------------------------------------------------------------------------
                 
+
+                WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
+                ----------------------------------------------------------------------------------------------------------
+            
     Bands used in the plotting:  [3, 4]
 
 
@@ -200,6 +208,10 @@ Property Projection mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     ----------------------------------------------------------------------------------------------------------
                 
+
+                WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
+                ----------------------------------------------------------------------------------------------------------
+            
     Bands used in the plotting:  [3, 4]
     Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
       warnings.warn(
@@ -259,6 +271,10 @@ Spin Texture mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     ----------------------------------------------------------------------------------------------------------
                 
+
+                WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
+                ----------------------------------------------------------------------------------------------------------
+            
     Bands used in the plotting:  [16, 17, 18, 19, 20, 21]
 
 
@@ -267,7 +283,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  13.652 seconds)
+   **Total running time of the script:** ( 3 minutes  28.779 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_2d_bands.py:

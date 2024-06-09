@@ -96,7 +96,7 @@ Plain mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -135,6 +135,10 @@ Plain mode
 
                 Here is a list modes : plain , plain_bands , parametric
                 --------------------------------------------------------
+            
+
+                WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+                ----------------------------------------------------------------------------------------------------------
             
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
@@ -186,7 +190,7 @@ plain_bands mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -226,6 +230,10 @@ plain_bands mode
                 Here is a list modes : plain , plain_bands , parametric
                 --------------------------------------------------------
             
+
+                WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+                ----------------------------------------------------------------------------------------------------------
+            
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
@@ -233,15 +241,14 @@ plain_bands mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-65
+.. GENERATED FROM PYTHON SOURCE LINES 60-64
 
 parametric mode
 +++++++++++++++++++++++++++++++++++++++
 
-Does not work. Contact developers
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-80
+.. GENERATED FROM PYTHON SOURCE LINES 64-79
 
 .. code-block:: default
 
@@ -281,7 +288,7 @@ Does not work. Contact developers
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -321,6 +328,10 @@ Does not work. Contact developers
                 Here is a list modes : plain , plain_bands , parametric
                 --------------------------------------------------------
             
+
+                WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+                ----------------------------------------------------------------------------------------------------------
+            
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
@@ -328,7 +339,7 @@ Does not work. Contact developers
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-87
+.. GENERATED FROM PYTHON SOURCE LINES 80-86
 
 Selecting band indices
 +++++++++++++++++++++++++++++++++++++++
@@ -337,7 +348,7 @@ You can specify specfic bands with the band indices keyword.
 band_indices will be a list of list that contain band indices to plot for a given spin. Below I only plot bands 6 and 7 for spin 0
 Also you can specify the colors of the bands as well with band_colors
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-95
+.. GENERATED FROM PYTHON SOURCE LINES 86-94
 
 .. code-block:: default
 
@@ -370,7 +381,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -410,6 +421,10 @@ Also you can specify the colors of the bands as well with band_colors
                 Here is a list modes : plain , plain_bands , parametric
                 --------------------------------------------------------
             
+
+                WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+                ----------------------------------------------------------------------------------------------------------
+            
     _____________________________________________________
     Useful band indices for spin-0 : [2 3 4 5]
     Useful band indices for spin-1 : [2 3]
@@ -420,7 +435,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.615 seconds)
+   **Total running time of the script:** ( 0 minutes  7.173 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py:

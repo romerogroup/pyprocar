@@ -60,7 +60,6 @@ pyprocar.fermi2D(code = 'vasp',
 # parametric mode
 # +++++++++++++++++++++++++++++++++++++++
 #
-# Does not work. Contact developers
 #
 
 atoms=[0]

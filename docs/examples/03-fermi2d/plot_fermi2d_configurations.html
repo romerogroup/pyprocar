@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.9 documentation</title>
+    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.10 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=cdf6d003"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=7aa426d2"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.9 documentation</p>
+    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
   
 </a></div>
     
@@ -557,7 +557,7 @@ to download the full example code</p>
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.9 created on Jun 10th, 2021
+Version 6.1.10 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -614,6 +614,10 @@ marker : {&#39;description&#39;: &#39;Controls the marker used for the spin plot
 dpi : {&#39;description&#39;: &#39;The dpi value to save the image as&#39;, &#39;value&#39;: &#39;figure&#39;}
 x_label : {&#39;description&#39;: &#39;The x label of the plot&#39;, &#39;value&#39;: &#39;$k_{x}$  ($\\AA^{-1}$)&#39;}
 y_label : {&#39;description&#39;: &#39;The x label of the plot&#39;, &#39;value&#39;: &#39;$k_{y}$  ($\\AA^{-1}$)&#39;}
+
+            WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+            ----------------------------------------------------------------------------------------------------------
+
 _____________________________________________________
 Useful band indices for spin-0 : [4 5 6 7 8 9]
 </pre></div>
@@ -645,7 +649,7 @@ Useful band indices for spin-0 : [4 5 6 7 8 9]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.9 created on Jun 10th, 2021
+Version 6.1.10 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -684,6 +688,10 @@ spin_texture    :  True
 
             Here is a list modes : plain , plain_bands , parametric
             --------------------------------------------------------
+
+
+            WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+            ----------------------------------------------------------------------------------------------------------
 
 _____________________________________________________
 Useful band indices for spin-0 : [4 5 6 7 8 9]
@@ -717,7 +725,7 @@ Useful band indices for spin-0 : [4 5 6 7 8 9]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.9 created on Jun 10th, 2021
+Version 6.1.10 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -757,11 +765,15 @@ spin_texture    :  True
             Here is a list modes : plain , plain_bands , parametric
             --------------------------------------------------------
 
+
+            WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
+            ----------------------------------------------------------------------------------------------------------
+
 _____________________________________________________
 Useful band indices for spin-0 : [4 5 6 7 8 9]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  17.872 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  18.796 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-03-fermi2d-plot-fermi2d-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/fdb826763925695b13fb39139d369c9e/plot_fermi2d_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi2d_configurations.py</span></code></a></p>

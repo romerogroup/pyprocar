@@ -177,7 +177,7 @@ Finding defects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.393 seconds)
+   **Total running time of the script:** ( 0 minutes  6.796 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_finding_defects_pyposcar.py:

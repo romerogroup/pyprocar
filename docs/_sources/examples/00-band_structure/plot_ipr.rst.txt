@@ -212,7 +212,7 @@ The pyprocar code is:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.280 seconds)
+   **Total running time of the script:** ( 0 minutes  23.839 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_ipr.py:

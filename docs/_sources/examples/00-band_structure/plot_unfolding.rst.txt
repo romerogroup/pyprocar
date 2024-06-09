@@ -156,7 +156,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.9 created on Jun 10th, 2021
+    Version 6.1.10 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -197,7 +197,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  21.979 seconds)
+   **Total running time of the script:** ( 0 minutes  22.998 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:
