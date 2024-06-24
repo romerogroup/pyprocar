@@ -248,7 +248,6 @@ class FermiVisualizer:
         config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_3d.yml'))
         config_manager.update_config(kwargs)  
         self.config=config_manager.get_config()
-
         self._setup_plotter()
 
     def add_scalar_bar(self,name):
@@ -466,16 +465,16 @@ class FermiVisualizer:
         self._add_custom_mesh_slice(mesh=surface,normal=slice_normal,origin=slice_origin)
         
         if show:
-            if self.config['plotter_offscreen']:
+            if self.config['plotter_offscreen']['value']:
                 self.plotter.off_screen = True
                 self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],auto_close=False)  
-                self.plotter.show(screenshot=save_2d)
-            else:
-                image=self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],screenshot=True)  
+            elif save_2d:
+                image=self.plotter.show( cpos=self.config['plotter_camera_pos']['value'], screenshot=save_2d) 
                 im = Image.fromarray(image)
                 im.save(save_2d)
-            # self.plotter.show(cpos=self.config['plotter_camera_pos']['value'], 
-            #              screenshot=save_2d)
+            else:
+                self.plotter.show(cpos=self.config['plotter_camera_pos']['value'])
+
         if save_2d_slice:
             slice_2d = self.plotter.plane_sliced_meshes[0]
             self.plotter.close()
@@ -522,7 +521,7 @@ class FermiVisualizer:
         
         self._add_custom_box_slice_widget(
                     mesh=surface, 
-                    show_cross_section_area=self.config['cross_section_slice_show_area'],
+                    show_cross_section_area=self.config['cross_section_slice_show_area']['value'],
                     normal=slice_normal,
                     origin=slice_origin,
                     )
@@ -562,7 +561,7 @@ class FermiVisualizer:
     def show(self,filename=None):
         if filename:
             file_extentions = filename.split()
-            if self.config['plotter_offscreen']:
+            if self.config['plotter_offscreen']['value']:
                 self.plotter.off_screen = True
                 self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],auto_close=False)  
                 self.plotter.show(screenshot=filename)
