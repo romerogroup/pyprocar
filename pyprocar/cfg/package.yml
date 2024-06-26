@@ -1,0 +1,2 @@
+APPLY_LOG_FILTER: True
+log_level: debug
