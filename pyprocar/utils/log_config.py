@@ -24,13 +24,14 @@ def setup_logging(log_dir,apply_filter=True, log_level='debug'):
                 'error': logging.ERROR, 
                 'critical': logging.CRITICAL}
     if log_level not in ['debug','info','warning','error','critical']:
-        raise ValueError(f"Invalid log level: {log_level}. 
+        raise ValueError(f"""Invalid log level: {log_level}. 
                         Must be one of 'debug', 'info', 
-                        'warning', 'error', or 'critical'.")
+                        'warning', 'error', or 'critical'.""")
 
     # Create a timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     log_filename = f"package_{timestamp}.log"
+    log_filename="package.log"
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -38,7 +39,7 @@ def setup_logging(log_dir,apply_filter=True, log_level='debug'):
                         level=logging.DEBUG, 
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - Line: %(lineno)d')
 
-    logger = logging.getLogger('matgraphdb')  # define globally (used in train.py, val.py, detect.py, etc.)
+    logger = logging.getLogger('pyprocar')  # define globally (used in train.py, val.py, detect.py, etc.)
     if apply_filter:
         logger.addFilter(InfoFilter())  # Apply the custom filter to only log INFO messages
     return logger

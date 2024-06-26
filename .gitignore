@@ -156,7 +156,7 @@ sphinx/source/examples/
 .pytest_cache/
 
 my_tests/
-
+/logs/
 data/
 reports/
 notebooks/
@@ -168,3 +168,4 @@ api_token.txt
 pypi_info.txt
 
 updating_pyprocar.md
+

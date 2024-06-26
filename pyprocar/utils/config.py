@@ -30,7 +30,7 @@ PKG_DIR = str(FILE.parents[1])  # pyprocar
 ROOT = str(FILE.parents[2])  # PyProcar
 LOG_DIR=os.path.join(ROOT,'logs')
 DATA_DIR=os.path.join(ROOT,'data')
-CONFIG_FILE=os.path.join(PKG_DIR,'cfg','config.yml')
+CONFIG_FILE=os.path.join(PKG_DIR,'cfg','package.yml')
 
 # Load config from yaml file
 with open(CONFIG_FILE, 'r') as f:
