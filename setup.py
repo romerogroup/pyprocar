@@ -1,3 +1,4 @@
+import os
 from distutils.core import setup
 from setuptools import find_packages
 import json
@@ -27,6 +28,18 @@ def write_version_py():
         wf.write(version_info_string)
     return release_data
 
+# Function to read the requirements.txt file
+def read_requirements(file_name):
+    with open(file_name) as f:
+        return f.read().splitlines()
+
+# Path to the requirements.txt file
+requirements_path = os.path.join(os.path.dirname(__file__), 'requirements.txt')
+
+# Read the requirements from the requirements.txt file
+requirements = read_requirements(requirements_path)
+
+
 data = write_version_py()
 
 setup(
@@ -38,21 +51,7 @@ setup(
     url=data["url"],
     download_url=data["download_url"],
     license="LICENSE",
-    install_requires=[
-        'gdown',
-        'matplotlib',
-        'numpy',
-        'pyvista',
-        'scikit-image',
-        'scikit-learn',
-        'scipy',
-        'seekpath',
-        'spglib',
-        'trimesh',
-        'ase',
-        'sympy',
-        'PyYAML',
-    ],
+    install_requires=requirements,
     data_files=[("", ["LICENSE"])],
     package_data={"": ["setup.json", '*.ini','*.yml']},
     scripts=["scripts/procar.py"],

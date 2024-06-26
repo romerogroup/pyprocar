@@ -1,6 +1,6 @@
 gdown
 matplotlib
-numpy
+numpy<2.0
 pyvista
 scikit-image
 scipy
