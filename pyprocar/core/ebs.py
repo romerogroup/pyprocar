@@ -22,6 +22,7 @@ from .kpath import KPath
 from .brillouin_zone import BrillouinZone
 from ..utils import  mathematics
 from pyprocar.utils.unfolder import Unfolder
+from pyprocar.utils import LOGGER
 
 HBAR_EV = 6.582119 *10**(-16) #eV*s
 HBAR_J = 1.0545718 *10**(-34) #eV*s
@@ -70,20 +71,23 @@ class ElectronicBandStructure:
         labels:List=None,
         reciprocal_lattice:np.ndarray=None,
         ):
-        
+        LOGGER.info('Initializing the ElectronicBandStructure object')
         
         self.kpoints = kpoints
         self.bands = bands - efermi
         self.efermi = efermi
         
+        
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
         self.kpath = kpath
+        self.is_mesh = True
+        if kpath is not None:
+            self.is_mesh = False
+        self.has_phase = False
         if self.projected_phase is not None:
             self.has_phase = True
-        else:
-            self.has_phase = False
         self.labels = labels
         self.weights = weights
         self.graph = None
@@ -111,6 +115,28 @@ class ElectronicBandStructure:
         self._effective_mass=None
         self._fermi_speed=None
         self._harmonic_average_effective_mass=None
+
+        LOGGER.info('Subtracting Fermi Energy from Bands')
+        LOGGER.info(f'Is Mesh: {self.is_mesh}')
+        LOGGER.info(f'Fermi Energy: {self.efermi}')
+        LOGGER.info(f'Kpoints shape: {self.kpoints.shape}')
+        LOGGER.info(f'Bands shape: {self.bands.shape}')
+        if self.projected is not None:
+            LOGGER.info(f'Projected shape: {self.projected.shape}')
+        if self.projected_phase is not None:
+            LOGGER.info(f'Projected phase shape: {self.projected_phase.shape}')
+        if self.kpath is not None:
+            LOGGER.info(f"Kpath: {self.kpath}")
+        if self.labels is not None:
+            LOGGER.info(f"Kpath: {self.labels}")
+        if self.reciprocal_lattice is not None:
+            LOGGER.info(f"Reciprocal lattice: {self.reciprocal_lattice}")
+        if self.weights is not None:
+            LOGGER.info(f"Weights: {self.weights}")
+        LOGGER.info('Initialized the ElectronicBandStructure object')
+        
+
+
           
     @property
     def n_kx(self):
@@ -1009,6 +1035,10 @@ class ElectronicBandStructure:
         rotations : np.ndarray
             The point symmetry operations of the lattice
         """
+        if not self.is_mesh:
+            raise ValueError("This function only works for meshes")
+        
+        LOGGER.info('Applying symmetry operations to the kpoints, bands, and projections')
         
         full_kpoints=[]
         full_projected=[]
@@ -1045,13 +1075,20 @@ class ElectronicBandStructure:
                         full_projected_phases.append(projected_phase)
         self.kpoints = np.array(full_kpoints)
         self.bands = np.array(full_bands)
+        
+        LOGGER.info(f'Array shapes after symmetry operations')
+        LOGGER.info(f'Kpoints shape: {self.kpoints.shape}')
+        LOGGER.info(f'Bands shape: {self.bands.shape}')
 
         if self.projected is not None:
             self.projected = np.array(full_projected)
+            LOGGER.info(f'Projected shape: {self.projected.shape}')
         if self.projected_phase is not None:
             self.projected_phase = np.array(full_projected_phases)
+            LOGGER.info(f'Projected shape: {self.projected.shape}')
         if self.weights is not None:
             self.weights = np.array(full_weights)
+            LOGGER.info(f'Weights shape: {self.weights.shape}')
 
         nk=self.kpoints.shape[0]
         if self.n_kx:
