@@ -6,7 +6,7 @@ __date__ = "March 31, 2020"
 from typing import List
 
 import numpy as np
-from scipy import interpolate
+
 from skimage import measure
 import pyvista as pv
 
