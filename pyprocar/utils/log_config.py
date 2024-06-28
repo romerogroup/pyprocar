@@ -7,7 +7,7 @@ class InfoFilter(logging.Filter):
         # Only allow INFO level messages
         return record.levelno == logging.INFO
 
-def setup_logging(log_dir,apply_filter=True, log_level='debug'):
+def setup_logging(log_dir,apply_filter=False, log_level='debug'):
     """
     Set up logging for the MatGraphDB package.
 
@@ -36,10 +36,10 @@ def setup_logging(log_dir,apply_filter=True, log_level='debug'):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     logging.basicConfig(filename=os.path.join(log_dir,log_filename), 
-                        level=logging.INFO, 
+                        level=logging.DEBUG, 
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - Line: %(lineno)d')
 
     logger = logging.getLogger('pyprocar')  # define globally (used in train.py, val.py, detect.py, etc.)
-    if apply_filter:
-        logger.addFilter(InfoFilter())  # Apply the custom filter to only log INFO messages
+    # if apply_filter:
+    #     logger.addFilter(InfoFilter())  # Apply the custom filter to only log INFO messages
     return logger
