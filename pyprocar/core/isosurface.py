@@ -12,6 +12,8 @@ import pyvista as pv
 
 from .surface import Surface
 
+from pyprocar.utils import LOGGER
+
 class Isosurface(Surface):
     """
     This class contains a surface that finds all the points corresponding
@@ -79,7 +81,7 @@ class Isosurface(Surface):
             transform_matrix:np.ndarray=None,
             boundaries=None,
         ):
-        
+        LOGGER.info(f'____ Initializing Isosurface ____')
 
         self.XYZ = np.array(XYZ)
         self.V = V
@@ -91,60 +93,15 @@ class Isosurface(Surface):
         self.interpolation_factor = interpolation_factor
         self.transform_matrix = transform_matrix
         self.boundaries = boundaries
-        
-        if self.algorithm not in ['classic', 'lewiner']:
-
-            print(
-                "The algorithm chose has to be from ['classic','lewiner'], automtically choosing 'lewiner'"
-            )
-            self.algorithm = "lewiner"
+        self.algorithm = self._get_algorithm(self.algorithm)
 
         if self.V_matrix is None:
             self.V_matrix = map2matrix(self.XYZ, self.V)
 
-        if self.padding is None:
-            
-            self.padding = [self.nX*2 // 2, self.nY*2 // 2, self.nZ*2 // 2]
+        self.padding = self._get_padding(self.nX,self.nY,self.nZ)
 
-        else:
-            
-            self.padding = [
-                self.nX // 2 * padding[0],
-                self.nY // 2 * padding[1],
-                self.nZ // 2 * padding[2],
-            ]
-        
         verts, faces, normals, values = self._get_isosurface(interpolation_factor)
-        
-
-        
-        if verts is not None and faces is not None:
-            if transform_matrix is not None:
-                verts = np.dot(verts,  transform_matrix)
-                column_of_verts_of_triangles = [3 for _ in range(len(faces[:,0])) ]
-                faces = np.insert(arr = faces,obj=0, values = column_of_verts_of_triangles, axis = 1)
-            """
-            Python, unlike statically typed languages such as Java, allows complete
-            freedom when calling methods during object initialization. However, 
-            standard object-oriented principles apply to Python classes using deep 
-            inheritance hierarchies. Therefore the developer has responsibility for 
-            ensuring that objects are properly initialized when there are multiple 
-            __init__ methods that need to be called.
-            For this reason I will make one temporary surface and from there I will
-            using the other surface provided.
-            """
-
-            if boundaries is not None:
-                supercell_surface = pv.PolyData(var_inp=verts, faces=faces)
-                for normal,center in zip(boundaries.face_normals, boundaries.centers):
-                    supercell_surface.clip(origin=center, normal=normal, inplace=True)
-
-                if len(supercell_surface.points) == 0:
-                    raise Exception("Clippping destroyed mesh.")
-    
-                verts = supercell_surface.points
-                faces = supercell_surface.faces
-
+        verts,faces = self._process_isosurface(verts,faces)
  
         super().__init__(verts=verts, faces=faces)
 
@@ -286,6 +243,133 @@ class Isosurface(Surface):
             # print(e)
             # print("No isosurface for this band")
             return None
+        
+    def _get_algorithm(self,algorithm):
+        """
+        This method will return the algorithm for the surface
+
+        Returns
+        -------
+        algorithm : str
+            The algorithm for the surface
+        """
+        if algorithm not in ['classic', 'lewiner']:
+            print("The algorithm chose has to be from ['classic','lewiner'], automtically choosing 'lewiner'")
+            algorithm = "lewiner"
+        return algorithm
+    
+    def _get_padding(self,n_x,n_y,n_z):
+        """
+        This method will return the padding for the surface
+
+        Parameters
+        ----------
+        n_x : int
+            The number of points in the x direction
+        n_y : int
+            The number of points in the y direction
+        n_z : int
+            The number of points in the z direction
+
+        Returns
+        -------
+        padding : List[int]
+            The padding for the surface
+        """
+        if self.padding is None:
+            padding = [n_x*2 // 2, n_y*2 // 2, n_z*2 // 2]
+        else:
+            padding = [
+                n_x // 2 * self.padding[0],
+                n_y // 2 * self.padding[1],
+                n_z // 2 * self.padding[2],
+            ]
+        return padding
+    
+    def _apply_transform_matrix(self,transform_matrix,verts,faces):
+        """
+        This method will apply the transform matrix to the surface
+        
+
+        Parameters
+        ----------
+        transform_matrix : np.ndarray
+            The transform matrix
+        verts : np.ndarray
+            The vertices of the surface
+        faces : np.ndarray
+            The faces of the surface
+
+        Returns
+        -------
+        verts : np.ndarray
+            The vertices of the surface
+        faces : np.ndarray
+            The faces of the surface
+        """
+        if transform_matrix is not None:
+            verts = np.dot(verts,  transform_matrix)
+            column_of_verts_of_triangles = [3 for _ in range(len(faces[:,0])) ]
+            faces = np.insert(arr = faces,obj=0, values = column_of_verts_of_triangles, axis = 1)
+        return verts,faces
+    
+    def _apply_boundaries(self,boundaries,verts,faces):
+        """
+        This method will apply the boundaries to the surface
+
+        Parameters
+        ----------
+        boundaries : pyprocar.core.surface
+            The boundaries of the surface
+        verts : np.ndarray
+            The vertices of the surface
+        faces : np.ndarray
+            The faces of the surface
+
+        Returns
+        -------
+        verts : np.ndarray
+            The vertices of the surface
+        faces : np.ndarray
+            The faces of the surface
+        """
+        if boundaries is not None:
+            supercell_surface = pv.PolyData(var_inp=verts, faces=faces)
+            for normal,center in zip(boundaries.face_normals, boundaries.centers):
+                supercell_surface.clip(origin=center, normal=normal, inplace=True)
+
+            if len(supercell_surface.points) == 0:
+                raise Exception("Clippping destroyed mesh.")
+
+            verts = supercell_surface.points
+            faces = supercell_surface.faces
+
+        return verts,faces
+    
+    def _process_isosurface(self,verts,faces):
+        """
+        This method will process the isosurface
+
+        Parameters
+        ----------
+        verts : np.ndarray
+            The vertices of the surface
+        faces : np.ndarray
+            The faces of the surface
+
+        Returns
+        -------
+        verts : np.ndarray
+            The vertices of the surface
+        faces : np.ndarray
+            The faces of the surface
+        """
+        
+        if verts is not None and faces is not None:
+            verts,faces = self._apply_transform_matrix(self.transform_matrix,verts,faces)
+            verts,faces = self._apply_boundaries(self.boundaries,verts,faces)
+
+        return verts,faces
 
     def _get_isosurface(self, interp_factor:float=1):
         """

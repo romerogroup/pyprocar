@@ -10,7 +10,7 @@ import yaml
 import numpy as np
 
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
-from pyprocar.utils import ROOT
+from pyprocar.utils import ROOT, LOGGER
 
 from .. import io
 
@@ -20,6 +20,7 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+
 class FermiHandler:
 
     def __init__(self, 
@@ -64,8 +65,6 @@ class FermiHandler:
             )
         else:
             self.e_fermi=fermi
-
-
 
         self.structure = parser.structure
         if self.structure.rotations is not None:

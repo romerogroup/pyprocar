@@ -8,7 +8,7 @@ import math
 import sys
 import copy
 import itertools
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 import scipy.interpolate as interpolate
@@ -16,7 +16,7 @@ from matplotlib import colors as mpcolors
 from matplotlib import cm
 
 from . import Isosurface, Surface, BrillouinZone
-
+from pyprocar.utils import LOGGER
 import pyvista as pv
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -62,40 +62,55 @@ class FermiSurface3D(Surface):
         projection_accuracy: str="Normal",
         supercell: List[int]=[1, 1, 1],
         ):
+        LOGGER.info(f'___Initializing the FermiSurface3D object___')
 
         self.ebs = copy.copy(ebs)
+
+        LOGGER.debug(f"ebs.bands shape: {self.ebs.bands.shape}")
         if (self.ebs.bands.shape)==3:
             raise "Must reduce ebs.bands into 2d darray"
         
-        # Shifts kpoints between [0.5,0.5)
+        # Shifts kpoints between [-0.5,0.5)
         self.ebs.kpoints = -np.fmod(self.ebs.kpoints + 6.5, 1 ) + 0.5
+
+        LOGGER.debug(f"ebs.kpoints shape: {self.ebs.kpoints.shape}")
+        LOGGER.debug(f"First 3 ebs.kpoints: {self.ebs.kpoints[:3]}")
 
         self.supercell = np.array(supercell)
         self.fermi = fermi + fermi_shift
         self.interpolation_factor = interpolation_factor
         self.projection_accuracy = projection_accuracy
 
+        LOGGER.info(f'Iso-value used to find isosurfaces: {self.fermi}')
+        LOGGER.info(f'Interpolation factor: {self.interpolation_factor}')
+        LOGGER.info(f'Projection accuracy: {self.projection_accuracy}')
+        LOGGER.info(f'Supercell used to calculate the FermiSurface3D: {self.supercell}')
+
+        # Preocessing steps
         self._input_checks()
         self.brillouin_zone = self._get_brilloin_zone(self.supercell)
         self.isosurfaces = self._generate_isosurfaces()
         self.surface = self._combine_isosurfaces()
+
         # Initialize the Fermi Surface
         super().__init__(verts=self.surface.points, faces=self.surface.faces)
 
-
-        self.point_data['band_index'] = self.surface.point_data['band_index'] 
+        # Storing band indices in the initialized surface
+        self.point_data['band_index'] = self.surface.point_data['band_index']
+        self.cell_data['band_index'] = self.surface.cell_data['band_index'] 
         self.fermi_surface_area = self.area
+
+        LOGGER.info(f'___End of initialization FermiSurface3D object___')
         return None
     
     def _input_checks(self):
         assert len(self.ebs.bands.shape)==2
 
     def _generate_isosurfaces(self):
-        # code to generate isosurfaces for each band
+        LOGGER.info(f'____Generating isosurfaces for each band___')
         isosurfaces=[]
-        self.band_index_map = []
-
-        for iband in  range(self.ebs.bands.shape[1]):
+        self.band_isosurface_index_map={}
+        for iband in range(self.ebs.bands.shape[1]):
             isosurface_band = Isosurface(
                                 XYZ=self.ebs.kpoints,
                                 V=self.ebs.bands[:,iband],
@@ -106,32 +121,62 @@ class FermiSurface3D(Surface):
                                 transform_matrix=self.ebs.reciprocal_lattice,
                                 boundaries=self.brillouin_zone,
                             )
-            
-
             # Check to see if the generated isosurface has points
-            if isosurface_band.points.shape[0] != 0:
-                isosurfaces.append(isosurface_band)
-                n_isosurface=len(isosurfaces)
-                self.band_index_map.append(iband)
+            if isosurface_band.points.shape[0] == 0:
+                continue
 
-        self.ebs.bands=self.ebs.bands[:,self.band_index_map]
+            LOGGER.debug(f"Found isosurface with {isosurface_band.points.shape[0]} points")
+
+            isosurfaces.append(isosurface_band)
+            n_isosurface=len(isosurfaces)-1
+            self.band_isosurface_index_map[iband]=n_isosurface
+
+        self.isosurface_band_index_map={value:key for key,value in self.band_isosurface_index_map.items()}
+        band_to_surface_indices=list(self.band_isosurface_index_map.keys())
+        self.ebs.bands=self.ebs.bands[:,band_to_surface_indices]
+
+        LOGGER.debug(f"self.ebs.bands shape: {self.ebs.bands.shape} after removing bands with no isosurfaces")
+        LOGGER.info(f'Band Isosurface index map: {self.band_isosurface_index_map}')
+        LOGGER.info(f'____End of generating isosurfaces for each band___')
         return isosurfaces
     
     def _combine_isosurfaces(self):
+        LOGGER.info(f'____Combining isosurfaces___')
         isosurfaces=copy.deepcopy(self.isosurfaces)
-        band_indices=[]
 
-        surface=isosurfaces[0]
-        band_index_list=[0]*surface.points.shape[0]
-        band_indices.extend(band_index_list)
-        for i_band,isosurface in enumerate(isosurfaces[1:]):
-            # The points are prepended to surface.points, 
-            # so at the end we need to reverse this list
-            surface.merge(isosurface, merge_points=False, inplace=True)
-            band_index_list=[i_band+1]*isosurface.points.shape[0]
-            band_indices.extend(band_index_list)
-        band_indices.reverse()
-        surface.point_data['band_index']=np.array(band_indices)
+        surface_band_indices_points=[]
+        surface_band_indices_cells=[]
+        surface=None
+        for i_surface,isosurface in enumerate(isosurfaces[:]):
+            LOGGER.info(f"Number of points on isosurface {i_surface} isosurface: {isosurface.points.shape[0]}")
+            n_points=isosurface.points.shape[0]
+            n_cells=isosurface.n_cells
+            
+            if i_surface == 0:
+                surface=isosurface
+            else:
+                # The points are prepended to surface.points, 
+                # so at the end we need to reverse this list
+                surface.merge(isosurface, merge_points=False, inplace=True)
+                LOGGER.info(f"Number of points after merging isosurface {i_surface} isosurface to surface: {surface.points.shape[0]}")
+            
+            band_index_points_list=[i_surface]*n_points
+            surface_band_indices_points.extend(band_index_points_list)
+
+            band_indices_cells_list=[i_surface]*n_cells
+            surface_band_indices_cells.extend(band_indices_cells_list)
+
+
+        # Setting band indices on the points of the combined surfaces
+        surface_band_indices_points.reverse()
+        surface.point_data['band_index']=np.array(surface_band_indices_points)
+
+        # Setting band indices on the cells of the combined surfaces
+        surface_band_indices_cells.reverse()
+        surface.cell_data['band_index']=np.array(surface_band_indices_cells)
+
+  
+        LOGGER.info(f'___End of combining isosurfaces___')
         return surface
     
     def _get_brilloin_zone(self, 
@@ -160,6 +205,7 @@ class FermiSurface3D(Surface):
         vectors_name : str, optional
             The name of the vectors, by default "vector"
         """
+        LOGGER.info(f"____Starting Projecting vector texture___")
         
         final_vectors_X = []
         final_vectors_Y = []
@@ -224,11 +270,26 @@ class FermiSurface3D(Surface):
                     XYZ_transformed, vectors_extended_Z, isosurface.points, method="linear"
                 )
 
-            final_vectors_X.extend( vectors_X)
-            final_vectors_Y.extend( vectors_Y)
-            final_vectors_Z.extend( vectors_Z)
+            # Must flip here because when the values are stored in cell_data, 
+            # the values are entered preprended to the cell_data array
+            # and are stored in the opposite order of what you would expect
+            vectors_X=np.flip(vectors_X,axis=0)
+            vectors_Y=np.flip(vectors_Y,axis=0)
+            vectors_Z=np.flip(vectors_Z,axis=0)
+
+            final_vectors_X.extend(vectors_X)
+            final_vectors_Y.extend(vectors_Y)
+            final_vectors_Z.extend(vectors_Z)
+
+        # Again must flip here because when the values are stored in cell_data, 
+        # the values are entered preprended to the cell_data array
+        # and are stored in the opposite order of what you would expect
+        final_vectors_X.reverse()
+        final_vectors_Y.reverse()
+        final_vectors_Z.reverse()
                 
         self.set_vectors(final_vectors_X, final_vectors_Y, final_vectors_Z,vectors_name = vectors_name)
+        LOGGER.info(f'___End of projecting vector texture___')
         return None
             
     def _project_color(self, 
@@ -248,14 +309,15 @@ class FermiSurface3D(Surface):
         -------
         None.
         """
+        LOGGER.info(f"____Starting Projecting atomic projections___")
+
         final_scalars = []
         for iband, isosurface in enumerate(self.isosurfaces):
             XYZ_extended = self.ebs.kpoints.copy()
             scalars_extended =  scalars_array[:,iband].copy()
-    
-    
             for ix in range(3):
                 for iy in range(self.supercell[ix]):
+                
                     temp = self.ebs.kpoints.copy()
                     temp[:, ix] += 1 * (iy + 1)
                     XYZ_extended = np.append(XYZ_extended, temp, axis=0)
@@ -274,42 +336,66 @@ class FermiSurface3D(Surface):
                 colors = interpolate.griddata(
                     XYZ_transformed, scalars_extended, isosurface.centers, method="linear"
                 )
-                
+            
+            # Again must flip here because when the values are stored in cell_data, 
+            # the values are entered preprended to the cell_data array
+            # and are stored in the opposite order of what you would expect
+            colors=np.flip(colors,axis=0)
             final_scalars.extend(colors)
 
+        # Again, you must flip the values here because the 
+        # values are stored in the opposite order of what you would expect
+        final_scalars.reverse()
+
         self.set_scalars(final_scalars, scalar_name = scalar_name)
+        LOGGER.info(f'___End of projecting scalars___')
         return None
   
     def project_atomic_projections(self,spd):
         """
         Method to calculate the atomic projections of the surface.
         """
+        LOGGER.info(f"____Starting Projecting atomic projections___")
+        LOGGER.debug(f"spd shape at this point: {spd.shape}")
+        LOGGER.debug(f"First 5 spd values coresponding to the first 5 kpoints: {spd[:5,:]}")
+
         scalars_array = []
         count = 0
         for iband in range(len(self.isosurfaces)):
             count+=1
             scalars_array.append(spd[:,iband])
         scalars_array = np.vstack(scalars_array).T
+
+        LOGGER.info(f"First 5 scalar array coresponding to the first 5 kpoints: {scalars_array[:5,:]}")
+        LOGGER.info(f'scalars_array shape after the creation of the array from the spd: {scalars_array.shape}')
+
         self._project_color(scalars_array = scalars_array, scalar_name = "scalars")
+
+        LOGGER.info(f"____Ending Projecting atomic projections___")
 
     def project_spin_texture_atomic_projections(self,spd_spin):
         """
         Method to calculate atomic spin texture projections of the surface.
         """
+        LOGGER.info(f"____Starting Projecting spin texture___")
         vectors_array = spd_spin
         self._create_vector_texture(vectors_array = vectors_array, vectors_name = "spin" )
+        LOGGER.info(f'___End of projecting spin texture___')
 
     def project_fermi_velocity(self,fermi_velocity):
         """
         Method to calculate atomic spin texture projections of the surface.
         """
+        LOGGER.info(f"____Starting Projecting fermi velocity___")
         vectors_array = fermi_velocity.swapaxes(1, 2)
         self._create_vector_texture(vectors_array = vectors_array, vectors_name = "Fermi Velocity Vector" )
+        LOGGER.info(f'___End of projecting fermi velocity___')
 
     def project_fermi_speed(self,fermi_speed):
         """
         Method to calculate the fermi speed of the surface.
         """
+        LOGGER.info(f"____Starting Projecting fermi speed___")
         scalars_array = []
         count = 0
         for iband in range(len(self.isosurfaces)):
@@ -317,11 +403,13 @@ class FermiSurface3D(Surface):
             scalars_array.append(fermi_speed[:,iband])
         scalars_array = np.vstack(scalars_array).T
         self._project_color(scalars_array = scalars_array, scalar_name = "Fermi Speed")
+        LOGGER.info(f'___End of projecting fermi speed___')
 
     def project_harmonic_effective_mass(self,harmonic_effective_mass):
         """
         Method to calculate the atomic projections of the surface.
         """
+        LOGGER.info(f"____Starting Projecting harmonic effective mass___")
         scalars_array = []
         count = 0
         for iband in range(len(self.isosurfaces)):
@@ -329,8 +417,9 @@ class FermiSurface3D(Surface):
             scalars_array.append(harmonic_effective_mass[:,iband])
         scalars_array = np.vstack(scalars_array).T
         self._project_color(scalars_array = scalars_array, scalar_name = "Harmonic Effective Mass" )
+        LOGGER.info(f'___End of projecting harmonic effective mass___')
 
-    def extend_surface(self,  extended_zone_directions: List[List[int] or Tuple[int,int,int]]=None,):
+    def extend_surface(self,  extended_zone_directions: List[Union[List[int],Tuple[int,int,int]]]=None,):
         """
         Method to extend the surface in the direction of a reciprocal lattice vecctor
 
@@ -339,6 +428,7 @@ class FermiSurface3D(Surface):
         extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
             List of directions to expand to, by default None
         """
+        LOGGER.info(f"____Starting extending surface___")
         # The following code  creates exteneded surfaces in a given direction
         extended_surfaces = []
         if extended_zone_directions is not None:
@@ -350,6 +440,7 @@ class FermiSurface3D(Surface):
                 self += surface.translate(np.dot(direction, self.ebs.reciprocal_lattice), inplace=True)
             # Clearing unneeded surface from memory
             del surface
+        LOGGER.info(f'___End of extending surface___')
  
 
 
