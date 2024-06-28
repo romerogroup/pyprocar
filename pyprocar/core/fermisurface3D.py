@@ -12,6 +12,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 import scipy.interpolate as interpolate
+from scipy.spatial import KDTree
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 
@@ -61,6 +62,7 @@ class FermiSurface3D(Surface):
         interpolation_factor: int=1,
         projection_accuracy: str="Normal",
         supercell: List[int]=[1, 1, 1],
+        max_distance:float=0.2,
         ):
         LOGGER.info(f'___Initializing the FermiSurface3D object___')
 
@@ -80,15 +82,17 @@ class FermiSurface3D(Surface):
         self.fermi = fermi + fermi_shift
         self.interpolation_factor = interpolation_factor
         self.projection_accuracy = projection_accuracy
+        self.max_distance=max_distance
 
         LOGGER.info(f'Iso-value used to find isosurfaces: {self.fermi}')
         LOGGER.info(f'Interpolation factor: {self.interpolation_factor}')
         LOGGER.info(f'Projection accuracy: {self.projection_accuracy}')
         LOGGER.info(f'Supercell used to calculate the FermiSurface3D: {self.supercell}')
+        LOGGER.info(f'Maximum distance to keep points from isosurface centers: {self.max_distance}')
 
         # Preocessing steps
         self._input_checks()
-        self.brillouin_zone = self._get_brilloin_zone(self.supercell)
+        self.brillouin_zone = self._get_brillouin_zone(self.supercell)
         self.isosurfaces = self._generate_isosurfaces()
         self.surface = self._combine_isosurfaces()
 
@@ -179,10 +183,11 @@ class FermiSurface3D(Surface):
         LOGGER.info(f'___End of combining isosurfaces___')
         return surface
     
-    def _get_brilloin_zone(self, 
+    def _get_brillouin_zone(self, 
                         supercell: List[int]):
 
         """Returns the BrillouinZone of the material
+        brillouin_zone
 
         Returns
         -------
@@ -245,7 +250,13 @@ class FermiSurface3D(Surface):
                     )
     
             XYZ_transformed = np.dot(XYZ_extended, self.ebs.reciprocal_lattice)
-    
+
+            near_isosurface_point=self._keep_points_near_subset(XYZ_transformed,isosurface.centers,max_distance=self.max_distance)
+            XYZ_transformed=XYZ_transformed[near_isosurface_point]
+            vectors_extended_X=vectors_extended_X[near_isosurface_point]
+            vectors_extended_Y=vectors_extended_Y[near_isosurface_point]
+            vectors_extended_Z=vectors_extended_Z[near_isosurface_point]
+
             if self.projection_accuracy.lower()[0] == "n":
                
                 vectors_X = interpolate.griddata(
@@ -291,7 +302,80 @@ class FermiSurface3D(Surface):
         self.set_vectors(final_vectors_X, final_vectors_Y, final_vectors_Z,vectors_name = vectors_name)
         LOGGER.info(f'___End of projecting vector texture___')
         return None
+    
+    @staticmethod
+    def _keep_points_inside_brillouin_zone(xyz,brillouin):
+        """
+        This method will keep points inside the brillouin zone
+        
+        Parameters
+        ----------
+        xyz : np.ndarray
+            These points have to be in cartersian coordinates
+        brilloin_zone : BrillouinZone
+            The brillouin zone
+        
+        Returns
+        -------
+        xyz : np.ndarray
+            The xyz array
+        """
+
+        face_centers = brillouin.centers
+        face_normals = brillouin.face_normals
+
+        LOGGER.debug(f"Brillouin Zone Face Centers: {face_centers}")
+        LOGGER.debug(f"Brillouin Zone Face Normals: {face_normals}")
+
+        # Initialize an array to store whether each point is inside the zone
+        is_inside = np.ones(len(xyz), dtype=bool)
+
+        # Check each face of the Brillouin zone
+        for center, normal in zip(face_centers, face_normals):
+            # Calculate the signed distance from each point to the plane
+            distance = np.dot(xyz - center, normal)
             
+            # Update is_inside: point is inside if distance is negative for all faces
+            is_inside &= (distance <= 0)
+
+        # Return only the points that are inside the Brillouin zone
+        return is_inside
+    
+    @staticmethod
+    def _keep_points_near_subset(points, subset, max_distance=0.2):
+        """
+        Keep only the points that are within a specified distance of any point in the subset.
+
+        Parameters
+        ----------
+        points : np.        Array of shape (n, 3) containing all points to be filtered.
+        subset : np.ndarray
+            Array of shape (m, 3) containing the subset of points to compare against.
+        max_distance : float
+            The maximum distance for a point to be considered "
+        Returns
+        -------
+        np.ndarray
+            Array of shape (k, 3) containing only the points that are near the subset,
+            where k <= n.
+        """
+
+
+        # Create a KDTree for efficient nearest neighbor search
+        tree = KDTree(subset)
+
+        # Find the distance to the    
+        distances, _ = tree.query(points, k=3)
+
+        # Create a boolean mask for points within the max_distance
+        mask = np.ones(distances.shape[0], dtype=bool)
+        n_neighbors=distances.shape[1]
+        for i_neighbor in range(n_neighbors):
+            mask &= (distances[:,i_neighbor] <= max_distance)
+
+        # Return only the points that satisfy the distance criterion
+        return mask
+
     def _project_color(self, 
                     scalars_array:np.ndarray,
                     scalar_name:str="scalars"):
@@ -326,8 +410,18 @@ class FermiSurface3D(Surface):
                     temp[:, ix] -= 1 * (iy + 1)
                     XYZ_extended = np.append(XYZ_extended, temp, axis=0)
                     scalars_extended = np.append(scalars_extended,  scalars_array[:,iband], axis=0)
-  
+
             XYZ_transformed = np.dot(XYZ_extended, self.ebs.reciprocal_lattice)
+            LOGGER.debug(f"Number of points before projecting inside the Brillouin zone: {len(XYZ_transformed)}")
+       
+
+            near_isosurface_point=self._keep_points_near_subset(XYZ_transformed,isosurface.centers,max_distance=self.max_distance)
+            XYZ_transformed=XYZ_transformed[near_isosurface_point]
+            scalars_extended=scalars_extended[near_isosurface_point]
+
+            LOGGER.debug(f"Number of points after determining which points are near isosurface centers: {len(XYZ_transformed)}")
+            LOGGER.debug(f"Number of scalars after determining which points are near isosurface centers: {len(scalars_extended)}")
+
             if self.projection_accuracy.lower()[0] == "n":
                 colors = interpolate.griddata(
                     XYZ_transformed, scalars_extended, isosurface.centers, method="nearest"
@@ -336,7 +430,7 @@ class FermiSurface3D(Surface):
                 colors = interpolate.griddata(
                     XYZ_transformed, scalars_extended, isosurface.centers, method="linear"
                 )
-            
+     
             # Again must flip here because when the values are stored in cell_data, 
             # the values are entered preprended to the cell_data array
             # and are stored in the opposite order of what you would expect

@@ -95,7 +95,6 @@ class FermiHandler:
                            orbitals=None, 
                            spins=None, 
                            spin_texture=False,
-                           property_name=None,
                            show=True,
                            save_2d=None,
                            save_gif=None,
@@ -138,7 +137,7 @@ class FermiHandler:
                                        spins=spins, 
                                        spin_texture=spin_texture)
         fermi_surface=self.data_handler.get_surface_data(fermi=self.e_fermi,
-                                                         property_name=property_name)
+                                                         property_name=config.property_name)
 
         visualizer = FermiVisualizer(self.data_handler, config)
         visualizer.add_brillouin_zone(fermi_surface)
@@ -223,8 +222,14 @@ class FermiHandler:
 
         e_surfaces = []
         for e_value in energy_values:
-            surface=self.data_handler.get_surface_data(property_name=property_name,fermi=e_value)
+            surface=self.data_handler.get_surface_data(property_name=config.property_name,fermi=e_value)
             e_surfaces.append(surface)
+
+            LOGGER.debug(f'___Getting surface for {e_value}__')
+            LOGGER.debug(f'Surface shape: {surface.points.shape}')
+            LOGGER.debug(f'Surface shape: {surface.point_data}')
+            LOGGER.debug(f'Surface shape: {surface.point_data}')
+            
 
         visualizer = FermiVisualizer(self.data_handler,config)
         
@@ -244,7 +249,6 @@ class FermiHandler:
                             orbitals=None, 
                             spins=None, 
                             spin_texture=False,
-                            property_name=None,
                             save_gif=None,
                             print_plot_opts:bool=False,
                             **kwargs):
@@ -290,7 +294,11 @@ class FermiHandler:
 
         e_surfaces = []
         for e_value in energy_values:
-            surface=self.data_handler.get_surface_data(property_name=property_name,fermi=e_value)
+            surface=self.data_handler.get_surface_data(fermi=e_value,property_name=config.property_name)
+            LOGGER.debug(f'___Getting surface for {e_value}__')
+            LOGGER.debug(f'Surface shape: {surface.points.shape}')
+            LOGGER.debug(f'Surface shape: {surface.point_data}')
+            LOGGER.debug(f'Surface shape: {surface.point_data}')
             e_surfaces.append(surface)
 
         visualizer = FermiVisualizer(self.data_handler,config)
@@ -306,7 +314,6 @@ class FermiHandler:
                             orbitals=None, 
                             spins=None, 
                             spin_texture=False,
-                            property_name=None,
                             show=True,
                             save_2d=None,
                             save_2d_slice=None,
@@ -340,7 +347,7 @@ class FermiHandler:
         # Process the data
         self.data_handler = FermiDataHandler(self.ebs,config)
         self.data_handler.process_data(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
-        surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
+        surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=config.property_name)
 
         visualizer = FermiVisualizer(self.data_handler,config)
         visualizer.add_slicer(surface,show,save_2d,save_2d_slice,slice_normal,slice_origin)
@@ -354,7 +361,6 @@ class FermiHandler:
                             orbitals=None, 
                             spins=None, 
                             spin_texture=False,
-                            property_name=None,
                             show=True,
                             save_2d=None,
                             save_2d_slice=None,
@@ -388,8 +394,8 @@ class FermiHandler:
         # Process the data
         self.data_handler = FermiDataHandler(self.ebs,config)
         self.data_handler.process_data(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
-        surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
-        print("Bands being used if bands=None: ", surface.band_index_map)
+        surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=config.property_name)
+        print("Bands being used if bands=None: ", surface.band_isosurface_index_map)
         visualizer = FermiVisualizer(self.data_handler,config)
         visualizer.add_box_slicer(surface,show,save_2d,save_2d_slice,
                                   slice_normal,

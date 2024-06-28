@@ -120,6 +120,8 @@ class FermiSurface3DConfig(BaseConfig):
         The accuracy of the projections. Options are 'high' and 'normal'.
     interpolation_factor : int, optional (default 1)
         The interpolation factor to use for the Fermi surface.
+    max_distance : float, optional (default 0.2)
+        The maximum distance to keep points from the isosurface centers.
     ---------------------
 
     Cross section Settings
@@ -213,6 +215,7 @@ class FermiSurface3DConfig(BaseConfig):
     scalar_bar_position_x: float = 0.4
     scalar_bar_position_y: float = 0.01
     scalar_bar_color: str = 'black'
+    property_name: str = 'fermi_speed'
 
     # Advanced Configurations
     fermi_tolerance: float = 0.1
@@ -220,6 +223,7 @@ class FermiSurface3DConfig(BaseConfig):
     supercell: List[int] = field(default_factory=lambda: [1, 1, 1])
     projection_accuracy: str = 'high'
     interpolation_factor: int = 1
+    max_distance: float = 0.2
 
     # Cross section Settings
     cross_section_slice_linewidth: float = 5.0

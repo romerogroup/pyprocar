@@ -299,6 +299,7 @@ class FermiDataHandler:
                                             interpolation_factor=self.config.interpolation_factor,
                                             projection_accuracy=self.config.projection_accuracy,
                                             supercell=self.config.supercell,
+                                            max_distance=self.config.max_distance,
                                         )
             self.property_name=property_name
 
@@ -432,7 +433,7 @@ class FermiVisualizer:
         self.e_surfaces=e_surfaces
         for i,surface in enumerate(self.e_surfaces):
 
-            if self.config.spin_colors != [None,None]:
+            if self.config.spin_colors != (None,None):
                 spin_colors=[]
                 for spin_index in surface.point_data['spin_index']:
                     if spin_index == 0:
@@ -476,7 +477,7 @@ class FermiVisualizer:
                     scalars_name=self.data_handler.scalars_name, 
                     vector_name=self.data_handler.vector_name)
         self.add_surface(surface)
-        if self.data_handler.mode != "plain":
+        if self.config.mode != "plain":
             self.add_scalar_bar(name=self.data_handler.scalars_name)
 
         self.plotter.show(auto_close=False)
@@ -537,7 +538,7 @@ class FermiVisualizer:
         self.set_background_color()
 
         self.add_surface(surface)
-        if self.data_handler.mode != "plain":
+        if self.config.mode != "plain":
             self.add_scalar_bar(name=self.data_handler.scalars_name)
         self.add_texture(
                         surface,
@@ -547,7 +548,7 @@ class FermiVisualizer:
         self._add_custom_mesh_slice(mesh=surface,normal=slice_normal,origin=slice_origin)
         
         if show:
-            if self.config['plotter_offscreen']['value']:
+            if self.config.plotter_offscreen:
                 self.plotter.off_screen = True
                 self.plotter.show( cpos=self.config.plotter_camera_pos,auto_close=False)
             elif save_2d:
@@ -594,7 +595,7 @@ class FermiVisualizer:
         self.set_background_color()
 
         self.add_surface(surface)
-        if self.data_handler.mode != "plain":
+        if self.config.mode != "plain":
             self.add_scalar_bar(name=self.data_handler.scalars_name)
         self.add_texture(
                         surface,
@@ -782,7 +783,7 @@ class FermiVisualizer:
                                     name='iso_surface',
                                     color=self.config.surface_color,
                                     opacity=self.config.surface_opacity)
-            elif self.config.spin_colors != [None,None]:
+            elif self.config.spin_colors != (None,None):
                 self.plotter.add_mesh(surface,
                                     name='iso_surface',
                                     scalars='spin_colors',
@@ -802,7 +803,7 @@ class FermiVisualizer:
                                     opacity=self.config.surface_opacity,
                                     rgba=self.data_handler.use_rgba)
 
-            if self.data_handler.mode != "plain":
+            if self.config.mode != "plain":
                 self.add_scalar_bar(name=self.data_handler.scalars_name)
             
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
@@ -850,13 +851,18 @@ class FermiVisualizer:
 
         name = kwargs.get('name', mesh.memory_address)
 
+        if self.config.mode == "plain":
+            rng = mesh.get_data_range(kwargs.get('bands', None))
+            kwargs.setdefault('clim', kwargs.pop('rng', rng))
+            mesh.set_active_scalars(kwargs.get('bands', mesh.active_scalars_name))
+        else:
+            rng = mesh.get_data_range(kwargs.get('scalars', None))
+            kwargs.setdefault('clim', kwargs.pop('rng', rng))
+            mesh.set_active_scalars(kwargs.get('scalars', mesh.active_scalars_name))
 
-        rng = mesh.get_data_range(kwargs.get('scalars', None))
-        kwargs.setdefault('clim', kwargs.pop('rng', rng))
-        mesh.set_active_scalars(kwargs.get('scalars', mesh.active_scalars_name))
-
-        self.plotter.add_mesh(mesh.outline(), name=name+"outline", 
+        self.plotter.add_mesh(mesh, name=name+"outline", 
                               opacity=0.0, 
+                              scalars=self.data_handler.scalars_name,
                               line_width=line_width,
                               show_scalar_bar=False, 
                               rgba=self.data_handler.use_rgba)
@@ -950,12 +956,17 @@ class FermiVisualizer:
             add_ids_algorithm(mesh, point_ids=False, cell_ids=True)
         )
         name = kwargs.get('name', mesh.memory_address)
-        rng = mesh.get_data_range(kwargs.get('scalars', None))
-        kwargs.setdefault('clim', kwargs.pop('rng', rng))
+        if self.config.mode=="plain":
+            rng = mesh.get_data_range(kwargs.get('scalars', None))
+            kwargs.setdefault('clim', kwargs.pop('rng', rng))
+            mesh.set_active_scalars(kwargs.get('scalars', mesh.active_scalars_name))
+        else:
+            rng = mesh.get_data_range(kwargs.get('bands', None))
+            kwargs.setdefault('clim', kwargs.pop('rng', rng))
+            mesh.set_active_scalars(kwargs.get('bands', mesh.active_scalars_name))
+ 
 
-        mesh.set_active_scalars(kwargs.get('scalars', mesh.active_scalars_name))
-
-        self.plotter.add_mesh(mesh.outline(), name=f"{name}-outline", opacity=0.0)
+        self.plotter.add_mesh(mesh,scalars=self.data_handler.scalars_name,show_scalar_bar=False,  name=f"{name}-outline", opacity=0.0)
 
         port = 1 if invert else 0
 
@@ -971,7 +982,7 @@ class FermiVisualizer:
             box_clipped_mesh = _get_output(crinkler)
         else:
             box_clipped_mesh = _get_output(clipper, oport=port)
-
+        
         self.plotter.box_clipped_meshes.append(box_clipped_mesh)
 
         def callback_box(planes):
@@ -1001,21 +1012,25 @@ class FermiVisualizer:
         #################################################################
 
         clipped_box_mesh =  self.plotter.box_clipped_meshes[0]
+        
         name = kwargs.get('name', clipped_box_mesh.memory_address)
 
-        # print(name)
-        # if kwargs.get('scalars', mesh.active_scalars_name) != 'spin':
-            
-        rng = clipped_box_mesh.get_data_range(kwargs.get('scalars', None))
-        kwargs.setdefault('clim', kwargs.pop('rng', rng))
-        clipped_box_mesh.set_active_scalars(kwargs.get('scalars', clipped_box_mesh.active_scalars_name))
+        
+        if self.config.mode=="plain":
+            rng = clipped_box_mesh.get_data_range(kwargs.get('scalars', None))
+            kwargs.setdefault('clim', kwargs.pop('rng', rng))
+            clipped_box_mesh.set_active_scalars(kwargs.get('scalars', clipped_box_mesh.active_scalars_name))
+        else:
+            rng = clipped_box_mesh.get_data_range(kwargs.get('bands', None))
+            kwargs.setdefault('clim', kwargs.pop('rng', rng))
+            clipped_box_mesh.set_active_scalars(kwargs.get('bands', clipped_box_mesh.active_scalars_name))
 
-        self.plotter.add_mesh(clipped_box_mesh.outline(), 
-                              name=name+"outline", 
-                              opacity=0.0, 
-                              line_width=0.0,
-                              show_scalar_bar=False, 
-                              rgba=self.data_handler.use_rgba)
+        # self.plotter.add_mesh(clipped_box_mesh, 
+        #                       name=name+"outline", 
+        #                       opacity=0.0, 
+        #                       line_width=0.0,
+        #                       show_scalar_bar=False, 
+        #                       rgba=self.data_handler.use_rgba)
 
         alg = vtk.vtkCutter() # Construct the cutter object
         alg.SetInputDataObject(clipped_box_mesh) # Use the grid as the data we desire to cut
