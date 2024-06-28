@@ -10,6 +10,7 @@ import yaml
 import numpy as np
 
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
+from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.utils import ROOT, LOGGER
 
 from .. import io
@@ -48,6 +49,9 @@ class FermiHandler:
             Boolean to apply symmetry to the fermi sruface.
             This is used when only symmetry reduced kpoints used in the calculation, by default True
         """
+
+        self.default_config = ConfigFactory.create_config(PlotType.FERMI_SURFACE_3D)
+        
         self.code = code
         self.dirname=dirname
         self.repair = repair
@@ -118,24 +122,34 @@ class FermiHandler:
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
+        config=ConfigManager.merge_configs(self.default_config, kwargs)
+        config=ConfigManager.merge_config(config, 'mode', mode)
+
         print(self.notification_message)
         if print_plot_opts:
             self.print_default_settings()
         
         # Process the data
-        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
-        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs, config)
+        self.data_handler.process_data(
+                                       bands=bands, 
+                                       atoms=atoms, 
+                                       orbitals=orbitals, 
+                                       spins=spins, 
+                                       spin_texture=spin_texture)
         fermi_surface=self.data_handler.get_surface_data(fermi=self.e_fermi,
                                                          property_name=property_name)
 
-        visualizer = FermiVisualizer(self.data_handler,**kwargs)
+        visualizer = FermiVisualizer(self.data_handler, config)
         visualizer.add_brillouin_zone(fermi_surface)
 
         visualizer.add_texture(
                     fermi_surface,
                     scalars_name=visualizer.data_handler.scalars_name, 
                     vector_name=visualizer.data_handler.vector_name)
+        
         visualizer.add_surface(fermi_surface)
+    
         if mode != "plain" or spin_texture:
             visualizer.add_scalar_bar(name=visualizer.data_handler.scalars_name)
 
@@ -191,12 +205,15 @@ class FermiHandler:
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
+        config=ConfigManager.merge_configs(self.default_config, kwargs)
+        config=ConfigManager.merge_config(config, 'mode', mode)
+
         print(self.notification_message)
         if print_plot_opts:
             self.print_default_settings()
         # Process the data
-        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
-        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,config)
+        self.data_handler.process_data(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         
         if iso_surfaces is not None:
             energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
@@ -209,7 +226,7 @@ class FermiHandler:
             surface=self.data_handler.get_surface_data(property_name=property_name,fermi=e_value)
             e_surfaces.append(surface)
 
-        visualizer = FermiVisualizer(self.data_handler,**kwargs)
+        visualizer = FermiVisualizer(self.data_handler,config)
         
         visualizer.add_isoslider(e_surfaces,energy_values)
 
@@ -256,12 +273,14 @@ class FermiHandler:
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
+        config=ConfigManager.merge_configs(self.default_config, kwargs)
+        config=ConfigManager.merge_config(config, 'mode', mode)
         print(self.notification_message)
         if print_plot_opts:
             self.print_default_settings()
         # Process the data
-        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
-        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,config)
+        self.data_handler.process_data(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         
         if iso_surfaces is not None:
             energy_values = np.linspace(self.e_fermi-iso_range/2,self.e_fermi+iso_range/2,iso_surfaces)
@@ -274,7 +293,7 @@ class FermiHandler:
             surface=self.data_handler.get_surface_data(property_name=property_name,fermi=e_value)
             e_surfaces.append(surface)
 
-        visualizer = FermiVisualizer(self.data_handler,**kwargs)
+        visualizer = FermiVisualizer(self.data_handler,config)
         
         visualizer.add_isovalue_gif(e_surfaces,energy_values,save_gif)
 
@@ -313,15 +332,17 @@ class FermiHandler:
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
+        config=ConfigManager.merge_configs(self.default_config, kwargs)
+        config=ConfigManager.merge_config(config, 'mode', mode)
         print(self.notification_message)
         if print_plot_opts:
             self.print_default_settings()
         # Process the data
-        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
-        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,config)
+        self.data_handler.process_data(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
 
-        visualizer = FermiVisualizer(self.data_handler,**kwargs)
+        visualizer = FermiVisualizer(self.data_handler,config)
         visualizer.add_slicer(surface,show,save_2d,save_2d_slice,slice_normal,slice_origin)
 
     def plot_fermi_cross_section_box_widget(self,
@@ -359,25 +380,23 @@ class FermiHandler:
         print_plot_opts: bool, optional
             Boolean to print the plotting options
         """
-
+        config=ConfigManager.merge_configs(self.default_config, kwargs)
+        config=ConfigManager.merge_config(config, 'mode', mode)
         print(self.notification_message)
         if print_plot_opts:
             self.print_default_settings()
         # Process the data
-        self.data_handler = FermiDataHandler(self.ebs,**kwargs)
-        self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
+        self.data_handler = FermiDataHandler(self.ebs,config)
+        self.data_handler.process_data(bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         surface=self.data_handler.get_surface_data(fermi=self.e_fermi,property_name=property_name)
         print("Bands being used if bands=None: ", surface.band_index_map)
-        visualizer = FermiVisualizer(self.data_handler,**kwargs)
+        visualizer = FermiVisualizer(self.data_handler,config)
         visualizer.add_box_slicer(surface,show,save_2d,save_2d_slice,
                                   slice_normal,
                                   slice_origin)
     
     def print_default_settings(self):
-        with open(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_3d.yml'), 'r') as file:
-            plotting_options = yaml.safe_load(file)
-        
-        for key,value in plotting_options.items():
+        for key,value in self.default_config.items():
             print(key,':',value)
 
    

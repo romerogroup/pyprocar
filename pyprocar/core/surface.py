@@ -178,8 +178,7 @@ class Surface(pyvista.PolyData):
         self[scalar_name] = self.scalars
         # self.cell_data[scalar_name] = self.scalars
         # self.point_data[scalar_name] = self.scalars
-        # self.set_active_scalars(scalar_name)
-        # self.set_active_scalars("scalars")
+        self.set_active_scalars(scalar_name,preference='cell')
 
     def set_vectors(self, 
                     vectors_X:np.ndarray, 

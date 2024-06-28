@@ -27,25 +27,18 @@ from pyvista.plotting.utilities.algorithms import (
     pointset_to_polydata_algorithm,
     set_algorithm_input,
 )
-# from pypro
 
-from pyprocar import io
 from pyprocar.core.fermisurface3D import FermiSurface3D
-from pyprocar.utils import ROOT, ConfigManager, LOGGER
+from pyprocar.utils import ROOT, LOGGER
 
-# TODO: Normalization function does not work.
+# TODO: Decouple FermiDataHandler from FermiVisualizer
 
 class FermiDataHandler:
 
-    def __init__(self, ebs, fermi_tolerance=0.1,**kwargs):
+    def __init__(self, ebs, config):
+        self.config = config
         self.initial_ebs=copy.copy(ebs)
         self.ebs = ebs
-        self.fermi_tolerance = fermi_tolerance
-        self.mode=None
-
-        config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_3d.yml'))
-        config_manager.update_config(kwargs)  
-        self.config=config_manager.get_config()
 
     def _determine_spin_projections(self,spins):
         """
@@ -236,7 +229,7 @@ class FermiDataHandler:
         LOGGER.info(f'____Finished Merging Fermi Surfaces of different spins ____')
         return fermi_surface
     
-    def process_data(self, mode:str,
+    def process_data(self,
                     bands:List[int]=None,
                     atoms:List[int]=None,
                     orbitals:List[int]=None,
@@ -247,8 +240,6 @@ class FermiDataHandler:
 
         Parameters
         ----------
-        mode : str
-            the mdoe name
         bands : List[int], optional
             List of bands, by default None
         atoms : List[int], optional
@@ -273,16 +264,15 @@ class FermiDataHandler:
         if bands_to_keep is None:
             bands_to_keep = np.arange(len(self.initial_ebs.bands[0, :,0]))
 
-        self.band_near_fermi = self._determine_bands_near_fermi(fermi_tolerance)
+        self.band_near_fermi = self._determine_bands_near_fermi(self.config.fermi_tolerance)
         spins , self.spin_pol = self._determine_spin_projections(spins)
 
-        spd=self._process_spd(mode,spins,atoms,orbitals,bands_to_keep)
+        spd=self._process_spd(self.config.mode,spins,atoms,orbitals,bands_to_keep)
         spd_spin=self._process_spd_spin_texture(spin_texture,spins,atoms,orbitals,bands_to_keep)
         self.spd=spd
         self.spd_spin=spd_spin
         self.bands_to_keep=bands_to_keep
         self.spins=spins
-        self.mode=mode
         LOGGER.info(f'____ Finished Processing Data ____')
         return spd, spd_spin, bands_to_keep, spins
     
@@ -291,7 +281,7 @@ class FermiDataHandler:
                     fermi:float=None,
                     fermi_shift: float=0.0):
         LOGGER.info(f'____ Getting Fermi Surface Data ____')
-        if self.mode is None:
+        if self.config.mode is None:
             raise "You must call process data function before get_surface"
 
         self._initialize_properties(property_name)
@@ -305,10 +295,10 @@ class FermiDataHandler:
             fermi_surface3D = FermiSurface3D(
                                             ebs=ebs,
                                             fermi=fermi,
-                                            fermi_shift = fermi_shift,
-                                            interpolation_factor=self.config['interpolation_factor']['value'],
-                                            projection_accuracy=self.config['projection_accuracy']['value'],
-                                            supercell=self.config['supercell']['value'],
+                                            fermi_shift=fermi_shift,
+                                            interpolation_factor=self.config.interpolation_factor,
+                                            projection_accuracy=self.config.projection_accuracy,
+                                            supercell=self.config.supercell,
                                         )
             self.property_name=property_name
 
@@ -319,12 +309,12 @@ class FermiDataHandler:
                 fermi_surface3D.project_fermi_velocity(fermi_velocity=ebs.fermi_velocity[...,band_to_surface_indices,ispin])
             elif self.property_name=='harmonic_effective_mass':
                 fermi_surface3D.project_harmonic_effective_mass(harmonic_effective_mass=ebs.harmonic_average_effective_mass[...,band_to_surface_indices,ispin])
-            if self.mode =='parametric':
+            if self.config.mode =='parametric':
                 fermi_surface3D.project_atomic_projections(self.spd[:,band_to_surface_indices,ispin])
-            if self.mode =='spin_texture':
+            if self.config.mode =='spin_texture':
                 fermi_surface3D.project_spin_texture_atomic_projections(self.spd_spin[:,band_to_surface_indices,:])
-            if self.config['extended_zone_directions']['value']:
-                fermi_surface3D.extend_surface(extended_zone_directions=self.config['extended_zone_directions']['value'])
+            if self.config.extended_zone_directions:
+                fermi_surface3D.extend_surface(extended_zone_directions=self.config.extended_zone_directions)
             fermi_surfaces.append(fermi_surface3D)
 
         self.fermi_surface=self._merge_fermi_surfaces(fermi_surfaces)
@@ -333,89 +323,86 @@ class FermiDataHandler:
     
 class FermiVisualizer:
 
-    def __init__(self, data_handler=None,**kwargs):
+    def __init__(self, data_handler, config):
 
         self.data_handler = data_handler
+        self.config = config
         self.plotter=pv.Plotter()
 
-        config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_3d.yml'))
-        config_manager.update_config(kwargs)  
-        self.config=config_manager.get_config()
         self._setup_plotter()
 
     def add_scalar_bar(self,name):
-        if self.config['scalar_bar_title']['value']:
-            name=self.config['scalar_bar_title']['value']
+        if self.config.scalar_bar_title:
+            name=self.config.scalar_bar_title
         else:
             name=name
-        if self.config['add_scalar_bar']['value']:
+        if self.config.add_scalar_bar:
             self.plotter.add_scalar_bar(
                     title=name,
-                    n_labels=self.config['scalar_bar_labels']['value'],
-                    italic=self.config['scalar_bar_italic']['value'],
-                    bold=self.config['scalar_bar_bold']['value'],
-                    title_font_size=self.config['scalar_bar_title_font_size']['value'],
-                    label_font_size=self.config['scalar_bar_label_font_size']['value'],
-                    position_x=self.config['scalar_bar_position_x']['value'],
-                    position_y=self.config['scalar_bar_position_y']['value'],
-                    color=self.config['scalar_bar_color']['value'])
+                    n_labels=self.config.scalar_bar_labels,
+                    italic=self.config.scalar_bar_italic,
+                    bold=self.config.scalar_bar_bold,
+                    title_font_size=self.config.scalar_bar_title_font_size,
+                    label_font_size=self.config.scalar_bar_label_font_size,
+                    position_x=self.config.scalar_bar_position_x,
+                    position_y=self.config.scalar_bar_position_y,
+                    color=self.config.scalar_bar_color)
         
     def add_axes(self):
-        if self.config['add_axes']['value']:
+        if self.config.add_axes:
             self.plotter.add_axes(
-                    xlabel=self.config['x_axes_label']['value'], 
-                    ylabel=self.config['y_axes_label']['value'], 
-                    zlabel=self.config['z_axes_label']['value'],
-                    color=self.config['axes_label_color']['value'],
-                    line_width=self.config['axes_line_width']['value'],
+                    xlabel=self.config.x_axes_label, 
+                    ylabel=self.config.y_axes_label, 
+                    zlabel=self.config.z_axes_label,
+                    color=self.config.axes_label_color,
+                    line_width=self.config.axes_line_width,
                 labels_off=False)
 
     def add_brillouin_zone(self,fermi_surface):
        self.plotter.add_mesh(
                 fermi_surface.brillouin_zone,
-                style=self.config['brillouin_zone_style']['value'],
-                line_width=self.config['brillouin_zone_line_width']['value'],
-                color=self.config['brillouin_zone_color']['value'],
-                opacity=self.config['brillouin_zone_opacity']['value']
+                style=self.config.brillouin_zone_style,
+                line_width=self.config.brillouin_zone_line_width,
+                color=self.config.brillouin_zone_color,
+                opacity=self.config.brillouin_zone_opacity
             )
     
     def add_surface(self,surface):
         LOGGER.info(f'____ Adding Surface to Plotter ____')
         surface=self._setup_band_colors(surface)
 
-        if self.config['spin_colors']['value'] != [None,None]:
-            LOGGER.debug(f'Adding surface with spin colors: {self.config["spin_colors"]["value"]}')
+        if self.config.spin_colors != (None,None):
+            LOGGER.debug(f'Adding surface with spin colors: {self.config.spin_colors}')
             spin_colors=[]
             for spin_index in surface.point_data['spin_index']:
                 if spin_index == 0:
-                    spin_colors.append(self.config['spin_colors']['value'][0])
+                    spin_colors.append(self.config.spin_colors[0])
                 else:
-                    spin_colors.append(self.config['spin_colors']['value'][1])
+                    spin_colors.append(self.config.spin_colors[1])
             surface.point_data['spin_colors']=spin_colors
             self.plotter.add_mesh(surface,
                                 scalars='spin_colors',
-                                cmap=self.config['surface_cmap']['value'],
-                                clim=self.config['surface_clim']['value'],
+                                cmap=self.config.surface_cmap,
+                                clim=self.config.surface_clim,
                                 show_scalar_bar=False,
-                                opacity=self.config['surface_opacity']['value'],)
-                                # rgba=self.data_handler.use_rgba)
+                                opacity=self.config.surface_opacity)
             
 
-        elif self.config['surface_color']['value']:
-            LOGGER.debug(f'Adding surface with color: {self.config["surface_color"]["value"]}')
+        elif self.config.surface_color:
+            LOGGER.debug(f'Adding surface with color: {self.config.surface_color}')
             self.plotter.add_mesh(surface,
-                                color=self.config['surface_color']['value'],
-                                opacity=self.config['surface_opacity']['value'],)
+                                color=self.config.surface_color,
+                                opacity=self.config.surface_opacity)
         else:
             LOGGER.debug(f'Adding surface with scalars: {self.data_handler.scalars_name}')
-            if self.config['surface_clim']['value']:
+            if self.config.surface_clim:
                 self._normalize_data(surface,scalars_name=self.data_handler.scalars_name)
             self.plotter.add_mesh(surface,
                                 scalars=self.data_handler.scalars_name,
-                                cmap=self.config['surface_cmap']['value'],
-                                clim=self.config['surface_clim']['value'],
+                                cmap=self.config.surface_cmap,
+                                clim=self.config.surface_clim,
                                 show_scalar_bar=False,
-                                opacity=self.config['surface_opacity']['value'],
+                                opacity=self.config.surface_opacity,
                                 rgba=self.data_handler.use_rgba)
             
     def add_texture(self,
@@ -424,18 +411,18 @@ class FermiVisualizer:
                     vector_name):
         if scalars_name=="spin_magnitude" or scalars_name=="Fermi Velocity Vector_magnitude":
             arrows = fermi_surface.glyph(orient=vector_name,
-                                         scale=self.config['texture_scale']['value'] ,
-                                         factor=self.config['texture_size']['value'])
-            if self.config['texture_color']['value'] is None:
+                                         scale=self.config.texture_scale ,
+                                         factor=self.config.texture_size)
+            if self.config.texture_color is None:
                 self.plotter.add_mesh(arrows,scalars=scalars_name, 
-                                      cmap=self.config['texture_cmap']['value'], 
+                                      cmap=self.config.texture_cmap,
                                       show_scalar_bar=False,
-                                      opacity=self.config['texture_opacity']['value'])
+                                      opacity=self.config.texture_opacity)
             else:
                 self.plotter.add_mesh(arrows,scalars=scalars_name, 
-                                      color=self.config['texture_color']['value'],
+                                      color=self.config.texture_color,
                                       show_scalar_bar=False,
-                                      opacity=self.config['texture_opacity']['value'])
+                                      opacity=self.config.texture_opacity)
         else:
             arrows=None
         return arrows
@@ -445,22 +432,22 @@ class FermiVisualizer:
         self.e_surfaces=e_surfaces
         for i,surface in enumerate(self.e_surfaces):
 
-            if self.config['spin_colors']['value'] != [None,None]:
+            if self.config.spin_colors != [None,None]:
                 spin_colors=[]
                 for spin_index in surface.point_data['spin_index']:
                     if spin_index == 0:
-                        spin_colors.append(self.config['spin_colors']['value'][0])
+                        spin_colors.append(self.config.spin_colors[0])
                     else:
-                        spin_colors.append(self.config['spin_colors']['value'][1])
+                        spin_colors.append(self.config.spin_colors[1])
                 self.e_surfaces[i].point_data['spin_colors']=spin_colors
             else:
                 self.e_surfaces[i]=self._setup_band_colors(surface)
 
         self.plotter.add_slider_widget(self._custom_isoslider_callback, 
                                 [np.amin(energy_values), np.amax(energy_values)], 
-                                title=self.config['isoslider_title']['value'],
-                                style=self.config['isoslider_style']['value'],
-                                color=self.config['isoslider_color']['value'])
+                                title=self.config.isoslider_title,
+                                style=self.config.isoslider_style,
+                                color=self.config.isoslider_color)
         
         self.add_brillouin_zone(self.e_surfaces[0])
         self.add_axes()
@@ -507,9 +494,8 @@ class FermiVisualizer:
 
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
                 e_arrows = e_surface.glyph(orient=self.data_handler.vector_name,
-                                            scale=self.config['texture_scale']['value'] ,
-                                            factor=self.config['texture_size']['value'])
-
+                                            scale=self.config.texture_scale ,
+                                            factor=self.config.texture_size)
                 arrows.copy_from(e_arrows)
                 arrows.set_active_scalars(name=self.data_handler.scalars_name)
                 # arrows.set_active_vectors(name=options_dict['vector_name'])
@@ -528,8 +514,8 @@ class FermiVisualizer:
 
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
                 e_arrows = e_surface.glyph(orient=self.data_handler.vector_name,
-                                            scale=self.config['texture_scale']['value'] ,
-                                            factor=self.config['texture_size']['value'])
+                                            scale=self.config.texture_scale ,
+                                            factor=self.config.texture_size)
 
                 arrows.copy_from(e_arrows)
                 arrows.set_active_scalars(name=self.data_handler.scalars_name)
@@ -563,13 +549,13 @@ class FermiVisualizer:
         if show:
             if self.config['plotter_offscreen']['value']:
                 self.plotter.off_screen = True
-                self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],auto_close=False)  
+                self.plotter.show( cpos=self.config.plotter_camera_pos,auto_close=False)
             elif save_2d:
-                image=self.plotter.show( cpos=self.config['plotter_camera_pos']['value'], screenshot=save_2d) 
+                image=self.plotter.show( cpos=self.config.plotter_camera_pos, screenshot=save_2d)
                 im = Image.fromarray(image)
                 im.save(save_2d)
             else:
-                self.plotter.show(cpos=self.config['plotter_camera_pos']['value'])
+                self.plotter.show(cpos=self.config.plotter_camera_pos)
 
         if save_2d_slice:
             slice_2d = self.plotter.plane_sliced_meshes[0]
@@ -581,16 +567,16 @@ class FermiVisualizer:
 
             if self.data_handler.vector_name:
                 arrows = slice_2d.glyph(orient=self.data_handler.vector_name, 
-                                        scale=self.config['texture_scale']['value'],
-                                        factor=self.config['texture_size']['value'])
-            if self.config['texture_color']['value'] is not None:
-                p.add_mesh(arrows, color=self.config['texture_color']['value'], show_scalar_bar=False,name='arrows')
+                                        scale=self.config.texture_scale,
+                                        factor=self.config.texture_size)
+            if self.config.texture_color is not None:
+                p.add_mesh(arrows, color=self.config.texture_color, show_scalar_bar=False,name='arrows')
             else:
                 p.add_mesh(arrows, 
-                           cmap=self.config['texture_cmap']['value'], 
+                           cmap=self.config.texture_cmap,
                            show_scalar_bar=False,name='arrows')
             p.add_mesh(slice_2d,
-                       line_width=self.config['cross_section_slice_linewidth']['value'])
+                       line_width=self.config.cross_section_slice_linewidth)
             p.remove_scalar_bar()
             # p.set_background(background_color)
             p.view_vector(normal_vec)
@@ -617,13 +603,13 @@ class FermiVisualizer:
         
         self._add_custom_box_slice_widget(
                     mesh=surface, 
-                    show_cross_section_area=self.config['cross_section_slice_show_area']['value'],
+                    show_cross_section_area=self.config.cross_section_slice_show_area,
                     normal=slice_normal,
                     origin=slice_origin,
                     )
 
         if show:
-            self.plotter.show(cpos=self.config['plotter_camera_pos']['value'], 
+            self.plotter.show(cpos=self.config.plotter_camera_pos,
                          screenshot=save_2d)
         if save_2d_slice:
 
@@ -638,58 +624,54 @@ class FermiVisualizer:
 
             if self.data_handler.vector_name:
                 arrows = slice_2d.glyph(orient=self.data_handler.vector_name, scale=False, factor=0.1)
-                if self.config['texture_color']['value'] is not None:
-                    p.add_mesh(arrows, color=self.config['texture_color']['value'], show_scalar_bar=False,name='arrows')
+                if self.config.texture_color is not None:
+                    p.add_mesh(arrows, color=self.config.texture_color, show_scalar_bar=False,name='arrows')
                 else:
                     p.add_mesh(arrows, 
-                            cmap=self.config['texture_cmap']['value'], 
+                            cmap=self.config.texture_cmap,
                             show_scalar_bar=False,name='arrows')
             p.add_mesh(slice_2d,
-                       line_width=self.config['cross_section_slice_linewidth']['value'])
+                       line_width=self.config.cross_section_slice_linewidth)
             p.remove_scalar_bar()
             # p.set_background(background_color)
             p.view_vector(normal_vec)
             p.show(screenshot=save_2d_slice,interactive=False)
 
     def set_background_color(self):
-        self.plotter.set_background(self.config['background_color']['value'])
+        self.plotter.set_background(self.config.background_color)
 
     def show(self,filename=None):
         if filename:
             file_extentions = filename.split()
-            if self.config['plotter_offscreen']['value']:
+            if self.config.plotter_offscreen:
                 self.plotter.off_screen = True
-                self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],auto_close=False)  
+                self.plotter.show( cpos=self.config.plotter_camera_pos,auto_close=False)
                 self.plotter.show(screenshot=filename)
             else:
-                image=self.plotter.show( cpos=self.config['plotter_camera_pos']['value'],screenshot=True)  
+                image=self.plotter.show( cpos=self.config.plotter_camera_pos,screenshot=True)
                 im = Image.fromarray(image)
                 im.save(filename)
         else:
-            self.plotter.show(cpos=self.config['plotter_camera_pos']['value'])
+            self.plotter.show(cpos=self.config.plotter_camera_pos)
         
     def save_gif(self,filename):
-        path = self.plotter.generate_orbital_path(n_points=self.config['orbit_gif_n_points']['value'])
+        path = self.plotter.generate_orbital_path(n_points=self.config.orbit_gif_n_points)
         self.plotter.open_gif(filename)
-        self.plotter.orbit_on_path(path, write_frames=True, viewup=[0, 0, 1], step=self.config['orbit_gif_step']['value'])
+        self.plotter.orbit_on_path(path, write_frames=True, viewup=[0, 0, 1], step=self.config.orbit_gif_step)
     
     def save_mp4(self,filename):
-        path = self.plotter.generate_orbital_path(n_points=self.config['orbit_mp4_n_points']['value'])
+        path = self.plotter.generate_orbital_path(n_points=self.config.orbit_mp4_n_points)
         self.plotter.open_movie(filename)
-        self.plotter.orbit_on_path(path, write_frames=True, viewup=[0, 0, 1], step=self.config['orbit_mp4_step']['value'])
+        self.plotter.orbit_on_path(path, write_frames=True, viewup=[0, 0, 1], step=self.config.orbit_mp4_step)
     
     def save_mesh(self,filename,surface):
         pv.save_meshio(filename, surface)
-
-    def update_config(self, config_dict):
-        for key,value in config_dict.items():
-            self.config[key]['value']=value
     
     def _setup_band_colors(self,fermi_surface):
         LOGGER.info(f'____ Setting up Band Colors ____')
 
-        band_colors = self.config['surface_bands_colors']['value']
-        if self.config['surface_bands_colors']['value'] == []:
+        band_colors = self.config.surface_bands_colors
+        if self.config.surface_bands_colors == []:
             band_colors=self._generate_band_colors(fermi_surface)
 
         fermi_surface = self._apply_fermi_surface_band_colors(fermi_surface,band_colors)
@@ -702,7 +684,7 @@ class FermiVisualizer:
         unique_band_index = np.unique(fermi_surface.point_data['band_index'])
         nsurface = len(unique_band_index)
         norm = mpcolors.Normalize(vmin=0, vmax=1)
-        cmap = cm.get_cmap(self.config['surface_cmap']['value'])
+        cmap = cm.get_cmap(self.config.surface_cmap)
         solid_color_surface = np.arange(nsurface ) / nsurface
         band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(-1, 4)
         LOGGER.debug(f'Band Colors: {band_colors}')
@@ -740,37 +722,37 @@ class FermiVisualizer:
     def _setup_plotter(self):
         """Helper method set parameter values
         """
-        if self.data_handler.mode == "plain":
+        if self.config.mode == "plain":
             text = "plain"
             scalars = "bands"
             vector_name=None
             use_rgba = True
 
-        elif self.data_handler.mode == "parametric":
+        elif self.config.mode == "parametric":
             text = "parametric"
             scalars = "scalars"
             vector_name=None
             use_rgba = False
 
-        elif self.data_handler.mode == "property_projection":
+        elif self.config.mode == "property_projection":
             
             use_rgba = False
 
-            if self.data_handler.property_name == 'fermi_speed':
+            if self.config.mode == 'fermi_speed':
                 scalars = "Fermi Speed"
                 text = "Fermi Speed"
                 vector_name=None
-            elif self.data_handler.property_name == 'fermi_velocity':
+            elif self.config.mode == 'fermi_velocity':
                 scalars = "Fermi Velocity Vector_magnitude"
                 vector_name = "Fermi Velocity Vector"
                 text = "Fermi Speed"
-            elif self.data_handler.property_name == 'harmonic_effective_mass':
+            elif self.config.mode == 'harmonic_effective_mass':
                 scalars = "Harmonic Effective Mass"
                 text = "Harmonic Effective Mass"
                 vector_name=None
             else:
                 print("Please select a property")
-        elif self.data_handler.mode == 'spin_texture':
+        elif self.config.mode == 'spin_texture':
             text = "Spin Texture"
             use_rgba = False
             scalars = "spin_magnitude"
@@ -783,8 +765,8 @@ class FermiVisualizer:
 
     def _normalize_data(self,surface,scalars_name):
         x=surface[scalars_name]
-        vmin=self.config['surface_clim']['value'][0]
-        vmax=self.config['surface_clim']['value'][1]
+        vmin=self.config.surface_clim[0]
+        vmax=self.config.surface_clim[1]
         x_max=x.max()
         x_min=x.min()
         x_norm =  x_min + ((x - vmin) * (vmax - x_min)) / (x_max - x_min)
@@ -795,29 +777,29 @@ class FermiVisualizer:
             res = float(value)
             closest_idx = find_nearest(self.energy_values, res)
             surface=self.e_surfaces[closest_idx]
-            if self.config['surface_color']['value']:
+            if self.config.surface_color:
                 self.plotter.add_mesh(surface,
                                     name='iso_surface',
-                                    color=self.config['surface_color']['value'],
-                                    opacity=self.config['surface_opacity']['value'],)
-            elif self.config['spin_colors']['value'] != [None,None]:
+                                    color=self.config.surface_color,
+                                    opacity=self.config.surface_opacity)
+            elif self.config.spin_colors != [None,None]:
                 self.plotter.add_mesh(surface,
                                     name='iso_surface',
                                     scalars='spin_colors',
-                                    cmap=self.config['surface_cmap']['value'],
-                                    clim=self.config['surface_clim']['value'],
+                                    cmap=self.config.surface_cmap,
+                                    clim=self.config.surface_clim,
                                     show_scalar_bar=False,
-                                    opacity=self.config['surface_opacity']['value'],)
+                                    opacity=self.config.surface_opacity)
             else:
-                if self.config['surface_clim']['value']:
+                if self.config.surface_clim:
                     self._normalize_data(surface,scalars_name=self.data_handler.scalars_name)
                 self.plotter.add_mesh(surface,
                                     name='iso_surface',
                                     scalars=self.data_handler.scalars_name,
-                                    cmap=self.config['surface_cmap']['value'],
-                                    clim=self.config['surface_clim']['value'],
+                                    cmap=self.config.surface_cmap,
+                                    clim=self.config.surface_clim,
                                     show_scalar_bar=False,
-                                    opacity=self.config['surface_opacity']['value'],
+                                    opacity=self.config.surface_opacity,
                                     rgba=self.data_handler.use_rgba)
 
             if self.data_handler.mode != "plain":
@@ -825,23 +807,23 @@ class FermiVisualizer:
             
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
                 arrows = surface.glyph(orient=self.data_handler.vector_name,
-                                            scale=self.config['texture_scale']['value'] ,
-                                            factor=self.config['texture_size']['value'])
+                                            scale=self.config.texture_scale ,
+                                            factor=self.config.texture_size)
                 
-                if self.config['texture_color']['value'] is None:
+                if self.config.texture_color is None:
                     self.plotter.add_mesh(arrows,
                                           name='iso_texture',
                                           scalars=self.data_handler.scalars_name, 
-                                            cmap=self.config['texture_cmap']['value'], 
+                                            cmap=self.config.texture_cmap,
                                             show_scalar_bar=False,
-                                            opacity=self.config['texture_opacity']['value'])
+                                            opacity=self.config.texture_opacity)
                 else:
                     self.plotter.add_mesh(arrows,
                                           name='iso_texture',
                                           scalars=self.data_handler.scalars_name, 
-                                        color=self.config['texture_color']['value'],
+                                        color=self.config.texture_color,
                                         show_scalar_bar=False,
-                                        opacity=self.config['texture_opacity']['value'])
+                                        opacity=self.config.texture_opacity)
                     
 
             return None
@@ -861,7 +843,7 @@ class FermiVisualizer:
                                     arrow_color=None,
                                    **kwargs):
 
-        line_width=self.config['cross_section_slice_linewidth']['value']
+        line_width=self.config.cross_section_slice_linewidth
         #################################################################
         # Following code handles the plane clipping
         #################################################################
@@ -960,7 +942,7 @@ class FermiVisualizer:
         # Following code handles the box clipping
         #################################################################
         
-        line_width=self.config['cross_section_slice_linewidth']['value']
+        line_width=self.config.cross_section_slice_linewidth
 
         mesh = pv.PolyData(mesh)
 
