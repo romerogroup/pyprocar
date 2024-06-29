@@ -279,6 +279,17 @@ class ElectronicBandStructure:
                 "Please provide a reciprocal lattice when initiating the Procar class"
             )
             return
+        
+    @property
+    def inv_reciprocal_lattice(self):
+        """Returns the inverse of the reciprocal lattice"""
+        if self.reciprocal_lattice is not None:
+            return np.linalg.inv(self.reciprocal_lattice)
+        else:
+            print(
+                "Please provide a reciprocal lattice when initiating the Procar class"
+            )
+            return None
 
     @property
     def kpoints_reduced(self):
