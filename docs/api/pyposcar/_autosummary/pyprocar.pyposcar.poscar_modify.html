@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.pyposcar.poscar_modify &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.pyposcar.poscar_modify &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -929,41 +929,14 @@ document.write(`
 <dt class="sig sig-object py" id="pyprocar.pyposcar.poscar_modify">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.pyposcar.</span></span><span class="sig-name descname"><span class="pre">poscar_modify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyprocar.pyposcar.Poscar.html#pyprocar.pyposcar.Poscar" title="pyprocar.pyposcar.Poscar"><span class="pre">Poscar</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/pyposcar/poscarUtils.html#poscar_modify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.pyposcar.poscar_modify" title="Permalink to this definition">#</a></dt>
 <dd><p>High-level class to change properties of a Poscar-object.</p>
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">write(filename,</span> <span class="pre">cartesian,</span> <span class="pre">xyz)</span>&#160;&#160; <span class="pre">#</span> <span class="pre">write</span> <span class="pre">the</span> <span class="pre">poscar</span> <span class="pre">with</span> <span class="pre">`filename`,</span> <span class="pre">in</span> <span class="pre">`cartesian`?</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">pos_multiply(factor,</span> <span class="pre">cartesian)</span>&#160;&#160; <span class="pre">#</span> <span class="pre">multiply</span> <span class="pre">the</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">atoms</span> <span class="pre">by</span> <span class="pre">`factor`</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">pos_sum(factor,</span> <span class="pre">cartesian)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">sums</span> <span class="pre">`factor`</span> <span class="pre">to</span> <span class="pre">each</span> <span class="pre">position</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">remove(self,</span> <span class="pre">atoms,</span> <span class="pre">human)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">removes</span> <span class="pre">a</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">`atoms`</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">add(element,</span> <span class="pre">position,</span> <span class="pre">cartesian)</span> <span class="pre">#</span> <span class="pre">add</span> <span class="pre">a</span> <span class="pre">single</span> <span class="pre">atom</span> <span class="pre">with</span>&#160; <span class="pre">`element`</span> <span class="pre">at</span> <span class="pre">`position`</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">shift(amount,</span> <span class="pre">cartesian)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">#</span> <span class="pre">shift</span> <span class="pre">all</span> <span class="pre">the</span> <span class="pre">positions</span> <span class="pre">by</span> <span class="pre">`amount`</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">scale_lattice(factor,</span> <span class="pre">cartesian)</span>&#160; <span class="pre">#</span> <span class="pre">scale</span> <span class="pre">the</span> <span class="pre">lattice</span> <span class="pre">by</span> <span class="pre">`factor`.</span> <span class="pre">are</span> <span class="pre">`cartesian`</span> <span class="pre">fixed?</span></span></dt>
-<dd></dd></dl>
-
+<p class="rubric">Methods</p>
+<p>write(filename, cartesian, xyz)   # write the poscar with <cite>filename</cite>, in <cite>cartesian</cite>?
+pos_multiply(factor, cartesian)   # multiply the position of each atoms by <cite>factor</cite>
+pos_sum(factor, cartesian)        # sums <cite>factor</cite> to each position
+remove(self, atoms, human)        # removes a list of <cite>atoms</cite>
+add(element, position, cartesian) # add a single atom with  <cite>element</cite> at <cite>position</cite>
+shift(amount, cartesian)          # shift all the positions by <cite>amount</cite>
+scale_lattice(factor, cartesian)  # scale the lattice by <cite>factor</cite>. are <cite>cartesian</cite> fixed?</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>

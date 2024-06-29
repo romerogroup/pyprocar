@@ -170,7 +170,6 @@ Cross section
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    Bands Near Fermi :  [4, 5, 6, 7, 8, 9]
 
 
 
@@ -239,7 +238,6 @@ Cross section. Save slice
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    Bands Near Fermi :  [4, 5, 6, 7, 8, 9]
 
 
 
@@ -247,7 +245,7 @@ Cross section. Save slice
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  59.250 seconds)
+   **Total running time of the script:** ( 0 minutes  14.443 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_cross_section.py:

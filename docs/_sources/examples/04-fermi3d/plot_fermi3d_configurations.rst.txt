@@ -128,55 +128,61 @@ Before diving into plotting, we need to download the example files. Use the foll
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    surface_cmap : {'value': 'jet', 'description': 'Controls the colormap of the surface'}
-    surface_color : {'value': None, 'description': 'Controls the color of the surface'}
-    spin_colors : {'description': 'The colors for the plot lines.', 'value': [None, None]}
-    surface_bands_colors : {'value': [], 'description': 'Controls the color of the surface per band'}
-    surface_opacity : {'value': 1.0, 'description': 'Controls the opacity of the surface'}
-    surface_clim : {'value': None, 'description': 'Controls the color scale on the surface'}
-    extended_zone_directions : {'value': None, 'description': 'Controls how many zone to generate. This is a list of directions to generates. Ex: [[1,0,0],[0,0,1]]'}
-    supercell : {'value': [1, 1, 1], 'description': 'Controls how many the supercell size used to generate the fermi surface'}
-    projection_accuracy : {'value': 'high', 'description': 'Controls the projection algorithmuse. Either high or normal'}
-    interpolation_factor : {'value': 1, 'description': 'Controls the interpolation factor used on the fermi surface'}
-    brillouin_zone_style : {'value': 'wireframe', 'description': 'Controls the wireframe style of the brillouin zone'}
-    brillouin_zone_line_width : {'value': 3.5, 'description': 'Controls the linewidth of the brillouin zone'}
-    brillouin_zone_color : {'value': 'black', 'description': 'Controls the color of the wireframe of the brillouin zone'}
-    brillouin_zone_opacity : {'value': 1.0, 'description': 'Controls the opacity of the wireframe of the brillouin zone'}
-    texture_cmap : {'value': 'jet', 'description': 'Controls the colormap of the texture'}
-    texture_color : {'value': None, 'description': 'Controls the color of the texture'}
-    texture_size : {'value': 0.1, 'description': 'Controls the size of the texture'}
-    texture_scale : {'value': False, 'description': 'Controls the scaling of the texture'}
-    texture_opacity : {'value': 1.0, 'description': 'Controls the opacity of the texture'}
-    add_axes : {'value': True, 'description': 'Controls if there should be direction axes'}
-    x_axes_label : {'value': 'Kx', 'description': 'Controls kx axis label'}
-    y_axes_label : {'value': 'Ky', 'description': 'Controls ky axis label'}
-    z_axes_label : {'value': 'Kz', 'description': 'Controls kz axis label'}
-    axes_label_color : {'value': 'black', 'description': 'Controls axes label color'}
-    axes_line_width : {'value': 6, 'description': 'Controls the linewdith of th axes label'}
-    add_scalar_bar : {'value': True, 'description': 'Controls if there is a colorbar'}
-    scalar_bar_labels : {'value': 6, 'description': 'Controls the scalar bar labels'}
-    scalar_bar_italic : {'value': False, 'description': 'Controls the label italic style'}
-    scalar_bar_bold : {'value': False, 'description': 'Controls the label bold style'}
-    scalar_bar_title : {'value': None, 'description': 'Controls scalar bar title font size'}
-    scalar_bar_title_font_size : {'value': None, 'description': 'Controls scalar bar title font size'}
-    scalar_bar_label_font_size : {'value': None, 'description': 'Controls scalar bar label font size'}
-    scalar_bar_position_x : {'value': 0.4, 'description': 'Controls scalar bar x position'}
-    scalar_bar_position_y : {'value': 0.01, 'description': 'Controls scalar bar y position'}
-    scalar_bar_color : {'value': 'black', 'description': 'Controls scalar bar outline color'}
-    background_color : {'value': 'white', 'description': 'Controls the background color'}
-    orbit_gif_n_points : {'value': 36, 'description': 'Controls the number of point on the orbit'}
-    orbit_gif_step : {'value': 0.05, 'description': 'Controls the step size of the orbit'}
-    orbit_mp4_n_points : {'value': 36, 'description': 'Controls the number of point on the orbit'}
-    orbit_mp4_step : {'value': 0.05, 'description': 'Controls the step size of the orbit'}
-    plotter_offscreen : {'value': False, 'description': 'Controls whether the plotter renders offscreen'}
-    plotter_camera_pos : {'value': [1, 1, 1], 'description': 'Controls the caemera position of the plotter'}
-    isoslider_title : {'value': 'Energy iso-value', 'description': 'Controls title of the isoslider'}
-    isoslider_style : {'value': 'modern', 'description': 'Controls isoslider  style'}
-    isoslider_color : {'value': 'black', 'description': 'Controls isoslider color'}
-    cross_section_slice_linewidth : {'value': 5.0, 'description': 'Controls the linewidth of the slice\\'}
-    cross_section_slice_show_area : {'value': False, 'description': 'Controls wheather to show the cross section area'}
-    arrow_size : {'description': 'The arrow size for the spin texture', 'value': 3}
-    Bands Near Fermi :  [2, 3, 4, 5]
+    plot_type: PlotType.FERMI_SURFACE_3D
+    custom_settings: {}
+    mode: plain
+    property: FermiSurfaceProperty.FERMI_SPEED
+    background_color: white
+    plotter_offscreen: False
+    plotter_camera_pos: [1, 1, 1]
+    surface_cmap: jet
+    surface_color: None
+    surface_opacity: 1.0
+    surface_clim: None
+    surface_bands_colors: []
+    spin_colors: (None, None)
+    arrow_size: 3
+    texture_cmap: jet
+    texture_color: None
+    texture_size: 0.1
+    texture_scale: False
+    texture_opacity: 1.0
+    brillouin_zone_style: wireframe
+    brillouin_zone_line_width: 3.5
+    brillouin_zone_color: black
+    brillouin_zone_opacity: 1.0
+    add_axes: True
+    x_axes_label: Kx
+    y_axes_label: Ky
+    z_axes_label: Kz
+    axes_label_color: black
+    axes_line_width: 6
+    add_scalar_bar: True
+    scalar_bar_labels: 6
+    scalar_bar_italic: False
+    scalar_bar_bold: False
+    scalar_bar_title: None
+    scalar_bar_title_font_size: None
+    scalar_bar_label_font_size: None
+    scalar_bar_position_x: 0.4
+    scalar_bar_position_y: 0.01
+    scalar_bar_color: black
+    property_name: fermi_speed
+    fermi_tolerance: 0.1
+    extended_zone_directions: None
+    supercell: [1, 1, 1]
+    projection_accuracy: high
+    interpolation_factor: 1
+    max_distance: 0.2
+    cross_section_slice_linewidth: 5.0
+    cross_section_slice_show_area: False
+    isoslider_title: Energy iso-value
+    isoslider_style: modern
+    isoslider_color: black
+    orbit_gif_n_points: 36
+    orbit_gif_step: 0.05
+    orbit_mp4_n_points: 36
+    orbit_mp4_step: 0.05
 
 
 
@@ -224,7 +230,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    Bands Near Fermi :  [2, 3, 4, 5]
 
 
 
@@ -232,7 +237,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.826 seconds)
+   **Total running time of the script:** ( 0 minutes  4.657 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py:

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.core.Surface &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.core.Surface &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -934,17 +934,17 @@ To create a surface the minimum requirements are verts and faces</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>verts</strong> (<em>list</em><em> of </em><em>float</em><em> (</em><em>nverts</em><em>,</em><em>3</em><em>)</em>) – The list of verticies that create the surface.</p></li>
-<li><p><strong>faces</strong> (<em>list</em><em> of </em><em>integers</em><em> (</em><em>nfaces</em><em>,</em><em>3</em><em>)</em>) – The default is None. The list of connectivity between
+<li><p><strong>verts</strong> (<em>list of float (nverts,3)</em>) – The list of verticies that create the surface.</p></li>
+<li><p><strong>faces</strong> (<em>list of integers (nfaces,3)</em>) – The default is None. The list of connectivity between
 verts that create the surface.</p></li>
-<li><p><strong>face_normals</strong> (<em>list</em><em> of </em><em>float</em><em> (</em><em>nfaces</em><em>,</em><em>3</em><em>)</em>) – The list of normal vectors to each face.</p></li>
-<li><p><strong>vert_normals</strong> (<em>list</em><em> of </em><em>float</em><em> (</em><em>nverts</em><em>,</em><em>3</em><em>)</em>) – The list of normal vectors to each vertex.</p></li>
-<li><p><strong>face_colors</strong> (<em>list</em><em> of </em><em>tuples floats</em><em> (</em><em>nfaces</em><em>,</em><em>3</em><em>)</em>) – The list of colors of each face.
+<li><p><strong>face_normals</strong> (<em>list of float (nfaces,3)</em>) – The list of normal vectors to each face.</p></li>
+<li><p><strong>vert_normals</strong> (<em>list of float (nverts,3)</em>) – The list of normal vectors to each vertex.</p></li>
+<li><p><strong>face_colors</strong> (<em>list of tuples floats (nfaces,3)</em>) – The list of colors of each face.
 <strong>example</strong>:<code class="docutils literal notranslate"><span class="pre">face_colors=[(1,0,0),(1,0.5,0),...,(1,0,0)]</span></code></p></li>
-<li><p><strong>vert_colors</strong> (<em>list</em><em> of </em><em>tuples floats</em><em> (</em><em>nfaces</em><em>,</em><em>3</em><em>)</em>) – The list of colors of each vertex.</p></li>
-<li><p><strong>vectors</strong> (<em>list</em><em> of </em><em>floats</em><em> (</em><em>nfaces</em><em>,</em><em>3</em><em>)</em>) – The list of vectors one wants to attach to the
+<li><p><strong>vert_colors</strong> (<em>list of tuples floats (nfaces,3)</em>) – The list of colors of each vertex.</p></li>
+<li><p><strong>vectors</strong> (<em>list of floats (nfaces,3)</em>) – The list of vectors one wants to attach to the
 surface(glyphs) Only useful in pyvista objects</p></li>
-<li><p><strong>scalars</strong> (<em>list</em><em> of </em><em>floats</em><em> (</em><em>nfaces</em><em>,</em><em>)</em>) – The list of scalars for each face. This can represent
+<li><p><strong>scalars</strong> (<em>list of floats (nfaces,)</em>) – The list of scalars for each face. This can represent
 the color using a color map</p></li>
 </ul>
 </dd>

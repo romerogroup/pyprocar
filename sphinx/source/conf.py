@@ -95,6 +95,23 @@ sphinx_gallery_conf = {
     "image_scrapers": ("pyvista", "matplotlib"),
 }
 
+# Configuration for the Napoleon extension
+napoleon_use_ivar = True
+napoleon_use_rtype = False
+napoleon_use_param = False
+napoleon_custom_sections = [
+    ('My Custom Section', 'params_style'),  # Custom section treated like parameters
+    ('Plot Appearance', 'params_style'),  # Custom section treated like parameters
+    ('Surface Configuration', 'params_style'),  # Custom section treated like parameters
+    ('Spin Settings', 'params_style'),  # Custom section treated like parameters
+    ('Axes and Labels', 'params_style'),  # Custom section treated like parameters
+    ('Brillouin Zone Styling', 'params_style'),  # Custom section treated like parameters
+    ('Advanced Configurations', 'params_style'),  # Custom section treated like parameters
+    ('Isoslider Settings', 'params_style'),  # Custom section treated like parameters
+    ('Miscellaneous', 'params_style'),  # Custom section treated like parameters
+    'Methods'
+]
+
 
 # See https://numpydoc.readthedocs.io/en/latest/install.html
 numpydoc_use_plots = True

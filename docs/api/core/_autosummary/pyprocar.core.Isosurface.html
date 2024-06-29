@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.core.Isosurface &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.core.Isosurface &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -931,16 +931,16 @@ document.write(`
 <dd><p>This class contains a surface that finds all the points corresponding
 to the following equation.
 V(X,Y,Z) = f</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>XYZ</strong> (<em>List</em><em> of </em><em>lists</em><em> of </em><em>floats</em><em>, </em><em>(</em><em>n</em><em>,</em><em>3</em><em>)</em>) – XYZ must be between (0.5,0.5]. a list of coordinates [[x1,y1,z1],[x2,y2,z2],…]
+<dd class="field-odd"><ul>
+<li><p><strong>XYZ</strong> (<em>List of lists of floats, (n,3)</em>) – XYZ must be between (0.5,0.5]. a list of coordinates [[x1,y1,z1],[x2,y2,z2],…]
 corresponding V</p></li>
-<li><p><strong>V</strong> (<em>TYPE</em><em>, </em><em>list</em><em> of </em><em>floats</em><em>, </em><em>(</em><em>n</em><em>,</em><em>)</em>) – DESCRIPTION. a list of values [V1,V2,…] corresponding to XYZ
+<li><p><strong>V</strong> (<em>TYPE, list of floats, (n,)</em>) – DESCRIPTION. a list of values [V1,V2,…] corresponding to XYZ
 XYZ[0] &gt;&gt;&gt; V[0]
 XYZ[1] &gt;&gt;&gt; V[1]</p></li>
 <li><p><strong>isovalue</strong> (<em>float</em>) – The constant value of the surface (f)</p></li>
-<li><p><strong>V_matrix</strong> (<em>float</em><em> (</em><em>nx</em><em>,</em><em>ny</em><em>,</em><em>nz</em><em>)</em>) – One can present V_matrix instead of XYZ and V.
+<li><p><strong>V_matrix</strong> (<em>float (nx,ny,nz)</em>) – One can present V_matrix instead of XYZ and V.
 V_matrix is a matrix representation of XYZ and V together.
 This matrix is generated if XYZ and V are provided.</p></li>
 <li><p><strong>algorithm</strong> (<em>str</em>) – The default is ‘lewiner’. The algorithm used to find the isosurface, This
@@ -949,7 +949,7 @@ function used scikit-image to find the isosurface. possibilities
 <li><p><strong>interpolation_factor</strong> (<em>int</em>) – The default is 1. This module uses Fourier Transform
 interpolation. interpolation factor will increase the grid points
 in each direction by a this factor, the dafault is set to 1</p></li>
-<li><p><strong>padding</strong> (<em>list</em><em> of </em><em>float</em><em> (</em><em>3</em><em>,</em><em>)</em>) – <p>Padding is used for periodic datasets such as bands in
+<li><p><strong>padding</strong> (<em>list of float (3,)</em>) – Padding is used for periodic datasets such as bands in
 a solid state calculation. e.g. The 1st BZ is not covered fully so
 one might want to pad the matrix with wrap(look at padding in
 numpy for wrap), afterwards one has to clip the surface to the
@@ -963,8 +963,8 @@ padding goes as follows</p>
 </pre></div>
 </div>
 <p>In other words it creates a super cell withpadding</p>
-</p></li>
-<li><p><strong>transform_matrix</strong> (<em>np.ndarray</em><em> (</em><em>3</em><em>,</em><em>3</em><em>) </em><em>float</em>) – Applies an transformation to the vertices VERTS_prime=T*VERTS</p></li>
+</li>
+<li><p><strong>transform_matrix</strong> (<em>np.ndarray (3,3) float</em>) – Applies an transformation to the vertices VERTS_prime=T*VERTS</p></li>
 <li><p><strong>boundaries</strong> (<em>pyprocar.core.surface</em>) – The default is None. The boundaries in which the isosurface will be clipped with
 for example the first brillouin zone</p></li>
 </ul>

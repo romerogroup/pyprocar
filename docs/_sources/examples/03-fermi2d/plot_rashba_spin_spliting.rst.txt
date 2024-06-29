@@ -793,7 +793,7 @@ energy = -0.90 sx projection with arrows
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  48.533 seconds)
+   **Total running time of the script:** ( 0 minutes  48.983 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_rashba_spin_spliting.py:

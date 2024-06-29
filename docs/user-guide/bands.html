@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Band structure &#8212; PyProcar 6.1.10 documentation</title>
+    <title>Band structure &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -113,7 +113,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -551,26 +551,26 @@ Usage:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>str</em><em>, </em><em>optional</em>) – String to of the code used, by default “vasp”</p></li>
-<li><p><strong>dirname</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory name of the calculation, by default None</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Sting for the mode of the calculation, by default “plain”</p></li>
-<li><p><strong>spins</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – A list of spins, by default None</p></li>
-<li><p><strong>atoms</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – A list of atoms, by default None</p></li>
-<li><p><strong>orbitals</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – A list of orbitals, by default None</p></li>
-<li><p><strong>items</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary where the keys are the atoms and the values a list of orbitals, by default {}</p></li>
-<li><p><strong>fermi</strong> (<em>float</em><em>, </em><em>optional</em>) – Float for the fermi energy, by default None. By default the fermi energy will be shifted by the fermi value that is found in the directory.
+<li><p><strong>code</strong> (<em>str, optional</em>) – String to of the code used, by default “vasp”</p></li>
+<li><p><strong>dirname</strong> (<em>str, optional</em>) – The directory name of the calculation, by default None</p></li>
+<li><p><strong>mode</strong> (<em>str, optional</em>) – Sting for the mode of the calculation, by default “plain”</p></li>
+<li><p><strong>spins</strong> (<em>List[int], optional</em>) – A list of spins, by default None</p></li>
+<li><p><strong>atoms</strong> (<em>List[int], optional</em>) – A list of atoms, by default None</p></li>
+<li><p><strong>orbitals</strong> (<em>List[int], optional</em>) – A list of orbitals, by default None</p></li>
+<li><p><strong>items</strong> (<em>dict, optional</em>) – A dictionary where the keys are the atoms and the values a list of orbitals, by default {}</p></li>
+<li><p><strong>fermi</strong> (<em>float, optional</em>) – Float for the fermi energy, by default None. By default the fermi energy will be shifted by the fermi value that is found in the directory.
 For band structure calculations, due to convergence issues, this fermi energy might not be accurate. If so add the fermi energy from the self-consistent calculation.</p></li>
-<li><p><strong>fermi_shift</strong> (<em>float</em><em>, </em><em>optional</em>) – Float to shift the fermi energy, by default 0.</p></li>
-<li><p><strong>interpolation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – The interpolation_factor, by default 1</p></li>
-<li><p><strong>interpolation_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The interpolation type, by default “cubic”</p></li>
-<li><p><strong>projection_mask</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – A custom projection mask, by default None</p></li>
-<li><p><strong>kticks</strong> (<em>_type_</em><em>, </em><em>optional</em>) – A list of kticks, by default None</p></li>
-<li><p><strong>knames</strong> (<em>_type_</em><em>, </em><em>optional</em>) – A list of kanems, by default None</p></li>
-<li><p><strong>elimit</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of floats to decide the energy window, by default None</p></li>
-<li><p><strong>ax</strong> (<em>plt.Axes</em><em>, </em><em>optional</em>) – A matplotlib axes, by default None</p></li>
-<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean if to show the plot, by default True</p></li>
-<li><p><strong>savefig</strong> (<em>str</em><em>, </em><em>optional</em>) – String to save the plot, by default None</p></li>
-<li><p><strong>print_plot_opts</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to print the plotting options</p></li>
+<li><p><strong>fermi_shift</strong> (<em>float, optional</em>) – Float to shift the fermi energy, by default 0.</p></li>
+<li><p><strong>interpolation_factor</strong> (<em>int, optional</em>) – The interpolation_factor, by default 1</p></li>
+<li><p><strong>interpolation_type</strong> (<em>str, optional</em>) – The interpolation type, by default “cubic”</p></li>
+<li><p><strong>projection_mask</strong> (<em>np.ndarray, optional</em>) – A custom projection mask, by default None</p></li>
+<li><p><strong>kticks</strong> (<em>_type_, optional</em>) – A list of kticks, by default None</p></li>
+<li><p><strong>knames</strong> (<em>_type_, optional</em>) – A list of kanems, by default None</p></li>
+<li><p><strong>elimit</strong> (<em>List[float], optional</em>) – A list of floats to decide the energy window, by default None</p></li>
+<li><p><strong>ax</strong> (<em>plt.Axes, optional</em>) – A matplotlib axes, by default None</p></li>
+<li><p><strong>show</strong> (<em>bool, optional</em>) – Boolean if to show the plot, by default True</p></li>
+<li><p><strong>savefig</strong> (<em>str, optional</em>) – String to save the plot, by default None</p></li>
+<li><p><strong>print_plot_opts</strong> (<em>bool, optional</em>) – Boolean to print the plotting options</p></li>
 </ul>
 </dd>
 </dl>

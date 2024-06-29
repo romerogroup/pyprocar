@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.core.ElectronicBandStructure &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.core.ElectronicBandStructure &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -935,13 +935,13 @@ document.write(`
 <li><p><strong>kpoints</strong> (<em>np.ndarray</em>) – The kpoints array. Will have the shape (n_kpoints, 3)</p></li>
 <li><p><strong>bands</strong> (<em>np.ndarray</em>) – The bands array. Will have the shape (n_kpoints, n_bands)</p></li>
 <li><p><strong>efermi</strong> (<em>float</em>) – The fermi energy</p></li>
-<li><p><strong>projected</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</p></li>
-<li><p><strong>projected_phase</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</p></li>
-<li><p><strong>kpath</strong> (<a class="reference internal" href="pyprocar.core.KPath.html#pyprocar.core.KPath" title="pyprocar.core.KPath"><em>KPath</em></a><em>, </em><em>optional</em>) – The kpath for band structure claculation, defaults to None</p></li>
-<li><p><strong>weights</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None</p></li>
-<li><p><strong>labels</strong> (<em>List</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>reciprocal_lattice</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None</p></li>
-<li><p><strong>shifted_to_efermi</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to determine if the fermi energy is shifted, defaults to False</p></li>
+<li><p><strong>projected</strong> (<em>np.ndarray, optional</em>) – The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</p></li>
+<li><p><strong>projected_phase</strong> (<em>np.ndarray, optional</em>) – The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None</p></li>
+<li><p><strong>kpath</strong> (<em>KPath, optional</em>) – The kpath for band structure claculation, defaults to None</p></li>
+<li><p><strong>weights</strong> (<em>np.ndarray, optional</em>) – The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None</p></li>
+<li><p><strong>labels</strong> (<em>List, optional</em>)</p></li>
+<li><p><strong>reciprocal_lattice</strong> (<em>np.ndarray, optional</em>) – The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None</p></li>
+<li><p><strong>shifted_to_efermi</strong> (<em>bool, optional</em>) – Boolean to determine if the fermi energy is shifted, defaults to False</p></li>
 </ul>
 </dd>
 </dl>

@@ -146,7 +146,6 @@ Plain mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    Bands Near Fermi :  [2, 3, 4, 5]
 
 
 
@@ -196,7 +195,6 @@ Parametric mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
-    Bands Near Fermi :  [2, 3, 4, 5]
 
 
 
@@ -204,7 +202,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.462 seconds)
+   **Total running time of the script:** ( 0 minutes  5.180 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_plain.py:

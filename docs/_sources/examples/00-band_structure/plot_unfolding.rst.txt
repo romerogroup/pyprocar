@@ -197,7 +197,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.998 seconds)
+   **Total running time of the script:** ( 0 minutes  23.988 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>bandgap &#8212; PyProcar 6.1.10 documentation</title>
+    <title>bandgap &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -932,18 +932,15 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>procar</strong> (<em>str</em><em>, </em><em>optional</em>) – The PROCAR filename, by default None</p></li>
-<li><p><strong>outcar</strong> (<em>str</em><em>, </em><em>optional</em>) – The OUTCAR filename, by default None</p></li>
-<li><p><strong>code</strong> (<em>str</em><em>, </em><em>optional</em>) – The code name, by default “vasp”</p></li>
-<li><p><strong>fermi</strong> (<em>float</em><em>, </em><em>optional</em>) – The fermi energy, by default None</p></li>
-<li><p><strong>repair</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to repair the PROCAR file, by default True</p></li>
+<li><p><strong>procar</strong> (<em>str, optional</em>) – The PROCAR filename, by default None</p></li>
+<li><p><strong>outcar</strong> (<em>str, optional</em>) – The OUTCAR filename, by default None</p></li>
+<li><p><strong>code</strong> (<em>str, optional</em>) – The code name, by default “vasp”</p></li>
+<li><p><strong>fermi</strong> (<em>float, optional</em>) – The fermi energy, by default None</p></li>
+<li><p><strong>repair</strong> (<em>bool, optional</em>) – Boolean to repair the PROCAR file, by default True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Returns the bandgap energy</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-even"><p><em>float</em> – Returns the bandgap energy</p>
 </dd>
 </dl>
 </dd></dl>

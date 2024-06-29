@@ -439,7 +439,8 @@ document.write(`
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">pyprocar.plotter</span> <span class="kn">import</span> <span class="n">FermiDataHandler</span><span class="p">,</span> <span class="n">FermiVisualizer</span>
-<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">pyprocar.cfg</span> <span class="kn">import</span> <span class="n">ConfigFactory</span><span class="p">,</span> <span class="n">ConfigManager</span><span class="p">,</span> <span class="n">PlotType</span>
+<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">ROOT</span><span class="p">,</span> <span class="n">LOGGER</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">io</span>
 
@@ -449,6 +450,7 @@ document.write(`
     <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">idx</span>
+
 <div class="viewcode-block" id="FermiHandler"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.html#pyprocar.scripts.FermiHandler">[docs]</a><span class="k">class</span> <span class="nc">FermiHandler</span><span class="p">:</span>
 
 <div class="viewcode-block" id="FermiHandler.__init__"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html#pyprocar.scripts.FermiHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
@@ -476,6 +478,9 @@ document.write(`
 <span class="sd">            Boolean to apply symmetry to the fermi sruface.</span>
 <span class="sd">            This is used when only symmetry reduced kpoints used in the calculation, by default True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_config</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="n">create_config</span><span class="p">(</span><span class="n">PlotType</span><span class="o">.</span><span class="n">FERMI_SURFACE_3D</span><span class="p">)</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repair</span> <span class="o">=</span> <span class="n">repair</span>
@@ -493,8 +498,6 @@ document.write(`
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">=</span><span class="n">fermi</span>
-
-
 
         <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">rotations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -521,7 +524,6 @@ document.write(`
                            <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                            <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                            <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                           <span class="n">property_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                            <span class="n">save_2d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">save_gif</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -548,24 +550,34 @@ document.write(`
 <span class="sd">        print_plot_opts: bool, optional</span>
 <span class="sd">            Boolean to print the plotting options</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_configs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notification_message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print_default_settings</span><span class="p">()</span>
         
         <span class="c1"># Process the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span>
+                                       <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> 
+                                       <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> 
+                                       <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> 
+                                       <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> 
+                                       <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
         <span class="n">fermi_surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span>
-                                                         <span class="n">property_name</span><span class="o">=</span><span class="n">property_name</span><span class="p">)</span>
+                                                         <span class="n">property_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">property_name</span><span class="p">)</span>
 
-        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_brillouin_zone</span><span class="p">(</span><span class="n">fermi_surface</span><span class="p">)</span>
 
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_texture</span><span class="p">(</span>
                     <span class="n">fermi_surface</span><span class="p">,</span>
                     <span class="n">scalars_name</span><span class="o">=</span><span class="n">visualizer</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">scalars_name</span><span class="p">,</span> 
                     <span class="n">vector_name</span><span class="o">=</span><span class="n">visualizer</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">vector_name</span><span class="p">)</span>
+        
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_surface</span><span class="p">(</span><span class="n">fermi_surface</span><span class="p">)</span>
+    
         <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;plain&quot;</span> <span class="ow">or</span> <span class="n">spin_texture</span><span class="p">:</span>
             <span class="n">visualizer</span><span class="o">.</span><span class="n">add_scalar_bar</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">visualizer</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">scalars_name</span><span class="p">)</span>
 
@@ -621,12 +633,15 @@ document.write(`
 <span class="sd">        print_plot_opts: bool, optional</span>
 <span class="sd">            Boolean to print the plotting options</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_configs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notification_message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print_default_settings</span><span class="p">()</span>
         <span class="c1"># Process the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">iso_surfaces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">energy_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">-</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">+</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">iso_surfaces</span><span class="p">)</span>
@@ -636,10 +651,16 @@ document.write(`
 
         <span class="n">e_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">e_value</span> <span class="ow">in</span> <span class="n">energy_values</span><span class="p">:</span>
-            <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">property_name</span><span class="o">=</span><span class="n">property_name</span><span class="p">,</span><span class="n">fermi</span><span class="o">=</span><span class="n">e_value</span><span class="p">)</span>
+            <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">property_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">property_name</span><span class="p">,</span><span class="n">fermi</span><span class="o">=</span><span class="n">e_value</span><span class="p">)</span>
             <span class="n">e_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
 
-        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;___Getting surface for </span><span class="si">{</span><span class="n">e_value</span><span class="si">}</span><span class="s1">__&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surface shape: </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surface shape: </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">point_data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surface shape: </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">point_data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+
+        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
         
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_isoslider</span><span class="p">(</span><span class="n">e_surfaces</span><span class="p">,</span><span class="n">energy_values</span><span class="p">)</span>
 
@@ -657,7 +678,6 @@ document.write(`
                             <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                             <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                             <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                            <span class="n">property_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">save_gif</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">print_plot_opts</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -686,12 +706,14 @@ document.write(`
 <span class="sd">        print_plot_opts: bool, optional</span>
 <span class="sd">            Boolean to print the plotting options</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_configs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notification_message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print_default_settings</span><span class="p">()</span>
         <span class="c1"># Process the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">iso_surfaces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">energy_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">-</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="o">+</span><span class="n">iso_range</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">iso_surfaces</span><span class="p">)</span>
@@ -701,10 +723,14 @@ document.write(`
 
         <span class="n">e_surfaces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">e_value</span> <span class="ow">in</span> <span class="n">energy_values</span><span class="p">:</span>
-            <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">property_name</span><span class="o">=</span><span class="n">property_name</span><span class="p">,</span><span class="n">fermi</span><span class="o">=</span><span class="n">e_value</span><span class="p">)</span>
+            <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">fermi</span><span class="o">=</span><span class="n">e_value</span><span class="p">,</span><span class="n">property_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">property_name</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;___Getting surface for </span><span class="si">{</span><span class="n">e_value</span><span class="si">}</span><span class="s1">__&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surface shape: </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surface shape: </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">point_data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surface shape: </span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">point_data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">e_surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
 
-        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
         
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_isovalue_gif</span><span class="p">(</span><span class="n">e_surfaces</span><span class="p">,</span><span class="n">energy_values</span><span class="p">,</span><span class="n">save_gif</span><span class="p">)</span></div>
 
@@ -717,7 +743,6 @@ document.write(`
                             <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                             <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                             <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                            <span class="n">property_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                             <span class="n">save_2d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">save_2d_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -743,15 +768,17 @@ document.write(`
 <span class="sd">        print_plot_opts: bool, optional</span>
 <span class="sd">            Boolean to print the plotting options</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_configs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notification_message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print_default_settings</span><span class="p">()</span>
         <span class="c1"># Process the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
-        <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span><span class="n">property_name</span><span class="o">=</span><span class="n">property_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
+        <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span><span class="n">property_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">property_name</span><span class="p">)</span>
 
-        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_slicer</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span><span class="n">show</span><span class="p">,</span><span class="n">save_2d</span><span class="p">,</span><span class="n">save_2d_slice</span><span class="p">,</span><span class="n">slice_normal</span><span class="p">,</span><span class="n">slice_origin</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FermiHandler.plot_fermi_cross_section_box_widget"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html#pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fermi_cross_section_box_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -763,7 +790,6 @@ document.write(`
                             <span class="n">orbitals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                             <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                             <span class="n">spin_texture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                            <span class="n">property_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                             <span class="n">save_2d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">save_2d_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -789,26 +815,27 @@ document.write(`
 <span class="sd">        print_plot_opts: bool, optional</span>
 <span class="sd">            Boolean to print the plotting options</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_configs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notification_message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print_default_settings</span><span class="p">()</span>
         <span class="c1"># Process the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
-        <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span><span class="n">property_name</span><span class="o">=</span><span class="n">property_name</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bands being used if bands=None: &quot;</span><span class="p">,</span> <span class="n">surface</span><span class="o">.</span><span class="n">band_index_map</span><span class="p">)</span>
-        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">FermiDataHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ebs</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">spin_texture</span><span class="o">=</span><span class="n">spin_texture</span><span class="p">)</span>
+        <span class="n">surface</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_surface_data</span><span class="p">(</span><span class="n">fermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">e_fermi</span><span class="p">,</span><span class="n">property_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">property_name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bands being used if bands=None: &quot;</span><span class="p">,</span> <span class="n">surface</span><span class="o">.</span><span class="n">band_isosurface_index_map</span><span class="p">)</span>
+        <span class="n">visualizer</span> <span class="o">=</span> <span class="n">FermiVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
         <span class="n">visualizer</span><span class="o">.</span><span class="n">add_box_slicer</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span><span class="n">show</span><span class="p">,</span><span class="n">save_2d</span><span class="p">,</span><span class="n">save_2d_slice</span><span class="p">,</span>
                                   <span class="n">slice_normal</span><span class="p">,</span>
                                   <span class="n">slice_origin</span><span class="p">)</span></div>
     
 <div class="viewcode-block" id="FermiHandler.print_default_settings"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.FermiHandler.print_default_settings.html#pyprocar.scripts.FermiHandler.print_default_settings">[docs]</a>    <span class="k">def</span> <span class="nf">print_default_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;pyprocar&#39;</span><span class="p">,</span><span class="s1">&#39;cfg&#39;</span><span class="p">,</span><span class="s1">&#39;fermi_surface_3d.yml&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-            <span class="n">plotting_options</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-        
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">plotting_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="n">value</span><span class="p">)</span></div></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints all the configuration settings with their current values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
 
    
 </pre></div>

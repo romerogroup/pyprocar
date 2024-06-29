@@ -39,6 +39,9 @@ if __name__ == '__main__':
     filepaths=glob(project_dir + '/pyprocar/cfg/*.yml')
 
     for filepath in filepaths:
+        filename=os.path.basename(filepath)
+        if filename == 'package.yml':
+            continue
         doc_content = generate_documentation_from_yaml(filepath)
         filename=filepath.split(os.sep)[-1].split('.')[0]
         rst_path = source_dir + '/source/api/cfg/' + filename + '.rst'

@@ -451,6 +451,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">.brillouin_zone</span> <span class="kn">import</span> <span class="n">BrillouinZone</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span>  <span class="n">mathematics</span>
 <span class="kn">from</span> <span class="nn">pyprocar.utils.unfolder</span> <span class="kn">import</span> <span class="n">Unfolder</span>
+<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">LOGGER</span>
 
 <span class="n">HBAR_EV</span> <span class="o">=</span> <span class="mf">6.582119</span> <span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">16</span><span class="p">)</span> <span class="c1">#eV*s</span>
 <span class="n">HBAR_J</span> <span class="o">=</span> <span class="mf">1.0545718</span> <span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">34</span><span class="p">)</span> <span class="c1">#eV*s</span>
@@ -499,20 +500,23 @@ document.write(`
         <span class="n">labels</span><span class="p">:</span><span class="n">List</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">reciprocal_lattice</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">):</span>
-        
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initializing the ElectronicBandStructure object&#39;</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">bands</span> <span class="o">-</span> <span class="n">efermi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">efermi</span> <span class="o">=</span> <span class="n">efermi</span>
         
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="o">=</span> <span class="n">projected_phase</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">reciprocal_lattice</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="o">=</span> <span class="n">kpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_mesh</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">kpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_mesh</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_phase</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">has_phase</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">has_phase</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="kc">None</span>
@@ -539,7 +543,29 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_fermi_velocity</span><span class="o">=</span><span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_effective_mass</span><span class="o">=</span><span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fermi_speed</span><span class="o">=</span><span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_harmonic_average_effective_mass</span><span class="o">=</span><span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_harmonic_average_effective_mass</span><span class="o">=</span><span class="kc">None</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Subtracting Fermi Energy from Bands&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Is Mesh: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">is_mesh</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Fermi Energy: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">efermi</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Kpoints shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Bands shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Projected shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Projected phase shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Kpath: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Kpath: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reciprocal lattice: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Weights: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized the ElectronicBandStructure object&#39;</span><span class="p">)</span></div>
+        
+
+
           
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_kx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1438,6 +1464,10 @@ document.write(`
 <span class="sd">        rotations : np.ndarray</span>
 <span class="sd">            The point symmetry operations of the lattice</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_mesh</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This function only works for meshes&quot;</span><span class="p">)</span>
+        
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Applying symmetry operations to the kpoints, bands, and projections&#39;</span><span class="p">)</span>
         
         <span class="n">full_kpoints</span><span class="o">=</span><span class="p">[]</span>
         <span class="n">full_projected</span><span class="o">=</span><span class="p">[]</span>
@@ -1474,13 +1504,20 @@ document.write(`
                         <span class="n">full_projected_phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">projected_phase</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">full_kpoints</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">full_bands</span><span class="p">)</span>
+        
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Array shapes after symmetry operations&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Kpoints shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Bands shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">full_projected</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Projected shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">projected_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">full_projected_phases</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Projected shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">full_weights</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Weights shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">nk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_kx</span><span class="p">:</span>

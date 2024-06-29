@@ -435,7 +435,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.173 seconds)
+   **Total running time of the script:** ( 0 minutes  6.736 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py:

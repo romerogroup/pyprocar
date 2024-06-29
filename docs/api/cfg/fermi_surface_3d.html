@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>fermi surface 3d plotting Options &#8212; PyProcar 6.1.10 documentation</title>
+    <title>Fermi Surface 3D Configuration API &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -901,7 +901,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Configuration Files</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">fermi surface 3d plotting Options</li>
+    <li class="breadcrumb-item active" aria-current="page">Fermi Surface 3D Configuration API</li>
   </ul>
 </nav>
 </div>
@@ -918,536 +918,454 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="fermi-surface-3d-plotting-options">
-<h1>fermi surface 3d plotting Options<a class="headerlink" href="#fermi-surface-3d-plotting-options" title="Permalink to this heading">#</a></h1>
-<section id="surface-cmap">
-<h2>surface_cmap<a class="headerlink" href="#surface-cmap" title="Permalink to this heading">#</a></h2>
+  <section id="module-pyprocar.cfg.fermi_surface_3d">
+<span id="fermi-surface-3d-configuration-api"></span><h1>Fermi Surface 3D Configuration API<a class="headerlink" href="#module-pyprocar.cfg.fermi_surface_3d" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.cfg.fermi_surface_3d.</span></span><span class="sig-name descname"><span class="pre">FermiSurface3DConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type:</span> <span class="pre">~pyprocar.cfg.base.PlotType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_settings:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">~pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode</span> <span class="pre">=</span> <span class="pre">FermiSurfaceMode.PLAIN</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property:</span> <span class="pre">~pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty</span> <span class="pre">=</span> <span class="pre">FermiSurfaceProperty.FERMI_SPEED</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'white'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotter_offscreen:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotter_camera_pos:</span> <span class="pre">~typing.List[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_cmap:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_color:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_opacity:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_clim:</span> <span class="pre">~typing.List[float]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_bands_colors:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_colors:</span> <span class="pre">~typing.Tuple[str]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">(None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_cmap:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_color:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_size:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_scale:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_opacity:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brillouin_zone_style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'wireframe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brillouin_zone_line_width:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">3.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brillouin_zone_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brillouin_zone_opacity:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axes:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axes_label:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Kx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axes_label:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Ky'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_axes_label:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Kz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_label_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_line_width:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_scalar_bar:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_labels:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_italic:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_bold:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_title:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_title_font_size:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_label_font_size:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_position_x:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_position_y:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_bar_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'fermi_speed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_tolerance:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extended_zone_directions:</span> <span class="pre">~typing.List[~typing.List[int]]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supercell:</span> <span class="pre">~typing.List[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_accuracy:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'high'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_factor:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_section_slice_linewidth:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross_section_slice_show_area:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isoslider_title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Energy</span> <span class="pre">iso-value'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isoslider_style:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'modern'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isoslider_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbit_gif_n_points:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">36</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbit_gif_step:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbit_mp4_n_points:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">36</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbit_mp4_step:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/fermi_surface_3d.html#FermiSurface3DConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></p>
+<p>Configuration class for plotting 3D Fermi surfaces in different modes and styles.</p>
 <dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>jet</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (FermiSurfaceMode, optional (default <cite>FermiSurfaceMode.PLAIN</cite>)) – Defines the mode of the Fermi surface representation. Options are:
+<cite>PLAIN</cite>, <cite>PARAMETRIC</cite>, and <cite>SPIN_TEXTURE</cite>.</p></li>
+<li><p><strong>property</strong> (FermiSurfaceProperty, optional (default <cite>FermiSurfaceProperty.FERMI_SPEED</cite>))</p></li>
+</ul>
 </dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the colormap of the surface</p>
+<dt class="field-even">Plot Appearance<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>background_color</strong> (<em>str, optional (default ‘white’)</em>) – Sets the background color of the plot.</p></li>
+<li><p><strong>plotter_offscreen</strong> (<em>bool, optional (default False)</em>) – Determines whether the plotter renders offscreen.</p></li>
+<li><p><strong>plotter_camera_pos</strong> (<em>List[int], optional (default [1, 1, 1])</em>) – Specifies the camera position for the plotter.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Surface Configuration<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface_cmap</strong> (<em>str, optional (default ‘jet’)</em>) – Defines the colormap for the surface plotting.</p></li>
+<li><p><strong>surface_color</strong> (<em>str, optional (default None)</em>) – Specific color for the surface if not using a colormap.</p></li>
+<li><p><strong>surface_opacity</strong> (<em>float, optional (default 1.0)</em>) – Sets the opacity level of the surface.</p></li>
+<li><p><strong>surface_clim</strong> (<em>List[float], optional (default None)</em>) – Defines the color limits for the surface colormap.</p></li>
+<li><p><strong>surface_bands_colors</strong> (<em>List[str], optional (default [])</em>) – List of colors for each band in the surface plot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Spin Settings<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>spin_colors</strong> (<em>Tuple[str], optional (None, None)</em>) – List of colors for the spin texture lines.</p></li>
+<li><p><strong>texture_cmap</strong> (<em>str, optional</em>) – Defines the colormap for texture mapping, default is “jet”.</p></li>
+<li><p><strong>texture_color</strong> (<em>Optional[str], optional</em>) – Specific color for the texture if not using a colormap, default is None.</p></li>
+<li><p><strong>texture_size</strong> (<em>float, optional</em>) – Size of the texture elements, default is 0.1.</p></li>
+<li><p><strong>texture_scale</strong> (<em>bool, optional</em>) – Flag to determine if texture scaling is applied, default is False.</p></li>
+<li><p><strong>texture_opacity</strong> (<em>float, optional</em>) – Opacity of the texture, default is 1.0.</p></li>
+<li><p><strong>arrow_size</strong> (<em>int, optional (default 3)</em>) – Size of the arrows in the spin texture mode.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Axes and Labels<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>add_axes</strong> (<em>bool, optional</em>) – Flag to determine if axes are added to the plot, default is True.</p></li>
+<li><p><strong>x_axes_label</strong> (<em>str, optional</em>) – Label for the x-axis, default is “Kx”.</p></li>
+<li><p><strong>y_axes_label</strong> (<em>str, optional</em>) – Label for the y-axis, default is “Ky”.</p></li>
+<li><p><strong>z_axes_label</strong> (<em>str, optional</em>) – Label for the z-axis, default is “Kz”.</p></li>
+<li><p><strong>axes_label_color</strong> (<em>str, optional</em>) – Color of the axes labels, default is “black”.</p></li>
+<li><p><strong>axes_line_width</strong> (<em>float, optional</em>) – Line width of the axes, default is 6.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Brillouin Zone Styling<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>brillouin_zone_style</strong> (<em>str, optional (default “wireframe”)</em>) – Defines the style of the Brillouin zone.</p></li>
+<li><p><strong>brillouin_zone_line_width</strong> (<em>float, optional (default 3.5)</em>) – Sets the line width of the Brillouin zone lines.</p></li>
+<li><p><strong>brillouin_zone_color</strong> (<em>str, optional (default “black”)</em>) – Specifies the color of the Brillouin zone lines.</p></li>
+<li><p><strong>brillouin_zone_opacity</strong> (<em>float, optional (default 1.0)</em>) – Controls the opacity of the Brillouin zone lines.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Advanced Configurations<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fermi_tolerance</strong> (<em>float, optional</em>) – The tolerance to search for bands around the Fermi energy, default is 0.1.</p></li>
+<li><p><strong>extended_zone_directions</strong> (<em>Optional[List[List[int]]], optional</em>) – List of directions to extend the surface in, default is None.</p></li>
+<li><p><strong>supercell</strong> (<em>List[int], optional</em>) – The supercell size to use for the Fermi surface, default is [1, 1, 1].</p></li>
+<li><p><strong>projection_accuracy</strong> (<em>str, optional</em>) – The accuracy of the projections with options ‘high’ and ‘normal’, default is ‘high’.</p></li>
+<li><p><strong>interpolation_factor</strong> (<em>int, optional</em>) – The interpolation factor to use for the Fermi surface, default is 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Advanced Configurations<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fermi_tolerance</strong> (<em>float, optional (default 0.1)</em>) – The tolerance to search for bands around the fermi energy.</p></li>
+<li><p><strong>extended_zone_directions</strong> (<em>List[List[int]], optional (default None)</em>) – List of directions to extend the surface in.</p></li>
+<li><p><strong>supercell</strong> (<em>List[int], optional (default [1, 1, 1])</em>) – The supercell size to use for the Fermi surface.</p></li>
+<li><p><strong>projection_accuracy</strong> (<em>str, optional (default ‘high’)</em>) – The accuracy of the projections. Options are ‘high’ and ‘normal’.</p></li>
+<li><p><strong>interpolation_factor</strong> (<em>int, optional (default 1)</em>) – The interpolation factor to use for the Fermi surface.</p></li>
+<li><p><strong>max_distance</strong> (<em>float, optional (default 0.2)</em>) – The maximum distance to keep points from the isosurface centers.</p></li>
+<li><p><strong>Cross section Settings</strong></p></li>
+<li><p><strong>———————-</strong></p></li>
+<li><p><strong>cross_section_slice_linewidth</strong> (<em>float, optional (default 5.0)</em>) – Line width for slices in cross-sectional views.</p></li>
+<li><p><strong>cross_section_slice_show_area</strong> (<em>bool, optional (default False)</em>) – Flag to determine if the area under the cross-section should be shown.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Isoslider Settings<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>isoslider_title</strong> (<em>str, optional (default ‘Energy iso-value’)</em>) – Title for the iso-value slider in the interface.</p></li>
+<li><p><strong>isoslider_style</strong> (<em>str, optional (default ‘modern’)</em>) – Style of the iso-value slider.</p></li>
+<li><p><strong>isoslider_color</strong> (<em>str, optional (default ‘black’)</em>) – Color of the iso-value slider.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Miscellaneous<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>orbit_gif_n_points</strong> (<em>int, optional</em>) – Number of points to interpolate for creating orbit GIF animations, default is 36.</p></li>
+<li><p><strong>orbit_gif_step</strong> (<em>float, optional</em>) – Step size between points in the orbit GIF animation, default is 0.05.</p></li>
+<li><p><strong>orbit_mp4_n_points</strong> (<em>int, optional</em>) – Number of points to interpolate for creating orbit MP4 animations, default is 36.</p></li>
+<li><p><strong>orbit_mp4_step</strong> (<em>float, optional</em>) – Step size between points in the orbit MP4 animation, default is 0.05.</p></li>
+</ul>
 </dd>
 </dl>
-</section>
-<section id="surface-color">
-<h2>surface_color<a class="headerlink" href="#surface-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the color of the surface</p>
+<p class="rubric">Methods</p>
+<dl class="simple">
+<dt>__post_init__():</dt><dd><p>Post-initialization to set additional properties like <cite>plot_type</cite>.</p>
 </dd>
 </dl>
-</section>
-<section id="spin-colors">
-<h2>spin_colors<a class="headerlink" href="#spin-colors" title="Permalink to this heading">#</a></h2>
+<p class="rubric">Examples</p>
+<p>To initialize a basic configuration with the default settings:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">FermiSurface3DConfig</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To customize the Fermi surface with a specific colormap and opacity:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">custom_config</span> <span class="o">=</span> <span class="n">FermiSurface3DConfig</span><span class="p">(</span><span class="n">surface_cmap</span><span class="o">=</span><span class="s1">&#39;magma&#39;</span><span class="p">,</span> <span class="n">surface_opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.add_axes">
+<span class="sig-name descname"><span class="pre">add_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.add_axes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.add_scalar_bar">
+<span class="sig-name descname"><span class="pre">add_scalar_bar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.add_scalar_bar" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.arrow_size">
+<span class="sig-name descname"><span class="pre">arrow_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.arrow_size" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/fermi_surface_3d.html#FermiSurface3DConfig.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.as_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a dictionary of the configuration settings.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.axes_label_color">
+<span class="sig-name descname"><span class="pre">axes_label_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'black'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.axes_label_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.axes_line_width">
+<span class="sig-name descname"><span class="pre">axes_line_width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.axes_line_width" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.background_color">
+<span class="sig-name descname"><span class="pre">background_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'white'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.background_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_color">
+<span class="sig-name descname"><span class="pre">brillouin_zone_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'black'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_line_width">
+<span class="sig-name descname"><span class="pre">brillouin_zone_line_width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3.5</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_line_width" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_opacity">
+<span class="sig-name descname"><span class="pre">brillouin_zone_opacity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_opacity" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_style">
+<span class="sig-name descname"><span class="pre">brillouin_zone_style</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'wireframe'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_style" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.cross_section_slice_linewidth">
+<span class="sig-name descname"><span class="pre">cross_section_slice_linewidth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5.0</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.cross_section_slice_linewidth" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.cross_section_slice_show_area">
+<span class="sig-name descname"><span class="pre">cross_section_slice_show_area</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.cross_section_slice_show_area" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.extended_zone_directions">
+<span class="sig-name descname"><span class="pre">extended_zone_directions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.extended_zone_directions" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.fermi_tolerance">
+<span class="sig-name descname"><span class="pre">fermi_tolerance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.fermi_tolerance" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.interpolation_factor">
+<span class="sig-name descname"><span class="pre">interpolation_factor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.interpolation_factor" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_color">
+<span class="sig-name descname"><span class="pre">isoslider_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'black'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_style">
+<span class="sig-name descname"><span class="pre">isoslider_style</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'modern'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_style" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_title">
+<span class="sig-name descname"><span class="pre">isoslider_title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Energy</span> <span class="pre">iso-value'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_title" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.max_distance">
+<span class="sig-name descname"><span class="pre">max_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.2</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.max_distance" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode" title="pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode"><span class="pre">FermiSurfaceMode</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'plain'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.mode" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_gif_n_points">
+<span class="sig-name descname"><span class="pre">orbit_gif_n_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">36</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_gif_n_points" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_gif_step">
+<span class="sig-name descname"><span class="pre">orbit_gif_step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.05</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_gif_step" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_mp4_n_points">
+<span class="sig-name descname"><span class="pre">orbit_mp4_n_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">36</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_mp4_n_points" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_mp4_step">
+<span class="sig-name descname"><span class="pre">orbit_mp4_step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.05</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_mp4_step" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.plotter_camera_pos">
+<span class="sig-name descname"><span class="pre">plotter_camera_pos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.plotter_camera_pos" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.plotter_offscreen">
+<span class="sig-name descname"><span class="pre">plotter_offscreen</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.plotter_offscreen" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.projection_accuracy">
+<span class="sig-name descname"><span class="pre">projection_accuracy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'high'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.projection_accuracy" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.property">
+<span class="sig-name descname"><span class="pre">property</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty" title="pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty"><span class="pre">FermiSurfaceProperty</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fermi_speed'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.property" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.property_name">
+<span class="sig-name descname"><span class="pre">property_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fermi_speed'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.property_name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_bold">
+<span class="sig-name descname"><span class="pre">scalar_bar_bold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_bold" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_color">
+<span class="sig-name descname"><span class="pre">scalar_bar_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'black'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_italic">
+<span class="sig-name descname"><span class="pre">scalar_bar_italic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_italic" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_label_font_size">
+<span class="sig-name descname"><span class="pre">scalar_bar_label_font_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_label_font_size" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_labels">
+<span class="sig-name descname"><span class="pre">scalar_bar_labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_labels" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_position_x">
+<span class="sig-name descname"><span class="pre">scalar_bar_position_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_position_x" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_position_y">
+<span class="sig-name descname"><span class="pre">scalar_bar_position_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.01</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_position_y" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_title">
+<span class="sig-name descname"><span class="pre">scalar_bar_title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_title" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_title_font_size">
+<span class="sig-name descname"><span class="pre">scalar_bar_title_font_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_title_font_size" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.spin_colors">
+<span class="sig-name descname"><span class="pre">spin_colors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(None,</span> <span class="pre">None)</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.spin_colors" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.supercell">
+<span class="sig-name descname"><span class="pre">supercell</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.supercell" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_bands_colors">
+<span class="sig-name descname"><span class="pre">surface_bands_colors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_bands_colors" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_clim">
+<span class="sig-name descname"><span class="pre">surface_clim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_clim" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_cmap">
+<span class="sig-name descname"><span class="pre">surface_cmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jet'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_cmap" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_color">
+<span class="sig-name descname"><span class="pre">surface_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_opacity">
+<span class="sig-name descname"><span class="pre">surface_opacity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_opacity" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_cmap">
+<span class="sig-name descname"><span class="pre">texture_cmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jet'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_cmap" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_color">
+<span class="sig-name descname"><span class="pre">texture_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_opacity">
+<span class="sig-name descname"><span class="pre">texture_opacity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.0</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_opacity" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_scale">
+<span class="sig-name descname"><span class="pre">texture_scale</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_scale" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_size">
+<span class="sig-name descname"><span class="pre">texture_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_size" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.x_axes_label">
+<span class="sig-name descname"><span class="pre">x_axes_label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Kx'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.x_axes_label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.y_axes_label">
+<span class="sig-name descname"><span class="pre">y_axes_label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Ky'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.y_axes_label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.z_axes_label">
+<span class="sig-name descname"><span class="pre">z_axes_label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Kz'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.z_axes_label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.cfg.fermi_surface_3d.</span></span><span class="sig-name descname"><span class="pre">FermiSurfaceMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/fermi_surface_3d.html#FermiSurfaceMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration for defining the modes of Fermi surface representations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The colors for the plot lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[None, None]</p>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PLAIN</strong> (<em>str</em>) – Represents the Fermi surface in a simple, unadorned style.</p></li>
+<li><p><strong>PARAMETRIC</strong> (<em>str</em>) – Represents the Fermi surface in a parametric form, allowing for complex geometrical transformations.</p></li>
+<li><p><strong>SPIN_TEXTURE</strong> (<em>str</em>) – Enhances the Fermi surface representation with spin texture information, indicating magnetic properties.</p></li>
+</ul>
 </dd>
 </dl>
-</section>
-<section id="surface-bands-colors">
-<h2>surface_bands_colors<a class="headerlink" href="#surface-bands-colors" title="Permalink to this heading">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.PARAMETRIC">
+<span class="sig-name descname"><span class="pre">PARAMETRIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'parametric'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.PARAMETRIC" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.PLAIN">
+<span class="sig-name descname"><span class="pre">PLAIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'plain'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.PLAIN" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.SPIN_TEXTURE">
+<span class="sig-name descname"><span class="pre">SPIN_TEXTURE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'spin_texture'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.SPIN_TEXTURE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.cfg.fermi_surface_3d.</span></span><span class="sig-name descname"><span class="pre">FermiSurfaceProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/fermi_surface_3d.html#FermiSurfaceProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration for defining the properties that can be visualized on the Fermi surface.</p>
 <dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[]</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the color of the surface per band</p>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FERMI_SPEED</strong> (<em>str</em>) – Visualizes the scalar speed at which electrons travel at the Fermi level.</p></li>
+<li><p><strong>FERMI_VELOCITY</strong> (<em>str</em>) – Visualizes the vector velocity of electrons moving at the Fermi level.</p></li>
+<li><p><strong>HARMONIC_AVERAGE_EFFECTIVE_MASS</strong> (<em>str</em>) – Displays the harmonic average of the effective mass of electrons, reflecting the electron mobility.</p></li>
+</ul>
 </dd>
 </dl>
-</section>
-<section id="surface-opacity">
-<h2>surface_opacity<a class="headerlink" href="#surface-opacity" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>1.0</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the opacity of the surface</p>
-</dd>
-</dl>
-</section>
-<section id="surface-clim">
-<h2>surface_clim<a class="headerlink" href="#surface-clim" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the color scale on the surface</p>
-</dd>
-</dl>
-</section>
-<section id="extended-zone-directions">
-<h2>extended_zone_directions<a class="headerlink" href="#extended-zone-directions" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls how many zone to generate. This is a list of directions to generates. Ex: [[1,0,0],[0,0,1]]</p>
-</dd>
-</dl>
-</section>
-<section id="supercell">
-<h2>supercell<a class="headerlink" href="#supercell" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[1, 1, 1]</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls how many the supercell size used to generate the fermi surface</p>
-</dd>
-</dl>
-</section>
-<section id="projection-accuracy">
-<h2>projection_accuracy<a class="headerlink" href="#projection-accuracy" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>high</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the projection algorithmuse. Either high or normal</p>
-</dd>
-</dl>
-</section>
-<section id="interpolation-factor">
-<h2>interpolation_factor<a class="headerlink" href="#interpolation-factor" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>1</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the interpolation factor used on the fermi surface</p>
-</dd>
-</dl>
-</section>
-<section id="brillouin-zone-style">
-<h2>brillouin_zone_style<a class="headerlink" href="#brillouin-zone-style" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>wireframe</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the wireframe style of the brillouin zone</p>
-</dd>
-</dl>
-</section>
-<section id="brillouin-zone-line-width">
-<h2>brillouin_zone_line_width<a class="headerlink" href="#brillouin-zone-line-width" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>3.5</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the linewidth of the brillouin zone</p>
-</dd>
-</dl>
-</section>
-<section id="brillouin-zone-color">
-<h2>brillouin_zone_color<a class="headerlink" href="#brillouin-zone-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>black</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the color of the wireframe of the brillouin zone</p>
-</dd>
-</dl>
-</section>
-<section id="brillouin-zone-opacity">
-<h2>brillouin_zone_opacity<a class="headerlink" href="#brillouin-zone-opacity" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>1.0</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the opacity of the wireframe of the brillouin zone</p>
-</dd>
-</dl>
-</section>
-<section id="texture-cmap">
-<h2>texture_cmap<a class="headerlink" href="#texture-cmap" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>jet</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the colormap of the texture</p>
-</dd>
-</dl>
-</section>
-<section id="texture-color">
-<h2>texture_color<a class="headerlink" href="#texture-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the color of the texture</p>
-</dd>
-</dl>
-</section>
-<section id="texture-size">
-<h2>texture_size<a class="headerlink" href="#texture-size" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>0.1</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the size of the texture</p>
-</dd>
-</dl>
-</section>
-<section id="texture-scale">
-<h2>texture_scale<a class="headerlink" href="#texture-scale" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>False</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the scaling of the texture</p>
-</dd>
-</dl>
-</section>
-<section id="texture-opacity">
-<h2>texture_opacity<a class="headerlink" href="#texture-opacity" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>1.0</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the opacity of the texture</p>
-</dd>
-</dl>
-</section>
-<section id="add-axes">
-<h2>add_axes<a class="headerlink" href="#add-axes" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls if there should be direction axes</p>
-</dd>
-</dl>
-</section>
-<section id="x-axes-label">
-<h2>x_axes_label<a class="headerlink" href="#x-axes-label" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Kx</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls kx axis label</p>
-</dd>
-</dl>
-</section>
-<section id="y-axes-label">
-<h2>y_axes_label<a class="headerlink" href="#y-axes-label" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Ky</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls ky axis label</p>
-</dd>
-</dl>
-</section>
-<section id="z-axes-label">
-<h2>z_axes_label<a class="headerlink" href="#z-axes-label" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Kz</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls kz axis label</p>
-</dd>
-</dl>
-</section>
-<section id="axes-label-color">
-<h2>axes_label_color<a class="headerlink" href="#axes-label-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>black</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls axes label color</p>
-</dd>
-</dl>
-</section>
-<section id="axes-line-width">
-<h2>axes_line_width<a class="headerlink" href="#axes-line-width" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>6</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the linewdith of th axes label</p>
-</dd>
-</dl>
-</section>
-<section id="add-scalar-bar">
-<h2>add_scalar_bar<a class="headerlink" href="#add-scalar-bar" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls if there is a colorbar</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-labels">
-<h2>scalar_bar_labels<a class="headerlink" href="#scalar-bar-labels" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>6</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the scalar bar labels</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-italic">
-<h2>scalar_bar_italic<a class="headerlink" href="#scalar-bar-italic" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>False</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the label italic style</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-bold">
-<h2>scalar_bar_bold<a class="headerlink" href="#scalar-bar-bold" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>False</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the label bold style</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-title">
-<h2>scalar_bar_title<a class="headerlink" href="#scalar-bar-title" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls scalar bar title font size</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-title-font-size">
-<h2>scalar_bar_title_font_size<a class="headerlink" href="#scalar-bar-title-font-size" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls scalar bar title font size</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-label-font-size">
-<h2>scalar_bar_label_font_size<a class="headerlink" href="#scalar-bar-label-font-size" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls scalar bar label font size</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-position-x">
-<h2>scalar_bar_position_x<a class="headerlink" href="#scalar-bar-position-x" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>0.4</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls scalar bar x position</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-position-y">
-<h2>scalar_bar_position_y<a class="headerlink" href="#scalar-bar-position-y" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>0.01</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls scalar bar y position</p>
-</dd>
-</dl>
-</section>
-<section id="scalar-bar-color">
-<h2>scalar_bar_color<a class="headerlink" href="#scalar-bar-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>black</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls scalar bar outline color</p>
-</dd>
-</dl>
-</section>
-<section id="background-color">
-<h2>background_color<a class="headerlink" href="#background-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>white</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the background color</p>
-</dd>
-</dl>
-</section>
-<section id="orbit-gif-n-points">
-<h2>orbit_gif_n_points<a class="headerlink" href="#orbit-gif-n-points" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>36</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the number of point on the orbit</p>
-</dd>
-</dl>
-</section>
-<section id="orbit-gif-step">
-<h2>orbit_gif_step<a class="headerlink" href="#orbit-gif-step" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>0.05</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the step size of the orbit</p>
-</dd>
-</dl>
-</section>
-<section id="orbit-mp4-n-points">
-<h2>orbit_mp4_n_points<a class="headerlink" href="#orbit-mp4-n-points" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>36</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the number of point on the orbit</p>
-</dd>
-</dl>
-</section>
-<section id="orbit-mp4-step">
-<h2>orbit_mp4_step<a class="headerlink" href="#orbit-mp4-step" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>0.05</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the step size of the orbit</p>
-</dd>
-</dl>
-</section>
-<section id="plotter-offscreen">
-<h2>plotter_offscreen<a class="headerlink" href="#plotter-offscreen" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>False</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls whether the plotter renders offscreen</p>
-</dd>
-</dl>
-</section>
-<section id="plotter-camera-pos">
-<h2>plotter_camera_pos<a class="headerlink" href="#plotter-camera-pos" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[1, 1, 1]</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the caemera position of the plotter</p>
-</dd>
-</dl>
-</section>
-<section id="isoslider-title">
-<h2>isoslider_title<a class="headerlink" href="#isoslider-title" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Energy iso-value</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls title of the isoslider</p>
-</dd>
-</dl>
-</section>
-<section id="isoslider-style">
-<h2>isoslider_style<a class="headerlink" href="#isoslider-style" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>modern</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls isoslider  style</p>
-</dd>
-</dl>
-</section>
-<section id="isoslider-color">
-<h2>isoslider_color<a class="headerlink" href="#isoslider-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>black</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls isoslider color</p>
-</dd>
-</dl>
-</section>
-<section id="cross-section-slice-linewidth">
-<h2>cross_section_slice_linewidth<a class="headerlink" href="#cross-section-slice-linewidth" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>5.0</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls the linewidth of the slice</p>
-</dd>
-</dl>
-</section>
-<section id="cross-section-slice-show-area">
-<h2>cross_section_slice_show_area<a class="headerlink" href="#cross-section-slice-show-area" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">value<span class="colon">:</span></dt>
-<dd class="field-odd"><p>False</p>
-</dd>
-<dt class="field-even">description<span class="colon">:</span></dt>
-<dd class="field-even"><p>Controls wheather to show the cross section area</p>
-</dd>
-</dl>
-</section>
-<section id="arrow-size">
-<h2>arrow_size<a class="headerlink" href="#arrow-size" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The arrow size for the spin texture</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>3</p>
-</dd>
-</dl>
-</section>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.FERMI_SPEED">
+<span class="sig-name descname"><span class="pre">FERMI_SPEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fermi_speed'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.FERMI_SPEED" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.FERMI_VELOCITY">
+<span class="sig-name descname"><span class="pre">FERMI_VELOCITY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'fermi_velocity'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.FERMI_VELOCITY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.HARMONIC_AVERAGE_EFFECTIVE_MASS">
+<span class="sig-name descname"><span class="pre">HARMONIC_AVERAGE_EFFECTIVE_MASS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'harmonic_effective_mass'</span></em><a class="headerlink" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.HARMONIC_AVERAGE_EFFECTIVE_MASS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -1497,54 +1415,75 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-cmap">surface_cmap</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-color">surface_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spin-colors">spin_colors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-bands-colors">surface_bands_colors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-opacity">surface_opacity</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surface-clim">surface_clim</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extended-zone-directions">extended_zone_directions</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supercell">supercell</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#projection-accuracy">projection_accuracy</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interpolation-factor">interpolation_factor</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-style">brillouin_zone_style</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-line-width">brillouin_zone_line_width</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-color">brillouin_zone_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#brillouin-zone-opacity">brillouin_zone_opacity</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-cmap">texture_cmap</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-color">texture_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-size">texture_size</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-scale">texture_scale</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#texture-opacity">texture_opacity</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#add-axes">add_axes</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#x-axes-label">x_axes_label</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#y-axes-label">y_axes_label</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#z-axes-label">z_axes_label</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#axes-label-color">axes_label_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#axes-line-width">axes_line_width</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#add-scalar-bar">add_scalar_bar</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-labels">scalar_bar_labels</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-italic">scalar_bar_italic</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-bold">scalar_bar_bold</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-title">scalar_bar_title</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-title-font-size">scalar_bar_title_font_size</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-label-font-size">scalar_bar_label_font_size</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-position-x">scalar_bar_position_x</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-position-y">scalar_bar_position_y</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-bar-color">scalar_bar_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background-color">background_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-gif-n-points">orbit_gif_n_points</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-gif-step">orbit_gif_step</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-mp4-n-points">orbit_mp4_n_points</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#orbit-mp4-step">orbit_mp4_step</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotter-offscreen">plotter_offscreen</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotter-camera-pos">plotter_camera_pos</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#isoslider-title">isoslider_title</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#isoslider-style">isoslider_style</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#isoslider-color">isoslider_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-section-slice-linewidth">cross_section_slice_linewidth</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-section-slice-show-area">cross_section_slice_show_area</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arrow-size">arrow_size</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.add_axes"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.add_axes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.add_scalar_bar"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.add_scalar_bar</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.arrow_size"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.arrow_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.as_dict"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.as_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.axes_label_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.axes_label_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.axes_line_width"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.axes_line_width</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.background_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.background_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.brillouin_zone_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_line_width"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.brillouin_zone_line_width</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_opacity"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.brillouin_zone_opacity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.brillouin_zone_style"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.brillouin_zone_style</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.cross_section_slice_linewidth"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.cross_section_slice_linewidth</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.cross_section_slice_show_area"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.cross_section_slice_show_area</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.extended_zone_directions"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.extended_zone_directions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.fermi_tolerance"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.fermi_tolerance</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.interpolation_factor"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.interpolation_factor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.isoslider_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_style"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.isoslider_style</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.isoslider_title"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.isoslider_title</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.max_distance"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.max_distance</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.mode"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.mode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_gif_n_points"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.orbit_gif_n_points</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_gif_step"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.orbit_gif_step</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_mp4_n_points"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.orbit_mp4_n_points</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.orbit_mp4_step"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.orbit_mp4_step</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.plotter_camera_pos"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.plotter_camera_pos</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.plotter_offscreen"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.plotter_offscreen</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.projection_accuracy"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.projection_accuracy</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.property"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.property</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.property_name"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.property_name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_bold"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_bold</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_italic"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_italic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_label_font_size"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_label_font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_labels"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_labels</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_position_x"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_position_x</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_position_y"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_position_y</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_title"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_title</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.scalar_bar_title_font_size"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.scalar_bar_title_font_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.spin_colors"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.spin_colors</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.supercell"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.supercell</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_bands_colors"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.surface_bands_colors</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_clim"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.surface_clim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_cmap"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.surface_cmap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.surface_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.surface_opacity"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.surface_opacity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_cmap"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.texture_cmap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_color"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.texture_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_opacity"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.texture_opacity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_scale"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.texture_scale</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.texture_size"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.texture_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.x_axes_label"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.x_axes_label</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.y_axes_label"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.y_axes_label</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurface3DConfig.z_axes_label"><code class="docutils literal notranslate"><span class="pre">FermiSurface3DConfig.z_axes_label</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceMode</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.PARAMETRIC"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceMode.PARAMETRIC</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.PLAIN"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceMode.PLAIN</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode.SPIN_TEXTURE"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceMode.SPIN_TEXTURE</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceProperty</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.FERMI_SPEED"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceProperty.FERMI_SPEED</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.FERMI_VELOCITY"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceProperty.FERMI_VELOCITY</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.fermi_surface_3d.FermiSurfaceProperty.HARMONIC_AVERAGE_EFFECTIVE_MASS"><code class="docutils literal notranslate"><span class="pre">FermiSurfaceProperty.HARMONIC_AVERAGE_EFFECTIVE_MASS</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

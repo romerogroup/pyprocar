@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.io.vasp.Outcar &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.io.vasp.Outcar &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -936,42 +936,16 @@ be chosen by modifying the NWRITE tag in the INCAR file.</p>
 <p>The Outcar class acts as a Mapping, providing key-value access to the variables parsed from the OUTCAR file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – The OUTCAR filename. If not provided, defaults to “OUTCAR”.</p>
+<dd class="field-odd"><p><strong>filename</strong> (<em>Union[str, Path], optional</em>) – The OUTCAR filename. If not provided, defaults to “OUTCAR”.</p>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>variables</strong> (<em>dict</em>) – A dictionary storing variables parsed from the OUTCAR file.</p></li>
+<li><p><strong>filename</strong> (<em>Path</em>) – The path to the OUTCAR file.</p></li>
+<li><p><strong>file_str</strong> (<em>str</em>) – The full string content of the OUTCAR file.</p></li>
+</ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar.variables">
-<span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#pyprocar.io.vasp.Outcar.variables" title="Permalink to this definition">#</a></dt>
-<dd><p>A dictionary storing variables parsed from the OUTCAR file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar.filename">
-<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#pyprocar.io.vasp.Outcar.filename" title="Permalink to this definition">#</a></dt>
-<dd><p>The path to the OUTCAR file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Path</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pyprocar.io.vasp.Outcar.file_str">
-<span class="sig-name descname"><span class="pre">file_str</span></span><a class="headerlink" href="#pyprocar.io.vasp.Outcar.file_str" title="Permalink to this definition">#</a></dt>
-<dd><p>The full string content of the OUTCAR file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
@@ -1048,12 +1022,7 @@ be chosen by modifying the NWRITE tag in the INCAR file.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar"><code class="docutils literal notranslate"><span class="pre">Outcar</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar.variables"><code class="docutils literal notranslate"><span class="pre">Outcar.variables</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar.filename"><code class="docutils literal notranslate"><span class="pre">Outcar.filename</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar.file_str"><code class="docutils literal notranslate"><span class="pre">Outcar.file_str</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.io.vasp.Outcar"><code class="docutils literal notranslate"><span class="pre">Outcar</span></code></a></li>
 </ul>
   </nav></div>
 

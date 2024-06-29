@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.core.DensityOfStates &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.core.DensityOfStates &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -933,10 +933,10 @@ functional theory calculation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>energies</strong> (<em>np.ndarray</em><em>,</em>) – Points on energy spectrum. shape = (n_dos, )</p></li>
+<li><p><strong>energies</strong> (<em>np.ndarray,</em>) – Points on energy spectrum. shape = (n_dos, )</p></li>
 <li><p><strong>total</strong> (<em>np.ndarray</em>) – Densities at each point. shape = (n_dos, )</p></li>
 <li><p><strong>efermi</strong> (<em>float</em>) – Fermi energy of the system.</p></li>
-<li><p><strong>projected</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
+<li><p><strong>projected</strong> (<em>np.ndarray, optional</em>) – Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
 <code class="docutils literal notranslate"><span class="pre">i_principal</span></code> works like the principal quantum number n. The last
 index should be the total. (i_principal = -1)
 n = i_principal =&gt; 0, 1, 2, 3, -1 =&gt; s, p, d, total
@@ -945,7 +945,7 @@ same. i_orbital follows this order
 (0, 1, 2, 3, 4, 5, 6, 7, 8) =&gt; s, py, pz, px, dxy, dyz, dz2, dxz, dx2-y2.
 <code class="docutils literal notranslate"><span class="pre">i_spin</span></code> works as magnetic quantum number.
 m = 0, 1, for spin up and down, by default None.</p></li>
-<li><p><strong>interpolation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of density of states points will increase by this factor
+<li><p><strong>interpolation_factor</strong> (<em>int, optional</em>) – The number of density of states points will increase by this factor
 in the interpolation, by default 1.</p></li>
 </ul>
 </dd>

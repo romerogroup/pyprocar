@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>2D spin-texture &#8212; PyProcar 6.1.10 documentation</title>
+    <title>2D spin-texture &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -113,7 +113,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -501,38 +501,35 @@ Usage:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>str</em><em>,</em>) – This parameter sets the code to parse, by default “vasp”</p></li>
-<li><p><strong>dirname</strong> (<em>str</em><em>, </em><em>optional</em>) – This parameter is the directory of the calculation, by default ‘’</p></li>
-<li><p><strong>fermi</strong> (<em>float</em><em>, </em><em>optional</em>) – The fermi energy. If none is given, the fermi energy in the directory will be used, by default None</p></li>
-<li><p><strong>fermi_shift</strong> (<em>float</em><em>, </em><em>optional</em>) – The fermi energy shift, by default 0.0</p></li>
-<li><p><strong>lobster</strong> (<em>bool</em><em>, </em><em>optional</em>) – A boolean value to determine to use lobster, by default False</p></li>
-<li><p><strong>band_indices</strong> (<em>List</em><em>[</em><em>List</em><em>]</em>) – A list of list that contains band indices for a given spin</p></li>
-<li><p><strong>band_colors</strong> (<em>List</em><em>[</em><em>List</em><em>]</em>) – A list of list that contains colors for the band index
+<li><p><strong>code</strong> (<em>str,</em>) – This parameter sets the code to parse, by default “vasp”</p></li>
+<li><p><strong>dirname</strong> (<em>str, optional</em>) – This parameter is the directory of the calculation, by default ‘’</p></li>
+<li><p><strong>fermi</strong> (<em>float, optional</em>) – The fermi energy. If none is given, the fermi energy in the directory will be used, by default None</p></li>
+<li><p><strong>fermi_shift</strong> (<em>float, optional</em>) – The fermi energy shift, by default 0.0</p></li>
+<li><p><strong>lobster</strong> (<em>bool, optional</em>) – A boolean value to determine to use lobster, by default False</p></li>
+<li><p><strong>band_indices</strong> (<em>List[List]</em>) – A list of list that contains band indices for a given spin</p></li>
+<li><p><strong>band_colors</strong> (<em>List[List]</em>) – A list of list that contains colors for the band index
 corresponding the band_indices for a given spin</p></li>
-<li><p><strong>spins</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of spins, by default [0]</p></li>
-<li><p><strong>atoms</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of atoms, by default None</p></li>
-<li><p><strong>orbitals</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of orbitals, by default None</p></li>
-<li><p><strong>energy</strong> (<em>float</em><em>, </em><em>optional</em>) – The energy to generate the iso surface.
+<li><p><strong>spins</strong> (<em>List[int], optional</em>) – List of spins, by default [0]</p></li>
+<li><p><strong>atoms</strong> (<em>List[int], optional</em>) – List of atoms, by default None</p></li>
+<li><p><strong>orbitals</strong> (<em>List[int], optional</em>) – List of orbitals, by default None</p></li>
+<li><p><strong>energy</strong> (<em>float, optional</em>) – The energy to generate the iso surface.
 When energy is None the 0 is used by default, which is the fermi energy,
 by default None</p></li>
-<li><p><strong>k_z_plane</strong> (<em>float</em><em>, </em><em>optional</em>) – Which K_z plane to generate 2d fermi surface, by default 0.0</p></li>
-<li><p><strong>rot_symm</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_, by default 1</p></li>
-<li><p><strong>translate</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Matrix to translate the kpoints, by default [0, 0, 0]</p></li>
-<li><p><strong>rotation</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Matrix to rotate the kpoints, by default [0, 0, 0, 1]</p></li>
-<li><p><strong>savefig</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename to save the plot as., by default None</p></li>
-<li><p><strong>spin_texture</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value to determine if spin arrows are plotted, by default False</p></li>
-<li><p><strong>exportplt</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean value where to return the matplotlib.pyplot state plt, by default False</p></li>
-<li><p><strong>print_plot_opts</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to print the plotting options</p></li>
+<li><p><strong>k_z_plane</strong> (<em>float, optional</em>) – Which K_z plane to generate 2d fermi surface, by default 0.0</p></li>
+<li><p><strong>rot_symm</strong> (<em>int, optional</em>) – _description_, by default 1</p></li>
+<li><p><strong>translate</strong> (<em>List[int], optional</em>) – Matrix to translate the kpoints, by default [0, 0, 0]</p></li>
+<li><p><strong>rotation</strong> (<em>List[int], optional</em>) – Matrix to rotate the kpoints, by default [0, 0, 0, 1]</p></li>
+<li><p><strong>savefig</strong> (<em>str, optional</em>) – The filename to save the plot as., by default None</p></li>
+<li><p><strong>spin_texture</strong> (<em>bool, optional</em>) – Boolean value to determine if spin arrows are plotted, by default False</p></li>
+<li><p><strong>exportplt</strong> (<em>bool, optional</em>) – Boolean value where to return the matplotlib.pyplot state plt, by default False</p></li>
+<li><p><strong>print_plot_opts</strong> (<em>bool, optional</em>) – Boolean to print the plotting options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Returns the matplotlib.pyplot state plt</p>
+<dd class="field-even"><p><em>matplotlib.pyplot</em> – Returns the matplotlib.pyplot state plt</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>matplotlib.pyplot</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>RuntimeError</strong> – invalid option –translate</p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>RuntimeError</strong> – invalid option –translate</p>
 </dd>
 </dl>
 </dd></dl>

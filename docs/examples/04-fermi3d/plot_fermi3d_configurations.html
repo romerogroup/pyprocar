@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.1.10 documentation</title>
+    <title>Plotting with Configurations in pyprocar &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -583,55 +583,61 @@ to download the full example code</p>
                 Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                 --------------------------------------------------------
 
-surface_cmap : {&#39;value&#39;: &#39;jet&#39;, &#39;description&#39;: &#39;Controls the colormap of the surface&#39;}
-surface_color : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls the color of the surface&#39;}
-spin_colors : {&#39;description&#39;: &#39;The colors for the plot lines.&#39;, &#39;value&#39;: [None, None]}
-surface_bands_colors : {&#39;value&#39;: [], &#39;description&#39;: &#39;Controls the color of the surface per band&#39;}
-surface_opacity : {&#39;value&#39;: 1.0, &#39;description&#39;: &#39;Controls the opacity of the surface&#39;}
-surface_clim : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls the color scale on the surface&#39;}
-extended_zone_directions : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls how many zone to generate. This is a list of directions to generates. Ex: [[1,0,0],[0,0,1]]&#39;}
-supercell : {&#39;value&#39;: [1, 1, 1], &#39;description&#39;: &#39;Controls how many the supercell size used to generate the fermi surface&#39;}
-projection_accuracy : {&#39;value&#39;: &#39;high&#39;, &#39;description&#39;: &#39;Controls the projection algorithmuse. Either high or normal&#39;}
-interpolation_factor : {&#39;value&#39;: 1, &#39;description&#39;: &#39;Controls the interpolation factor used on the fermi surface&#39;}
-brillouin_zone_style : {&#39;value&#39;: &#39;wireframe&#39;, &#39;description&#39;: &#39;Controls the wireframe style of the brillouin zone&#39;}
-brillouin_zone_line_width : {&#39;value&#39;: 3.5, &#39;description&#39;: &#39;Controls the linewidth of the brillouin zone&#39;}
-brillouin_zone_color : {&#39;value&#39;: &#39;black&#39;, &#39;description&#39;: &#39;Controls the color of the wireframe of the brillouin zone&#39;}
-brillouin_zone_opacity : {&#39;value&#39;: 1.0, &#39;description&#39;: &#39;Controls the opacity of the wireframe of the brillouin zone&#39;}
-texture_cmap : {&#39;value&#39;: &#39;jet&#39;, &#39;description&#39;: &#39;Controls the colormap of the texture&#39;}
-texture_color : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls the color of the texture&#39;}
-texture_size : {&#39;value&#39;: 0.1, &#39;description&#39;: &#39;Controls the size of the texture&#39;}
-texture_scale : {&#39;value&#39;: False, &#39;description&#39;: &#39;Controls the scaling of the texture&#39;}
-texture_opacity : {&#39;value&#39;: 1.0, &#39;description&#39;: &#39;Controls the opacity of the texture&#39;}
-add_axes : {&#39;value&#39;: True, &#39;description&#39;: &#39;Controls if there should be direction axes&#39;}
-x_axes_label : {&#39;value&#39;: &#39;Kx&#39;, &#39;description&#39;: &#39;Controls kx axis label&#39;}
-y_axes_label : {&#39;value&#39;: &#39;Ky&#39;, &#39;description&#39;: &#39;Controls ky axis label&#39;}
-z_axes_label : {&#39;value&#39;: &#39;Kz&#39;, &#39;description&#39;: &#39;Controls kz axis label&#39;}
-axes_label_color : {&#39;value&#39;: &#39;black&#39;, &#39;description&#39;: &#39;Controls axes label color&#39;}
-axes_line_width : {&#39;value&#39;: 6, &#39;description&#39;: &#39;Controls the linewdith of th axes label&#39;}
-add_scalar_bar : {&#39;value&#39;: True, &#39;description&#39;: &#39;Controls if there is a colorbar&#39;}
-scalar_bar_labels : {&#39;value&#39;: 6, &#39;description&#39;: &#39;Controls the scalar bar labels&#39;}
-scalar_bar_italic : {&#39;value&#39;: False, &#39;description&#39;: &#39;Controls the label italic style&#39;}
-scalar_bar_bold : {&#39;value&#39;: False, &#39;description&#39;: &#39;Controls the label bold style&#39;}
-scalar_bar_title : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls scalar bar title font size&#39;}
-scalar_bar_title_font_size : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls scalar bar title font size&#39;}
-scalar_bar_label_font_size : {&#39;value&#39;: None, &#39;description&#39;: &#39;Controls scalar bar label font size&#39;}
-scalar_bar_position_x : {&#39;value&#39;: 0.4, &#39;description&#39;: &#39;Controls scalar bar x position&#39;}
-scalar_bar_position_y : {&#39;value&#39;: 0.01, &#39;description&#39;: &#39;Controls scalar bar y position&#39;}
-scalar_bar_color : {&#39;value&#39;: &#39;black&#39;, &#39;description&#39;: &#39;Controls scalar bar outline color&#39;}
-background_color : {&#39;value&#39;: &#39;white&#39;, &#39;description&#39;: &#39;Controls the background color&#39;}
-orbit_gif_n_points : {&#39;value&#39;: 36, &#39;description&#39;: &#39;Controls the number of point on the orbit&#39;}
-orbit_gif_step : {&#39;value&#39;: 0.05, &#39;description&#39;: &#39;Controls the step size of the orbit&#39;}
-orbit_mp4_n_points : {&#39;value&#39;: 36, &#39;description&#39;: &#39;Controls the number of point on the orbit&#39;}
-orbit_mp4_step : {&#39;value&#39;: 0.05, &#39;description&#39;: &#39;Controls the step size of the orbit&#39;}
-plotter_offscreen : {&#39;value&#39;: False, &#39;description&#39;: &#39;Controls whether the plotter renders offscreen&#39;}
-plotter_camera_pos : {&#39;value&#39;: [1, 1, 1], &#39;description&#39;: &#39;Controls the caemera position of the plotter&#39;}
-isoslider_title : {&#39;value&#39;: &#39;Energy iso-value&#39;, &#39;description&#39;: &#39;Controls title of the isoslider&#39;}
-isoslider_style : {&#39;value&#39;: &#39;modern&#39;, &#39;description&#39;: &#39;Controls isoslider  style&#39;}
-isoslider_color : {&#39;value&#39;: &#39;black&#39;, &#39;description&#39;: &#39;Controls isoslider color&#39;}
-cross_section_slice_linewidth : {&#39;value&#39;: 5.0, &#39;description&#39;: &#39;Controls the linewidth of the slice\\&#39;}
-cross_section_slice_show_area : {&#39;value&#39;: False, &#39;description&#39;: &#39;Controls wheather to show the cross section area&#39;}
-arrow_size : {&#39;description&#39;: &#39;The arrow size for the spin texture&#39;, &#39;value&#39;: 3}
-Bands Near Fermi :  [2, 3, 4, 5]
+plot_type: PlotType.FERMI_SURFACE_3D
+custom_settings: {}
+mode: plain
+property: FermiSurfaceProperty.FERMI_SPEED
+background_color: white
+plotter_offscreen: False
+plotter_camera_pos: [1, 1, 1]
+surface_cmap: jet
+surface_color: None
+surface_opacity: 1.0
+surface_clim: None
+surface_bands_colors: []
+spin_colors: (None, None)
+arrow_size: 3
+texture_cmap: jet
+texture_color: None
+texture_size: 0.1
+texture_scale: False
+texture_opacity: 1.0
+brillouin_zone_style: wireframe
+brillouin_zone_line_width: 3.5
+brillouin_zone_color: black
+brillouin_zone_opacity: 1.0
+add_axes: True
+x_axes_label: Kx
+y_axes_label: Ky
+z_axes_label: Kz
+axes_label_color: black
+axes_line_width: 6
+add_scalar_bar: True
+scalar_bar_labels: 6
+scalar_bar_italic: False
+scalar_bar_bold: False
+scalar_bar_title: None
+scalar_bar_title_font_size: None
+scalar_bar_label_font_size: None
+scalar_bar_position_x: 0.4
+scalar_bar_position_y: 0.01
+scalar_bar_color: black
+property_name: fermi_speed
+fermi_tolerance: 0.1
+extended_zone_directions: None
+supercell: [1, 1, 1]
+projection_accuracy: high
+interpolation_factor: 1
+max_distance: 0.2
+cross_section_slice_linewidth: 5.0
+cross_section_slice_show_area: False
+isoslider_title: Energy iso-value
+isoslider_style: modern
+isoslider_color: black
+orbit_gif_n_points: 36
+orbit_gif_step: 0.05
+orbit_mp4_n_points: 36
+orbit_mp4_step: 0.05
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 2: Parametric Mode with Custom Settings</span>
@@ -652,19 +658,17 @@ Bands Near Fermi :  [2, 3, 4, 5]
                               <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" srcset="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" alt="plot fermi3d configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                --------------------------------------------------------
-                There are additional plot options that are defined in a configuration file.
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" srcset="../../_images/sphx_glr_plot_fermi3d_configurations_002.png" alt="plot fermi3d configurations" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>--------------------------------------------------------
+There are additional plot options that are defined in a configuration file.
+You can change these configurations by passing the keyword argument to the function
+To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , spin_texture , overlay
-                Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                --------------------------------------------------------
-
-Bands Near Fermi :  [2, 3, 4, 5]
+Here is a list modes : plain , parametric , spin_texture , overlay
+Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+--------------------------------------------------------
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.826 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.657 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plot-fermi3d-configurations-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1c19089d986386276f0b2d4704368c54/plot_fermi3d_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi3d_configurations.py</span></code></a></p>

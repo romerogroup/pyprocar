@@ -504,7 +504,7 @@ overlay mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  30.744 seconds)
+   **Total running time of the script:** ( 0 minutes  30.287 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_colinear_dos.py:

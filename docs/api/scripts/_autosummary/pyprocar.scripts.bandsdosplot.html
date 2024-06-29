@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>bandsdosplot &#8212; PyProcar 6.1.10 documentation</title>
+    <title>bandsdosplot &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -932,22 +932,22 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bands_settings</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary containing the keyword arguments from bandsplot, by default bands_settings</p></li>
-<li><p><strong>dos_settings</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary containing the keyword arguments from dosplot, by default dos_settings</p></li>
-<li><p><strong>dos_limit</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The dos window to plot, by default None</p></li>
-<li><p><strong>elimit</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The energy window to plot, by default None</p></li>
-<li><p><strong>k_limit</strong> (<em>_type_</em><em>, </em><em>optional</em>) – The kpath points to plot, by default None</p></li>
-<li><p><strong>grid</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to plot a grid, by default False</p></li>
-<li><p><strong>code</strong> (<em>str</em><em>, </em><em>optional</em>) – The code to use, by default “vasp”</p></li>
-<li><p><strong>lobster</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean if this is a lobster calculation, by default False</p></li>
-<li><p><strong>savefig</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename to to save the plot as., by default None</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – String for the title name, by default None</p></li>
-<li><p><strong>title_fontsize</strong> (<em>float</em><em>, </em><em>optional</em>) – Float for the title size, by default 16</p></li>
-<li><p><strong>discontinuities</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
-<li><p><strong>draw_fermi</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to plot the fermi level, by default True</p></li>
-<li><p><strong>plot_color_bar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to plot the color bar, by default True</p></li>
-<li><p><strong>repair</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to repair the PROCAR file, by default True</p></li>
-<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to show the plot, by default True</p></li>
+<li><p><strong>bands_settings</strong> (<em>dict, optional</em>) – A dictionary containing the keyword arguments from bandsplot, by default bands_settings</p></li>
+<li><p><strong>dos_settings</strong> (<em>dict, optional</em>) – A dictionary containing the keyword arguments from dosplot, by default dos_settings</p></li>
+<li><p><strong>dos_limit</strong> (<em>List[int], optional</em>) – The dos window to plot, by default None</p></li>
+<li><p><strong>elimit</strong> (<em>List[int], optional</em>) – The energy window to plot, by default None</p></li>
+<li><p><strong>k_limit</strong> (<em>_type_, optional</em>) – The kpath points to plot, by default None</p></li>
+<li><p><strong>grid</strong> (<em>bool, optional</em>) – Boolean to plot a grid, by default False</p></li>
+<li><p><strong>code</strong> (<em>str, optional</em>) – The code to use, by default “vasp”</p></li>
+<li><p><strong>lobster</strong> (<em>bool, optional</em>) – Boolean if this is a lobster calculation, by default False</p></li>
+<li><p><strong>savefig</strong> (<em>str, optional</em>) – The filename to to save the plot as., by default None</p></li>
+<li><p><strong>title</strong> (<em>str, optional</em>) – String for the title name, by default None</p></li>
+<li><p><strong>title_fontsize</strong> (<em>float, optional</em>) – Float for the title size, by default 16</p></li>
+<li><p><strong>discontinuities</strong> (<em>_type_, optional</em>) – _description_, by default None</p></li>
+<li><p><strong>draw_fermi</strong> (<em>bool, optional</em>) – Boolean to plot the fermi level, by default True</p></li>
+<li><p><strong>plot_color_bar</strong> (<em>bool, optional</em>) – Boolean to plot the color bar, by default True</p></li>
+<li><p><strong>repair</strong> (<em>bool, optional</em>) – Boolean to repair the PROCAR file, by default True</p></li>
+<li><p><strong>show</strong> (<em>bool, optional</em>) – Boolean to show the plot, by default True</p></li>
 </ul>
 </dd>
 </dl>

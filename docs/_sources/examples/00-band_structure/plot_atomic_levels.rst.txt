@@ -130,7 +130,7 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.326 seconds)
+   **Total running time of the script:** ( 0 minutes  1.435 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py:

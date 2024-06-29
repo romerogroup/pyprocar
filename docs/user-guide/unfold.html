@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Band unfolding &#8212; PyProcar 6.1.10 documentation</title>
+    <title>Band unfolding &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -504,23 +504,23 @@ Usage:</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fname</strong> (<em>PROCAR filename.</em>) – </p></li>
-<li><p><strong>poscar</strong> (<em>POSCAR filename</em>) – </p></li>
-<li><p><strong>outcar</strong> (<em>OUTCAR filename</em><em>, </em><em>for reading fermi energy. You can also use efermi and set outcar=None</em>) – </p></li>
-<li><p><strong>supercell_matrix</strong> (<em>supercell matrix from primitive cell to supercell</em>) – </p></li>
-<li><p><strong>ispin</strong> (<em>For non-spin polarized system</em><em>, </em><em>ispin=None.</em>) – For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</p></li>
-<li><p><strong>fermi</strong> (<em>Fermi energy</em>) – </p></li>
-<li><p><strong>fermi_shift</strong> (<em>Shift the bands by the Fermi energy.</em>) – </p></li>
-<li><p><strong>elimit</strong> (<em>range</em><em> of </em><em>energy to be plotted.</em>) – </p></li>
-<li><p><strong>kticks</strong> (<em>the indices</em><em> of </em><em>K points which has labels given in knames.</em>) – </p></li>
-<li><p><strong>knames</strong> (<em>see kticks</em>) – </p></li>
-<li><p><strong>print_kpts</strong> (<em>print all the kpoints to screen. This is to help find the kticks and knames.</em>) – </p></li>
-<li><p><strong>show_band</strong> (<em>whether to plot the bands before unfolding.</em>) – </p></li>
-<li><p><strong>width</strong> (<em>the width</em><em> of </em><em>the unfolded band.</em>) – </p></li>
-<li><p><strong>color</strong> (<em>color</em><em> of </em><em>the unfoled band.</em>) – </p></li>
-<li><p><strong>savetab</strong> (<em>the csv file name</em><em> of </em><em>which  the table</em><em> of </em><em>unfolding result will be written into.</em>) – </p></li>
-<li><p><strong>savefig</strong> (<em>the file name</em><em> of </em><em>which the figure will be saved.</em>) – </p></li>
-<li><p><strong>exportplt</strong> (<em>flag to export plot as matplotlib.pyplot object.</em>) – </p></li>
+<li><p><strong>fname</strong> (<em>PROCAR filename.</em>)</p></li>
+<li><p><strong>poscar</strong> (<em>POSCAR filename</em>)</p></li>
+<li><p><strong>outcar</strong> (<em>OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None</em>)</p></li>
+<li><p><strong>supercell_matrix</strong> (<em>supercell matrix from primitive cell to supercell</em>)</p></li>
+<li><p><strong>ispin</strong> (<em>For non-spin polarized system, ispin=None.</em>) – For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.</p></li>
+<li><p><strong>fermi</strong> (<em>Fermi energy</em>)</p></li>
+<li><p><strong>fermi_shift</strong> (<em>Shift the bands by the Fermi energy.</em>)</p></li>
+<li><p><strong>elimit</strong> (<em>range of energy to be plotted.</em>)</p></li>
+<li><p><strong>kticks</strong> (<em>the indices of K points which has labels given in knames.</em>)</p></li>
+<li><p><strong>knames</strong> (<em>see kticks</em>)</p></li>
+<li><p><strong>print_kpts</strong> (<em>print all the kpoints to screen. This is to help find the kticks and knames.</em>)</p></li>
+<li><p><strong>show_band</strong> (<em>whether to plot the bands before unfolding.</em>)</p></li>
+<li><p><strong>width</strong> (<em>the width of the unfolded band.</em>)</p></li>
+<li><p><strong>color</strong> (<em>color of the unfoled band.</em>)</p></li>
+<li><p><strong>savetab</strong> (<em>the csv file name of which  the table of unfolding result will be written into.</em>)</p></li>
+<li><p><strong>savefig</strong> (<em>the file name of which the figure will be saved.</em>)</p></li>
+<li><p><strong>exportplt</strong> (<em>flag to export plot as matplotlib.pyplot object.</em>)</p></li>
 </ul>
 </dd>
 </dl>

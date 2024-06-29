@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.io.qe.QEParser &#8212; PyProcar 6.1.10 documentation</title>
+    <title>pyprocar.io.qe.QEParser &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=83b2645e"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
   
 </a></div>
     
@@ -392,7 +392,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">fermi surface 3d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
 </ul>
 </li>
@@ -933,12 +933,12 @@ The most important objects that comes from this parser are the .ebs and .dos</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dirname</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory path to where calculation took place, by default “”</p></li>
-<li><p><strong>scf_in_filename</strong> (<em>str</em><em>, </em><em>optional</em>) – The scf filename, by default “scf.in”</p></li>
-<li><p><strong>bands_in_filename</strong> (<em>str</em><em>, </em><em>optional</em>) – The bands filename in the case of a band structure calculation, by default “bands.in”</p></li>
-<li><p><strong>pdos_in_filename</strong> (<em>str</em><em>, </em><em>optional</em>) – The pdos filename in the case of a density ofstates calculation, by default “pdos.in”</p></li>
-<li><p><strong>kpdos_in_filename</strong> (<em>str</em><em>, </em><em>optional</em>) – The kpdos filename, by default “kpdos.in”</p></li>
-<li><p><strong>atomic_proj_xml</strong> (<em>str</em><em>, </em><em>optional</em>) – The atomic projection xml name. This is located in the where the outdir is and in the {prefix}.save directory, by default “atomic_proj.xml”</p></li>
+<li><p><strong>dirname</strong> (<em>str, optional</em>) – Directory path to where calculation took place, by default “”</p></li>
+<li><p><strong>scf_in_filename</strong> (<em>str, optional</em>) – The scf filename, by default “scf.in”</p></li>
+<li><p><strong>bands_in_filename</strong> (<em>str, optional</em>) – The bands filename in the case of a band structure calculation, by default “bands.in”</p></li>
+<li><p><strong>pdos_in_filename</strong> (<em>str, optional</em>) – The pdos filename in the case of a density ofstates calculation, by default “pdos.in”</p></li>
+<li><p><strong>kpdos_in_filename</strong> (<em>str, optional</em>) – The kpdos filename, by default “kpdos.in”</p></li>
+<li><p><strong>atomic_proj_xml</strong> (<em>str, optional</em>) – The atomic projection xml name. This is located in the where the outdir is and in the {prefix}.save directory, by default “atomic_proj.xml”</p></li>
 </ul>
 </dd>
 </dl>
