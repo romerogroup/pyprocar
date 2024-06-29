@@ -402,7 +402,10 @@ class FermiHandler:
                                   slice_origin)
     
     def print_default_settings(self):
-        for key,value in self.default_config.items():
-            print(key,':',value)
+        """
+        Prints all the configuration settings with their current values.
+        """
+        for key, value in self.default_config.as_dict().items():
+            print(f'{key}: {value}')
 
    

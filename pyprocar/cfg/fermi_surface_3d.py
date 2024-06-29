@@ -1,15 +1,39 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Dict, Any, List, Optional,Tuple
 from enum import Enum, auto
 
 from pyprocar.cfg.base import PlotType, BaseConfig
 
 class FermiSurfaceMode(Enum):
+    """
+    An enumeration for defining the modes of Fermi surface representations.
+
+    Attributes
+    ----------
+    PLAIN : str
+        Represents the Fermi surface in a simple, unadorned style.
+    PARAMETRIC : str
+        Represents the Fermi surface in a parametric form, allowing for complex geometrical transformations.
+    SPIN_TEXTURE : str
+        Enhances the Fermi surface representation with spin texture information, indicating magnetic properties.
+    """
     PLAIN = "plain"
     PARAMETRIC = "parametric"
     SPIN_TEXTURE = "spin_texture"
 
 class FermiSurfaceProperty(Enum):
+    """
+    An enumeration for defining the properties that can be visualized on the Fermi surface.
+
+    Attributes
+    ----------
+    FERMI_SPEED : str
+        Visualizes the scalar speed at which electrons travel at the Fermi level.
+    FERMI_VELOCITY : str
+        Visualizes the vector velocity of electrons moving at the Fermi level.
+    HARMONIC_AVERAGE_EFFECTIVE_MASS : str
+        Displays the harmonic average of the effective mass of electrons, reflecting the electron mobility.
+    """
     FERMI_SPEED = "fermi_speed"
     FERMI_VELOCITY = "fermi_velocity"
     HARMONIC_AVERAGE_EFFECTIVE_MASS = "harmonic_effective_mass"
@@ -122,7 +146,6 @@ class FermiSurface3DConfig(BaseConfig):
         The interpolation factor to use for the Fermi surface.
     max_distance : float, optional (default 0.2)
         The maximum distance to keep points from the isosurface centers.
-    ---------------------
 
     Cross section Settings
     ----------------------
@@ -246,3 +269,9 @@ class FermiSurface3DConfig(BaseConfig):
         It is useful to validate the data and set default values.
         """
         self.plot_type = PlotType.FERMI_SURFACE_3D
+
+    def as_dict(self):
+        """
+        Returns a dictionary of the configuration settings.
+        """
+        return asdict(self)

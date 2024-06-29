@@ -32,6 +32,7 @@ from pyprocar.core.fermisurface3D import FermiSurface3D
 from pyprocar.utils import ROOT, LOGGER
 
 # TODO: Decouple FermiDataHandler from FermiVisualizer
+# TODO: Normalize data does not work.
 
 class FermiDataHandler:
 
@@ -396,8 +397,8 @@ class FermiVisualizer:
                                 opacity=self.config.surface_opacity)
         else:
             LOGGER.debug(f'Adding surface with scalars: {self.data_handler.scalars_name}')
-            if self.config.surface_clim:
-                self._normalize_data(surface,scalars_name=self.data_handler.scalars_name)
+            # if self.config.surface_clim:
+                # self._normalize_data(surface,scalars_name=self.data_handler.scalars_name)
             self.plotter.add_mesh(surface,
                                 scalars=self.data_handler.scalars_name,
                                 cmap=self.config.surface_cmap,
@@ -771,7 +772,7 @@ class FermiVisualizer:
         x_max=x.max()
         x_min=x.min()
         x_norm =  x_min + ((x - vmin) * (vmax - x_min)) / (x_max - x_min)
-        surface[scalars_name]=x_norm
+        surface[scalars_name] = x_norm
         return x_norm
 
     def _custom_isoslider_callback(self, value):
