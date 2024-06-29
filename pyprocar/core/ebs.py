@@ -65,7 +65,7 @@ class ElectronicBandStructure:
         n_ky:int=None,
         n_kz:int=None,
         projected:np.ndarray = None,
-        projected_phase:np.ndarray =None,
+        projected_phase:np.ndarray=None,
         weights:np.ndarray=None,
         kpath:KPath=None,
         labels:List=None,
@@ -76,8 +76,7 @@ class ElectronicBandStructure:
         self.kpoints = kpoints
         self.bands = bands - efermi
         self.efermi = efermi
-        
-        
+    
         self.projected = projected
         self.projected_phase = projected_phase
         self.reciprocal_lattice = reciprocal_lattice
@@ -91,6 +90,12 @@ class ElectronicBandStructure:
         self.labels = labels
         self.weights = weights
         self.graph = None
+
+        self.ibz_kpoints = None
+        self.ibz_bands = None
+        self.ibz_projected = None
+        self.ibz_projected_phase = None
+        self.ibz_weights = None
 
         self._n_kx=n_kx
         self._n_ky=n_ky
@@ -1038,75 +1043,54 @@ class ElectronicBandStructure:
         if not self.is_mesh:
             raise ValueError("This function only works for meshes")
         
-        LOGGER.info('Applying symmetry operations to the kpoints, bands, and projections')
-        
-        full_kpoints=[]
-        full_projected=[]
-        full_bands=[]
-        full_weights=[]
-        full_projected_phases=[]
+        n_kpoints = self.kpoints.shape[0]
+        n_rotations = rotations.shape[0]
 
-        # Used for indexing full_kpoints
-        ik=0
-        # for each symmetry operation
+        # Calculate new shape for kpoints and all properties
+        total_points = n_kpoints * n_rotations
+        new_shape = (total_points, 3)
+
+        # Initialize new arrays for kpoints and properties
+        new_kpoints = np.zeros(new_shape)
+
+        properties = ['bands', 'projected', 'projected_phase', 'weights']
+        new_properties = {}
+
+        for prop in properties:
+            original_value = getattr(self, prop)
+            if original_value is not None:
+
+                setattr(self, f'ibz_{prop}', original_value.copy())
+
+                prop_shape = (total_points,) + original_value.shape[1:]
+                new_properties[prop] = np.zeros(prop_shape)
+
+        # Apply rotations and copy properties
         for i, rotation in enumerate(rotations):
-            # for each point
-            for j, kpoint in enumerate(self.kpoints):
-                # apply symmetry operation to kpoint
-                
-                new_kp = rotation.dot(kpoint)
-                # apply boundary conditions
-                new_kp = -np.fmod(new_kp + 6.5, 1 ) + 0.5
-                new_kp = np.around(new_kp,decimals=6)
-                new_kp=new_kp.tolist()
-                if new_kp not in full_kpoints:
-                    full_kpoints.append(new_kp)
-                    if self.bands is not None:
-                        band = self.bands[j].tolist()
-                        full_bands.append(band)
-                    if self.projected is not None:
-                        projection = self.projected[j].tolist()
-                        full_projected.append(projection)
-                    if self.weights is not None:
-                        weight = self.weights[j].tolist()
-                        full_weights.append(weight)
-                    if self.projected_phase is not None:
-                        projected_phase = self.projected_phase[j].tolist()
-                        full_projected_phases.append(projected_phase)
-        self.kpoints = np.array(full_kpoints)
-        self.bands = np.array(full_bands)
+            start_idx = i * n_kpoints
+            end_idx = start_idx + n_kpoints
+
+            # Rotate kpoints
+            rotated_kpoints = self.kpoints.dot(rotation.T)
+            new_kpoints[start_idx:end_idx] = rotated_kpoints
+
+            # Update properties
+            for prop in properties:
+                if getattr(self, prop) is not None:
+                    new_properties[prop][start_idx:end_idx] = getattr(self, prop)
+
+        # Apply boundary conditions to kpoints
+        new_kpoints = -np.fmod(new_kpoints + 6.5, 1) + 0.5
+        _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
+
+        # Update the object's properties with unique kpoints
+        self.ibz_kpoints = self.kpoints
+        self.kpoints = new_kpoints[unique_indices]
+        for prop in properties:
+            if getattr(self, prop) is not None:
+                setattr(self, prop, new_properties[prop][unique_indices])
+        return None
         
-        LOGGER.info(f'Array shapes after symmetry operations')
-        LOGGER.info(f'Kpoints shape: {self.kpoints.shape}')
-        LOGGER.info(f'Bands shape: {self.bands.shape}')
-
-        if self.projected is not None:
-            self.projected = np.array(full_projected)
-            LOGGER.info(f'Projected shape: {self.projected.shape}')
-        if self.projected_phase is not None:
-            self.projected_phase = np.array(full_projected_phases)
-            LOGGER.info(f'Projected shape: {self.projected.shape}')
-        if self.weights is not None:
-            self.weights = np.array(full_weights)
-            LOGGER.info(f'Weights shape: {self.weights.shape}')
-
-        nk=self.kpoints.shape[0]
-        if self.n_kx:
-            if nk != self.n_kx*self.n_ky*self.n_kz:
-
-                err_text=f"""
-                        nkpoints != n_kx*n_ky*n_kz
-                        Error trying to symmetrize the irreducible kmesh. 
-                        This is issue is most likely related to 
-                        how the DFT code using symmetry operations to reduce the kmesh.
-                        Check the recommendations for k-mesh type for the crystal system.
-                        If all else fails turn off symmetry.
-                        n_kx={self.n_kx}
-                        n_ky={self.n_ky}
-                        n_kz={self.n_kz}
-                        nk={nk}
-                        """
-                raise ValueError(err_text)
 
     def interpolate_mesh_grid(self, mesh_grid,interpolation_factor=2):
         """This function will interpolate an Nd, 3d mesh grid
