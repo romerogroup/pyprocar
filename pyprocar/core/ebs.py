@@ -577,13 +577,22 @@ class ElectronicBandStructure:
         """
 
         if self._bands_gradient_mesh is None:
-            n_i, n_j, n_k, n_bands, n_spins = self.bands_mesh.shape
+            scalar_diffs=calculate_scalar_differences(self.bands_mesh)
+            band_gradients=np.einsum('ij,uvwsrj->uvwsri', self.reciprocal_lattice, scalar_diffs)
 
-            band_gradients = np.zeros(( n_i, n_j, n_k ,n_bands, n_spins, 3))
-            for i_band in range(n_bands):
-                for i_spin in range(n_spins):
-                    band_gradients[:,:,:,i_band,i_spin,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_mesh[:,:,:,i_band,i_spin],
-                                                                                           mesh_grid=self.kpoints_cartesian_mesh)
+            # print(np.array_equal(scalar_diffs,scalar_diffs_2))
+            # This is equivalent to the above
+            # n_i, n_j, n_k, n_bands, n_spins = self.bands_mesh.shape
+            # band_gradients_2 = np.zeros(( n_i, n_j, n_k ,n_bands, n_spins,3))
+            # scalar_diffs_2 = np.zeros(( n_i, n_j, n_k ,n_bands, n_spins,3))
+            # for i_band in range(n_bands):
+            #     for i_spin in range(n_spins):
+            #         band_gradients_2[:,:,:,i_band,i_spin,:]=self.calculate_scalar_gradient_2(self.bands_mesh[:,:,:,i_band,i_spin],
+            #         reciprocal_lattice=self.reciprocal_lattice)
+
+            #         scalar_diffs_2[:,:,:,i_band,i_spin,:]=self.calculate_scalar_diff_2(self.bands_mesh[:,:,:,i_band,i_spin])
+
+
             band_gradients *= METER_ANGSTROM
             self._bands_gradient_mesh = band_gradients
         return self._bands_gradient_mesh
@@ -592,7 +601,7 @@ class ElectronicBandStructure:
     def bands_hessian_mesh(self):
         """
         Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.   
-        Shape = [n_kx,n_ky,n_kz,n_bands,n_spin,,3,3], 
+        Shape = [n_kx,n_ky,n_kz,n_bands,n_spin,3,3], 
         where the last two dimensions represent d/dx,d/dy,d/dz  
         
         Returns
@@ -604,16 +613,27 @@ class ElectronicBandStructure:
         """
 
         if self._bands_hessian_mesh is None:
-            n_i, n_j, n_k, n_bands, n_spins, n_dim = self.bands_gradient_mesh.shape
 
-            band_hessians = np.zeros(( n_i, n_j, n_k, n_bands, n_spins, 3, 3))
-
-            for i_dim in range(n_dim):
-                for i_band in range(n_bands):
-                    for i_spin in range(n_spins):
-                        band_hessians[:,:,:,i_band,i_spin,i_dim,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_gradient_mesh[:,:,:,i_band,i_spin,i_dim],
-                                                                                                    mesh_grid=self.kpoints_cartesian_mesh)
+            letters=['a','b','c','d','e','f','g','h']
+            scalar_diffs=calculate_scalar_differences(self.bands_gradient_mesh)
+            n_dim=len(scalar_diffs.shape[3:])-1
+            transform_matrix_einsum_string='ij'
+            dim_letters=''.join(letters[0:n_dim])
+            scalar_array_einsum_string='uvw' + dim_letters + 'j'
+            transformed_scalar_string='uvw' + dim_letters + 'i'
+            ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
+            band_hessians=np.einsum(ein_sum_string, self.reciprocal_lattice, scalar_diffs)
             
+            # This is equivalent to the previous code
+            # n_i, n_j, n_k, n_bands, n_spins, n_dim = self.bands_gradient_mesh.shape
+            # band_hessians = np.zeros(( n_i, n_j, n_k, n_bands, n_spins, 3, 3))
+            # for i_dim in range(n_dim):
+            #     for i_band in range(n_bands):
+            #         for i_spin in range(n_spins):
+            #             # band_hessians[:,:,:,i_band,i_spin,i_dim,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_gradient_mesh[:,:,:,i_band,i_spin,i_dim],
+            #             #                                                                             mesh_grid=self.kpoints_cartesian_mesh)
+            #             band_hessians[:,:,:,i_band,i_spin,i_dim,:] = calculate_scalar_differences_2(scalar_mesh = self.bands_gradient_mesh[:,:,:,i_band,i_spin,i_dim],
+            #                                                                                         transform_matrix=self.reciprocal_lattice)
             band_hessians *= METER_ANGSTROM
             self._bands_hessian_mesh = band_hessians
         return self._bands_hessian_mesh
@@ -760,58 +780,7 @@ class ElectronicBandStructure:
         prop_shape = (nkx*nky*nkz,) + mesh.shape[3:]
         array=mesh.reshape(prop_shape)
         return array
-    
-    @staticmethod
-    def calculate_scalar_gradient(scalar_mesh,mesh_grid):
-        """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
 
-        Parameters
-        ----------
-        scalar_mesh : np.ndarray
-            The scalar mesh. shape = [n_kx,n_ky,n_kz]
-
-        Returns
-        -------
-        np.ndarray
-            scalar_gradient_mesh shape = [3,n_kx,n_ky,n_kz]
-        """
-        n_kx,n_ky,n_kz=scalar_mesh.shape[:3]
-        scalar_gradients =  np.zeros((n_kx,n_ky,n_kz,3))
-
-        # Calculate cartesian separations along each crystal direction
-        sep_vectors_i = mesh_grid_difference(mesh_grid, axis=0, padding_mode='edge')
-        sep_vectors_j = mesh_grid_difference(mesh_grid, axis=1, padding_mode='edge')
-        if n_kz>1:
-            sep_vectors_k = mesh_grid_difference(mesh_grid, axis=2, padding_mode='edge')
-        else:
-            sep_vectors_k=copy.copy(sep_vectors_j)
-            sep_vectors_k[:,:,:,:]=0
-        
-        # Calculating scalar differences along each crystal direction
-        scalar_diffs_i = mesh_grid_difference(scalar_mesh, axis=0, padding_mode='wrap')
-        scalar_diffs_j = mesh_grid_difference(scalar_mesh, axis=1, padding_mode='wrap')
-        if n_kz>1:
-            scalar_diffs_k = mesh_grid_difference(scalar_mesh, axis=2, padding_mode='wrap')
-        else:
-            scalar_diffs_k=copy.copy(scalar_diffs_j)
-            scalar_diffs_k[:,:,:]=0
-        # Calculating gradients
-        sep_vectors_meshes = (sep_vectors_i,sep_vectors_j,sep_vectors_k)
-        energy_diffs_meshes = (scalar_diffs_i,scalar_diffs_j,scalar_diffs_k)
-
-        for sep_vector,energy_diff in zip(sep_vectors_meshes,energy_diffs_meshes):
-            for i_coord in range(3):
-                
-                dx = sep_vector[:, :, :, i_coord]
-                tmp_grad = energy_diff / (2 * dx)
-                # Changing infinities to 0
-                tmp_grad = np.nan_to_num(tmp_grad, neginf=0,posinf=0) 
-                scalar_gradients[:, :, :,i_coord] += tmp_grad
-
-        if n_kz == 1:
-            scalar_gradients[:,:,:,2]=0
-        return scalar_gradients
-    
     @staticmethod
     def calculate_scalar_integral(scalar_mesh,mesh_grid):
         """Calculate the scalar integral"""
@@ -837,6 +806,15 @@ class ElectronicBandStructure:
 
     @staticmethod
     def calculate_harmonic_average_effective_mass(hessian):
+        # letters=['a','b','c','d','e','f','g','h']
+        # scalar_diffs=calculate_scalar_differences(self.bands_gradient_mesh)
+        # n_dim=len(scalar_diffs.shape[3:])-1
+        # transform_matrix_einsum_string='ij'
+        # dim_letters=''.join(letters[0:n_dim])
+        # scalar_array_einsum_string='uvw' + dim_letters + 'j'
+        # transformed_scalar_string='uvw' + dim_letters + 'i'
+        # ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
+        # band_hessians=np.einsum(ein_sum_string, self.reciprocal_lattice, scalar_diffs)
         # Calculate the trace of each 3x3 matrix along the last two axes
         trace_tensor = np.trace(hessian, axis1=-2, axis2=-1)
         
@@ -1289,33 +1267,73 @@ class ElectronicBandStructure:
         ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
         return ret
     
-def harmonic_average_effective_mass(tensor):
-    inv_effective_mass_tensor = tensor
-    e_mass = 3*(inv_effective_mass_tensor[0,0] + inv_effective_mass_tensor[1,1] + inv_effective_mass_tensor[2,2])**-1 /FREE_ELECTRON_MASS
-    return e_mass
 
+def calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis):
+    """Calculates the scalar differences over the 
+    k mesh grid using central differences
 
-def mesh_grid_difference(grid, axis, padding_mode='wrap'):
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz]
+
+    Returns
+    -------
+    np.ndarray
+        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
     """
-    Calculate the mesh grid difference along a specified axis.
-    
-    Parameters:
-    grid (numpy.ndarray): The input mesh grid of shape (n_kx, n_ky, n_kz, 3)
-    axis (int): The axis along which to calculate the difference (0, 1, or 2)
-    
-    Returns:
-    numpy.ndarray: The mesh grid difference of shape (n_kx, n_ky, n_kz, 3)
-    """
-    # Calculate the difference along the specified axis
-    diff = np.diff(grid, axis=axis)
+    n=scalar_mesh.shape[axis]
+    # Calculate indices with periodic boundary conditions
+    plus_one_indices = np.arange(n) + 1
+    minus_one_indices = np.arange(n) - 1
+    plus_one_indices[-1] = 0
+    minus_one_indices[0] = n - 1
+    if axis==0:
+        return scalar_mesh[plus_one_indices,...] - scalar_mesh[minus_one_indices,...]
+    elif axis==1:
+        return scalar_mesh[:,plus_one_indices,:,...] - scalar_mesh[:,minus_one_indices,:,...]
+    elif axis==2:
+        return scalar_mesh[:,:,plus_one_indices,...] - scalar_mesh[:,:,minus_one_indices,...]
 
-    # Pad the result to maintain the original shape
-    n_grid_size = len(grid.shape)
-    pad_width = [(0, 0)] * n_grid_size
-    pad_width[axis] = (0, 1)
-    diff_padded = np.pad(diff, pad_width, mode=padding_mode)
-    
-    return diff_padded
+def calculate_scalar_differences(scalar_mesh):
+    """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+
+    Uses gradient trnasformation matrix to calculate the gradient
+    scalar_differens are calculated by central differences
+
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz,...,3]
+    """
+    scalar_diffs_i=calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis=0)
+    scalar_diffs_j=calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis=1)
+    scalar_diffs_k=calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis=2)
+    scalar_diffs=np.array([scalar_diffs_i,scalar_diffs_j,scalar_diffs_k])
+    scalar_diffs=np.moveaxis(scalar_diffs,0,-1)
+    return scalar_diffs
+
+def calculate_scalar_differences_2(scalar_mesh,transform_matrix):
+    """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+
+    Uses gradient trnasformation matrix to calculate the gradient
+    scalar_differens are calculated by central differences
+
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz,...,3]
+    """
+    scalar_diffs_i=calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis=0)
+    scalar_diffs_j=calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis=1)
+    scalar_diffs_k=calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis=2)
+    scalar_diffs=np.array([scalar_diffs_i,scalar_diffs_j,scalar_diffs_k])
+    scalar_diffs=np.moveaxis(scalar_diffs,0,-1)
+
+    scalar_diffs_2=np.einsum('ij,uvwj->uvwi', transform_matrix, scalar_diffs)
+    return scalar_diffs_2
 
     # def reorder(self, plot=True, cutoff=0.2):
     #     nspins = self.nspins
