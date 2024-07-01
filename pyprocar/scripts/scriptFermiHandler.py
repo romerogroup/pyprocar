@@ -174,7 +174,6 @@ class FermiHandler:
                             orbitals=None, 
                             spins=None, 
                             spin_texture=False,
-                            property_name=None,
                             show=True,
                             save_2d=None,
                             print_plot_opts:bool=False,

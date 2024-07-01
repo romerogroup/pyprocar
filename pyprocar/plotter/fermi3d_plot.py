@@ -163,7 +163,7 @@ class FermiDataHandler:
                 if property_name=='fermi_velocity':
                     self.ebs.bands_gradient
                 elif property_name=='fermi_speed':
-                    self.ebs.bands_hessian
+                    self.ebs.fermi_speed
                 elif property_name=='harmonic_effective_mass':
                     self.ebs.bands_hessian
                 
@@ -308,7 +308,7 @@ class FermiDataHandler:
             if self.property_name=='fermi_speed':
                 fermi_surface3D.project_fermi_speed(fermi_speed=ebs.fermi_speed[...,band_to_surface_indices,ispin])
             elif self.property_name=='fermi_velocity':
-                fermi_surface3D.project_fermi_velocity(fermi_velocity=ebs.fermi_velocity[...,band_to_surface_indices,ispin])
+                fermi_surface3D.project_fermi_velocity(fermi_velocity=ebs.fermi_velocity[...,band_to_surface_indices,ispin,:])
             elif self.property_name=='harmonic_effective_mass':
                 fermi_surface3D.project_harmonic_effective_mass(harmonic_effective_mass=ebs.harmonic_average_effective_mass[...,band_to_surface_indices,ispin])
             if self.config.mode =='parametric':
@@ -739,16 +739,15 @@ class FermiVisualizer:
         elif self.config.mode == "property_projection":
             
             use_rgba = False
-
-            if self.config.mode == 'fermi_speed':
+            if self.config.property_name == 'fermi_speed':
                 scalars = "Fermi Speed"
                 text = "Fermi Speed"
                 vector_name=None
-            elif self.config.mode == 'fermi_velocity':
+            elif self.config.property_name == 'fermi_velocity':
                 scalars = "Fermi Velocity Vector_magnitude"
                 vector_name = "Fermi Velocity Vector"
                 text = "Fermi Speed"
-            elif self.config.mode == 'harmonic_effective_mass':
+            elif self.config.property_name == 'harmonic_effective_mass':
                 scalars = "Harmonic Effective Mass"
                 text = "Harmonic Effective Mass"
                 vector_name=None
@@ -806,8 +805,8 @@ class FermiVisualizer:
 
             if self.config.mode != "plain":
                 self.add_scalar_bar(name=self.data_handler.scalars_name)
-            
             if self.data_handler.scalars_name=="spin_magnitude" or self.data_handler.scalars_name=="Fermi Velocity Vector_magnitude":
+                
                 arrows = surface.glyph(orient=self.data_handler.vector_name,
                                             scale=self.config.texture_scale ,
                                             factor=self.config.texture_size)

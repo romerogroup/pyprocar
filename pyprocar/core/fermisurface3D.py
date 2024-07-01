@@ -251,7 +251,7 @@ class FermiSurface3D(Surface):
     
             XYZ_transformed = np.dot(XYZ_extended, self.ebs.reciprocal_lattice)
 
-            near_isosurface_point=self._keep_points_near_subset(XYZ_transformed,isosurface.centers,max_distance=self.max_distance)
+            near_isosurface_point=self._keep_points_near_subset(XYZ_transformed,isosurface.points,max_distance=self.max_distance)
             XYZ_transformed=XYZ_transformed[near_isosurface_point]
             vectors_extended_X=vectors_extended_X[near_isosurface_point]
             vectors_extended_Y=vectors_extended_Y[near_isosurface_point]
