@@ -161,7 +161,6 @@ class BandStructure2DataHandler:
             elif self.property_name=='band_velocity':
                 band_structure_2D.project_band_velocity(band_velocity=ebs.fermi_velocity[...,ispin,:])
             elif self.property_name=='harmonic_effective_mass':
-                print("harmonic_effective_mass",ebs.harmonic_average_effective_mass.shape)
                 band_structure_2D.project_harmonic_effective_mass(harmonic_effective_mass=ebs.harmonic_average_effective_mass[...,ispin])
             if self.mode =='parametric':
                 band_structure_2D.project_atomic_projections(self.spd[...,ispin])

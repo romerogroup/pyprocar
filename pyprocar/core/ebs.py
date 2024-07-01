@@ -31,6 +31,7 @@ EV_TO_J = 1.602*10**(-19)
 FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
 
 # TODO: Check hormonic average effective mass values
+# TODO: Check method to calculate the bands integral
 
 class ElectronicBandStructure:
     """This object stores electronic band structure informomration.
@@ -577,8 +578,7 @@ class ElectronicBandStructure:
         """
 
         if self._bands_gradient_mesh is None:
-            scalar_diffs=calculate_scalar_differences(self.bands_mesh)
-            band_gradients=np.einsum('ij,uvwsrj->uvwsri', self.reciprocal_lattice, scalar_diffs)
+            band_gradients=self.calculate_nd_scalar_derivatives(self.bands_mesh, self.reciprocal_lattice)
 
             # print(np.array_equal(scalar_diffs,scalar_diffs_2))
             # This is equivalent to the above
@@ -613,16 +613,7 @@ class ElectronicBandStructure:
         """
 
         if self._bands_hessian_mesh is None:
-
-            letters=['a','b','c','d','e','f','g','h']
-            scalar_diffs=calculate_scalar_differences(self.bands_gradient_mesh)
-            n_dim=len(scalar_diffs.shape[3:])-1
-            transform_matrix_einsum_string='ij'
-            dim_letters=''.join(letters[0:n_dim])
-            scalar_array_einsum_string='uvw' + dim_letters + 'j'
-            transformed_scalar_string='uvw' + dim_letters + 'i'
-            ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
-            band_hessians=np.einsum(ein_sum_string, self.reciprocal_lattice, scalar_diffs)
+            band_hessians=self.calculate_nd_scalar_derivatives(self.bands_gradient_mesh, self.reciprocal_lattice)
             
             # This is equivalent to the previous code
             # n_i, n_j, n_k, n_bands, n_spins, n_dim = self.bands_gradient_mesh.shape
@@ -704,6 +695,10 @@ class ElectronicBandStructure:
             
         return self._harmonic_average_effective_mass_mesh
     
+    @property
+    def bands_integral(self):
+        return self.calculate_nd_scalar_integral(self.bands_mesh,self.reciprocal_lattice)
+
     @staticmethod
     def reduced_to_cartesian(kpoints,reciprocal_lattice):
         if reciprocal_lattice is not None:
@@ -780,27 +775,48 @@ class ElectronicBandStructure:
         prop_shape = (nkx*nky*nkz,) + mesh.shape[3:]
         array=mesh.reshape(prop_shape)
         return array
+    
+    @staticmethod
+    def calculate_nd_scalar_derivatives(scalar_array, reciprocal_lattice):
+        """Transforms the derivatives to cartesian coordinates
+            (n,j,k,...)->(n,j,k,...,3)
+
+        Parameters
+        ----------
+        derivatives : np.ndarray
+            The derivatives to transform
+        reciprocal_lattice : np.ndarray
+            The reciprocal lattice
+
+        Returns
+        -------
+        np.ndarray
+            The transformed derivatives
+        """
+        letters=['a','b','c','d','e','f','g','h']
+        scalar_diffs=calculate_scalar_differences(scalar_array)
+        n_dim=len(scalar_diffs.shape[3:])-1
+        transform_matrix_einsum_string='ij'
+        dim_letters=''.join(letters[0:n_dim])
+        scalar_array_einsum_string='uvw' + dim_letters + 'j'
+        transformed_scalar_string='uvw' + dim_letters + 'i'
+        ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
+        scalar_gradients=np.einsum(ein_sum_string, reciprocal_lattice, scalar_diffs)
+
+        return scalar_gradients
 
     @staticmethod
-    def calculate_scalar_integral(scalar_mesh,mesh_grid):
+    def calculate_nd_scalar_integral(scalar_mesh,reciprocal_lattice):
         """Calculate the scalar integral"""
+        n1,n2,n3=scalar_mesh.shape[:3]
+        volume_reduced_vector=np.array([1,1,1])
+        volume_cartesian_vector=np.dot(reciprocal_lattice,volume_reduced_vector)
+        volume=np.prod(volume_cartesian_vector)
+        dv=volume/(n1*n2*n3)
 
-
-        # edge1 = abs(self.kpoints_cartesian[self.index_mesh[1, 0, 0], :] - self.kpoints_cartesian[self.index_mesh[0, 0, 0], :])
-        # edge2 = abs(self.kpoints_cartesian[self.index_mesh[0, 1, 0], :] - self.kpoints_cartesian[self.index_mesh[0, 0, 0], :])
-        # edge3 = abs(self.kpoints_cartesian[self.index_mesh[0, 0, 1], :] - self.kpoints_cartesian[self.index_mesh[0, 0, 0], :])
-        edge1 = mesh_grid_difference(mesh_grid, axis=0, padding_mode='edge')
-        edge2 = mesh_grid_difference(mesh_grid, axis=1, padding_mode='edge')
-        edge3 = mesh_grid_difference(mesh_grid, axis=2, padding_mode='edge')
-
-        # Create a matrix with the edge vectors.
-        matrix = np.array([edge1, edge2, edge3]).T
-        
-        # Calculate the volume using the determinant of the matrix.
-        dv = abs(np.linalg.det(matrix))
-
+        scalar_volume_avg=calculate_scalar_volume_averages(scalar_mesh)
         # Compute the integral by summing up the product of scalar values and the volume of each grid cell.
-        integral = np.sum(scalar_mesh * dv)
+        integral = np.sum(scalar_volume_avg * dv,axis=(0,1,2))
         
         return integral
 
@@ -1066,8 +1082,6 @@ class ElectronicBandStructure:
                 setattr(self, "bz_" + prop, new_properties[prop][unique_indices])
  
         self._sort_by_kpoints()
-
-
         return None
 
     def ravel_array(self,mesh_grid):
@@ -1294,6 +1308,42 @@ def calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis):
         return scalar_mesh[:,plus_one_indices,:,...] - scalar_mesh[:,minus_one_indices,:,...]
     elif axis==2:
         return scalar_mesh[:,:,plus_one_indices,...] - scalar_mesh[:,:,minus_one_indices,...]
+    
+def calculate_forward_averages_on_meshgrid_axis(scalar_mesh,axis):
+    """Calculates the scalar differences over the 
+    k mesh grid using central differences
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz]
+
+    Returns
+    -------
+    np.ndarray
+        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
+    """
+    n=scalar_mesh.shape[axis]
+
+    # Calculate indices with periodic boundary conditions
+    plus_one_indices = np.arange(n) + 1
+    zero_one_indices = np.arange(n)
+    plus_one_indices[-1] = 0
+    if axis==0:
+        return (scalar_mesh[zero_one_indices,...] + scalar_mesh[plus_one_indices,...]) /2
+    elif axis==1:
+        return (scalar_mesh[:,zero_one_indices,:,...] + scalar_mesh[:,plus_one_indices,:,...]) /2
+    elif axis==2:
+        return (scalar_mesh[:,:,zero_one_indices,...] + scalar_mesh[:,:,plus_one_indices,...]) /2
+
+def calculate_scalar_volume_averages(scalar_mesh):
+    """Calculates the scalar averages over the k mesh grid in cartesian coordinates
+    """
+    scalar_sums_i=calculate_forward_averages_on_meshgrid_axis(scalar_mesh,axis=0)
+    scalar_sums_j=calculate_forward_averages_on_meshgrid_axis(scalar_mesh,axis=1)
+    scalar_sums_k=calculate_forward_averages_on_meshgrid_axis(scalar_mesh,axis=2)
+    scalar_sums=(scalar_sums_i + scalar_sums_j + scalar_sums_k)/3
+    return scalar_sums
 
 def calculate_scalar_differences(scalar_mesh):
     """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
