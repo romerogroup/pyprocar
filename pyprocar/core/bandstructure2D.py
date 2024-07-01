@@ -8,7 +8,7 @@ import math
 import sys
 import copy
 from itertools import product
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 import scipy.interpolate as interpolate
@@ -20,6 +20,9 @@ from . import Surface, BrillouinZone2D
 
 import pyvista as pv
 np.set_printoptions(threshold=sys.maxsize)
+
+#TODO: method to reduce number of points for interpolation need to be modified since the tolerance on the space 
+# is not lonmg soley reciprocal space, but energy and reciprocal space    
 
 class BandStructure2D(Surface):
     """
@@ -60,45 +63,23 @@ class BandStructure2D(Surface):
 
         self.brillouin_zone = self._get_brilloin_zone(self.supercell,zlim=zlim)
 
-        grid_cart_x=self.ebs.kpoints_cartesian_mesh[0,:,:,0]
-        grid_cart_y=self.ebs.kpoints_cartesian_mesh[1,:,:,0]
+        grid_cart_x=self.ebs.kpoints_cartesian_mesh[:,:,0,0]
+        grid_cart_y=self.ebs.kpoints_cartesian_mesh[:,:,0,1]
 
-        
         self.band_surfaces = self._generate_band_structure_2d(grid_cart_x,grid_cart_y)
         self.surface = self._combine_band_surfaces()
+
         # Initialize the Fermi Surface
         super().__init__(verts=self.surface.points, faces=self.surface.faces)
         self.point_data['band_index'] = self.surface.point_data['band_index']
-
         return None
-    
-
-    def _combine_band_surfaces(self):
-        band_surfaces=copy.deepcopy(self.band_surfaces)
-        band_indices=[]
-
-        surface=band_surfaces[0]
-        band_index_list=[0]*surface.points.shape[0]
-        band_indices.extend(band_index_list)
-        for i_band,band_surface in enumerate(band_surfaces[1:]):
-            # The points are prepended to surface.points, 
-            # so at the end we need to reverse this list
-            surface.merge(band_surface, merge_points=False, inplace=True)
-            band_index_list=[i_band+1]*band_surface.points.shape[0]
-            band_indices.extend(band_index_list)
-
-
-        band_indices.reverse()
-        surface.point_data['band_index']=np.array(band_indices)
-        return surface
     
     def _generate_band_structure_2d(self,grid_cart_x,grid_cart_y):
         surfaces=[]
-        n_bands=self.ebs.bands_mesh.shape[0]
+        n_bands=self.ebs.bands_mesh.shape[3]
         n_points=0
         for iband in range(n_bands):
-            
-            grid_z=self.ebs.bands_mesh[iband,self.ispin,:,:,0]
+            grid_z=self.ebs.bands_mesh[:,:,0,iband,self.ispin]
             
             surface = pv.StructuredGrid(grid_cart_x,grid_cart_y,grid_z)
             surface = surface.cast_to_unstructured_grid()
@@ -112,6 +93,29 @@ class BandStructure2D(Surface):
             surfaces.append(surface)
 
         return surfaces
+
+    def _combine_band_surfaces(self):
+        band_surfaces=copy.deepcopy(self.band_surfaces)
+
+        band_indices=[]
+        surface=None
+        for i_band,band_surface in enumerate(band_surfaces):
+            # The points are prepended to surface.points, 
+            # so at the end we need to reverse this list
+            if i_band == 0:
+                surface=band_surface
+            else:
+                surface.merge(band_surface, merge_points=False, inplace=True)
+
+            band_index_list=[i_band]*band_surface.points.shape[0]
+            band_indices.extend(band_index_list)
+
+
+        band_indices.reverse()
+        surface.point_data['band_index']=np.array(band_indices)
+        return surface
+    
+
     
     @staticmethod
     def _keep_points_near_subset(points, subset, max_distance=0.2):
@@ -175,7 +179,7 @@ class BandStructure2D(Surface):
 
             XYZ_transformed=XYZ_extended
 
-            near_isosurface_point=self._keep_points_near_subset(XYZ_transformed,isosurface.centers)
+            near_isosurface_point=self._keep_points_near_subset(XYZ_transformed,isosurface.points)
             XYZ_transformed=XYZ_transformed[near_isosurface_point]
             vectors_extended_X=vectors_extended_X[near_isosurface_point]
             vectors_extended_Y=vectors_extended_Y[near_isosurface_point]
@@ -294,7 +298,7 @@ class BandStructure2D(Surface):
         """
         Method to calculate band velocity of the surface.
         """
-        vectors_array = band_velocity.swapaxes(1, 2)
+        vectors_array = band_velocity
         self._create_vector_texture(vectors_array = vectors_array, vectors_name = "Band Velocity Vector" )
 
     def project_band_speed(self,band_speed):
@@ -321,7 +325,7 @@ class BandStructure2D(Surface):
         scalars_array = np.vstack(scalars_array).T
         self._project_color(scalars_array = scalars_array, scalar_name = "Harmonic Effective Mass" )
 
-    def extend_surface(self,  extended_zone_directions: List[List[int] or Tuple[int,int,int]]=None,):
+    def extend_surface(self,  extended_zone_directions: List[Union[List[int],Tuple[int,int,int]]]=None,):
         """
         Method to extend the surface in the direction of a reciprocal lattice vecctor
 

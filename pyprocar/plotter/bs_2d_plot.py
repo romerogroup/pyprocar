@@ -157,12 +157,11 @@ class BandStructure2DataHandler:
                                         )
             self.property_name=property_name
             if self.property_name=='band_speed':
-                band_structure_2D.project_band_speed(band_speed=ebs.fermi_speed[...,ispin])
+                band_structure_2D.project_band_speed(band_speed=ebs.fermi_speed[...,ispin,0])
             elif self.property_name=='band_velocity':
-                band_structure_2D.project_band_velocity(band_velocity=ebs.fermi_velocity[...,ispin])
+                band_structure_2D.project_band_velocity(band_velocity=ebs.fermi_velocity[...,ispin,:])
             elif self.property_name=='harmonic_effective_mass':
-                band_structure_2D.project_harmonic_effective_mass(harmonic_effective_mass=ebs.harmonic_average_effective_mass[...,ispin])
-
+                band_structure_2D.project_harmonic_effective_mass(harmonic_effective_mass=ebs.harmonic_average_effective_mass[...,ispin,0])
             if self.mode =='parametric':
                 band_structure_2D.project_atomic_projections(self.spd[...,ispin])
 
@@ -573,6 +572,7 @@ class BandStructure2DVisualizer:
 
     def clip_broullin_zone(self,surface):
         if self.config['clip_brillouin_zone']['value']:
+            
             for normal,center in zip(surface.brillouin_zone.face_normals, surface.brillouin_zone.centers):
                 
                 center_with_factor = center

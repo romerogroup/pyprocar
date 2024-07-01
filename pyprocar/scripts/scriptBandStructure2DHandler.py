@@ -145,14 +145,16 @@ class BandStructure2DHandler:
         f"""
             WARNING : Make sure the kmesh has kz points with kz={k_z_plane} +- {k_z_plane_tol}
             ----------------------------------------------------------------------------------------------------------
-            """
-    )
+            """)
 
         # Process the data
-        self._find_bands_near_fermi(bands=bands)
-        self._expand_kpoints_to_supercell()
+        self.ebs.reduce_bands_near_fermi(bands=bands, tolerance=0.7)
+        self.ebs.expand_kpoints_to_supercell()
+        self.ebs.reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
         self.data_handler = BandStructure2DataHandler(self.ebs, **kwargs)
-        self._reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
+        # self.ebs.reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
+        # self.data_handler.ebs.reduce_kpoints_to_plane(k_z_plane,k_z_plane_tol)
+
         self.data_handler.process_data(mode, bands=bands, atoms=atoms, orbitals=orbitals, spins=spins, spin_texture=spin_texture)
         band_structure_surface=self.data_handler.get_surface_data(property_name=property_name)
         visualizer = BandStructure2DVisualizer(self.data_handler,**kwargs)
@@ -192,46 +194,6 @@ class BandStructure2DHandler:
         
         for key,value in plotting_options.items():
             print(key,':',value)
-
-    def _find_bands_near_fermi(self,bands=None,energy_tolerance=0.7):
-        energy_level = 0
-        full_band_index = []
-        for iband in range(len(self.ebs.bands[0,:,0])):
-            fermi_surface_test = len(np.where(np.logical_and(self.ebs.bands[:,iband,0]>=energy_level-energy_tolerance, self.ebs.bands[:,iband,0]<=energy_level+energy_tolerance))[0])
-            if fermi_surface_test != 0:
-                full_band_index.append(iband)
-        
-        if bands:
-            full_band_index=bands
-        self.ebs.bands=self.ebs.bands[:,full_band_index,:]
-        self.ebs.projected=self.ebs.projected[:,full_band_index,:,:,:]
-        print("Bands used in the plotting: " , full_band_index )
-
-    def _expand_kpoints_to_supercell(self):
-        supercell_directions=list(list(product([1, 0,-1], repeat=2)))
-        
-        initial_kpoints=copy.copy(self.ebs.kpoints )
-        initial_bands=copy.copy(self.ebs.bands )
-        initial_projected=copy.copy(self.ebs.projected )
-
-        for supercell_direction in supercell_directions:
-            new_kpoints=copy.copy(initial_kpoints)
-            if supercell_direction != (0,0):
-
-                new_kpoints[:,0] = new_kpoints[:,0] + supercell_direction[0]
-                new_kpoints[:,1] = new_kpoints[:,1] + supercell_direction[1]
-
-                self.ebs.kpoints=np.append(self.ebs.kpoints, new_kpoints,  axis=0)
-                self.ebs.bands=np.append(self.ebs.bands, initial_bands,  axis=0)
-                self.ebs.projected=np.append(self.ebs.projected, initial_projected,  axis=0)
-
-    def _reduce_kpoints_to_plane(self,k_z_plane,k_z_plane_tol):
-        i_kpoints_near_z_0 = np.where(np.logical_and(self.data_handler.ebs.kpoints_cartesian[:,2] < k_z_plane + k_z_plane_tol, 
-                                                     self.data_handler.ebs.kpoints_cartesian[:,2] > k_z_plane - k_z_plane_tol) )
-
-        self.data_handler.ebs.kpoints = self.data_handler.ebs.kpoints[i_kpoints_near_z_0,:][0]
-        self.data_handler.ebs.bands = self.data_handler.ebs.bands[i_kpoints_near_z_0,:][0]
-        self.data_handler.ebs.projected = self.data_handler.ebs.projected[i_kpoints_near_z_0,:][0]
 
 
 # def find_nearest(array, value):
