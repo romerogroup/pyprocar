@@ -801,6 +801,7 @@ class ElectronicBandStructure:
         scalar_array_einsum_string='uvw' + dim_letters + 'j'
         transformed_scalar_string='uvw' + dim_letters + 'i'
         ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
+        print(ein_sum_string)
         scalar_gradients=np.einsum(ein_sum_string, reciprocal_lattice, scalar_diffs)
 
         return scalar_gradients
@@ -1168,6 +1169,43 @@ class ElectronicBandStructure:
 
         self._sort_by_kpoints()
 
+    def expand_kpoints_to_supercell_by_axes(self, axes_to_expand=[0, 1, 2]):
+        # Validate input
+        if not set(axes_to_expand).issubset({0, 1, 2}):
+            raise ValueError("axes_to_expand must be a subset of [0, 1, 2]")
+
+        # Create supercell directions based on axes to expand
+        supercell_directions = list(itertools.product([1, 0, -1], repeat=len(axes_to_expand)))
+        
+        initial_kpoints = copy.deepcopy(self.kpoints)
+        initial_property_values = {}
+        
+        # Do not use kpoints in initial properties
+        for prop in self.initial_properties[1:]:
+            initial_property_values[prop] = copy.deepcopy(getattr(self, prop))
+
+        final_kpoints = copy.deepcopy(initial_kpoints)
+        
+        for supercell_direction in supercell_directions:
+            if supercell_direction != tuple([0] * len(axes_to_expand)):
+                new_kpoints = copy.deepcopy(initial_kpoints)
+                
+                for i, axis in enumerate(axes_to_expand):
+                    new_kpoints[:, axis] += supercell_direction[i]
+                
+                final_kpoints = np.append(final_kpoints, new_kpoints, axis=0)
+                
+                # Do not use kpoints in initial properties
+                for prop in self.initial_properties[1:]:
+                    original_value = getattr(self, prop)
+                    if original_value is not None:
+                        initial_value = initial_property_values[prop]
+                        new_values = np.append(original_value, initial_value, axis=0)
+                        setattr(self, prop, new_values)
+        
+        self.kpoints = final_kpoints
+        self._sort_by_kpoints()
+
     def reduce_bands_near_fermi(self, bands, tolerance=0.7):
         """
         Reduces the bands to those near the fermi energy
@@ -1302,12 +1340,13 @@ def calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis):
     minus_one_indices = np.arange(n) - 1
     plus_one_indices[-1] = 0
     minus_one_indices[0] = n - 1
+    
     if axis==0:
-        return scalar_mesh[plus_one_indices,...] - scalar_mesh[minus_one_indices,...]
+        return (scalar_mesh[plus_one_indices,...] - scalar_mesh[minus_one_indices,...])/2
     elif axis==1:
-        return scalar_mesh[:,plus_one_indices,:,...] - scalar_mesh[:,minus_one_indices,:,...]
+        return (scalar_mesh[:,plus_one_indices,:,...] - scalar_mesh[:,minus_one_indices,:,...])/2
     elif axis==2:
-        return scalar_mesh[:,:,plus_one_indices,...] - scalar_mesh[:,:,minus_one_indices,...]
+        return (scalar_mesh[:,:,plus_one_indices,...] - scalar_mesh[:,:,minus_one_indices,...])/2
     
 def calculate_forward_averages_on_meshgrid_axis(scalar_mesh,axis):
     """Calculates the scalar differences over the 
