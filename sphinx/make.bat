@@ -66,6 +66,9 @@ if "%1" == "deploy" (
 if "%1" == "html" (
     python "%SOURCEDIR%\generate_yml_docs.py"
     %SPHINXBUILD% -M html "%SOURCEDIR%" "%BUILDDIR%" %SPHINXOPTS%
+	@xcopy _build\html\* ..\docs\ /E /I /Y
+	rmdir /s /q _build\html
+	rmdir /s /q _build\doctrees
 	goto end
 )
 
