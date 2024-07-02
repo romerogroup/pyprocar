@@ -12,6 +12,7 @@ These examples demonstrate the density of states plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -97,6 +98,8 @@ These examples demonstrate the density of states plotting capabilities.
       <div class="sphx-glr-thumbnail-title">Plotting spin-polarized density of states</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

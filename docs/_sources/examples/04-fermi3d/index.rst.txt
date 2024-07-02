@@ -14,6 +14,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -150,6 +151,8 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
       <div class="sphx-glr-thumbnail-title">Plotting fermi3d cross_section</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

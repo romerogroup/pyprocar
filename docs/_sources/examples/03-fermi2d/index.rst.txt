@@ -12,6 +12,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -80,6 +81,8 @@ These examples demonstrate the Fermi2D plotting capabilities.
       <div class="sphx-glr-thumbnail-title">Plotting rashba spin splitting</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

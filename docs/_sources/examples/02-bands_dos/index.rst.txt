@@ -12,6 +12,7 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -46,6 +47,8 @@ These examples demonstrate the bandsdosplot plotting capabilities.
       <div class="sphx-glr-thumbnail-title">Plotting bandsdosplot</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_05-other_plot_kpath_generation.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -54,7 +54,7 @@ The :math:`k`-path generation utility within PyProcar is based on the Python lib
 
 .. GENERATED FROM PYTHON SOURCE LINES 39-41
 
-.. code-block:: default
+.. code-block:: Python
 
     # sphinx_gallery_thumbnail_number = 1
 
@@ -72,7 +72,7 @@ Plotting K Path
 
 .. GENERATED FROM PYTHON SOURCE LINES 44-48
 
-.. code-block:: default
+.. code-block:: Python
 
     import pyvista
     # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
@@ -91,7 +91,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 50-87
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -151,7 +151,7 @@ importing pyprocar and specifying local data_dir
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -178,7 +178,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.507 seconds)
+   **Total running time of the script:** (0 minutes 2.637 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_kpath_generation.py:
@@ -187,16 +187,13 @@ importing pyprocar and specifying local data_dir
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_kpath_generation.ipynb <plot_kpath_generation.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_kpath_generation.py <plot_kpath_generation.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_kpath_generation.ipynb <plot_kpath_generation.ipynb>`
 
 
 .. only:: html

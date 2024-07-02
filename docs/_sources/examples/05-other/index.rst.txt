@@ -12,6 +12,7 @@ These examples demonstrate other capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -80,6 +81,8 @@ These examples demonstrate other capabilities.
       <div class="sphx-glr-thumbnail-title">Example of finding the bandgap</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

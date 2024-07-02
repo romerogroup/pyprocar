@@ -12,6 +12,7 @@ These examples demonstrate the PyPoscar module
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -97,6 +98,8 @@ These examples demonstrate the PyPoscar module
       <div class="sphx-glr-thumbnail-title">Modifying a POSCAR File: Scaling, Supercells, and Defects</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

@@ -12,6 +12,7 @@ These examples demonstrate the band structure plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -199,6 +200,8 @@ These examples demonstrate the band structure plotting capabilities.
       <div class="sphx-glr-thumbnail-title">Plotting 2D band structure</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 

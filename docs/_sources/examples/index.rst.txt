@@ -15,6 +15,9 @@ do!
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -30,6 +33,7 @@ These examples demonstrate the band structure plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -218,6 +222,8 @@ These examples demonstrate the band structure plotting capabilities.
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -232,6 +238,7 @@ These examples demonstrate the density of states plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -318,6 +325,8 @@ These examples demonstrate the density of states plotting capabilities.
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -332,6 +341,7 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -367,6 +377,8 @@ These examples demonstrate the bandsdosplot plotting capabilities.
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -381,6 +393,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -450,6 +463,8 @@ These examples demonstrate the Fermi2D plotting capabilities.
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -466,6 +481,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -603,6 +619,8 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -617,6 +635,7 @@ These examples demonstrate other capabilities.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -686,6 +705,8 @@ These examples demonstrate other capabilities.
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -700,6 +721,7 @@ These examples demonstrate the PyPoscar module
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -785,6 +807,8 @@ These examples demonstrate the PyPoscar module
       <div class="sphx-glr-thumbnail-title">Modifying a POSCAR File: Scaling, Supercells, and Defects</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
