@@ -1,0 +1,727 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Density of States &#8212; PyProcar 6.2.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=e5fbc548" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=83b2645e"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/dos';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ElectronicBandStructure" href="ebs.html" />
+    <link rel="prev" title="Compare bands" href="comparebands.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="atomic_projections.html">Atomic Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bands.html">Band structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Concatenating multiple calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparebands.html">Compare bands</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Density of States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ebs.html">ElectronicBandStructure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fermi2d.html">2D spin-texture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fermi3d.html">3D Fermi surface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filtering data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kpath.html">K Path</a></li>
+<li class="toctree-l1"><a class="reference internal" href="repair.html">Repair</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unfold.html">Band unfolding</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Density of States</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="density-of-states">
+<span id="dos"></span><h1>Density of States<a class="headerlink" href="#density-of-states" title="Permalink to this heading">#</a></h1>
+<p>Similar to the bands structure plot PyProcar goes beyond the conventional plain Density of states(DOS) plot to plot the projected DOS that carry more information. DOS plots in PyProcar have multiple functionalities(modes), plain, parametric, parametric_line, stack, stack_orbitals and stack_species. To read the information about DOS from the output of DFT calculations pyprocars depends on different files depending on the DFT package. In VASP PyProcar uses vasprun.xml while in elk it uses specific files generated by elk, given the elk.in PyProcar will resolve the files that need to be parsed. The Parameters used in this function are very similar to the ones in bandsplot.</p>
+<p>All the arguments invloved in this function are exmplaed in the API of this function that can be found in the following <a class="reference external" href="dos.html#pyprocar.scriptDosplot.dosplot">link</a> in the end of this document. Each argumnet will have a description, an example and a the dafault setting. If the desired setting matches the default, one does not need to specify that aregumnet. The following section will provide examples of the usage of each mode of plotting.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To copy the example you can easily use the copy button in the right top corner of each example.</p>
+</div>
+<section id="mode-plain">
+<h2>1. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code><a class="headerlink" href="#mode-plain" title="Permalink to this heading">#</a></h2>
+<p>This mode plots the basic Total Density of States of the structure. This mode is set as the default mode of <code class="docutils literal notranslate"><span class="pre">dosplot()</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\uparrow$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\downarrow$&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">title</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Total Density of States SrVO$_3$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_plain_hor.png" src="../_images/dos_plain_hor.png" />
+<p>Note that <code class="docutils literal notranslate"><span class="pre">filename</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code> and <code class="docutils literal notranslate"><span class="pre">orientation</span></code> did not need to be specifies as we are using the defalut values.
+The following will be the change in usage of <code class="docutils literal notranslate"><span class="pre">orientation</span></code>, and the choice of the spin asked to be plotted. After this example we will switch back to horizontal plot for the examples. and plotting both of the spins in plots.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\uparrow$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\downarrow$&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">title</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Total Density of States SrVO$_3$&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">savefig</span><span class="o">=</span><span class="s1">&#39;dos_plain_ver.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/dos_plain_ver.png"><img alt="../_images/dos_plain_ver.png" class="align-center" src="../_images/dos_plain_ver.png" style="width: 230pt;" /></a>
+</section>
+<section id="mode-parametric">
+<h2>2. <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code><a class="headerlink" href="#mode-parametric" title="Permalink to this heading">#</a></h2>
+<p>This mode will use color coding to illustrate the projection of atoms and orbitals asked to be projected. The following will plot shows the projection of p orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>) of O(<code class="docutils literal notranslate"><span class="pre">atoms=[2,3,4]</span></code>) in SrVO<sub>3</sub></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">title</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Projected DOS of p orbitals of Oxygen in SrVO$_3$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_parametric.png" src="../_images/dos_parametric.png" />
+</section>
+<section id="mode-parametric-line">
+<h2>3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code><a class="headerlink" href="#mode-parametric-line" title="Permalink to this heading">#</a></h2>
+<p>This mode will use curves to plot the projected density of states. The following will plot shows the projection of d orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code>) of Fe(<code class="docutils literal notranslate"><span class="pre">atoms=[0]</span></code>) in Fe.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_parametric_line.png" src="../_images/dos_parametric_line.png" />
+</section>
+<section id="mode-stack">
+<h2>4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code><a class="headerlink" href="#mode-stack" title="Permalink to this heading">#</a></h2>
+<p>This mode plots the contribution of the species and their specified orbitals as stacked curves with filled areas under the curves. The following example represents the stacked projected DOS of d orbitals of Sr(Sr=[4,5,6,7,8]), p orbitals of O(O=[1,2,3]) and the s and p orbitals of V(V=[0,1,2,3]). In this example we have specified colors to have an example for not using the default colors.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;lawngreen&#39;</span><span class="p">,</span> <span class="s1">&#39;orangered&#39;</span><span class="p">,</span> <span class="s1">&#39;royalblue&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">items</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">Sr</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="n">O</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">V</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span>
+<span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_stack.png" src="../_images/dos_stack.png" />
+</section>
+<section id="mode-stack-species">
+<h2>5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code><a class="headerlink" href="#mode-stack-species" title="Permalink to this heading">#</a></h2>
+<p>This mode is a more specified version of <code class="docutils literal notranslate"><span class="pre">mode=='stack'</span></code>. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if <code class="docutils literal notranslate"><span class="pre">orbitals=[1,2,3]</span></code>, PyProcar will plot all the p orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_species&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_stack_species.png" src="../_images/dos_stack_species.png" />
+</section>
+<section id="mode-stack-orbitals">
+<h2>6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code><a class="headerlink" href="#mode-stack-orbitals" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='stack'</span></code>, This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following example shows all the orbitals of Oxygen(<code class="docutils literal notranslate"><span class="pre">atoms=[2,</span> <span class="pre">3,</span> <span class="pre">4]</span></code>)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;vasp_dir&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">plot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="mode-overlay">
+<h2>7. <code class="docutils literal notranslate"><span class="pre">mode='overlay'</span></code><a class="headerlink" href="#mode-overlay" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='overlay'</span></code>. This mode will plot the selected atoms and orbitals. The following will plot shows the projection of d orbitals(<code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code>) of Fe(<code class="docutils literal notranslate"><span class="pre">atoms=[0]</span></code>) in Fe.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_overlay.png" src="../_images/dos_overlay.png" />
+</section>
+<section id="mode-overlay-species">
+<h2>8. <code class="docutils literal notranslate"><span class="pre">mode='overlay_species'</span></code><a class="headerlink" href="#mode-overlay-species" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='overlay_species'</span></code>. This mode will plot the selected orbitals for all the species. The plot will be stached curves with filled areas under the curve. This mode will plot the selected orbitals for all the species. For example if <code class="docutils literal notranslate"><span class="pre">orbitals=[4,5,6,7,8]</span></code>, PyProcar will plot all the d orbitals of all the species. If no orbital is specifies, it will plot the projection over all the species. The following example is representing the stacked curves for all species, without orbitals defined(i.e. sum over all the orbitals)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_species&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_overlay_species.png" src="../_images/dos_overlay_species.png" />
+</section>
+<section id="mode-overlay-orbitals">
+<h2>9. <code class="docutils literal notranslate"><span class="pre">mode='overlay_orbitals'</span></code><a class="headerlink" href="#mode-overlay-orbitals" title="Permalink to this heading">#</a></h2>
+<p>This mode is another variation of <code class="docutils literal notranslate"><span class="pre">mode=='overlay_orbitals'</span></code>. This mode will plot the selected atoms for all the orbitals. The list of atoms do not need to be from the same species. The following will plot shows all the orbitals for Fe(<code class="docutils literal notranslate"><span class="pre">atoms=[0]</span></code>).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<span class="gp">... </span>                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/dos_overlay_orbitals.png" src="../_images/dos_overlay_orbitals.png" />
+<span class="target" id="module-pyprocar.scriptDosplot"></span></section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="comparebands.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Compare bands</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ebs.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ElectronicBandStructure</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-plain">1. <code class="docutils literal notranslate"><span class="pre">mode='plain'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-parametric">2. <code class="docutils literal notranslate"><span class="pre">mode='parametric'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-parametric-line">3. <code class="docutils literal notranslate"><span class="pre">mode='parametric_line'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-stack">4. <code class="docutils literal notranslate"><span class="pre">mode='stack'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-stack-species">5. <code class="docutils literal notranslate"><span class="pre">mode='stack_species'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-stack-orbitals">6. <code class="docutils literal notranslate"><span class="pre">mode='stack_orbitals'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-overlay">7. <code class="docutils literal notranslate"><span class="pre">mode='overlay'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-overlay-species">8. <code class="docutils literal notranslate"><span class="pre">mode='overlay_species'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mode-overlay-orbitals">9. <code class="docutils literal notranslate"><span class="pre">mode='overlay_orbitals'</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/dos.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2020, Romero Group.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

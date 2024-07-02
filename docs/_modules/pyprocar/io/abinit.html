@@ -1,0 +1,1121 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyprocar.io.abinit &#8212; PyProcar 6.1.10 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=e5fbc548" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=7aa426d2"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyprocar/io/abinit';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">PyProcar 6.1.10 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+                        DFT Prep
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw"></i></span>
+            <label class="sr-only">Contributing</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw"></i></span>
+            <label class="sr-only">The Paper</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">pyprocar.io.abinit</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for pyprocar.io.abinit</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">DensityOfStates</span><span class="p">,</span> <span class="n">ElectronicBandStructure</span><span class="p">,</span> <span class="n">KPath</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">elements</span>
+<span class="kn">from</span> <span class="nn">.vasp</span> <span class="kn">import</span> <span class="n">Procar</span><span class="p">,</span> <span class="n">Kpoints</span>
+
+<div class="viewcode-block" id="Output"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.abinit.Output.html#pyprocar.io.abinit.Output">[docs]</a><span class="k">class</span> <span class="nc">Output</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class contains methods to parse the fermi energy, reciprocal</span>
+<span class="sd">    lattice vectors and structure from the Abinit output file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Output.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.abinit.Output.__init__.html#pyprocar.io.abinit.Output.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span> <span class="o">=</span> <span class="n">abinit_output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reclat</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reciprocal lattice vectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nspin</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># spin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reduced atomic coordinates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># call parsing functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readFermi</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readRecLattice</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readCoordinates</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readLattice</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readAtoms</span><span class="p">()</span>
+
+        <span class="c1"># creating structure object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span>
+            <span class="n">atoms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
+            <span class="n">fractional_coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span></div>
+
+    <span class="k">def</span> <span class="nf">_readFermi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the Fermi energy from the Abinit output file.&quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot;Fermi\w*.\(\w*.HOMO\)\s*\w*\s*\(\w*\)\s*\=\s*([0-9.+-]*)&quot;</span><span class="p">,</span> <span class="n">data</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Converting from Hartree to eV</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="mf">27.211396641308</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span>
+
+            <span class="c1"># read spin (nsppol)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nspin</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;nsppol\s*=\s*([1-9]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_readRecLattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the reciprocal lattice vectors</span>
+<span class="sd">        from the Abinit output file. This is used to calculate</span>
+<span class="sd">        the k-path in cartesian coordinates if required.&quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">lattice_block</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;G\([1,2,3]\)=\s*([0-9.\s-]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="n">lattice_block</span> <span class="o">=</span> <span class="n">lattice_block</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reclat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">lattice_block</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lattice_block</span><span class="p">))],</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_readCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the coordinates as given by the xred keyword.&quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">coordinate_block</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;xred\s*([+-.0-9E\s]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="c1"># for single atom at (0,0,0) xred is not printed out at the end.</span>
+            <span class="c1"># So we use this workaround.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">coordinate_block</span><span class="p">:</span>
+                <span class="n">coordinate_block</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot;reduced\scoordinates\s\(array\sxred\)\sfor\s*[1-9]\satoms\n([+-.0-9E\s]*)\n&quot;</span><span class="p">,</span>
+                    <span class="n">data</span><span class="p">,</span>
+                <span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="n">coordinate_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">coordinate_block</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinate_list</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordinate_list</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+            <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_readLattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the lattice vectors from rprim keyword and scales with acell.&quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+            <span class="c1"># acell</span>
+            <span class="n">acell</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;acell\s*([+-.0-9E\s]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">acell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">acell</span><span class="p">])</span>
+
+            <span class="c1"># convert acell from Bohr to Angstrom</span>
+            <span class="n">acell</span> <span class="o">=</span> <span class="mf">0.529177</span> <span class="o">*</span> <span class="n">acell</span>
+
+            <span class="c1"># rprim</span>
+            <span class="n">rprim_block</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;rprim\s*([+-.0-9E\s]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">rprim_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">rprim_block</span><span class="p">])</span>
+            <span class="n">rprim</span> <span class="o">=</span> <span class="n">rprim_list</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rprim_list</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+            <span class="c1"># lattice</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">acell</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">acell</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">rprim</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_readAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads atomic elements used and puts them in an array according to their composition.&quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+            <span class="c1"># Getting typat and znucl</span>
+            <span class="n">typat</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;typat\s*([+-.0-9E\s]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">typat</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typat</span><span class="p">]</span>
+
+            <span class="n">znucl</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;znucl\s*([+-.0-9E\s]*)&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">znucl</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">znucl</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">elements</span><span class="o">.</span><span class="n">atomic_symbol</span><span class="p">(</span><span class="n">znucl</span><span class="p">[</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typat</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbinitKpoints"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.abinit.AbinitKpoints.html#pyprocar.io.abinit.AbinitKpoints">[docs]</a><span class="k">class</span> <span class="nc">AbinitKpoints</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class parses the k-point information.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AbinitKpoints.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.abinit.AbinitKpoints.__init__.html#pyprocar.io.abinit.AbinitKpoints.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="n">has_time_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span>
+        <span class="c1"># calling parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse_kpoints</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="o">=</span><span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abinitkpointsobject</span><span class="o">.</span><span class="n">knames</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="o">=</span> <span class="n">KPath</span><span class="p">(</span>
+                <span class="n">knames</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">abinitkpointsobject</span><span class="o">.</span><span class="n">knames</span><span class="p">,</span>
+                <span class="n">special_kpoints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">abinitkpointsobject</span><span class="o">.</span><span class="n">special_kpoints</span><span class="p">,</span>
+                <span class="n">ngrids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">abinitkpointsobject</span><span class="o">.</span><span class="n">ngrids</span><span class="p">,</span>
+                <span class="n">has_time_reversal</span><span class="o">=</span><span class="n">has_time_reversal</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_parse_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads KPOINTS file.</span>
+<span class="sd">        Abinit has multiple way of defining the</span>
+<span class="sd">        k-path. For the time being, we suggest to use</span>
+<span class="sd">        a KPOINTS file similar to VASP to obtain the</span>
+<span class="sd">        k-path for PyProcar from an Abinit calculation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">abinitkpointsobject</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">has_time_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbinitProcar"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.abinit.AbinitProcar.html#pyprocar.io.abinit.AbinitProcar">[docs]</a><span class="k">class</span> <span class="nc">AbinitProcar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class has functions to parse the PROCAR file</span>
+<span class="sd">    generated from Abinit. Unlike, VASP here the PROCAR files</span>
+<span class="sd">    need to be merged and fixed for formatting issues prior to</span>
+<span class="sd">    further processing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AbinitProcar.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.abinit.AbinitProcar.__init__.html#pyprocar.io.abinit.AbinitProcar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dirname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">inFiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">efermi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span> <span class="o">=</span> <span class="n">inFiles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span> <span class="o">=</span> <span class="n">abinit_output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span> <span class="o">=</span> <span class="n">reciprocal_lattice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpath</span> <span class="o">=</span> <span class="n">kpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">efermi</span> <span class="o">=</span> <span class="n">efermi</span>
+
+        <span class="c1"># Preparing files for merging</span>
+        <span class="c1"># reading in all PROCAR_* files and putting it into a list if not provided.</span>
+        <span class="k">if</span> <span class="n">inFiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tmp_str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s2">&quot;PROCAR_*&quot;</span><span class="p">)</span>
+            <span class="n">inFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">tmp_str</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inFiles</span> <span class="o">=</span> <span class="n">inFiles</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s2">&quot;PROCAR&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inFiles</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mergeparallel</span><span class="p">(</span>
+                <span class="n">inputfiles</span><span class="o">=</span><span class="n">inFiles</span><span class="p">,</span>
+                <span class="n">outputfile</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                <span class="n">abinit_output</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">abinit_output</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+
+        <span class="c1"># Use VASP Procar parser following PROCAR merge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abinitprocarobject</span> <span class="o">=</span> <span class="n">Procar</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">reciprocal_lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">,</span>
+            <span class="n">kpath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span>
+            <span class="n">efermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">efermi</span><span class="p">,</span>
+            <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_mergeparallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputfiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">abinit_output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This merges Procar files seperated between k-point ranges.</span>
+<span class="sd">        Happens with parallel Abinit runs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Merging parallel files...&quot;</span><span class="p">)</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">inputfiles</span><span class="p">)</span>
+
+        <span class="c1"># creating an instance of the AbinitParser class</span>
+        <span class="k">if</span> <span class="n">abinit_output</span><span class="p">:</span>
+            <span class="n">abinitparserobject</span> <span class="o">=</span> <span class="n">Output</span><span class="p">(</span><span class="n">abinit_output</span><span class="o">=</span><span class="n">abinit_output</span><span class="p">)</span>
+            <span class="n">nspin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">abinitparserobject</span><span class="o">.</span><span class="n">nspin</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Abinit output file not found.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nspin</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">nspin</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># for spin polarized calculations the spin down segments are saved in the</span>
+            <span class="c1"># second half of the PROCAR&#39;s but in reverse k-point order. So we have to</span>
+            <span class="c1"># fix the order and merge the second half of the PROCAR&#39;s.</span>
+            <span class="n">spinup_list</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span>
+            <span class="n">spindown_list</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="p">:]</span>
+
+            <span class="c1"># reading the second line of the header to set as the separating line</span>
+            <span class="c1"># in the colinear spin PROCAR.</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">spinup_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="n">header1</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">header2</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c1"># second half of PROCAR files in reverse order.</span>
+            <span class="n">spindown_list</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+            <span class="c1"># Writing new PROCAR with first spin up, header2 and then</span>
+            <span class="c1"># spin down (reversed).</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">spinupfile</span> <span class="ow">in</span> <span class="n">spinup_list</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">spinupfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header2</span><span class="p">)</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">spindownfile</span> <span class="ow">in</span> <span class="n">spindown_list</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">spindownfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">infile</span><span class="p">:</span>
+                            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fixformat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fixes the formatting of Abinit&#39;s Procar</span>
+<span class="sd">        when the tot projection is not summed and spin directions</span>
+<span class="sd">        not seperated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fixing formatting errors...&quot;</span><span class="p">)</span>
+        <span class="c1"># removing existing temporary fixed file</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outputfile</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">outputfile</span><span class="p">)</span>
+
+        <span class="c1">####### Fixing the parallel PROCARs from Abinit ##########</span>
+
+        <span class="n">rf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inputfile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">rf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># reading headers</span>
+        <span class="n">rffl</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inputfile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">first_line</span> <span class="o">=</span> <span class="n">rffl</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">rffl</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># header</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;#\sof\s.*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># writing to PROCAR</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">first_line</span><span class="p">)</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># get all the k-point line headers</span>
+        <span class="n">kpoints_raw</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;k-point\s*[0-9]\s*:*.*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">kpoint_counter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kpoints_raw</span><span class="p">)):</span>
+
+            <span class="k">if</span> <span class="n">kpoint_counter</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kpoints_raw</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># get bands of last k point</span>
+                <span class="n">bands_raw</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                    <span class="n">kpoints_raw</span><span class="p">[</span><span class="n">kpoint_counter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;([a-z0-9\s</span><span class="se">\n</span><span class="s2">.+#-]*)&quot;</span><span class="p">,</span> <span class="n">data</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># get bands between k point n and n+1</span>
+                <span class="n">bands_raw</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                    <span class="n">kpoints_raw</span><span class="p">[</span><span class="n">kpoint_counter</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="s2">&quot;([a-z0-9\s</span><span class="se">\n</span><span class="s2">.+#-]*)&quot;</span>
+                    <span class="o">+</span> <span class="n">kpoints_raw</span><span class="p">[</span><span class="n">kpoint_counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                    <span class="n">data</span><span class="p">,</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># get the bands headers for a certain k point</span>
+            <span class="n">raw_bands</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;band\s*[0-9]*.*&quot;</span><span class="p">,</span> <span class="n">bands_raw</span><span class="p">)</span>
+
+            <span class="c1"># writing k point header to file</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">kpoints_raw</span><span class="p">[</span><span class="n">kpoint_counter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">band_counter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_bands</span><span class="p">)):</span>
+
+                <span class="k">if</span> <span class="n">band_counter</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw_bands</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="c1"># the last band</span>
+                    <span class="n">single_band</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                        <span class="n">raw_bands</span><span class="p">[</span><span class="n">band_counter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;([a-z0-9.+\s</span><span class="se">\n</span><span class="s2">-]*)&quot;</span><span class="p">,</span> <span class="n">bands_raw</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># get a single band</span>
+                    <span class="n">single_band</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                        <span class="n">raw_bands</span><span class="p">[</span><span class="n">band_counter</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="s2">&quot;([a-z0-9.+\s</span><span class="se">\n</span><span class="s2">-]*)&quot;</span>
+                        <span class="o">+</span> <span class="n">raw_bands</span><span class="p">[</span><span class="n">band_counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">bands_raw</span><span class="p">,</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># get the column headers for ion, orbitals and total</span>
+                <span class="n">column_header</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;ion\s.*tot&quot;</span><span class="p">,</span> <span class="n">single_band</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># get number of ions using PROCAR file</span>
+                <span class="n">nion_raw</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;#\s*of\s*ions:\s*[0-9]*&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nion</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nion_raw</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="c1"># the first column of the band. Same as ions</span>
+                <span class="n">first_column</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">single_band</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;ion&quot;</span><span class="p">:</span>
+                                <span class="n">first_column</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+                <span class="c1"># number of spin orientations</span>
+                <span class="n">norient</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_column</span><span class="p">)</span> <span class="o">/</span> <span class="n">nion</span><span class="p">)</span>
+
+                <span class="c1"># calculate the number of orbital headers (s,p,d etc.)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">single_band</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ion&quot;</span><span class="p">:</span>
+                                <span class="n">norbital</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">-</span> <span class="mi">2</span>
+
+                <span class="c1"># array to store a single band data as seperate lines</span>
+                <span class="n">single_band_lines</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">single_band</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;ion&quot;</span><span class="p">:</span>
+                                <span class="n">single_band_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+                <span class="c1"># create empty array to store data (the orbitals + tot)</span>
+                <span class="n">bands_orb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">norient</span><span class="p">,</span> <span class="n">nion</span><span class="p">,</span> <span class="n">norbital</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1"># enter data into bands_orb</span>
+                <span class="n">iion</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">iorient</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">single_band</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot; &quot;</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;ion&quot;</span><span class="p">:</span>
+                        <span class="n">iline</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">iion</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">iion</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">iorient</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">for</span> <span class="n">iorb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">norbital</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">bands_orb</span><span class="p">[</span><span class="n">iorient</span><span class="p">,</span> <span class="n">iion</span><span class="p">,</span> <span class="n">iorb</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">iline</span><span class="p">[</span><span class="n">iorb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                        <span class="n">iion</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># create an array to store the total values</span>
+                <span class="n">tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">norient</span><span class="p">,</span> <span class="n">norbital</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1"># entering data into tot array</span>
+                <span class="k">for</span> <span class="n">iorient</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">norient</span><span class="p">):</span>
+                    <span class="n">tot</span><span class="p">[</span><span class="n">iorient</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bands_orb</span><span class="p">[</span><span class="n">iorient</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># writing data</span>
+                <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">raw_bands</span><span class="p">[</span><span class="n">band_counter</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">column_header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="n">band_iterator</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">total_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">orientations_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">norient</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">ions_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nion</span><span class="p">):</span>
+                        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">single_band_lines</span><span class="p">[</span><span class="n">band_iterator</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">band_iterator</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;tot  &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">tot</span><span class="p">[</span><span class="n">total_count</span><span class="p">,</span> <span class="p">:]))</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">total_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+
+
+<span class="k">class</span> <span class="nc">AbinitDOSParser</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dirname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dos_total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_total_dos</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_projected_dos_files</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dos</span> <span class="o">=</span> <span class="n">DensityOfStates</span><span class="p">(</span>
+            <span class="n">energies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span>
+            <span class="n">total</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dos_total</span><span class="p">,</span>
+            <span class="n">efermi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fermi</span><span class="p">,</span>
+            <span class="n">projected</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projected</span><span class="p">,</span>
+            <span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parse_total_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_dos_filename</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">+</span> <span class="s2">&quot;/abinito_DOS_TOTAL*&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_dos_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">text_lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="n">header_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_lines</span><span class="p">[:</span><span class="mi">13</span><span class="p">])</span>
+            <span class="n">dos_text</span> <span class="o">=</span> <span class="n">text_lines</span><span class="p">[</span><span class="mi">13</span><span class="p">:]</span>
+
+        <span class="n">nsppol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;nsppol\s=\s(\d)&quot;</span><span class="p">,</span> <span class="n">header_text</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">fermi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;Fermi energy\s:\s*([-\d*.]*)&quot;</span><span class="p">,</span> <span class="n">header_text</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">energy_details</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;between\s*([-\d*.]*)\s*and\s*([-\d*.]*)\s*Hartree\s*by\s*steps\s*of\s*([-\d*.]*)&quot;</span><span class="p">,</span>
+            <span class="n">header_text</span><span class="p">,</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">energy_details</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">energy_details</span><span class="p">]</span>
+        <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">,</span> <span class="n">e_step</span> <span class="o">=</span> <span class="n">energy_details</span>
+
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span> <span class="o">+</span> <span class="n">e_step</span><span class="p">,</span> <span class="n">e_step</span><span class="p">)</span>
+        <span class="n">n_energies</span> <span class="o">=</span> <span class="n">energies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">nsppol</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">n_spin_header</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">n_up_start</span> <span class="o">=</span> <span class="n">n_spin_header</span>
+            <span class="n">n_up_end</span> <span class="o">=</span> <span class="n">n_up_start</span> <span class="o">+</span> <span class="n">n_energies</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_text</span><span class="p">[</span><span class="n">n_up_start</span><span class="p">:</span><span class="n">n_up_end</span><span class="p">]</span>
+
+            <span class="n">n_block_spacing</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">n_down_start</span> <span class="o">=</span> <span class="n">n_spin_header</span> <span class="o">+</span> <span class="n">n_energies</span> <span class="o">+</span> <span class="n">n_block_spacing</span>
+            <span class="n">n_down_end</span> <span class="o">=</span> <span class="n">n_down_start</span> <span class="o">+</span> <span class="n">n_energies</span>
+            <span class="n">dos_down</span> <span class="o">=</span> <span class="n">dos_text</span><span class="p">[</span><span class="n">n_down_start</span><span class="p">:</span><span class="n">n_down_end</span><span class="p">]</span>
+
+            <span class="c1"># converting to floats</span>
+            <span class="n">dos_down</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dos_down</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dos_up</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Keep dos column</span>
+            <span class="n">dos_down</span> <span class="o">=</span> <span class="n">dos_down</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_up</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">dos_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">dos_up</span><span class="p">,</span> <span class="n">dos_down</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_header</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">n_up_start</span> <span class="o">=</span> <span class="n">n_header</span>
+            <span class="n">n_up_end</span> <span class="o">=</span> <span class="n">n_up_start</span> <span class="o">+</span> <span class="n">n_energies</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_text</span><span class="p">[</span><span class="n">n_up_start</span><span class="p">:</span><span class="n">n_up_end</span><span class="p">]</span>
+
+            <span class="c1"># converting to floats</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dos_up</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Keep dos column</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_up</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">dos_total</span> <span class="o">=</span> <span class="n">dos_up</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="n">energies</span> <span class="o">-=</span> <span class="n">fermi</span>
+        <span class="k">return</span> <span class="n">dos_total</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="n">fermi</span>
+
+    <span class="k">def</span> <span class="nf">_parse_projected_dos_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projected_dos_filenames</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">+</span> <span class="s2">&quot;/abinito_DOS_AT*&quot;</span><span class="p">)</span>
+
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projected_dos_filenames</span><span class="p">)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_atoms</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_dos_filenames</span><span class="p">:</span>
+            <span class="n">dos_atom_projections</span><span class="p">,</span> <span class="n">atom_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_projected_dos_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="n">projected</span><span class="p">[</span><span class="n">atom_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dos_atom_projections</span>
+            <span class="n">projected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dos_atom_projections</span><span class="p">)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">projected</span><span class="p">)</span>
+
+        <span class="c1"># organizing the projection array in the appropiate formate</span>
+        <span class="c1"># (n_atoms, n_principals, n_orbitals, n_spins, n_dos)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">projected</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># This is adding for the principle quantum number. Throughout the code this is unecessary, but puting here for consitency</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">projected</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">projected</span>
+
+    <span class="k">def</span> <span class="nf">_parse_projected_dos_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">text_lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="n">header_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_lines</span><span class="p">[:</span><span class="mi">13</span><span class="p">])</span>
+            <span class="n">dos_text</span> <span class="o">=</span> <span class="n">text_lines</span><span class="p">[</span><span class="mi">13</span><span class="p">:]</span>
+
+        <span class="n">nsppol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;nsppol\s=\s(\d)&quot;</span><span class="p">,</span> <span class="n">header_text</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">energy_details</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+            <span class="s2">&quot;between\s*([-\d*.]*)\s*and\s*([-\d*.]*)\s*Hartree\s*by\s*steps\s*of\s*([-\d*.]*)&quot;</span><span class="p">,</span>
+            <span class="n">header_text</span><span class="p">,</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">energy_details</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">energy_details</span><span class="p">]</span>
+        <span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">,</span> <span class="n">e_step</span> <span class="o">=</span> <span class="n">energy_details</span>
+
+        <span class="n">atom_detail_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dos_text</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">atom_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;iatom=\s*(\d)&quot;</span><span class="p">,</span> <span class="n">atom_detail_text</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span> <span class="o">+</span> <span class="n">e_step</span><span class="p">,</span> <span class="n">e_step</span><span class="p">)</span>
+        <span class="n">n_energies</span> <span class="o">=</span> <span class="n">energies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">nsppol</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">n_spin_header</span> <span class="o">=</span> <span class="mi">7</span>
+            <span class="n">n_up_start</span> <span class="o">=</span> <span class="n">n_spin_header</span>
+            <span class="n">n_up_end</span> <span class="o">=</span> <span class="n">n_up_start</span> <span class="o">+</span> <span class="n">n_energies</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_text</span><span class="p">[</span><span class="n">n_up_start</span><span class="p">:</span><span class="n">n_up_end</span><span class="p">]</span>
+
+            <span class="n">n_block_spacing</span> <span class="o">=</span> <span class="mi">7</span>
+            <span class="n">n_down_start</span> <span class="o">=</span> <span class="n">n_up_end</span> <span class="o">+</span> <span class="n">n_block_spacing</span>
+            <span class="n">n_down_end</span> <span class="o">=</span> <span class="n">n_down_start</span> <span class="o">+</span> <span class="n">n_energies</span>
+            <span class="n">dos_down</span> <span class="o">=</span> <span class="n">dos_text</span><span class="p">[</span><span class="n">n_down_start</span><span class="p">:</span><span class="n">n_down_end</span><span class="p">]</span>
+
+            <span class="c1"># converting to floats</span>
+            <span class="n">dos_down</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dos_down</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dos_up</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Keep only s,p,d projections</span>
+            <span class="n">dos_down</span> <span class="o">=</span> <span class="n">dos_down</span><span class="p">[:,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_up</span><span class="p">[:,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span>
+
+            <span class="n">dos_atom_projections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">([</span><span class="n">dos_up</span><span class="p">,</span> <span class="n">dos_down</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_spin_header</span> <span class="o">=</span> <span class="mi">6</span>
+            <span class="n">n_up_start</span> <span class="o">=</span> <span class="n">n_spin_header</span>
+            <span class="n">n_up_end</span> <span class="o">=</span> <span class="n">n_up_start</span> <span class="o">+</span> <span class="n">n_energies</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_text</span><span class="p">[</span><span class="n">n_up_start</span><span class="p">:</span><span class="n">n_up_end</span><span class="p">]</span>
+
+            <span class="c1"># converting to floats</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dos_up</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Keep only s,p,d projections</span>
+            <span class="n">dos_up</span> <span class="o">=</span> <span class="n">dos_up</span><span class="p">[:,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span>
+
+            <span class="n">dos_atom_projections</span> <span class="o">=</span> <span class="n">dos_up</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">dos_atom_projections</span><span class="p">,</span> <span class="n">atom_index</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2020, Romero Group.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
