@@ -3,11 +3,12 @@ import yaml
 
 import numpy as np
 
-from ..utils import welcome,ROOT
-from ..utils.defaults import settings
-from ..utils.info import orbital_names
-from ..plotter import EBSPlot
-from .. import io
+from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.utils import welcome,ROOT
+from pyprocar.utils.defaults import settings
+from pyprocar.utils.info import orbital_names
+from pyprocar.plotter import EBSPlot
+from pyprocar import io
 
 
 with open(os.path.join(ROOT,'pyprocar','cfg','unfold.yml'), 'r') as file:
@@ -25,7 +26,6 @@ def unfold(
         items=None,
         projection_mask=None,
         unfold_mask=None,
-
         fermi=None,
         fermi_shift=0,
         interpolation_factor=1,
@@ -69,9 +69,10 @@ def unfold(
 
         """
     welcome()
-    modes=["plain","parametric","scatter","atomic",
-           "overlay", "overlay_species", "overlay_orbitals", "ipr"]
-    modes_txt=' , '.join(modes)
+    default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE)
+    config=ConfigManager.merge_configs(default_config, kwargs)
+    modes_txt=' , '.join(config.modes)
+
     message=f"""
             --------------------------------------------------------
             There are additional plot options that are defined in a configuration file. 
@@ -103,7 +104,7 @@ def unfold(
             ----------------------------------------------------------------------------------------------------------
             """)
 
-    ebs_plot = EBSPlot(ebs, kpath, ax, spins)
+    ebs_plot = EBSPlot(ebs, kpath, ax, spins, config=config)
     
     labels=None
 
@@ -130,7 +131,7 @@ def unfold(
         color_mask = unfold_mask
     else :
         raise ValueError("Invalid unfold_mode was selected: {unfold_mode} please select from the following 'both', 'thickness','color'")
-
+    labels = []
     if mode == "plain":
         ebs_plot.plot_bands()
         ebs_plot.plot_parameteric(color_weights=color_weights,
@@ -142,7 +143,7 @@ def unfold(
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
 
-        labels = []
+
         if mode == "overlay_species":
 
             for ispc in structure.species:

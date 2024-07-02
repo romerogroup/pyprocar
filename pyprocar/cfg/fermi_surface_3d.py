@@ -11,11 +11,11 @@ class FermiSurfaceMode(Enum):
     Attributes
     ----------
     PLAIN : str
-        Represents the Fermi surface in a simple, unadorned style.
+        Represents the Fermi surface in a simple, where the colors are the different bands.
     PARAMETRIC : str
-        Represents the Fermi surface in a parametric form, allowing for complex geometrical transformations.
+        Represents the Fermi surface in a parametric form, summing over the projections.
     SPIN_TEXTURE : str
-        Enhances the Fermi surface representation with spin texture information, indicating magnetic properties.
+        Enhances the Fermi surface representation with spin texture information
     """
     PLAIN = "plain"
     PARAMETRIC = "parametric"

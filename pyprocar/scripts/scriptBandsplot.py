@@ -4,21 +4,17 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 from typing import List
-import os
-import yaml
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ..utils.info import orbital_names
-from .. import io
-from ..plotter import EBSPlot
-from ..utils import welcome, ROOT
+from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.utils.info import orbital_names
+from pyprocar import io
+from pyprocar.plotter import EBSPlot
+from pyprocar.utils import welcome
 
 
-with open(os.path.join(ROOT,'pyprocar','cfg','band_structure.yml'), 'r') as file:
-    plot_opt = yaml.safe_load(file)
-    
 def bandsplot(
     code: str,
     dirname: str,
@@ -86,10 +82,11 @@ def bandsplot(
     print_plot_opts: bool, optional
         Boolean to print the plotting options
     """
+    default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE)
+    config=ConfigManager.merge_configs(default_config, kwargs)
 
-    modes=["plain","parametric","scatter","atomic",
-           "overlay", "overlay_species", "overlay_orbitals", "ipr"]
-    modes_txt=' , '.join(modes)
+
+    modes_txt=' , '.join(config.modes)
     message=f"""
             ----------------------------------------------------------------------------------------------------------
             There are additional plot options that are defined in the configuration file. 
@@ -101,7 +98,7 @@ def bandsplot(
             """
     print(message)
     if print_plot_opts:
-        for key,value in plot_opt.items():
+        for key,value in default_config.as_dict().items():
             print(key,':',value)
 
     parser = io.Parser(code = code, dir = dirname)
@@ -129,7 +126,7 @@ def bandsplot(
         if ebs.fix_collinear_spin():
           spins = [0]
         
-    ebs_plot = EBSPlot(ebs, kpath, ax, spins, kdirect=kdirect ,**kwargs)
+    ebs_plot = EBSPlot(ebs, kpath, ax, spins, kdirect=kdirect ,config=config)
 
  
     labels = []
@@ -138,11 +135,11 @@ def bandsplot(
 
     elif mode == "ipr":
       weights = ebs_plot.ebs.ebs_ipr()
-      if plot_opt['weighted_color']['value']:
+      if config.weighted_color:
         color_weights = weights
       else:
         color_weights = None
-      if plot_opt['weighted_width']['value']:
+      if config.weighted_width:
         width_weights = weights
       else:
         width_weights = None
@@ -230,11 +227,11 @@ def bandsplot(
 
 
         weights = ebs_plot.ebs.ebs_sum(atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
-        if plot_opt['weighted_color']['value']:
+        if config.weighted_color:
             color_weights = weights
         else:
             color_weights = None
-        if plot_opt['weighted_width']['value']:
+        if config.weighted_width:
             width_weights = weights
         else:
             width_weights = None
@@ -260,7 +257,7 @@ def bandsplot(
             ebs_plot.set_colorbar_title()
         elif mode == "atomic":
             if ebs.kpoints.shape[0]!=1:
-                raise Value('Must use a single kpoint')
+                raise Exception('Must use a single kpoint')
             if color_weights is not None:
                 color_weights = np.vstack((color_weights, color_weights))
             ebs_plot.plot_atomic_levels(

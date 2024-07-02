@@ -2,6 +2,11 @@ from typing import Dict, Any
 
 from pyprocar.cfg.base import PlotType, BaseConfig
 from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
+from pyprocar.cfg.band_structure import BandStructureConfig
+from pyprocar.cfg.dos import DensityOfStatesConfig
+from pyprocar.cfg.unfold import UnfoldingConfig
+from pyprocar.cfg.band_structure_2d import Bandstructure2DConfig
+from pyprocar.cfg.fermi_surface_2d import FermiSurface2DConfig
 class ConfigFactory:
     """
     Factory class for creating configuration objects based on the plot type.
@@ -33,10 +38,16 @@ class ConfigFactory:
     def create_config(plot_type: PlotType, **kwargs):
         if plot_type == PlotType.FERMI_SURFACE_3D:
             return FermiSurface3DConfig(plot_type=plot_type, **kwargs)
-        # elif plot_type == PlotType.BAND_STRUCTURE:
-        #     return BandStructureConfig(**kwargs)
-        # elif plot_type == PlotType.DENSITY_OF_STATES:
-        #     return DensityOfStatesConfig(**kwargs)
+        elif plot_type == PlotType.BAND_STRUCTURE:
+            return BandStructureConfig(plot_type=plot_type,**kwargs)
+        elif plot_type == PlotType.DENSITY_OF_STATES:
+            return DensityOfStatesConfig(plot_type=plot_type,**kwargs)
+        elif plot_type == PlotType.UNFOLD:
+            return UnfoldingConfig(plot_type=plot_type,**kwargs)
+        elif plot_type == PlotType.BAND_STRUCTURE_2D:
+            return Bandstructure2DConfig(plot_type=plot_type,**kwargs)
+        elif plot_type == PlotType.FERMI_SURFACE_2D:
+            return FermiSurface2DConfig(plot_type=plot_type,**kwargs)
         else:
             raise ValueError(f"Unknown plot type: {plot_type}")
         
