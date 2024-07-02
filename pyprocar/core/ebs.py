@@ -738,6 +738,7 @@ class ElectronicBandStructure:
         """
         Converts a list to a mesh that corresponds to ebs.kpoints
         [n_kx*n_ky*n_kz,...]->[n_kx,n_ky,n_kz,...]. Make sure array is sorted by lexisort
+
         Parameters
         ----------
         array : np.ndarray
@@ -748,6 +749,7 @@ class ElectronicBandStructure:
             The number of ky points
         nkz : int
             The number of kz points
+            
         Returns
         -------
         np.ndarray

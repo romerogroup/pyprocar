@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>band structure plotting Options &#8212; PyProcar 6.2.0 documentation</title>
+    <title>Band Structure Configuration API &#8212; PyProcar 6.2.0 documentation</title>
   
   
   
@@ -388,7 +388,7 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Configuration Files</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">band structure plotting Options</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Band Structure Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unfold.html">unfold plotting Options</a></li>
@@ -422,39 +422,51 @@ document.write(`
 <li class="toctree-l2 has-children"><a class="reference internal" href="../core/ebs.html">ElectronicBandStructure</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.html">pyprocar.core.ElectronicBandStructure</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.__init__.html">__init__</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient.html">calculate_scalar_gradient</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_scalar_integral.html">calculate_scalar_integral</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_nd_mesh.html">create_nd_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html">create_scaler_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.create_vector_mesh.html">create_vector_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.array_to_mesh.html">array_to_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html">calculate_harmonic_average_effective_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html">calculate_nd_scalar_derivatives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html">calculate_nd_scalar_integral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html">cartesian_to_reduced</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html">expand_kpoints_to_supercell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html">expand_kpoints_to_supercell_by_axes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html">fix_collinear_spin</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.mesh_to_array.html">mesh_to_array</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.plot_kpoints.html">plot_kpoints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ravel_array.html">ravel_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html">reduce_bands_near_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html">reduce_kpoints_to_plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html">reduced_to_cartesian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.unfold.html">unfold</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.update_weights.html">update_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands.html">bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands_gradient.html">bands_gradient</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands_gradient_mesh.html">bands_gradient_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands_hessian.html">bands_hessian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands_hessian_mesh.html">bands_hessian_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands_integral.html">bands_integral</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.bands_mesh.html">bands_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.efermi.html">efermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.fermi_speed.html">fermi_speed</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.fermi_speed_mesh.html">fermi_speed_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.fermi_velocity.html">fermi_velocity</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh.html">fermi_velocity_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass.html">harmonic_average_effective_mass</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh.html">harmonic_average_effective_mass_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.index_mesh.html">index_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice.html">inv_reciprocal_lattice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.is_non_collinear.html">is_non_collinear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kpath.html">kpath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kpoints.html">kpoints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kpoints_cartesian.html">kpoints_cartesian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html">kpoints_cartesian_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kpoints_mesh.html">kpoints_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kpoints_reduced.html">kpoints_reduced</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kx_map.html">kx_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.ky_map.html">ky_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.kz_map.html">kz_map</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.n_kx.html">n_kx</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.n_ky.html">n_ky</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.n_kz.html">n_kz</a></li>
@@ -464,8 +476,12 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.norbitals.html">norbitals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.nprincipals.html">nprincipals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.nspins.html">nspins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.projected.html">projected</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.projected_mesh.html">projected_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.projected_phase.html">projected_phase</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.projected_phase_mesh.html">projected_phase_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.reciprocal_lattice.html">reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.weights.html">weights</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../core/_autosummary/pyprocar.core.ElectronicBandStructure.weights_mesh.html">weights_mesh</a></li>
 </ul>
 </li>
@@ -724,7 +740,6 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_ylim.html">set_ylim</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_yticks.html">set_yticks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.show.html">show</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../plotter/_autosummary/pyprocar.plotter.EBSPlot.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -901,7 +916,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Configuration Files</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">band structure plotting Options</li>
+    <li class="breadcrumb-item active" aria-current="page">Band Structure Configuration API</li>
   </ul>
 </nav>
 </div>
@@ -918,349 +933,300 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="band-structure-plotting-options">
-<h1>band structure plotting Options<a class="headerlink" href="#band-structure-plotting-options" title="Permalink to this heading">#</a></h1>
-<section id="spin-colors">
-<h2>spin_colors<a class="headerlink" href="#spin-colors" title="Permalink to this heading">#</a></h2>
+  <section id="module-pyprocar.cfg.band_structure">
+<span id="band-structure-configuration-api"></span><h1>Band Structure Configuration API<a class="headerlink" href="#module-pyprocar.cfg.band_structure" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.cfg.band_structure.</span></span><span class="sig-name descname"><span class="pre">BandStructureConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type:</span> <span class="pre">~pyprocar.cfg.base.PlotType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_settings:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_colors:</span> <span class="pre">~typing.Tuple[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar_title:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'Atomic</span> <span class="pre">Orbital</span> <span class="pre">Projections'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar_title_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar_title_padding:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar_tick_labelsize:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clim:</span> <span class="pre">~typing.Tuple[float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">float]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">(0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_linestyle:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'dotted'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_linewidth:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_axis:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_color:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'grey'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_linestyle:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'solid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_linewidth:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_which:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'major'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label:</span> <span class="pre">~typing.Tuple[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linestyle:</span> <span class="pre">~typing.Tuple[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth:</span> <span class="pre">~typing.Tuple[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker:</span> <span class="pre">~typing.Tuple[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markersize:</span> <span class="pre">~typing.Tuple[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity:</span> <span class="pre">~typing.Tuple[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_color_bar:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighted_color:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighted_width:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size:</span> <span class="pre">~typing.Tuple[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'figure'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/band_structure.html#BandStructureConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></p>
+<p>Configuration class for plotting band structures with custom options.</p>
 <dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The colors for the plot lines.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color</strong> (<em>str, optional (default ‘black’)</em>) – Color for the plot lines.</p></li>
+<li><p><strong>spin_colors</strong> (<em>Tuple[str], optional</em>) – Colors for the spin texture lines.</p></li>
+<li><p><strong>colorbar_title</strong> (<em>str, optional</em>) – Title of the colorbar.</p></li>
+<li><p><strong>colorbar_title_size</strong> (<em>int, optional</em>) – Font size of the title of the colorbar.</p></li>
+<li><p><strong>colorbar_title_padding</strong> (<em>int, optional</em>) – Padding of the title of the colorbar.</p></li>
+<li><p><strong>colorbar_tick_labelsize</strong> (<em>int, optional</em>) – Size of the tick labels on the colorbar.</p></li>
+</ul>
 </dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[‘blue’, ‘red’]</p>
+<dt class="field-even">Plot Appearance<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>cmap</strong> (<em>str, optional (default ‘jet’)</em>) – The colormap used for the plot.</p></li>
+<li><p><strong>clim</strong> (<em>Tuple[float, float], optional</em>) – The color scale limits for the color bar.</p></li>
+<li><p><strong>fermi_color</strong> (<em>str, optional</em>) – Color of the Fermi line.</p></li>
+<li><p><strong>fermi_linestyle</strong> (<em>str, optional</em>) – The linestyle of the Fermi line.</p></li>
+<li><p><strong>fermi_linewidth</strong> (<em>float, optional</em>) – The linewidth of the Fermi line.</p></li>
+<li><p><strong>grid</strong> (<em>bool, optional</em>) – If true, a grid will be shown on the plot.</p></li>
+<li><p><strong>grid_axis</strong> (<em>str, optional</em>) – Which axis (or both) the grid lines should be drawn on.</p></li>
+<li><p><strong>grid_color</strong> (<em>str, optional</em>) – The color of the grid lines.</p></li>
+<li><p><strong>grid_linestyle</strong> (<em>str, optional</em>) – The linestyle of the grid lines.</p></li>
+<li><p><strong>grid_linewidth</strong> (<em>float, optional</em>) – The linewidth of the grid lines.</p></li>
+<li><p><strong>grid_which</strong> (<em>str, optional</em>) – Which grid lines to draw (major, minor, or both).</p></li>
+<li><p><strong>label</strong> (<em>Tuple[str], optional</em>) – The labels for the plot lines.</p></li>
+<li><p><strong>legend</strong> (<em>bool, optional</em>) – If true, a legend will be shown on the plot.</p></li>
+<li><p><strong>linestyle</strong> (<em>Tuple[str], optional</em>) – The linestyles for the plot lines.</p></li>
+<li><p><strong>linewidth</strong> (<em>Tuple[float], optional</em>) – The linewidths for the plot lines.</p></li>
+<li><p><strong>marker</strong> (<em>Tuple[str], optional</em>) – The marker styles for the plot points.</p></li>
+<li><p><strong>markersize</strong> (<em>Tuple[float], optional</em>) – The size of the markers for the plot points.</p></li>
+<li><p><strong>opacity</strong> (<em>Tuple[float], optional</em>) – The opacities for the plot lines.</p></li>
+<li><p><strong>plot_color_bar</strong> (<em>bool, optional</em>) – If true, a color bar will be shown on the plot.</p></li>
+<li><p><strong>savefig</strong> (<em>str, optional</em>) – The file name to save the figure. If null, the figure will not be saved.</p></li>
+<li><p><strong>title</strong> (<em>str, optional</em>) – The title for the plot. If null, no title will be displayed.</p></li>
+<li><p><strong>weighted_color</strong> (<em>bool, optional</em>) – If true, the color of the lines will be weighted.</p></li>
+<li><p><strong>weighted_width</strong> (<em>bool, optional</em>) – If true, the width of the lines will be weighted.</p></li>
+<li><p><strong>figure_size</strong> (<em>Tuple[int], optional</em>) – The size of the figure (width, height) in inches.</p></li>
+<li><p><strong>dpi</strong> (<em>str, optional</em>) – The resolution in dots per inch. If ‘figure’, use the figure’s dpi value.</p></li>
+</ul>
 </dd>
 </dl>
-</section>
-<section id="color">
-<h2>color<a class="headerlink" href="#color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The colors for the plot lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>black</p>
+<p class="rubric">Methods</p>
+<dl class="simple">
+<dt>__post_init__():</dt><dd><p>Post-initialization to set additional properties like <cite>plot_type</cite>.</p>
 </dd>
 </dl>
-</section>
-<section id="colorbar-title">
-<h2>colorbar_title<a class="headerlink" href="#colorbar-title" title="Permalink to this heading">#</a></h2>
+<p class="rubric">Examples</p>
+<p>To initialize a basic configuration with the default settings:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">BandStructureConfig</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To customize the plot with a specific colormap and line styles:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">custom_config</span> <span class="o">=</span> <span class="n">BandStructureConfig</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;magma&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;dotted&#39;</span><span class="p">,</span> <span class="s1">&#39;dashed&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/band_structure.html#BandStructureConfig.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.as_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a dictionary of the configuration settings.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.clim">
+<span class="sig-name descname"><span class="pre">clim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0.0,</span> <span class="pre">1.0)</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.clim" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.cmap">
+<span class="sig-name descname"><span class="pre">cmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'jet'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.cmap" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.color">
+<span class="sig-name descname"><span class="pre">color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'black'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.colorbar_tick_labelsize">
+<span class="sig-name descname"><span class="pre">colorbar_tick_labelsize</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_tick_labelsize" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title">
+<span class="sig-name descname"><span class="pre">colorbar_title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Atomic</span> <span class="pre">Orbital</span> <span class="pre">Projections'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title_padding">
+<span class="sig-name descname"><span class="pre">colorbar_title_padding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title_padding" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title_size">
+<span class="sig-name descname"><span class="pre">colorbar_title_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title_size" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.dpi">
+<span class="sig-name descname"><span class="pre">dpi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'figure'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.dpi" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.fermi_color">
+<span class="sig-name descname"><span class="pre">fermi_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'blue'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.fermi_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.fermi_linestyle">
+<span class="sig-name descname"><span class="pre">fermi_linestyle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'dotted'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.fermi_linestyle" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.fermi_linewidth">
+<span class="sig-name descname"><span class="pre">fermi_linewidth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.fermi_linewidth" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.figure_size">
+<span class="sig-name descname"><span class="pre">figure_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.figure_size" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.grid_axis">
+<span class="sig-name descname"><span class="pre">grid_axis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'both'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_axis" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.grid_color">
+<span class="sig-name descname"><span class="pre">grid_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'grey'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.grid_linestyle">
+<span class="sig-name descname"><span class="pre">grid_linestyle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'solid'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_linestyle" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.grid_linewidth">
+<span class="sig-name descname"><span class="pre">grid_linewidth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_linewidth" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.grid_which">
+<span class="sig-name descname"><span class="pre">grid_which</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'major'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_which" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.legend">
+<span class="sig-name descname"><span class="pre">legend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.legend" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.linestyle">
+<span class="sig-name descname"><span class="pre">linestyle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.linestyle" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.linewidth">
+<span class="sig-name descname"><span class="pre">linewidth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.linewidth" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.marker">
+<span class="sig-name descname"><span class="pre">marker</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.marker" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.markersize">
+<span class="sig-name descname"><span class="pre">markersize</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.markersize" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.modes">
+<span class="sig-name descname"><span class="pre">modes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.modes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.opacity">
+<span class="sig-name descname"><span class="pre">opacity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.opacity" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.plot_color_bar">
+<span class="sig-name descname"><span class="pre">plot_color_bar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.plot_color_bar" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.savefig">
+<span class="sig-name descname"><span class="pre">savefig</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.savefig" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.spin_colors">
+<span class="sig-name descname"><span class="pre">spin_colors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.spin_colors" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.title">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.title" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.weighted_color">
+<span class="sig-name descname"><span class="pre">weighted_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.weighted_color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureConfig.weighted_width">
+<span class="sig-name descname"><span class="pre">weighted_width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureConfig.weighted_width" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.cfg.band_structure.</span></span><span class="sig-name descname"><span class="pre">BandStructureMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/band_structure.html#BandStructureMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration for defining the modes of Band Structure representations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Title of the colorbar.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>Atomic Orbital Projections</p>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PLAIN</strong> (<em>str</em>) – Represents the band structure in a simple, where the colors are the different bands.</p></li>
+<li><p><strong>PARAMETRIC</strong> (<em>str</em>) – Represents the band structure in a parametric form, summing over the projections.</p></li>
+<li><p><strong>SACATTER</strong> (<em>str</em>) – Represents the band structure in a scatter plot, where the colors are the different bands.</p></li>
+<li><p><strong>ATOMIC</strong> (<em>str</em>) – Represents the band structure in an atomic level plot, plots singlr kpoint bands.</p></li>
+<li><p><strong>OVERLAY</strong> (<em>str</em>) – Represents the band structure in an overlay plot, where the colors are the selected projections</p></li>
+<li><p><strong>OVERLAY_SPECIES</strong> (<em>str</em>) – Represents the band structure in an overlay plot, where the colors are
+the different projection of the species.</p></li>
+<li><p><strong>OVERLAY_ORBITALS</strong> (<em>str</em>) – Represents the band structure in an overlay plot, where  the colors are
+the different projection of the orbitals.</p></li>
+</ul>
 </dd>
 </dl>
-</section>
-<section id="colorbar-title-size">
-<h2>colorbar_title_size<a class="headerlink" href="#colorbar-title-size" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Font size of the title of the colorbar.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>15</p>
-</dd>
-</dl>
-</section>
-<section id="colorbar-title-padding">
-<h2>colorbar_title_padding<a class="headerlink" href="#colorbar-title-padding" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Padding of the title of the colorbar.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>20</p>
-</dd>
-</dl>
-</section>
-<section id="colorbar-tick-labelsize">
-<h2>colorbar_tick_labelsize<a class="headerlink" href="#colorbar-tick-labelsize" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Size of the title of the colorbar ticks</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>10</p>
-</dd>
-</dl>
-</section>
-<section id="cmap">
-<h2>cmap<a class="headerlink" href="#cmap" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The colormap used for the plot.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>jet</p>
-</dd>
-</dl>
-</section>
-<section id="clim">
-<h2>clim<a class="headerlink" href="#clim" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The color scale for the color bar</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[None, None]</p>
-</dd>
-</dl>
-</section>
-<section id="fermi-color">
-<h2>fermi_color<a class="headerlink" href="#fermi-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The color of the Fermi line.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>blue</p>
-</dd>
-</dl>
-</section>
-<section id="fermi-linestyle">
-<h2>fermi_linestyle<a class="headerlink" href="#fermi-linestyle" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The linestyle of the Fermi line.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>dotted</p>
-</dd>
-</dl>
-</section>
-<section id="fermi-linewidth">
-<h2>fermi_linewidth<a class="headerlink" href="#fermi-linewidth" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The linewidth of the Fermi line.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>1</p>
-</dd>
-</dl>
-</section>
-<section id="grid">
-<h2>grid<a class="headerlink" href="#grid" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>If true, a grid will be shown on the plot.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>False</p>
-</dd>
-</dl>
-</section>
-<section id="grid-axis">
-<h2>grid_axis<a class="headerlink" href="#grid-axis" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Which axis (or both) the grid lines should be drawn on.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>both</p>
-</dd>
-</dl>
-</section>
-<section id="grid-color">
-<h2>grid_color<a class="headerlink" href="#grid-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The color of the grid lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>grey</p>
-</dd>
-</dl>
-</section>
-<section id="grid-linestyle">
-<h2>grid_linestyle<a class="headerlink" href="#grid-linestyle" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The linestyle of the grid lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>solid</p>
-</dd>
-</dl>
-</section>
-<section id="grid-linewidth">
-<h2>grid_linewidth<a class="headerlink" href="#grid-linewidth" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The linewidth of the grid lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>1</p>
-</dd>
-</dl>
-</section>
-<section id="grid-which">
-<h2>grid_which<a class="headerlink" href="#grid-which" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Which grid lines to draw (major, minor or both).</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>major</p>
-</dd>
-</dl>
-</section>
-<section id="label">
-<h2>label<a class="headerlink" href="#label" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The labels for the plot lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[‘$\uparrow$’, ‘$\downarrow$’]</p>
-</dd>
-</dl>
-</section>
-<section id="legend">
-<h2>legend<a class="headerlink" href="#legend" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>If true, a legend will be shown on the plot.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>True</p>
-</dd>
-</dl>
-</section>
-<section id="linestyle">
-<h2>linestyle<a class="headerlink" href="#linestyle" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The linestyles for the plot lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[‘solid’, ‘dashed’]</p>
-</dd>
-</dl>
-</section>
-<section id="linewidth">
-<h2>linewidth<a class="headerlink" href="#linewidth" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The linewidths for the plot lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[1.0, 1.0]</p>
-</dd>
-</dl>
-</section>
-<section id="marker">
-<h2>marker<a class="headerlink" href="#marker" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The marker styles for the plot points.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[‘o’, ‘v’, ‘^’, ‘D’]</p>
-</dd>
-</dl>
-</section>
-<section id="markersize">
-<h2>markersize<a class="headerlink" href="#markersize" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The size of the markers for the plot points.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[0.2, 0.2]</p>
-</dd>
-</dl>
-</section>
-<section id="opacity">
-<h2>opacity<a class="headerlink" href="#opacity" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The opacities for the plot lines.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[1.0, 1.0]</p>
-</dd>
-</dl>
-</section>
-<section id="plot-color-bar">
-<h2>plot_color_bar<a class="headerlink" href="#plot-color-bar" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>If true, a color bar will be shown on the plot.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>True</p>
-</dd>
-</dl>
-</section>
-<section id="savefig">
-<h2>savefig<a class="headerlink" href="#savefig" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The file name to save the figure. If null, the figure will not be saved.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</section>
-<section id="title">
-<h2>title<a class="headerlink" href="#title" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The title for the plot. If null, no title will be displayed.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</section>
-<section id="weighted-color">
-<h2>weighted_color<a class="headerlink" href="#weighted-color" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>If true, the color of the lines will be weighted.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>True</p>
-</dd>
-</dl>
-</section>
-<section id="weighted-width">
-<h2>weighted_width<a class="headerlink" href="#weighted-width" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>If true, the width of the lines will be weighted.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>False</p>
-</dd>
-</dl>
-</section>
-<section id="figure-size">
-<h2>figure_size<a class="headerlink" href="#figure-size" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The size of the figure (width, height) in inches.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>[9, 6]</p>
-</dd>
-</dl>
-</section>
-<section id="dpi">
-<h2>dpi<a class="headerlink" href="#dpi" title="Permalink to this heading">#</a></h2>
-<dl class="field-list simple">
-<dt class="field-odd">description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The resolution in dots per inch. If ‘figure’, use the figure’s dpi value.</p>
-</dd>
-<dt class="field-even">value<span class="colon">:</span></dt>
-<dd class="field-even"><p>figure</p>
-</dd>
-</dl>
-</section>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.ATOMIC">
+<span class="sig-name descname"><span class="pre">ATOMIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'atomic'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.ATOMIC" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.OVERLAY">
+<span class="sig-name descname"><span class="pre">OVERLAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'overlay'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.OVERLAY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.OVERLAY_ORBITALS">
+<span class="sig-name descname"><span class="pre">OVERLAY_ORBITALS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'overlay_orbitals'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.OVERLAY_ORBITALS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.OVERLAY_SPECIES">
+<span class="sig-name descname"><span class="pre">OVERLAY_SPECIES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'overlay_species'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.OVERLAY_SPECIES" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.PARAMETRIC">
+<span class="sig-name descname"><span class="pre">PARAMETRIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'parametric'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.PARAMETRIC" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.PLAIN">
+<span class="sig-name descname"><span class="pre">PLAIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'plain'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.PLAIN" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureMode.SACATTER">
+<span class="sig-name descname"><span class="pre">SACATTER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scatter'</span></em><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureMode.SACATTER" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyprocar.cfg.band_structure.BandStructureProperty">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyprocar.cfg.band_structure.</span></span><span class="sig-name descname"><span class="pre">BandStructureProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyprocar/cfg/band_structure.html#BandStructureProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.cfg.band_structure.BandStructureProperty" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration for defining the properties that can be visualized on the BandStructure.</p>
+</dd></dl>
+
 </section>
 
 
@@ -1310,37 +1276,53 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spin-colors">spin_colors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#color">color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#colorbar-title">colorbar_title</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#colorbar-title-size">colorbar_title_size</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#colorbar-title-padding">colorbar_title_padding</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#colorbar-tick-labelsize">colorbar_tick_labelsize</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cmap">cmap</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clim">clim</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-color">fermi_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-linestyle">fermi_linestyle</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fermi-linewidth">fermi_linewidth</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid">grid</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-axis">grid_axis</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-color">grid_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-linestyle">grid_linestyle</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-linewidth">grid_linewidth</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#grid-which">grid_which</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#label">label</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#legend">legend</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linestyle">linestyle</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linewidth">linewidth</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#marker">marker</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#markersize">markersize</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#opacity">opacity</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-color-bar">plot_color_bar</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#savefig">savefig</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#title">title</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weighted-color">weighted_color</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#weighted-width">weighted_width</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#figure-size">figure_size</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dpi">dpi</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.as_dict"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.as_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.clim"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.clim</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.cmap"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.cmap</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.color"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_tick_labelsize"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.colorbar_tick_labelsize</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.colorbar_title</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title_padding"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.colorbar_title_padding</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.colorbar_title_size"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.colorbar_title_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.dpi"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.dpi</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.fermi_color"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.fermi_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.fermi_linestyle"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.fermi_linestyle</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.fermi_linewidth"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.fermi_linewidth</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.figure_size"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.figure_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.grid</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_axis"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.grid_axis</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_color"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.grid_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_linestyle"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.grid_linestyle</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_linewidth"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.grid_linewidth</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.grid_which"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.grid_which</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.label"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.label</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.legend"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.legend</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.linestyle"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.linestyle</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.linewidth"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.linewidth</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.marker"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.marker</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.markersize"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.markersize</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.modes"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.modes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.opacity"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.opacity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.plot_color_bar"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.plot_color_bar</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.savefig"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.savefig</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.spin_colors"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.spin_colors</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.title"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.title</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.weighted_color"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.weighted_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureConfig.weighted_width"><code class="docutils literal notranslate"><span class="pre">BandStructureConfig.weighted_width</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode"><code class="docutils literal notranslate"><span class="pre">BandStructureMode</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.ATOMIC"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.ATOMIC</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.OVERLAY"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.OVERLAY</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.OVERLAY_ORBITALS"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.OVERLAY_ORBITALS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.OVERLAY_SPECIES"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.OVERLAY_SPECIES</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.PARAMETRIC"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.PARAMETRIC</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.PLAIN"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.PLAIN</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureMode.SACATTER"><code class="docutils literal notranslate"><span class="pre">BandStructureMode.SACATTER</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.cfg.band_structure.BandStructureProperty"><code class="docutils literal notranslate"><span class="pre">BandStructureProperty</span></code></a></li>
 </ul>
   </nav></div>
 

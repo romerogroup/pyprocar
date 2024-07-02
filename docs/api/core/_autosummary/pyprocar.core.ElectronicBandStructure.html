@@ -388,7 +388,7 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../cfg/index.html">Configuration Files</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure.html">band structure plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure.html">Band Structure Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
@@ -422,39 +422,51 @@ document.write(`
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="../ebs.html">ElectronicBandStructure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">pyprocar.core.ElectronicBandStructure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.__init__.html">__init__</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient.html">calculate_scalar_gradient</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_scalar_integral.html">calculate_scalar_integral</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_nd_mesh.html">create_nd_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html">create_scaler_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_vector_mesh.html">create_vector_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.array_to_mesh.html">array_to_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html">calculate_harmonic_average_effective_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html">calculate_nd_scalar_derivatives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html">calculate_nd_scalar_integral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html">cartesian_to_reduced</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html">expand_kpoints_to_supercell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html">expand_kpoints_to_supercell_by_axes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html">fix_collinear_spin</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html">mesh_to_array</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html">plot_kpoints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ravel_array.html">ravel_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html">reduce_bands_near_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html">reduce_kpoints_to_plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html">reduced_to_cartesian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html">unfold</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html">update_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands.html">bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient.html">bands_gradient</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh.html">bands_gradient_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian.html">bands_hessian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh.html">bands_hessian_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_integral.html">bands_integral</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_mesh.html">bands_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.efermi.html">efermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed.html">fermi_speed</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh.html">fermi_speed_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity.html">fermi_velocity</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh.html">fermi_velocity_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass.html">harmonic_average_effective_mass</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh.html">harmonic_average_effective_mass_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.index_mesh.html">index_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice.html">inv_reciprocal_lattice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.is_non_collinear.html">is_non_collinear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpath.html">kpath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints.html">kpoints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian.html">kpoints_cartesian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html">kpoints_cartesian_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_mesh.html">kpoints_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_reduced.html">kpoints_reduced</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kx_map.html">kx_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ky_map.html">ky_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kz_map.html">kz_map</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kx.html">n_kx</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_ky.html">n_ky</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kz.html">n_kz</a></li>
@@ -464,8 +476,12 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.norbitals.html">norbitals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nprincipals.html">nprincipals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nspins.html">nspins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected.html">projected</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_mesh.html">projected_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase.html">projected_phase</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase_mesh.html">projected_phase_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reciprocal_lattice.html">reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights.html">weights</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights_mesh.html">weights_mesh</a></li>
 </ul>
 </li>
@@ -724,7 +740,6 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_ylim.html">set_ylim</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_yticks.html">set_yticks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.show.html">show</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -951,20 +966,20 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.__init__.html#pyprocar.core.ElectronicBandStructure.__init__" title="pyprocar.core.ElectronicBandStructure.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.__init__</span></code></a>(kpoints, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient.html#pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient" title="pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.calculate_scalar_gradient</span></code></a>(...)</p></td>
-<td><p>Calculates the scalar gradient over the k mesh grid in cartesian coordinates</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.array_to_mesh.html#pyprocar.core.ElectronicBandStructure.array_to_mesh" title="pyprocar.core.ElectronicBandStructure.array_to_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.array_to_mesh</span></code></a>(array, ...)</p></td>
+<td><p>Converts a list to a mesh that corresponds to ebs.kpoints [n_kx*n_ky*n_kz,...]-&gt;[n_kx,n_ky,n_kz,...].</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_scalar_integral.html#pyprocar.core.ElectronicBandStructure.calculate_scalar_integral" title="pyprocar.core.ElectronicBandStructure.calculate_scalar_integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.calculate_scalar_integral</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html#pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass" title="pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.calculate_harmonic_average_effective_mass</span></code></a>(hessian)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html#pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives" title="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.calculate_nd_scalar_derivatives</span></code></a>(...)</p></td>
+<td><p>Transforms the derivatives to cartesian coordinates</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html#pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral" title="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.calculate_nd_scalar_integral</span></code></a>(...)</p></td>
 <td><p>Calculate the scalar integral</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_nd_mesh.html#pyprocar.core.ElectronicBandStructure.create_nd_mesh" title="pyprocar.core.ElectronicBandStructure.create_nd_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.create_nd_mesh</span></code></a>(nd_list)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html#pyprocar.core.ElectronicBandStructure.create_scaler_mesh" title="pyprocar.core.ElectronicBandStructure.create_scaler_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.create_scaler_mesh</span></code></a>(...)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_vector_mesh.html#pyprocar.core.ElectronicBandStructure.create_vector_mesh" title="pyprocar.core.ElectronicBandStructure.create_vector_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.create_vector_mesh</span></code></a>(...)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html#pyprocar.core.ElectronicBandStructure.cartesian_to_reduced" title="pyprocar.core.ElectronicBandStructure.cartesian_to_reduced"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.cartesian_to_reduced</span></code></a>(...)</p></td>
+<td><p>Converts cartesian coordinates to fractional coordinates</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr.html#pyprocar.core.ElectronicBandStructure.ebs_ipr" title="pyprocar.core.ElectronicBandStructure.ebs_ipr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ebs_ipr</span></code></a>()</p></td>
 <td><p>_summary_</p></td>
@@ -975,17 +990,23 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum" title="pyprocar.core.ElectronicBandStructure.ebs_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ebs_sum</span></code></a>([atoms, ...])</p></td>
 <td><p>_summary_</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html#pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell" title="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.expand_kpoints_to_supercell</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html#pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes" title="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.expand_kpoints_to_supercell_by_axes</span></code></a>([...])</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html#pyprocar.core.ElectronicBandStructure.fix_collinear_spin" title="pyprocar.core.ElectronicBandStructure.fix_collinear_spin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fix_collinear_spin</span></code></a>()</p></td>
 <td><p>Converts data from two spin channels to a single channel, adjusting the spin down values to negatives.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz" title="pyprocar.core.ElectronicBandStructure.ibz2fbz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ibz2fbz</span></code></a>(rotations)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz" title="pyprocar.core.ElectronicBandStructure.ibz2fbz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ibz2fbz</span></code></a>(rotations[, ...])</p></td>
 <td><p>Applys symmetry operations to the kpoints, bands, and projections</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html#pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid" title="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.interpolate_mesh_grid</span></code></a>(...)</p></td>
 <td><p>This function will interpolate an Nd, 3d mesh grid [...,nx,ny,nz]</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html#pyprocar.core.ElectronicBandStructure.mesh_to_array" title="pyprocar.core.ElectronicBandStructure.mesh_to_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.mesh_to_array</span></code></a>(mesh)</p></td>
-<td><p>Converts a mesh to a list that corresponds to ebs.kpoints</p></td>
+<td><p>Converts a mesh to a list that corresponds to ebs.kpoints [n_kx,n_ky,n_kz,...]-&gt;[n_kx*n_ky*n_kz,...] :Parameters: <strong>mesh</strong> (<em>np.ndarray</em>) -- The mesh to convert to a list</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints" title="pyprocar.core.ElectronicBandStructure.plot_kpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.plot_kpoints</span></code></a>([...])</p></td>
 <td><p>This needs to be moved to core.KPath and updated new implementation of pyvista PolyData</p></td>
@@ -993,10 +1014,19 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ravel_array.html#pyprocar.core.ElectronicBandStructure.ravel_array" title="pyprocar.core.ElectronicBandStructure.ravel_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ravel_array</span></code></a>(mesh_grid)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold" title="pyprocar.core.ElectronicBandStructure.unfold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.unfold</span></code></a>([...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html#pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi" title="pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.reduce_bands_near_fermi</span></code></a>(bands)</p></td>
+<td><p>Reduces the bands to those near the fermi energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html#pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane" title="pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.reduce_kpoints_to_plane</span></code></a>(...)</p></td>
+<td><p>Reduces the kpoints to a plane</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html#pyprocar.core.ElectronicBandStructure.reduced_to_cartesian" title="pyprocar.core.ElectronicBandStructure.reduced_to_cartesian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.reduced_to_cartesian</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold" title="pyprocar.core.ElectronicBandStructure.unfold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.unfold</span></code></a>([...])</p></td>
 <td><p>The method helps unfold the bands.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights" title="pyprocar.core.ElectronicBandStructure.update_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.update_weights</span></code></a>(weights)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights" title="pyprocar.core.ElectronicBandStructure.update_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.update_weights</span></code></a>(weights)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -1004,91 +1034,124 @@ document.write(`
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient.html#pyprocar.core.ElectronicBandStructure.bands_gradient" title="pyprocar.core.ElectronicBandStructure.bands_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_gradient</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands.html#pyprocar.core.ElectronicBandStructure.bands" title="pyprocar.core.ElectronicBandStructure.bands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient.html#pyprocar.core.ElectronicBandStructure.bands_gradient" title="pyprocar.core.ElectronicBandStructure.bands_gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_gradient</span></code></a></p></td>
 <td><p>Bands gradient is a numpy array that stores each band gradient a list that corresponds to the self.kpoints Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh.html#pyprocar.core.ElectronicBandStructure.bands_gradient_mesh" title="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_gradient_mesh</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh.html#pyprocar.core.ElectronicBandStructure.bands_gradient_mesh" title="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_gradient_mesh</span></code></a></p></td>
 <td><p>Bands gradient mesh is a numpy array that stores each band gradient in a mesh grid.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian.html#pyprocar.core.ElectronicBandStructure.bands_hessian" title="pyprocar.core.ElectronicBandStructure.bands_hessian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_hessian</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian.html#pyprocar.core.ElectronicBandStructure.bands_hessian" title="pyprocar.core.ElectronicBandStructure.bands_hessian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_hessian</span></code></a></p></td>
 <td><p>Bands hessian is a numpy array that stores each band hessian in a list that corresponds to the self.kpoints Shape = [n_kpoints,3,3,n_bands], where the second and third dimension represent d/dx,d/dy,d/dz</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh.html#pyprocar.core.ElectronicBandStructure.bands_hessian_mesh" title="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_hessian_mesh</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh.html#pyprocar.core.ElectronicBandStructure.bands_hessian_mesh" title="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_hessian_mesh</span></code></a></p></td>
 <td><p>Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_integral.html#pyprocar.core.ElectronicBandStructure.bands_integral" title="pyprocar.core.ElectronicBandStructure.bands_integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_integral</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_mesh.html#pyprocar.core.ElectronicBandStructure.bands_mesh" title="pyprocar.core.ElectronicBandStructure.bands_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.bands_mesh</span></code></a></p></td>
 <td><p>Bands mesh is a numpy array that stores each band in a mesh grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed.html#pyprocar.core.ElectronicBandStructure.fermi_speed" title="pyprocar.core.ElectronicBandStructure.fermi_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_speed</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.efermi.html#pyprocar.core.ElectronicBandStructure.efermi" title="pyprocar.core.ElectronicBandStructure.efermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.efermi</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed.html#pyprocar.core.ElectronicBandStructure.fermi_speed" title="pyprocar.core.ElectronicBandStructure.fermi_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_speed</span></code></a></p></td>
 <td><p>fermi speed is a numpy array that stores each fermi speed a list that corresponds to the self.kpoints Shape = [n_kpoints,n_bands]</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh.html#pyprocar.core.ElectronicBandStructure.fermi_speed_mesh" title="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_speed_mesh</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh.html#pyprocar.core.ElectronicBandStructure.fermi_speed_mesh" title="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_speed_mesh</span></code></a></p></td>
 <td><p>Fermi speed mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity.html#pyprocar.core.ElectronicBandStructure.fermi_velocity" title="pyprocar.core.ElectronicBandStructure.fermi_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_velocity</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity.html#pyprocar.core.ElectronicBandStructure.fermi_velocity" title="pyprocar.core.ElectronicBandStructure.fermi_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_velocity</span></code></a></p></td>
 <td><p>fermi_velocity is a numpy array that stores each fermi_velocity a list that corresponds to the self.kpoints Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh.html#pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh" title="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_velocity_mesh</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh.html#pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh" title="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.fermi_velocity_mesh</span></code></a></p></td>
 <td><p>Fermi Velocity mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass.html#pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass" title="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.harmonic_average_effective_mass</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass.html#pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass" title="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.harmonic_average_effective_mass</span></code></a></p></td>
 <td><p>harmonic average effective mass is a numpy array that stores each harmonic average effective mass in a list that corresponds to the self.kpoints Shape = [n_kpoints,n_bands],</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh.html#pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh" title="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.harmonic_average_effective_mass_mesh</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh.html#pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh" title="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.harmonic_average_effective_mass_mesh</span></code></a></p></td>
 <td><p>harmonic average effective mass mesh is a numpy array that stores each harmonic average effective mass mesh in a mesh grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.index_mesh.html#pyprocar.core.ElectronicBandStructure.index_mesh" title="pyprocar.core.ElectronicBandStructure.index_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.index_mesh</span></code></a></p></td>
-<td><p>Index mesh stores the the kpoints index in kpoints list at a particular grid point .</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice.html#pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice" title="pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.inv_reciprocal_lattice</span></code></a></p></td>
+<td><p>Returns the inverse of the reciprocal lattice</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.is_non_collinear.html#pyprocar.core.ElectronicBandStructure.is_non_collinear" title="pyprocar.core.ElectronicBandStructure.is_non_collinear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.is_non_collinear</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.is_non_collinear.html#pyprocar.core.ElectronicBandStructure.is_non_collinear" title="pyprocar.core.ElectronicBandStructure.is_non_collinear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.is_non_collinear</span></code></a></p></td>
 <td><p>Boolean to determine if this is a non-colinear calculation</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian.html#pyprocar.core.ElectronicBandStructure.kpoints_cartesian" title="pyprocar.core.ElectronicBandStructure.kpoints_cartesian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_cartesian</span></code></a></p></td>
-<td><p>Returns the kpoints in cartesian basis</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpath.html#pyprocar.core.ElectronicBandStructure.kpath" title="pyprocar.core.ElectronicBandStructure.kpath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpath</span></code></a></p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html#pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh" title="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_cartesian_mesh</span></code></a></p></td>
-<td><p>Kpoint cartesian mesh representation of the kpoints grid.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_mesh.html#pyprocar.core.ElectronicBandStructure.kpoints_mesh" title="pyprocar.core.ElectronicBandStructure.kpoints_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_mesh</span></code></a></p></td>
-<td><p>Kpoint mesh representation of the kpoints grid.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_reduced.html#pyprocar.core.ElectronicBandStructure.kpoints_reduced" title="pyprocar.core.ElectronicBandStructure.kpoints_reduced"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_reduced</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints.html#pyprocar.core.ElectronicBandStructure.kpoints" title="pyprocar.core.ElectronicBandStructure.kpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints</span></code></a></p></td>
 <td><p>Returns the kpoints in fractional basis</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kx.html#pyprocar.core.ElectronicBandStructure.n_kx" title="pyprocar.core.ElectronicBandStructure.n_kx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.n_kx</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian.html#pyprocar.core.ElectronicBandStructure.kpoints_cartesian" title="pyprocar.core.ElectronicBandStructure.kpoints_cartesian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_cartesian</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html#pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh" title="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_cartesian_mesh</span></code></a></p></td>
+<td><p>Kpoint cartesian mesh representation of the kpoints grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_mesh.html#pyprocar.core.ElectronicBandStructure.kpoints_mesh" title="pyprocar.core.ElectronicBandStructure.kpoints_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kpoints_mesh</span></code></a></p></td>
+<td><p>Kpoint mesh representation of the kpoints grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kx_map.html#pyprocar.core.ElectronicBandStructure.kx_map" title="pyprocar.core.ElectronicBandStructure.kx_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kx_map</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ky_map.html#pyprocar.core.ElectronicBandStructure.ky_map" title="pyprocar.core.ElectronicBandStructure.ky_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.ky_map</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kz_map.html#pyprocar.core.ElectronicBandStructure.kz_map" title="pyprocar.core.ElectronicBandStructure.kz_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.kz_map</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kx.html#pyprocar.core.ElectronicBandStructure.n_kx" title="pyprocar.core.ElectronicBandStructure.n_kx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.n_kx</span></code></a></p></td>
 <td><p>The number of unique kpoints in kx direction in the reduced basis</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_ky.html#pyprocar.core.ElectronicBandStructure.n_ky" title="pyprocar.core.ElectronicBandStructure.n_ky"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.n_ky</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_ky.html#pyprocar.core.ElectronicBandStructure.n_ky" title="pyprocar.core.ElectronicBandStructure.n_ky"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.n_ky</span></code></a></p></td>
 <td><p>The number of unique kpoints in kx direction in the reduced basis</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kz.html#pyprocar.core.ElectronicBandStructure.n_kz" title="pyprocar.core.ElectronicBandStructure.n_kz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.n_kz</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kz.html#pyprocar.core.ElectronicBandStructure.n_kz" title="pyprocar.core.ElectronicBandStructure.n_kz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.n_kz</span></code></a></p></td>
 <td><p>The number of unique kpoints in ky direction in the reduced basis</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.natoms.html#pyprocar.core.ElectronicBandStructure.natoms" title="pyprocar.core.ElectronicBandStructure.natoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.natoms</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.natoms.html#pyprocar.core.ElectronicBandStructure.natoms" title="pyprocar.core.ElectronicBandStructure.natoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.natoms</span></code></a></p></td>
 <td><p>The number of atoms</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nbands.html#pyprocar.core.ElectronicBandStructure.nbands" title="pyprocar.core.ElectronicBandStructure.nbands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nbands</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nbands.html#pyprocar.core.ElectronicBandStructure.nbands" title="pyprocar.core.ElectronicBandStructure.nbands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nbands</span></code></a></p></td>
 <td><p>The number of bands</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nkpoints.html#pyprocar.core.ElectronicBandStructure.nkpoints" title="pyprocar.core.ElectronicBandStructure.nkpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nkpoints</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nkpoints.html#pyprocar.core.ElectronicBandStructure.nkpoints" title="pyprocar.core.ElectronicBandStructure.nkpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nkpoints</span></code></a></p></td>
 <td><p>The number of k points</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.norbitals.html#pyprocar.core.ElectronicBandStructure.norbitals" title="pyprocar.core.ElectronicBandStructure.norbitals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.norbitals</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.norbitals.html#pyprocar.core.ElectronicBandStructure.norbitals" title="pyprocar.core.ElectronicBandStructure.norbitals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.norbitals</span></code></a></p></td>
 <td><p>The number of orbitals</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nprincipals.html#pyprocar.core.ElectronicBandStructure.nprincipals" title="pyprocar.core.ElectronicBandStructure.nprincipals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nprincipals</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nprincipals.html#pyprocar.core.ElectronicBandStructure.nprincipals" title="pyprocar.core.ElectronicBandStructure.nprincipals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nprincipals</span></code></a></p></td>
 <td><p>The number of principal quantum numbers</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nspins.html#pyprocar.core.ElectronicBandStructure.nspins" title="pyprocar.core.ElectronicBandStructure.nspins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nspins</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nspins.html#pyprocar.core.ElectronicBandStructure.nspins" title="pyprocar.core.ElectronicBandStructure.nspins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.nspins</span></code></a></p></td>
 <td><p>The number of spin channels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected.html#pyprocar.core.ElectronicBandStructure.projected" title="pyprocar.core.ElectronicBandStructure.projected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.projected</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_mesh.html#pyprocar.core.ElectronicBandStructure.projected_mesh" title="pyprocar.core.ElectronicBandStructure.projected_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.projected_mesh</span></code></a></p></td>
 <td><p>projected mesh is a numpy array that stores each projection in a mesh grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase_mesh.html#pyprocar.core.ElectronicBandStructure.projected_phase_mesh" title="pyprocar.core.ElectronicBandStructure.projected_phase_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.projected_phase_mesh</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase.html#pyprocar.core.ElectronicBandStructure.projected_phase" title="pyprocar.core.ElectronicBandStructure.projected_phase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.projected_phase</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase_mesh.html#pyprocar.core.ElectronicBandStructure.projected_phase_mesh" title="pyprocar.core.ElectronicBandStructure.projected_phase_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.projected_phase_mesh</span></code></a></p></td>
 <td><p>projected phase mesh is a numpy array that stores each projection phases in a mesh grid.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights_mesh.html#pyprocar.core.ElectronicBandStructure.weights_mesh" title="pyprocar.core.ElectronicBandStructure.weights_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.weights_mesh</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reciprocal_lattice.html#pyprocar.core.ElectronicBandStructure.reciprocal_lattice" title="pyprocar.core.ElectronicBandStructure.reciprocal_lattice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.reciprocal_lattice</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights.html#pyprocar.core.ElectronicBandStructure.weights" title="pyprocar.core.ElectronicBandStructure.weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.weights</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights_mesh.html#pyprocar.core.ElectronicBandStructure.weights_mesh" title="pyprocar.core.ElectronicBandStructure.weights_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicBandStructure.weights_mesh</span></code></a></p></td>
 <td><p>weights mesh is a numpy array that stores each weights in a mesh grid.</p></td>
 </tr>
 </tbody>

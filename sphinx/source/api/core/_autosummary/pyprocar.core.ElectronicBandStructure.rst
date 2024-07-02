@@ -20,27 +20,27 @@
       
       
         
-          ElectronicBandStructure.calculate_scalar_gradient
+          ElectronicBandStructure.array_to_mesh
         
       
       
         
-          ElectronicBandStructure.calculate_scalar_integral
+          ElectronicBandStructure.calculate_harmonic_average_effective_mass
         
       
       
         
-          ElectronicBandStructure.create_nd_mesh
+          ElectronicBandStructure.calculate_nd_scalar_derivatives
         
       
       
         
-          ElectronicBandStructure.create_scaler_mesh
+          ElectronicBandStructure.calculate_nd_scalar_integral
         
       
       
         
-          ElectronicBandStructure.create_vector_mesh
+          ElectronicBandStructure.cartesian_to_reduced
         
       
       
@@ -56,6 +56,16 @@
       
         
           ElectronicBandStructure.ebs_sum
+        
+      
+      
+        
+          ElectronicBandStructure.expand_kpoints_to_supercell
+        
+      
+      
+        
+          ElectronicBandStructure.expand_kpoints_to_supercell_by_axes
         
       
       
@@ -90,6 +100,21 @@
       
       
         
+          ElectronicBandStructure.reduce_bands_near_fermi
+        
+      
+      
+        
+          ElectronicBandStructure.reduce_kpoints_to_plane
+        
+      
+      
+        
+          ElectronicBandStructure.reduced_to_cartesian
+        
+      
+      
+        
           ElectronicBandStructure.unfold
         
       
@@ -108,6 +133,11 @@
    .. autosummary::
       :toctree:
    
+      
+        
+          ElectronicBandStructure.bands
+        
+      
       
         
           ElectronicBandStructure.bands_gradient
@@ -130,7 +160,17 @@
       
       
         
+          ElectronicBandStructure.bands_integral
+        
+      
+      
+        
           ElectronicBandStructure.bands_mesh
+        
+      
+      
+        
+          ElectronicBandStructure.efermi
         
       
       
@@ -165,12 +205,22 @@
       
       
         
-          ElectronicBandStructure.index_mesh
+          ElectronicBandStructure.inv_reciprocal_lattice
         
       
       
         
           ElectronicBandStructure.is_non_collinear
+        
+      
+      
+        
+          ElectronicBandStructure.kpath
+        
+      
+      
+        
+          ElectronicBandStructure.kpoints
         
       
       
@@ -190,7 +240,17 @@
       
       
         
-          ElectronicBandStructure.kpoints_reduced
+          ElectronicBandStructure.kx_map
+        
+      
+      
+        
+          ElectronicBandStructure.ky_map
+        
+      
+      
+        
+          ElectronicBandStructure.kz_map
         
       
       
@@ -240,12 +300,32 @@
       
       
         
+          ElectronicBandStructure.projected
+        
+      
+      
+        
           ElectronicBandStructure.projected_mesh
         
       
       
         
+          ElectronicBandStructure.projected_phase
+        
+      
+      
+        
           ElectronicBandStructure.projected_phase_mesh
+        
+      
+      
+        
+          ElectronicBandStructure.reciprocal_lattice
+        
+      
+      
+        
+          ElectronicBandStructure.weights
         
       
       

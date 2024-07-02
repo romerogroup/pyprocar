@@ -108,11 +108,6 @@
           EBSPlot.show
         
       
-      
-        
-          EBSPlot.update_config
-        
-      
    
    
 

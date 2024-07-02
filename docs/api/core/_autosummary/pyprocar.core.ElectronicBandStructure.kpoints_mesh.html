@@ -49,7 +49,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/core/_autosummary/pyprocar.core.ElectronicBandStructure.kpoints_mesh';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="kpoints_reduced" href="pyprocar.core.ElectronicBandStructure.kpoints_reduced.html" />
+    <link rel="next" title="kx_map" href="pyprocar.core.ElectronicBandStructure.kx_map.html" />
     <link rel="prev" title="kpoints_cartesian_mesh" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -388,7 +388,7 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../cfg/index.html">Configuration Files</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure.html">band structure plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure.html">Band Structure Configuration API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
@@ -422,39 +422,51 @@ document.write(`
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="../ebs.html">ElectronicBandStructure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l3 current active has-children"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.html">pyprocar.core.ElectronicBandStructure</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.__init__.html">__init__</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_scalar_gradient.html">calculate_scalar_gradient</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_scalar_integral.html">calculate_scalar_integral</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_nd_mesh.html">create_nd_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_scaler_mesh.html">create_scaler_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.create_vector_mesh.html">create_vector_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.array_to_mesh.html">array_to_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html">calculate_harmonic_average_effective_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html">calculate_nd_scalar_derivatives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html">calculate_nd_scalar_integral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html">cartesian_to_reduced</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html">expand_kpoints_to_supercell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html">expand_kpoints_to_supercell_by_axes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html">fix_collinear_spin</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html">mesh_to_array</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html">plot_kpoints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ravel_array.html">ravel_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html">reduce_bands_near_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html">reduce_kpoints_to_plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html">reduced_to_cartesian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html">unfold</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html">update_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands.html">bands</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient.html">bands_gradient</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh.html">bands_gradient_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian.html">bands_hessian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh.html">bands_hessian_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_integral.html">bands_integral</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_mesh.html">bands_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.efermi.html">efermi</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed.html">fermi_speed</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh.html">fermi_speed_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity.html">fermi_velocity</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh.html">fermi_velocity_mesh</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass.html">harmonic_average_effective_mass</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh.html">harmonic_average_effective_mass_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.index_mesh.html">index_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice.html">inv_reciprocal_lattice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.is_non_collinear.html">is_non_collinear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpath.html">kpath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints.html">kpoints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian.html">kpoints_cartesian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html">kpoints_cartesian_mesh</a></li>
 <li class="toctree-l4 current active"><a class="current reference internal" href="#">kpoints_mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_reduced.html">kpoints_reduced</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kx_map.html">kx_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ky_map.html">ky_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kz_map.html">kz_map</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kx.html">n_kx</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_ky.html">n_ky</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kz.html">n_kz</a></li>
@@ -464,8 +476,12 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.norbitals.html">norbitals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nprincipals.html">nprincipals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nspins.html">nspins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected.html">projected</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_mesh.html">projected_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase.html">projected_phase</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase_mesh.html">projected_phase_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reciprocal_lattice.html">reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights.html">weights</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights_mesh.html">weights_mesh</a></li>
 </ul>
 </li>
@@ -724,7 +740,6 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_ylim.html">set_ylim</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_yticks.html">set_yticks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.show.html">show</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.update_config.html">update_config</a></li>
 </ul>
 </li>
 </ul>
@@ -928,8 +943,8 @@ document.write(`
 <dl class="py property">
 <dt class="sig sig-object py" id="pyprocar.core.ElectronicBandStructure.kpoints_mesh">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ElectronicBandStructure.</span></span><span class="sig-name descname"><span class="pre">kpoints_mesh</span></span><a class="headerlink" href="#pyprocar.core.ElectronicBandStructure.kpoints_mesh" title="Permalink to this definition">#</a></dt>
-<dd><p>Kpoint mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
-:returns: <em>np.ndarray</em> – Kpoint mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]</p>
+<dd><p>Kpoint mesh representation of the kpoints grid. Shape = [n_kx,n_ky,n_kz,3]
+:returns: <em>np.ndarray</em> – Kpoint mesh representation of the kpoints grid. Shape = [n_kx,n_ky,n_kz,3]</p>
 </dd></dl>
 
 </section>
@@ -955,11 +970,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="pyprocar.core.ElectronicBandStructure.kpoints_reduced.html"
+       href="pyprocar.core.ElectronicBandStructure.kx_map.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">kpoints_reduced</p>
+        <p class="prev-next-title">kx_map</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
