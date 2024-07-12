@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 
 from pyprocar.utils import welcome, ROOT
 from pyprocar.utils.info import orbital_names
-from .. import io
-from ..plotter import DOSPlot
+from pyprocar import io
+from pyprocar.plotter import DOSPlot
 
-with open(os.path.join(ROOT,'pyprocar','cfg','dos.yml'), 'r') as file:
-    plot_opts = yaml.safe_load(file)
+from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+
 
 def dosplot(
         code:str="vasp",
@@ -250,7 +250,9 @@ def dosplot(
         >>> fig.show()
 
     """
-    
+    default_config = ConfigFactory.create_config(PlotType.DENSITY_OF_STATES)
+    config=ConfigManager.merge_configs(default_config, kwargs)
+
     modes=['plain','parametric',
            'parametric_line', 'stack', 
            'stack_orbitals', 'stack_species']
@@ -295,10 +297,10 @@ def dosplot(
     if elimit is None:
         elimit = [dos.energies.min(), dos.energies.max()]
     
-    edos_plot = DOSPlot(dos = dos, structure = structure, ax=ax, **kwargs)
+    edos_plot = DOSPlot(dos = dos, structure = structure, ax=ax, orientation = orientation, config=config)
     
     if mode == "plain":
-        edos_plot.plot_dos(spins=spins, orientation = orientation)
+        values_dict = edos_plot.plot_dos(spins=spins)
 
     elif mode == "parametric":
         if atoms is None:
@@ -307,12 +309,11 @@ def dosplot(
             spins = list(np.arange(len(edos_plot.dos.total)))
         if orbitals is None:
             orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
-        edos_plot.plot_parametric(
+        values_dict = edos_plot.plot_parametric(
                         atoms=atoms,
                         principal_q_numbers=[-1],
                         orbitals=orbitals,
-                        spins=spins,
-                        orientation=orientation)
+                        spins=spins)
 
     elif mode == "parametric_line":
         if atoms is None:
@@ -322,51 +323,45 @@ def dosplot(
         if orbitals is None:
             orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
         
-        edos_plot.plot_parametric_line(
+        values_dict = edos_plot.plot_parametric_line(
                         atoms=atoms,
                         principal_q_numbers=[-1],
                         spins=spins,
                         orbitals=orbitals,
-                        orientation=orientation
                         )
 
     elif mode == "stack_species":
-        edos_plot.plot_stack_species(
+        values_dict = edos_plot.plot_stack_species(
             spins=spins,
             orbitals=orbitals,
-            orientation=orientation,
         )
     elif mode == "stack_orbitals":
-        edos_plot.plot_stack_orbitals(
+        values_dict = edos_plot.plot_stack_orbitals(
             spins=spins,
             atoms=atoms,
-            orientation=orientation,
         )
     elif mode == "stack":
-        edos_plot.plot_stack(
+        values_dict = edos_plot.plot_stack(
             spins=spins,
             items=items,
-            orientation=orientation,
         )
     elif mode == "overlay_species":
-        edos_plot.plot_stack_species(
+        values_dict = edos_plot.plot_stack_species(
             spins=spins,
             orbitals=orbitals,
-            orientation=orientation,
+
             overlay_mode=True
         )
     elif mode == "overlay_orbitals":
-        edos_plot.plot_stack_orbitals(
+        values_dict = edos_plot.plot_stack_orbitals(
             spins=spins,
             atoms=atoms,
-            orientation=orientation,
             overlay_mode=True
         )
     elif mode == "overlay":
-        edos_plot.plot_stack(
+        values_dict = edos_plot.plot_stack(
             spins=spins,
             items=items,
-            orientation=orientation,
             overlay_mode=True
         )
     else:
