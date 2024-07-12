@@ -267,7 +267,7 @@ def dosplot(
             --------------------------------------------------------"""
     print(message)
     if print_plot_opts:
-        for key,value in plot_opts.items():
+        for key,value in default_config.as_dict().items():
             print(key,':',value)
     
 

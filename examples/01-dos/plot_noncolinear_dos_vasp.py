@@ -45,5 +45,6 @@ pyprocar.dosplot(
                 fermi=5.5962,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)

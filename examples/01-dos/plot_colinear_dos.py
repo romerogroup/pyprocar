@@ -14,9 +14,9 @@ First download the example files with the code below. Then replace data_dir belo
 
     data_dir = pyprocar.download_example(save_dir='', 
                                 material='SrVO3',
-                                code='qe', 
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
-                                calc_type='dos')
+                                calc_type='fermi')
 """
 
 
@@ -25,7 +25,7 @@ First download the example files with the code below. Then replace data_dir belo
 import os
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}SrVO3{os.sep}vasp{os.sep}non-spin-polarized{os.sep}dos"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}SrVO3{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
 
 
 ###############################################################################
@@ -56,6 +56,7 @@ pyprocar.dosplot(
                 fermi=5.3017,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 
@@ -77,6 +78,7 @@ pyprocar.dosplot(
                 fermi=5.3017,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 
@@ -123,7 +125,7 @@ pyprocar.dosplot(
 # 
 #
 
-items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8]),
+items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])
 pyprocar.dosplot(
                 code='vasp', 
                 mode='stack',
@@ -173,7 +175,7 @@ pyprocar.dosplot(
 # 
 #
 
-items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8]),
+items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])
 pyprocar.dosplot(
                 code='vasp', 
                 mode='overlay',

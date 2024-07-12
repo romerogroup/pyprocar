@@ -494,6 +494,7 @@ class DOSPlot:
         return label
 
     def _setup_colorbar(self, dos_projected, dos_total_projected):
+
         vmin, vmax = self._get_color_limits(dos_projected, dos_total_projected)
         cmap = mpl.cm.get_cmap(self.config.cmap)
         
@@ -505,14 +506,16 @@ class DOSPlot:
                         size=self.config.colorbar_title_size,
                         rotation=270,
                         labelpad=self.config.colorbar_title_padding)
-
+            
     def _get_color_limits(self, dos_projected, dos_total_projected):
         if self.config.clim:
-            vmin, vmax = self.config.clim
+            self.clim = self.config.clim
         else:
-            vmin = dos_projected.min() / dos_total_projected.max()
-            vmax = dos_projected.max() / dos_total_projected.max()
-        return vmin, vmax
+            self.clim = [0,0]
+            self.clim[0] = dos_projected.min() / dos_total_projected.max()
+            self.clim[1] = dos_projected.max() / dos_total_projected.max()
+        return self.clim
+
     
     def _set_plot_limits(self, spin_channels):
         if self.orientation == 'horizontal':
@@ -651,8 +654,8 @@ class DOSPlot:
         # generates line segments. This is the reason for the offset of the points
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        norm = mpl.colors.Normalize(vmin=self.config.clim[0], 
-                                    vmax=self.config.clim[1])
+        norm = mpl.colors.Normalize(vmin=self.clim[0], 
+                                    vmax=self.clim[1])
         lc = LineCollection(segments, cmap=plt.get_cmap(self.config.cmap), norm=norm)
         lc.set_array(normalized_dos_spin_projected)
         lc.set_linewidth(self.config.linewidth[spin_channel])
