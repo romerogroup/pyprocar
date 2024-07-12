@@ -6,28 +6,62 @@
 
 Computation times
 =================
-**04:53.848** total execution time for **examples_00-band_structure** files:
+**03:35.930** total execution time for 11 files **from examples\00-band_structure**:
 
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_2d_bands.py` (``plot_2d_bands.py``)                                 | 03:21.522 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_autobands.py` (``plot_autobands.py``)                               | 00:27.193 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py` (``plot_ipr.py``)                                           | 00:24.836 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_unfolding.py` (``plot_unfolding.py``)                               | 00:23.988 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_colinear.py` (``plot_colinear.py``)                                 | 00:03.167 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py` (``plot_bandsplot_configurations.py``) | 00:02.662 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py` (``plot_spin_polarized.py``)                     | 00:02.556 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py` (``plot_compare_bands.py``)                       | 00:02.534 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py` (``plot_noncolinear_vasp.py``)                 | 00:02.174 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py` (``plot_noncolinear_qe.py``)                     | 00:01.781 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_00-band_structure_plot_atomic_levels.py` (``plot_atomic_levels.py``)                       | 00:01.435 | 0.0 MB |
-+--------------------------------------------------------------------------------------------------------------------+-----------+--------+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_2d_bands.py` (``plot_2d_bands.py``)
+     - 02:13.131
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_autobands.py` (``plot_autobands.py``)
+     - 00:25.318
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py` (``plot_ipr.py``)
+     - 00:22.809
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_unfolding.py` (``plot_unfolding.py``)
+     - 00:21.062
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_colinear.py` (``plot_colinear.py``)
+     - 00:02.856
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py` (``plot_bandsplot_configurations.py``)
+     - 00:02.441
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py` (``plot_spin_polarized.py``)
+     - 00:02.336
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py` (``plot_noncolinear_vasp.py``)
+     - 00:01.845
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py` (``plot_compare_bands.py``)
+     - 00:01.665
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py` (``plot_noncolinear_qe.py``)
+     - 00:01.308
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_atomic_levels.py` (``plot_atomic_levels.py``)
+     - 00:01.159
+     - 0.0

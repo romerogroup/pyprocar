@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-01-dos-plot-dosplot-configurations-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-with-configurations-in-pyprocar">
 <span id="ref-plot-dos-configuration"></span><span id="sphx-glr-examples-01-dos-plot-dosplot-configurations-py"></span><h1>Plotting with Configurations in <cite>pyprocar</cite><a class="headerlink" href="#plotting-with-configurations-in-pyprocar" title="Permalink to this heading">#</a></h1>
@@ -554,7 +554,7 @@ to download the full example code</p>
 </pre></div>
 </div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="c1"># Define the directory containing the example data</span>
@@ -564,7 +564,7 @@ to download the full example code</p>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 1: Locating and Printing Configuration Files</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 1: Locating and Printing Configuration Files</span>
 <span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
 <span class="c1">#</span>
 <span class="c1"># This section demonstrates where the configuration files are located in the package.</span>
@@ -588,50 +588,53 @@ to download the full example code</p>
 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
-cmap : {&#39;description&#39;: &#39;The colormap used for the plot.&#39;, &#39;value&#39;: &#39;jet&#39;}
-colors : {&#39;description&#39;: &#39;List of colors for the plot lines.&#39;, &#39;value&#39;: [&#39;red&#39;, &#39;green&#39;, &#39;blue&#39;, &#39;cyan&#39;, &#39;magenta&#39;, &#39;yellow&#39;, &#39;orange&#39;, &#39;purple&#39;, &#39;brown&#39;, &#39;navy&#39;, &#39;maroon&#39;, &#39;olive&#39;]}
-colorbar_title : {&#39;description&#39;: &#39;Title of the colorbar.&#39;, &#39;value&#39;: &#39;Atomic Orbital Projections&#39;}
-colorbar_title_size : {&#39;description&#39;: &#39;Font size of the title of the colorbar.&#39;, &#39;value&#39;: 15}
-colorbar_title_padding : {&#39;description&#39;: &#39;Padding of the title of the colorbar.&#39;, &#39;value&#39;: 20}
-colorbar_tick_labelsize : {&#39;description&#39;: &#39;Size of the title of the colorbar ticks&#39;, &#39;value&#39;: 10}
-fermi_color : {&#39;description&#39;: &#39;The color of the Fermi line.&#39;, &#39;value&#39;: &#39;black&#39;}
-fermi_linestyle : {&#39;description&#39;: &#39;The linestyle of the Fermi line.&#39;, &#39;value&#39;: &#39;dotted&#39;}
-fermi_linewidth : {&#39;description&#39;: &#39;The linewidth of the Fermi line.&#39;, &#39;value&#39;: 1}
-figure_size : {&#39;description&#39;: &#39;The size of the figure (width, height) in inches.&#39;, &#39;value&#39;: [9, 6]}
-font : {&#39;description&#39;: &#39;The font style for the plot text.&#39;, &#39;value&#39;: &#39;Arial&#39;}
-font_size : {&#39;description&#39;: &#39;The size of the font used in the plot.&#39;, &#39;value&#39;: 16}
-grid : {&#39;description&#39;: &#39;If true, a grid will be shown on the plot.&#39;, &#39;value&#39;: False}
-grid_axis : {&#39;description&#39;: &#39;Which axis (or both) the grid lines should be drawn on.&#39;, &#39;value&#39;: &#39;both&#39;}
-grid_color : {&#39;description&#39;: &#39;The color of the grid lines.&#39;, &#39;value&#39;: &#39;grey&#39;}
-grid_linestyle : {&#39;description&#39;: &#39;The linestyle of the grid lines.&#39;, &#39;value&#39;: &#39;solid&#39;}
-grid_linewidth : {&#39;description&#39;: &#39;The linewidth of the grid lines.&#39;, &#39;value&#39;: 1}
-grid_which : {&#39;description&#39;: &#39;Which grid lines to draw (major, minor or both).&#39;, &#39;value&#39;: &#39;major&#39;}
-legend : {&#39;description&#39;: &#39;If true, a legend will be shown on the plot.&#39;, &#39;value&#39;: True}
-linestyle : {&#39;description&#39;: &#39;The linestyles for the plot lines.&#39;, &#39;value&#39;: [&#39;solid&#39;, &#39;dashed&#39;]}
-linewidth : {&#39;description&#39;: &#39;The linewidths for the plot lines.&#39;, &#39;value&#39;: [1, 1]}
-marker : {&#39;description&#39;: &#39;The marker styles for the plot points.&#39;, &#39;value&#39;: [&#39;o&#39;, &#39;v&#39;, &#39;^&#39;, &#39;D&#39;]}
-markersize : {&#39;description&#39;: &#39;The size of the markers for the plot points.&#39;, &#39;value&#39;: [0.2, 0.2]}
-opacity : {&#39;description&#39;: &#39;The opacities for the plot lines.&#39;, &#39;value&#39;: [1.0, 1.0]}
-plot_bar : {&#39;description&#39;: &#39;If true, a bar plot will be displayed.&#39;, &#39;value&#39;: True}
-plot_color_bar : {&#39;description&#39;: &#39;If true, a color bar will be shown on the plot.&#39;, &#39;value&#39;: True}
-plot_total : {&#39;description&#39;: &#39;If true, the total plot will be displayed.&#39;, &#39;value&#39;: True}
-savefig : {&#39;description&#39;: &#39;The file name to save the figure. If null, the figure will not be saved.&#39;, &#39;value&#39;: None}
-spin_colors : {&#39;description&#39;: &#39;The colors for the spin up and spin down lines.&#39;, &#39;value&#39;: [&#39;black&#39;, &#39;red&#39;]}
-spin_labels : {&#39;description&#39;: &#39;The labels for the spin up and spin down.&#39;, &#39;value&#39;: [&#39;$\\uparrow$&#39;, &#39;$\\downarrow$&#39;]}
-title : {&#39;description&#39;: &#39;The title for the plot. If null, no title will be displayed.&#39;, &#39;value&#39;: None}
-verbose : {&#39;description&#39;: &#39;If true, the program will print detailed information.&#39;, &#39;value&#39;: True}
-weighted_color : {&#39;description&#39;: &#39;If true, the color of the lines will be weighted.&#39;, &#39;value&#39;: True}
-weighted_width : {&#39;description&#39;: &#39;If true, the width of the lines will be weighted.&#39;, &#39;value&#39;: False}
-clim : {&#39;description&#39;: &#39;Value range to scale the colorbar&#39;, &#39;value&#39;: None}
-stack_y_label : {&#39;description&#39;: &#39;The label for the y-axis for stack mode&#39;, &#39;value&#39;: &#39;DOS&#39;}
-x_label : {&#39;description&#39;: &#39;The label for the x-axis.&#39;, &#39;value&#39;: None}
-y_label : {&#39;description&#39;: &#39;The label for the y-axis.&#39;, &#39;value&#39;: None}
-dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;figure&#39;, use the figure&#39;s dpi value.&quot;, &#39;value&#39;: &#39;figure&#39;}
+plot_type : PlotType.DENSITY_OF_STATES
+custom_settings : {}
+modes : [&#39;plain&#39;, &#39;parametric&#39;, &#39;parameteric_line&#39;, &#39;stack&#39;, &#39;stack_orbitals&#39;, &#39;stack_species&#39;, &#39;overlay&#39;, &#39;overlay_orbitals&#39;, &#39;overlay_species&#39;]
+cmap : jet
+colors : [&#39;red&#39;, &#39;green&#39;, &#39;blue&#39;, &#39;cyan&#39;, &#39;magenta&#39;, &#39;yellow&#39;, &#39;orange&#39;, &#39;purple&#39;, &#39;brown&#39;, &#39;navy&#39;, &#39;maroon&#39;, &#39;olive&#39;]
+colorbar_title : Atomic Orbital Projections
+colorbar_title_size : 15
+colorbar_title_padding : 20
+colorbar_tick_labelsize : 10
+fermi_color : black
+fermi_linestyle : dotted
+fermi_linewidth : 1
+figure_size : (9, 6)
+font : Arial
+font_size : 16
+grid : False
+grid_axis : both
+grid_color : grey
+grid_linestyle : solid
+grid_linewidth : 1
+grid_which : major
+legend : True
+linestyle : [&#39;solid&#39;, &#39;dashed&#39;]
+linewidth : [1, 1]
+marker : [&#39;o&#39;, &#39;v&#39;, &#39;^&#39;, &#39;D&#39;]
+markersize : [0.2, 0.2]
+opacity : [1.0, 1.0]
+plot_bar : True
+plot_color_bar : True
+plot_total : True
+savefig : None
+spin_colors : [&#39;black&#39;, &#39;red&#39;]
+spin_labels : [&#39;$\\uparrow$&#39;, &#39;$\\downarrow$&#39;]
+title : None
+verbose : True
+weighted_color : True
+weighted_width : False
+clim : None
+stack_y_label : DOS
+x_label :
+y_label :
+dpi : figure
 
 (&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 2: Changing cmap, clim, and Fermi line properties</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 2: Changing cmap, clim, and Fermi line properties</span>
 <span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
 <span class="c1">#</span>
 <span class="c1"># This section demonstrates how to change the colormap (cmap), color limits (clim),</span>
@@ -664,7 +667,7 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 4: Setting the Figure Size and DPI</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 4: Setting the Figure Size and DPI</span>
 <span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
 <span class="c1">#</span>
 <span class="c1"># This section demonstrates how to set the figure size and dots per inch (DPI) for the plot.</span>
@@ -677,6 +680,7 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
     <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
     <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
     <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
+    <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
     <span class="n">figure_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>  <span class="c1"># Figure size (width, height)</span>
     <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>  <span class="c1"># Dots per inch</span>
     <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Boolean for grid</span>
@@ -694,13 +698,13 @@ dpi : {&#39;description&#39;: &quot;The resolution in dots per inch. If &#39;fig
 (&lt;Figure size 1000x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.360 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.613 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plot-dosplot-configurations-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/44002a32a2c12b63ac956f30ab9fbeca/plot_dosplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dosplot_configurations.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/596210a8656d0349621199ea5ab59d0e/plot_dosplot_configurations.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dosplot_configurations.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/44002a32a2c12b63ac956f30ab9fbeca/plot_dosplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dosplot_configurations.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

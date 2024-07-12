@@ -6,16 +6,44 @@
 
 Computation times
 =================
-**01:04.902** total execution time for **examples_01-dos** files:
+**00:32.440** total execution time for 5 files **from examples\01-dos**:
 
-+-----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_01-dos_plot_colinear_dos.py` (``plot_colinear_dos.py``)                     | 00:30.287 | 0.0 MB |
-+-----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_01-dos_plot_noncolinear_dos_qe.py` (``plot_noncolinear_dos_qe.py``)         | 00:22.948 | 0.0 MB |
-+-----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_01-dos_plot_noncolinear_dos_vasp.py` (``plot_noncolinear_dos_vasp.py``)     | 00:05.546 | 0.0 MB |
-+-----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_01-dos_plot_spin_polarized_dos.py` (``plot_spin_polarized_dos.py``)         | 00:03.761 | 0.0 MB |
-+-----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py` (``plot_dosplot_configurations.py``) | 00:02.360 | 0.0 MB |
-+-----------------------------------------------------------------------------------------------------+-----------+--------+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_examples_01-dos_plot_noncolinear_dos_qe.py` (``plot_noncolinear_dos_qe.py``)
+     - 00:18.812
+     - 0.0
+   * - :ref:`sphx_glr_examples_01-dos_plot_noncolinear_dos_vasp.py` (``plot_noncolinear_dos_vasp.py``)
+     - 00:04.541
+     - 0.0
+   * - :ref:`sphx_glr_examples_01-dos_plot_colinear_dos.py` (``plot_colinear_dos.py``)
+     - 00:04.252
+     - 0.0
+   * - :ref:`sphx_glr_examples_01-dos_plot_spin_polarized_dos.py` (``plot_spin_polarized_dos.py``)
+     - 00:03.222
+     - 0.0
+   * - :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py` (``plot_dosplot_configurations.py``)
+     - 00:01.613
+     - 0.0

@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_06-PyPoscar_plot_subsitution_pyposcar.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -36,7 +36,7 @@ Before diving in, make sure to have `pyvista`, `numpy`, and `pyprocar` installed
 
 .. GENERATED FROM PYTHON SOURCE LINES 18-30
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -64,7 +64,7 @@ Reading and Parsing the POSCAR File
 
 .. GENERATED FROM PYTHON SOURCE LINES 33-52
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Read the POSCAR file
@@ -120,7 +120,7 @@ Atom Substitution
 
 .. GENERATED FROM PYTHON SOURCE LINES 55-76
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Substitute the second B atom with an N atom
@@ -178,7 +178,7 @@ Visualization of Atomic Structures
 
 .. GENERATED FROM PYTHON SOURCE LINES 79-96
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Visualize the atomic structures side by side
@@ -216,7 +216,7 @@ Creating GIFs for Visualization
 
 .. GENERATED FROM PYTHON SOURCE LINES 99-116
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Define a function to create a GIF visualization of the atomic structure
@@ -262,7 +262,7 @@ Creating GIFs for Visualization
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.519 seconds)
+   **Total running time of the script:** (0 minutes 7.702 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_subsitution_pyposcar.py:
@@ -271,16 +271,13 @@ Creating GIFs for Visualization
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_subsitution_pyposcar.ipynb <plot_subsitution_pyposcar.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_subsitution_pyposcar.py <plot_subsitution_pyposcar.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_subsitution_pyposcar.ipynb <plot_subsitution_pyposcar.ipynb>`
 
 
 .. only:: html

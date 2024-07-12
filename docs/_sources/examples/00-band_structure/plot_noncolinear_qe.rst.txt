@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_noncolinear_qe.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -38,7 +38,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 21-23
 
-.. code-block:: default
+.. code-block:: Python
 
     # sphinx_gallery_thumbnail_number = 2
 
@@ -55,7 +55,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-31
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -77,7 +77,7 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 36-44
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -106,7 +106,7 @@ Plain mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -125,7 +125,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. GENERATED FROM PYTHON SOURCE LINES 51-66
 
-.. code-block:: default
+.. code-block:: Python
 
 
     atoms=[0]
@@ -161,7 +161,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -172,7 +172,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.781 seconds)
+   **Total running time of the script:** (0 minutes 1.308 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_noncolinear_qe.py:
@@ -181,16 +181,13 @@ For details on the meaning of the indices of the atomic projection please refer 
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_noncolinear_qe.ipynb <plot_noncolinear_qe.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_noncolinear_qe.py <plot_noncolinear_qe.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_noncolinear_qe.ipynb <plot_noncolinear_qe.ipynb>`
 
 
 .. only:: html

@@ -533,7 +533,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-05-other-plot-2dkmesh-generation-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="example-of-kmesh-generator">
 <span id="example-kmesh-generator"></span><span id="sphx-glr-examples-05-other-plot-2dkmesh-generation-py"></span><h1>Example of kmesh_generator<a class="headerlink" href="#example-of-kmesh-generator" title="Permalink to this heading">#</a></h1>
@@ -548,18 +548,18 @@ ranging from coordinates (-0.5, -0.5, 0.0) to (0.5, 0.5, 0.0) with 5 grids in th
 </div>
 </div>
 <p>This information is automatically written to a KPOINTS file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
 </pre></div>
 </div>
 <section id="plotting-kmesh">
 <h2>Plotting Kmesh<a class="headerlink" href="#plotting-kmesh" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
 <span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
 <span class="n">pyvista</span><span class="o">.</span><span class="n">OFF_SCREEN</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">kpoints</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">generate2dkmesh</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
@@ -579,7 +579,7 @@ ranging from coordinates (-0.5, -0.5, 0.0) to (0.5, 0.5, 0.0) with 5 grids in th
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -600,13 +600,13 @@ Developers:
 - Freddy Farah
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.384 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.441 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-05-other-plot-2dkmesh-generation-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/305ecbc716d77baeb5050e87e39c237d/plot_2dkmesh_generation.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_2dkmesh_generation.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d279bef957765a4d1e6ca116fee628b6/plot_2dkmesh_generation.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_2dkmesh_generation.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/305ecbc716d77baeb5050e87e39c237d/plot_2dkmesh_generation.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_2dkmesh_generation.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

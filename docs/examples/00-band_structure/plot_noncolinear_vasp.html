@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-00-band-structure-plot-noncolinear-vasp-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-non-colinear-band-structures-in-vasp">
 <span id="ref-plotting-noncolinear-vasp"></span><span id="sphx-glr-examples-00-band-structure-plot-noncolinear-vasp-py"></span><h1>Plotting non colinear band structures in VASP<a class="headerlink" href="#plotting-non-colinear-band-structures-in-vasp" title="Permalink to this heading">#</a></h1>
@@ -549,7 +549,7 @@ to download the full example code</p>
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
@@ -557,7 +557,7 @@ to download the full example code</p>
 </div>
 <section id="plain-mode">
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.596151</span><span class="p">,</span>
@@ -569,7 +569,7 @@ to download the full example code</p>
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -580,7 +580,7 @@ to download the full example code</p>
 <section id="parametric-mode">
 <h2>Parametric mode<a class="headerlink" href="#parametric-mode" title="Permalink to this heading">#</a></h2>
 <p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -599,20 +599,20 @@ to download the full example code</p>
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.174 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.845 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-noncolinear-vasp-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/d71df43ce9ea3d07c48301fa4fb2d1df/plot_noncolinear_vasp.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_noncolinear_vasp.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/b110f643ba1910417f890e1aace81279/plot_noncolinear_vasp.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_noncolinear_vasp.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d71df43ce9ea3d07c48301fa4fb2d1df/plot_noncolinear_vasp.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_noncolinear_vasp.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

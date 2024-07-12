@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_05-other_plot_ebs.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -43,7 +43,7 @@ related to the electronic band structure.
 
 .. GENERATED FROM PYTHON SOURCE LINES 26-33
 
-.. code-block:: default
+.. code-block:: Python
 
     # sphinx_gallery_thumbnail_number = 1
 
@@ -65,7 +65,7 @@ importing pyprocar and specify the local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 35-43
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -88,7 +88,7 @@ Initialize the parser object and get the ElectronicBandStructure
 
 .. GENERATED FROM PYTHON SOURCE LINES 45-54
 
-.. code-block:: default
+.. code-block:: Python
 
 
     parser=pyprocar.io.Parser(code="vasp",dir=data_dir)
@@ -112,7 +112,7 @@ You can print the object to see some information about the Band Structure
 
 .. GENERATED FROM PYTHON SOURCE LINES 56-60
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print(ebs)
@@ -143,7 +143,7 @@ Let's plot the kpoints
 
 .. GENERATED FROM PYTHON SOURCE LINES 62-68
 
-.. code-block:: default
+.. code-block:: Python
 
 
     p=pv.Plotter()
@@ -173,7 +173,7 @@ Bands
 
 .. GENERATED FROM PYTHON SOURCE LINES 74-82
 
-.. code-block:: default
+.. code-block:: Python
 
     kpoints=pv.PolyData(ebs.kpoints)
     kpoints['band_0']=ebs.bands[:,0,0]
@@ -202,7 +202,7 @@ Projections
 
 .. GENERATED FROM PYTHON SOURCE LINES 85-92
 
-.. code-block:: default
+.. code-block:: Python
 
     print(ebs.projected.shape)
     kpoints['band_0-atom_0-orbital_5-spin-0']=ebs.projected[:,0,0,0,4,0]
@@ -236,7 +236,7 @@ Gradients
 
 .. GENERATED FROM PYTHON SOURCE LINES 95-104
 
-.. code-block:: default
+.. code-block:: Python
 
     print(ebs.bands_gradient.shape)
     kpoints['band_0-gradients']=ebs.bands_gradient[:,:,0,0]
@@ -249,18 +249,18 @@ Gradients
 
 
 
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_004.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_004.png
-   :class: sphx-glr-single-img
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
-    (3375, 3, 8, 1)
+    Traceback (most recent call last):
+      File "Z:\Research Projects\pyprocar\examples\05-other\plot_ebs.py", line 99, in <module>
+        arrows = kpoints.glyph(orient='band_0-gradients', scale=False, factor=0.08)
+      File "Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\filters\data_set.py", line 2315, in glyph
+        dataset.set_active_vectors(orient, preference=prefer)
+      File "Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\dataset.py", line 692, in set_active_vectors
+        raise ValueError(
+    ValueError: Data field (band_0-gradients) with type (FieldAssociation.POINT) could not be set as the active vectors
 
 
 
@@ -272,7 +272,7 @@ Band/Fermi velocities
 
 .. GENERATED FROM PYTHON SOURCE LINES 107-118
 
-.. code-block:: default
+.. code-block:: Python
 
     print(ebs.fermi_velocity.shape)
     kpoints['band_0-band_velocity']=ebs.fermi_velocity[:,:,0,0]
@@ -286,23 +286,6 @@ Band/Fermi velocities
 
 
 
-
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_005.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_005.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    (3375, 3, 8, 1)
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 Effective mass
@@ -310,7 +293,7 @@ Effective mass
 
 .. GENERATED FROM PYTHON SOURCE LINES 121-129
 
-.. code-block:: default
+.. code-block:: Python
 
     print(ebs.harmonic_average_effective_mass.shape)
     kpoints['band_0-harmonic_average_effective_mass']=ebs.harmonic_average_effective_mass[:,0,0]
@@ -322,26 +305,9 @@ Effective mass
 
 
 
-
-.. image-sg:: /examples/05-other/images/sphx_glr_plot_ebs_006.png
-   :alt: plot ebs
-   :srcset: /examples/05-other/images/sphx_glr_plot_ebs_006.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    (3375, 8, 1)
-
-
-
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.919 seconds)
+   **Total running time of the script:** (0 minutes 1.308 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_ebs.py:
@@ -350,16 +316,13 @@ Effective mass
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_ebs.ipynb <plot_ebs.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_ebs.py <plot_ebs.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_ebs.ipynb <plot_ebs.ipynb>`
 
 
 .. only:: html

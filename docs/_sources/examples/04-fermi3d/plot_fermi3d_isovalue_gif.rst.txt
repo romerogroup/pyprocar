@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_04-fermi3d_plot_fermi3d_isovalue_gif.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -40,7 +40,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 23-25
 
-.. code-block:: default
+.. code-block:: Python
 
     # sphinx_gallery_thumbnail_number = 1
 
@@ -53,7 +53,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 26-31
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import pyvista
@@ -73,7 +73,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 33-48
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -102,6 +102,8 @@ importing pyprocar and specifying local data_dir
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
                 
+    z:\research projects\pyprocar\pyprocar\core\ebs.py:1067: ComplexWarning: Casting complex values to real discards the imaginary part
+      new_properties[prop][start_idx:end_idx] = original_value
 
 
 
@@ -115,7 +117,7 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 53-73
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -160,6 +162,7 @@ Plain mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    ij,uvwabj->uvwabi
 
 
 
@@ -167,7 +170,7 @@ Plain mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  46.365 seconds)
+   **Total running time of the script:** (0 minutes 32.865 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_isovalue_gif.py:
@@ -176,16 +179,13 @@ Plain mode
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_fermi3d_isovalue_gif.ipynb <plot_fermi3d_isovalue_gif.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi3d_isovalue_gif.py <plot_fermi3d_isovalue_gif.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_fermi3d_isovalue_gif.ipynb <plot_fermi3d_isovalue_gif.ipynb>`
 
 
 .. only:: html

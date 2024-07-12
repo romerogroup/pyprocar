@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_06-PyPoscar_plot_utils_pyposcar.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -33,7 +33,7 @@ Let's get started!
 
 .. GENERATED FROM PYTHON SOURCE LINES 15-26
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -60,7 +60,7 @@ Utility function for creating GIF visualizations
 
 .. GENERATED FROM PYTHON SOURCE LINES 29-42
 
-.. code-block:: default
+.. code-block:: Python
 
 
     def create_gif(atoms, labels, unit_cell, save_file):
@@ -89,7 +89,7 @@ Scaling Vacuum Space in the Lattice
 
 .. GENERATED FROM PYTHON SOURCE LINES 45-82
 
-.. code-block:: default
+.. code-block:: Python
 
 
     a = p.poscarUtils.poscar_modify(os.path.join(data_dir, "POSCAR-9AGNR.vasp"), verbose=False)
@@ -173,7 +173,7 @@ Creating a Supercell
 
 .. GENERATED FROM PYTHON SOURCE LINES 85-121
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print('\n\nNow I will make an supercell 3x1x1')
@@ -251,7 +251,7 @@ Introducing Defects
 
 .. GENERATED FROM PYTHON SOURCE LINES 124-173
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print('\n\nFinally I want to create a defect by changing atoms #28, #29 to B and N, respectively')
@@ -343,7 +343,7 @@ Introducing Defects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.874 seconds)
+   **Total running time of the script:** (0 minutes 23.325 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_utils_pyposcar.py:
@@ -352,16 +352,13 @@ Introducing Defects
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_utils_pyposcar.ipynb <plot_utils_pyposcar.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_utils_pyposcar.py <plot_utils_pyposcar.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_utils_pyposcar.ipynb <plot_utils_pyposcar.ipynb>`
 
 
 .. only:: html

@@ -533,7 +533,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-00-band-structure-plot-ipr-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-inverse-participation-ratio">
 <span id="ref-plot-ipr"></span><span id="sphx-glr-examples-00-band-structure-plot-ipr-py"></span><h1>Plotting Inverse participation ratio<a class="headerlink" href="#plotting-inverse-participation-ratio" title="Permalink to this heading">#</a></h1>
@@ -579,7 +579,7 @@ Use the following code to do this. Once downloaded, specify the <cite>data_dir</
 <section id="setting-up-the-environment">
 <h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Permalink to this heading">#</a></h2>
 <p>First, we will import the necessary libraries and set up our data directory path.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="c1"># Define the directory containing the example data</span>
@@ -597,7 +597,7 @@ The whole slab has six van der Waals layers (quintuple layers), each is five ato
 in contrast a extended state cover the six quintuple layers.
 The ratio between the localization of both types of states is 1 to 3, and the $IPR$ has enough resolution to provide a clear visual identification.
 The PyProcar code is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="n">bi2se3_data_dir</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="n">bi2se3_data_dir</span><span class="p">,</span>
                    <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;ipr&#39;</span><span class="p">,</span>
                    <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -610,7 +610,7 @@ The PyProcar code is:</p>
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -632,7 +632,7 @@ but only occupied for the spin majority. Hence, according to the optical transit
 of the spin channel labelled <cite>spin-1</cite>. The calculation of the main emission line involves a calculation of the excited state,
 which can be simulated by fixing the occupations of the mentioned levels, <strong>i.e.</strong> the <span class="math notranslate nohighlight">\(\Delta\)</span> SCFmethod.[Jin2021]
 The pyprocar code is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="n">C_data_dir</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span><span class="n">dirname</span><span class="o">=</span><span class="n">C_data_dir</span><span class="p">,</span>
                    <span class="n">elimit</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span><span class="mf">2.5</span><span class="p">],</span>
                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;ipr&#39;</span><span class="p">,</span>
                    <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -645,14 +645,14 @@ The pyprocar code is:</p>
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
             WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
             ----------------------------------------------------------------------------------------------------------
 
-z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:607: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:604: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
   self.ax.set_xlim(interval)
 Atomic plot: bands.shape  : (2, 540, 2)
 Atomic plot: spd.shape    : (2, 540, 215, 1, 9, 2)
@@ -661,13 +661,13 @@ Atomic plot: kpoints.shape: (2, 3)
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.836 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 22.809 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-ipr-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/cc17acbaf1a277703c0d7600aeaf250a/plot_ipr.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ipr.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/a5890fb88d040bf16c474641f98c10b9/plot_ipr.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ipr.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cc17acbaf1a277703c0d7600aeaf250a/plot_ipr.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ipr.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

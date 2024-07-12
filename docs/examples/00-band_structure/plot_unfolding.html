@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-00-band-structure-plot-unfolding-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="unfolding-band-structure">
 <span id="ref-plot-unfolding"></span><span id="sphx-glr-examples-00-band-structure-plot-unfolding-py"></span><h1>Unfolding Band Structure<a class="headerlink" href="#unfolding-band-structure" title="Permalink to this heading">#</a></h1>
@@ -555,7 +555,7 @@ to download the full example code</p>
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -566,7 +566,7 @@ to download the full example code</p>
 </div>
 <section id="plotting-primitive-bands">
 <h2>Plotting primitive bands<a class="headerlink" href="#plotting-primitive-bands" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">bandsplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">fermi</span><span class="o">=</span><span class="mf">4.993523</span><span class="p">,</span>
@@ -579,7 +579,7 @@ to download the full example code</p>
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -593,7 +593,7 @@ to download the full example code</p>
 the POSCAR and KPOINTS will be different from the primitive cell
 For the POSCAR, we create a 2 2 2 supercell from the primitive.
 For the KPOINTS, the paths need to be changed to reflect the change in the unitcell</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">unfold</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">unfold</span><span class="p">(</span>
         <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
         <span class="n">unfold_mode</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span>
@@ -611,7 +611,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -637,24 +637,20 @@ Developers:
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             --------------------------------------------------------
 
-z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:684: UserWarning: Legend does not support handles for list instances.
-A proxy artist may be used instead.
-See: https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html#controlling-the-legend-entries
-  self.ax.legend(self.handles, labels)
 
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  23.988 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 21.062 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-unfolding-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/cc74c3bdb45c45890fbe02c5da28aa4c/plot_unfolding.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_unfolding.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/2ccce647e0ac59b9f555853f69095794/plot_unfolding.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_unfolding.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cc74c3bdb45c45890fbe02c5da28aa4c/plot_unfolding.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_unfolding.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

@@ -87,6 +87,7 @@ pyprocar.dosplot(
     atoms=[0],
     orbitals=[4,5,6,7,8],
     mode='parametric_line',
+    clim=[0,1],
     figure_size=(10, 6),  # Figure size (width, height)
     dpi=300,  # Dots per inch
     grid=True, # Boolean for grid

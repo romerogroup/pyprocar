@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_03-fermi2d_plot_fermi2d_configurations.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -40,7 +40,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. GENERATED FROM PYTHON SOURCE LINES 22-28
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -57,7 +57,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. GENERATED FROM PYTHON SOURCE LINES 29-44
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Section 1: Locating and Printing Configuration Files
@@ -96,7 +96,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -165,7 +165,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. GENERATED FROM PYTHON SOURCE LINES 45-65
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Section 2: Spin Texture Projection with Custom Settings
@@ -208,7 +208,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -260,7 +260,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. GENERATED FROM PYTHON SOURCE LINES 66-86
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Section 3: Adjusting DPI
@@ -303,7 +303,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -356,7 +356,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  18.335 seconds)
+   **Total running time of the script:** (0 minutes 12.888 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_configurations.py:
@@ -365,16 +365,13 @@ Before diving into plotting, we need to download the example files. Use the foll
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_fermi2d_configurations.ipynb <plot_fermi2d_configurations.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi2d_configurations.py <plot_fermi2d_configurations.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_fermi2d_configurations.ipynb <plot_fermi2d_configurations.ipynb>`
 
 
 .. only:: html

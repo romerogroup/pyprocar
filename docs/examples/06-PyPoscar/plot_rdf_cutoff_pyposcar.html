@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-06-pyposcar-plot-rdf-cutoff-pyposcar-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="analyzing-radial-distribution-functions-rdf">
 <span id="ref-example-rdf"></span><span id="sphx-glr-examples-06-pyposcar-plot-rdf-cutoff-pyposcar-py"></span><h1>Analyzing Radial Distribution Functions (RDF)<a class="headerlink" href="#analyzing-radial-distribution-functions-rdf" title="Permalink to this heading">#</a></h1>
@@ -545,7 +545,7 @@ to download the full example code</p>
 <li><p>Visualize the results using <cite>matplotlib</cite>.</p></li>
 </ol>
 <p>Let’s dive in!</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar.pyposcar</span> <span class="k">as</span> <span class="nn">p</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
@@ -560,14 +560,14 @@ to download the full example code</p>
 </div>
 <section id="parsing-the-poscar-file">
 <h2>Parsing the POSCAR file<a class="headerlink" href="#parsing-the-poscar-file" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s1">&#39;POSCAR-AGNR-defect.vasp&#39;</span><span class="p">))</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s1">&#39;POSCAR-AGNR-defect.vasp&#39;</span><span class="p">))</span>
 <span class="n">a</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="computing-rdf-and-kde-curves">
 <h2>Computing RDF and KDE Curves<a class="headerlink" href="#computing-rdf-and-kde-curves" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_rdf</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">rdf</span><span class="o">.</span><span class="n">RDF</span><span class="p">(</span><span class="n">poscar</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">my_rdf</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">rdf</span><span class="o">.</span><span class="n">RDF</span><span class="p">(</span><span class="n">poscar</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
 <span class="n">thresholdSp</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">neighbor_thresholdSp</span>
 
 <span class="c1">#Calculates KDE curves for each species interaction</span>
@@ -606,7 +606,7 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 </section>
 <section id="visualizing-the-results">
 <h2>Visualizing the Results<a class="headerlink" href="#visualizing-the-results" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">height_ratios</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">height_ratios</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
 
 <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
@@ -684,13 +684,13 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 {0.7725483399593904, 1.8348023074035522, 1.9434419177103412, 1.7744469683442248, 1.3036753236814713, 1.4123149339882604, 1.2433199846221439, 2.0520815280171307, 1.883086578651014, 1.7140916292848973}
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.684 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.588 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-06-pyposcar-plot-rdf-cutoff-pyposcar-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/71bfca38986e8f5542d47a68b4d32e6c/plot_rdf_cutoff_pyposcar.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rdf_cutoff_pyposcar.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c3caa44ef3b6c685adf075dede68f1ff/plot_rdf_cutoff_pyposcar.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rdf_cutoff_pyposcar.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/71bfca38986e8f5542d47a68b4d32e6c/plot_rdf_cutoff_pyposcar.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rdf_cutoff_pyposcar.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

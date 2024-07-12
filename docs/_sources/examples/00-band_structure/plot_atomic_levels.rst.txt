@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -50,7 +50,7 @@ First, we will import the necessary libraries and set up our data directory path
 
 .. GENERATED FROM PYTHON SOURCE LINES 31-40
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -77,7 +77,7 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
 .. GENERATED FROM PYTHON SOURCE LINES 45-57
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Define the atom indices we're interested in
@@ -110,14 +110,14 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
                 WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
                 ----------------------------------------------------------------------------------------------------------
             
-    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:607: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:604: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
       self.ax.set_xlim(interval)
     Atomic plot: bands.shape  : (2, 246, 2)
     Atomic plot: spd.shape    : (2, 246, 98, 1, 9, 2)
@@ -130,7 +130,7 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.435 seconds)
+   **Total running time of the script:** (0 minutes 1.159 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py:
@@ -139,16 +139,13 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_atomic_levels.ipynb <plot_atomic_levels.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_atomic_levels.py <plot_atomic_levels.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_atomic_levels.ipynb <plot_atomic_levels.ipynb>`
 
 
 .. only:: html

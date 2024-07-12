@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_06-PyPoscar_plot_rdf_cutoff_pyposcar.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -36,7 +36,7 @@ Let's dive in!
 
 .. GENERATED FROM PYTHON SOURCE LINES 18-32
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -66,7 +66,7 @@ Parsing the POSCAR file
 
 .. GENERATED FROM PYTHON SOURCE LINES 35-39
 
-.. code-block:: default
+.. code-block:: Python
 
 
     a = p.poscar.Poscar(os.path.join(data_dir,'POSCAR-AGNR-defect.vasp'))
@@ -86,7 +86,7 @@ Computing RDF and KDE Curves
 
 .. GENERATED FROM PYTHON SOURCE LINES 42-65
 
-.. code-block:: default
+.. code-block:: Python
 
 
     my_rdf = p.rdf.RDF(poscar = a)
@@ -141,7 +141,7 @@ Visualizing the Results
 
 .. GENERATED FROM PYTHON SOURCE LINES 68-140
 
-.. code-block:: default
+.. code-block:: Python
 
 
     gs = GridSpec(2,2, height_ratios = [1,2])
@@ -237,7 +237,7 @@ Visualizing the Results
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.684 seconds)
+   **Total running time of the script:** (0 minutes 0.588 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_rdf_cutoff_pyposcar.py:
@@ -246,16 +246,13 @@ Visualizing the Results
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_rdf_cutoff_pyposcar.ipynb <plot_rdf_cutoff_pyposcar.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_rdf_cutoff_pyposcar.py <plot_rdf_cutoff_pyposcar.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_rdf_cutoff_pyposcar.ipynb <plot_rdf_cutoff_pyposcar.ipynb>`
 
 
 .. only:: html

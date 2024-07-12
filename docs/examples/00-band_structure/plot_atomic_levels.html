@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-00-band-structure-plot-atomic-levels-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-atomic-levels">
 <span id="ref-plotting-atomic-levels"></span><span id="sphx-glr-examples-00-band-structure-plot-atomic-levels-py"></span><h1>Plotting Atomic Levels<a class="headerlink" href="#plotting-atomic-levels" title="Permalink to this heading">#</a></h1>
@@ -558,7 +558,7 @@ to download the full example code</p>
 <section id="setting-up-the-environment">
 <h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Permalink to this heading">#</a></h2>
 <p>First, we will import the necessary libraries and set up our data directory path.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="c1"># Define the directory containing the example data</span>
@@ -570,7 +570,7 @@ to download the full example code</p>
 <h2>Plotting in Atomic Mode<a class="headerlink" href="#plotting-in-atomic-mode" title="Permalink to this heading">#</a></h2>
 <p>The atomic mode is used to plot the energy levels at a specific k-point. In this example, we focus on the GAMMA point.
 The plot will display energy levels for specific atoms in the range of -6 to 6 eV.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the atom indices we&#39;re interested in</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the atom indices we&#39;re interested in</span>
 <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="mi">96</span><span class="p">,</span> <span class="mi">97</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">44</span><span class="p">]</span>
 
 <span class="c1"># Plot the atomic bands</span>
@@ -589,14 +589,14 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
             WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
             ----------------------------------------------------------------------------------------------------------
 
-z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:607: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:604: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
   self.ax.set_xlim(interval)
 Atomic plot: bands.shape  : (2, 246, 2)
 Atomic plot: spd.shape    : (2, 246, 98, 1, 9, 2)
@@ -605,13 +605,13 @@ Atomic plot: kpoints.shape: (2, 3)
 (&lt;Figure size 900x600 with 2 Axes&gt;, &lt;Axes: ylabel=&#39;E (eV)&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.435 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.159 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-atomic-levels-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/f1ef24696748d66839bc7dfbc0aafea8/plot_atomic_levels.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_atomic_levels.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/3199d9cf1b4a404903cfdfdd5d748571/plot_atomic_levels.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_atomic_levels.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/f1ef24696748d66839bc7dfbc0aafea8/plot_atomic_levels.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_atomic_levels.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

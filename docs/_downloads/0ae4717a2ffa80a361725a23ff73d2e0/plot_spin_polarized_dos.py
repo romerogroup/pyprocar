@@ -48,6 +48,7 @@ pyprocar.dosplot(
                 code='vasp', 
                 mode='plain',
                 fermi=5.590136,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 
@@ -69,6 +70,7 @@ pyprocar.dosplot(
                 fermi=5.590136,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 
@@ -90,6 +92,7 @@ pyprocar.dosplot(
                 fermi=5.590136,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 

@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_04-fermi3d_plot_fermi3d_spin-polarized.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -40,7 +40,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 23-25
 
-.. code-block:: default
+.. code-block:: Python
 
     # sphinx_gallery_thumbnail_number = 2
 
@@ -53,7 +53,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 26-31
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import pyvista
@@ -73,7 +73,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 33-49
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -116,7 +116,7 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 54-66
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # spins in spins polarized calculations specifies which energy bands to plot
@@ -153,6 +153,7 @@ Plain mode
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    ij,uvwabj->uvwabi
 
 
 
@@ -166,7 +167,7 @@ Parametric mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 71-92
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Here you can look at the atomic projections on a given spin energy bands
@@ -241,7 +242,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.231 seconds)
+   **Total running time of the script:** (0 minutes 5.801 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_spin-polarized.py:
@@ -250,16 +251,13 @@ Parametric mode
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_fermi3d_spin-polarized.ipynb <plot_fermi3d_spin-polarized.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi3d_spin-polarized.py <plot_fermi3d_spin-polarized.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_fermi3d_spin-polarized.ipynb <plot_fermi3d_spin-polarized.ipynb>`
 
 
 .. only:: html

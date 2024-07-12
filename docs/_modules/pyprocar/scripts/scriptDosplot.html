@@ -464,11 +464,11 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">welcome</span><span class="p">,</span> <span class="n">ROOT</span>
 <span class="kn">from</span> <span class="nn">pyprocar.utils.info</span> <span class="kn">import</span> <span class="n">orbital_names</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">io</span>
-<span class="kn">from</span> <span class="nn">..plotter</span> <span class="kn">import</span> <span class="n">DOSPlot</span>
+<span class="kn">from</span> <span class="nn">pyprocar</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span> <span class="nn">pyprocar.plotter</span> <span class="kn">import</span> <span class="n">DOSPlot</span>
 
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;pyprocar&#39;</span><span class="p">,</span><span class="s1">&#39;cfg&#39;</span><span class="p">,</span><span class="s1">&#39;dos.yml&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-    <span class="n">plot_opts</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyprocar.cfg</span> <span class="kn">import</span> <span class="n">ConfigFactory</span><span class="p">,</span> <span class="n">ConfigManager</span><span class="p">,</span> <span class="n">PlotType</span>
+
 
 <div class="viewcode-block" id="dosplot"><a class="viewcode-back" href="../../../api/scripts/_autosummary/pyprocar.scripts.dosplot.html#pyprocar.scripts.dosplot">[docs]</a><span class="k">def</span> <span class="nf">dosplot</span><span class="p">(</span>
         <span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span>
@@ -701,7 +701,9 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; fig.show()</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+    <span class="n">default_config</span> <span class="o">=</span> <span class="n">ConfigFactory</span><span class="o">.</span><span class="n">create_config</span><span class="p">(</span><span class="n">PlotType</span><span class="o">.</span><span class="n">DENSITY_OF_STATES</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">ConfigManager</span><span class="o">.</span><span class="n">merge_configs</span><span class="p">(</span><span class="n">default_config</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
     <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
            <span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span> <span class="s1">&#39;stack&#39;</span><span class="p">,</span> 
            <span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span> <span class="s1">&#39;stack_species&#39;</span><span class="p">]</span>
@@ -716,7 +718,7 @@ document.write(`
 <span class="s2">            --------------------------------------------------------&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">print_plot_opts</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">plot_opts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">default_config</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
     
 
@@ -746,10 +748,10 @@ document.write(`
     <span class="k">if</span> <span class="n">elimit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">elimit</span> <span class="o">=</span> <span class="p">[</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">dos</span><span class="o">.</span><span class="n">energies</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
     
-    <span class="n">edos_plot</span> <span class="o">=</span> <span class="n">DOSPlot</span><span class="p">(</span><span class="n">dos</span> <span class="o">=</span> <span class="n">dos</span><span class="p">,</span> <span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">edos_plot</span> <span class="o">=</span> <span class="n">DOSPlot</span><span class="p">(</span><span class="n">dos</span> <span class="o">=</span> <span class="n">dos</span><span class="p">,</span> <span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;plain&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_dos</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">)</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_dos</span><span class="p">(</span><span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -758,12 +760,11 @@ document.write(`
             <span class="n">spins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edos_plot</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span><span class="p">)))</span>
         <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">orbitals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edos_plot</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_parametric</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_parametric</span><span class="p">(</span>
                         <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                         <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
                         <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-                        <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
-                        <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span>
+                        <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;parametric_line&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -773,51 +774,45 @@ document.write(`
         <span class="k">if</span> <span class="n">orbitals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">orbitals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edos_plot</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">projected</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
         
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_parametric_line</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_parametric_line</span><span class="p">(</span>
                         <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                         <span class="n">principal_q_numbers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
                         <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                         <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-                        <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span>
                         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack_species&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_species</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_species</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack_orbitals&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_orbitals</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_orbitals</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;stack&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay_species&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_species</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_species</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+
             <span class="n">overlay_mode</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay_orbitals&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_orbitals</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack_orbitals</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
             <span class="n">overlay_mode</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;overlay&quot;</span><span class="p">:</span>
-        <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span>
+        <span class="n">values_dict</span> <span class="o">=</span> <span class="n">edos_plot</span><span class="o">.</span><span class="n">plot_stack</span><span class="p">(</span>
             <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
             <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
             <span class="n">overlay_mode</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-06-pyposcar-plot-clusters-pyposcar-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="visualizing-clusters-in-bi2se3-slab">
 <span id="ref-example-cluster-visualization"></span><span id="sphx-glr-examples-06-pyposcar-plot-clusters-pyposcar-py"></span><h1>Visualizing Clusters in Bi2Se3 Slab<a class="headerlink" href="#visualizing-clusters-in-bi2se3-slab" title="Permalink to this heading">#</a></h1>
@@ -543,7 +543,7 @@ to download the full example code</p>
 <li><p>Visualize the atomic clusters using <cite>pyvista</cite>.</p></li>
 </ol>
 <p>Let’s get started!</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">import</span> <span class="nn">pyprocar.pyposcar</span> <span class="k">as</span> <span class="nn">p</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -557,7 +557,7 @@ to download the full example code</p>
 </div>
 <section id="utility-function-for-creating-gif-visualizations">
 <h2>Utility function for creating GIF visualizations<a class="headerlink" href="#utility-function-for-creating-gif-visualizations" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_gif</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">unit_cell</span><span class="p">,</span><span class="n">scalars</span><span class="p">,</span> <span class="n">save_file</span><span class="p">):</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_gif</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">unit_cell</span><span class="p">,</span><span class="n">scalars</span><span class="p">,</span> <span class="n">save_file</span><span class="p">):</span>
     <span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
     <span class="n">title</span> <span class="o">=</span> <span class="n">save_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">plotter</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
@@ -573,7 +573,7 @@ to download the full example code</p>
 </section>
 <section id="parsing-the-poscar-and-identifying-clusters">
 <h2>Parsing the POSCAR and Identifying Clusters<a class="headerlink" href="#parsing-the-poscar-and-identifying-clusters" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading a slab of Bi2Se3&#39;</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading a slab of Bi2Se3&#39;</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s2">&quot;Bi2Se3.vasp&quot;</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">a</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
 
@@ -599,7 +599,7 @@ The Quintuple layers are
 </section>
 <section id="visualizing-the-clusters">
 <h2>Visualizing the Clusters<a class="headerlink" href="#visualizing-the-clusters" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert positions to Cartesian coordinates for visualization</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert positions to Cartesian coordinates for visualization</span>
 <span class="n">atoms_before</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">))</span>
 <span class="n">atoms_before</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">elm</span>
 
@@ -620,13 +620,13 @@ The Quintuple layers are
 <li><img src="../../_images/sphx_glr_plot_clusters_pyposcar_001.gif" srcset="../../_images/sphx_glr_plot_clusters_pyposcar_001.gif" alt="plot clusters pyposcar" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_clusters_pyposcar_002.gif" srcset="../../_images/sphx_glr_plot_clusters_pyposcar_002.gif" alt="plot clusters pyposcar" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.657 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.684 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-06-pyposcar-plot-clusters-pyposcar-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/60cd3f6ee263a842437e4f641e6f3393/plot_clusters_pyposcar.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_clusters_pyposcar.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/ddce4f8cfa4d56c4c6cd0bbd3fee3ab6/plot_clusters_pyposcar.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_clusters_pyposcar.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/60cd3f6ee263a842437e4f641e6f3393/plot_clusters_pyposcar.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_clusters_pyposcar.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

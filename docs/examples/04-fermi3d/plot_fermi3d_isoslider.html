@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-04-fermi3d-plot-fermi3d-isoslider-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-fermi3d-isoslider">
 <span id="ref-plotting-fermi3d-isoslider"></span><span id="sphx-glr-examples-04-fermi3d-plot-fermi3d-isoslider-py"></span><h1>Plotting fermi3d isoslider<a class="headerlink" href="#plotting-fermi3d-isoslider" title="Permalink to this heading">#</a></h1>
@@ -549,16 +549,16 @@ to download the full example code</p>
 </pre></div>
 </div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
 <span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
 <span class="n">pyvista</span><span class="o">.</span><span class="n">OFF_SCREEN</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
@@ -574,13 +574,16 @@ to download the full example code</p>
                                     <span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
----------------------------------------------------------------------------------------------------------------
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
+                ---------------------------------------------------------------------------------------------------------------
+
+z:\research projects\pyprocar\pyprocar\core\ebs.py:1067: ComplexWarning: Casting complex values to real discards the imaginary part
+  new_properties[prop][start_idx:end_idx] = original_value
 </pre></div>
 </div>
 <section id="plain-mode">
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># iso_range will be the energy range around the fermi level. 2 would search 1 ev above and below.</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># iso_range will be the energy range around the fermi level. 2 would search 1 ev above and below.</span>
 <span class="n">iso_range</span><span class="o">=</span><span class="mi">2</span>
 
 <span class="c1"># iso_surface will generate 5 surfaces equally space throughout the range.</span>
@@ -595,23 +598,25 @@ to download the full example code</p>
                                  <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_fermi3d_isoslider_001.png" srcset="../../_images/sphx_glr_plot_fermi3d_isoslider_001.png" alt="plot fermi3d isoslider" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>--------------------------------------------------------
-There are additional plot options that are defined in a configuration file.
-You can change these configurations by passing the keyword argument to the function
-To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_fermi3d_isoslider_001.png" srcset="../../_images/sphx_glr_plot_fermi3d_isoslider_001.png" alt="plot fermi3d isoslider" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file.
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
 
-Here is a list modes : plain , parametric , spin_texture , overlay
-Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
---------------------------------------------------------
+                Here is a list modes : plain , parametric , spin_texture , overlay
+                Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+                --------------------------------------------------------
+
+ij,uvwabj-&gt;uvwabi
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  47.330 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 32.153 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plot-fermi3d-isoslider-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/78d8ca0d5618d02c99d445ba62bf5532/plot_fermi3d_isoslider.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi3d_isoslider.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d8d4fa5958c7469cbc4e4510d197e15e/plot_fermi3d_isoslider.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_fermi3d_isoslider.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/78d8ca0d5618d02c99d445ba62bf5532/plot_fermi3d_isoslider.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi3d_isoslider.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

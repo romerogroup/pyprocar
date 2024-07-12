@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-05-other-plot-ebs-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="example-of-finding-the-bandgap">
 <span id="ref-example-ebs"></span><span id="sphx-glr-examples-05-other-plot-ebs-py"></span><h1>Example of finding the bandgap<a class="headerlink" href="#example-of-finding-the-bandgap" title="Permalink to this heading">#</a></h1>
@@ -555,7 +555,7 @@ related to the electronic band structure.</p>
 </pre></div>
 </div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
 
 <span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
 <span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
@@ -563,7 +563,7 @@ related to the electronic band structure.</p>
 </pre></div>
 </div>
 <p>importing pyprocar and specify the local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
@@ -571,7 +571,7 @@ related to the electronic band structure.</p>
 </pre></div>
 </div>
 <p>Initialize the parser object and get the ElectronicBandStructure</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parser</span><span class="o">=</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span><span class="nb">dir</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">parser</span><span class="o">=</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Parser</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span><span class="nb">dir</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 <span class="n">ebs</span><span class="o">=</span><span class="n">parser</span><span class="o">.</span><span class="n">ebs</span>
 <span class="n">e_fermi</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">ebs</span><span class="o">.</span><span class="n">efermi</span>
 <span class="n">structure</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">structure</span>
@@ -581,7 +581,7 @@ related to the electronic band structure.</p>
 </pre></div>
 </div>
 <p>You can print the object to see some information about the Band Structure</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Enectronic Band Structure
@@ -593,7 +593,7 @@ Total number of orbitals = 9
 </pre></div>
 </div>
 <p>Let’s plot the kpoints</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
 <span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -603,7 +603,7 @@ Total number of orbitals = 9
 </section>
 <section id="bands">
 <h2>Bands<a class="headerlink" href="#bands" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kpoints</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">kpoints</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
@@ -614,7 +614,7 @@ Total number of orbitals = 9
 <img src="../../_images/sphx_glr_plot_ebs_002.png" srcset="../../_images/sphx_glr_plot_ebs_002.png" alt="plot ebs" class = "sphx-glr-single-img"/></section>
 <section id="projections">
 <h2>Projections<a class="headerlink" href="#projections" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-atom_0-orbital_5-spin-0&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">projected</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
@@ -628,7 +628,7 @@ Total number of orbitals = 9
 </section>
 <section id="gradients">
 <h2>Gradients<a class="headerlink" href="#gradients" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands_gradient</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands_gradient</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-gradients&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">bands_gradient</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># Use the Glyph filter to generate arrows for the vectors</span>
@@ -638,13 +638,20 @@ Total number of orbitals = 9
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_ebs_004.png" srcset="../../_images/sphx_glr_plot_ebs_004.png" alt="plot ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 3, 8, 1)
+<div class="sphx-glr-script-out highlight-pytb notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;Z:\Research Projects\pyprocar\examples\05-other\plot_ebs.py&quot;</span>, line <span class="m">99</span>, in <span class="n">&lt;module&gt;</span>
+<span class="w">    </span><span class="n">arrows</span> <span class="o">=</span> <span class="n">kpoints</span><span class="o">.</span><span class="n">glyph</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;band_0-gradients&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.08</span><span class="p">)</span>
+  File <span class="nb">&quot;Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\filters\data_set.py&quot;</span>, line <span class="m">2315</span>, in <span class="n">glyph</span>
+<span class="w">    </span><span class="n">dataset</span><span class="o">.</span><span class="n">set_active_vectors</span><span class="p">(</span><span class="n">orient</span><span class="p">,</span> <span class="n">preference</span><span class="o">=</span><span class="n">prefer</span><span class="p">)</span>
+  File <span class="nb">&quot;Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\dataset.py&quot;</span>, line <span class="m">692</span>, in <span class="n">set_active_vectors</span>
+<span class="w">    </span><span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="gr">ValueError</span>: <span class="n">Data field (band_0-gradients) with type (FieldAssociation.POINT) could not be set as the active vectors</span>
 </pre></div>
 </div>
 </section>
 <section id="band-fermi-velocities">
 <h2>Band/Fermi velocities<a class="headerlink" href="#band-fermi-velocities" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-band_velocity&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_velocity</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-band_speed&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">fermi_speed</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
@@ -655,13 +662,10 @@ Total number of orbitals = 9
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_ebs_005.png" srcset="../../_images/sphx_glr_plot_ebs_005.png" alt="plot ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 3, 8, 1)
-</pre></div>
-</div>
 </section>
 <section id="effective-mass">
 <h2>Effective mass<a class="headerlink" href="#effective-mass" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">harmonic_average_effective_mass</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ebs</span><span class="o">.</span><span class="n">harmonic_average_effective_mass</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 <span class="n">kpoints</span><span class="p">[</span><span class="s1">&#39;band_0-harmonic_average_effective_mass&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">ebs</span><span class="o">.</span><span class="n">harmonic_average_effective_mass</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">p</span><span class="o">=</span><span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
@@ -669,16 +673,13 @@ Total number of orbitals = 9
 <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_ebs_006.png" srcset="../../_images/sphx_glr_plot_ebs_006.png" alt="plot ebs" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(3375, 8, 1)
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.919 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.308 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-05-other-plot-ebs-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/83454b89a3ab4c7411ef98bb0352ed7e/plot_ebs.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ebs.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d532a8b4521662fcf3da475ac4bf8821/plot_ebs.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ebs.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/83454b89a3ab4c7411ef98bb0352ed7e/plot_ebs.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ebs.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

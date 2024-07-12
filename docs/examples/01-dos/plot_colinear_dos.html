@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-01-dos-plot-colinear-dos-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-density-of-states">
 <span id="ref-plotting-colinear-dos"></span><span id="sphx-glr-examples-01-dos-plot-colinear-dos-py"></span><h1>Plotting density of states<a class="headerlink" href="#plotting-density-of-states" title="Permalink to this heading">#</a></h1>
@@ -541,26 +541,26 @@ to download the full example code</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-text">Downloading example</span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">data_dir</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">download_example</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                             <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Fe&#39;</span><span class="p">,</span>
-                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                             <span class="n">material</span><span class="o">=</span><span class="s1">&#39;SrVO3&#39;</span><span class="p">,</span>
+                             <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                              <span class="n">spin_calc_type</span><span class="o">=</span><span class="s1">&#39;non-spin-polarized&#39;</span><span class="p">,</span>
-                             <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;dos&#39;</span><span class="p">)</span>
+                             <span class="n">calc_type</span><span class="o">=</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">qe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">dos&quot;</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">SrVO3</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
 </pre></div>
 </div>
 <section id="plain-mode">
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -579,16 +579,17 @@ to download the full example code</p>
 <section id="parametric-mode">
 <h2>Parametric mode<a class="headerlink" href="#parametric-mode" title="Permalink to this heading">#</a></h2>
 <p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -608,16 +609,17 @@ to download the full example code</p>
 <section id="parametric-line-mode">
 <h2>parametric_line mode<a class="headerlink" href="#parametric-line-mode" title="Permalink to this heading">#</a></h2>
 <p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parametric_line&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -636,13 +638,13 @@ to download the full example code</p>
 </section>
 <section id="stack-species-mode">
 <h2>stack_species mode<a class="headerlink" href="#stack-species-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_species&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -663,12 +665,12 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 </section>
 <section id="stack-orbtials-mode">
 <h2>stack_orbtials mode<a class="headerlink" href="#stack-orbtials-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack_orbitals&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -681,7 +683,7 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
-The plot only considers atoms [&#39;Fe&#39;]
+The plot only considers atoms [&#39;O&#39; &#39;O&#39; &#39;O&#39;]
 
 (&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
@@ -689,11 +691,11 @@ The plot only considers atoms [&#39;Fe&#39;]
 </section>
 <section id="stack-mode">
 <h2>stack mode<a class="headerlink" href="#stack-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">Sr</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">O</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">V</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;stack&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -712,13 +714,13 @@ The plot only considers atoms [&#39;Fe&#39;]
 </section>
 <section id="overlay-species-mode">
 <h2>overlay_species mode<a class="headerlink" href="#overlay-species-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_species&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -739,12 +741,12 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 </section>
 <section id="overlay-orbtials-mode">
 <h2>overlay_orbtials mode<a class="headerlink" href="#overlay-orbtials-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay_orbitals&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
@@ -757,7 +759,7 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 
             Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
             --------------------------------------------------------
-The plot only considers atoms [&#39;Fe&#39;]
+The plot only considers atoms [&#39;Sr&#39;]
 
 (&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
@@ -765,11 +767,11 @@ The plot only considers atoms [&#39;Fe&#39;]
 </section>
 <section id="overlay-mode">
 <h2>overlay mode<a class="headerlink" href="#overlay-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">Sr</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">O</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">V</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
-                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;qe&#39;</span><span class="p">,</span>
+                <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;overlay&#39;</span><span class="p">,</span>
-                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.599480</span><span class="p">,</span>
+                <span class="n">fermi</span><span class="o">=</span><span class="mf">5.3017</span><span class="p">,</span>
                 <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -785,13 +787,13 @@ The plot only considers atoms [&#39;Fe&#39;]
 (&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  30.287 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.252 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plot-colinear-dos-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/f543fc33d0c7e1250dd18eb4d5567496/plot_colinear_dos.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_colinear_dos.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1eece99f8b23cdc98ef72380a2df4e50/plot_colinear_dos.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_colinear_dos.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/f543fc33d0c7e1250dd18eb4d5567496/plot_colinear_dos.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_colinear_dos.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

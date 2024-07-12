@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_01-dos_plot_spin_polarized_dos.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-30
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -66,7 +66,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 
 .. GENERATED FROM PYTHON SOURCE LINES 36-42
 
-.. code-block:: default
+.. code-block:: Python
 
     pyprocar.dosplot(
                     code='vasp', 
@@ -106,15 +106,16 @@ The line-styles or line-colors, these may be changed in the ebs section in the :
 
 The keyword spins can also be used to select which spin bands to plot
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-54
+.. GENERATED FROM PYTHON SOURCE LINES 46-55
 
-.. code-block:: default
+.. code-block:: Python
 
     spins = [1]
     pyprocar.dosplot(
                     code='vasp', 
                     mode='plain',
                     fermi=5.590136,
+                    clim=[0,1],
                     spins=spins,
                     dirname=data_dir)
 
@@ -144,7 +145,7 @@ The keyword spins can also be used to select which spin bands to plot
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-62
+.. GENERATED FROM PYTHON SOURCE LINES 56-63
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -154,9 +155,9 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-75
+.. GENERATED FROM PYTHON SOURCE LINES 63-77
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
@@ -168,6 +169,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                     fermi=5.590136,
                     atoms=atoms,
                     orbitals=orbitals,
+                    clim=[0,1],
                     spins=spins,
                     dirname=data_dir)
 
@@ -197,7 +199,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-83
+.. GENERATED FROM PYTHON SOURCE LINES 78-85
 
 parametric_line mode
 +++++++++++++++++++++++++++++++++++++++
@@ -207,9 +209,9 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-98
+.. GENERATED FROM PYTHON SOURCE LINES 85-101
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
@@ -221,6 +223,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                     fermi=5.590136,
                     atoms=atoms,
                     orbitals=orbitals,
+                    clim=[0,1],
                     spins=spins,
                     dirname=data_dir)
 
@@ -252,7 +255,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-104
+.. GENERATED FROM PYTHON SOURCE LINES 102-107
 
 stack_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -260,9 +263,9 @@ stack_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-115
+.. GENERATED FROM PYTHON SOURCE LINES 107-118
 
-.. code-block:: default
+.. code-block:: Python
 
     orbitals=[4,5,6,7,8]
     spins=[0,1]
@@ -302,7 +305,7 @@ stack_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-121
+.. GENERATED FROM PYTHON SOURCE LINES 119-124
 
 stack_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -310,9 +313,9 @@ stack_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-133
+.. GENERATED FROM PYTHON SOURCE LINES 124-136
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     spins=[0,1]
@@ -353,7 +356,7 @@ stack_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-139
+.. GENERATED FROM PYTHON SOURCE LINES 137-142
 
 stack mode
 +++++++++++++++++++++++++++++++++++++++
@@ -361,9 +364,9 @@ stack mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-151
+.. GENERATED FROM PYTHON SOURCE LINES 142-154
 
-.. code-block:: default
+.. code-block:: Python
 
 
     items={'Fe':[4,5,6,7,8]}
@@ -403,7 +406,7 @@ stack mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 152-157
+.. GENERATED FROM PYTHON SOURCE LINES 155-160
 
 overlay_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -411,9 +414,9 @@ overlay_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 157-168
+.. GENERATED FROM PYTHON SOURCE LINES 160-171
 
-.. code-block:: default
+.. code-block:: Python
 
     orbitals=[4,5,6,7,8]
     spins=[0,1]
@@ -453,7 +456,7 @@ overlay_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 169-174
+.. GENERATED FROM PYTHON SOURCE LINES 172-177
 
 overlay_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -461,9 +464,9 @@ overlay_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 174-186
+.. GENERATED FROM PYTHON SOURCE LINES 177-189
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     spins=[0,1]
@@ -504,7 +507,7 @@ overlay_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 187-192
+.. GENERATED FROM PYTHON SOURCE LINES 190-195
 
 overlay mode
 +++++++++++++++++++++++++++++++++++++++
@@ -512,9 +515,9 @@ overlay mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 192-202
+.. GENERATED FROM PYTHON SOURCE LINES 195-205
 
-.. code-block:: default
+.. code-block:: Python
 
 
     items={'Fe':[4,5,6,7,8]}
@@ -555,7 +558,7 @@ overlay mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.761 seconds)
+   **Total running time of the script:** (0 minutes 3.222 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_spin_polarized_dos.py:
@@ -564,16 +567,13 @@ overlay mode
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_spin_polarized_dos.ipynb <plot_spin_polarized_dos.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_spin_polarized_dos.py <plot_spin_polarized_dos.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_spin_polarized_dos.ipynb <plot_spin_polarized_dos.ipynb>`
 
 
 .. only:: html

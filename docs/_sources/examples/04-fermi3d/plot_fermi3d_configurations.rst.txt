@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-42
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import pyvista
@@ -80,7 +80,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. GENERATED FROM PYTHON SOURCE LINES 43-65
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Section 1: Plain Mode
@@ -183,13 +183,14 @@ Before diving into plotting, we need to download the example files. Use the foll
     orbit_gif_step: 0.05
     orbit_mp4_n_points: 36
     orbit_mp4_step: 0.05
+    ij,uvwabj->uvwabi
 
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 66-82
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Section 2: Parametric Mode with Custom Settings
@@ -237,7 +238,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.657 seconds)
+   **Total running time of the script:** (0 minutes 3.328 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py:
@@ -246,16 +247,13 @@ Before diving into plotting, we need to download the example files. Use the foll
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_fermi3d_configurations.ipynb <plot_fermi3d_configurations.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi3d_configurations.py <plot_fermi3d_configurations.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_fermi3d_configurations.ipynb <plot_fermi3d_configurations.ipynb>`
 
 
 .. only:: html

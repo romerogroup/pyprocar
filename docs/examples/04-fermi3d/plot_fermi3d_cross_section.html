@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-04-fermi3d-plot-fermi3d-cross-section-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-fermi3d-cross-section">
 <span id="ref-plotting-fermi3d-cross-section"></span><span id="sphx-glr-examples-04-fermi3d-plot-fermi3d-cross-section-py"></span><h1>Plotting fermi3d cross_section<a class="headerlink" href="#plotting-fermi3d-cross-section" title="Permalink to this heading">#</a></h1>
@@ -549,16 +549,16 @@ to download the full example code</p>
 </pre></div>
 </div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
 <span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
 <span class="n">pyvista</span><span class="o">.</span><span class="n">OFF_SCREEN</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
@@ -579,7 +579,7 @@ to download the full example code</p>
 </div>
 <section id="cross-section">
 <h2>Cross section<a class="headerlink" href="#cross-section" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># show_cross_section_area can show the outermost cross section area</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># show_cross_section_area can show the outermost cross section area</span>
 <span class="n">show_cross_section_area</span><span class="o">=</span><span class="kc">False</span>
 
 <span class="c1"># slice_normal is the initial orientation of the the cross section plane widget</span>
@@ -606,20 +606,22 @@ to download the full example code</p>
                               <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_fermi3d_cross_section_001.png" srcset="../../_images/sphx_glr_plot_fermi3d_cross_section_001.png" alt="plot fermi3d cross section" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>--------------------------------------------------------
-There are additional plot options that are defined in a configuration file.
-You can change these configurations by passing the keyword argument to the function
-To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_fermi3d_cross_section_001.png" srcset="../../_images/sphx_glr_plot_fermi3d_cross_section_001.png" alt="plot fermi3d cross section" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                --------------------------------------------------------
+                There are additional plot options that are defined in a configuration file.
+                You can change these configurations by passing the keyword argument to the function
+                To print a list of plot options set print_plot_opts=True
 
-Here is a list modes : plain , parametric , spin_texture , overlay
-Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
---------------------------------------------------------
+                Here is a list modes : plain , parametric , spin_texture , overlay
+                Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+                --------------------------------------------------------
+
+ij,uvwabj-&gt;uvwabi
 </pre></div>
 </div>
 </section>
 <section id="cross-section-save-slice">
 <h2>Cross section. Save slice<a class="headerlink" href="#cross-section-save-slice" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># when you run this code, you will be able to adjust the widget manually.</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># when you run this code, you will be able to adjust the widget manually.</span>
 <span class="c1"># If you want to save the position of the widget use this keyword argument to save an image.</span>
 <span class="c1"># This must be a string to the filename where you will save the image</span>
 <span class="n">save_2d_slice</span><span class="o">=</span><span class="s1">&#39;2d_slice.png&#39;</span>
@@ -650,13 +652,13 @@ Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_
 --------------------------------------------------------
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.443 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 11.313 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plot-fermi3d-cross-section-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/21ab6c3b0351eb24503eabf7e5f7a487/plot_fermi3d_cross_section.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi3d_cross_section.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d03c2f73b27d3251268e6bdebc82ddd5/plot_fermi3d_cross_section.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_fermi3d_cross_section.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/21ab6c3b0351eb24503eabf7e5f7a487/plot_fermi3d_cross_section.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fermi3d_cross_section.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

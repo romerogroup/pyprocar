@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-00-band-structure-plot-2d-bands-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-2d-band-structure">
 <span id="ref-plotting-2d-bands"></span><span id="sphx-glr-examples-00-band-structure-plot-2d-bands-py"></span><h1>Plotting 2D band structure<a class="headerlink" href="#plotting-2d-band-structure" title="Permalink to this heading">#</a></h1>
@@ -549,7 +549,7 @@ to download the full example code</p>
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">graphene</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">2d_bands&quot;</span>
@@ -557,7 +557,7 @@ to download the full example code</p>
 </div>
 <section id="plain-mode">
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">handler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">BandStructure2DHandler</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                                           <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                                           <span class="n">fermi</span><span class="o">=-</span><span class="mf">0.795606</span><span class="p">,</span>
@@ -585,15 +585,14 @@ to download the full example code</p>
             WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
             ----------------------------------------------------------------------------------------------------------
 
-Bands used in the plotting:  [3, 4]
-Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
+Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
   warnings.warn(
 </pre></div>
 </div>
 </section>
 <section id="parametric-mode">
 <h2>Parametric mode<a class="headerlink" href="#parametric-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">handler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">BandStructure2DHandler</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span><span class="n">fermi</span><span class="o">=-</span><span class="mf">0.795606</span><span class="p">,</span><span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -603,26 +602,24 @@ Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities
                            <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_2d_bands_002.png" srcset="../../_images/sphx_glr_plot_2d_bands_002.png" alt="plot 2d bands" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                ----------------------------------------------------------------------------------------------------------
-                There are additional plot options that are defined in a configuration file.
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_2d_bands_002.png" srcset="../../_images/sphx_glr_plot_2d_bands_002.png" alt="plot 2d bands" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>    ----------------------------------------------------------------------------------------------------------
+    There are additional plot options that are defined in a configuration file.
+    You can change these configurations by passing the keyword argument to the function
+    To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , spin_texture , overlay
-                Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                ----------------------------------------------------------------------------------------------------------
+    Here is a list modes : plain , parametric , spin_texture , overlay
+    Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+    ----------------------------------------------------------------------------------------------------------
 
 
-            WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
-            ----------------------------------------------------------------------------------------------------------
-
-Bands used in the plotting:  [3, 4]
+WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
+----------------------------------------------------------------------------------------------------------
 </pre></div>
 </div>
 </section>
 <section id="property-projection-mode">
 <h2>Property Projection mode<a class="headerlink" href="#property-projection-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">handler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">BandStructure2DHandler</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span><span class="n">fermi</span><span class="o">=-</span><span class="mf">0.795606</span><span class="p">,</span><span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">handler</span> <span class="o">=</span> <span class="n">pyprocar</span><span class="o">.</span><span class="n">BandStructure2DHandler</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span><span class="n">fermi</span><span class="o">=-</span><span class="mf">0.795606</span><span class="p">,</span><span class="n">apply_symmetry</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">handler</span><span class="o">.</span><span class="n">plot_band_structure</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;property_projection&#39;</span><span class="p">,</span>
                            <span class="n">property_name</span><span class="o">=</span><span class="s1">&#39;band_velocity&#39;</span><span class="p">,</span>
                            <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>
@@ -646,15 +643,15 @@ Bands used in the plotting:  [3, 4]
             WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
             ----------------------------------------------------------------------------------------------------------
 
-Bands used in the plotting:  [3, 4]
-Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
+ij,uvwabj-&gt;uvwabi
+Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
   warnings.warn(
 </pre></div>
 </div>
 </section>
 <section id="spin-texture-mode">
 <h2>Spin Texture mode<a class="headerlink" href="#spin-texture-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span><span class="s1">&#39;BiSb_monolayer&#39;</span><span class="p">,</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="s1">&#39;non-colinear&#39;</span><span class="p">,</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">data_dir</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span><span class="s1">&#39;BiSb_monolayer&#39;</span><span class="p">,</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span><span class="s1">&#39;non-colinear&#39;</span><span class="p">,</span><span class="s1">&#39;fermi&#39;</span><span class="p">)</span>
 
 
 <span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -674,29 +671,27 @@ Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities
                            <span class="n">surface_clim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_2d_bands_004.png" srcset="../../_images/sphx_glr_plot_2d_bands_004.png" alt="plot 2d bands" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>                ----------------------------------------------------------------------------------------------------------
-                There are additional plot options that are defined in a configuration file.
-                You can change these configurations by passing the keyword argument to the function
-                To print a list of plot options set print_plot_opts=True
+<img src="../../_images/sphx_glr_plot_2d_bands_004.png" srcset="../../_images/sphx_glr_plot_2d_bands_004.png" alt="plot 2d bands" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>    ----------------------------------------------------------------------------------------------------------
+    There are additional plot options that are defined in a configuration file.
+    You can change these configurations by passing the keyword argument to the function
+    To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , spin_texture , overlay
-                Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
-                ----------------------------------------------------------------------------------------------------------
+    Here is a list modes : plain , parametric , spin_texture , overlay
+    Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
+    ----------------------------------------------------------------------------------------------------------
 
 
-            WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
-            ----------------------------------------------------------------------------------------------------------
-
-Bands used in the plotting:  [16, 17, 18, 19, 20, 21]
+WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
+----------------------------------------------------------------------------------------------------------
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 3 minutes  21.522 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 13.131 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-2d-bands-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/fb15cc3f1cf9cfdc4c42fd1b26bacdef/plot_2d_bands.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_2d_bands.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/cc4da0ee3820da1d1048c855e1a3d8c1/plot_2d_bands.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_2d_bands.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/fb15cc3f1cf9cfdc4c42fd1b26bacdef/plot_2d_bands.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_2d_bands.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

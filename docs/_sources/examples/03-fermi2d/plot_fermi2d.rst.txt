@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-31
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -66,7 +66,7 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 36-43
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.fermi2D(code = 'vasp', 
@@ -96,7 +96,7 @@ Plain mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -156,7 +156,7 @@ plain_bands mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 48-59
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.fermi2D(code = 'vasp', 
@@ -190,7 +190,7 @@ plain_bands mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -250,7 +250,7 @@ parametric mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 64-79
 
-.. code-block:: default
+.. code-block:: Python
 
 
     atoms=[0]
@@ -288,7 +288,7 @@ parametric mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -350,7 +350,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. GENERATED FROM PYTHON SOURCE LINES 86-94
 
-.. code-block:: default
+.. code-block:: Python
 
     band_indices = [[4,5],[]]
     band_colors = [['blue','navy'], []]
@@ -381,7 +381,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -435,7 +435,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.736 seconds)
+   **Total running time of the script:** (0 minutes 1.691 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py:
@@ -444,16 +444,13 @@ Also you can specify the colors of the bands as well with band_colors
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_fermi2d.ipynb <plot_fermi2d.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi2d.py <plot_fermi2d.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_fermi2d.ipynb <plot_fermi2d.ipynb>`
 
 
 .. only:: html

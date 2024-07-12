@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_compare_bands.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -49,7 +49,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 32-40
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -73,7 +73,7 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
 
 .. GENERATED FROM PYTHON SOURCE LINES 43-45
 
-.. code-block:: default
+.. code-block:: Python
 
 
     fig, ax = pyprocar.bandsplot(code='vasp', dirname = vasp_data_dir, mode='parametric',fermi=5.599480, elimit=[-5,5], orbitals=[4,5,6,7,8], show=False)
@@ -96,7 +96,7 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -105,7 +105,7 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -116,7 +116,7 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.534 seconds)
+   **Total running time of the script:** (0 minutes 1.665 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_compare_bands.py:
@@ -125,16 +125,13 @@ When show is equal to False, bandsplot will return a maplotlib.Figure and maplot
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_compare_bands.ipynb <plot_compare_bands.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_compare_bands.py <plot_compare_bands.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_compare_bands.ipynb <plot_compare_bands.ipynb>`
 
 
 .. only:: html

@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_2d_bands.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 26-33
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -65,7 +65,7 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 36-50
 
-.. code-block:: default
+.. code-block:: Python
 
     spins=[0]
     handler = pyprocar.BandStructure2DHandler(code='vasp',
@@ -108,8 +108,7 @@ Plain mode
                 WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
                 ----------------------------------------------------------------------------------------------------------
             
-    Bands used in the plotting:  [3, 4]
-    Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
+    Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
       warnings.warn(
 
 
@@ -122,7 +121,7 @@ Parametric mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 53-63
 
-.. code-block:: default
+.. code-block:: Python
 
 
     atoms=[0,1]
@@ -161,7 +160,6 @@ Parametric mode
                 WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
                 ----------------------------------------------------------------------------------------------------------
             
-    Bands used in the plotting:  [3, 4]
 
 
 
@@ -173,7 +171,7 @@ Property Projection mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 66-76
 
-.. code-block:: default
+.. code-block:: Python
 
     handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
     handler.plot_band_structure(mode='property_projection',
@@ -212,8 +210,8 @@ Property Projection mode
                 WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
                 ----------------------------------------------------------------------------------------------------------
             
-    Bands used in the plotting:  [3, 4]
-    Z:\Research Projects\pyprocar\venv_docs\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
+    ij,uvwabj->uvwabi
+    Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
       warnings.warn(
 
 
@@ -226,7 +224,7 @@ Spin Texture mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 79-99
 
-.. code-block:: default
+.. code-block:: Python
 
 
     data_dir =  os.path.join(pyprocar.utils.ROOT,'data','examples','BiSb_monolayer','vasp','non-colinear','fermi')
@@ -275,7 +273,6 @@ Spin Texture mode
                 WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
                 ----------------------------------------------------------------------------------------------------------
             
-    Bands used in the plotting:  [16, 17, 18, 19, 20, 21]
 
 
 
@@ -283,7 +280,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 3 minutes  21.522 seconds)
+   **Total running time of the script:** (2 minutes 13.131 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_2d_bands.py:
@@ -292,16 +289,13 @@ Spin Texture mode
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_2d_bands.ipynb <plot_2d_bands.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_2d_bands.py <plot_2d_bands.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_2d_bands.ipynb <plot_2d_bands.ipynb>`
 
 
 .. only:: html

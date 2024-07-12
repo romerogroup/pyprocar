@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_spin_polarized.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-31
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -68,7 +68,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 
 .. GENERATED FROM PYTHON SOURCE LINES 39-45
 
-.. code-block:: default
+.. code-block:: Python
 
     pyprocar.bandsplot(
                     code='vasp', 
@@ -95,7 +95,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -111,7 +111,7 @@ The keyword spins can also be used to select which spin bands to plot
 
 .. GENERATED FROM PYTHON SOURCE LINES 49-57
 
-.. code-block:: default
+.. code-block:: Python
 
     spins = [1]
     pyprocar.bandsplot(
@@ -140,7 +140,7 @@ The keyword spins can also be used to select which spin bands to plot
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -158,7 +158,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. GENERATED FROM PYTHON SOURCE LINES 63-77
 
-.. code-block:: default
+.. code-block:: Python
 
 
     atoms=[0]
@@ -193,7 +193,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -211,7 +211,7 @@ Scatter mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 83-96
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
@@ -245,7 +245,7 @@ Scatter mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -256,7 +256,7 @@ Scatter mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.556 seconds)
+   **Total running time of the script:** (0 minutes 2.336 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_spin_polarized.py:
@@ -265,16 +265,13 @@ Scatter mode
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_spin_polarized.ipynb <plot_spin_polarized.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_spin_polarized.py <plot_spin_polarized.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_spin_polarized.ipynb <plot_spin_polarized.ipynb>`
 
 
 .. only:: html

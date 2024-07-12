@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_01-dos_plot_colinear_dos.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -31,10 +31,10 @@ First download the example files with the code below. Then replace data_dir belo
    :caption: Downloading example
 
     data_dir = pyprocar.download_example(save_dir='', 
-                                material='Fe',
-                                code='qe', 
+                                material='SrVO3',
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
-                                calc_type='dos')
+                                calc_type='fermi')
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-25
 
@@ -42,12 +42,12 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-31
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}dos"
+    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}SrVO3{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
 
 
 
@@ -64,13 +64,13 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 34-41
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='plain',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     dirname=data_dir)
 
 
@@ -109,20 +109,21 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-62
+.. GENERATED FROM PYTHON SOURCE LINES 49-63
 
-.. code-block:: default
+.. code-block:: Python
 
-    atoms=[0]
+    atoms=[0,1,2,3,4]
     orbitals=[4,5,6,7,8]
     spins=[0]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     atoms=atoms,
                     orbitals=orbitals,
+                    clim=[0,1],
                     spins=spins,
                     dirname=data_dir)
 
@@ -152,7 +153,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-70
+.. GENERATED FROM PYTHON SOURCE LINES 64-71
 
 parametric_line mode
 +++++++++++++++++++++++++++++++++++++++
@@ -162,20 +163,21 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-85
+.. GENERATED FROM PYTHON SOURCE LINES 71-87
 
-.. code-block:: default
+.. code-block:: Python
 
-    atoms=[0]
+    atoms=[0,1,2,3,4]
     orbitals=[4,5,6,7,8]
     spins=[0]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='parametric_line',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     atoms=atoms,
                     orbitals=orbitals,
+                    clim=[0,1],
                     spins=spins,
                     dirname=data_dir)
 
@@ -207,7 +209,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-91
+.. GENERATED FROM PYTHON SOURCE LINES 88-93
 
 stack_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -215,17 +217,17 @@ stack_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-102
+.. GENERATED FROM PYTHON SOURCE LINES 93-104
 
-.. code-block:: default
+.. code-block:: Python
 
     orbitals=[4,5,6,7,8]
     spins=[0]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='stack_species',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
@@ -257,7 +259,7 @@ stack_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-108
+.. GENERATED FROM PYTHON SOURCE LINES 105-110
 
 stack_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -265,16 +267,16 @@ stack_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-119
+.. GENERATED FROM PYTHON SOURCE LINES 110-121
 
-.. code-block:: default
+.. code-block:: Python
 
-    atoms=[0]
+    atoms=[2,3,4]
     spins=[0]
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='stack_orbitals',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     atoms=atoms,
                     spins=spins,
                     dirname=data_dir)
@@ -301,13 +303,13 @@ stack_orbtials mode
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-    The plot only considers atoms ['Fe']
+    The plot only considers atoms ['O' 'O' 'O']
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-125
+.. GENERATED FROM PYTHON SOURCE LINES 122-127
 
 stack mode
 +++++++++++++++++++++++++++++++++++++++
@@ -315,16 +317,16 @@ stack mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-135
+.. GENERATED FROM PYTHON SOURCE LINES 127-137
 
-.. code-block:: default
+.. code-block:: Python
 
 
-    items={'Fe':[4,5,6,7,8]}
+    items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='stack',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     items=items,
                     dirname=data_dir)
 
@@ -355,7 +357,7 @@ stack mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-141
+.. GENERATED FROM PYTHON SOURCE LINES 138-143
 
 overlay_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -363,17 +365,17 @@ overlay_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 141-152
+.. GENERATED FROM PYTHON SOURCE LINES 143-154
 
-.. code-block:: default
+.. code-block:: Python
 
     orbitals=[4,5,6,7,8]
     spins=[0]
 
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay_species',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     orbitals=orbitals,
                     spins=spins,
                     dirname=data_dir)
@@ -405,7 +407,7 @@ overlay_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 153-158
+.. GENERATED FROM PYTHON SOURCE LINES 155-160
 
 overlay_orbtials mode
 +++++++++++++++++++++++++++++++++++++++
@@ -413,16 +415,16 @@ overlay_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 158-169
+.. GENERATED FROM PYTHON SOURCE LINES 160-171
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     spins=[0]
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay_orbitals',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     atoms=atoms,
                     spins=spins,
                     dirname=data_dir)
@@ -449,13 +451,13 @@ overlay_orbtials mode
 
                 Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
                 --------------------------------------------------------
-    The plot only considers atoms ['Fe']
+    The plot only considers atoms ['Sr']
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 170-175
+.. GENERATED FROM PYTHON SOURCE LINES 172-177
 
 overlay mode
 +++++++++++++++++++++++++++++++++++++++
@@ -463,16 +465,16 @@ overlay mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 175-183
+.. GENERATED FROM PYTHON SOURCE LINES 177-185
 
-.. code-block:: default
+.. code-block:: Python
 
 
-    items={'Fe':[4,5,6,7,8]}
+    items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])
     pyprocar.dosplot(
-                    code='qe', 
+                    code='vasp', 
                     mode='overlay',
-                    fermi=5.599480,
+                    fermi=5.3017,
                     items=items,
                     dirname=data_dir)
 
@@ -504,7 +506,7 @@ overlay mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  30.287 seconds)
+   **Total running time of the script:** (0 minutes 4.252 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_colinear_dos.py:
@@ -513,16 +515,13 @@ overlay mode
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_colinear_dos.ipynb <plot_colinear_dos.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_colinear_dos.py <plot_colinear_dos.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_colinear_dos.ipynb <plot_colinear_dos.ipynb>`
 
 
 .. only:: html

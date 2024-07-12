@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_01-dos_plot_noncolinear_dos_qe.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 24-30
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -68,9 +68,9 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-50
+.. GENERATED FROM PYTHON SOURCE LINES 39-51
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     spins=[0]
@@ -82,6 +82,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                     fermi=18.0536,
                     atoms=atoms,
                     orbitals=orbitals,
+                    clim=[0,1],
                     spins=spins,
                     dirname=data_dir)
 
@@ -112,7 +113,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  22.948 seconds)
+   **Total running time of the script:** (0 minutes 18.812 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_noncolinear_dos_qe.py:
@@ -121,16 +122,13 @@ For details on the meaning of the indices of the atomic projection please refer 
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_noncolinear_dos_qe.ipynb <plot_noncolinear_dos_qe.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_noncolinear_dos_qe.py <plot_noncolinear_dos_qe.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_noncolinear_dos_qe.ipynb <plot_noncolinear_dos_qe.ipynb>`
 
 
 .. only:: html

@@ -13,10 +13,10 @@ First download the example files with the code below. Then replace data_dir belo
    :caption: Downloading example
 
     data_dir = pyprocar.download_example(save_dir='', 
-                                material='Fe',
-                                code='qe', 
+                                material='SrVO3',
+                                code='vasp', 
                                 spin_calc_type='non-spin-polarized',
-                                calc_type='dos')
+                                calc_type='fermi')
 """
 
 
@@ -25,7 +25,7 @@ First download the example files with the code below. Then replace data_dir belo
 import os
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-spin-polarized{os.sep}dos"
+data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}SrVO3{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
 
 
 ###############################################################################
@@ -33,9 +33,9 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 # +++++++++++++++++++++++++++++++++++++++
 
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='plain',
-                fermi=5.599480,
+                fermi=5.3017,
                 dirname=data_dir)
 
 ###############################################################################
@@ -46,16 +46,17 @@ pyprocar.dosplot(
 # 
 #
 #
-atoms=[0]
+atoms=[0,1,2,3,4]
 orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='parametric',
-                fermi=5.599480,
+                fermi=5.3017,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 
@@ -67,16 +68,17 @@ pyprocar.dosplot(
 # 
 #
 #
-atoms=[0]
+atoms=[0,1,2,3,4]
 orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='parametric_line',
-                fermi=5.599480,
+                fermi=5.3017,
                 atoms=atoms,
                 orbitals=orbitals,
+                clim=[0,1],
                 spins=spins,
                 dirname=data_dir)
 
@@ -92,9 +94,9 @@ orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='stack_species',
-                fermi=5.599480,
+                fermi=5.3017,
                 orbitals=orbitals,
                 spins=spins,
                 dirname=data_dir)
@@ -105,12 +107,12 @@ pyprocar.dosplot(
 #
 # 
 #
-atoms=[0]
+atoms=[2,3,4]
 spins=[0]
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='stack_orbitals',
-                fermi=5.599480,
+                fermi=5.3017,
                 atoms=atoms,
                 spins=spins,
                 dirname=data_dir)
@@ -123,11 +125,11 @@ pyprocar.dosplot(
 # 
 #
 
-items={'Fe':[4,5,6,7,8]}
+items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='stack',
-                fermi=5.599480,
+                fermi=5.3017,
                 items=items,
                 dirname=data_dir)
 
@@ -142,9 +144,9 @@ orbitals=[4,5,6,7,8]
 spins=[0]
 
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay_species',
-                fermi=5.599480,
+                fermi=5.3017,
                 orbitals=orbitals,
                 spins=spins,
                 dirname=data_dir)
@@ -158,9 +160,9 @@ pyprocar.dosplot(
 atoms=[0]
 spins=[0]
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay_orbitals',
-                fermi=5.599480,
+                fermi=5.3017,
                 atoms=atoms,
                 spins=spins,
                 dirname=data_dir)
@@ -173,10 +175,10 @@ pyprocar.dosplot(
 # 
 #
 
-items={'Fe':[4,5,6,7,8]}
+items=dict(Sr=[0],O=[1,2,3],V=[4,5,6,7,8])
 pyprocar.dosplot(
-                code='qe', 
+                code='vasp', 
                 mode='overlay',
-                fermi=5.599480,
+                fermi=5.3017,
                 items=items,
                 dirname=data_dir)

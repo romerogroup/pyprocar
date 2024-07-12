@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_unfolding.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -48,7 +48,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 30-39
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -73,7 +73,7 @@ Plotting primitive bands
 
 .. GENERATED FROM PYTHON SOURCE LINES 42-51
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.bandsplot(
@@ -103,7 +103,7 @@ Plotting primitive bands
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -123,7 +123,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. GENERATED FROM PYTHON SOURCE LINES 59-69
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.unfold(
@@ -156,7 +156,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.1.10 created on Jun 10th, 2021
+    Version 6.2.0 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -182,13 +182,9 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 --------------------------------------------------------
             
-    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:684: UserWarning: Legend does not support handles for list instances.
-    A proxy artist may be used instead.
-    See: https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html#controlling-the-legend-entries
-      self.ax.legend(self.handles, labels)
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -197,7 +193,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  23.988 seconds)
+   **Total running time of the script:** (0 minutes 21.062 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:
@@ -206,16 +202,13 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_unfolding.ipynb <plot_unfolding.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_unfolding.py <plot_unfolding.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_unfolding.ipynb <plot_unfolding.ipynb>`
 
 
 .. only:: html

@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-03-fermi2d-plot-rashba-spin-spliting-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-rashba-spin-splitting">
 <span id="ref-plotting-plotting-rashba-spin-spliting"></span><span id="sphx-glr-examples-03-fermi2d-plot-rashba-spin-spliting-py"></span><h1>Plotting rashba spin splitting<a class="headerlink" href="#plotting-rashba-spin-splitting" title="Permalink to this heading">#</a></h1>
@@ -550,7 +550,7 @@ From our first paper we had an example to plot the different spin texture projec
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">BiSb_monolayer</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
@@ -558,7 +558,7 @@ From our first paper we had an example to plot the different spin texture projec
 </div>
 <section id="energy-0-60-sx-projection-no-arrows">
 <h2>energy = 0.60 sx projection no arrows<a class="headerlink" href="#energy-0-60-sx-projection-no-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -576,7 +576,7 @@ From our first paper we had an example to plot the different spin texture projec
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -627,7 +627,7 @@ Useful band indices for spin-0 : [20 21]
 </section>
 <section id="energy-0-60-sy-projection-no-arrows">
 <h2>energy = 0.60 sy projection no arrows<a class="headerlink" href="#energy-0-60-sy-projection-no-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -645,7 +645,7 @@ Useful band indices for spin-0 : [20 21]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -696,7 +696,7 @@ Useful band indices for spin-0 : [20 21]
 </section>
 <section id="energy-0-60-sz-projection-no-arrows">
 <h2>energy = 0.60 sz projection no arrows<a class="headerlink" href="#energy-0-60-sz-projection-no-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -714,7 +714,7 @@ Useful band indices for spin-0 : [20 21]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -765,7 +765,7 @@ Useful band indices for spin-0 : [20 21]
 </section>
 <section id="energy-0-90-sx-projection-no-arrows">
 <h2>energy = -0.90 sx projection no arrows<a class="headerlink" href="#energy-0-90-sx-projection-no-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=-</span><span class="mf">0.90</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -783,7 +783,7 @@ Useful band indices for spin-0 : [20 21]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -834,7 +834,7 @@ Useful band indices for spin-0 : [16 17 18 19]
 </section>
 <section id="energy-0-90-sy-projection-no-arrows">
 <h2>energy = -0.90 sy projection no arrows<a class="headerlink" href="#energy-0-90-sy-projection-no-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=-</span><span class="mf">0.90</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -852,7 +852,7 @@ Useful band indices for spin-0 : [16 17 18 19]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -903,7 +903,7 @@ Useful band indices for spin-0 : [16 17 18 19]
 </section>
 <section id="energy-0-90-sz-projection-no-arrows">
 <h2>energy = -0.90 sz projection no arrows<a class="headerlink" href="#energy-0-90-sz-projection-no-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=-</span><span class="mf">0.90</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -921,7 +921,7 @@ Useful band indices for spin-0 : [16 17 18 19]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -972,7 +972,7 @@ Useful band indices for spin-0 : [16 17 18 19]
 </section>
 <section id="energy-0-60-sx-projection-with-arrows">
 <h2>energy = 0.60 sx projection with arrows<a class="headerlink" href="#energy-0-60-sx-projection-with-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=</span><span class="mf">0.60</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -991,7 +991,7 @@ Useful band indices for spin-0 : [16 17 18 19]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -1042,7 +1042,7 @@ Useful band indices for spin-0 : [20 21]
 </section>
 <section id="energy-0-90-sx-projection-with-arrows">
 <h2>energy = -0.90 sx projection with arrows<a class="headerlink" href="#energy-0-90-sx-projection-with-arrows" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">fermi2D</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
                <span class="n">energy</span><span class="o">=-</span><span class="mf">0.90</span><span class="p">,</span>
                <span class="n">fermi</span><span class="o">=-</span><span class="mf">1.1904</span><span class="p">,</span>
@@ -1061,7 +1061,7 @@ Useful band indices for spin-0 : [20 21]
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -1109,13 +1109,13 @@ _____________________________________________________
 Useful band indices for spin-0 : [16 17 18 19]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  48.983 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 38.136 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-03-fermi2d-plot-rashba-spin-spliting-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/5fb746fda43862186a77b594e97d94d7/plot_rashba_spin_spliting.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rashba_spin_spliting.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/498b7e12b5246f70935a30cb0236fa20/plot_rashba_spin_spliting.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rashba_spin_spliting.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/5fb746fda43862186a77b594e97d94d7/plot_rashba_spin_spliting.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rashba_spin_spliting.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

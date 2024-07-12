@@ -533,7 +533,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-04-fermi3d-plot-de-hass-van-alphen-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="showing-how-to-get-van-alphen-fequencies-from-the-fermi-surface">
 <span id="ref-plotting-de-hass-van-alphen"></span><span id="sphx-glr-examples-04-fermi3d-plot-de-hass-van-alphen-py"></span><h1>Showing how to get van alphen fequencies from the fermi surface<a class="headerlink" href="#showing-how-to-get-van-alphen-fequencies-from-the-fermi-surface" title="Permalink to this heading">#</a></h1>
@@ -554,16 +554,16 @@ To compare the theoretical freuqencies we will compare with the results taken fr
 </pre></div>
 </div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 1</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyvista</span>
 <span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
 <span class="n">pyvista</span><span class="o">.</span><span class="n">OFF_SCREEN</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Au</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fermi&quot;</span>
@@ -584,7 +584,7 @@ To compare the theoretical freuqencies we will compare with the results taken fr
 </div>
 <section id="maximal-cross-sectional-area-along-the-0-0-1">
 <h2>Maximal cross sectional area along the (0,0,1)<a class="headerlink" href="#maximal-cross-sectional-area-along-the-0-0-1" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section_box_widget</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section_box_widget</span><span class="p">(</span>
                             <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
                             <span class="n">slice_normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
                             <span class="n">slice_origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
@@ -602,6 +602,7 @@ To compare the theoretical freuqencies we will compare with the results taken fr
                 Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                 --------------------------------------------------------
 
+ij,uvwabj-&gt;uvwabi
 Bands being used if bands=None:  {0: 0}
 </pre></div>
 </div>
@@ -611,7 +612,7 @@ Bands being used if bands=None:  {0: 0}
 </section>
 <section id="minimal-cross-sectional-area-along-the-0-0-1">
 <h2>Minimal cross sectional area along the (0,0,1)<a class="headerlink" href="#minimal-cross-sectional-area-along-the-0-0-1" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section_box_widget</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section_box_widget</span><span class="p">(</span>
                                 <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
                                 <span class="n">slice_normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
                                 <span class="n">slice_origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.25</span><span class="p">),</span>
@@ -638,7 +639,7 @@ Bands being used if bands=None:  {0: 0}
 </section>
 <section id="extremal-cross-sectional-area-along-the-0-1-1">
 <h2>Extremal cross sectional area along the (0,1,1)<a class="headerlink" href="#extremal-cross-sectional-area-along-the-0-1-1" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section_box_widget</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fermiHandler</span><span class="o">.</span><span class="n">plot_fermi_cross_section_box_widget</span><span class="p">(</span>
                                 <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
                                 <span class="n">slice_normal</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
                                 <span class="n">slice_origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
@@ -662,13 +663,13 @@ Bands being used if bands=None:  {0: 0}
 <p>In the above figure we can see the cross section area is <span class="math notranslate nohighlight">\(A = 4.3956 Ang^{-2} = 4.3956e^{16} cm^{-2} (cgs)\)</span>.</p>
 <p><span class="math notranslate nohighlight">\(F = \frac{ c \hbar A }{ 2 \pi e  } = 4.61e^8 G\)</span></p>
 <p><span class="math notranslate nohighlight">\(F_{exp} = 4.85e^8 G\)</span></p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.151 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.112 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-04-fermi3d-plot-de-hass-van-alphen-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/5fedb2be60051531080cdede30af99e0/plot_de_hass_van_alphen.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_de_hass_van_alphen.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/9158268fd95e17740417379b77c121fa/plot_de_hass_van_alphen.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_de_hass_van_alphen.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/5fedb2be60051531080cdede30af99e0/plot_de_hass_van_alphen.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_de_hass_van_alphen.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

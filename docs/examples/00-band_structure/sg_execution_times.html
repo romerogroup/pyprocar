@@ -452,55 +452,74 @@ document.write(`
                   
   <section id="computation-times">
 <span id="sphx-glr-examples-00-band-structure-sg-execution-times"></span><h1>Computation times<a class="headerlink" href="#computation-times" title="Permalink to this heading">#</a></h1>
-<p><strong>04:53.848</strong> total execution time for <strong>examples_00-band_structure</strong> files:</p>
-<table class="table">
+<p><strong>03:35.930</strong> total execution time for 11 files <strong>from examples00-band_structure</strong>:</p>
+<div class="docutils container">
+<style scoped>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+</style>
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" class="init">
+$(document).ready( function () {
+    $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+} );
+</script><table class="table table-striped sg-datatable">
+<thead>
+<tr class="row-odd"><th class="head"><p>Example</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Mem (MB)</p></th>
+</tr>
+</thead>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="plot_2d_bands.html#sphx-glr-examples-00-band-structure-plot-2d-bands-py"><span class="std std-ref">Plotting 2D band structure</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_2d_bands.py</span></code>)</p></td>
-<td><p>03:21.522</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_2d_bands.html#sphx-glr-examples-00-band-structure-plot-2d-bands-py"><span class="std std-ref">Plotting 2D band structure</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_2d_bands.py</span></code>)</p></td>
+<td><p>02:13.131</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="plot_autobands.html#sphx-glr-examples-00-band-structure-plot-autobands-py"><span class="std std-ref">Autobands plotting</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_autobands.py</span></code>)</p></td>
-<td><p>00:27.193</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="plot_autobands.html#sphx-glr-examples-00-band-structure-plot-autobands-py"><span class="std std-ref">Autobands plotting</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_autobands.py</span></code>)</p></td>
+<td><p>00:25.318</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="plot_ipr.html#sphx-glr-examples-00-band-structure-plot-ipr-py"><span class="std std-ref">Plotting Inverse participation ratio</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_ipr.py</span></code>)</p></td>
-<td><p>00:24.836</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_ipr.html#sphx-glr-examples-00-band-structure-plot-ipr-py"><span class="std std-ref">Plotting Inverse participation ratio</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_ipr.py</span></code>)</p></td>
+<td><p>00:22.809</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="plot_unfolding.html#sphx-glr-examples-00-band-structure-plot-unfolding-py"><span class="std std-ref">Unfolding Band Structure</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_unfolding.py</span></code>)</p></td>
-<td><p>00:23.988</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="plot_unfolding.html#sphx-glr-examples-00-band-structure-plot-unfolding-py"><span class="std std-ref">Unfolding Band Structure</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_unfolding.py</span></code>)</p></td>
+<td><p>00:21.062</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="plot_colinear.html#sphx-glr-examples-00-band-structure-plot-colinear-py"><span class="std std-ref">Plotting band structure</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_colinear.py</span></code>)</p></td>
-<td><p>00:03.167</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_colinear.html#sphx-glr-examples-00-band-structure-plot-colinear-py"><span class="std std-ref">Plotting band structure</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_colinear.py</span></code>)</p></td>
+<td><p>00:02.856</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="plot_bandsplot_configurations.html#sphx-glr-examples-00-band-structure-plot-bandsplot-configurations-py"><span class="std std-ref">Plotting with Configurations in pyprocar</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_bandsplot_configurations.py</span></code>)</p></td>
-<td><p>00:02.662</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="plot_bandsplot_configurations.html#sphx-glr-examples-00-band-structure-plot-bandsplot-configurations-py"><span class="std std-ref">Plotting with Configurations in pyprocar</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_bandsplot_configurations.py</span></code>)</p></td>
+<td><p>00:02.441</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="plot_spin_polarized.html#sphx-glr-examples-00-band-structure-plot-spin-polarized-py"><span class="std std-ref">Plotting spin polarized band structures</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_spin_polarized.py</span></code>)</p></td>
-<td><p>00:02.556</p></td>
-<td><p>0.0 MB</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="plot_compare_bands.html#sphx-glr-examples-00-band-structure-plot-compare-bands-py"><span class="std std-ref">Comparing band structures</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_compare_bands.py</span></code>)</p></td>
-<td><p>00:02.534</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_spin_polarized.html#sphx-glr-examples-00-band-structure-plot-spin-polarized-py"><span class="std std-ref">Plotting spin polarized band structures</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_spin_polarized.py</span></code>)</p></td>
+<td><p>00:02.336</p></td>
+<td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="plot_noncolinear_vasp.html#sphx-glr-examples-00-band-structure-plot-noncolinear-vasp-py"><span class="std std-ref">Plotting non colinear band structures in VASP</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_noncolinear_vasp.py</span></code>)</p></td>
-<td><p>00:02.174</p></td>
-<td><p>0.0 MB</p></td>
+<td><p>00:01.845</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="plot_noncolinear_qe.html#sphx-glr-examples-00-band-structure-plot-noncolinear-qe-py"><span class="std std-ref">Plotting non colinear band structures in Quantum Espresso</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_noncolinear_qe.py</span></code>)</p></td>
-<td><p>00:01.781</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_compare_bands.html#sphx-glr-examples-00-band-structure-plot-compare-bands-py"><span class="std std-ref">Comparing band structures</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_compare_bands.py</span></code>)</p></td>
+<td><p>00:01.665</p></td>
+<td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="plot_atomic_levels.html#sphx-glr-examples-00-band-structure-plot-atomic-levels-py"><span class="std std-ref">Plotting Atomic Levels</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_atomic_levels.py</span></code>)</p></td>
-<td><p>00:01.435</p></td>
-<td><p>0.0 MB</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="plot_noncolinear_qe.html#sphx-glr-examples-00-band-structure-plot-noncolinear-qe-py"><span class="std std-ref">Plotting non colinear band structures in Quantum Espresso</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_noncolinear_qe.py</span></code>)</p></td>
+<td><p>00:01.308</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_atomic_levels.html#sphx-glr-examples-00-band-structure-plot-atomic-levels-py"><span class="std std-ref">Plotting Atomic Levels</span></a> (<code class="docutils literal notranslate"><span class="pre">plot_atomic_levels.py</span></code>)</p></td>
+<td><p>00:01.159</p></td>
+<td><p>0.0</p></td>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 
 

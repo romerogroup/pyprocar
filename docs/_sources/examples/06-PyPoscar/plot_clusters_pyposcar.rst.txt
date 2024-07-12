@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_06-PyPoscar_plot_clusters_pyposcar.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -33,7 +33,7 @@ Let's get started!
 
 .. GENERATED FROM PYTHON SOURCE LINES 16-28
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -61,7 +61,7 @@ Utility function for creating GIF visualizations
 
 .. GENERATED FROM PYTHON SOURCE LINES 31-44
 
-.. code-block:: default
+.. code-block:: Python
 
 
     def create_gif(atoms, labels, unit_cell,scalars, save_file):
@@ -90,7 +90,7 @@ Parsing the POSCAR and Identifying Clusters
 
 .. GENERATED FROM PYTHON SOURCE LINES 47-64
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print('Loading a slab of Bi2Se3')
@@ -132,7 +132,7 @@ Visualizing the Clusters
 
 .. GENERATED FROM PYTHON SOURCE LINES 67-82
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Convert positions to Cartesian coordinates for visualization
@@ -176,7 +176,7 @@ Visualizing the Clusters
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.657 seconds)
+   **Total running time of the script:** (0 minutes 7.684 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_clusters_pyposcar.py:
@@ -185,16 +185,13 @@ Visualizing the Clusters
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_clusters_pyposcar.ipynb <plot_clusters_pyposcar.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_clusters_pyposcar.py <plot_clusters_pyposcar.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_clusters_pyposcar.ipynb <plot_clusters_pyposcar.ipynb>`
 
 
 .. only:: html

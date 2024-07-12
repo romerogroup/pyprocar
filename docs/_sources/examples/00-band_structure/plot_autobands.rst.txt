@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_autobands.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -71,7 +71,7 @@ First, we will import the necessary libraries and set up our data directory path
 
 .. GENERATED FROM PYTHON SOURCE LINES 52-59
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -100,7 +100,7 @@ and the associated localized states.
 
 .. GENERATED FROM PYTHON SOURCE LINES 68-72
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.autobandsplot(code='vasp', dirname=data_dir)
@@ -140,7 +140,7 @@ and the associated localized states.
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
@@ -154,7 +154,7 @@ and the associated localized states.
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
@@ -169,7 +169,7 @@ and the associated localized states.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  27.193 seconds)
+   **Total running time of the script:** (0 minutes 25.318 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_autobands.py:
@@ -178,16 +178,13 @@ and the associated localized states.
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_autobands.ipynb <plot_autobands.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_autobands.py <plot_autobands.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_autobands.ipynb <plot_autobands.ipynb>`
 
 
 .. only:: html

@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-02-bands-dos-plot-bandsdosplot-configurations-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-bandsdosplot">
 <span id="ref-plot-bandsdosplot-configurations"></span><span id="sphx-glr-examples-02-bands-dos-plot-bandsdosplot-configurations-py"></span><h1>Plotting bandsdosplot<a class="headerlink" href="#plotting-bandsdosplot" title="Permalink to this heading">#</a></h1>
@@ -556,14 +556,14 @@ to download the full example code</p>
 </pre></div>
 </div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">bands_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
 <span class="n">dos_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">dos&quot;</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 1: Plain Mode with Default Settings</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 1: Plain Mode with Default Settings</span>
 <span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
 <span class="c1">#</span>
 <span class="c1"># This section demonstrates how to plot both band structures and DOS side by side using default settings.</span>
@@ -598,7 +598,7 @@ to download the full example code</p>
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -624,7 +624,7 @@ Developers:
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -639,7 +639,7 @@ Developers:
 (&lt;Figure size 1650x550 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;, &lt;Axes: xlabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 2: Customizing Bands and DOS Plots</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 2: Customizing Bands and DOS Plots</span>
 <span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
 <span class="c1">#</span>
 <span class="c1"># This section demonstrates how to customize the appearance of both the band structures and DOS plots.</span>
@@ -685,7 +685,7 @@ Developers:
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -711,7 +711,7 @@ Developers:
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -726,7 +726,7 @@ Developers:
 (&lt;Figure size 1650x550 with 3 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;, &lt;Axes: xlabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 3: Adjusting Figure Size and DPI</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Section 3: Adjusting Figure Size and DPI</span>
 <span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
 <span class="c1">#</span>
 <span class="c1"># This section demonstrates how to adjust the overall figure size and dots per inch (DPI) for the combined plot.</span>
@@ -758,7 +758,7 @@ Developers:
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -784,7 +784,7 @@ Developers:
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -807,13 +807,13 @@ Developers:
 (&lt;Figure size 1650x550 with 3 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E (eV)&#39;&gt;, &lt;Axes: xlabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.343 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.971 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-02-bands-dos-plot-bandsdosplot-configurations-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/a61da4c0af389a0a799c3e2847eb8039/plot_bandsdosplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsdosplot_configurations.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/b6c323afaddfad8e95934cc3242fdf06/plot_bandsdosplot_configurations.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_bandsdosplot_configurations.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a61da4c0af389a0a799c3e2847eb8039/plot_bandsdosplot_configurations.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsdosplot_configurations.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

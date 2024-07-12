@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_ipr.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -72,7 +72,7 @@ First, we will import the necessary libraries and set up our data directory path
 
 .. GENERATED FROM PYTHON SOURCE LINES 53-64
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -105,7 +105,7 @@ The PyProcar code is:
 
 .. GENERATED FROM PYTHON SOURCE LINES 73-83
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.bandsplot(dirname=bi2se3_data_dir,
@@ -136,7 +136,7 @@ The PyProcar code is:
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -164,7 +164,7 @@ The pyprocar code is:
 
 .. GENERATED FROM PYTHON SOURCE LINES 95-102
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.bandsplot(dirname=C_data_dir, 
@@ -192,14 +192,14 @@ The pyprocar code is:
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
                 WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
                 ----------------------------------------------------------------------------------------------------------
             
-    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:607: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
+    z:\research projects\pyprocar\pyprocar\plotter\ebs_plot.py:604: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
       self.ax.set_xlim(interval)
     Atomic plot: bands.shape  : (2, 540, 2)
     Atomic plot: spd.shape    : (2, 540, 215, 1, 9, 2)
@@ -212,7 +212,7 @@ The pyprocar code is:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  24.836 seconds)
+   **Total running time of the script:** (0 minutes 22.809 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_ipr.py:
@@ -221,16 +221,13 @@ The pyprocar code is:
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_ipr.ipynb <plot_ipr.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_ipr.py <plot_ipr.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_ipr.ipynb <plot_ipr.ipynb>`
 
 
 .. only:: html

@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-02-bands-dos-plot-bandsdosplot-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-bandsdosplot">
 <span id="ref-plot-bandsdosplot"></span><span id="sphx-glr-examples-02-bands-dos-plot-bandsdosplot-py"></span><h1>Plotting bandsdosplot<a class="headerlink" href="#plotting-bandsdosplot" title="Permalink to this heading">#</a></h1>
@@ -555,7 +555,7 @@ to download the full example code</p>
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">bands_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">non-spin-polarized</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">bands&quot;</span>
@@ -566,7 +566,7 @@ to download the full example code</p>
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
 <p>The keywords that works for bandsplot and dosplot will work in bandsdosplot.
 These keyword arguments can be set in bands_settings and dos_settings as done below.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bands_settings</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">bands_settings</span> <span class="o">=</span> <span class="p">{</span>
                   <span class="s1">&#39;mode&#39;</span><span class="p">:</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                   <span class="s1">&#39;fermi&#39;</span><span class="p">:</span><span class="mf">5.599480</span><span class="p">,</span> <span class="c1"># This will overide the default fermi value found in bands directory</span>
                   <span class="s1">&#39;dirname&#39;</span><span class="p">:</span> <span class="n">bands_dir</span>
@@ -592,7 +592,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
        |___/
 A Python library for electronic structure pre/post-processing.
 
-Version 6.1.10 created on Jun 10th, 2021
+Version 6.2.0 created on Jun 10th, 2021
 
 Please cite:
  Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -618,7 +618,7 @@ Developers:
             You can change these configurations by passing the keyword argument to the function.
             To print a list of all plot options set `print_plot_opts=True`
 
-            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+            Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
 
@@ -633,13 +633,13 @@ Developers:
 (&lt;Figure size 1650x550 with 2 Axes&gt;, &lt;Axes: xlabel=&#39;K vector&#39;, ylabel=&#39;E - E$_F$ (eV)&#39;&gt;, &lt;Axes: xlabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.621 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.331 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-02-bands-dos-plot-bandsdosplot-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/739a73b2e22bcdfe7b8d83bdc731942f/plot_bandsdosplot.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsdosplot.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/944a0173409f4bb08246c2e0702fcaa4/plot_bandsdosplot.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_bandsdosplot.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/739a73b2e22bcdfe7b8d83bdc731942f/plot_bandsdosplot.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_bandsdosplot.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

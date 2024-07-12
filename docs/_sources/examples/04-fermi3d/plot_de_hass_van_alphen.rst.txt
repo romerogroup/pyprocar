@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_04-fermi3d_plot_de_hass_van_alphen.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -53,7 +53,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 36-39
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # sphinx_gallery_thumbnail_number = 1
@@ -67,7 +67,7 @@ First download the example files with the code below. Then replace data_dir belo
 
 .. GENERATED FROM PYTHON SOURCE LINES 40-45
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import pyvista
@@ -87,7 +87,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 47-64
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import os
@@ -130,7 +130,7 @@ Maximal cross sectional area along the (0,0,1)
 
 .. GENERATED FROM PYTHON SOURCE LINES 68-80
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -167,6 +167,7 @@ Maximal cross sectional area along the (0,0,1)
                     Here is a list of properties: fermi_speed , fermi_velocity , harmonic_effective_mass
                     --------------------------------------------------------
                 
+    ij,uvwabj->uvwabi
     Bands being used if bands=None:  {0: 0}
 
 
@@ -189,7 +190,7 @@ Minimal cross sectional area along the (0,0,1)
 
 .. GENERATED FROM PYTHON SOURCE LINES 92-101
 
-.. code-block:: default
+.. code-block:: Python
 
 
     fermiHandler.plot_fermi_cross_section_box_widget(
@@ -246,7 +247,7 @@ Extremal cross sectional area along the (0,1,1)
 
 .. GENERATED FROM PYTHON SOURCE LINES 114-124
 
-.. code-block:: default
+.. code-block:: Python
 
 
     fermiHandler.plot_fermi_cross_section_box_widget(
@@ -297,7 +298,7 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.151 seconds)
+   **Total running time of the script:** (0 minutes 3.112 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_de_hass_van_alphen.py:
@@ -306,16 +307,13 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_de_hass_van_alphen.ipynb <plot_de_hass_van_alphen.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_de_hass_van_alphen.py <plot_de_hass_van_alphen.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_de_hass_van_alphen.ipynb <plot_de_hass_van_alphen.ipynb>`
 
 
 .. only:: html

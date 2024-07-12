@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_00-band_structure_plot_colinear.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -42,7 +42,7 @@ importing pyprocar and specifying local data_dir
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-31
 
-.. code-block:: default
+.. code-block:: Python
 
     import os
     import pyprocar
@@ -64,7 +64,7 @@ Plain mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 34-41
 
-.. code-block:: default
+.. code-block:: Python
 
 
     pyprocar.bandsplot(
@@ -92,7 +92,7 @@ Plain mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -112,7 +112,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. GENERATED FROM PYTHON SOURCE LINES 49-62
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
@@ -146,7 +146,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -166,7 +166,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. GENERATED FROM PYTHON SOURCE LINES 70-85
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
@@ -202,7 +202,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -220,7 +220,7 @@ Scatter mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 91-105
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     orbitals=[4,5,6,7,8]
@@ -255,7 +255,7 @@ Scatter mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -273,7 +273,7 @@ overlay_species mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 111-122
 
-.. code-block:: default
+.. code-block:: Python
 
     orbitals=[4,5,6,7,8]
     spins=[0]
@@ -305,7 +305,7 @@ overlay_species mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -323,7 +323,7 @@ overlay_orbtials mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 128-139
 
-.. code-block:: default
+.. code-block:: Python
 
     atoms=[0]
     spins=[0]
@@ -355,7 +355,7 @@ overlay_orbtials mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -373,7 +373,7 @@ overlay mode
 
 .. GENERATED FROM PYTHON SOURCE LINES 145-154
 
-.. code-block:: default
+.. code-block:: Python
 
 
     items={'Fe':[4,5,6,7,8]}
@@ -403,7 +403,7 @@ overlay mode
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -421,7 +421,7 @@ overlay mode by orbital names
 
 .. GENERATED FROM PYTHON SOURCE LINES 160-167
 
-.. code-block:: default
+.. code-block:: Python
 
 
     items={'Fe':['p','d']}
@@ -449,7 +449,7 @@ overlay mode by orbital names
                 You can change these configurations by passing the keyword argument to the function.
                 To print a list of all plot options set `print_plot_opts=True`
 
-                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals , ipr
+                Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
 
@@ -460,7 +460,7 @@ overlay mode by orbital names
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.167 seconds)
+   **Total running time of the script:** (0 minutes 2.856 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_colinear.py:
@@ -469,16 +469,13 @@ overlay mode by orbital names
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_colinear.ipynb <plot_colinear.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_colinear.py <plot_colinear.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_colinear.ipynb <plot_colinear.ipynb>`
 
 
 .. only:: html

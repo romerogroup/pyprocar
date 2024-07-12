@@ -532,7 +532,7 @@ document.write(`
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-01-dos-plot-spin-polarized-dos-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="plotting-spin-polarized-density-of-states">
 <span id="ref-plotting-spin-polarized-dos"></span><span id="sphx-glr-examples-01-dos-plot-spin-polarized-dos-py"></span><h1>Plotting spin-polarized density of states<a class="headerlink" href="#plotting-spin-polarized-density-of-states" title="Permalink to this heading">#</a></h1>
@@ -549,7 +549,7 @@ to download the full example code</p>
 </div>
 </div>
 <p>importing pyprocar and specifying local data_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">Fe</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">vasp</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">spin-polarized-colinear</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">dos&quot;</span>
@@ -559,7 +559,7 @@ to download the full example code</p>
 <h2>Plain mode<a class="headerlink" href="#plain-mode" title="Permalink to this heading">#</a></h2>
 <p>When the calculation is a spin-polarized calculation. There are few more features features bandsplot can do.
 The default settings bandsplot will plot the spin-up and spin-down bands on the same plot.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
@@ -579,11 +579,12 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 </div>
 <p>The line-styles or line-colors, these may be changed in the ebs section in the :doc:’pyprocar/utils/default_settings.ini’ file.</p>
 <p>The keyword spins can also be used to select which spin bands to plot</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">spins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">,</span>
                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
+                <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -603,7 +604,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <section id="parametric-mode">
 <h2>Parametric mode<a class="headerlink" href="#parametric-mode" title="Permalink to this heading">#</a></h2>
 <p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
@@ -613,6 +614,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -632,7 +634,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 <section id="parametric-line-mode">
 <h2>parametric_line mode<a class="headerlink" href="#parametric-line-mode" title="Permalink to this heading">#</a></h2>
 <p>For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:’atomic_projections’</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
@@ -642,6 +644,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 <span class="n">fermi</span><span class="o">=</span><span class="mf">5.590136</span><span class="p">,</span>
                 <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                 <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
+                <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
                 <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span>
                 <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
@@ -660,7 +663,7 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
 </section>
 <section id="stack-species-mode">
 <h2>stack_species mode<a class="headerlink" href="#stack-species-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
@@ -687,7 +690,7 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 </section>
 <section id="stack-orbtials-mode">
 <h2>stack_orbtials mode<a class="headerlink" href="#stack-orbtials-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -713,7 +716,7 @@ The plot only considers atoms [&#39;Fe&#39;]
 </section>
 <section id="stack-mode">
 <h2>stack mode<a class="headerlink" href="#stack-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -738,7 +741,7 @@ The plot only considers atoms [&#39;Fe&#39;]
 </section>
 <section id="overlay-species-mode">
 <h2>overlay_species mode<a class="headerlink" href="#overlay-species-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">orbitals</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
@@ -765,7 +768,7 @@ The plot only considers orbitals [4, 5, 6, 7, 8]
 </section>
 <section id="overlay-orbtials-mode">
 <h2>overlay_orbtials mode<a class="headerlink" href="#overlay-orbtials-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -791,7 +794,7 @@ The plot only considers atoms [&#39;Fe&#39;]
 </section>
 <section id="overlay-mode">
 <h2>overlay mode<a class="headerlink" href="#overlay-mode" title="Permalink to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Fe&#39;</span><span class="p">:[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
 <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">pyprocar</span><span class="o">.</span><span class="n">dosplot</span><span class="p">(</span>
                 <span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span>
@@ -813,13 +816,13 @@ The plot only considers atoms [&#39;Fe&#39;]
 (&lt;Figure size 900x600 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;Energy - E$_F$ (eV)&#39;, ylabel=&#39;DOS&#39;&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.761 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.222 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-dos-plot-spin-polarized-dos-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/0ae4717a2ffa80a361725a23ff73d2e0/plot_spin_polarized_dos.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_spin_polarized_dos.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/3a34777fc720c39085494138831a04fa/plot_spin_polarized_dos.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_spin_polarized_dos.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/0ae4717a2ffa80a361725a23ff73d2e0/plot_spin_polarized_dos.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_spin_polarized_dos.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
