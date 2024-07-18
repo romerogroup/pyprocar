@@ -6,6 +6,7 @@ scikit-image
 scipy
 seekpath
 spglib
+pandas
 trimesh
 ase
 sympy

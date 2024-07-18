@@ -38,6 +38,8 @@ def dosplot(
         ax:plt.Axes=None,
         show:bool=True,
         print_plot_opts:bool=False,
+        export_data_file:str=None,
+        export_append_mode:bool=True,
         **kwargs
     ):
 
@@ -230,6 +232,14 @@ def dosplot(
 
         e.g. ``plt_show=True``
 
+    export_data_file : str, optional
+        The file name to export the data to. If not provided the
+        data will not be exported.
+
+    export_append_mode : bool, optional
+        Boolean to append the mode to the file name. If not provided the
+        data will be overwritten.
+
     print_plot_opts: bool, optional
         Boolean to print the plotting options
 
@@ -323,7 +333,7 @@ def dosplot(
         if orbitals is None:
             orbitals = list(np.arange(len(edos_plot.dos.projected[0][0]), dtype=int))
         
-        values_dict = edos_plot.plot_parametric_line(
+        edos_plot.plot_parametric_line(
                         atoms=atoms,
                         principal_q_numbers=[-1],
                         spins=spins,
@@ -331,35 +341,35 @@ def dosplot(
                         )
 
     elif mode == "stack_species":
-        values_dict = edos_plot.plot_stack_species(
+        edos_plot.plot_stack_species(
             spins=spins,
             orbitals=orbitals,
         )
     elif mode == "stack_orbitals":
-        values_dict = edos_plot.plot_stack_orbitals(
+        edos_plot.plot_stack_orbitals(
             spins=spins,
             atoms=atoms,
         )
     elif mode == "stack":
-        values_dict = edos_plot.plot_stack(
+        edos_plot.plot_stack(
             spins=spins,
             items=items,
         )
     elif mode == "overlay_species":
-        values_dict = edos_plot.plot_stack_species(
+        edos_plot.plot_stack_species(
             spins=spins,
             orbitals=orbitals,
 
             overlay_mode=True
         )
     elif mode == "overlay_orbitals":
-        values_dict = edos_plot.plot_stack_orbitals(
+        edos_plot.plot_stack_orbitals(
             spins=spins,
             atoms=atoms,
             overlay_mode=True
         )
     elif mode == "overlay":
-        values_dict = edos_plot.plot_stack(
+        edos_plot.plot_stack(
             spins=spins,
             items=items,
             overlay_mode=True
@@ -399,4 +409,14 @@ def dosplot(
         edos_plot.save(savefig)
     if show:
         edos_plot.show()
+
+    if export_data_file is not None:
+        if export_append_mode:
+            file_basename,file_type=export_data_file.split('.')
+            filename=f"{file_basename}_{mode}.{file_type}"
+        else:
+            filename=export_data_file
+        edos_plot.export_data(filename)
+
+
     return edos_plot.fig, edos_plot.ax

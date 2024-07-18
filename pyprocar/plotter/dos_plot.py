@@ -5,9 +5,11 @@ __date__ = "March 31, 2020"
 
 import os
 import yaml
+import json
 from typing import List
 
 import numpy as np
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pylab as plt
 from matplotlib.collections import LineCollection
@@ -55,6 +57,7 @@ class DOSPlot:
         self.handles = []
         self.labels = []
         self.orientation = orientation
+        self.values_dict={}
 
 
         if ax is None:
@@ -76,14 +79,19 @@ class DOSPlot:
         energies = self.dos.energies
         dos_total = self.dos.total
 
+        
+
         self._set_plot_limits(spin_channels)
         for ispin, spin_channel in enumerate(spin_channels):
             
             # flip the sign of the total dos if there are 2 spin channels
             dos_total_spin = dos_total[spin_channel, :] * (-1 if ispin > 0 else 1)
-            values_dict['dos_total_spin-'+str(spin_channel)]=dos_total_spin
-
             self._plot_total_dos(energies, dos_total_spin, spin_channel)
+            values_dict['energies']=energies
+            values_dict['dosTotalSpin-'+str(spin_channel)]=dos_total_spin
+            
+
+        self.values_dict=values_dict
         return values_dict
 
     def plot_parametric(self,
@@ -98,7 +106,11 @@ class DOSPlot:
                                                                                        spin_projections, 
                                                                                        principal_q_numbers)
         
-        
+        orbital_string=':'.join([str(orbital) for orbital in orbitals])
+        atom_string=':'.join([str(atom) for atom in atoms])
+        spin_string=':'.join([str(spin_projection) for spin_projection in spin_projections])
+
+
         self._setup_colorbar(dos_projected, dos_total_projected)
         self._set_plot_limits(spin_channels)
         
@@ -114,10 +126,15 @@ class DOSPlot:
             if self.config.plot_total:
                 self._plot_total_dos(energies, dos_spin_total, spin_channel)
 
-            values_dict['spin-'+str(spin_channel)+'_projections']=normalized_dos_spin_projected
             values_dict['energies']=energies
-            values_dict['dos_total_spin-'+str(spin_channel)]=dos_spin_total
+            values_dict['dosTotalSpin-'+str(spin_channel)]=dos_spin_total
+            values_dict['spinChannel-'+str(spin_channel) + 
+                        f'_orbitals-{orbital_string}' + 
+                        f'_atoms-{atom_string}' + 
+                        f'_spinProjection-{spin_string}'] =normalized_dos_spin_projected
 
+
+        self.values_dict=values_dict
         return values_dict
 
     def plot_parametric_line(self,
@@ -132,6 +149,10 @@ class DOSPlot:
                                                                                        spin_projections, 
                                                                                        principal_q_numbers)
         
+        orbital_string=':'.join([str(orbital) for orbital in orbitals])
+        atom_string=':'.join([str(atom) for atom in atoms])
+        spin_string=':'.join([str(spin_projection) for spin_projection in spin_projections])
+        
         self._setup_colorbar(dos_projected, dos_total_projected)
         self._set_plot_limits(spin_channels)
         
@@ -145,10 +166,14 @@ class DOSPlot:
             
             self._plot_spin_data_parametric_line(energies, dos_spin_total, normalized_dos_spin_projected, spin_channel)
 
-            values_dict['spin-'+str(spin_channel)+'_projections']=normalized_dos_spin_projected
             values_dict['energies']=energies
-            values_dict['dos_total_spin-'+str(spin_channel)]=dos_spin_total
+            values_dict['dosTotalSpin-'+str(spin_channel)]=dos_spin_total
+            values_dict['spinChannel-'+str(spin_channel) + 
+                        f'_orbitals-{orbital_string}' + 
+                        f'_atoms-{atom_string}' + 
+                        f'_spinProjection-{spin_string}']=normalized_dos_spin_projected
 
+        self.values_dict=values_dict
         return values_dict
     
     def plot_stack_species(
@@ -168,6 +193,12 @@ class DOSPlot:
         for specie in range(len(self.structure.species)):
             idx = (np.array(self.structure.atoms) == self.structure.species[specie])
             atoms = list(np.where(idx)[0])
+
+            orbital_string=':'.join([str(orbital) for orbital in orbitals])
+            atom_string=':'.join([str(atom) for atom in atoms])
+            spin_string=':'.join([str(spin_projection) for spin_projection in spin_projections])
+
+
             dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
                                                                                        atoms,
                                                                                        orbitals, 
@@ -175,6 +206,9 @@ class DOSPlot:
                                                                                        principal_q_numbers)
 
             color=self.config.colors[specie]
+
+            
+
             for ispin, spin_channel in enumerate(spin_channels):
                 energies, dos_spin_total, scaled_dos_spin_projected = self._prepare_parametric_spin_data(spin_channel, 
                                                                                             ispin, 
@@ -198,8 +232,15 @@ class DOSPlot:
                     bottom_value+=top_value
                     
                 label=self.structure.species[specie] + orbital_label
-                values_dict[label+'_spin-'+str(spin_channel)+'_projections']=scaled_dos_spin_projected
+
                 values_dict['energies']=energies
+                values_dict['dosTotalSpin-'+str(spin_channel)]=dos_spin_total
+                values_dict['spinChannel-'+str(spin_channel) + 
+                        f'_orbitals-{orbital_string}' + 
+                        f'_atoms-{atom_string}' + 
+                        f'_spinProjection-{spin_string}']=scaled_dos_spin_projected
+
+
 
 
             self.handles.append(handle)
@@ -207,7 +248,8 @@ class DOSPlot:
 
         if self.config.plot_total:
             total_values_dict=self.plot_dos(spin_channels)
-            values_dict.update(total_values_dict)
+
+        self.values_dict=values_dict
         return values_dict
 
     def plot_stack_orbitals(
@@ -225,6 +267,10 @@ class DOSPlot:
         self._set_plot_limits(spin_channels)
         bottom_value=0
         for iorb in range(len(orb_l)):
+
+            orbital_string=':'.join([str(orbital) for orbital in orb_l[iorb]])
+            atom_string=':'.join([str(atom) for atom in atoms])
+            spin_string=':'.join([str(spin_projection) for spin_projection in spin_projections])
 
             dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
                                                                                        atoms=atoms,
@@ -256,15 +302,21 @@ class DOSPlot:
                     bottom_value+=top_value
                     
                 label=atom_names + orb_names[iorb]# + self.config.spin_labels[ispin]
-                values_dict[label+'_spin-'+str(spin_channel)+'_projections']=scaled_dos_spin_projected
+                
                 values_dict['energies']=energies
+                values_dict['dosTotalSpin-'+str(spin_channel)]=dos_spin_total
+                values_dict['spinChannel-'+str(spin_channel) + 
+                        f'_orbitals-{orbital_string}' + 
+                        f'_atoms-{atom_string}' + 
+                        f'_spinProjection-{spin_string}']=scaled_dos_spin_projected
 
             self.handles.append(handle)
             self.labels.append(label)
 
         if self.config.plot_total:
             total_values_dict=self.plot_dos(spin_channels)
-            values_dict.update(total_values_dict)
+
+        self.values_dict=values_dict
         return values_dict
 
     def plot_stack(
@@ -297,6 +349,10 @@ class DOSPlot:
             orbitals = items[specie]
             orbital_label=self._get_stack_labels(orbitals)
 
+            orbital_string=':'.join([str(orbital) for orbital in orbitals])
+            atom_string=':'.join([str(atom) for atom in atoms])
+            spin_string=':'.join([str(spin_projection) for spin_projection in spin_projections])
+
             dos_total, dos_total_projected, dos_projected = self._calculate_parametric_dos(
                                                                                        atoms=atoms,
                                                                                        orbitals=orbitals,
@@ -327,9 +383,13 @@ class DOSPlot:
                     bottom_value+=top_value
 
                 label=specie + orbital_label
-
-                values_dict[label+'_spin-'+str(spin_channel)+'_projections']=scaled_dos_spin_projected
                 values_dict['energies']=energies
+                values_dict['dosTotalSpin-'+str(spin_channel)]=dos_spin_total
+                values_dict['spinChannel-'+str(spin_channel) + 
+                        f'_orbitals-{orbital_string}' + 
+                        f'_atoms-{atom_string}' + 
+                        f'_spinProjection-{spin_string}']=scaled_dos_spin_projected
+                
 
 
             self.handles.append(handle)
@@ -337,7 +397,8 @@ class DOSPlot:
 
         if self.config.plot_total:
             total_values_dict=self.plot_dos(spin_channels)
-            values_dict.update(total_values_dict)
+
+        self.values_dict=values_dict
 
         return values_dict
 
@@ -916,4 +977,63 @@ class DOSPlot:
         for key,value in config_dict.items():
             self.config[key]['value']=value
      
+    def export_data(self,filename):
+        """
+        This method will export the data to a csv file
 
+        Parameters
+        ----------
+        filename : str
+            The file name to export the data to
+
+        Returns
+        -------
+        None
+            None
+        """
+        possible_file_types=['csv','txt','json','dat']  
+        file_type=filename.split('.')[-1]
+        if file_type not in possible_file_types:
+            raise ValueError(f"The file type must be {possible_file_types}")
+        if self.values_dict is None:
+            raise ValueError("The data has not been plotted yet")
+        
+        column_names=list(self.values_dict.keys())
+        sorted_column_names=[None]*len(column_names)
+        index=0
+        for column_name in column_names:
+            if 'energies' in column_name.split('_')[0]:
+                sorted_column_names[index]=column_name
+                index+=1
+
+        for column_name in column_names:
+            if 'dosTotalSpin' in column_name.split('_')[0]:
+                sorted_column_names[index]=column_name
+                index+=1
+        for ispin in range(2):
+            for column_name in column_names:
+                
+                if 'spinChannel-0' in column_name.split('_')[0] and ispin==0:
+                    sorted_column_names[index]=column_name
+                    index+=1
+                if 'spinChannel-1' in column_name.split('_')[0] and ispin==1:
+                    sorted_column_names[index]=column_name
+                    index+=1
+
+            
+
+        column_names.sort()
+        if file_type=='csv':
+            df=pd.DataFrame(self.values_dict)
+            df.to_csv(filename, columns=sorted_column_names, index=False)
+        elif file_type=='txt':
+            df=pd.DataFrame(self.values_dict)
+            df.to_csv(filename, columns=sorted_column_names, sep='\t', index=False)
+        elif file_type=='json':
+            with open(filename, 'w') as outfile:
+                for key,value in self.values_dict.items():
+                    self.values_dict[key]=value.tolist()
+                json.dump(self.values_dict, outfile)
+        elif file_type=='dat':
+            df=pd.DataFrame(self.values_dict)
+            df.to_csv(filename, columns=sorted_column_names, sep=' ', index=False)
