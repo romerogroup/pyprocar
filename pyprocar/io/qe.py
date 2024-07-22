@@ -74,12 +74,9 @@ class QEParser():
             self.isBandsCalc = True
             with open(bands_in_filename, "r") as f:
                 self.bandsIn = f.read()
-            self.getKpointLabels()
+            self._get_kpoint_labels()
 
-        # if xml_root.findall(".//input/control_variables/calculation")[0].text == "nscf":
-        #     self.is_dos_fermi_calc = True
-        # if self.kpath is not None:
-        # self.bands -= self.efermi
+ 
         self.ebs = ElectronicBandStructure(
                                 kpoints=self.kpoints,
                                 n_kx=self.nkx,
@@ -202,11 +199,10 @@ class QEParser():
 
         # Parsing total density of states
         energies, total_dos = self._parse_dos_total(dos_total_filename=f"{dirname}{os.sep}{self.pdos_prefix}.pdos_tot")
-
+        self.n_energies=len(energies)
         # Finding all the density of states projections files
-        # print(self.wfc_filenames)
         wfc_filenames = self._parse_available_wfc_filenames(dirname = self.dirname)
-        projected_dos, projected_labels = self._parse_dos_projections(wfc_filenames=wfc_filenames, n_energy = len(energies))    
+        projected_dos = self._parse_dos_projections(wfc_filenames=wfc_filenames, n_energy = len(energies))    
         
         # print(projected_labels)
         dos = DensityOfStates(energies=energies,
@@ -255,131 +251,157 @@ class QEParser():
         energies -= self.efermi
         return energies, total_dos
    
-    def _parse_dos_projections(self,wfc_filenames,n_energy):
-        """Helper method to parse the dos projection files
-
-        Parameters
-        ----------
-        wfc_filenames : List[str]
-            A List of projection filenames.
-        n_energy : int
-            The number of energies for which the density of states is calculated at.
-
-        Returns
-        -------
-        _type_
-            _description_
-
-        Raises
-        ------
-        ValueError
-            _description_
-        """
+    def _parse_dos_projections(self, wfc_filenames, n_energy):
+        """Parse the dos projection files using efficient array operations."""
         n_principal_number = 1
-        projected_dos_array =  np.zeros(shape=(self.n_atoms,n_principal_number,self.n_orbitals,self.n_spin,n_energy))
-        for filename in wfc_filenames[:]:
-            if not os.path.exists(filename):
-                raise ValueError('ERROR: pdos file not found')   
-            with open(filename) as f:
-                pdos_text = ''.join(f.readlines()[1:])
 
-            # -1 because indexing starts at 0
-            atom_num = int(re.findall("#(\d*)",filename)[0]) - 1
-            wfc_Name = re.findall("atm#\d*\(([a-zA-Z0-9]*)\)",filename)[0]
-            orbital_name = re.findall("wfc#\d*\(([_a-zA-Z0-9.]*)\)",filename)[0]
-            n_orbitial = len(self.orbitals)
+        projected_dos_array = np.zeros((self.n_atoms, n_principal_number, self.n_orbitals, self.n_spin, n_energy))
+
+        for filename in wfc_filenames:
+            self._validate_file(filename)
+
+            # Some pdos files are not non-colinear. 
+            # In the version of the qe code where we get the spin projections. 
+            # Non-colinear pdos files should have the word 'j' in the filename.
+            if not self._is_non_colinear_file(filename) and self.is_non_colinear:
+                continue
             
-
-            # For noncolinear caluclations
+            # Determine the parsing method based on calculation type
             if self.is_non_colinear:
-                # In the noncolinear case there are some files that are not used. They are in the uncoupled basis
-                try:
-                    tot_ang_mom = float(orbital_name.split('j')[-1])
-                except:
-                    continue
-                
-                # This controls the mapping from raw orbital projection data to structured orbital projection data
-                # as defined by the order in self.orbitals
-                l_orbital_name = orbital_name.split('_')[0]
-                if l_orbital_name == 's':
-                    if tot_ang_mom == 0.5:
-                        m_js = np.linspace(-0.5,0.5,2)
-                        orbital_nums = [0,1]
-                elif l_orbital_name == 'p':
-                    if tot_ang_mom == 0.5:
-                        m_js = np.linspace(-0.5,0.5,2)
-                        orbital_nums = [2,3]
-                    elif tot_ang_mom == 1.5:
-                        m_js = np.linspace(-1.5,1.5,4)
-                        orbital_nums = [4,5,6,7]
-                elif l_orbital_name == 'd':
-                    if tot_ang_mom == 0.5:
-                        m_js = np.linspace(-0.5,0.5,2)
-                        orbital_nums = [2,3]
-                    elif tot_ang_mom == 1.5:
-                        m_js = np.linspace(-1.5,1.5,4)
-                        orbital_nums = [8,9,10,11]
-                    elif tot_ang_mom == 2.5:
-                        m_js = np.linspace(-2.5,2.5,6)
-                        orbital_nums = [12,13,14,15,16,17]
-
-                # Filters unwanted empty character from the regular expression search
-                raw_energy_blocks = list(filter(None,re.findall('([\s\S]*?)(?=\n \n)',pdos_text)))
-
-                # Loop through the energies
-                for i_energy, raw_energy_block in enumerate(raw_energy_blocks[:]):
-                    #Strippng unwanted space characters before and after the block
-                    raw_energy_block =raw_energy_block.lstrip().rstrip()
-                    # Orbital_num is the index in the final array, i_orbital is the index in the raw_data
-                    for i_orbital,orbital_num in enumerate(orbital_nums):
-                        # Loop through spins
-                        for i_spin,spin_comp in enumerate([1,2,3]):
-                            # Totals
-                            # if i_spin == 0:
-                            #     projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_energy_block.split('\n')[0].split()[2+i_orbital])
-                            # # spin components
-                            # else:
-                            #     projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_energy_block.split('\n')[i_spin+1].split()[1+i_orbital])
-                                
-                            projected_dos_array[atom_num,0,orbital_num,spin_comp,i_energy] += float(raw_energy_block.split('\n')[i_spin+2].split()[1+i_orbital])
-                        
-            # For colinear calculations
+                self._parse_non_colinear(filename,  projected_dos_array)
             else:
-                current_orbital_name =  orbital_name
+                self._parse_colinear(filename, projected_dos_array)
 
-                # This controls the mapping from raw orbital projection data to structured orbital projection data
-                # as defined by the order in self.orbitals
-                if current_orbital_name == 's':
-                    m_s = np.linspace(0,0,1)
-                    orbital_nums = [0]
-                elif current_orbital_name == 'p':
-                    m_s = np.linspace(-1,1,3)
-                    orbital_nums = [1,2,3]
-                elif current_orbital_name == 'd':
-                    m_s = np.linspace(-2,2,5)
-                    orbital_nums = [4,5,6,7,8]
+        return projected_dos_array
+    
+    def _is_non_colinear_file(self, filename):
+        """Determine if the file corresponds to non-colinear calculations."""
+        file_tag = filename.split('_')[-1]
+        return 'j' in file_tag
+    
+    def _validate_file(self, filename):
+        if not os.path.exists(filename):
+            raise ValueError(f'ERROR: pdos file not found: {filename}')
 
-                # Filters unwanted empty character from the regular expression search
-                raw_energy_blocks = pdos_text.rstrip().split('\n')
+    def _read_file_content(self, filename):
+        with open(filename) as f:
+            # Check if spin component projections are present
+            lines=f.readlines()[1:]
+            spin_projections_present = 'lsigma' in lines[1]
 
-                # Loop through the energies
-                for i_energy, raw_energy_block in enumerate(raw_energy_blocks):
-                    raw_energy_block =raw_energy_block.lstrip().rstrip()
-                    raw_projections = raw_energy_block.split()[1+self.n_spin:]
+            if spin_projections_present:
+                pdos=self._parse_spin_components_lines(lines)
+            elif self.is_non_colinear:
+                pdos=self._parse_noncolinear_pdos(lines)
+            else:
+                pdos=self._parse_colinear_pdos(lines)
+        return pdos
+            
+    def _parse_spin_components_lines(self, lines):
+ 
+        n_orbitals=len(lines[0].split()) - 2
+        pdos=np.zeros(shape=(self.n_energies, n_orbitals, self.n_spin))
+        for i_energy in range(self.n_energies):
+            iblock_start=i_energy*6
+            total_line=lines[iblock_start].split()[2:]
+            x_line=lines[iblock_start+2].split()[1:]
+            y_line=lines[iblock_start+3].split()[1:]
+            z_line=lines[iblock_start+4].split()[1:]
+            pdos[i_energy, : ,0] = [float(tot) for tot in total_line]
+            pdos[i_energy, : ,1] = [float(x) for x in x_line]
+            pdos[i_energy, : ,2] = [float(y) for y in y_line]
+            pdos[i_energy, : ,3] = [float(z) for z in z_line]
 
-                    # Orbital_num is the index in the final array, i_orbital is the index in the raw_data
-                    for i_orbital, orbital_num in enumerate(orbital_nums):
+        # Move energy to the last axis
+        pdos = np.moveaxis(pdos, 0, -1)
+        return pdos
+    
+    def _parse_colinear_pdos(self,lines):
+        # The energy column is first, the sum totals by spin channel
+        n_orbitals=len(lines[0].split()) - self.n_spin - 1
+        n_orbitals //= self.n_spin
+        pdos=np.zeros(shape=(self.n_energies, n_orbitals, self.n_spin))
+        col_start= 1 + self.n_spin
+        for i_energy in range(self.n_energies):
+            
+            # Skip energies and sum over projections
+            values=lines[i_energy].split()[col_start:]
+            if self.n_spin == 1:
+                pdos[i_energy, : , 0] = values
+            else:
+                pdos[i_energy, : , 0] = values[::2]
+                pdos[i_energy, : , 1] = values[1::2]
+        
+        # Move energy to the last axis
+        pdos = np.moveaxis(pdos, 0, -1)
+        return pdos
+    
+    def _parse_noncolinear_pdos(self,lines):
+        # The energy column is first, the sum totals by spin channel
+        n_orbitals=len(lines[0].split()) - 1 - 1
+        n_orbitals //= 1
+        pdos=np.zeros(shape=(self.n_energies, n_orbitals, 4))
+        col_start= 1 + 1
+        for i_energy in range(self.n_energies):
+            # Skip energies and sum over projections
+            values=lines[i_energy].split()[col_start:]
+            pdos[i_energy, : , 0] = values
+        # Move energy to the last axis
+        pdos = np.moveaxis(pdos, 0, -1)
+        return pdos
 
-                        # Loop through spins
-                        for i_spin in range(self.n_spin):
-                            projected_dos_array[atom_num,0,orbital_num,i_spin,i_energy] += float(raw_projections[i_spin::self.n_spin][i_orbital])
-
-
+    def _extract_file_info(self, filename):
+        atom_num = int(re.findall(r"#(\d*)", filename)[0]) - 1
+        wfc_name = re.findall(r"atm#\d*\(([a-zA-Z0-9]*)\)", filename)[0]
+        orbital_name = filename.split('(')[-1][0]
+        
+        total_angular_momentum=None
         if self.is_non_colinear:
-            projected_dos_array[:,:,:,0,:] = (projected_dos_array[:,:,:,1,:]**2 + projected_dos_array[:,:,:,2,:]**2 + projected_dos_array[:,:,:,3,:]**2)**0.5 
-        return projected_dos_array, self.orbital_names
+            tmp_str=filename.split('_')[-1]
+            total_angular_momentum=float(tmp_str.strip('j').strip(')'))
+        return atom_num, wfc_name, orbital_name,total_angular_momentum
 
-    def getKpointLabels(self):
+    def _parse_non_colinear(self, filename, projected_dos_array):
+
+        pdos_data = self._read_file_content(filename)
+        atom_num, wfc_name, orbital_name, total_angular_momentum = self._extract_file_info(filename)
+
+        orbital_nums, _ = self._get_orbital_info_non_colinear(orbital_name, total_angular_momentum)
+        if not orbital_nums:
+            raise ValueError(f'ERROR: orbital_nums is empty for {filename}')
+
+        projected_dos_array[atom_num, 0, orbital_nums, :, :self.n_energies] += pdos_data
+
+    def _parse_colinear(self, filename, projected_dos_array):
+
+        pdos_data = self._read_file_content(filename)
+        atom_num, wfc_name, orbital_name,total_angular_momentum = self._extract_file_info(filename)
+        orbital_nums, _ = self._get_orbital_info_colinear(orbital_name)
+
+        if not orbital_nums:
+            raise ValueError(f'ERROR: orbital_nums is empty for {filename}')
+        projected_dos_array[atom_num, 0, orbital_nums, : , :self.n_energies] += pdos_data
+
+    def _get_orbital_info_non_colinear(self, l_orbital_name, tot_ang_mom):
+        orbital_info = {
+            's': {0.5: ([0, 1], np.linspace(-0.5, 0.5, 2))},
+            'p': {0.5: ([2, 3], np.linspace(-0.5, 0.5, 2)),
+                  1.5: ([4, 5, 6, 7], np.linspace(-1.5, 1.5, 4))},
+            'd': {0.5: ([2, 3], np.linspace(-0.5, 0.5, 2)),
+                  1.5: ([8, 9, 10, 11], np.linspace(-1.5, 1.5, 4)),
+                  2.5: ([12, 13, 14, 15, 16, 17], np.linspace(-2.5, 2.5, 6))}
+        }
+        return orbital_info.get(l_orbital_name, {}).get(tot_ang_mom, ([], []))
+
+    def _get_orbital_info_colinear(self, orbital_name):
+        orbital_info = {
+            's': ([0], np.linspace(0, 0, 1)),
+            'p': ([1, 2, 3], np.linspace(-1, 1, 3)),
+            'd': ([4, 5, 6, 7, 8], np.linspace(-2, 2, 5))
+        }
+        return orbital_info.get(orbital_name, ([], []))
+
+    def _get_kpoint_labels(self):
         """
         This method will parse the bands.in file to get the kpath information.
         """
@@ -496,20 +518,26 @@ class QEParser():
             dirname = dirname + os.sep
         else:
             dirname = ""
-            
-        with open(f"{dirname}{scf_in}", "r") as f:
+        
+        scf_in_file_path = os.path.join(dirname,scf_in)
+        with open(scf_in_file_path, "r") as f:
             scf_in = f.read()
 
         outdir = re.findall("outdir\s*=\s*'\S*?([A-Za-z]*)'",  scf_in)[0]
         prefix = re.findall("prefix\s*=\s*'(.*)'", scf_in)[0]
         xml_filename =  prefix + ".xml"
         
-        if os.path.exists(f"{dirname}{outdir}"):
-            atomic_proj_xml = f"{dirname}{os.sep}{outdir}{os.sep}{prefix}.save{os.sep}atomic_proj.xml"
-        else:
-            atomic_proj_xml = f"{dirname}atomic_proj.xml"
+        atomic_proj_xml = os.path.join(dirname,outdir,prefix + ".save","atomic_proj.xml")
+        if not os.path.exists(atomic_proj_xml):
+            atomic_proj_xml = os.path.join(dirname,"atomic_proj.xml")
 
-        tree = ET.parse(f"{dirname}{xml_filename}")
+        output_xml=os.path.join(dirname,outdir,xml_filename)
+        if not os.path.exists(output_xml):
+            output_xml = os.path.join(dirname,xml_filename)
+
+        
+        tree = ET.parse(output_xml)
+
         root = tree.getroot()
         prefix = root.findall(".//input/control_variables/prefix")[0].text
 
@@ -636,9 +664,13 @@ class QEParser():
         nbnd = int(root_header.get("NUMBER_OF_BANDS"))
         nk = int(root_header.get("NUMBER_OF_K-POINTS"))
         nwfc = int(root_header.get("NUMBER_OF_ATOMIC_WFC"))
-        norb = len(self.orbitals) 
-        natm = len(self.species)
-
+        norb = self.n_orbitals
+        natm = self.n_atoms
+        nspin_channels = int(root_header.get("NUMBER_OF_SPIN_COMPONENTS"))
+        nspin_projections = self.n_spin 
+        # The indices are to match the format of the from PROCAR format. 
+        # In it there is an extra 2 columns for orbitals for the ion index and the total
+        # Also there is and extra row for the totals
         self.spd = np.zeros(shape = (self.n_k, self.n_band , self.n_spin ,self.n_atoms+1,self.n_orbitals + 2,))
 
         self.spd_phase = np.zeros(
@@ -647,70 +679,107 @@ class QEParser():
             ),
             dtype=np.complex_,
         )
-        # print(self.wfc_mapping)
-        ik = -1
-        for ieigenstate, eigenstates_element in enumerate(atm_proj_root.findall(".//EIGENSTATES")[0]):
-            # print(eigenstates_element.tag)
-            if eigenstates_element.tag == 'K-POINT':
 
-                # sets ik back to zero for other spin channel
-                if ik==nk-1:
-                    ik=0
-                else:
-                    ik+=1
-                
-            if eigenstates_element.tag == 'PROJS':
-                
-                for i, projs_element in enumerate(eigenstates_element):
-                    iwfc = int(projs_element.get('index'))
-                    iorb = self.wfc_mapping[f"wfc_{iwfc}"]["orbital"]
-                    iatm = self.wfc_mapping[f"wfc_{iwfc}"]["atom"]
+        bands=self._parse_bands_tag(atm_proj_root, nk, nbnd, nspin_channels)
+        kpoints=self._parse_kpoints_tag(atm_proj_root, nk, nspin_channels)
+        projs, projs_phase=self._parse_projections_tag(atm_proj_root, nk, nbnd, natm, norb, nspin_channels, nspin_projections)
 
-                    if self.is_non_colinear:
-                        # Skips the total projections
-                        if projs_element.tag == "ATOMIC_WFC":
-                            ispin = int(projs_element.get('spin'))-1
-                            continue
-                        # Parse spin components. -1 to align index with spd array
-                        if projs_element.tag == "ATOMIC_SIGMA_PHI":
-                            ispin = int(projs_element.get('ipol'))
-                    else:
-                        if projs_element.tag == "ATOMIC_WFC":
-                            ispin = int(projs_element.get('spin'))-1
-                       
+        # maping the projections to the spd array. The spd array is the output of the PROCAR file
+        self.spd[:,:,:,:-1,1:-1] += projs[:,:,:,:,:]
+        self.spd_phase[:,:,:,:-1,1:-1] += projs_phase[:,:,:,:,:]
 
-                    projections = projs_element.text.split("\n")[1:-1]
-                    for iband, band_projection in enumerate(projections):
-                        real = float(band_projection.split()[0])
-                        imag = float(band_projection.split()[1])
-                        comp = complex(real , imag)
-                        comp_squared = np.absolute(comp)**2
 
-                        
-                        self.spd_phase[ik,iband,ispin,iatm - 1,iorb + 1] = complex(real , imag)
-
-                        # The spd will depend on of the calculation is a non colinear or colinear. Noncolinear
-                        if self.is_non_colinear:
-                            
-                            self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = real
-                        else:
-                            self.spd[ik,iband,ispin,iatm - 1,iorb + 1] = comp_squared
-
-        if self.is_non_colinear:
-            
-            self.spd[:,:,0,:,:] = (self.spd[:,:,1,:,:] ** 2 + self.spd[:,:,2,:,:] ** 2 + self.spd[:,:,3,:,:] ** 2)**0.5
-            self.spd_phase[:,:,0,:,:] = (self.spd_phase[:,:,1,:,:] ** 2 + self.spd_phase[:,:,2,:,:] ** 2 + self.spd_phase[:,:,3,:,:] ** 2)**0.5
-
+        # Adding atom index. This is a vasp output thing
         for ions in range(self.ionsCount):
             self.spd[:, :, :, ions, 0] = ions + 1
 
-        # The following fills the totals for the spd array
+        # The following fills the totals for the spd array. Again this is a vasp output thing.
         self.spd[:, :, :, :, -1] = np.sum(self.spd[:, :, :, :, 1:-1], axis=4)
         self.spd[:, :, :, -1, :] = np.sum(self.spd[:, :, :, :-1, :], axis=3)
         self.spd[:, :, :, -1, 0] = 0
 
         return None
-                
+    
+    def _parse_bands_tag(self,atm_proj_root, nk, nbnd, nspins):
+
+        bands=np.zeros(shape=(nk,nbnd,nspins))
+        results=atm_proj_root.findall(".//EIGENSTATES/E")
+        # For spin-polarized calculations, there are two spin channels. 
+        # They add them by first adding the spin up and then the spin down
+        # I break this down with the folloiwng indexing
+        spin_reuslts=[results[i*nk : (i+1)*nk ] for i in range(nspins)]
+        for ispin,spin_result in enumerate(spin_reuslts):
+            for ik,result in enumerate(spin_result):
+                bands_per_kpoint=result.text.split()
+                bands[ik,:,ispin]=bands_per_kpoint
+
+        return bands
+    
+    def _parse_kpoints_tag(self,atm_proj_root, nk, nspins):
+        kpoints=np.zeros(shape=(nk,3))
+        kpoint_tags=atm_proj_root.findall(".//EIGENSTATES/K-POINT")
+        # For spin-polarized calculations, there are two spin channels. 
+        # They add them by first adding the spin up and then the spin down
+        # I break this down with the folloiwng indexing
+        spin_reuslts=[kpoint_tags[i*nk : (i+1)*nk ] for i in range(nspins)]
+        for ispin,spin_result in enumerate(spin_reuslts):
+            for ik,kpoint_tag in enumerate(spin_result):
+                kpoint=kpoint_tag.text.split()
+                kpoints[ik,:]=kpoint
+        return kpoints
+    
+    def _parse_projections_tag(self,atm_proj_root, nk, nbnd, natm, norb, nspin_channels, nspin_projections):
+
+        projs=np.zeros(shape=(nk,nbnd,nspin_projections,natm,norb))
+        projs_phase=np.zeros(shape=(nk,nbnd,nspin_projections,natm,norb), dtype=np.complex_)
+        proj_tags=atm_proj_root.findall(".//EIGENSTATES/PROJS")
+        # For spin-polarized calculations, there are two spin channels. 
+        # They add them by first adding the spin up and then the spin down
+        # I break this down with the folloiwng indexing
+        spin_reuslts=[proj_tags[i*nk : (i+1)*nk ] for i in range(nspin_channels)]
+        for ispin,spin_result in enumerate(spin_reuslts):
+            for ik,proj_tag in enumerate(spin_result):
+                atm_wfs_tags=proj_tag.findall('ATOMIC_WFC')
+                for atm_wfs_tag in atm_wfs_tags:
+                    iwfc = int(atm_wfs_tag.get('index'))
+                    iorb = self.wfc_mapping[f"wfc_{iwfc}"]["orbital"]
+                    iatm = self.wfc_mapping[f"wfc_{iwfc}"]["atom"] - 1
+                    band_projections=atm_wfs_tag.text.strip().split('\n')
+                    for iband, band_projection in enumerate(band_projections):
+                        real = float(band_projection.split()[0])
+                        imag = float(band_projection.split()[1])
+                        comp = complex(real , imag)
+                        comp_squared = np.absolute(comp)**2
+
+                        projs_phase[ik,iband,ispin,iatm,iorb] = complex(real , imag)
+                        projs[ik,iband,ispin,iatm,iorb] = comp_squared
+
+                atm_sigma_wfs_tags=proj_tag.findall('ATOMIC_SIGMA_PHI')
+                if atm_sigma_wfs_tags:
+                    spin_x_projections = [atm_sigma_wfs_tag for atm_sigma_wfs_tag in atm_sigma_wfs_tags if atm_sigma_wfs_tag.get('ipol') == '1']
+                    spin_y_projections = [atm_sigma_wfs_tag for atm_sigma_wfs_tag in atm_sigma_wfs_tags if atm_sigma_wfs_tag.get('ipol') == '2']
+                    spin_z_projections = [atm_sigma_wfs_tag for atm_sigma_wfs_tag in atm_sigma_wfs_tags if atm_sigma_wfs_tag.get('ipol') == '3']
+                    spin_projections=[spin_x_projections,spin_y_projections,spin_z_projections]
+                    for i_spin_component,spin_projection_tags in enumerate(spin_projections):
+                        for spin_projection_tag in spin_projection_tags:
+                            iwfc = int(spin_projection_tag.get('index'))
+                            iorb = self.wfc_mapping[f"wfc_{iwfc}"]["orbital"]
+                            iatm = self.wfc_mapping[f"wfc_{iwfc}"]["atom"] - 1
+                            band_projections=spin_projection_tag.text.strip().split('\n')
+                            for iband, band_projection in enumerate(band_projections):
+                                real = float(band_projection.split()[0])
+                                imag = float(band_projection.split()[1])
+                                comp = complex(real , imag)
+                                comp_squared = np.absolute(comp)**2
+
+                                # Move spin index by 1 to match the order in the spd array
+                                # First index should be total, 
+                                # second, third, and fourth should be x,y,z, respoectively
+                                projs_phase[ik,iband,i_spin_component+1,iatm,iorb] = complex(real , imag)
+                                projs[ik,iband,i_spin_component+1,iatm,iorb] = real
+
+        return projs, projs_phase
+
     def _parse_structure(self,main_xml_root):
         """A helper method to parse the structure tag of the main xml file
 
