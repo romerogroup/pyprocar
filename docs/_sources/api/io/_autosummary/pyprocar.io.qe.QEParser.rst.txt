@@ -20,11 +20,6 @@
       
       
         
-          QEParser.getKpointLabels
-        
-      
-      
-        
           QEParser.kpoints_cart
         
       

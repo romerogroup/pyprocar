@@ -25,6 +25,11 @@
       
       
         
+          DOSPlot.export_data
+        
+      
+      
+        
           DOSPlot.grid
         
       

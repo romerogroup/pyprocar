@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyprocar.plotter.DOSPlot &#8212; PyProcar 6.2.0 documentation</title>
+    <title>pyprocar.plotter.DOSPlot &#8212; PyProcar 6.2.1 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=d345c3d3"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=773d47ca"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -125,7 +125,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.1 documentation</p>
   
 </a></div>
     
@@ -654,7 +654,6 @@ document.write(`
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../io/qe.html">QEParser</a><input class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-30"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.html">pyprocar.io.qe.QEParser</a><input class="toctree-checkbox" id="toctree-checkbox-31" name="toctree-checkbox-31" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-31"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.__init__.html">__init__</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.getKpointLabels.html">getKpointLabels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.kpoints_cart.html">kpoints_cart</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.final_structure.html">final_structure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.initial_structure.html">initial_structure</a></li>
@@ -771,6 +770,7 @@ document.write(`
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">pyprocar.plotter.DOSPlot</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-44" name="toctree-checkbox-44" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-44"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.DOSPlot.__init__.html">__init__</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.DOSPlot.draw_fermi.html">draw_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.DOSPlot.export_data.html">export_data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.DOSPlot.grid.html">grid</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.DOSPlot.legend.html">legend</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_dos.html">plot_dos</a></li>
@@ -989,55 +989,58 @@ The default is None.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.draw_fermi.html#pyprocar.plotter.DOSPlot.draw_fermi" title="pyprocar.plotter.DOSPlot.draw_fermi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.draw_fermi</span></code></a>(value[, orientation])</p></td>
 <td><p>A method to draw the fermi surface</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.grid.html#pyprocar.plotter.DOSPlot.grid" title="pyprocar.plotter.DOSPlot.grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.grid</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.export_data.html#pyprocar.plotter.DOSPlot.export_data" title="pyprocar.plotter.DOSPlot.export_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.export_data</span></code></a>(filename)</p></td>
+<td><p>This method will export the data to a csv file</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.grid.html#pyprocar.plotter.DOSPlot.grid" title="pyprocar.plotter.DOSPlot.grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.grid</span></code></a>()</p></td>
 <td><p>A method to include a grid on the plot.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.legend.html#pyprocar.plotter.DOSPlot.legend" title="pyprocar.plotter.DOSPlot.legend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.legend</span></code></a>([labels])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.legend.html#pyprocar.plotter.DOSPlot.legend" title="pyprocar.plotter.DOSPlot.legend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.legend</span></code></a>([labels])</p></td>
 <td><p>A method to include the legend</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_dos.html#pyprocar.plotter.DOSPlot.plot_dos" title="pyprocar.plotter.DOSPlot.plot_dos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_dos</span></code></a>([spins])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_dos.html#pyprocar.plotter.DOSPlot.plot_dos" title="pyprocar.plotter.DOSPlot.plot_dos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_dos</span></code></a>([spins])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_parametric.html#pyprocar.plotter.DOSPlot.plot_parametric" title="pyprocar.plotter.DOSPlot.plot_parametric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_parametric</span></code></a>([atoms, orbitals, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_parametric.html#pyprocar.plotter.DOSPlot.plot_parametric" title="pyprocar.plotter.DOSPlot.plot_parametric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_parametric</span></code></a>([atoms, orbitals, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_parametric_line.html#pyprocar.plotter.DOSPlot.plot_parametric_line" title="pyprocar.plotter.DOSPlot.plot_parametric_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_parametric_line</span></code></a>([atoms, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_parametric_line.html#pyprocar.plotter.DOSPlot.plot_parametric_line" title="pyprocar.plotter.DOSPlot.plot_parametric_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_parametric_line</span></code></a>([atoms, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_stack.html#pyprocar.plotter.DOSPlot.plot_stack" title="pyprocar.plotter.DOSPlot.plot_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_stack</span></code></a>([items, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_stack.html#pyprocar.plotter.DOSPlot.plot_stack" title="pyprocar.plotter.DOSPlot.plot_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_stack</span></code></a>([items, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_stack_orbitals.html#pyprocar.plotter.DOSPlot.plot_stack_orbitals" title="pyprocar.plotter.DOSPlot.plot_stack_orbitals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_stack_orbitals</span></code></a>([...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_stack_orbitals.html#pyprocar.plotter.DOSPlot.plot_stack_orbitals" title="pyprocar.plotter.DOSPlot.plot_stack_orbitals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_stack_orbitals</span></code></a>([...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_stack_species.html#pyprocar.plotter.DOSPlot.plot_stack_species" title="pyprocar.plotter.DOSPlot.plot_stack_species"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_stack_species</span></code></a>([...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.plot_stack_species.html#pyprocar.plotter.DOSPlot.plot_stack_species" title="pyprocar.plotter.DOSPlot.plot_stack_species"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.plot_stack_species</span></code></a>([...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.save.html#pyprocar.plotter.DOSPlot.save" title="pyprocar.plotter.DOSPlot.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.save</span></code></a>([filename])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.save.html#pyprocar.plotter.DOSPlot.save" title="pyprocar.plotter.DOSPlot.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.save</span></code></a>([filename])</p></td>
 <td><p>A method to save the plot</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_xlabel.html#pyprocar.plotter.DOSPlot.set_xlabel" title="pyprocar.plotter.DOSPlot.set_xlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_xlabel</span></code></a>(label)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_xlabel.html#pyprocar.plotter.DOSPlot.set_xlabel" title="pyprocar.plotter.DOSPlot.set_xlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_xlabel</span></code></a>(label)</p></td>
 <td><p>A method to set the x label</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_xlim.html#pyprocar.plotter.DOSPlot.set_xlim" title="pyprocar.plotter.DOSPlot.set_xlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_xlim</span></code></a>([interval])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_xlim.html#pyprocar.plotter.DOSPlot.set_xlim" title="pyprocar.plotter.DOSPlot.set_xlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_xlim</span></code></a>([interval])</p></td>
 <td><p>A method to set the xlim of the plot</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_xticks.html#pyprocar.plotter.DOSPlot.set_xticks" title="pyprocar.plotter.DOSPlot.set_xticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_xticks</span></code></a>([tick_positions, tick_names])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_xticks.html#pyprocar.plotter.DOSPlot.set_xticks" title="pyprocar.plotter.DOSPlot.set_xticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_xticks</span></code></a>([tick_positions, tick_names])</p></td>
 <td><p>A method to set the xticks of the plot</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_ylabel.html#pyprocar.plotter.DOSPlot.set_ylabel" title="pyprocar.plotter.DOSPlot.set_ylabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_ylabel</span></code></a>(label)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_ylabel.html#pyprocar.plotter.DOSPlot.set_ylabel" title="pyprocar.plotter.DOSPlot.set_ylabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_ylabel</span></code></a>(label)</p></td>
 <td><p>A method to set the y label</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_ylim.html#pyprocar.plotter.DOSPlot.set_ylim" title="pyprocar.plotter.DOSPlot.set_ylim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_ylim</span></code></a>([interval])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_ylim.html#pyprocar.plotter.DOSPlot.set_ylim" title="pyprocar.plotter.DOSPlot.set_ylim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_ylim</span></code></a>([interval])</p></td>
 <td><p>A method to set the ylim of the plot</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_yticks.html#pyprocar.plotter.DOSPlot.set_yticks" title="pyprocar.plotter.DOSPlot.set_yticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_yticks</span></code></a>([tick_positions, tick_names])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.set_yticks.html#pyprocar.plotter.DOSPlot.set_yticks" title="pyprocar.plotter.DOSPlot.set_yticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.set_yticks</span></code></a>([tick_positions, tick_names])</p></td>
 <td><p>A method to set the yticks of the plot</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.show.html#pyprocar.plotter.DOSPlot.show" title="pyprocar.plotter.DOSPlot.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.show</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.show.html#pyprocar.plotter.DOSPlot.show" title="pyprocar.plotter.DOSPlot.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.show</span></code></a>()</p></td>
 <td><p>A method to show the plot</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.update_config.html#pyprocar.plotter.DOSPlot.update_config" title="pyprocar.plotter.DOSPlot.update_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.update_config</span></code></a>(config_dict)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="pyprocar.plotter.DOSPlot.update_config.html#pyprocar.plotter.DOSPlot.update_config" title="pyprocar.plotter.DOSPlot.update_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DOSPlot.update_config</span></code></a>(config_dict)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

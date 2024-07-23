@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyprocar.plotter.dos_plot &#8212; PyProcar 6.2.0 documentation</title>
+    <title>pyprocar.plotter.dos_plot &#8212; PyProcar 6.2.1 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
   <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=d345c3d3"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=773d47ca"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -122,7 +122,7 @@
   
   
   
-    <p class="title logo__title">PyProcar 6.2.0 documentation</p>
+    <p class="title logo__title">PyProcar 6.2.1 documentation</p>
   
 </a></div>
     
@@ -456,9 +456,11 @@ document.write(`
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">LineCollection</span>
@@ -506,6 +508,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="p">{}</span>
 
 
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -527,14 +530,19 @@ document.write(`
         <span class="n">energies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">energies</span>
         <span class="n">dos_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dos</span><span class="o">.</span><span class="n">total</span>
 
+        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">spin_channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">):</span>
             
             <span class="c1"># flip the sign of the total dos if there are 2 spin channels</span>
             <span class="n">dos_total_spin</span> <span class="o">=</span> <span class="n">dos_total</span><span class="p">[</span><span class="n">spin_channel</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">ispin</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dos_total_spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_total_spin</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_total_dos</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">dos_total_spin</span><span class="p">,</span> <span class="n">spin_channel</span><span class="p">)</span>
+            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">energies</span>
+            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dosTotalSpin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_total_spin</span>
+            
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="n">values_dict</span>
         <span class="k">return</span> <span class="n">values_dict</span></div>
 
 <div class="viewcode-block" id="DOSPlot.plot_parametric"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_parametric.html#pyprocar.plotter.DOSPlot.plot_parametric">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parametric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -549,7 +557,11 @@ document.write(`
                                                                                        <span class="n">spin_projections</span><span class="p">,</span> 
                                                                                        <span class="n">principal_q_numbers</span><span class="p">)</span>
         
-        
+        <span class="n">orbital_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">orbital</span><span class="p">)</span> <span class="k">for</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orbitals</span><span class="p">])</span>
+        <span class="n">atom_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+        <span class="n">spin_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_projection</span><span class="p">)</span> <span class="k">for</span> <span class="n">spin_projection</span> <span class="ow">in</span> <span class="n">spin_projections</span><span class="p">])</span>
+
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_colorbar</span><span class="p">(</span><span class="n">dos_projected</span><span class="p">,</span> <span class="n">dos_total_projected</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
         
@@ -565,10 +577,15 @@ document.write(`
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">plot_total</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_plot_total_dos</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">dos_spin_total</span><span class="p">,</span> <span class="n">spin_channel</span><span class="p">)</span>
 
-            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_projections&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">normalized_dos_spin_projected</span>
             <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">energies</span>
-            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dos_total_spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dosTotalSpin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spinChannel-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_orbitals-</span><span class="si">{</span><span class="n">orbital_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_atoms-</span><span class="si">{</span><span class="n">atom_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_spinProjection-</span><span class="si">{</span><span class="n">spin_string</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span><span class="n">normalized_dos_spin_projected</span>
 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="n">values_dict</span>
         <span class="k">return</span> <span class="n">values_dict</span></div>
 
 <div class="viewcode-block" id="DOSPlot.plot_parametric_line"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_parametric_line.html#pyprocar.plotter.DOSPlot.plot_parametric_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parametric_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -583,6 +600,10 @@ document.write(`
                                                                                        <span class="n">spin_projections</span><span class="p">,</span> 
                                                                                        <span class="n">principal_q_numbers</span><span class="p">)</span>
         
+        <span class="n">orbital_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">orbital</span><span class="p">)</span> <span class="k">for</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orbitals</span><span class="p">])</span>
+        <span class="n">atom_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+        <span class="n">spin_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_projection</span><span class="p">)</span> <span class="k">for</span> <span class="n">spin_projection</span> <span class="ow">in</span> <span class="n">spin_projections</span><span class="p">])</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_colorbar</span><span class="p">(</span><span class="n">dos_projected</span><span class="p">,</span> <span class="n">dos_total_projected</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
         
@@ -596,10 +617,14 @@ document.write(`
             
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_spin_data_parametric_line</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">dos_spin_total</span><span class="p">,</span> <span class="n">normalized_dos_spin_projected</span><span class="p">,</span> <span class="n">spin_channel</span><span class="p">)</span>
 
-            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_projections&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">normalized_dos_spin_projected</span>
             <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">energies</span>
-            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dos_total_spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dosTotalSpin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+            <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spinChannel-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_orbitals-</span><span class="si">{</span><span class="n">orbital_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_atoms-</span><span class="si">{</span><span class="n">atom_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_spinProjection-</span><span class="si">{</span><span class="n">spin_string</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">normalized_dos_spin_projected</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="n">values_dict</span>
         <span class="k">return</span> <span class="n">values_dict</span></div>
     
 <div class="viewcode-block" id="DOSPlot.plot_stack_species"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_stack_species.html#pyprocar.plotter.DOSPlot.plot_stack_species">[docs]</a>    <span class="k">def</span> <span class="nf">plot_stack_species</span><span class="p">(</span>
@@ -619,6 +644,12 @@ document.write(`
         <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">specie</span><span class="p">])</span>
             <span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">orbital_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">orbital</span><span class="p">)</span> <span class="k">for</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orbitals</span><span class="p">])</span>
+            <span class="n">atom_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+            <span class="n">spin_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_projection</span><span class="p">)</span> <span class="k">for</span> <span class="n">spin_projection</span> <span class="ow">in</span> <span class="n">spin_projections</span><span class="p">])</span>
+
+
             <span class="n">dos_total</span><span class="p">,</span> <span class="n">dos_total_projected</span><span class="p">,</span> <span class="n">dos_projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_parametric_dos</span><span class="p">(</span>
                                                                                        <span class="n">atoms</span><span class="p">,</span>
                                                                                        <span class="n">orbitals</span><span class="p">,</span> 
@@ -626,6 +657,9 @@ document.write(`
                                                                                        <span class="n">principal_q_numbers</span><span class="p">)</span>
 
             <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">specie</span><span class="p">]</span>
+
+            
+
             <span class="k">for</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">spin_channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">):</span>
                 <span class="n">energies</span><span class="p">,</span> <span class="n">dos_spin_total</span><span class="p">,</span> <span class="n">scaled_dos_spin_projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_parametric_spin_data</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">,</span> 
                                                                                             <span class="n">ispin</span><span class="p">,</span> 
@@ -649,8 +683,15 @@ document.write(`
                     <span class="n">bottom_value</span><span class="o">+=</span><span class="n">top_value</span>
                     
                 <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">specie</span><span class="p">]</span> <span class="o">+</span> <span class="n">orbital_label</span>
-                <span class="n">values_dict</span><span class="p">[</span><span class="n">label</span><span class="o">+</span><span class="s1">&#39;_spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_projections&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">scaled_dos_spin_projected</span>
+
                 <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">energies</span>
+                <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dosTotalSpin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+                <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spinChannel-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_orbitals-</span><span class="si">{</span><span class="n">orbital_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_atoms-</span><span class="si">{</span><span class="n">atom_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_spinProjection-</span><span class="si">{</span><span class="n">spin_string</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">scaled_dos_spin_projected</span>
+
+
 
 
             <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
@@ -658,7 +699,8 @@ document.write(`
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">plot_total</span><span class="p">:</span>
             <span class="n">total_values_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_dos</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
-            <span class="n">values_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">total_values_dict</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="n">values_dict</span>
         <span class="k">return</span> <span class="n">values_dict</span></div>
 
 <div class="viewcode-block" id="DOSPlot.plot_stack_orbitals"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_stack_orbitals.html#pyprocar.plotter.DOSPlot.plot_stack_orbitals">[docs]</a>    <span class="k">def</span> <span class="nf">plot_stack_orbitals</span><span class="p">(</span>
@@ -676,6 +718,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
         <span class="n">bottom_value</span><span class="o">=</span><span class="mi">0</span>
         <span class="k">for</span> <span class="n">iorb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orb_l</span><span class="p">)):</span>
+
+            <span class="n">orbital_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">orbital</span><span class="p">)</span> <span class="k">for</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orb_l</span><span class="p">[</span><span class="n">iorb</span><span class="p">]])</span>
+            <span class="n">atom_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+            <span class="n">spin_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_projection</span><span class="p">)</span> <span class="k">for</span> <span class="n">spin_projection</span> <span class="ow">in</span> <span class="n">spin_projections</span><span class="p">])</span>
 
             <span class="n">dos_total</span><span class="p">,</span> <span class="n">dos_total_projected</span><span class="p">,</span> <span class="n">dos_projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_parametric_dos</span><span class="p">(</span>
                                                                                        <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
@@ -707,15 +753,21 @@ document.write(`
                     <span class="n">bottom_value</span><span class="o">+=</span><span class="n">top_value</span>
                     
                 <span class="n">label</span><span class="o">=</span><span class="n">atom_names</span> <span class="o">+</span> <span class="n">orb_names</span><span class="p">[</span><span class="n">iorb</span><span class="p">]</span><span class="c1"># + self.config.spin_labels[ispin]</span>
-                <span class="n">values_dict</span><span class="p">[</span><span class="n">label</span><span class="o">+</span><span class="s1">&#39;_spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_projections&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">scaled_dos_spin_projected</span>
+                
                 <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">energies</span>
+                <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dosTotalSpin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+                <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spinChannel-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_orbitals-</span><span class="si">{</span><span class="n">orbital_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_atoms-</span><span class="si">{</span><span class="n">atom_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_spinProjection-</span><span class="si">{</span><span class="n">spin_string</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">scaled_dos_spin_projected</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">plot_total</span><span class="p">:</span>
             <span class="n">total_values_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_dos</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
-            <span class="n">values_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">total_values_dict</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="n">values_dict</span>
         <span class="k">return</span> <span class="n">values_dict</span></div>
 
 <div class="viewcode-block" id="DOSPlot.plot_stack"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_stack.html#pyprocar.plotter.DOSPlot.plot_stack">[docs]</a>    <span class="k">def</span> <span class="nf">plot_stack</span><span class="p">(</span>
@@ -748,6 +800,10 @@ document.write(`
             <span class="n">orbitals</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">specie</span><span class="p">]</span>
             <span class="n">orbital_label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_stack_labels</span><span class="p">(</span><span class="n">orbitals</span><span class="p">)</span>
 
+            <span class="n">orbital_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">orbital</span><span class="p">)</span> <span class="k">for</span> <span class="n">orbital</span> <span class="ow">in</span> <span class="n">orbitals</span><span class="p">])</span>
+            <span class="n">atom_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">])</span>
+            <span class="n">spin_string</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_projection</span><span class="p">)</span> <span class="k">for</span> <span class="n">spin_projection</span> <span class="ow">in</span> <span class="n">spin_projections</span><span class="p">])</span>
+
             <span class="n">dos_total</span><span class="p">,</span> <span class="n">dos_total_projected</span><span class="p">,</span> <span class="n">dos_projected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_parametric_dos</span><span class="p">(</span>
                                                                                        <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span>
                                                                                        <span class="n">orbitals</span><span class="o">=</span><span class="n">orbitals</span><span class="p">,</span>
@@ -778,9 +834,13 @@ document.write(`
                     <span class="n">bottom_value</span><span class="o">+=</span><span class="n">top_value</span>
 
                 <span class="n">label</span><span class="o">=</span><span class="n">specie</span> <span class="o">+</span> <span class="n">orbital_label</span>
-
-                <span class="n">values_dict</span><span class="p">[</span><span class="n">label</span><span class="o">+</span><span class="s1">&#39;_spin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_projections&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">scaled_dos_spin_projected</span>
                 <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">energies</span>
+                <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;dosTotalSpin-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)]</span><span class="o">=</span><span class="n">dos_spin_total</span>
+                <span class="n">values_dict</span><span class="p">[</span><span class="s1">&#39;spinChannel-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">spin_channel</span><span class="p">)</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_orbitals-</span><span class="si">{</span><span class="n">orbital_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_atoms-</span><span class="si">{</span><span class="n">atom_string</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> 
+                        <span class="sa">f</span><span class="s1">&#39;_spinProjection-</span><span class="si">{</span><span class="n">spin_string</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">scaled_dos_spin_projected</span>
+                
 
 
             <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
@@ -788,7 +848,8 @@ document.write(`
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">plot_total</span><span class="p">:</span>
             <span class="n">total_values_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_dos</span><span class="p">(</span><span class="n">spin_channels</span><span class="p">)</span>
-            <span class="n">values_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">total_values_dict</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">=</span><span class="n">values_dict</span>
 
         <span class="k">return</span> <span class="n">values_dict</span></div>
 
@@ -1365,9 +1426,68 @@ document.write(`
     
 <div class="viewcode-block" id="DOSPlot.update_config"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.update_config.html#pyprocar.plotter.DOSPlot.update_config">[docs]</a>    <span class="k">def</span> <span class="nf">update_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">value</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">value</span></div>
      
+<div class="viewcode-block" id="DOSPlot.export_data"><a class="viewcode-back" href="../../../api/plotter/_autosummary/pyprocar.plotter.DOSPlot.export_data.html#pyprocar.plotter.DOSPlot.export_data">[docs]</a>    <span class="k">def</span> <span class="nf">export_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method will export the data to a csv file</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            The file name to export the data to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">possible_file_types</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;csv&#39;</span><span class="p">,</span><span class="s1">&#39;txt&#39;</span><span class="p">,</span><span class="s1">&#39;json&#39;</span><span class="p">,</span><span class="s1">&#39;dat&#39;</span><span class="p">]</span>  
+        <span class="n">file_type</span><span class="o">=</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">file_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">possible_file_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The file type must be </span><span class="si">{</span><span class="n">possible_file_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The data has not been plotted yet&quot;</span><span class="p">)</span>
+        
+        <span class="n">column_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">sorted_column_names</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span>
+        <span class="n">index</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;energies&#39;</span> <span class="ow">in</span> <span class="n">column_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">sorted_column_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">=</span><span class="n">column_name</span>
+                <span class="n">index</span><span class="o">+=</span><span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;dosTotalSpin&#39;</span> <span class="ow">in</span> <span class="n">column_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">sorted_column_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">=</span><span class="n">column_name</span>
+                <span class="n">index</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">ispin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+                
+                <span class="k">if</span> <span class="s1">&#39;spinChannel-0&#39;</span> <span class="ow">in</span> <span class="n">column_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ispin</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sorted_column_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">=</span><span class="n">column_name</span>
+                    <span class="n">index</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="s1">&#39;spinChannel-1&#39;</span> <span class="ow">in</span> <span class="n">column_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ispin</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">sorted_column_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">=</span><span class="n">column_name</span>
+                    <span class="n">index</span><span class="o">+=</span><span class="mi">1</span>
+
+            
+
+        <span class="n">column_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">file_type</span><span class="o">==</span><span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">sorted_column_names</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">file_type</span><span class="o">==</span><span class="s1">&#39;txt&#39;</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">sorted_column_names</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">file_type</span><span class="o">==</span><span class="s1">&#39;json&#39;</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">file_type</span><span class="o">==</span><span class="s1">&#39;dat&#39;</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values_dict</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">sorted_column_names</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
 </pre></div>
 
                 </article>

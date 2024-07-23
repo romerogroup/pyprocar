@@ -6,7 +6,7 @@
 
 Notice
 ===========
-- **New Release** We recently updated to a new version 'v6.2.0'.
+- **New Release** We recently updated to a new version 'v6.2.1'.
 - **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
 
 
@@ -135,6 +135,7 @@ will bring a help menu.
 
 Changelog
 --------------
+v6.2.1 Jul 23rd, 2024 -- New symmetrization method, new fermi surface projection method, ebs and dos refactor,  <br />
 v6.2.0 Jun 29th, 2024 -- Major bug fixes to 3d plotting and other minor bug fixes <br />
 v6.1.10 Jun 09th, 2024 -- Bug fix to dos, qe parser changes, elk parser changes, fermisurface changes  <br />
 v6.1.9 Mar 28th, 2024 -- Changed default fermi level behavior, updated dos implementation, and doc updates <br />
