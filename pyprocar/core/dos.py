@@ -15,6 +15,7 @@ from typing import List
 import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import CubicSpline
+from scipy.integrate import trapezoid
 from sympy.physics.quantum.cg import CG
 
 
@@ -311,7 +312,29 @@ class DensityOfStates:
         
         return None
 
+    def normalize_dos(self,mode='max'):
+        """
+        Normalizes the density of states.
 
+        Returns
+        -------
+        None
+            None
+            The density of states is normalized.
+        """
+        possible_modes=['max','integral']
+        if mode not in possible_modes:
+            raise ValueError(f"The mode must be {possible_modes}")
+        if mode=='max':
+            for i in range(len(self.total)):
+                self.total[i] = self.total[i] / np.max(self.total[i])
+        elif mode=='integral':
+            for i in range(len(self.total)):
+                y = self.total[i]
+                x = self.energies
+                integral=trapezoid(y, x=self.energies)
+                self.total[i] = self.total[i] / integral
+        return None
 def interpolate(x, y, factor=2):
     """
     Interplates the function y=f(x) by increasing the x points by the factor.

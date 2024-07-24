@@ -28,6 +28,7 @@ def dosplot(
         atoms:List[int]=None,
         orbitals:List[int]=None,
         items:dict={},
+        normalize_dos_mode:str=None,
         fermi:float=None,
         fermi_shift:float=0,
         elimit:List[float]=None,
@@ -145,6 +146,10 @@ def dosplot(
 
         If nothing is specified pyprocar will select all the present
         orbitals.
+
+    normalize_dos_mode : str, optional
+        This defines the mode of the normalization of the density of states. The default is None. 
+        If None, the density of states will not be normalized.
 
     elimit : list float, optional
         Energy window limit asked to plot. ``elimit`` has to be a two
@@ -302,6 +307,8 @@ def dosplot(
             WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy.
             ----------------------------------------------------------------------------------------------------------
             """)
+    if normalize_dos_mode:
+        dos.normalize_dos(mode=normalize_dos_mode)
 
 
     if elimit is None:

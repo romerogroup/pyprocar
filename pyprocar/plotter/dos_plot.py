@@ -579,15 +579,21 @@ class DOSPlot:
 
     
     def _set_plot_limits(self, spin_channels):
+        total_max = 0
+        for ispin in range(len(spin_channels)):
+            tmp_max = self.dos.total[ispin].max()
+            if tmp_max > total_max:
+                total_max = tmp_max
         if self.orientation == 'horizontal':
             self.set_xlabel(self.config.x_label)
             self.set_ylabel(self.config.y_label)
             self.set_xlim([self.dos.energies.min(), self.dos.energies.max()])
-            self.set_ylim([-self.dos.total.max(), self.dos.total.max()] if len(spin_channels) == 2 else [0, self.dos.total.max()])
+            self.set_ylim([-self.dos.total.max(), total_max] if len(spin_channels) == 2 else [0, total_max])
         elif self.orientation == 'vertical':
+            
             self.set_xlabel(self.config.y_label)
             self.set_ylabel(self.config.x_label)
-            self.set_xlim([-self.dos.total.max(), self.dos.total.max()] if len(spin_channels) == 2 else [0, self.dos.total.max()])
+            self.set_xlim([-self.dos.total.max(), total_max] if len(spin_channels) == 2 else [0, total_max])
             self.set_ylim([self.dos.energies.min(), self.dos.energies.max()])
 
     def _prepare_parametric_spin_data(self, spin_channel, ispin, 
