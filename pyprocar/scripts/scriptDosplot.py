@@ -294,6 +294,9 @@ def dosplot(
     dos = parser.dos
     structure = parser.structure
 
+    codes_with_scf_fermi = ['qe', 'elk']
+    if code in codes_with_scf_fermi and fermi is None:
+        fermi = dos.efermi
     if fermi is not None:
         dos.energies -= fermi
         dos.energies += fermi_shift

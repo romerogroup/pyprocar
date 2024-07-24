@@ -79,6 +79,9 @@ class BandStructure2DHandler:
         parser = io.Parser(code = code, dir = dirname)
         self.ebs = parser.ebs
 
+        codes_with_scf_fermi = ['qe', 'elk']
+        if code in codes_with_scf_fermi and fermi is None:
+            fermi = self.ebs.efermi
         if fermi is not None:
             self.ebs.bands -= fermi
             self.ebs.bands += fermi_shift

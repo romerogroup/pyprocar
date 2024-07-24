@@ -140,6 +140,9 @@ def fermi2D(
     ebs = parser.ebs
     structure = parser.structure
 
+    codes_with_scf_fermi = ['qe', 'elk']
+    if code in codes_with_scf_fermi and fermi is None:
+        fermi = ebs.efermi
     if fermi is not None:
         ebs.bands -= fermi
         ebs.bands += fermi_shift
