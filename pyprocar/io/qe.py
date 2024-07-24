@@ -522,6 +522,9 @@ class QEParser():
         scf_in_file_path = os.path.join(dirname,scf_in)
         with open(scf_in_file_path, "r") as f:
             scf_in = f.read()
+            
+        scf_filename=os.path.basename(scf_in_file_path).split('.')[0]
+        self.scf_out = os.path.join(dirname,f'{scf_filename}.out')
 
         outdir = re.findall("outdir\s*=\s*'\S*?([A-Za-z]*)'",  scf_in)[0]
         prefix = re.findall("prefix\s*=\s*'(.*)'", scf_in)[0]
@@ -1106,7 +1109,11 @@ class QEParser():
         None
             None
         """
-        self.efermi =  float(main_xml_root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
+        # self.efermi =  float(main_xml_root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
+
+        with open(self.scf_out, "r") as f:
+            scf_out = f.read()
+            self.efermi = float(re.findall("the Fermi energy is\s*([-\d.]*)", scf_out)[0])
         return None
 
     def _convert_lorbnum_to_letter(self, lorbnum):
