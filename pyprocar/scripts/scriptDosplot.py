@@ -268,10 +268,8 @@ def dosplot(
     default_config = ConfigFactory.create_config(PlotType.DENSITY_OF_STATES)
     config=ConfigManager.merge_configs(default_config, kwargs)
 
-    modes=['plain','parametric',
-           'parametric_line', 'stack', 
-           'stack_orbitals', 'stack_species']
-    modes_txt=' , '.join(modes)
+
+    modes_txt=' , '.join(config.modes)
     message=f"""
             --------------------------------------------------------
             There are additional plot options that are defined in a configuration file. 
