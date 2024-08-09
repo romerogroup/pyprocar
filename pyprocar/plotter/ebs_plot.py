@@ -3,7 +3,7 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-import os 
+import os
 import yaml
 from typing import List
 
@@ -39,10 +39,10 @@ class EBSPlot:
     None.
 
     """
-    def __init__(self, 
-                    ebs:ElectronicBandStructure, 
-                    kpath:KPath=None, 
-                    ax:mpl.axes.Axes=None, 
+    def __init__(self,
+                    ebs:ElectronicBandStructure,
+                    kpath:KPath=None,
+                    ax:mpl.axes.Axes=None,
                     spins:List[int]=None,
                     kdirect:bool=True,
                     config=None):
@@ -59,7 +59,7 @@ class EBSPlot:
             self.spins = [0]
         self.handles = []
 
-        
+
         figsize=tuple(self.config.figure_size)
         if ax is None:
             self.fig = plt.figure(figsize=figsize)
@@ -72,7 +72,7 @@ class EBSPlot:
 
         self._initiate_plot_args()
         return None
-        
+
     def _initiate_plot_args(self):
         """Helper method to initialize the plot options
         """
@@ -82,7 +82,7 @@ class EBSPlot:
         self.set_ylabel()
         self.set_xlim()
         self.set_ylim()
-        
+
     def _get_x(self):
         """
         Provides the x axis data of the plots
@@ -95,7 +95,7 @@ class EBSPlot:
         """
         pos = 0
         if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
-  
+
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
                 if self.kdirect is False:
@@ -129,20 +129,20 @@ class EBSPlot:
 
         """
 
-        
+
         for ispin in self.spins:
             if len(self.spins)==1:
                 color=self.config.color
             else:
                 color=self.config.spin_colors[ispin]
-            
+
             for iband in range(self.ebs.nbands):
                 handle = self.ax.plot(
-                    self.x, self.ebs.bands[:, iband, ispin], 
-                    color=color, 
-                    alpha=self.config.opacity[ispin], 
-                    linestyle=self.config.linestyle[ispin], 
-                    label=self.config.label[ispin], 
+                    self.x, self.ebs.bands[:, iband, ispin],
+                    color=color,
+                    alpha=self.config.opacity[ispin],
+                    linestyle=self.config.linestyle[ispin],
+                    label=self.config.label[ispin],
                     linewidth=self.config.linewidth[ispin],
                 )
                 self.handles.append(handle)
@@ -173,7 +173,7 @@ class EBSPlot:
             spins = range(self.ebs.nspins)
         if self.ebs.is_non_collinear:
             spins = [0]
-        
+
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
             markersize = self.config.markersize
@@ -280,7 +280,7 @@ class EBSPlot:
                                   spins=spins,
                                   elimit=elimit)
           return
-        
+
         if width_weights is None:
             width_weights = np.ones_like(self.ebs.bands)
             linewidth = self.config.linewidth
@@ -291,8 +291,8 @@ class EBSPlot:
             spins = range(self.ebs.nspins)
         if self.ebs.is_non_collinear:
             spins = [0]
-        
-        
+
+
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
                 mbands = np.ma.masked_array(
@@ -311,7 +311,7 @@ class EBSPlot:
             if vmax is None:
                 vmax = color_weights[:,:,spins].max()
             norm = mpl.colors.Normalize(vmin, vmax)
-            
+
         for ispin in spins:
             for iband in range(self.ebs.nbands):
                 if len(self.spins)==1:
@@ -321,14 +321,14 @@ class EBSPlot:
                 points = np.array(
                     [self.x, mbands[:, iband, ispin]]).T.reshape(-1, 1, 2)
                 segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                
+
                 # this is to delete the segments on the high sym points
                 x = self.x
                 # segments = np.delete(
                 #     segments, np.where(x[1:] == x[:-1])[0], axis=0)
                 if color_weights is None:
                     lc = LineCollection(
-                        segments, colors=color, 
+                        segments, colors=color,
                         linestyle=self.config.linestyle[ispin])
                 else:
                     lc = LineCollection(
@@ -345,7 +345,7 @@ class EBSPlot:
 
         if self.config.plot_color_bar and color_weights is not None:
             self.cb = self.fig.colorbar(lc, ax=self.ax)
-            
+
     def plot_parameteric_overlay(self,
                                  spins:List[int]=None,
                                  weights:np.ndarray=None,
@@ -359,7 +359,7 @@ class EBSPlot:
         weights : np.ndarray, optional
             The weights of each point, by default None
         """
-        
+
         linewidth = [l*7 for l in self.config.linewidth]
         if type(self.config.cmap) is str:
             color_map = ['Reds', "Blues", "Greens",
@@ -390,7 +390,7 @@ class EBSPlot:
                     segments = np.delete(
                         segments, np.where(x[1:] == x[:-1])[0], axis=0)
                     lc = LineCollection(
-                        segments, cmap=plt.get_cmap(color_map[iweight]), norm=norm, 
+                        segments, cmap=plt.get_cmap(color_map[iweight]), norm=norm,
                         alpha=self.config.opacity[ispin])
                     lc.set_array(weight[:, iband, ispin])
                     lc.set_linewidth(weight[:, iband, ispin]*linewidth[ispin])
@@ -408,7 +408,7 @@ class EBSPlot:
         color_mask:np.ndarray=None,
         width_weights:np.ndarray=None,
         color_weights:np.ndarray=None,
-        elimit:List[float]=None                   
+        elimit:List[float]=None
         ):
         """A method to plot a scatter plot
 
@@ -425,7 +425,7 @@ class EBSPlot:
         color_weights : np.ndarray, optional
             The color weights at each point, by default None
         elimit : List[float], optional
-            The energy range to plot. 
+            The energy range to plot.
         """
         self.ebs.bands = np.vstack((self.ebs.bands, self.ebs.bands))
         self.ebs.projected = np.vstack((self.ebs.projected, self.ebs.projected))
@@ -444,7 +444,7 @@ class EBSPlot:
         else:
             emin, emax = np.min(self.ebs.bands), np.max(self.ebs.bands)
         # print('Energy range', emin, emax)
-        
+
         if spins is None:
             spins = range(self.ebs.nspins)
         if self.ebs.is_non_collinear:
@@ -464,7 +464,7 @@ class EBSPlot:
         # I need to set the energy limits
         self.set_ylim(elimit)
         self.set_xlim()
-        
+
         # knowing the text size
         txt = texts[-1]
         txt = plt.text(*txt)
@@ -473,10 +473,10 @@ class EBSPlot:
         w, h = bbox_data.width, bbox_data.height
         txt.remove()
         # print('Width, ', w, '. Height,', h)
-        
+
         shift = 0
         txt = texts[0]
-        self.ax.text(*txt)            
+        self.ax.text(*txt)
         for i in range(1, len(texts)):
             txt = texts[i]
             last = texts[i-1]
@@ -491,20 +491,20 @@ class EBSPlot:
 
                 txt[0] = txt[0] + w*1.5*shift
             else:
-                shift = 0    
-                
+                shift = 0
+
             # print(txt)
-            self.ax.text(*txt)            
-                
+            self.ax.text(*txt)
+
         self.plot_parameteric(color_weights=color_weights,
                             width_weights=width_weights,
                             color_mask=color_mask,
                             width_mask=width_mask,
                             spins=spins)
 
-    def set_xticks(self, 
-        tick_positions:List[int]=None, 
-        tick_names:List[str]=None, 
+    def set_xticks(self,
+        tick_positions:List[int]=None,
+        tick_names:List[str]=None,
         color:str="black"):
         """A method to set the x ticks
 
@@ -533,9 +533,9 @@ class EBSPlot:
                 axis='x',
                 direction='in')
 
-    def set_yticks(self, 
-        major:float=None, 
-        minor:float=None, 
+    def set_yticks(self,
+        major:float=None,
+        minor:float=None,
         interval:List[float]=None):
         """A method to set the y ticks
 
@@ -582,7 +582,7 @@ class EBSPlot:
             length=5,
             labelright=False,
             right=True,
-            left=True) 
+            left=True)
 
         self.ax.tick_params(
             which='minor',
@@ -660,11 +660,11 @@ class EBSPlot:
         else:
             title=self.config.colorbar_title
         self.cb.ax.tick_params(labelsize=self.config.colorbar_tick_labelsize)
-        self.cb.set_label(title, 
+        self.cb.set_label(title,
                         size=self.config.colorbar_title_size,
                         rotation=270,
                         labelpad=self.config.colorbar_title_padding)
-    
+
     def legend(self, labels:List[str]=None):
         """A methdo to plot the legend
 
@@ -687,9 +687,9 @@ class EBSPlot:
         fermi_level : str, optional
             The energy level to draw the line
         """
-        self.ax.axhline(y=fermi_level, 
-                        color=self.config.fermi_color, 
-                        linestyle=self.config.fermi_linestyle, 
+        self.ax.axhline(y=fermi_level,
+                        color=self.config.fermi_color,
+                        linestyle=self.config.fermi_linestyle,
                         linewidth=self.config.fermi_linewidth)
 
     def grid(self):
@@ -700,9 +700,9 @@ class EBSPlot:
                 self.config.grid,
                 which=self.config.grid_which,
                 color=self.config.grid_color,
-                linestyle=self.config.grid_linestlye,
+                linestyle=self.config.grid_linestyle,
                 linewidth=self.config.grid_linewidth)
-    
+
     def show(self):
         """A method to show the plot
         """
@@ -718,5 +718,5 @@ class EBSPlot:
         """
         plt.savefig(filename, dpi=self.config.dpi, bbox_inches="tight")
         plt.clf()
-    
+
 
