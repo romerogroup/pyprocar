@@ -166,3 +166,5 @@ venv_docs/
 
 api_token.txt
 pypi_info.txt
+
+pyrightconfig.json

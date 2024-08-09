@@ -231,10 +231,11 @@ def fermi2D(
         symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz, character=character)
     else:
         symm = ProcarSymmetry(kpoints, bands, character=character)
-        symm.translate(translate)
-        symm.general_rotation(rotation[0], rotation[1:])
-        # symm.MirrorX()
-        symm.rot_symmetry_z(rot_symm)
+
+    symm.translate(translate)
+    symm.general_rotation(rotation[0], rotation[1:])
+    # symm.MirrorX()
+    symm.rot_symmetry_z(rot_symm)
 
     fs = FermiSurface(symm.kpoints, symm.bands, symm.character,  
                       band_indices=band_indices, 
