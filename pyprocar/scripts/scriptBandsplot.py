@@ -36,6 +36,8 @@ def bandsplot(
     show:bool=True,
     savefig:str=None,
     print_plot_opts:bool=False,
+    export_data_file:str=None,
+    export_append_mode:bool=True,
     **kwargs
     ):
     """A function to plot the band structutre
@@ -79,6 +81,12 @@ def bandsplot(
         Boolean if to show the plot, by default True
     savefig : str, optional
         String to save the plot, by default None
+    export_data_file : str, optional
+        The file name to export the data to. If not provided the
+        data will not be exported.
+    export_append_mode : bool, optional
+        Boolean to append the mode to the file name. If not provided the
+        data will be overwritten.
     print_plot_opts: bool, optional
         Boolean to print the plotting options
     """
@@ -131,7 +139,7 @@ def bandsplot(
         
     ebs_plot = EBSPlot(ebs, kpath, ax, spins, kdirect=kdirect ,config=config)
 
- 
+    projection_labels=[]
     labels = []
     if mode == "plain":
         ebs_plot.plot_bands()
@@ -162,11 +170,13 @@ def bandsplot(
         
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
-        
         if mode == "overlay_species":
             for ispc in structure.species:
                 labels.append(ispc)
                 atoms = np.where(structure.atoms == ispc)[0]
+
+                projection_label=f'atom-{ispc}_orbitals-'+",".join(str(x) for x in orbitals)
+                projection_labels.append(projection_label)
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
                     principal_q_numbers=[-1],
@@ -180,6 +190,13 @@ def bandsplot(
                     continue
                 orbitals = orbital_names[orb]
                 labels.append(orb)
+
+                atom_label=''
+                if atoms:
+                    atom_labels=",".join(str(x) for x in atoms)
+                    atom_label=f'atom-{atom_labels}_'
+                projection_label=f'{atom_label}orbitals-{orb}'
+                projection_labels.append(projection_label)
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
                     principal_q_numbers=[-1],
@@ -204,6 +221,11 @@ def bandsplot(
                         else:
                             orbitals = it[ispc]
                             labels.append(ispc + "-" + "_".join(str(x) for x in it[ispc]))
+
+                        atom_labels=",".join(str(x) for x in atoms)
+                        orbital_labels=",".join(str(x) for x in orbitals)
+                        projection_label=f'atoms-{atom_labels}_orbitals-{orbital_labels}'
+                        projection_labels.append(projection_label)
                         w = ebs_plot.ebs.ebs_sum(
                             atoms=atoms,
                             principal_q_numbers=[-1],
@@ -211,7 +233,7 @@ def bandsplot(
                             spins=spins,
                         )
                         weights.append(w)
-        ebs_plot.plot_parameteric_overlay(spins=spins,weights=weights)
+        ebs_plot.plot_parameteric_overlay(spins=spins,weights=weights,labels=projection_labels)
     else:
         if atoms is not None and isinstance(atoms[0], str):
             atoms_str = atoms
@@ -228,6 +250,19 @@ def bandsplot(
             for iorb in orbital_str:
                 orbitals = np.append(orbitals, orbital_names[iorb]).astype(np.int)
 
+        projection_labels=[]
+        projection_label=''
+        atoms_labels=''
+        if atoms:
+            atoms_labels=",".join(str(x) for x in atoms)
+            projection_label+=f'atoms-{atoms_labels}'
+        orbital_labels=''
+        if orbitals:
+            orbital_labels=",".join(str(x) for x in orbitals)
+            if len(projection_label)!=0:
+                projection_label+='_'
+        projection_label+=f'orbitals-{orbital_labels}'
+        projection_labels.append(projection_label)
 
         weights = ebs_plot.ebs.ebs_sum(atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins)
         if config.weighted_color:
@@ -246,7 +281,8 @@ def bandsplot(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                spins=spins
+                spins=spins,
+                labels=projection_labels
                 )
             ebs_plot.set_colorbar_title()
         elif mode == "scatter":
@@ -255,7 +291,8 @@ def bandsplot(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                spins=spins
+                spins=spins,
+                labels=projection_labels
             )
             ebs_plot.set_colorbar_title()
         elif mode == "atomic":
@@ -269,7 +306,9 @@ def bandsplot(
                 color_mask=color_mask,
                 width_mask=width_mask,
                 spins=spins,
-                elimit=elimit)
+                elimit=elimit,
+                labels=projection_labels
+                )
             
             ebs_plot.set_xlabel(label='')
             ebs_plot.set_colorbar_title()
@@ -295,5 +334,13 @@ def bandsplot(
         ebs_plot.save(savefig)
     if show:
         ebs_plot.show()
+
+    if export_data_file is not None:
+        if export_append_mode:
+            file_basename,file_type=export_data_file.split('.')
+            filename=f"{file_basename}_{mode}.{file_type}"
+        else:
+            filename=export_data_file
+        ebs_plot.export_data(filename)
         
     return ebs_plot.fig, ebs_plot.ax
