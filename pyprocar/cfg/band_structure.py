@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Dict, Any, List, Optional,Tuple
 from enum import Enum, auto
 
+
 from pyprocar.cfg.base import PlotType, BaseConfig
 
 class BandStructureMode(Enum):
@@ -117,6 +118,33 @@ class BandStructureConfig(BaseConfig):
         The size of the figure (width, height) in inches.
     dpi : str, optional
         The resolution in dots per inch. If 'figure', use the figure's dpi value.
+    
+    
+    colorbar_tick_params : Dict[str, any], optional
+        The colorbar tick parameters, by default None
+    colorbar_label_params : Dict[str, any], optional
+        The colorbar label parameters, by default None
+    x_label_params : Dict[str, any], optional
+        The x label parameters, by default None
+    y_label_params : Dict[str, any], optional
+        The y label parameters, by default None
+    title_params : Dict[str, any], optional
+        The title parameters, by default None
+    major_x_tick_params : Dict[str, any], optional
+        The major x tick parameters, by default None
+    major_y_tick_params : Dict[str, any], optional
+        The major y tick parameters, by default None
+    minor_y_tick_params : Dict[str, any], optional
+        The minor y tick parameters, by default None
+    major_y_locator : matplotlib.ticker.Locator, optional
+        The major y locator, by default None
+    minor_y_locator : matplotlib.ticker.Locator, optional
+        The minor y locator, by default None
+    multiple_locator_y_major_value : float, optional
+        The major value for the multiple locator, by default None
+    multiple_locator_y_minor_value : float, optional
+        The minor value for the multiple locator, by default None
+    
 
     Methods
     -------
@@ -170,6 +198,43 @@ class BandStructureConfig(BaseConfig):
     weighted_width: bool = False
     figure_size: Tuple[int] = field(default_factory=lambda: (9, 6))
     dpi: str = 'figure'
+
+
+    colorbar_tick_params: Dict[str, any] = field(default_factory=lambda: {})
+    colorbar_label_params: Dict[str, any] = field(default_factory=lambda: {})
+    x_label_params: Dict[str, any] = field(default_factory=lambda: {})
+    y_label_params: Dict[str, any] = field(default_factory=lambda: {})
+    title_params: Dict[str, any] = field(default_factory=lambda: {})
+    # Tick Parameters
+    major_y_tick_params: Dict[str, any] = field(default_factory=lambda: {
+        "which": "major",
+        "axis": "y",
+        "direction": "inout",
+        "width": 1,
+        "length": 5,
+        "labelright": False,
+        "right": True,
+        "left": True
+    })
+    minor_y_tick_params: Dict[str, any] = field(default_factory=lambda: {
+        "which": "minor",
+        "axis": "y",
+        "direction": "in",
+        "left": True,
+        "right": True
+    })
+    major_x_tick_params: Dict[str, any] = field(default_factory=lambda: {
+        "which": "major",
+        "axis": "x",
+        "direction": "in"
+        })
+    major_y_locator = None
+    minor_y_locator = None
+
+    multiple_locator_y_major_value:float = None
+    multiple_locator_y_minor_value:float = None
+
+    
 
     def __post_init__(self):
         """This method is immediately called after the object is initialized.

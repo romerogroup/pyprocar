@@ -528,10 +528,7 @@ class EBSPlot:
 
             self.ax.set_xticks(self.x[tick_positions])
             self.ax.set_xticklabels(tick_names)
-            self.ax.tick_params(
-                which='major',
-                axis='x',
-                direction='in')
+            self.ax.tick_params(**self.config.major_x_tick_params)
 
     def set_yticks(self,
         major:float=None,
@@ -548,48 +545,50 @@ class EBSPlot:
         interval : List[float], optional
             The interval of the ticks, by default None
         """
-        if (major is None or minor is None):
-            if interval is None:
-                interval = (self.ebs.bands.min()-abs(self.ebs.bands.min())
-                            * 0.1, self.ebs.bands.max()*1.1)
+        # if (major is None or minor is None):
+        if interval is None:
+            interval = (self.ebs.bands.min()-abs(self.ebs.bands.min())
+                        * 0.1, self.ebs.bands.max()*1.1)
 
-            interval = abs(interval[1] - interval[0])
-            if interval < 30 and interval >= 20:
-                major = 5
-                minor = 1
-            elif interval < 20 and interval >= 10:
-                major = 4
-                minor = 0.5
-            elif interval < 10 and interval >= 5:
-                major = 2
-                minor = 0.2
-            elif interval < 5 and interval >= 3:
-                major = 1
-                minor = 0.1
-            elif interval < 3 and interval >= 1:
-                major = 0.5
-                minor = 0.1
-            else:
-                pass
-        if major is not None and minor is not None:
-            self.ax.yaxis.set_major_locator(MultipleLocator(major))
-            self.ax.yaxis.set_minor_locator(MultipleLocator(minor))
-        self.ax.tick_params(
-            which='major',
-            axis="y",
-            direction="inout",
-            width=1,
-            length=5,
-            labelright=False,
-            right=True,
-            left=True)
+        interval = abs(interval[1] - interval[0])
+        if interval < 30 and interval >= 20:
+            major = 5
+            minor = 1
+        elif interval < 20 and interval >= 10:
+            major = 4
+            minor = 0.5
+        elif interval < 10 and interval >= 5:
+            major = 2
+            minor = 0.2
+        elif interval < 5 and interval >= 3:
+            major = 1
+            minor = 0.1
+        elif interval < 3 and interval >= 1:
+            major = 0.5
+            minor = 0.1
+        else:
+            pass 
 
-        self.ax.tick_params(
-            which='minor',
-            axis="y",
-            direction="in",
-            left=True,
-            right=True)
+
+        if self.config.multiple_locator_y_major_value is not None:
+            major = self.config.multiple_locator_y_major_value
+        if self.config.multiple_locator_y_minor_value is not None:
+            minor = self.config.multiple_locator_y_minor_value
+        
+
+        if self.config.major_y_locator is not None or self.config.minor_y_locator is not None:
+            if self.config.major_y_locator is not None:
+                self.ax.yaxis.set_major_locator(self.config.major_y_locator)
+            if self.config.minor_y_locator is not None:
+                self.ax.yaxis.set_minor_locator(self.config.minor_y_locator)
+        else:
+            if major is not None:
+                self.ax.yaxis.set_major_locator(MultipleLocator(major))
+            if minor is not None:
+                self.ax.yaxis.set_minor_locator(MultipleLocator(minor))
+
+        self.ax.tick_params(**self.config.major_y_tick_params)
+        self.ax.tick_params(**self.config.minor_y_tick_params)
 
     def set_xlim(self, interval:List[float]=None):
         """A method to set the x limit
@@ -624,7 +623,7 @@ class EBSPlot:
         label : str, optional
             String fo the x label name, by default "K vector"
         """
-        self.ax.set_xlabel(label)
+        self.ax.set_xlabel(label, **self.config.x_label_params)
 
     def set_ylabel(self, label:str=r"E - E$_F$ (eV)"):
         """A method to set the y label
@@ -634,7 +633,7 @@ class EBSPlot:
         label : str, optional
             String fo the y label name, by default r"E - E$ (eV)"
         """
-        self.ax.set_ylabel(label)
+        self.ax.set_ylabel(label, **self.config.y_label_params)
 
     def set_title(self, title:str="Band Structure"):
         """A method to set the title
@@ -645,7 +644,7 @@ class EBSPlot:
             String for the title, by default "Band Structure"
         """
         if self.config.title:
-            self.ax.set_title(label=self.config.title)
+            self.ax.set_title(label=self.config.title, **self.config.title_params)
 
     def set_colorbar_title(self, title:str=None):
         """A method to set the title of the color bar
@@ -659,11 +658,19 @@ class EBSPlot:
             title=title
         else:
             title=self.config.colorbar_title
-        self.cb.ax.tick_params(labelsize=self.config.colorbar_tick_labelsize)
-        self.cb.set_label(title,
-                        size=self.config.colorbar_title_size,
-                        rotation=270,
-                        labelpad=self.config.colorbar_title_padding)
+            
+        if self.config.colorbar_tick_params:
+            self.cb.ax.tick_params(**self.config.colorbar_tick_params)
+        else:
+            self.cb.ax.tick_params(labelsize=self.config.colorbar_tick_labelsize)
+
+        if self.config.colorbar_label_params:
+            self.cb.set_label(title, **self.config.colorbar_label_params)
+        else:
+            self.cb.set_label(title,
+                            size=self.config.colorbar_title_size,
+                            rotation=270,
+                            labelpad=self.config.colorbar_title_padding)
 
     def legend(self, labels:List[str]=None):
         """A methdo to plot the legend
