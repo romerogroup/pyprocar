@@ -170,7 +170,9 @@ class FermiSurface3D(Surface):
             band_indices_cells_list=[i_surface]*n_cells
             surface_band_indices_cells.extend(band_indices_cells_list)
 
-
+        if surface == None:
+            raise ValueError("No Fermi surface found. The structure is probably not metallic, so there will be no Fermi surface.")
+        
         # Setting band indices on the points of the combined surfaces
         surface_band_indices_points.reverse()
         surface.point_data['band_index']=np.array(surface_band_indices_points)
