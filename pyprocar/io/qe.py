@@ -449,9 +449,13 @@ class QEParser():
                 grid_current = int(raw_khigh_sym[ihs].split()[3])
                 if ihs < self.nhigh_sym - 2:
                     self.ngrids.append(grid_current)
-                elif ihs == self.nhigh_sym - 1:
+
+                # Incrementing grid by 1 for seocnd to last high symmetry point
+                elif ihs == self.nhigh_sym - 2:
                     self.ngrids.append(grid_current+1)
-                elif ihs == self.nhigh_sym:
+
+                # Skipping the last high symmetry point
+                elif ihs == self.nhigh_sym - 1:
                     continue
                 self.kticks.append(tick_Count - 1)
                 tick_Count += grid_current
