@@ -12,9 +12,8 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
+from pyprocar.utils.units import HARTREE_TO_EV, AU_TO_ANG
 
-
-HARTREE_TO_EV = 27.211386245988  #eV/Hartree
 class QEParser():
     """The class is used to parse Quantum Expresso files. 
         The most important objects that comes from this parser are the .ebs and .dos
@@ -806,6 +805,7 @@ class QEParser():
         self.species_list = list(self.composition.keys())
         self.ionsCount = int(main_xml_root.findall(".//output/atomic_structure")[0].attrib['nat'])
         self.alat =  float(main_xml_root.findall(".//output/atomic_structure")[0].attrib['alat'])
+        self.alat = self.alat * AU_TO_ANG
 
         self.ions = []
         for ion in main_xml_root.findall(".//output/atomic_structure/atomic_positions")[0]:
@@ -818,8 +818,12 @@ class QEParser():
         # in a.u
         self.direct_lattice = np.array([ acell.text.split() for acell  in main_xml_root.findall(".//output/atomic_structure/cell")[0] ],dtype = float)
 
-
+        # in a.u
         self.reciprocal_lattice = (2 * np.pi /self.alat) * np.array([ acell.text.split() for acell  in main_xml_root.findall(".//output/basis_set/reciprocal_lattice")[0] ],dtype = float)
+        
+        # Convert to angstrom
+        self.direct_lattice = self.direct_lattice * AU_TO_ANG
+        
         return None
 
     def _parse_symmetries(self,main_xml_root):

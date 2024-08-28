@@ -1,0 +1,8 @@
+
+
+AU_TO_ANG = 0.52917721067121 # bohr/ang
+ANG_TO_AU = 1.0 / AU_TO_ANG # ang/bohr
+
+
+HARTREE_TO_EV = 27.211386245988  #eV/Hartree
+EV_TO_HARTREE = 1.0 / HARTREE_TO_EV #Hartree/eV
