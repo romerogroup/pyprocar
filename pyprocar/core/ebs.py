@@ -146,6 +146,15 @@ class ElectronicBandStructure:
             LOGGER.info(f"Weights: {self.weights}")
         LOGGER.info('Initialized the ElectronicBandStructure object')
 
+    def __str__(self):
+        ret = 'Enectronic Band Structure     \n'
+        ret += '------------------------     \n'
+        ret += 'Total number of kpoints  = {}\n'.format(self.nkpoints)
+        ret += 'Total number of bands    = {}\n'.format(self.nbands)
+        ret += 'Total number of atoms    = {}\n'.format(self.natoms)
+        ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
+        return ret
+    
     @property
     def nkpoints(self):
         """The number of k points
@@ -1208,7 +1217,7 @@ class ElectronicBandStructure:
         self.kpoints = final_kpoints
         self._sort_by_kpoints()
 
-    def reduce_bands_near_fermi(self, bands, tolerance=0.7):
+    def reduce_bands_near_fermi(self, bands=None, tolerance=0.7):
         """
         Reduces the bands to those near the fermi energy
         """
@@ -1312,15 +1321,192 @@ class ElectronicBandStructure:
 
         p.show()
 
-    def __str__(self):
-        ret = 'Enectronic Band Structure     \n'
-        ret += '------------------------     \n'
-        ret += 'Total number of kpoints  = {}\n'.format(self.nkpoints)
-        ret += 'Total number of bands    = {}\n'.format(self.nbands)
-        ret += 'Total number of atoms    = {}\n'.format(self.natoms)
-        ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
-        return ret
+    def general_rotation(self, angle, kpoints, sx, sy, sz, rotAxis=[0, 0, 1], store=True):
+        """Apply a rotation defined by an angle and an axis.
     
+        Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin
+                        vectors (if not the case, they will be empty
+                        arrays).
+
+        Arguments
+        angle: the rotation angle, must be in degrees!
+
+        rotAxis : a fixed Axis when applying the symmetry, usually it is
+        from Gamma to another point). It doesn't need to be normalized. 
+        The RotAxis can be:
+        [x,y,z] : a cartesian vector in k-space.
+        'x': [1,0,0], a rotation in the yz plane. 
+        'y': [0,1,0], a rotation in the zx plane.
+        'z': [0,0,1], a rotation in the xy plane
+
+        """
+        sx = np.array([])
+        if sx is not None:
+            sx = sx
+        sy = np.array([])
+        if sy is not None:
+            sy = sy
+        sz = np.array([])
+        if sz is not None:
+            sz = sz
+
+        if rotAxis == "x" or rotAxis == "X":
+            rotAxis = [1, 0, 0]
+        if rotAxis == "y" or rotAxis == "Y":
+            rotAxis = [0, 1, 0]
+        if rotAxis == "z" or rotAxis == "Z":
+            rotAxis = [0, 0, 1]
+        rotAxis = np.array(rotAxis, dtype=float)
+        LOGGER.debug("rotAxis : " + str(rotAxis))
+        rotAxis = rotAxis / np.linalg.norm(rotAxis)
+        LOGGER.debug("rotAxis Normalized : " + str(rotAxis))
+        LOGGER.debug("Angle : " + str(angle))
+        angle = angle * np.pi / 180
+        # defining a quaternion for rotatoin
+        angle = angle / 2
+        rotAxis = rotAxis * np.sin(angle)
+        qRot = np.array((np.cos(angle), rotAxis[0], rotAxis[1], rotAxis[2]))
+        qRotI = np.array((np.cos(angle), -rotAxis[0], -rotAxis[1], -rotAxis[2]))
+
+        LOGGER.debug("Rot. quaternion : " + str(qRot))
+        LOGGER.debug("Rot. quaternion conjugate : " + str(qRotI))
+
+        # converting self.kpoints into quaternions
+        w = np.zeros((len(kpoints), 1))
+        qvectors = np.column_stack((w, kpoints)).transpose()
+        LOGGER.debug(
+            "Kpoints-> quaternions (transposed):\n" + str(qvectors.transpose())
+        )
+        qvectors = q_multi(qRot, qvectors)
+        qvectors = q_multi(qvectors, qRotI).transpose()
+        kpoints = qvectors[:, 1:]
+        LOGGER.debug("Rotated kpoints :\n" + str(qvectors))
+
+        # rotating the spin vector (if exist)
+        sxShape, syShape, szShape = sx.shape, sy.shape, sz.shape
+        LOGGER.debug("Spin vector Shapes : " + str((sxShape, syShape, szShape)))
+        # The first entry has to be an array of 0s, w could do the work,
+        # but if len(self.sx)==0 qvectors will have a non-defined length
+        qvectors = (
+            0 * sx.flatten(),
+            sx.flatten(),
+            sy.flatten(),
+            sz.flatten(),
+        )
+        LOGGER.debug("Spin vector quaternions: \n" + str(qvectors))
+        qvectors = q_multi(qRot, qvectors)
+        qvectors = q_multi(qvectors, qRotI)
+        LOGGER.debug("Spin quaternions after rotation:\n" + str(qvectors))
+        sx, sy, sz = qvectors[1], qvectors[2], qvectors[3]
+        sx.shape, sy.shape, sz.shape = sxShape, syShape, szShape
+
+        LOGGER.debug("GeneralRotation: ...Done")
+        return (kpoints, sx, sy, sz)
+
+    def rot_symmetry_z(self, order, kpoints, bands, projected, sx, sy, sz):
+        """Applies the given rotational crystal symmetry to the current
+        system. ie: to unfold the irreductible BZ to the full BZ.
+
+        Only rotations along z-axis are performed, you can use
+        self.GeneralRotation first. 
+
+        The user is responsible of provide a useful input. The method
+        doesn't check the physics.
+
+        """
+        character = np.array([])
+        if character is not None:
+            character = character
+        sx = np.array([])
+        if sx is not None:
+            sx = sx
+        sy = np.array([])
+        if sy is not None:
+            sy = sy
+        sz = np.array([])
+        if sz is not None:
+            sz = sz
+
+        
+        LOGGER.debug("RotSymmetryZ:...")
+        rotations = [
+            self.general_rotation(360 * i / order, store=False) for i in range(order)
+        ]
+        rotations = list(zip(*rotations))
+        LOGGER.debug(
+            "self.kpoints.shape (before concat.): " + str(kpoints.shape)
+        )
+        kpoints = np.concatenate(rotations[0], axis=0)
+        LOGGER.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
+        sx = np.concatenate(rotations[1], axis=0)
+        sy = np.concatenate(rotations[2], axis=0)
+        sz = np.concatenate(rotations[3], axis=0)
+        # the bands and proj. character also need to be enlarged
+        bandsChar = [(bands, projected) for i in range(order)]
+        bandsChar = list(zip(*bandsChar))
+        bands = np.concatenate(bandsChar[0], axis=0)
+        projected = np.concatenate(bandsChar[1], axis=0)
+        LOGGER.debug("RotSymmZ:...Done")
+
+        return (kpoints, bands, projected, sx, sy, sz)
+
+    def mirror_x(self, kpoints, bands, projected, sx, sy, sz):
+        """Applies the given rotational crystal symmetry to the current
+        system. ie: to unfold the irreductible BZ to the full BZ.
+
+        """
+        character = np.array([])
+        if character is not None:
+            character = character
+        sx = np.array([])
+        if sx is not None:
+            sx = sx
+        sy = np.array([])
+        if sy is not None:
+            sy = sy
+        sz = np.array([])
+        if sz is not None:
+            sz = sz
+
+        LOGGER.debug("Mirror:...")
+        newK = kpoints * np.array([1, -1, 1])
+        kpoints = np.concatenate((kpoints, newK), axis=0)
+        LOGGER.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
+        newSx = -1 * sx
+        newSy = 1 * sy
+        newSz = 1 * sz
+        sx = np.concatenate((sx, newSx), axis=0)
+        sy = np.concatenate((sy, newSy), axis=0)
+        sz = np.concatenate((sz, newSz), axis=0)
+        print("self.sx", sx.shape)
+        print("self.sy", sy.shape)
+        print("self.sz", sz.shape)
+        # the bands and proj. character also need to be enlarged
+        bands = np.concatenate((bands, bands), axis=0)
+        projected = np.concatenate((projected, projected), axis=0)
+        print("self.projected", projected.shape)
+        print("self.bands", bands.shape)
+        LOGGER.debug("Mirror:...Done")
+
+        return (kpoints, bands, projected, sx, sy, sz)
+
+    def translate(self, newOrigin, kpoints):
+        """Centers the Kpoints at newOrigin, newOrigin is either and index (of
+        some Kpoint) or the cartesian coordinates of one point in the
+        reciprocal space.
+
+        """
+        LOGGER.debug("Translate():  ...")
+        if len(newOrigin) == 1:
+            newOrigin = int(newOrigin[0])
+            newOrigin = kpoints[newOrigin]
+        # Make sure newOrigin is a numpy array
+        newOrigin = np.array(newOrigin, dtype=float)
+        LOGGER.debug("newOrigin: " + str(newOrigin))
+        kpoints = kpoints - newOrigin
+        LOGGER.debug("new Kpoints:\n" + str(kpoints))
+        LOGGER.debug("Translate(): ...Done")
+        return kpoints
 
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis):
     """Calculates the scalar differences over the 
@@ -1425,6 +1611,20 @@ def calculate_scalar_differences_2(scalar_mesh,transform_matrix):
 
     scalar_diffs_2=np.einsum('ij,uvwj->uvwi', transform_matrix, scalar_diffs)
     return scalar_diffs_2
+
+
+def q_multi(q1, q2):
+        """
+        Multiplication of quaternions, it doesn't fit in any other place
+        """
+        w1, x1, y1, z1 = q1
+        w2, x2, y2, z2 = q2
+        w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+        x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+        y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
+        z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
+        return np.array((w, x, y, z))
+
 
     # def reorder(self, plot=True, cutoff=0.2):
     #     nspins = self.nspins
