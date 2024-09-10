@@ -566,17 +566,19 @@ class FermiVisualizer:
             point2 = slice_2d.points[1,:]
             normal_vec = np.cross(point1,point2)
             p = pv.Plotter()
-
+            arrows=None
             if self.data_handler.vector_name:
                 arrows = slice_2d.glyph(orient=self.data_handler.vector_name, 
                                         scale=self.config.texture_scale,
                                         factor=self.config.texture_size)
-            if self.config.texture_color is not None:
-                p.add_mesh(arrows, color=self.config.texture_color, show_scalar_bar=False,name='arrows')
-            else:
-                p.add_mesh(arrows, 
-                           cmap=self.config.texture_cmap,
-                           show_scalar_bar=False,name='arrows')
+                
+            if arrows:
+                if self.config.texture_color is not None:
+                    p.add_mesh(arrows, color=self.config.texture_color, show_scalar_bar=False,name='arrows')
+                else:
+                    p.add_mesh(arrows, 
+                            cmap=self.config.texture_cmap,
+                            show_scalar_bar=False,name='arrows')
             p.add_mesh(slice_2d,
                        line_width=self.config.cross_section_slice_linewidth)
             p.remove_scalar_bar()
