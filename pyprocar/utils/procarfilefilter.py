@@ -49,7 +49,7 @@ class ProcarFileFilter:
 
   """
 
-    def __init__(self, infile=None, outfile=None, loglevel=logging.WARNING):
+    def __init__(self, infile=None, outfile=None, loglevel=logging.DEBUG):
         """Initialize the class.
 
     Params: `infile=None`, input fileName
@@ -313,10 +313,14 @@ class ProcarFileFilter:
         line = fin.readline()
         # the third value needs to be changed, however better print it
         self.log.debug("The line contaning bands number is " + line)
-        line = line.split()
-        self.log.debug("The number of bands is: " + line[7])
-        line[7] = str(Max - Min + 1)
-        line = " ".join(line)
+
+        pattern = r"# of bands:\s*(\d+)"
+        replacement = "# of bands: " + str(Max - Min + 1)
+        line = re.sub(pattern, replacement, line)
+
+        
+        self.log.debug("The new line with # of bands is: " + line)
+
         fout.write(line + "\n")
 
         # now parsing the rest of the file
