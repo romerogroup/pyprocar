@@ -1,0 +1,38 @@
+name: Trigger on Draft Release Creation
+
+on:
+  release:
+    types: [created]  # Trigger when a release is created
+
+jobs:
+  handle-draft-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if this is a draft release
+        run: |
+          if [ "${{ github.event.release.draft }}" = "true" ]; then
+            echo "This is a draft release. Proceeding with further steps."
+          else
+            echo "This is not a draft release. Skipping further steps."
+            exit 0
+          fi
+
+      - name: Do something for draft release
+        run: |
+          echo "Draft release created: ${{ github.event.release.tag_name }}"
+          echo "Release title: ${{ github.event.release.name }}"
+          echo "Release body: ${{ github.event.release.body }}"
+
+      - name: Update draft release body
+        if: ${{ github.event.release.draft }}  # Only run if it's a draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }} \
+            -d '{
+              "body": "This is an updated body for the draft release. You can add details here."
+            }'

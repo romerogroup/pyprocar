@@ -1,0 +1,53 @@
+name: Run Script on Commit
+
+
+on:
+  push:
+    branches:
+      - main  # Change this to the branch you want to track commits on
+permissions:
+  contents: write  # This allows the workflow to push changes
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history so we can access all commit logs
+
+    - name: Fetch all tags
+      run: git fetch --tags
+
+    - name: Clear GitHub Cache (Manual)
+      run: |
+        rm -rf ~/.cache/pip
+        rm -rf venv
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build python-dotenv requests
+
+    - name: Build package and get version
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_ID: ${{ github.event.release.id }}
+        REPO_NAME: ${{ github.repository }}
+      run: |
+
+        TAG=$(python scripts/workflow_get_release_tag.py)
+        echo "TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Build package
+      env:
+        SETUPTOOLS_SCM_DEBUG: True
+        SETUPTOOLS_SCM_PRETEND_VERSION: ${{ env.TAG }} 
+      run: python -m build
