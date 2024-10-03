@@ -39,12 +39,12 @@ jobs:
         SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }} 
       run: python -m build
 
-    # - name: Publish package
-    #   if: success()
-    #   uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-    #   with:
-    #     user: __token__
-    #     password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Publish package
+      if: success()
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
     
     - name: This will processes the commit messages and write to the CHANGELOG.md file
       if: success() 
