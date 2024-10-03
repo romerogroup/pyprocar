@@ -161,10 +161,11 @@ class EBSPlot:
         tick_names=[]
         for i,x in enumerate(self.x):
             tick_name=''
-            for i_tick, tick_position in enumerate(self.kpath.tick_positions):
-                if i == tick_position:
-                    tick_name=self.kpath.tick_names[i_tick]
-            tick_names.append(tick_name)
+            if self.kpath is not None:
+                for i_tick, tick_position in enumerate(self.kpath.tick_positions):
+                    if i == tick_position:
+                        tick_name=self.kpath.tick_names[i_tick]
+                tick_names.append(tick_name)
         values_dict['kpath_tick_names']=tick_names
         self.values_dict=values_dict
 
@@ -279,10 +280,11 @@ class EBSPlot:
         tick_names=[]
         for i,x in enumerate(self.x):
             tick_name=''
-            for i_tick, tick_position in enumerate(self.kpath.tick_positions):
-                if i == tick_position:
-                    tick_name=self.kpath.tick_names[i_tick]
-            tick_names.append(tick_name)
+            if self.kpath is not None:
+                for i_tick, tick_position in enumerate(self.kpath.tick_positions):
+                    if i == tick_position:
+                        tick_name=self.kpath.tick_names[i_tick]
+                tick_names.append(tick_name)
         values_dict['kpath_tick_names']=tick_names
 
         self.values_dict=values_dict
@@ -404,10 +406,11 @@ class EBSPlot:
         tick_names=[]
         for i,x in enumerate(self.x):
             tick_name=''
-            for i_tick, tick_position in enumerate(self.kpath.tick_positions):
-                if i == tick_position:
-                    tick_name=self.kpath.tick_names[i_tick]
-            tick_names.append(tick_name)
+            if self.kpath is not None:
+                for i_tick, tick_position in enumerate(self.kpath.tick_positions):
+                    if i == tick_position:
+                        tick_name=self.kpath.tick_names[i_tick]
+                tick_names.append(tick_name)
         values_dict['kpath_tick_names']=tick_names
         self.values_dict=values_dict
 
@@ -481,10 +484,11 @@ class EBSPlot:
         tick_names=[]
         for i,x in enumerate(self.x):
             tick_name=''
-            for i_tick, tick_position in enumerate(self.kpath.tick_positions):
-                if i == tick_position:
-                    tick_name=self.kpath.tick_names[i_tick]
-            tick_names.append(tick_name)
+            if self.kpath is not None:
+                for i_tick, tick_position in enumerate(self.kpath.tick_positions):
+                    if i == tick_position:
+                        tick_name=self.kpath.tick_names[i_tick]
+                tick_names.append(tick_name)
         values_dict['kpath_tick_names']=tick_names
         self.values_dict=values_dict
 
