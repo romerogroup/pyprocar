@@ -33,37 +33,6 @@ ___
 - Added option to normalize DOS by integral or max, requiring normalization mode specification in dosplot
 
 ___
-
-___
-
-# 6.3.0 (10-03-2024)
-
-##### Bugs
-- Bug fix in filter; was not properly filtering bands with more than 10K kpoints.
-- Bug in fermi3d cross section slicer; arrow not initialized in non-spin texture case.
-- Bug fix in fermisurface2d plot; skimage contour output was using mesh index points instead of kmesh grid, requiring interpolation.
-- Bug fix in parsing of high symmetry points grid value.
-- Bug in scriptfermi2d; the symmetry operation did not apply in spin texture case.
-- Fix ebs_plot bug due to a typo of grid_linestyle.
-
-##### New Features
-- Added conda env.yml.
-- Added GitHub action workflow to automate deployment on package release; includes building and deploying to PYPI, prepending recent changes in CHANGELOG, updating the repo version, and updating the release notes.
-- Added procar symmetry operations to ElectronicBandStructure.
-- Added option to export bandsplot data.
-- Added more configurations for user control of plots via *_params for various matplotlib functions.
-- Switched behavior to allow QE and ELK to automatically shift by Fermi.
-- Changed QE parser to get Fermi energy from scf.out; in nscf, the .xml gets overwritten, but in bands, the value does not.
-- Added option to normalize DOS by integral or max, requiring specification of normalize_dos_mode='max' or 'integral' in dosplot.
-
-##### Documentation
-- Removed dependencies from requirements.txt, moved them to pyproject.toml.
-
-##### Maintenance
-- Modified so that the list of modes comes from cfg/dos.py.
-- Merge pull request #158 from alex2shiyu/master.
-
-___
 ___
 
 ## Old Changelog
