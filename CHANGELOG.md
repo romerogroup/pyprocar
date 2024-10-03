@@ -4,6 +4,41 @@ ___
 # 6.3.0 (10-03-2024)
 
 ##### Bugs
+- Bug fix in filter for handling more than 10K kpoints in band filtering
+- Fixed issue in fermi3d cross section slicer where arrow was not initialized in non-spin texture case
+- Bug fix in fermisurface2d plot's output from skimage contour, requiring interpolation to map back to kmesh
+- Bug fix in parsing of high symmetry points grid value
+- Added exception handling for scenarios where no fermisurface is found, indicating the structure may not be metallic
+- Bug in scriptfermi2d where symmetry operation did not apply in spin texture case
+- Fixed bug in ebs_plot due to a typo in grid_linestyle
+
+##### New Features
+- Added publishing back into workflow and completed testing
+- Introduced option to export bandsplot data
+- Added more configurations for user control over plot parameters
+- Added conda env.yml for dependency management
+- Implemented GitHub action workflow for automated deployment to PYPI
+- Added procar symmetry operations to ElectronicBandStructure
+- Allowed QE and ELK to automatically shift by Fermi level
+- Modified the QE parser to retrieve Fermi energy from scf.out
+
+##### Documentation
+- Updated _version.py and CHANGELOG.md for the new release
+- Enhanced CHANGELOG with recent changes upon package release
+
+##### Maintenance
+- Removed dependencies from requirements.txt and migrated them to pyproject.toml
+- Corrected the consistency of QE output results in angstrom to match VASP
+- Made changes to ensure that the list of modes is sourced from cfg/dos.py
+- Added option to normalize DOS by integral or max, requiring normalization mode specification in dosplot
+
+___
+
+___
+
+# 6.3.0 (10-03-2024)
+
+##### Bugs
 - Bug fix in filter; was not properly filtering bands with more than 10K kpoints.
 - Bug in fermi3d cross section slicer; arrow not initialized in non-spin texture case.
 - Bug fix in fermisurface2d plot; skimage contour output was using mesh index points instead of kmesh grid, requiring interpolation.
