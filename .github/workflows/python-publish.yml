@@ -33,19 +33,12 @@ jobs:
         echo "RELEASE_ID=${{ github.event.release.id }}"
         echo "REPO_NAME=${{ github.repository}}"
         echo "TAG=${{ github.event.release.tag_name }}"
-
-    - name: Build package
+    
+    - name: Test Build 
       env:
-        SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }} 
+        SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
       run: python -m build
 
-    - name: Publish package
-      if: success()
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
-    
     - name: This will processes the commit messages and write to the CHANGELOG.md file
       if: success() 
       env:
@@ -55,7 +48,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
 
-        CHANGELOG=$(python scripts/workflow_generate_changlog_on_recent_tag.py)
+        CHANGELOG=$(python scripts/github_workflow/workflow_generate_changlog_on_recent_tag.py)
         echo "CHANGELOG<<EOF" >> $GITHUB_ENV
         echo "$CHANGELOG" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
@@ -88,8 +81,23 @@ jobs:
         CHANGELOG: ${{ env.CHANGELOG }}
       run: |
         
-        python scripts/workflow_update_release_body.py
+        python scripts/github_workflow/workflow_update_release_body.py
+    
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch full history
 
+    - name: Actual Build 
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }} 
+      run: python -m build
+
+    - name: Publish package
+      if: success()
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
     
 
     # Add a failure cleanup step to delete the release if the workflow fails
@@ -102,4 +110,4 @@ jobs:
         TAG: ${{ github.event.release.tag_name }}
       run: |
 
-        python scripts/workflow_delete_release.py
+        python scripts/github_workflow/workflow_delete_release.py
