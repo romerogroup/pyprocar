@@ -1,6 +1,25 @@
 
 ___
 
+# 6.3.1 (10-11-2024)
+
+##### Bugs
+- Bug Fix: The method to export band structure did not account for `self.kpath` being `None` due to `atomicplot`.
+
+##### New Features
+- Added updated workflow script.
+  
+##### Documentation
+- Updated CHANGELOG.md.
+
+##### Maintenance
+- Updated GitHub workflow scripts.
+- Updated `_version.py` and CHANGELOG.md due to new release.
+
+___
+
+___
+
 # 6.3.0 (10-03-2024)
 
 ##### Bugs
