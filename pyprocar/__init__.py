@@ -1,11 +1,12 @@
 from .version import (
-    version as __version__,
     author as __author__,
     copyright as __copyright__,
     email as __email__,
     status as __status__,
     date as __date__,
 )
+
+from ._version import __version__
 
 from .scripts import *
 from .io import *
