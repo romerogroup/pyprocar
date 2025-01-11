@@ -3,17 +3,17 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
-import os
-import yaml
 import json
+import os
 from typing import List
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import yaml
 from matplotlib.collections import LineCollection
-import matplotlib as mpl
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
+from matplotlib.ticker import AutoMinorLocator, FormatStrFormatter, MultipleLocator
 
 from pyprocar.core import ElectronicBandStructure, KPath
 
@@ -317,6 +317,8 @@ class EBSPlot:
             Energy range to plot. Only useful if the band index is written
         """
         values_dict={}
+        if labels is None:
+            labels = ['']
 
         # if there is only a single k-point the method for atomic
         # levels will be called to fake another kpoint and then
@@ -429,6 +431,8 @@ class EBSPlot:
             The weights of each point, by default None
         """
         values_dict={}
+        if labels is None:
+            labels = ['']
 
         linewidth = [l*7 for l in self.config.linewidth]
         if type(self.config.cmap) is str:
@@ -518,6 +522,8 @@ class EBSPlot:
         elimit : List[float], optional
             The energy range to plot.
         """
+        if labels is None:
+            labels = ['']
         self.ebs.bands = np.vstack((self.ebs.bands, self.ebs.bands))
         self.ebs.projected = np.vstack((self.ebs.projected, self.ebs.projected))
         self.ebs.kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
