@@ -1,0 +1,6 @@
+mirror\_x
+=========
+
+.. currentmodule:: pyprocar.core
+
+.. automethod:: ElectronicBandStructure.mirror_x

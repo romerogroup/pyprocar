@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../../" >
 
   <head>
     <meta charset="utf-8" />
@@ -13,44 +13,48 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=773d47ca"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/documentation_options.js?v=55479182"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=30646c52"></script>
-    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyprocar/io/vasp';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="6.2.1" />
   </head>
   
   
@@ -58,32 +62,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -91,7 +79,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -99,20 +86,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../../../index.html">
@@ -133,49 +127,43 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
-                        Getting started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
-                        DFT Prep
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../examples/index.html">
-                        Examples
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        API Reference
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+    DFT Prep
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -187,31 +175,23 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
-        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -222,7 +202,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -234,7 +214,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Contributing</span></a>
         </li>
         <li class="nav-item">
@@ -246,7 +226,7 @@ document.write(`
           
           
           
-          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">The Paper</span></a>
         </li>
 </ul></div>
@@ -258,27 +238,29 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -287,52 +269,49 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
-                        Getting started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
-                        DFT Prep
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../examples/index.html">
-                        Examples
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        API Reference
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+    DFT Prep
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -342,17 +321,13 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -363,7 +338,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -375,7 +350,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Contributing</span></a>
         </li>
         <li class="nav-item">
@@ -387,7 +362,7 @@ document.write(`
           
           
           
-          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">The Paper</span></a>
         </li>
 </ul></div>
@@ -405,22 +380,20 @@ document.write(`
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -431,7 +404,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">pyprocar.io.vasp</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">pyprocar.io.vasp</span></li>
   </ul>
 </nav>
 </div>
@@ -446,7 +419,7 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <h1>Source code for pyprocar.io.vasp</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -465,7 +438,9 @@ document.write(`
 <span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">DensityOfStates</span><span class="p">,</span> <span class="n">ElectronicBandStructure</span><span class="p">,</span> <span class="n">KPath</span>
 <span class="kn">from</span> <span class="nn">..utils.strings</span> <span class="kn">import</span> <span class="n">remove_comment</span>
 
-<div class="viewcode-block" id="Outcar"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.html#pyprocar.io.vasp.Outcar">[docs]</a><span class="k">class</span> <span class="nc">Outcar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+<div class="viewcode-block" id="Outcar">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.html#pyprocar.io.vasp.Outcar">[docs]</a>
+<span class="k">class</span> <span class="nc">Outcar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to parse the OUTCAR file from a VASP run and extract electronic structure data.</span>
 
@@ -491,7 +466,9 @@ document.write(`
 <span class="sd">        The full string content of the OUTCAR file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-<div class="viewcode-block" id="Outcar.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.__init__.html#pyprocar.io.vasp.Outcar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OUTCAR&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Outcar.__init__">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.__init__.html#pyprocar.io.vasp.Outcar.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OUTCAR&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor method to initialize an Outcar object. Reads the file specified by filename and stores its content.</span>
 
@@ -507,6 +484,7 @@ document.write(`
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rf</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
     <span class="k">def</span> <span class="nf">_get_axes_nk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        n_kx</span>
@@ -654,7 +632,9 @@ document.write(`
                 <span class="n">rotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rotations</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Outcar.get_symmetry_operations"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.get_symmetry_operations.html#pyprocar.io.vasp.Outcar.get_symmetry_operations">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetry_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Outcar.get_symmetry_operations">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Outcar.get_symmetry_operations.html#pyprocar.io.vasp.Outcar.get_symmetry_operations">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_symmetry_operations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">has_new_rotation_format</span> <span class="o">=</span> <span class="kc">False</span>
@@ -705,6 +685,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">symmetry_operations</span></div>
 
+
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
 
@@ -718,7 +699,10 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Poscar"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Poscar.html#pyprocar.io.vasp.Poscar">[docs]</a><span class="k">class</span> <span class="nc">Poscar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Poscar">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Poscar.html#pyprocar.io.vasp.Poscar">[docs]</a>
+<span class="k">class</span> <span class="nc">Poscar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to parse the POSCAR file</span>
 
@@ -727,7 +711,9 @@ document.write(`
 <span class="sd">    filename : str, optional</span>
 <span class="sd">        The POSCAR filename, by default &quot;POSCAR&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Poscar.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Poscar.__init__.html#pyprocar.io.vasp.Poscar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="n">rotations</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Poscar.__init__">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Poscar.__init__.html#pyprocar.io.vasp.Poscar.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="n">rotations</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -735,6 +721,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span>
             <span class="n">atoms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="n">fractional_coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span><span class="n">rotations</span><span class="o">=</span><span class="n">rotations</span>
         <span class="p">)</span></div>
+
 
         
     <span class="k">def</span> <span class="nf">_parse_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -817,7 +804,10 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Kpoints"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Kpoints.html#pyprocar.io.vasp.Kpoints">[docs]</a><span class="k">class</span> <span class="nc">Kpoints</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Kpoints">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Kpoints.html#pyprocar.io.vasp.Kpoints">[docs]</a>
+<span class="k">class</span> <span class="nc">Kpoints</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to parse the KPOINTS file</span>
 
@@ -829,7 +819,9 @@ document.write(`
 <span class="sd">        A boolean vlaue to determine if the kpioints has time reversal symmetry, </span>
 <span class="sd">        by default True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Kpoints.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Kpoints.__init__.html#pyprocar.io.vasp.Kpoints.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="n">has_time_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Kpoints.__init__">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Kpoints.__init__.html#pyprocar.io.vasp.Kpoints.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">,</span> <span class="n">has_time_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
@@ -851,6 +843,7 @@ document.write(`
                 <span class="n">ngrids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ngrids</span><span class="p">,</span>
                 <span class="n">has_time_reversal</span><span class="o">=</span><span class="n">has_time_reversal</span><span class="p">,</span>
             <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_parse_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A helper method to parse the KOINTS file</span>
@@ -980,7 +973,10 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Procar"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.html#pyprocar.io.vasp.Procar">[docs]</a><span class="k">class</span> <span class="nc">Procar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Procar">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.html#pyprocar.io.vasp.Procar">[docs]</a>
+<span class="k">class</span> <span class="nc">Procar</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to parse the PROCAR file</span>
 
@@ -1001,7 +997,9 @@ document.write(`
 <span class="sd">    interpolation_factor : int, optional</span>
 <span class="sd">        The interpolation factor, by default 1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Procar.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.__init__.html#pyprocar.io.vasp.Procar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Procar.__init__">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.__init__.html#pyprocar.io.vasp.Procar.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;PROCAR&quot;</span><span class="p">,</span>
         <span class="n">structure</span><span class="p">:</span><span class="n">Structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1085,7 +1083,10 @@ document.write(`
 
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Procar.repair"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.repair.html#pyprocar.io.vasp.Procar.repair">[docs]</a>    <span class="k">def</span> <span class="nf">repair</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Procar.repair">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.repair.html#pyprocar.io.vasp.Procar.repair">[docs]</a>
+    <span class="k">def</span> <span class="nf">repair</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        It Tries to repair some stupid problems due the stupid fixed</span>
 <span class="sd">        format of the stupid fortran.</span>
@@ -1122,6 +1123,7 @@ document.write(`
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">return</span></div>
+
 
     <span class="k">def</span> <span class="nf">_open_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1691,7 +1693,9 @@ document.write(`
 
         <span class="k">return</span> <span class="n">projected</span>
 
-<div class="viewcode-block" id="Procar.symmetrize"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.symmetrize.html#pyprocar.io.vasp.Procar.symmetrize">[docs]</a>    <span class="k">def</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+<div class="viewcode-block" id="Procar.symmetrize">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.Procar.symmetrize.html#pyprocar.io.vasp.Procar.symmetrize">[docs]</a>
+    <span class="k">def</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
                         <span class="n">outcar</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                         <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                         <span class="n">spglib</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -1799,6 +1803,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spdlist</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spd2projected</span><span class="p">(</span><span class="n">spd</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
 
@@ -1812,7 +1817,10 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="VaspXML"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.html#pyprocar.io.vasp.VaspXML">[docs]</a><span class="k">class</span> <span class="nc">VaspXML</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.html#pyprocar.io.vasp.VaspXML">[docs]</a>
+<span class="k">class</span> <span class="nc">VaspXML</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class to parse the vasprun xml file</span>
 
 <span class="sd">    Parameters</span>
@@ -1827,7 +1835,9 @@ document.write(`
 <span class="sd">    ValueError</span>
 <span class="sd">        File not found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="VaspXML.__init__"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.__init__.html#pyprocar.io.vasp.VaspXML.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<div class="viewcode-block" id="VaspXML.__init__">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.__init__.html#pyprocar.io.vasp.VaspXML.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span> 
                 <span class="n">dos_interpolation_factor</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         
@@ -1853,7 +1863,10 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">spins_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;spin 1&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-up&quot;</span><span class="p">,</span> <span class="s2">&quot;spin 2&quot;</span><span class="p">:</span> <span class="s2">&quot;Spin-down&quot;</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="VaspXML.read"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.read.html#pyprocar.io.vasp.VaspXML.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.read">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.read.html#pyprocar.io.vasp.VaspXML.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read and parse vasprun.xml.</span>
 
@@ -1864,6 +1877,7 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_vasprun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2347,7 +2361,9 @@ document.write(`
         <span class="c1"># if vasprun.xml is read the calculation is finished</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="VaspXML.text_to_bool"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.text_to_bool.html#pyprocar.io.vasp.VaspXML.text_to_bool">[docs]</a>    <span class="k">def</span> <span class="nf">text_to_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<div class="viewcode-block" id="VaspXML.text_to_bool">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.text_to_bool.html#pyprocar.io.vasp.VaspXML.text_to_bool">[docs]</a>
+    <span class="k">def</span> <span class="nf">text_to_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;boolians in vaspxml are stores as T or F in str format, this function coverts them to python boolians &quot;&quot;&quot;</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span> <span class="ow">or</span> <span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;.True.&quot;</span> <span class="ow">or</span> <span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;.TRUE.&quot;</span><span class="p">:</span>
@@ -2355,7 +2371,10 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="VaspXML.conv"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.conv.html#pyprocar.io.vasp.VaspXML.conv">[docs]</a>    <span class="k">def</span> <span class="nf">conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ele</span><span class="p">,</span> <span class="n">_type</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.conv">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.conv.html#pyprocar.io.vasp.VaspXML.conv">[docs]</a>
+    <span class="k">def</span> <span class="nf">conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ele</span><span class="p">,</span> <span class="n">_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function converts the xml text to the type specified in the attrib of xml tree &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span><span class="p">:</span>
@@ -2370,14 +2389,20 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">ele</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VaspXML.get_varray"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_varray.html#pyprocar.io.vasp.VaspXML.get_varray">[docs]</a>    <span class="k">def</span> <span class="nf">get_varray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.get_varray">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_varray.html#pyprocar.io.vasp.VaspXML.get_varray">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_varray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns an array for each varray tag in vaspxml &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ielement</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()])</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="VaspXML.get_params"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_params.html#pyprocar.io.vasp.VaspXML.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.get_params">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_params.html#pyprocar.io.vasp.VaspXML.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;dest should be a dictionary</span>
 <span class="sd">        This function is recurcive #check spelling&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
@@ -2405,7 +2430,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">dest</span></div>
 
-<div class="viewcode-block" id="VaspXML.get_structure"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_structure.html#pyprocar.io.vasp.VaspXML.get_structure">[docs]</a>    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.get_structure">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_structure.html#pyprocar.io.vasp.VaspXML.get_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a dictionary of the structure &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">ielement</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
@@ -2422,7 +2450,10 @@ document.write(`
                     <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;reduced&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_varray</span><span class="p">(</span><span class="n">ielement</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="VaspXML.get_scstep"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_scstep.html#pyprocar.io.vasp.VaspXML.get_scstep">[docs]</a>    <span class="k">def</span> <span class="nf">get_scstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.get_scstep">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_scstep.html#pyprocar.io.vasp.VaspXML.get_scstep">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_scstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function extracts the self-consistent step information &quot;&quot;&quot;</span>
         <span class="n">scstep</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="p">{}}</span>
         <span class="k">for</span> <span class="n">isub</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">:</span>
@@ -2436,7 +2467,10 @@ document.write(`
                                      <span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ienergy</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">scstep</span></div>
 
-<div class="viewcode-block" id="VaspXML.get_set"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_set.html#pyprocar.io.vasp.VaspXML.get_set">[docs]</a>    <span class="k">def</span> <span class="nf">get_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">,</span> <span class="n">ret</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.get_set">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_set.html#pyprocar.io.vasp.VaspXML.get_set">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">,</span> <span class="n">ret</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; This function will extract any element taged set recurcively&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">xml_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
             <span class="n">ret</span><span class="p">[</span><span class="n">xml_tree</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_varray</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">)</span>
@@ -2457,7 +2491,10 @@ document.write(`
                     <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="VaspXML.get_general"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_general.html#pyprocar.io.vasp.VaspXML.get_general">[docs]</a>    <span class="k">def</span> <span class="nf">get_general</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">,</span> <span class="n">ret</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.get_general">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.get_general.html#pyprocar.io.vasp.VaspXML.get_general">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_general</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_tree</span><span class="p">,</span> <span class="n">ret</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; This function will parse any element in calculatio other than the structures, scsteps&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;dimension&quot;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">tag</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xml_tree</span><span class="p">]:</span>
             <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2481,7 +2518,10 @@ document.write(`
                     <span class="n">ielement</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="n">ielement</span><span class="o">.</span><span class="n">tag</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="VaspXML.parse_vasprun"><a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.parse_vasprun.html#pyprocar.io.vasp.VaspXML.parse_vasprun">[docs]</a>    <span class="k">def</span> <span class="nf">parse_vasprun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VaspXML.parse_vasprun">
+<a class="viewcode-back" href="../../../api/io/_autosummary/pyprocar.io.vasp.VaspXML.parse_vasprun.html#pyprocar.io.vasp.VaspXML.parse_vasprun">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse_vasprun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasprun</span><span class="p">):</span>
         <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">vasprun</span><span class="p">)</span>
         <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
 
@@ -2668,6 +2708,7 @@ document.write(`
             <span class="s2">&quot;atom_info&quot;</span><span class="p">:</span> <span class="n">atom_info</span><span class="p">,</span>
         <span class="p">}</span></div>
 
+
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
 
@@ -2679,6 +2720,7 @@ document.write(`
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+
 </pre></div>
 
                 </article>
@@ -2687,7 +2729,7 @@ document.write(`
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -2708,8 +2750,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2729,7 +2771,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -2742,7 +2784,7 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
 </p></div>
       
     </div>

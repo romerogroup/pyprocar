@@ -1,0 +1,6 @@
+translate
+=========
+
+.. currentmodule:: pyprocar.core
+
+.. automethod:: ElectronicBandStructure.translate

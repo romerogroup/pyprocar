@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:03.409** total execution time for 4 files **from examples\05-other**:
+**00:02.400** total execution time for 4 files **from examples\05-other**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_05-other_plot_ebs.py` (``plot_ebs.py``)
-     - 00:03.409
-     - 0.0
-   * - :ref:`sphx_glr_examples_05-other_plot_2dkmesh_generation.py` (``plot_2dkmesh_generation.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_examples_05-other_plot_bandgap.py` (``plot_bandgap.py``)
-     - 00:00.000
+     - 00:01.349
      - 0.0
    * - :ref:`sphx_glr_examples_05-other_plot_kpath_generation.py` (``plot_kpath_generation.py``)
-     - 00:00.000
+     - 00:00.501
+     - 0.0
+   * - :ref:`sphx_glr_examples_05-other_plot_2dkmesh_generation.py` (``plot_2dkmesh_generation.py``)
+     - 00:00.418
+     - 0.0
+   * - :ref:`sphx_glr_examples_05-other_plot_bandgap.py` (``plot_bandgap.py``)
+     - 00:00.132
      - 0.0

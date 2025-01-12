@@ -114,6 +114,8 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
@@ -298,7 +300,7 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.112 seconds)
+   **Total running time of the script:** (0 minutes 3.656 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_de_hass_van_alphen.py:
@@ -314,6 +316,10 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_de_hass_van_alphen.py <plot_de_hass_van_alphen.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_de_hass_van_alphen.zip <plot_de_hass_van_alphen.zip>`
 
 
 .. only:: html

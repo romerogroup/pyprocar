@@ -1,0 +1,6 @@
+rot\_symmetry\_z
+================
+
+.. currentmodule:: pyprocar.core
+
+.. automethod:: ElectronicBandStructure.rot_symmetry_z

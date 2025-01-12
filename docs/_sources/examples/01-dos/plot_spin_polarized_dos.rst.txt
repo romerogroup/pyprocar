@@ -93,8 +93,10 @@ The default settings bandsplot will plot the spin-up and spin-down bands on the 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
 
@@ -138,7 +140,7 @@ The keyword spins can also be used to select which spin bands to plot
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
@@ -192,7 +194,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
@@ -248,7 +250,7 @@ For details on the meaning of the indices of the atomic projection please refer 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
@@ -297,7 +299,7 @@ stack_species mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
@@ -348,7 +350,7 @@ stack_orbtials mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
     The plot only considers atoms ['Fe']
 
@@ -399,7 +401,7 @@ stack mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
@@ -448,7 +450,7 @@ overlay_species mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
     The plot only considers orbitals [4, 5, 6, 7, 8]
 
@@ -499,7 +501,7 @@ overlay_orbtials mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
     The plot only considers atoms ['Fe']
 
@@ -548,7 +550,7 @@ overlay mode
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='Energy - E$_F$ (eV)', ylabel='DOS'>)
@@ -558,7 +560,7 @@ overlay mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.222 seconds)
+   **Total running time of the script:** (0 minutes 3.315 seconds)
 
 
 .. _sphx_glr_download_examples_01-dos_plot_spin_polarized_dos.py:
@@ -574,6 +576,10 @@ overlay mode
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_spin_polarized_dos.py <plot_spin_polarized_dos.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_spin_polarized_dos.zip <plot_spin_polarized_dos.zip>`
 
 
 .. only:: html

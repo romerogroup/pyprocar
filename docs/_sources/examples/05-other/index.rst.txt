@@ -33,7 +33,7 @@ These examples demonstrate other capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This utility can be used to generate a 2D k-mesh centered at a given k-point and in a given k-p...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This utility can be used to generate a 2D k-mesh centered at a given k-point and in a given k-plane.  This is particularly useful in computing 2D spin-textures and plotting 2D Fermi-surfaces.  For example, the following command creates a 2D k_{x}-k_{y} -mesh centered at the \Gamma point (k_{z}= 0)  ranging from coordinates (-0.5, -0.5, 0.0) to (0.5, 0.5, 0.0) with 5 grids in the x direction and 7 grids in the y direction">
 
 .. only:: html
 
@@ -50,7 +50,7 @@ These examples demonstrate other capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In order to plot a band structure, one must define a set of k-points following a desired k-path...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In order to plot a band structure, one must define a set of k-points following a desired k-path in momentum space.  PyProcar&#x27;s k-path generation utility enables a the user to automatically generate  a suitable and sufficient k-path given the crystal structure, typically read from the POSCAR file (VASP). ">
 
 .. only:: html
 
@@ -67,7 +67,7 @@ These examples demonstrate other capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The ElectronicBandStructure is used to handle the information  related to the electronic band s...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The ElectronicBandStructure is used to handle the information  related to the electronic band structure.">
 
 .. only:: html
 

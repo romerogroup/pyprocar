@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:39.229** total execution time for 8 files **from examples\04-fermi3d**:
+**01:30.921** total execution time for 8 files **from examples\04-fermi3d**:
 
 .. container::
 
@@ -33,26 +33,26 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_isovalue_gif.py` (``plot_fermi3d_isovalue_gif.py``)
-     - 00:32.865
+     - 00:26.773
      - 0.0
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_isoslider.py` (``plot_fermi3d_isoslider.py``)
-     - 00:32.153
+     - 00:26.118
      - 0.0
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_cross_section.py` (``plot_fermi3d_cross_section.py``)
-     - 00:11.313
+     - 00:12.691
      - 0.0
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin_texture.py` (``plot_fermi3d_spin_texture.py``)
-     - 00:07.507
+     - 00:07.979
      - 0.0
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin-polarized.py` (``plot_fermi3d_spin-polarized.py``)
-     - 00:05.801
+     - 00:06.359
      - 0.0
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_configurations.py` (``plot_fermi3d_configurations.py``)
-     - 00:03.328
-     - 0.0
-   * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_plain.py` (``plot_fermi3d_plain.py``)
-     - 00:03.149
+     - 00:03.744
      - 0.0
    * - :ref:`sphx_glr_examples_04-fermi3d_plot_de_hass_van_alphen.py` (``plot_de_hass_van_alphen.py``)
-     - 00:03.112
+     - 00:03.656
+     - 0.0
+   * - :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_plain.py` (``plot_fermi3d_plain.py``)
+     - 00:03.601
      - 0.0

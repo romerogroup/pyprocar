@@ -75,6 +75,11 @@
       
       
         
+          ElectronicBandStructure.general_rotation
+        
+      
+      
+        
           ElectronicBandStructure.ibz2fbz
         
       
@@ -86,6 +91,11 @@
       
         
           ElectronicBandStructure.mesh_to_array
+        
+      
+      
+        
+          ElectronicBandStructure.mirror_x
         
       
       
@@ -111,6 +121,16 @@
       
         
           ElectronicBandStructure.reduced_to_cartesian
+        
+      
+      
+        
+          ElectronicBandStructure.rot_symmetry_z
+        
+      
+      
+        
+          ElectronicBandStructure.translate
         
       
       

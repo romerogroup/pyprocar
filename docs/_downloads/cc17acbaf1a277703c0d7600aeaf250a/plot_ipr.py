@@ -52,10 +52,13 @@ Use the following code to do this. Once downloaded, specify the `data_dir` to po
 # First, we will import the necessary libraries and set up our data directory path.
 
 import os
+
 import pyprocar
 
 # Define the directory containing the example data
-bi2se3_data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Bi2Se3-spinorbit-surface"
+bi2se3_data_dir = (
+    f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Bi2Se3-spinorbit-surface"
+)
 
 
 C_data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}NV-center"
@@ -64,38 +67,43 @@ C_data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}NV-cente
 ###############################################################################
 # Topologically-protected surface states in :math:`Bi_2Se_3`
 # -----------------------------------------------------------
-# 
-# The first example is the detection of topologically-protected surface states in :math:`Bi_2Se_3`, [zhang2009]. 
-# The whole slab has six van der Waals layers (quintuple layers), each is five atom thick. The surface states localize on the outer quintuple layers, 
-# in contrast a extended state cover the six quintuple layers. 
-# The ratio between the localization of both types of states is 1 to 3, and the $IPR$ has enough resolution to provide a clear visual identification. 
+#
+# The first example is the detection of topologically-protected surface states in :math:`Bi_2Se_3`, [zhang2009].
+# The whole slab has six van der Waals layers (quintuple layers), each is five atom thick. The surface states localize on the outer quintuple layers,
+# in contrast a extended state cover the six quintuple layers.
+# The ratio between the localization of both types of states is 1 to 3, and the $IPR$ has enough resolution to provide a clear visual identification.
 # The PyProcar code is:
 
-pyprocar.bandsplot(dirname=bi2se3_data_dir,
-                   elimit=[-1.0,1.0],
-                   mode='ipr',
-                   code='vasp',
-                   spins=[0],
-                   clim=[0,0.2])
-
+pyprocar.bandsplot(
+    dirname=bi2se3_data_dir,
+    elimit=[-1.0, 1.0],
+    mode="ipr",
+    code="vasp",
+    spins=[0],
+    fermi=2.0446,
+    clim=[0, 0.2],
+)
 
 
 ###############################################################################
 #  :math:`NV^-` defect in diamond
 # ---------------------------------
 #
-# The second example is the :math:`NV^-` defect in diamond, it is a negatively charged N substitution plus an adjacent vacancy. 
-# This defect if of interest as a source of single photons. Its ground state is a triplet, allowing the control of the spin by microwave radiation.[DOHERTY2013] 
-# The supercell has 215 atoms, hence :math:`IPR\to0` for bulk states (blue lines). 
-# Several defect levels lie within the fundamental band gap of diamond (dark red lines). The closest levels to the Fermi energy are double degenerate (**i.e.** triplet), 
+# The second example is the :math:`NV^-` defect in diamond, it is a negatively charged N substitution plus an adjacent vacancy.
+# This defect if of interest as a source of single photons. Its ground state is a triplet, allowing the control of the spin by microwave radiation.[DOHERTY2013]
+# The supercell has 215 atoms, hence :math:`IPR\to0` for bulk states (blue lines).
+# Several defect levels lie within the fundamental band gap of diamond (dark red lines). The closest levels to the Fermi energy are double degenerate (**i.e.** triplet),
 # but only occupied for the spin majority. Hence, according to the optical transition takes place between the bands with index :math:`430\to431` or :math:`430\to432`
-# of the spin channel labelled `spin-1`. The calculation of the main emission line involves a calculation of the excited state, 
+# of the spin channel labelled `spin-1`. The calculation of the main emission line involves a calculation of the excited state,
 # which can be simulated by fixing the occupations of the mentioned levels, **i.e.** the :math:`\Delta` SCFmethod.[Jin2021]
 # The pyprocar code is:
 
-pyprocar.bandsplot(dirname=C_data_dir, 
-                   elimit=[-3.0,2.5], 
-                   mode='ipr',
-                   code='vasp', 
-                   spins=[0,1], 
-                   clim=[0,0.1])
+pyprocar.bandsplot(
+    dirname=C_data_dir,
+    elimit=[-3.0, 2.5],
+    mode="ipr",
+    code="vasp",
+    fermi=12.4563,
+    spins=[0, 1],
+    clim=[0, 0.1],
+)

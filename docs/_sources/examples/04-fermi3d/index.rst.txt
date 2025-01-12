@@ -120,7 +120,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 3D Fermi surfac...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 3D Fermi surface using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the plot_fermi_surface function. ">
 
 .. only:: html
 

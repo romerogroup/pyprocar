@@ -50,7 +50,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 2D Fermi surfac...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 2D Fermi surface with non-colinear spin textures using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the fermi2D function. For more information about fermi2D, refer to fermi2d.">
 
 .. only:: html
 
@@ -67,7 +67,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the dif...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the different spin texture projections of BiSb at a constant energy surface 0.60eV above the fermei level and -0.90ev below the fermi level. ">
 
 .. only:: html
 

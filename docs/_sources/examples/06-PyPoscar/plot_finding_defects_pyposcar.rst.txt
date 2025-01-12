@@ -177,7 +177,7 @@ Finding defects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 9.326 seconds)
+   **Total running time of the script:** (0 minutes 9.862 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_finding_defects_pyposcar.py:
@@ -193,6 +193,10 @@ Finding defects
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_finding_defects_pyposcar.py <plot_finding_defects_pyposcar.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_finding_defects_pyposcar.zip <plot_finding_defects_pyposcar.zip>`
 
 
 .. only:: html

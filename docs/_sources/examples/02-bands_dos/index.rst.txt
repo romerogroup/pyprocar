@@ -33,7 +33,7 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting both band structure...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting both band structures and density of states (DOS) side by side using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the bandsdosplot function.">
 
 .. only:: html
 

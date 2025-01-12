@@ -131,6 +131,8 @@ and the associated localized states.
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
     [[0, 0.953], [0, 0.956]]
     []
@@ -143,6 +145,8 @@ and the associated localized states.
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
     2 orbitals. (Some of) They are unknow (if you did 'filter' them it is OK).
 
                 WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
@@ -169,7 +173,7 @@ and the associated localized states.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 25.318 seconds)
+   **Total running time of the script:** (0 minutes 22.194 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_autobands.py:
@@ -185,6 +189,10 @@ and the associated localized states.
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_autobands.py <plot_autobands.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_autobands.zip <plot_autobands.zip>`
 
 
 .. only:: html

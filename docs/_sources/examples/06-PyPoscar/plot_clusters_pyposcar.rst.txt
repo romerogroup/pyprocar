@@ -176,7 +176,7 @@ Visualizing the Clusters
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.684 seconds)
+   **Total running time of the script:** (0 minutes 8.764 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_clusters_pyposcar.py:
@@ -192,6 +192,10 @@ Visualizing the Clusters
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_clusters_pyposcar.py <plot_clusters_pyposcar.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_clusters_pyposcar.zip <plot_clusters_pyposcar.zip>`
 
 
 .. only:: html

@@ -33,6 +33,11 @@
           DensityOfStates.get_current_basis
         
       
+      
+        
+          DensityOfStates.normalize_dos
+        
+      
    
    
 

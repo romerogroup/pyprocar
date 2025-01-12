@@ -16,7 +16,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the atomic clusters within a slab of Bi2Se3. The slab structure ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the atomic clusters within a slab of Bi2Se3. The slab structure is formed by quintuple layers (QL) where each QL can be regarded as a cluster. We&#x27;ll:">
 
 .. only:: html
 
@@ -50,7 +50,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the radial distribution functions (RDF) of an atomic structure. ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the radial distribution functions (RDF) of an atomic structure. The RDF provides insights into the probability of finding an atom at a certain distance from another. This can be useful for understanding the local environment of atoms.">
 
 .. only:: html
 
@@ -67,7 +67,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to substitute atoms in a POSCAR file using the pyprocar ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to substitute atoms in a POSCAR file using the pyprocar package.  Specifically, we will:">
 
 .. only:: html
 
@@ -84,7 +84,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate several modifications on a POSCAR file using the pyprocar pa...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate several modifications on a POSCAR file using the pyprocar package:">
 
 .. only:: html
 

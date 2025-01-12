@@ -37,7 +37,7 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="One of the most powerful capabilities of PyProcar is allowing to correlate real space with elec...">
+    <div class="sphx-glr-thumbcontainer" tooltip="One of the most powerful capabilities of PyProcar is allowing to correlate real space with electronic structure,  for instance finding surface states or defect levels. Traditionally this task is done by the user,  providing a list of atoms representing the surface or the defect (parameter atom in bandsplot).  Also the user needs to choose a relevant energy window for the plot and setting the boundaries of the color scale to highlight the relevant states.  That process is both tedious and error prone: for instance the user need to find the special atoms (e.g. defect, surface, etc.)  and take care of whether the indexes are 0- or 1-based.">
 
 .. only:: html
 
@@ -71,7 +71,7 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to plot atomic energy levels for the compound hBN-CNCN at the GAMM...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to plot atomic energy levels for the compound hBN-CNCN at the GAMMA point using the pyprocar package.">
 
 .. only:: html
 
@@ -105,6 +105,23 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Often it is needed to search for localized modes within the band structure, typical examples are surface/interface states and defect levels.  The usual procedure for detecting them is looking for bands with a large projection around the atoms at the surface or defect.  This procedure is both cumbersome for the user and error-prone. For instance, the lowest unoccupied levels of the neutral C_N defect in h-BN has practically no projection on the defect atom and its nearest neighbors.  This delayed its identification as a single-photon emitter.[jara2021,auburger2021]  A much simpler way to detect these localized levels is by means of the Inverse Participation Ratio, defined as">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_ipr_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting Inverse participation ratio</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
 
 .. only:: html
@@ -117,23 +134,6 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Often it is needed to search for localized modes within the band structure, typical examples ar...">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_ipr_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting Inverse participation ratio</div>
     </div>
 
 
@@ -190,7 +190,7 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures usi...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the bandsplot function.">
 
 .. only:: html
 
@@ -276,7 +276,7 @@ These examples demonstrate the density of states plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of stat...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of states (DOS) using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the dosplot function.">
 
 .. only:: html
 
@@ -362,7 +362,7 @@ These examples demonstrate the bandsdosplot plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting both band structure...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting both band structures and density of states (DOS) side by side using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the bandsdosplot function.">
 
 .. only:: html
 
@@ -431,7 +431,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 2D Fermi surfac...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 2D Fermi surface with non-colinear spin textures using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the fermi2D function. For more information about fermi2D, refer to fermi2d.">
 
 .. only:: html
 
@@ -448,7 +448,7 @@ These examples demonstrate the Fermi2D plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the dif...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting rashba spin splitting example.  From our first paper we had an example to plot the different spin texture projections of BiSb at a constant energy surface 0.60eV above the fermei level and -0.90ev below the fermi level. ">
 
 .. only:: html
 
@@ -587,7 +587,7 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 3D Fermi surfac...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the 3D Fermi surface using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the plot_fermi_surface function. ">
 
 .. only:: html
 
@@ -656,7 +656,7 @@ These examples demonstrate other capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This utility can be used to generate a 2D k-mesh centered at a given k-point and in a given k-p...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This utility can be used to generate a 2D k-mesh centered at a given k-point and in a given k-plane.  This is particularly useful in computing 2D spin-textures and plotting 2D Fermi-surfaces.  For example, the following command creates a 2D k_{x}-k_{y} -mesh centered at the \Gamma point (k_{z}= 0)  ranging from coordinates (-0.5, -0.5, 0.0) to (0.5, 0.5, 0.0) with 5 grids in the x direction and 7 grids in the y direction">
 
 .. only:: html
 
@@ -673,7 +673,7 @@ These examples demonstrate other capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In order to plot a band structure, one must define a set of k-points following a desired k-path...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In order to plot a band structure, one must define a set of k-points following a desired k-path in momentum space.  PyProcar&#x27;s k-path generation utility enables a the user to automatically generate  a suitable and sufficient k-path given the crystal structure, typically read from the POSCAR file (VASP). ">
 
 .. only:: html
 
@@ -690,7 +690,7 @@ These examples demonstrate other capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The ElectronicBandStructure is used to handle the information  related to the electronic band s...">
+    <div class="sphx-glr-thumbcontainer" tooltip="The ElectronicBandStructure is used to handle the information  related to the electronic band structure.">
 
 .. only:: html
 
@@ -725,7 +725,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the atomic clusters within a slab of Bi2Se3. The slab structure ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the atomic clusters within a slab of Bi2Se3. The slab structure is formed by quintuple layers (QL) where each QL can be regarded as a cluster. We&#x27;ll:">
 
 .. only:: html
 
@@ -759,7 +759,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the radial distribution functions (RDF) of an atomic structure. ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the radial distribution functions (RDF) of an atomic structure. The RDF provides insights into the probability of finding an atom at a certain distance from another. This can be useful for understanding the local environment of atoms.">
 
 .. only:: html
 
@@ -776,7 +776,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to substitute atoms in a POSCAR file using the pyprocar ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to substitute atoms in a POSCAR file using the pyprocar package.  Specifically, we will:">
 
 .. only:: html
 
@@ -793,7 +793,7 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate several modifications on a POSCAR file using the pyprocar pa...">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate several modifications on a POSCAR file using the pyprocar package:">
 
 .. only:: html
 

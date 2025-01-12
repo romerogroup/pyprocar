@@ -95,7 +95,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
  .. code-block:: none
 
-    Configuration files are located at: z:\research projects\pyprocar\pyprocar\cfg
+    Configuration files are located at: C:\Users\lllang\Desktop\Current_Projects\pyprocar\pyprocar\cfg
 
                 ----------------------------------------------------------------------------------------------------------
                 There are additional plot options that are defined in the configuration file. 
@@ -139,6 +139,18 @@ Before diving into plotting, we need to download the example files. Use the foll
     weighted_width : False
     figure_size : (9, 6)
     dpi : figure
+    colorbar_tick_params : {}
+    colorbar_label_params : {}
+    x_label_params : {}
+    y_label_params : {}
+    title_params : {}
+    major_y_tick_params : {'which': 'major', 'axis': 'y', 'direction': 'inout', 'width': 1, 'length': 5, 'labelright': False, 'right': True, 'left': True}
+    minor_y_tick_params : {'which': 'minor', 'axis': 'y', 'direction': 'in', 'left': True, 'right': True}
+    major_x_tick_params : {'which': 'major', 'axis': 'x', 'direction': 'in'}
+    multiple_locator_y_major_value : None
+    multiple_locator_y_minor_value : None
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -193,6 +205,8 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -242,6 +256,8 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -291,6 +307,8 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -299,7 +317,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.441 seconds)
+   **Total running time of the script:** (0 minutes 2.357 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:
@@ -315,6 +333,10 @@ Before diving into plotting, we need to download the example files. Use the foll
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_bandsplot_configurations.py <plot_bandsplot_configurations.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_bandsplot_configurations.zip <plot_bandsplot_configurations.zip>`
 
 
 .. only:: html

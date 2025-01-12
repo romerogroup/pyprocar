@@ -228,8 +228,12 @@ Visualizing the Results
 
  .. code-block:: none
 
+    C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_cutoff_pyposcar.py:86: MatplotlibDeprecationWarning: Passing label as a length 2 sequence when plotting a single dataset is deprecated in Matplotlib 3.9 and will error in 3.11.  To keep the current behavior, cast the sequence to string before passing.
+      ax2.plot(domain, curve, label = label, color = c)
     The DataBase Thresholds are:
     {0.7725483399593904, 1.8348023074035522, 1.9434419177103412, 1.7744469683442248, 1.3036753236814713, 1.4123149339882604, 1.2433199846221439, 2.0520815280171307, 1.883086578651014, 1.7140916292848973}
+    C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_cutoff_pyposcar.py:119: MatplotlibDeprecationWarning: Passing label as a length 2 sequence when plotting a single dataset is deprecated in Matplotlib 3.9 and will error in 3.11.  To keep the current behavior, cast the sequence to string before passing.
+      var_cutoffs.append(ax3.plot([cutOff,cutOff], [0,1000],color = c, label = my_rdf.interactions[i]))
 
 
 
@@ -237,7 +241,7 @@ Visualizing the Results
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.588 seconds)
+   **Total running time of the script:** (0 minutes 0.625 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_rdf_cutoff_pyposcar.py:
@@ -253,6 +257,10 @@ Visualizing the Results
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_rdf_cutoff_pyposcar.py <plot_rdf_cutoff_pyposcar.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_rdf_cutoff_pyposcar.zip <plot_rdf_cutoff_pyposcar.zip>`
 
 
 .. only:: html

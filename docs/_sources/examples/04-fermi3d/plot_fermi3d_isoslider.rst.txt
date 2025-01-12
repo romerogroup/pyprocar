@@ -99,11 +99,13 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
                 
-    z:\research projects\pyprocar\pyprocar\core\ebs.py:1067: ComplexWarning: Casting complex values to real discards the imaginary part
+    C:\Users\lllang\Desktop\Current_Projects\pyprocar\pyprocar\core\ebs.py:1076: ComplexWarning: Casting complex values to real discards the imaginary part
       new_properties[prop][start_idx:end_idx] = original_value
 
 
@@ -169,7 +171,7 @@ Plain mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 32.153 seconds)
+   **Total running time of the script:** (0 minutes 26.118 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_isoslider.py:
@@ -185,6 +187,10 @@ Plain mode
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi3d_isoslider.py <plot_fermi3d_isoslider.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_fermi3d_isoslider.zip <plot_fermi3d_isoslider.zip>`
 
 
 .. only:: html

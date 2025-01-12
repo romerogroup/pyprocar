@@ -96,7 +96,7 @@ Plain mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.2.0 created on Jun 10th, 2021
+    Version 6.3.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -116,7 +116,7 @@ Plain mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -136,6 +136,8 @@ Plain mode
                 Here is a list modes : plain , plain_bands , parametric
                 --------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                 WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
                 ----------------------------------------------------------------------------------------------------------
@@ -190,7 +192,7 @@ plain_bands mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.2.0 created on Jun 10th, 2021
+    Version 6.3.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -210,7 +212,7 @@ plain_bands mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -288,7 +290,7 @@ parametric mode
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.2.0 created on Jun 10th, 2021
+    Version 6.3.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -308,7 +310,7 @@ parametric mode
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  None
     atoms           :  [0]
     orbitals        :  [4, 5, 6, 7, 8]
@@ -381,7 +383,7 @@ Also you can specify the colors of the bands as well with band_colors
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.2.0 created on Jun 10th, 2021
+    Version 6.3.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -401,7 +403,7 @@ Also you can specify the colors of the bands as well with band_colors
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  Z:\Research Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
+    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\spin-polarized-colinear\fermi
     bands           :  [[4, 5], []]
     atoms           :  None
     orbitals        :  None
@@ -435,7 +437,7 @@ Also you can specify the colors of the bands as well with band_colors
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.691 seconds)
+   **Total running time of the script:** (0 minutes 2.386 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d.py:
@@ -451,6 +453,10 @@ Also you can specify the colors of the bands as well with band_colors
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_fermi2d.py <plot_fermi2d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_fermi2d.zip <plot_fermi2d.zip>`
 
 
 .. only:: html

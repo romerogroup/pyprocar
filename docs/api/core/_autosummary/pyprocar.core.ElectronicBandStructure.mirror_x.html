@@ -1,0 +1,1069 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mirror_x &#8212; PyProcar 6.2.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../../../_static/documentation_options.js?v=55479182"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/core/_autosummary/pyprocar.core.ElectronicBandStructure.mirror_x';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="plot_kpoints" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html" />
+    <link rel="prev" title="mesh_to_array" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="6.2.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">PyProcar 6.2.1 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+    DFT Prep
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contributing</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">The Paper</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+    DFT Prep
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contributing</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">The Paper</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../cfg/index.html">Configuration Files</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure.html">Band Structure Configuration API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/band_structure_2d.html">band structure 2d plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/dos.html">dos plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/unfold.html">unfold plotting Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_3d.html">Fermi Surface 3D Configuration API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cfg/fermi_surface_2d.html">fermi surface 2d plotting Options</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Core API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../brillouin_zone.html">BrillouinZone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.BrillouinZone.html">pyprocar.core.BrillouinZone</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.BrillouinZone.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.BrillouinZone.wigner_seitz.html">wigner_seitz</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dos.html">DensityOfStates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.DensityOfStates.html">pyprocar.core.DensityOfStates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.coupled_to_uncoupled_basis.html">coupled_to_uncoupled_basis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.dos_sum.html">dos_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.get_current_basis.html">get_current_basis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.normalize_dos.html">normalize_dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.is_non_collinear.html">is_non_collinear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.n_dos.html">n_dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.n_energies.html">n_energies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.DensityOfStates.n_spins.html">n_spins</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../ebs.html">ElectronicBandStructure</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active has-children"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.html">pyprocar.core.ElectronicBandStructure</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.array_to_mesh.html">array_to_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html">calculate_harmonic_average_effective_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html">calculate_nd_scalar_derivatives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html">calculate_nd_scalar_integral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html">cartesian_to_reduced</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr.html">ebs_ipr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html">ebs_ipr_atom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ebs_sum.html">ebs_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html">expand_kpoints_to_supercell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html">expand_kpoints_to_supercell_by_axes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html">fix_collinear_spin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.general_rotation.html">general_rotation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ibz2fbz.html">ibz2fbz</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html">interpolate_mesh_grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html">mesh_to_array</a></li>
+<li class="toctree-l4 current active"><a class="current reference internal" href="#">mirror_x</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html">plot_kpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ravel_array.html">ravel_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html">reduce_bands_near_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html">reduce_kpoints_to_plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html">reduced_to_cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.rot_symmetry_z.html">rot_symmetry_z</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.translate.html">translate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.unfold.html">unfold</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.update_weights.html">update_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands.html">bands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient.html">bands_gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_gradient_mesh.html">bands_gradient_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian.html">bands_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_hessian_mesh.html">bands_hessian_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_integral.html">bands_integral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.bands_mesh.html">bands_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.efermi.html">efermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed.html">fermi_speed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_speed_mesh.html">fermi_speed_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity.html">fermi_velocity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.fermi_velocity_mesh.html">fermi_velocity_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass.html">harmonic_average_effective_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.harmonic_average_effective_mass_mesh.html">harmonic_average_effective_mass_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.inv_reciprocal_lattice.html">inv_reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.is_non_collinear.html">is_non_collinear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpath.html">kpath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints.html">kpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian.html">kpoints_cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_cartesian_mesh.html">kpoints_cartesian_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kpoints_mesh.html">kpoints_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kx_map.html">kx_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.ky_map.html">ky_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.kz_map.html">kz_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kx.html">n_kx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_ky.html">n_ky</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.n_kz.html">n_kz</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.natoms.html">natoms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nbands.html">nbands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nkpoints.html">nkpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.norbitals.html">norbitals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nprincipals.html">nprincipals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.nspins.html">nspins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected.html">projected</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_mesh.html">projected_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase.html">projected_phase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.projected_phase_mesh.html">projected_phase_mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.reciprocal_lattice.html">reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights.html">weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.ElectronicBandStructure.weights_mesh.html">weights_mesh</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../fermi2d.html">FermiSurface</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.FermiSurface.html">pyprocar.core.FermiSurface</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.add_axes_labels.html">add_axes_labels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.add_legend.html">add_legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.find_energy.html">find_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.plot.html">plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.savefig.html">savefig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.show.html">show</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface.spin_texture.html">spin_texture</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../fermi3d.html">FermiSurface3D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.FermiSurface3D.html">pyprocar.core.FermiSurface3D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.extend_surface.html">extend_surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.project_atomic_projections.html">project_atomic_projections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.project_fermi_speed.html">project_fermi_speed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.project_fermi_velocity.html">project_fermi_velocity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.project_harmonic_effective_mass.html">project_harmonic_effective_mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.FermiSurface3D.project_spin_texture_atomic_projections.html">project_spin_texture_atomic_projections</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../isosurface.html">Isosurface</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.Isosurface.html">pyprocar.core.Isosurface</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Isosurface.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Isosurface.dxyz.html">dxyz</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Isosurface.nX.html">nX</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Isosurface.nY.html">nY</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Isosurface.nZ.html">nZ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Isosurface.surface_boundaries.html">surface_boundaries</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../kpath.html">KPath</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.KPath.html">pyprocar.core.KPath</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.get_kpoints_transformed.html">get_kpoints_transformed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.get_optimized_kpoints_transformed.html">get_optimized_kpoints_transformed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.write_to_file.html">write_to_file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.kdistances.html">kdistances</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.nsegments.html">nsegments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.tick_names.html">tick_names</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.KPath.tick_positions.html">tick_positions</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../structure.html">Structure</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.Structure.html">pyprocar.core.Structure</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.get_space_group_international.html">get_space_group_international</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.get_space_group_number.html">get_space_group_number</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.get_spglib_symmetry_dataset.html">get_spglib_symmetry_dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.get_wyckoff_positions.html">get_wyckoff_positions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.is_point_inside.html">is_point_inside</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.plot_cell_convex_hull.html">plot_cell_convex_hull</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.supercell.html">supercell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.transform.html">transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.a.html">a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.alpha.html">alpha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.atomic_numbers.html">atomic_numbers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.b.html">b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.beta.html">beta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.c.html">c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.cell_convex_hull.html">cell_convex_hull</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.density.html">density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.gamma.html">gamma</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.lattice_corners.html">lattice_corners</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.masses.html">masses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.natoms.html">natoms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.nspecies.html">nspecies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.reciprocal_lattice.html">reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.species.html">species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Structure.volume.html">volume</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../surface.html">Surface</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="pyprocar.core.Surface.html">pyprocar.core.Surface</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.export.html">export</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.set_color_with_cmap.html">set_color_with_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.set_scalars.html">set_scalars</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.set_vectors.html">set_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.centers.html">centers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyprocar.core.Surface.faces_array.html">faces_array</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../io/index.html">IO API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../io/abinit.html">AbinitParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.abinit.AbinitProcar.html">pyprocar.io.abinit.AbinitProcar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.abinit.AbinitProcar.__init__.html">__init__</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.abinit.Output.html">pyprocar.io.abinit.Output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.abinit.Output.__init__.html">__init__</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.abinit.AbinitKpoints.html">pyprocar.io.abinit.AbinitKpoints</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.abinit.AbinitKpoints.__init__.html">__init__</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../io/bxsf.html">BxsfParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.bxsf.BxsfParser.html">pyprocar.io.bxsf.BxsfParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.bxsf.BxsfParser.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.bxsf.BxsfParser.parse_bxsf.html">parse_bxsf</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../io/lobster.html">LobsterParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.html">pyprocar.io.lobster.LobsterParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.dos_parametric.html">dos_parametric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.parse_structure.html">parse_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.dos.html">dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.dos_projected.html">dos_projected</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.dos_to_dict.html">dos_to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.dos_total.html">dos_total</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.final_structure.html">final_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.initial_structure.html">initial_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.species.html">species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.structure.html">structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.lobster.LobsterParser.structures.html">structures</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../io/qe.html">QEParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.html">pyprocar.io.qe.QEParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.kpoints_cart.html">kpoints_cart</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.final_structure.html">final_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.initial_structure.html">initial_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.species.html">species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.structure.html">structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.qe.QEParser.structures.html">structures</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../io/siesta.html">SiestaParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.siesta.SiestaParser.html">pyprocar.io.siesta.SiestaParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.siesta.SiestaParser.__init__.html">__init__</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../io/vasp.html">VaspParser</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.html">pyprocar.io.vasp.Outcar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.get_symmetry_operations.html">get_symmetry_operations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.efermi.html">efermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.reciprocal_lattice.html">reciprocal_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Outcar.rotations.html">rotations</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Poscar.html">pyprocar.io.vasp.Poscar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Poscar.__init__.html">__init__</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Procar.html">pyprocar.io.vasp.Procar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Procar.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Procar.repair.html">repair</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Procar.symmetrize.html">symmetrize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Procar.kpoints_cartesian.html">kpoints_cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Procar.kpoints_reduced.html">kpoints_reduced</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Kpoints.html">pyprocar.io.vasp.Kpoints</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.Kpoints.__init__.html">__init__</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.html">pyprocar.io.vasp.VaspXML</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.conv.html">conv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.get_general.html">get_general</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.get_params.html">get_params</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.get_scstep.html">get_scstep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.get_set.html">get_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.get_structure.html">get_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.get_varray.html">get_varray</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.parse_vasprun.html">parse_vasprun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.read.html">read</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.text_to_bool.html">text_to_bool</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.bands.html">bands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.bands_projected.html">bands_projected</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.convergence.html">convergence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.convergence_electronic.html">convergence_electronic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.convergence_ionic.html">convergence_ionic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.dos.html">dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.dos_projected.html">dos_projected</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.dos_to_dict.html">dos_to_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.dos_total.html">dos_total</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.energies.html">energies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.energy.html">energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.fermi.html">fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.final_structure.html">final_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.forces.html">forces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.incar.html">incar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.initial_structure.html">initial_structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.is_finished.html">is_finished</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.iteration_data.html">iteration_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.kpoints.html">kpoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.kpoints_list.html">kpoints_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.last_energy.html">last_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.potcar_info.html">potcar_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.species.html">species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.structure.html">structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.structures.html">structures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../io/_autosummary/pyprocar.io.vasp.VaspXML.vasp_parameters.html">vasp_parameters</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../plotter/index.html">Plotter API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../plotter/bandsplot.html">EBSPlot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.html">pyprocar.plotter.EBSPlot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.draw_fermi.html">draw_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.export_data.html">export_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.grid.html">grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.legend.html">legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_atomic_levels.html">plot_atomic_levels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_bands.html">plot_bands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric.html">plot_parameteric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_parameteric_overlay.html">plot_parameteric_overlay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.plot_scatter.html">plot_scatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.save.html">save</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_colorbar_title.html">set_colorbar_title</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_title.html">set_title</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_xlabel.html">set_xlabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_xlim.html">set_xlim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_xticks.html">set_xticks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_ylabel.html">set_ylabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_ylim.html">set_ylim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.set_yticks.html">set_yticks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.EBSPlot.show.html">show</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../plotter/dosplot.html">DosPlot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.html">pyprocar.plotter.DOSPlot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.draw_fermi.html">draw_fermi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.export_data.html">export_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.grid.html">grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.legend.html">legend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_dos.html">plot_dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_parametric.html">plot_parametric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_parametric_line.html">plot_parametric_line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_stack.html">plot_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_stack_orbitals.html">plot_stack_orbitals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.plot_stack_species.html">plot_stack_species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.save.html">save</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.set_xlabel.html">set_xlabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.set_xlim.html">set_xlim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.set_xticks.html">set_xticks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.set_ylabel.html">set_ylabel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.set_ylim.html">set_ylim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.set_yticks.html">set_yticks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.show.html">show</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.DOSPlot.update_config.html">update_config</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../plotter/procarplot.html">ProcarPlot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.ProcarPlot.html">pyprocar.plotter.ProcarPlot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.ProcarPlot.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.ProcarPlot.atomicPlot.html">atomicPlot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.ProcarPlot.parametricPlot.html">parametricPlot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.ProcarPlot.plotBands.html">plotBands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotter/_autosummary/pyprocar.plotter.ProcarPlot.scatterPlot.html">scatterPlot</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../scripts/index.html">Scripts API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/bandgap.html">bandgap</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.bandgap.html">bandgap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/bandsplot.html">bandsplot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.bandsplot.html">bandsplot</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/bandsdosplot.html">bandsdosplot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.bandsdosplot.html">bandsdosplot</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/cat.html">cat</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.cat.html">cat</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/dosplot.html">dosplot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.dosplot.html">dosplot</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/fermi2d.html">fermi2D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.fermi2D.html">fermi2D</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/fermihandler.html">FermiHandler</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.html">pyprocar.scripts.FermiHandler</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.create_isovalue_gif.html">create_isovalue_gif</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section.html">plot_fermi_cross_section</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_cross_section_box_widget.html">plot_fermi_cross_section_box_widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_isoslider.html">plot_fermi_isoslider</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.plot_fermi_surface.html">plot_fermi_surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.FermiHandler.print_default_settings.html">print_default_settings</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/generate2dkmesh.html">generate2dkmesh</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.generate2dkmesh.html">generate2dkmesh</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/kpath.html">kpath</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.kpath.html">kpath</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../scripts/repair.html">reapir</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../scripts/_autosummary/pyprocar.scripts.repair.html">repair</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../pyposcar/index.html">PyPoscar API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pyposcar/poscar.html">Poscar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.html">pyprocar.pyposcar.Poscar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.add.html">add</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.load_from_data.html">load_from_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.parse.html">parse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.remove.html">remove</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.sort.html">sort</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.write.html">write</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.Poscar.xyz.html">xyz</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../pyposcar/poscarutils.html">poscarUtils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.html">pyprocar.pyposcar.poscar_modify</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.add.html">add</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.change_elements.html">change_elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.pos_multiply.html">pos_multiply</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.pos_sum.html">pos_sum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.remove.html">remove</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.scale_lattice.html">scale_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.shift.html">shift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_modify.write.html">write</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_supercell.html">pyprocar.pyposcar.poscar_supercell</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_supercell.__init__.html">__init__</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_supercell.supercell.html">supercell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscar_supercell.write.html">write</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pyposcar/_autosummary/pyprocar.pyposcar.poscarDiff.html">poscarDiff</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Core API</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../ebs.html" class="nav-link">ElectronicBandStructure</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="pyprocar.core.ElectronicBandStructure.html" class="nav-link">pyprocar.core.ElectronicBandStructure</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mirror_x</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="mirror-x">
+<h1>mirror_x<a class="headerlink" href="#mirror-x" title="Link to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyprocar.core.ElectronicBandStructure.mirror_x">
+<span class="sig-prename descclassname"><span class="pre">ElectronicBandStructure.</span></span><span class="sig-name descname"><span class="pre">mirror_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pyprocar/core/ebs.html#ElectronicBandStructure.mirror_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyprocar.core.ElectronicBandStructure.mirror_x" title="Link to this definition">#</a></dt>
+<dd><p>Applies the given rotational crystal symmetry to the current
+system. ie: to unfold the irreductible BZ to the full BZ.</p>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="pyprocar.core.ElectronicBandStructure.mesh_to_array.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mesh_to_array</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="pyprocar.core.ElectronicBandStructure.plot_kpoints.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">plot_kpoints</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pyprocar.core.ElectronicBandStructure.mirror_x"><code class="docutils literal notranslate"><span class="pre">ElectronicBandStructure.mirror_x()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/api/core/_autosummary/pyprocar.core.ElectronicBandStructure.mirror_x.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2020, Romero Group.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

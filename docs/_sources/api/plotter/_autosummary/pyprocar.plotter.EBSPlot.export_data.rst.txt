@@ -1,0 +1,6 @@
+export\_data
+============
+
+.. currentmodule:: pyprocar.plotter
+
+.. automethod:: EBSPlot.export_data

@@ -109,6 +109,8 @@ Plain mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -164,6 +166,8 @@ For details on the meaning of the indices of the atomic projection please refer 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -172,7 +176,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.308 seconds)
+   **Total running time of the script:** (0 minutes 1.416 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_noncolinear_qe.py:
@@ -188,6 +192,10 @@ For details on the meaning of the indices of the atomic projection please refer 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_noncolinear_qe.py <plot_noncolinear_qe.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_noncolinear_qe.zip <plot_noncolinear_qe.zip>`
 
 
 .. only:: html

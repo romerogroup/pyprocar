@@ -103,6 +103,13 @@ Initialize the parser object and get the ElectronicBandStructure
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
+
 
 
 
@@ -254,11 +261,11 @@ Gradients
 .. code-block:: pytb
 
     Traceback (most recent call last):
-      File "Z:\Research Projects\pyprocar\examples\05-other\plot_ebs.py", line 99, in <module>
+      File "C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\05-other\plot_ebs.py", line 99, in <module>
         arrows = kpoints.glyph(orient='band_0-gradients', scale=False, factor=0.08)
-      File "Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\filters\data_set.py", line 2315, in glyph
+      File "C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\pyvista\core\filters\data_set.py", line 2379, in glyph
         dataset.set_active_vectors(orient, preference=prefer)
-      File "Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\dataset.py", line 692, in set_active_vectors
+      File "C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\pyvista\core\dataset.py", line 703, in set_active_vectors
         raise ValueError(
     ValueError: Data field (band_0-gradients) with type (FieldAssociation.POINT) could not be set as the active vectors
 
@@ -307,7 +314,7 @@ Effective mass
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.409 seconds)
+   **Total running time of the script:** (0 minutes 1.349 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_ebs.py:
@@ -323,6 +330,10 @@ Effective mass
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_ebs.py <plot_ebs.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_ebs.zip <plot_ebs.zip>`
 
 
 .. only:: html

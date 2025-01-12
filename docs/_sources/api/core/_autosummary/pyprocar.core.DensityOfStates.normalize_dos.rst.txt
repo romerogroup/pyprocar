@@ -1,0 +1,6 @@
+normalize\_dos
+==============
+
+.. currentmodule:: pyprocar.core
+
+.. automethod:: DensityOfStates.normalize_dos

@@ -94,6 +94,8 @@ Plain mode
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -108,7 +110,7 @@ Plain mode
                 WARNING : Make sure the kmesh has kz points with kz=0 +- 0.0001
                 ----------------------------------------------------------------------------------------------------------
             
-    Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\pyvista\core\utilities\points.py:55: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
       warnings.warn(
 
 
@@ -146,6 +148,8 @@ Parametric mode
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -196,6 +200,8 @@ Property Projection mode
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -211,7 +217,7 @@ Property Projection mode
                 ----------------------------------------------------------------------------------------------------------
             
     ij,uvwabj->uvwabi
-    Z:\Anaconda\envs\pyprocar_6.1.10\lib\site-packages\pyvista\core\utilities\points.py:52: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\pyvista\core\utilities\points.py:55: UserWarning: Points is not a float type. This can cause issues when transforming or applying filters. Casting to ``np.float32``. Disable this by passing ``force_float=False``.
       warnings.warn(
 
 
@@ -259,6 +265,8 @@ Spin Texture mode
 
  .. code-block:: none
 
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -280,7 +288,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 13.131 seconds)
+   **Total running time of the script:** (2 minutes 44.803 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_2d_bands.py:
@@ -296,6 +304,10 @@ Spin Texture mode
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_2d_bands.py <plot_2d_bands.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_2d_bands.zip <plot_2d_bands.zip>`
 
 
 .. only:: html

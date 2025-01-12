@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../../" >
 
   <head>
     <meta charset="utf-8" />
@@ -13,44 +13,48 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=773d47ca"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/documentation_options.js?v=55479182"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=30646c52"></script>
-    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pyprocar/core/ebs';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="6.2.1" />
   </head>
   
   
@@ -58,32 +62,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -91,7 +79,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -99,20 +86,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../../../index.html">
@@ -133,49 +127,43 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
-                        Getting started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
-                        DFT Prep
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../examples/index.html">
-                        Examples
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        API Reference
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+    DFT Prep
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -187,31 +175,23 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
       
-        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -222,7 +202,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -234,7 +214,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Contributing</span></a>
         </li>
         <li class="nav-item">
@@ -246,7 +226,7 @@ document.write(`
           
           
           
-          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">The Paper</span></a>
         </li>
 </ul></div>
@@ -258,27 +238,29 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -287,52 +269,49 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../getting-started/index.html">
-                        Getting started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../user-guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../dftprep/index.html">
-                        DFT Prep
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../examples/index.html">
-                        Examples
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        API Reference
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dftprep/index.html">
+    DFT Prep
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API Reference
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -342,17 +321,13 @@ document.write(`
         
           <div class="navbar-item">
 
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
-  </button>
-`);
-</script></div>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -363,7 +338,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
         <li class="nav-item">
@@ -375,7 +350,7 @@ document.write(`
           
           
           
-          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst" title="Contributing" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-gavel fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">Contributing</span></a>
         </li>
         <li class="nav-item">
@@ -387,7 +362,7 @@ document.write(`
           
           
           
-          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i></span>
+          <a href="https://doi.org/10.1016/j.cpc.2019.107080" title="The Paper" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-file-text fa-fw fa-lg" aria-hidden="true"></i>
             <span class="sr-only">The Paper</span></a>
         </li>
 </ul></div>
@@ -405,22 +380,20 @@ document.write(`
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -431,7 +404,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">pyprocar.core.ebs</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">pyprocar.core.ebs</span></li>
   </ul>
 </nav>
 </div>
@@ -446,7 +419,7 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <h1>Source code for pyprocar.core.ebs</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
@@ -484,7 +457,9 @@ document.write(`
 <span class="c1"># TODO: Check hormonic average effective mass values</span>
 <span class="c1"># TODO: Check method to calculate the bands integral</span>
 
-<div class="viewcode-block" id="ElectronicBandStructure"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.html#pyprocar.core.ElectronicBandStructure">[docs]</a><span class="k">class</span> <span class="nc">ElectronicBandStructure</span><span class="p">:</span>
+<div class="viewcode-block" id="ElectronicBandStructure">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.html#pyprocar.core.ElectronicBandStructure">[docs]</a>
+<span class="k">class</span> <span class="nc">ElectronicBandStructure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This object stores electronic band structure informomration.</span>
 
 <span class="sd">        Parameters</span>
@@ -511,7 +486,9 @@ document.write(`
 <span class="sd">             Boolean to determine if the fermi energy is shifted, defaults to False</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ElectronicBandStructure.__init__"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.__init__.html#pyprocar.core.ElectronicBandStructure.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="ElectronicBandStructure.__init__">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.__init__.html#pyprocar.core.ElectronicBandStructure.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">kpoints</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">bands</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -597,6 +574,16 @@ document.write(`
             <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Weights: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized the ElectronicBandStructure object&#39;</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;Enectronic Band Structure     </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;------------------------     </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of kpoints  = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nkpoints</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of bands    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of atoms    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of orbitals = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nkpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of k points</span>
@@ -1150,7 +1137,9 @@ document.write(`
     <span class="k">def</span> <span class="nf">bands_integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_nd_scalar_integral</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands_mesh</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">reciprocal_lattice</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ElectronicBandStructure.reduced_to_cartesian"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html#pyprocar.core.ElectronicBandStructure.reduced_to_cartesian">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ElectronicBandStructure.reduced_to_cartesian">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.reduced_to_cartesian.html#pyprocar.core.ElectronicBandStructure.reduced_to_cartesian">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">reduced_to_cartesian</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span><span class="n">reciprocal_lattice</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">reciprocal_lattice</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">reciprocal_lattice</span><span class="p">)</span>
@@ -1159,8 +1148,11 @@ document.write(`
                 <span class="s2">&quot;Please provide a reciprocal lattice when initiating the Procar class&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span></div>
+
         
-<div class="viewcode-block" id="ElectronicBandStructure.cartesian_to_reduced"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html#pyprocar.core.ElectronicBandStructure.cartesian_to_reduced">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ElectronicBandStructure.cartesian_to_reduced">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.cartesian_to_reduced.html#pyprocar.core.ElectronicBandStructure.cartesian_to_reduced">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">cartesian_to_reduced</span><span class="p">(</span><span class="n">cartesian</span><span class="p">,</span><span class="n">reciprocal_lattice</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts cartesian coordinates to fractional coordinates</span>
 
@@ -1184,7 +1176,10 @@ document.write(`
             <span class="p">)</span>
             <span class="k">return</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.array_to_mesh"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.array_to_mesh.html#pyprocar.core.ElectronicBandStructure.array_to_mesh">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.array_to_mesh">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.array_to_mesh.html#pyprocar.core.ElectronicBandStructure.array_to_mesh">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">array_to_mesh</span><span class="p">(</span> <span class="n">array</span><span class="p">,</span> <span class="n">nkx</span><span class="p">,</span> <span class="n">nky</span><span class="p">,</span> <span class="n">nkz</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts a list to a mesh that corresponds to ebs.kpoints</span>
@@ -1209,8 +1204,11 @@ document.write(`
         <span class="n">prop_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span><span class="p">,</span> <span class="n">nky</span><span class="p">,</span> <span class="n">nkz</span><span class="p">,)</span> <span class="o">+</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="n">scalar_grid</span><span class="o">=</span><span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">prop_shape</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">scalar_grid</span></div>
+
     
-<div class="viewcode-block" id="ElectronicBandStructure.mesh_to_array"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.mesh_to_array.html#pyprocar.core.ElectronicBandStructure.mesh_to_array">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ElectronicBandStructure.mesh_to_array">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.mesh_to_array.html#pyprocar.core.ElectronicBandStructure.mesh_to_array">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">mesh_to_array</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts a mesh to a list that corresponds to ebs.kpoints</span>
@@ -1228,8 +1226,11 @@ document.write(`
         <span class="n">prop_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nkx</span><span class="o">*</span><span class="n">nky</span><span class="o">*</span><span class="n">nkz</span><span class="p">,)</span> <span class="o">+</span> <span class="n">mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
         <span class="n">array</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">prop_shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">array</span></div>
+
     
-<div class="viewcode-block" id="ElectronicBandStructure.calculate_nd_scalar_derivatives"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html#pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ElectronicBandStructure.calculate_nd_scalar_derivatives">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives.html#pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_derivatives">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calculate_nd_scalar_derivatives</span><span class="p">(</span><span class="n">scalar_array</span><span class="p">,</span> <span class="n">reciprocal_lattice</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms the derivatives to cartesian coordinates</span>
 <span class="sd">            (n,j,k,...)-&gt;(n,j,k,...,3)</span>
@@ -1259,7 +1260,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">scalar_gradients</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.calculate_nd_scalar_integral"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html#pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.calculate_nd_scalar_integral">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral.html#pyprocar.core.ElectronicBandStructure.calculate_nd_scalar_integral">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calculate_nd_scalar_integral</span><span class="p">(</span><span class="n">scalar_mesh</span><span class="p">,</span><span class="n">reciprocal_lattice</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the scalar integral&quot;&quot;&quot;</span>
         <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="o">=</span><span class="n">scalar_mesh</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
@@ -1274,7 +1278,10 @@ document.write(`
         
         <span class="k">return</span> <span class="n">integral</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.calculate_harmonic_average_effective_mass"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html#pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.calculate_harmonic_average_effective_mass">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass.html#pyprocar.core.ElectronicBandStructure.calculate_harmonic_average_effective_mass">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calculate_harmonic_average_effective_mass</span><span class="p">(</span><span class="n">hessian</span><span class="p">):</span>
         <span class="c1"># letters=[&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;,&#39;e&#39;,&#39;f&#39;,&#39;g&#39;,&#39;h&#39;]</span>
         <span class="c1"># scalar_diffs=calculate_scalar_differences(self.bands_gradient_mesh)</span>
@@ -1292,8 +1299,11 @@ document.write(`
         <span class="n">e_mass</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">trace_tensor</span><span class="o">**-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">FREE_ELECTRON_MASS</span>
         
         <span class="k">return</span> <span class="n">e_mass</span></div>
+
     
-<div class="viewcode-block" id="ElectronicBandStructure.interpolate_mesh_grid"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html#pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ElectronicBandStructure.interpolate_mesh_grid">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid.html#pyprocar.core.ElectronicBandStructure.interpolate_mesh_grid">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">interpolate_mesh_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_grid</span><span class="p">,</span><span class="n">interpolation_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This function will interpolate an Nd, 3d mesh grid</span>
 <span class="sd">        [...,nx,ny,nz]</span>
@@ -1318,12 +1328,18 @@ document.write(`
 
             <span class="n">new_mesh</span><span class="p">[</span><span class="n">mesh_idx</span><span class="p">]</span><span class="o">=</span><span class="n">new_grid</span>
         <span class="k">return</span> <span class="n">new_mesh</span></div>
+
     
-<div class="viewcode-block" id="ElectronicBandStructure.update_weights"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<div class="viewcode-block" id="ElectronicBandStructure.update_weights">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.update_weights.html#pyprocar.core.ElectronicBandStructure.update_weights">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
         <span class="k">return</span></div>
+
     
-<div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html#pyprocar.core.ElectronicBandStructure.ebs_ipr">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_ipr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr.html#pyprocar.core.ElectronicBandStructure.ebs_ipr">[docs]</a>
+    <span class="k">def</span> <span class="nf">ebs_ipr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 
 <span class="sd">        Returns</span>
@@ -1347,7 +1363,10 @@ document.write(`
         <span class="n">IPR</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">den</span>
         <span class="k">return</span> <span class="n">IPR</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr_atom"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html#pyprocar.core.ElectronicBandStructure.ebs_ipr_atom">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_ipr_atom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.ebs_ipr_atom">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_ipr_atom.html#pyprocar.core.ElectronicBandStructure.ebs_ipr_atom">[docs]</a>
+    <span class="k">def</span> <span class="nf">ebs_ipr_atom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        It returns the atom-resolved , pIPR:</span>
 
@@ -1382,8 +1401,11 @@ document.write(`
         <span class="n">pIPR</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">den</span><span class="p">[:,:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
         <span class="c1"># print(&#39;pIPR&#39;, pIPR.shape)</span>
         <span class="k">return</span> <span class="n">pIPR</span></div>
+
         
-<div class="viewcode-block" id="ElectronicBandStructure.ebs_sum"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum">[docs]</a>    <span class="k">def</span> <span class="nf">ebs_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<div class="viewcode-block" id="ElectronicBandStructure.ebs_sum">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ebs_sum.html#pyprocar.core.ElectronicBandStructure.ebs_sum">[docs]</a>
+    <span class="k">def</span> <span class="nf">ebs_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">atoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                 <span class="n">principal_q_numbers</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
                 <span class="n">orbitals</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
@@ -1431,7 +1453,10 @@ document.write(`
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.unfold"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold">[docs]</a>    <span class="k">def</span> <span class="nf">unfold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.unfold">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.unfold.html#pyprocar.core.ElectronicBandStructure.unfold">[docs]</a>
+    <span class="k">def</span> <span class="nf">unfold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.</span>
 <span class="sd">        The current weights are then updated</span>
 
@@ -1453,6 +1478,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">update_weights</span><span class="p">(</span><span class="n">uf</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="kc">None</span></div>
+
     
     <span class="k">def</span> <span class="nf">_sort_by_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sorts the bands and projected arrays by kpoints&quot;&quot;&quot;</span>
@@ -1464,7 +1490,9 @@ document.write(`
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">original_value</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">,</span><span class="o">...</span><span class="p">])</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ElectronicBandStructure.ibz2fbz"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz">[docs]</a>    <span class="k">def</span> <span class="nf">ibz2fbz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotations</span><span class="p">,</span><span class="n">decimals</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<div class="viewcode-block" id="ElectronicBandStructure.ibz2fbz">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ibz2fbz.html#pyprocar.core.ElectronicBandStructure.ibz2fbz">[docs]</a>
+    <span class="k">def</span> <span class="nf">ibz2fbz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotations</span><span class="p">,</span><span class="n">decimals</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applys symmetry operations to the kpoints, bands, and projections</span>
 
 <span class="sd">        Parameters</span>
@@ -1538,13 +1566,19 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_kpoints</span><span class="p">()</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.ravel_array"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ravel_array.html#pyprocar.core.ElectronicBandStructure.ravel_array">[docs]</a>    <span class="k">def</span> <span class="nf">ravel_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mesh_grid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.ravel_array">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.ravel_array.html#pyprocar.core.ElectronicBandStructure.ravel_array">[docs]</a>
+    <span class="k">def</span> <span class="nf">ravel_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mesh_grid</span><span class="p">):</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">mesh_grid</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">mesh_grid</span><span class="o">=</span><span class="n">mesh_grid</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,))</span>
         <span class="n">mesh_grid</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">mesh_grid</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">mesh_grid</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.fix_collinear_spin"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html#pyprocar.core.ElectronicBandStructure.fix_collinear_spin">[docs]</a>    <span class="k">def</span> <span class="nf">fix_collinear_spin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.fix_collinear_spin">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.fix_collinear_spin.html#pyprocar.core.ElectronicBandStructure.fix_collinear_spin">[docs]</a>
+    <span class="k">def</span> <span class="nf">fix_collinear_spin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts data from two spin channels to a single channel, adjusting the spin down values to negatives. This is typically used for plotting the Density of States (DOS).</span>
 
@@ -1579,8 +1613,11 @@ document.write(`
 
         
         <span class="k">return</span> <span class="kc">True</span></div>
+
     
-<div class="viewcode-block" id="ElectronicBandStructure.reduce_kpoints_to_plane"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html#pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_kpoints_to_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k_z_plane</span><span class="p">,</span><span class="n">k_z_plane_tol</span><span class="p">):</span>
+<div class="viewcode-block" id="ElectronicBandStructure.reduce_kpoints_to_plane">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane.html#pyprocar.core.ElectronicBandStructure.reduce_kpoints_to_plane">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce_kpoints_to_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k_z_plane</span><span class="p">,</span><span class="n">k_z_plane_tol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reduces the kpoints to a plane</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1594,7 +1631,10 @@ document.write(`
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">original_value</span><span class="p">[</span><span class="n">i_kpoints_near_z_0</span><span class="p">,</span><span class="o">...</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.expand_kpoints_to_supercell"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html#pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell">[docs]</a>    <span class="k">def</span> <span class="nf">expand_kpoints_to_supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.expand_kpoints_to_supercell">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell.html#pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell">[docs]</a>
+    <span class="k">def</span> <span class="nf">expand_kpoints_to_supercell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">supercell_directions</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span>
         <span class="n">initial_kpoints</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="p">)</span>
         <span class="n">initial_property_values</span><span class="o">=</span><span class="p">{}</span>
@@ -1622,7 +1662,10 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_kpoints</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.expand_kpoints_to_supercell_by_axes"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html#pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes">[docs]</a>    <span class="k">def</span> <span class="nf">expand_kpoints_to_supercell_by_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes_to_expand</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.expand_kpoints_to_supercell_by_axes">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes.html#pyprocar.core.ElectronicBandStructure.expand_kpoints_to_supercell_by_axes">[docs]</a>
+    <span class="k">def</span> <span class="nf">expand_kpoints_to_supercell_by_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes_to_expand</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]):</span>
         <span class="c1"># Validate input</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">axes_to_expand</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">({</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">}):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;axes_to_expand must be a subset of [0, 1, 2]&quot;</span><span class="p">)</span>
@@ -1659,7 +1702,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">final_kpoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_kpoints</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.reduce_bands_near_fermi"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html#pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_bands_near_fermi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.7</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.reduce_bands_near_fermi">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi.html#pyprocar.core.ElectronicBandStructure.reduce_bands_near_fermi">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce_bands_near_fermi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.7</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reduces the bands to those near the fermi energy</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1681,7 +1727,10 @@ document.write(`
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="ElectronicBandStructure.plot_kpoints"><a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">plot_kpoints</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ElectronicBandStructure.plot_kpoints">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.plot_kpoints.html#pyprocar.core.ElectronicBandStructure.plot_kpoints">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_kpoints</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">reduced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">show_brillouin_zone</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1763,15 +1812,206 @@ document.write(`
 
         <span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;Enectronic Band Structure     </span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;------------------------     </span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of kpoints  = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nkpoints</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of bands    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbands</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of atoms    = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Total number of orbitals = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norbitals</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
-    
+
+<div class="viewcode-block" id="ElectronicBandStructure.general_rotation">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.general_rotation.html#pyprocar.core.ElectronicBandStructure.general_rotation">[docs]</a>
+    <span class="k">def</span> <span class="nf">general_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">rotAxis</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a rotation defined by an angle and an axis.</span>
+<span class="sd">    </span>
+<span class="sd">        Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin</span>
+<span class="sd">                        vectors (if not the case, they will be empty</span>
+<span class="sd">                        arrays).</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        angle: the rotation angle, must be in degrees!</span>
+
+<span class="sd">        rotAxis : a fixed Axis when applying the symmetry, usually it is</span>
+<span class="sd">        from Gamma to another point). It doesn&#39;t need to be normalized. </span>
+<span class="sd">        The RotAxis can be:</span>
+<span class="sd">        [x,y,z] : a cartesian vector in k-space.</span>
+<span class="sd">        &#39;x&#39;: [1,0,0], a rotation in the yz plane. </span>
+<span class="sd">        &#39;y&#39;: [0,1,0], a rotation in the zx plane.</span>
+<span class="sd">        &#39;z&#39;: [0,0,1], a rotation in the xy plane</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">sx</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">sy</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sz</span> <span class="o">=</span> <span class="n">sz</span>
+
+        <span class="k">if</span> <span class="n">rotAxis</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span> <span class="ow">or</span> <span class="n">rotAxis</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+            <span class="n">rotAxis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rotAxis</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span> <span class="ow">or</span> <span class="n">rotAxis</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+            <span class="n">rotAxis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rotAxis</span> <span class="o">==</span> <span class="s2">&quot;z&quot;</span> <span class="ow">or</span> <span class="n">rotAxis</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span>
+            <span class="n">rotAxis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;rotAxis : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">))</span>
+        <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">rotAxis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;rotAxis Normalized : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">))</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Angle : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">angle</span><span class="p">))</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+        <span class="c1"># defining a quaternion for rotatoin</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">rotAxis</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">qRot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">rotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">rotAxis</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">qRotI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="o">-</span><span class="n">rotAxis</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">rotAxis</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">rotAxis</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Rot. quaternion : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qRot</span><span class="p">))</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Rot. quaternion conjugate : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qRotI</span><span class="p">))</span>
+
+        <span class="c1"># converting self.kpoints into quaternions</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">kpoints</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">qvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">w</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Kpoints-&gt; quaternions (transposed):</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qvectors</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">qvectors</span> <span class="o">=</span> <span class="n">q_multi</span><span class="p">(</span><span class="n">qRot</span><span class="p">,</span> <span class="n">qvectors</span><span class="p">)</span>
+        <span class="n">qvectors</span> <span class="o">=</span> <span class="n">q_multi</span><span class="p">(</span><span class="n">qvectors</span><span class="p">,</span> <span class="n">qRotI</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">qvectors</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Rotated kpoints :</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qvectors</span><span class="p">))</span>
+
+        <span class="c1"># rotating the spin vector (if exist)</span>
+        <span class="n">sxShape</span><span class="p">,</span> <span class="n">syShape</span><span class="p">,</span> <span class="n">szShape</span> <span class="o">=</span> <span class="n">sx</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">sy</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">sz</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Spin vector Shapes : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">((</span><span class="n">sxShape</span><span class="p">,</span> <span class="n">syShape</span><span class="p">,</span> <span class="n">szShape</span><span class="p">)))</span>
+        <span class="c1"># The first entry has to be an array of 0s, w could do the work,</span>
+        <span class="c1"># but if len(self.sx)==0 qvectors will have a non-defined length</span>
+        <span class="n">qvectors</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">0</span> <span class="o">*</span> <span class="n">sx</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+            <span class="n">sx</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+            <span class="n">sy</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+            <span class="n">sz</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Spin vector quaternions: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qvectors</span><span class="p">))</span>
+        <span class="n">qvectors</span> <span class="o">=</span> <span class="n">q_multi</span><span class="p">(</span><span class="n">qRot</span><span class="p">,</span> <span class="n">qvectors</span><span class="p">)</span>
+        <span class="n">qvectors</span> <span class="o">=</span> <span class="n">q_multi</span><span class="p">(</span><span class="n">qvectors</span><span class="p">,</span> <span class="n">qRotI</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Spin quaternions after rotation:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qvectors</span><span class="p">))</span>
+        <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">qvectors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">qvectors</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">qvectors</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">sx</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">sy</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">sz</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">sxShape</span><span class="p">,</span> <span class="n">syShape</span><span class="p">,</span> <span class="n">szShape</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;GeneralRotation: ...Done&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElectronicBandStructure.rot_symmetry_z">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.rot_symmetry_z.html#pyprocar.core.ElectronicBandStructure.rot_symmetry_z">[docs]</a>
+    <span class="k">def</span> <span class="nf">rot_symmetry_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">projected</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the given rotational crystal symmetry to the current</span>
+<span class="sd">        system. ie: to unfold the irreductible BZ to the full BZ.</span>
+
+<span class="sd">        Only rotations along z-axis are performed, you can use</span>
+<span class="sd">        self.GeneralRotation first. </span>
+
+<span class="sd">        The user is responsible of provide a useful input. The method</span>
+<span class="sd">        doesn&#39;t check the physics.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">character</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">character</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">character</span> <span class="o">=</span> <span class="n">character</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">sx</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">sy</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sz</span> <span class="o">=</span> <span class="n">sz</span>
+
+        
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;RotSymmetryZ:...&quot;</span><span class="p">)</span>
+        <span class="n">rotations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">general_rotation</span><span class="p">(</span><span class="mi">360</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">order</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">rotations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">rotations</span><span class="p">))</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;self.kpoints.shape (before concat.): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">rotations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.kpoints.shape (after concat.): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">rotations</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">rotations</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">rotations</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># the bands and proj. character also need to be enlarged</span>
+        <span class="n">bandsChar</span> <span class="o">=</span> <span class="p">[(</span><span class="n">bands</span><span class="p">,</span> <span class="n">projected</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">order</span><span class="p">)]</span>
+        <span class="n">bandsChar</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bandsChar</span><span class="p">))</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">bandsChar</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">bandsChar</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;RotSymmZ:...Done&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">projected</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElectronicBandStructure.mirror_x">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.mirror_x.html#pyprocar.core.ElectronicBandStructure.mirror_x">[docs]</a>
+    <span class="k">def</span> <span class="nf">mirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">projected</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applies the given rotational crystal symmetry to the current</span>
+<span class="sd">        system. ie: to unfold the irreductible BZ to the full BZ.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">character</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">character</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">character</span> <span class="o">=</span> <span class="n">character</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">sx</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">sy</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">sz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sz</span> <span class="o">=</span> <span class="n">sz</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Mirror:...&quot;</span><span class="p">)</span>
+        <span class="n">newK</span> <span class="o">=</span> <span class="n">kpoints</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">newK</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.kpoints.shape (after concat.): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kpoints</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">newSx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">sx</span>
+        <span class="n">newSy</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">sy</span>
+        <span class="n">newSz</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">sz</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">sx</span><span class="p">,</span> <span class="n">newSx</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">sy</span><span class="p">,</span> <span class="n">newSy</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">sz</span><span class="p">,</span> <span class="n">newSz</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.sx&quot;</span><span class="p">,</span> <span class="n">sx</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.sy&quot;</span><span class="p">,</span> <span class="n">sy</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.sz&quot;</span><span class="p">,</span> <span class="n">sz</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="c1"># the bands and proj. character also need to be enlarged</span>
+        <span class="n">bands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">bands</span><span class="p">,</span> <span class="n">bands</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">projected</span><span class="p">,</span> <span class="n">projected</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.projected&quot;</span><span class="p">,</span> <span class="n">projected</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.bands&quot;</span><span class="p">,</span> <span class="n">bands</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Mirror:...Done&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">projected</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ElectronicBandStructure.translate">
+<a class="viewcode-back" href="../../../api/core/_autosummary/pyprocar.core.ElectronicBandStructure.translate.html#pyprocar.core.ElectronicBandStructure.translate">[docs]</a>
+    <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newOrigin</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Centers the Kpoints at newOrigin, newOrigin is either and index (of</span>
+<span class="sd">        some Kpoint) or the cartesian coordinates of one point in the</span>
+<span class="sd">        reciprocal space.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Translate():  ...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">newOrigin</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">newOrigin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">newOrigin</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">newOrigin</span> <span class="o">=</span> <span class="n">kpoints</span><span class="p">[</span><span class="n">newOrigin</span><span class="p">]</span>
+        <span class="c1"># Make sure newOrigin is a numpy array</span>
+        <span class="n">newOrigin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">newOrigin</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;newOrigin: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">newOrigin</span><span class="p">))</span>
+        <span class="n">kpoints</span> <span class="o">=</span> <span class="n">kpoints</span> <span class="o">-</span> <span class="n">newOrigin</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;new Kpoints:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kpoints</span><span class="p">))</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Translate(): ...Done&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kpoints</span></div>
+</div>
+
 
 <span class="k">def</span> <span class="nf">calculate_central_differences_on_meshgrid_axis</span><span class="p">(</span><span class="n">scalar_mesh</span><span class="p">,</span><span class="n">axis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the scalar differences over the </span>
@@ -1876,6 +2116,20 @@ document.write(`
 
     <span class="n">scalar_diffs_2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,uvwj-&gt;uvwi&#39;</span><span class="p">,</span> <span class="n">transform_matrix</span><span class="p">,</span> <span class="n">scalar_diffs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">scalar_diffs_2</span>
+
+
+<span class="k">def</span> <span class="nf">q_multi</span><span class="p">(</span><span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Multiplication of quaternions, it doesn&#39;t fit in any other place</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">w1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">q1</span>
+        <span class="n">w2</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span> <span class="o">=</span> <span class="n">q2</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">-</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">z2</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z2</span> <span class="o">-</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">y2</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">z2</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">z2</span> <span class="o">+</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">x2</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+
 
     <span class="c1"># def reorder(self, plot=True, cutoff=0.2):</span>
     <span class="c1">#     nspins = self.nspins</span>
@@ -2026,7 +2280,7 @@ document.write(`
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -2047,8 +2301,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2068,7 +2322,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -2081,7 +2335,7 @@ document.write(`
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
 </p></div>
       
     </div>

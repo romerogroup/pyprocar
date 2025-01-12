@@ -1,0 +1,6 @@
+general\_rotation
+=================
+
+.. currentmodule:: pyprocar.core
+
+.. automethod:: ElectronicBandStructure.general_rotation

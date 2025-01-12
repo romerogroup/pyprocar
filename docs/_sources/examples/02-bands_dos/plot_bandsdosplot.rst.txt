@@ -114,7 +114,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.2.0 created on Jun 10th, 2021
+    Version 6.3.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -143,14 +143,18 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
                 You can change these configurations by passing the keyword argument to the function
                 To print a list of plot options set print_plot_opts=True
 
-                Here is a list modes : plain , parametric , parametric_line , stack , stack_orbitals , stack_species
+                Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
@@ -159,7 +163,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.331 seconds)
+   **Total running time of the script:** (0 minutes 0.342 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot.py:
@@ -175,6 +179,10 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_bandsdosplot.py <plot_bandsdosplot.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_bandsdosplot.zip <plot_bandsdosplot.zip>`
 
 
 .. only:: html

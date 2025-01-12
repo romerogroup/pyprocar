@@ -106,6 +106,8 @@ Plotting primitive bands
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -156,7 +158,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.2.0 created on Jun 10th, 2021
+    Version 6.3.1 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -185,6 +187,10 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 --------------------------------------------------------
             
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
+    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -193,7 +199,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 21.062 seconds)
+   **Total running time of the script:** (0 minutes 19.262 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:
@@ -209,6 +215,10 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_unfolding.py <plot_unfolding.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_unfolding.zip <plot_unfolding.zip>`
 
 
 .. only:: html
