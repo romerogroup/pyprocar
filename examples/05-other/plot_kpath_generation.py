@@ -36,12 +36,14 @@ The :math:`k`-path generation utility within PyProcar is based on the Python lib
 
 
 """
+
 # sphinx_gallery_thumbnail_number = 1
 
 ###############################################################################
 # Plotting K Path
 # +++++++++++++++++++++++++++++++++++++++
 import pyvista
+
 # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
 pyvista.OFF_SCREEN = True
 
@@ -49,37 +51,56 @@ pyvista.OFF_SCREEN = True
 # importing pyprocar and specifying local data_dir
 
 import os
+
 import numpy as np
+
 import pyprocar
 
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR,
+    "examples",
+    "Fe",
+    "vasp",
+    "spin-polarized-colinear",
+    "bands",
+)
 
+poscar = os.path.join(data_dir, "POSCAR")
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
-poscar = f"{data_dir}{os.sep}POSCAR"
-
-k_path, k_labels = pyprocar.kpath(poscar,'KPOINTS',40,True,'hpkot',1e-07,1e-05,-1.0,np.eye(3))
+k_path, k_labels = pyprocar.kpath(
+    poscar, "KPOINTS", 40, True, "hpkot", 1e-07, 1e-05, -1.0, np.eye(3)
+)
 
 
 # Getting unique points for plotting
 unique_labels = []
-unique_kpath= []
-for i,k_label in enumerate(k_labels):
-    if k_label not in  unique_labels:
+unique_kpath = []
+for i, k_label in enumerate(k_labels):
+    if k_label not in unique_labels:
         unique_labels.append(k_label)
         unique_kpath.append(k_path[i])
 
 
-plotter=pyvista.Plotter()
+plotter = pyvista.Plotter()
 
 # plotting connecting lines
-for ik,points in enumerate(k_path):
+for ik, points in enumerate(k_path):
     if ik == len(k_path) - 1:
-        plotter.add_lines(np.array([k_path[ik-1],k_path[ik]]), color='red', width = 10)
+        plotter.add_lines(np.array([k_path[ik - 1], k_path[ik]]), color="red", width=10)
     else:
-        plotter.add_lines(np.array([k_path[ik],k_path[ik+1]]), color='red', width = 10 )
+        plotter.add_lines(np.array([k_path[ik], k_path[ik + 1]]), color="red", width=10)
 
 # plotting points and labels
-plotter.add_point_labels(unique_kpath, unique_labels, point_color = 'blue', text_color='blue', render_points_as_spheres=True, point_size=20, font_size=36, always_visible=True)
+plotter.add_point_labels(
+    unique_kpath,
+    unique_labels,
+    point_color="blue",
+    text_color="blue",
+    render_points_as_spheres=True,
+    point_size=20,
+    font_size=36,
+    always_visible=True,
+)
 plotter.show_axes()
 plotter.show_grid()
 plotter.view_yz()

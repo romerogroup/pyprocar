@@ -25,13 +25,16 @@ Before diving into plotting, we need to download the example files. Use the foll
 """
 
 import os
+
 import pyprocar
 
 # Define the directory containing the example data
-code='vasp'
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}{code}{os.sep}spin-polarized-colinear{os.sep}dos"
+code = "vasp"
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", code, "spin-polarized-colinear", "dos"
+)
 
-spins=[0,1]
+spins = [0, 1]
 
 ###############################################################################
 
@@ -43,11 +46,11 @@ spins=[0,1]
 #
 
 # Path to the configuration files in the package
-config_path = os.path.join(pyprocar.__path__[0], 'cfg')
+config_path = os.path.join(pyprocar.__path__[0], "cfg")
 print(f"Configuration files are located at: {config_path}")
 
 # Print the configurations
-pyprocar.dosplot(code=code, dirname=data_dir,fermi=5.599480, print_plot_opts=True)
+pyprocar.dosplot(code=code, dirname=data_dir, fermi=5.599480, print_plot_opts=True)
 
 ###############################################################################
 
@@ -63,13 +66,13 @@ pyprocar.dosplot(
     dirname=data_dir,
     fermi=5.599480,
     atoms=[0],
-    orbitals=[4,5,6,7,8],
-    mode='parametric',
-    cmap='viridis',  # Colormap
+    orbitals=[4, 5, 6, 7, 8],
+    mode="parametric",
+    cmap="viridis",  # Colormap
     clim=[0, 1],  # Color limits
-    fermi_color='red',  # Fermi line color
-    fermi_linestyle='--',  # Fermi line linestyle
-    fermi_linewidth=2.0  # Fermi line linewidth
+    fermi_color="red",  # Fermi line color
+    fermi_linestyle="--",  # Fermi line linestyle
+    fermi_linewidth=2.0,  # Fermi line linewidth
 )
 
 ###############################################################################
@@ -85,10 +88,10 @@ pyprocar.dosplot(
     dirname=data_dir,
     fermi=5.599480,
     atoms=[0],
-    orbitals=[4,5,6,7,8],
-    mode='parametric_line',
-    clim=[0,1],
+    orbitals=[4, 5, 6, 7, 8],
+    mode="parametric_line",
+    clim=[0, 1],
     figure_size=(10, 6),  # Figure size (width, height)
     dpi=300,  # Dots per inch
-    grid=True, # Boolean for grid
+    grid=True,  # Boolean for grid
 )

@@ -56,13 +56,12 @@ import os
 import pyprocar
 
 # Define the directory containing the example data
-bi2se3_data_dir = (
-    f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Bi2Se3-spinorbit-surface"
+bi2se3_data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Bi2Se3-spinorbit-surface"
 )
 
 
-C_data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}NV-center"
-
+C_data_dir = os.path.join(pyprocar.utils.DATA_DIR, "examples", "NV-center")
 
 ###############################################################################
 # Topologically-protected surface states in :math:`Bi_2Se_3`

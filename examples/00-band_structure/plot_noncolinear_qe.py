@@ -18,15 +18,19 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-colinear',
                                 calc_type='bands')
 """
+
 # sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
 # importing pyprocar and specifying local data_dir
 
 import os
+
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}bands"
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", "qe", "non-colinear", "bands"
+)
 
 ###########################
 
@@ -35,31 +39,26 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 # +++++++++++++++++++++++++++++++++++++++
 
 
-pyprocar.bandsplot(
-                code='qe', 
-                mode='plain',
-                fermi=18.0536,
-                dirname=data_dir)
+pyprocar.bandsplot(code="qe", mode="plain", fermi=18.0536, dirname=data_dir)
 
 ###############################################################################
 # Parametric mode
 # +++++++++++++++++++++++++++++++++++++++
-# Quantum Espresso expresses the projections in the coupled basis, 
+# Quantum Espresso expresses the projections in the coupled basis,
 # therefore orbitals takes different meanings.
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 #
 
-atoms=[0]
-spins=[0]
-orbitals=[8,9,10,11,12,13,14,15,16,17]
+atoms = [0]
+spins = [0]
+orbitals = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
 pyprocar.bandsplot(
-                code='qe', 
-                mode='parametric',
-                fermi=18.0536,
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-                dirname=data_dir)
-
-
+    code="qe",
+    mode="parametric",
+    fermi=18.0536,
+    atoms=atoms,
+    orbitals=orbitals,
+    spins=spins,
+    dirname=data_dir,
+)

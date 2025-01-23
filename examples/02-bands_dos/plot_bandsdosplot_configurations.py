@@ -27,10 +27,15 @@ Before diving into plotting, we need to download the example files. Use the foll
 """
 
 import os
+
 import pyprocar
 
-bands_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
-dos_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}dos"
+bands_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "bands"
+)
+dos_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "dos"
+)
 
 ###############################################################################
 
@@ -38,27 +43,28 @@ dos_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}v
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # This section demonstrates how to plot both band structures and DOS side by side using default settings.
-# The keywords that work for `bandsplot` and `dosplot` will also work in `bandsdosplot`. 
+# The keywords that work for `bandsplot` and `dosplot` will also work in `bandsdosplot`.
 # These keyword arguments can be set in `bands_settings` and `dos_settings` as demonstrated below.
 #
 
 
 bands_settings = {
-                  'mode':'plain',
-                  'fermi':5.599480, # This will overide the default fermi value found in bands directory
-                  'dirname': bands_dir
-                  }
+    "mode": "plain",
+    "fermi": 5.599480,  # This will overide the default fermi value found in bands directory
+    "dirname": bands_dir,
+}
 
 dos_settings = {
-               'mode':'plain',
-               'fermi':5.599480,   # This will overide the default fermi value found in dos directory
-               'dirname': dos_dir
-                }
+    "mode": "plain",
+    "fermi": 5.599480,  # This will overide the default fermi value found in dos directory
+    "dirname": dos_dir,
+}
 
-pyprocar.bandsdosplot(code='vasp',
-                bands_settings=bands_settings,
-                dos_settings=dos_settings,
-                )
+pyprocar.bandsdosplot(
+    code="vasp",
+    bands_settings=bands_settings,
+    dos_settings=dos_settings,
+)
 
 ###############################################################################
 
@@ -70,34 +76,35 @@ pyprocar.bandsdosplot(code='vasp',
 #
 
 bands_settings = {
-    'mode': 'scatter',
-    'dirname': bands_dir,
-    'fermi':5.599480, # This will overide the default fermi value found in bands directory
-    'atoms':[0],
-    'orbitals':[4,5,6,7,8],
-    'cmap': 'viridis',
-    'clim': [0, 1],
-    'fermi_color': 'red',
-    'fermi_linestyle': '--',
-    'fermi_linewidth': 2.0
+    "mode": "scatter",
+    "dirname": bands_dir,
+    "fermi": 5.599480,  # This will overide the default fermi value found in bands directory
+    "atoms": [0],
+    "orbitals": [4, 5, 6, 7, 8],
+    "cmap": "viridis",
+    "clim": [0, 1],
+    "fermi_color": "red",
+    "fermi_linestyle": "--",
+    "fermi_linewidth": 2.0,
 }
 
 dos_settings = {
-    'mode': 'parametric',
-    'dirname': dos_dir,
-    'fermi':5.599480,   # This will overide the default fermi value found in dos directory
-    'atoms':[0],
-    'orbitals':[4,5,6,7,8],
-    'cmap': 'viridis',
-    'clim': [0, 1],
-    'marker': ['v', 'o'],
-    'markersize': [10, 5]
+    "mode": "parametric",
+    "dirname": dos_dir,
+    "fermi": 5.599480,  # This will overide the default fermi value found in dos directory
+    "atoms": [0],
+    "orbitals": [4, 5, 6, 7, 8],
+    "cmap": "viridis",
+    "clim": [0, 1],
+    "marker": ["v", "o"],
+    "markersize": [10, 5],
 }
 
-pyprocar.bandsdosplot(code='vasp',
-                bands_settings=bands_settings,
-                dos_settings=dos_settings,
-                )
+pyprocar.bandsdosplot(
+    code="vasp",
+    bands_settings=bands_settings,
+    dos_settings=dos_settings,
+)
 
 ###############################################################################
 
@@ -107,20 +114,14 @@ pyprocar.bandsdosplot(code='vasp',
 # This section demonstrates how to adjust the overall figure size and dots per inch (DPI) for the combined plot.
 #
 
-bands_settings = {
-    'mode': 'scatter',
-    'dirname': bands_dir
-}
+bands_settings = {"mode": "scatter", "dirname": bands_dir}
 
-dos_settings = {
-    'mode': 'parametric',
-    'dirname': dos_dir
-}
+dos_settings = {"mode": "parametric", "dirname": dos_dir}
 
-pyprocar.bandsdosplot(code='vasp',
-                bands_settings=bands_settings,
-                dos_settings=dos_settings,
-                figure_size=(12, 7),
-                dpi=300
-                )
-
+pyprocar.bandsdosplot(
+    code="vasp",
+    bands_settings=bands_settings,
+    dos_settings=dos_settings,
+    figure_size=(12, 7),
+    dpi=300,
+)
