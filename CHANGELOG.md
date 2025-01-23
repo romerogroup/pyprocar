@@ -1,6 +1,26 @@
 
 ___
 
+# 6.3.2 (01-12-2025)
+
+##### Bugs
+- Fixed bug with `EBSPlot` due to handling of `labels` keyword, now defaults to a list with an empty string to avoid errors.
+
+##### New Features
+- Changed the source of `__version__` to `.version` for automatic updates on releases to GitHub and PyPI.
+
+##### Documentation
+- Documentation update.
+
+##### Maintenance
+- Updated publish workflow.
+- Updated `_version.py` and `CHANGELOG.md` due to new release.
+- Merge branch 'main' of github.com:romerogroup/pyprocar into main.
+
+___
+
+___
+
 # 6.3.1 (10-11-2024)
 
 ##### Bugs
