@@ -52,9 +52,10 @@ The :math:`k`-path generation utility within PyProcar is based on the Python lib
 
         Y. Hinuma, G. Pizzi, Y. Kumagai, F. Oba, I. Tanaka, Band structure diagram paths based on crystallography, Computational Materials Science 128 (2017) 140–184.doi:10.1016/j.commatsci.2016.10.015.
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-41
+.. GENERATED FROM PYTHON SOURCE LINES 39-42
 
 .. code-block:: Python
+
 
     # sphinx_gallery_thumbnail_number = 1
 
@@ -65,16 +66,17 @@ The :math:`k`-path generation utility within PyProcar is based on the Python lib
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-44
+.. GENERATED FROM PYTHON SOURCE LINES 43-45
 
 Plotting K Path
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-48
+.. GENERATED FROM PYTHON SOURCE LINES 45-50
 
 .. code-block:: Python
 
     import pyvista
+
     # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
     pyvista.OFF_SCREEN = True
 
@@ -85,47 +87,66 @@ Plotting K Path
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-50
+.. GENERATED FROM PYTHON SOURCE LINES 51-52
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-87
+.. GENERATED FROM PYTHON SOURCE LINES 52-108
 
 .. code-block:: Python
 
 
     import os
+
     import numpy as np
+
     import pyprocar
 
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "Fe",
+        "vasp",
+        "spin-polarized-colinear",
+        "bands",
+    )
 
+    poscar = os.path.join(data_dir, "POSCAR")
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
-    poscar = f"{data_dir}{os.sep}POSCAR"
-
-    k_path, k_labels = pyprocar.kpath(poscar,'KPOINTS',40,True,'hpkot',1e-07,1e-05,-1.0,np.eye(3))
+    k_path, k_labels = pyprocar.kpath(
+        poscar, "KPOINTS", 40, True, "hpkot", 1e-07, 1e-05, -1.0, np.eye(3)
+    )
 
 
     # Getting unique points for plotting
     unique_labels = []
-    unique_kpath= []
-    for i,k_label in enumerate(k_labels):
-        if k_label not in  unique_labels:
+    unique_kpath = []
+    for i, k_label in enumerate(k_labels):
+        if k_label not in unique_labels:
             unique_labels.append(k_label)
             unique_kpath.append(k_path[i])
 
 
-    plotter=pyvista.Plotter()
+    plotter = pyvista.Plotter()
 
     # plotting connecting lines
-    for ik,points in enumerate(k_path):
+    for ik, points in enumerate(k_path):
         if ik == len(k_path) - 1:
-            plotter.add_lines(np.array([k_path[ik-1],k_path[ik]]), color='red', width = 10)
+            plotter.add_lines(np.array([k_path[ik - 1], k_path[ik]]), color="red", width=10)
         else:
-            plotter.add_lines(np.array([k_path[ik],k_path[ik+1]]), color='red', width = 10 )
+            plotter.add_lines(np.array([k_path[ik], k_path[ik + 1]]), color="red", width=10)
 
     # plotting points and labels
-    plotter.add_point_labels(unique_kpath, unique_labels, point_color = 'blue', text_color='blue', render_points_as_spheres=True, point_size=20, font_size=36, always_visible=True)
+    plotter.add_point_labels(
+        unique_kpath,
+        unique_labels,
+        point_color="blue",
+        text_color="blue",
+        render_points_as_spheres=True,
+        point_size=20,
+        font_size=36,
+        always_visible=True,
+    )
     plotter.show_axes()
     plotter.show_grid()
     plotter.view_yz()
@@ -151,7 +172,7 @@ importing pyprocar and specifying local data_dir
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -192,7 +213,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.501 seconds)
+   **Total running time of the script:** (0 minutes 0.449 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_kpath_generation.py:

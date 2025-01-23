@@ -65,12 +65,13 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-45
+.. GENERATED FROM PYTHON SOURCE LINES 40-46
 
 .. code-block:: Python
 
 
     import pyvista
+
     # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
     pyvista.OFF_SCREEN = True
 
@@ -81,29 +82,27 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-47
+.. GENERATED FROM PYTHON SOURCE LINES 47-48
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-64
+.. GENERATED FROM PYTHON SOURCE LINES 48-63
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Au{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
-
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Au", "vasp", "non-spin-polarized", "fermi"
+    )
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
-    # Symmetry only works for specfic space groups currently. 
+    # Symmetry only works for specfic space groups currently.
     # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
-    fermiHandler = pyprocar.FermiHandler(
-                                        code="vasp",
-                                        dirname=data_dir,
-                                        apply_symmetry=True)
-
+    fermiHandler = pyprocar.FermiHandler(code="vasp", dirname=data_dir, apply_symmetry=True)
 
 
 
@@ -114,8 +113,6 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
@@ -124,27 +121,26 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-68
+.. GENERATED FROM PYTHON SOURCE LINES 64-67
 
 Maximal cross sectional area along the (0,0,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-80
+.. GENERATED FROM PYTHON SOURCE LINES 67-78
 
 .. code-block:: Python
 
 
 
-
-
     fermiHandler.plot_fermi_cross_section_box_widget(
-                                bands=[5],
-                                slice_normal=(0,0,1),
-                                slice_origin=(0,0,0),
-                                surface_opacity=0.40,
-                                mode="parametric",
-                                show=True)
+        bands=[5],
+        slice_normal=(0, 0, 1),
+        slice_origin=(0, 0, 0),
+        surface_opacity=0.40,
+        mode="parametric",
+        show=True,
+    )
 
 
 
@@ -175,7 +171,7 @@ Maximal cross sectional area along the (0,0,1)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-86
+.. GENERATED FROM PYTHON SOURCE LINES 79-84
 
 In the above figure we can see the cross section area is :math:`A = 4.1586 Ang^{-2} = 4.1586e^{16} cm^{-2} (cgs)`.
 
@@ -183,25 +179,26 @@ In the above figure we can see the cross section area is :math:`A = 4.1586 Ang^{
 
 :math:`F_{exp} = 4.50e^7 G`
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-92
+.. GENERATED FROM PYTHON SOURCE LINES 86-90
 
 Minimal cross sectional area along the (0,0,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 92-101
+.. GENERATED FROM PYTHON SOURCE LINES 90-100
 
 .. code-block:: Python
 
 
     fermiHandler.plot_fermi_cross_section_box_widget(
-                                    bands=[5],
-                                    slice_normal=(0,0,1),
-                                    slice_origin=(0,0,1.25),
-                                    surface_opacity=0.40,
-                                    mode="parametric",
-                                    show=True,)
+        bands=[5],
+        slice_normal=(0, 0, 1),
+        slice_origin=(0, 0, 1.25),
+        surface_opacity=0.40,
+        mode="parametric",
+        show=True,
+    )
 
 
 
@@ -231,7 +228,7 @@ Minimal cross sectional area along the (0,0,1)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-108
+.. GENERATED FROM PYTHON SOURCE LINES 101-107
 
 In the above figure we can see the cross section area is :math:`A = 0.1596 Ang^{-2} = 0.1596e^{16} cm^{-2} (cgs)`.
 
@@ -240,25 +237,26 @@ In the above figure we can see the cross section area is :math:`A = 0.1596 Ang^{
 :math:`F_{exp} = 1.50e^7 G`
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-114
+.. GENERATED FROM PYTHON SOURCE LINES 109-113
 
 Extremal cross sectional area along the (0,1,1)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-124
+.. GENERATED FROM PYTHON SOURCE LINES 113-124
 
 .. code-block:: Python
 
 
     fermiHandler.plot_fermi_cross_section_box_widget(
-                                    bands=[5],
-                                    slice_normal=(0,1,1),
-                                    slice_origin=(0,0,0),
-                                    surface_opacity=0.40,
-                                    mode="parametric",
-                                    show=True,)
+        bands=[5],
+        slice_normal=(0, 1, 1),
+        slice_origin=(0, 0, 0),
+        surface_opacity=0.40,
+        mode="parametric",
+        show=True,
+    )
 
 
 
@@ -300,7 +298,7 @@ In the above figure we can see the cross section area is :math:`A = 4.3956 Ang^{
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.656 seconds)
+   **Total running time of the script:** (0 minutes 4.146 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_de_hass_van_alphen.py:

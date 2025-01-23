@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:51.927** total execution time for 5 files **from examples\06-PyPoscar**:
+**00:48.237** total execution time for 5 files **from examples\06-PyPoscar**:
 
 .. container::
 
@@ -33,17 +33,17 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_06-PyPoscar_plot_utils_pyposcar.py` (``plot_utils_pyposcar.py``)
-     - 00:23.987
+     - 00:22.359
      - 0.0
    * - :ref:`sphx_glr_examples_06-PyPoscar_plot_finding_defects_pyposcar.py` (``plot_finding_defects_pyposcar.py``)
-     - 00:09.862
-     - 0.0
-   * - :ref:`sphx_glr_examples_06-PyPoscar_plot_clusters_pyposcar.py` (``plot_clusters_pyposcar.py``)
-     - 00:08.764
+     - 00:09.143
      - 0.0
    * - :ref:`sphx_glr_examples_06-PyPoscar_plot_subsitution_pyposcar.py` (``plot_subsitution_pyposcar.py``)
-     - 00:08.688
+     - 00:08.542
+     - 0.0
+   * - :ref:`sphx_glr_examples_06-PyPoscar_plot_clusters_pyposcar.py` (``plot_clusters_pyposcar.py``)
+     - 00:07.662
      - 0.0
    * - :ref:`sphx_glr_examples_06-PyPoscar_plot_rdf_cutoff_pyposcar.py` (``plot_rdf_cutoff_pyposcar.py``)
-     - 00:00.625
+     - 00:00.531
      - 0.0

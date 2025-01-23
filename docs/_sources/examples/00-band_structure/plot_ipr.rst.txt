@@ -70,7 +70,7 @@ Setting up the environment
 --------------------------
 First, we will import the necessary libraries and set up our data directory path.
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-67
+.. GENERATED FROM PYTHON SOURCE LINES 53-66
 
 .. code-block:: Python
 
@@ -80,12 +80,12 @@ First, we will import the necessary libraries and set up our data directory path
     import pyprocar
 
     # Define the directory containing the example data
-    bi2se3_data_dir = (
-        f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Bi2Se3-spinorbit-surface"
+    bi2se3_data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Bi2Se3-spinorbit-surface"
     )
 
 
-    C_data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}NV-center"
+    C_data_dir = os.path.join(pyprocar.utils.DATA_DIR, "examples", "NV-center")
 
 
 
@@ -94,8 +94,7 @@ First, we will import the necessary libraries and set up our data directory path
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 68-76
+.. GENERATED FROM PYTHON SOURCE LINES 67-75
 
 Topologically-protected surface states in :math:`Bi_2Se_3`
 -----------------------------------------------------------
@@ -106,7 +105,7 @@ in contrast a extended state cover the six quintuple layers.
 The ratio between the localization of both types of states is 1 to 3, and the $IPR$ has enough resolution to provide a clear visual identification.
 The PyProcar code is:
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-88
+.. GENERATED FROM PYTHON SOURCE LINES 75-87
 
 .. code-block:: Python
 
@@ -144,14 +143,12 @@ The PyProcar code is:
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-100
+.. GENERATED FROM PYTHON SOURCE LINES 88-99
 
 :math:`NV^-` defect in diamond
 ---------------------------------
@@ -165,7 +162,7 @@ of the spin channel labelled `spin-1`. The calculation of the main emission line
 which can be simulated by fixing the occupations of the mentioned levels, **i.e.** the :math:`\Delta` SCFmethod.[Jin2021]
 The pyprocar code is:
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-110
+.. GENERATED FROM PYTHON SOURCE LINES 99-109
 
 .. code-block:: Python
 
@@ -201,8 +198,6 @@ The pyprocar code is:
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
     C:\Users\lllang\Desktop\Current_Projects\pyprocar\pyprocar\plotter\ebs_plot.py:701: UserWarning: Attempting to set identical low and high xlims makes transformation singular; automatically expanding.
       self.ax.set_xlim(interval)
     Atomic plot: bands.shape  : (2, 540, 2)
@@ -216,7 +211,7 @@ The pyprocar code is:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 20.169 seconds)
+   **Total running time of the script:** (0 minutes 21.526 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_ipr.py:

@@ -36,18 +36,21 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-25
+.. GENERATED FROM PYTHON SOURCE LINES 23-24
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-31
+.. GENERATED FROM PYTHON SOURCE LINES 24-32
 
 .. code-block:: Python
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "bands"
+    )
 
 
 
@@ -56,22 +59,17 @@ importing pyprocar and specifying local data_dir
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 32-34
+.. GENERATED FROM PYTHON SOURCE LINES 33-35
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-41
+.. GENERATED FROM PYTHON SOURCE LINES 35-38
 
 .. code-block:: Python
 
 
-    pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='plain',
-                    fermi=5.599480,
-                    dirname=data_dir)
+    pyprocar.bandsplot(code="vasp", mode="plain", fermi=5.599480, dirname=data_dir)
 
 
 
@@ -95,14 +93,12 @@ Plain mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-49
+.. GENERATED FROM PYTHON SOURCE LINES 39-46
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
@@ -112,22 +108,23 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-62
+.. GENERATED FROM PYTHON SOURCE LINES 46-60
 
 .. code-block:: Python
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0]
+    atoms = [0]
+    orbitals = [4, 5, 6, 7, 8]
+    spins = [0]
 
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='parametric',
-                    fermi=5.599480,
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spins=spins,
-                    dirname=data_dir)
+        code="vasp",
+        mode="parametric",
+        fermi=5.599480,
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        dirname=data_dir,
+    )
 
 
 
@@ -151,14 +148,12 @@ For details on the meaning of the indices of the atomic projection please refer 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-70
+.. GENERATED FROM PYTHON SOURCE LINES 61-68
 
 parametric_linemode
 +++++++++++++++++++++++++++++++++++++++
@@ -168,23 +163,23 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-85
+.. GENERATED FROM PYTHON SOURCE LINES 68-83
 
 .. code-block:: Python
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0]
+    atoms = [0]
+    orbitals = [4, 5, 6, 7, 8]
+    spins = [0]
 
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='parametric',
-                    fermi=5.599480,
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spins=spins,
-                    dirname=data_dir)
-
+        code="vasp",
+        mode="parametric",
+        fermi=5.599480,
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        dirname=data_dir,
+    )
 
 
 
@@ -209,14 +204,12 @@ For details on the meaning of the indices of the atomic projection please refer 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-91
+.. GENERATED FROM PYTHON SOURCE LINES 84-89
 
 Scatter mode
 +++++++++++++++++++++++++++++++++++++++
@@ -224,22 +217,23 @@ Scatter mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-105
+.. GENERATED FROM PYTHON SOURCE LINES 89-104
 
 .. code-block:: Python
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0]
+    atoms = [0]
+    orbitals = [4, 5, 6, 7, 8]
+    spins = [0]
 
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='scatter',
-                    fermi=5.599480,
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spins=spins,
-                    dirname=data_dir)
+        code="vasp",
+        mode="scatter",
+        fermi=5.599480,
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        dirname=data_dir,
+    )
 
 
 
@@ -264,14 +258,12 @@ Scatter mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-111
+.. GENERATED FROM PYTHON SOURCE LINES 105-110
 
 overlay_species mode
 +++++++++++++++++++++++++++++++++++++++
@@ -279,20 +271,21 @@ overlay_species mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-122
+.. GENERATED FROM PYTHON SOURCE LINES 110-122
 
 .. code-block:: Python
 
-    orbitals=[4,5,6,7,8]
-    spins=[0]
+    orbitals = [4, 5, 6, 7, 8]
+    spins = [0]
 
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='overlay_species',
-                    fermi=5.599480,
-                    orbitals=orbitals,
-                    spins=spins,
-                    dirname=data_dir)
+        code="vasp",
+        mode="overlay_species",
+        fermi=5.599480,
+        orbitals=orbitals,
+        spins=spins,
+        dirname=data_dir,
+    )
 
 
 
@@ -316,8 +309,6 @@ overlay_species mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -331,19 +322,20 @@ overlay_orbtials mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-139
+.. GENERATED FROM PYTHON SOURCE LINES 128-140
 
 .. code-block:: Python
 
-    atoms=[0]
-    spins=[0]
+    atoms = [0]
+    spins = [0]
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='overlay_orbitals',
-                    fermi=5.599480,
-                    atoms=atoms,
-                    spins=spins,
-                    dirname=data_dir)
+        code="vasp",
+        mode="overlay_orbitals",
+        fermi=5.599480,
+        atoms=atoms,
+        spins=spins,
+        dirname=data_dir,
+    )
 
 
 
@@ -368,14 +360,12 @@ overlay_orbtials mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 4 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 140-145
+.. GENERATED FROM PYTHON SOURCE LINES 141-146
 
 overlay mode
 +++++++++++++++++++++++++++++++++++++++
@@ -383,18 +373,15 @@ overlay mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 145-154
+.. GENERATED FROM PYTHON SOURCE LINES 146-152
 
 .. code-block:: Python
 
 
-    items={'Fe':[4,5,6,7,8]}
+    items = {"Fe": [4, 5, 6, 7, 8]}
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='overlay',
-                    fermi=5.599480,
-                    items=items,
-                    dirname=data_dir)
+        code="vasp", mode="overlay", fermi=5.599480, items=items, dirname=data_dir
+    )
 
 
 
@@ -418,14 +405,12 @@ overlay mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 155-160
+.. GENERATED FROM PYTHON SOURCE LINES 153-158
 
 overlay mode by orbital names
 =============================
@@ -433,18 +418,16 @@ overlay mode by orbital names
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-167
+.. GENERATED FROM PYTHON SOURCE LINES 158-163
 
 .. code-block:: Python
 
 
-    items={'Fe':['p','d']}
+    items = {"Fe": ["p", "d"]}
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='overlay',
-                    fermi=5.599480,
-                    items=items,
-                    dirname=data_dir)
+        code="vasp", mode="overlay", fermi=5.599480, items=items, dirname=data_dir
+    )
+
 
 
 .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_colinear_008.png
@@ -466,8 +449,6 @@ overlay mode by orbital names
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -476,7 +457,7 @@ overlay mode by orbital names
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.716 seconds)
+   **Total running time of the script:** (0 minutes 2.830 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_colinear.py:

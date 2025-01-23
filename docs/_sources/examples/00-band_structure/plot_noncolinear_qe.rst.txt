@@ -36,9 +36,10 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-colinear',
                                 calc_type='bands')
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-23
+.. GENERATED FROM PYTHON SOURCE LINES 21-24
 
 .. code-block:: Python
+
 
     # sphinx_gallery_thumbnail_number = 2
 
@@ -49,19 +50,22 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-25
+.. GENERATED FROM PYTHON SOURCE LINES 25-26
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-31
+.. GENERATED FROM PYTHON SOURCE LINES 26-35
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}qe{os.sep}non-colinear{os.sep}bands"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "qe", "non-colinear", "bands"
+    )
 
 
 
@@ -70,22 +74,18 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-36
+.. GENERATED FROM PYTHON SOURCE LINES 38-40
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-44
+.. GENERATED FROM PYTHON SOURCE LINES 40-44
 
 .. code-block:: Python
 
 
 
-    pyprocar.bandsplot(
-                    code='qe', 
-                    mode='plain',
-                    fermi=18.0536,
-                    dirname=data_dir)
+    pyprocar.bandsplot(code="qe", mode="plain", fermi=18.0536, dirname=data_dir)
 
 
 
@@ -109,8 +109,6 @@ Plain mode
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -120,30 +118,29 @@ Plain mode
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
-Quantum Espresso expresses the projections in the coupled basis, 
+Quantum Espresso expresses the projections in the coupled basis,
 therefore orbitals takes different meanings.
 For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-66
+.. GENERATED FROM PYTHON SOURCE LINES 51-65
 
 .. code-block:: Python
 
 
-    atoms=[0]
-    spins=[0]
-    orbitals=[8,9,10,11,12,13,14,15,16,17]
+    atoms = [0]
+    spins = [0]
+    orbitals = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
     pyprocar.bandsplot(
-                    code='qe', 
-                    mode='parametric',
-                    fermi=18.0536,
-                    atoms=atoms,
-                    orbitals=orbitals,
-                    spins=spins,
-                    dirname=data_dir)
-
-
+        code="qe",
+        mode="parametric",
+        fermi=18.0536,
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        dirname=data_dir,
+    )
 
 
 
@@ -166,8 +163,6 @@ For details on the meaning of the indices of the atomic projection please refer 
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -176,7 +171,7 @@ For details on the meaning of the indices of the atomic projection please refer 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.416 seconds)
+   **Total running time of the script:** (0 minutes 1.505 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_noncolinear_qe.py:

@@ -423,10 +423,11 @@
                   
   <h1>Source code for pyprocar.cfg.fermi_surface_3d</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span><span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">from</span> <span class="nn">pyprocar.cfg.base</span> <span class="kn">import</span> <span class="n">PlotType</span><span class="p">,</span> <span class="n">BaseConfig</span>
+<span class="kn">from</span> <span class="nn">pyprocar.cfg.base</span> <span class="kn">import</span> <span class="n">BaseConfig</span><span class="p">,</span> <span class="n">PlotType</span>
+
 
 <div class="viewcode-block" id="FermiSurfaceMode">
 <a class="viewcode-back" href="../../../api/cfg/fermi_surface_3d.html#pyprocar.cfg.fermi_surface_3d.FermiSurfaceMode">[docs]</a>
@@ -443,9 +444,11 @@
 <span class="sd">    SPIN_TEXTURE : str</span>
 <span class="sd">        Enhances the Fermi surface representation with spin texture information</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">PLAIN</span> <span class="o">=</span> <span class="s2">&quot;plain&quot;</span>
     <span class="n">PARAMETRIC</span> <span class="o">=</span> <span class="s2">&quot;parametric&quot;</span>
     <span class="n">SPIN_TEXTURE</span> <span class="o">=</span> <span class="s2">&quot;spin_texture&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="FermiSurfaceProperty">
@@ -463,9 +466,11 @@
 <span class="sd">    HARMONIC_AVERAGE_EFFECTIVE_MASS : str</span>
 <span class="sd">        Displays the harmonic average of the effective mass of electrons, reflecting the electron mobility.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">FERMI_SPEED</span> <span class="o">=</span> <span class="s2">&quot;fermi_speed&quot;</span>
     <span class="n">FERMI_VELOCITY</span> <span class="o">=</span> <span class="s2">&quot;fermi_velocity&quot;</span>
     <span class="n">HARMONIC_AVERAGE_EFFECTIVE_MASS</span> <span class="o">=</span> <span class="s2">&quot;harmonic_effective_mass&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="FermiSurface3DConfig">
@@ -504,8 +509,8 @@
 <span class="sd">    surface_bands_colors : List[str], optional (default [])</span>
 <span class="sd">        List of colors for each band in the surface plot.</span>
 
-<span class="sd">    </span>
-<span class="sd">    </span>
+
+
 <span class="sd">    Spin Settings</span>
 <span class="sd">    ---------------------</span>
 <span class="sd">    spin_colors : Tuple[str], optional (None, None)</span>
@@ -625,19 +630,19 @@
     <span class="c1"># Basic Plot Settings</span>
     <span class="n">mode</span><span class="p">:</span> <span class="n">FermiSurfaceMode</span> <span class="o">=</span> <span class="n">FermiSurfaceMode</span><span class="o">.</span><span class="n">PLAIN</span>
     <span class="nb">property</span><span class="p">:</span> <span class="n">FermiSurfaceProperty</span> <span class="o">=</span> <span class="n">FermiSurfaceProperty</span><span class="o">.</span><span class="n">FERMI_SPEED</span>
-    <span class="n">background_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span>
+    <span class="n">background_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
     <span class="n">plotter_offscreen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">plotter_camera_pos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># Surface Appearance</span>
-    <span class="n">surface_cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;jet&#39;</span>  <span class="c1"># Colormap for the surface</span>
+    <span class="n">surface_cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;jet&quot;</span>  <span class="c1"># Colormap for the surface</span>
     <span class="n">surface_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Specific color for the surface</span>
     <span class="n">surface_opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">surface_clim</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">surface_bands_colors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
 
     <span class="c1"># Spin Settings</span>
-    <span class="n">spin_colors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">spin_colors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">arrow_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Size of arrows for spin texture</span>
     <span class="n">texture_cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;jet&quot;</span>
     <span class="n">texture_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -669,25 +674,25 @@
     <span class="n">scalar_bar_label_font_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">scalar_bar_position_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.4</span>
     <span class="n">scalar_bar_position_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
-    <span class="n">scalar_bar_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
-    <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;fermi_speed&#39;</span>
+    <span class="n">scalar_bar_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;black&quot;</span>
+    <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fermi_speed&quot;</span>
 
     <span class="c1"># Advanced Configurations</span>
     <span class="n">fermi_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
     <span class="n">extended_zone_directions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">supercell</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="n">projection_accuracy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;high&#39;</span>
+    <span class="n">projection_accuracy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;high&quot;</span>
     <span class="n">interpolation_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
 
     <span class="c1"># Cross section Settings</span>
     <span class="n">cross_section_slice_linewidth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span>
     <span class="n">cross_section_slice_show_area</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Isoslider Settings</span>
-    <span class="n">isoslider_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Energy iso-value&#39;</span>
-    <span class="n">isoslider_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;modern&#39;</span>
-    <span class="n">isoslider_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+    <span class="n">isoslider_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Energy iso-value&quot;</span>
+    <span class="n">isoslider_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;modern&quot;</span>
+    <span class="n">isoslider_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;black&quot;</span>
 
     <span class="c1"># Miscellaneous</span>
     <span class="n">orbit_gif_n_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">36</span>
@@ -695,9 +700,8 @@
     <span class="n">orbit_mp4_n_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">36</span>
     <span class="n">orbit_mp4_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
 
-
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method is immediately called after the object is initialized. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This method is immediately called after the object is initialized.</span>
 <span class="sd">        It is useful to validate the data and set default values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="n">PlotType</span><span class="o">.</span><span class="n">FERMI_SURFACE_3D</span>

@@ -25,6 +25,7 @@ The bandgap calculation should be done for non-self consistent (band structure) 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 """
+
 # sphinx_gallery_thumbnail_number = 1
 
 
@@ -32,9 +33,13 @@ The bandgap calculation should be done for non-self consistent (band structure) 
 # importing pyprocar and specifying local data_dir
 
 import os
+
 import numpy as np
+
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "bands"
+)
 
 band_gap = pyprocar.bandgap(dirname=data_dir, code="vasp")

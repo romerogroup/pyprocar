@@ -51,21 +51,20 @@ Use the following code to do this. Once downloaded, specify the `data_dir` to po
 # First, we will import the necessary libraries and set up our data directory path.
 
 import os
+
 import pyprocar
 
 # Define the directory containing the example data
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}auto"
+data_dir = os.path.join(pyprocar.utils.DATA_DIR, "examples", "auto")
 
 ###############################################################################
 # Autobands Example
 # -------------------------------------------------------
-# 
-# As an example of this functionality, we calculate a slab of a topologically non-trivial phase of Bi. 
+#
+# As an example of this functionality, we calculate a slab of a topologically non-trivial phase of Bi.
 # It features surface states with Dirac cones at high-symmetry points. The code used to plot the band structure is below.
-# The title of the figure is ``Defect 0``, which corresponds to the upper surface of the slab, the other surface generates a second figure, 
-# with title ``Defect 1``. When running the code above, a file ``report.txt`` is generated with info about the atoms comprising each defect, 
+# The title of the figure is ``Defect 0``, which corresponds to the upper surface of the slab, the other surface generates a second figure,
+# with title ``Defect 1``. When running the code above, a file ``report.txt`` is generated with info about the atoms comprising each defect,
 # and the associated localized states.
 
-pyprocar.autobandsplot(code='vasp', dirname=data_dir)
-
-
+pyprocar.autobandsplot(code="vasp", dirname=data_dir)

@@ -53,7 +53,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/00-band_structure/plot_autobands';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Comparing band structures" href="plot_compare_bands.html" />
+    <link rel="next" title="Plotting non colinear band structures in VASP" href="plot_noncolinear_vasp.html" />
     <link rel="prev" title="Band Structure" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -384,24 +384,24 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Band Structure</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Autobands plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_atomic_levels.html">Plotting Atomic Levels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_ipr.html">Plotting Inverse participation ratio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_colinear.html">Plotting band structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_2d_bands.html">Plotting 2D band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../01-dos/index.html">Density of States</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_colinear_dos.html">Plotting density of states</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -417,12 +417,12 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../04-fermi3d/index.html">Fermi 3D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_plain.html">Plotting fermi3d plain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_de_hass_van_alphen.html">Showing how to get van alphen fequencies from the fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
 </ul>
@@ -436,8 +436,8 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../06-PyPoscar/index.html">PyPoscar</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_clusters_pyposcar.html">Visualizing Clusters in Bi2Se3 Slab</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_rdf_cutoff_pyposcar.html">Analyzing Radial Distribution Functions (RDF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_subsitution_pyposcar.html">Substituting Atoms in a POSCAR File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../06-PyPoscar/plot_utils_pyposcar.html">Modifying a POSCAR File: Scaling, Supercells, and Defects</a></li>
 </ul>
@@ -548,10 +548,11 @@ Use the following code to do this. Once downloaded, specify the <cite>data_dir</
 <h2>Setting up the environment<a class="headerlink" href="#setting-up-the-environment" title="Link to this heading">#</a></h2>
 <p>First, we will import the necessary libraries and set up our data directory path.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">pyprocar</span>
 
 <span class="c1"># Define the directory containing the example data</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ROOT</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">data</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">examples</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">auto&quot;</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pyprocar</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -562,16 +563,14 @@ It features surface states with Dirac cones at high-symmetry points. The code us
 The title of the figure is <code class="docutils literal notranslate"><span class="pre">Defect</span> <span class="pre">0</span></code>, which corresponds to the upper surface of the slab, the other surface generates a second figure,
 with title <code class="docutils literal notranslate"><span class="pre">Defect</span> <span class="pre">1</span></code>. When running the code above, a file <code class="docutils literal notranslate"><span class="pre">report.txt</span></code> is generated with info about the atoms comprising each defect,
 and the associated localized states.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">autobandsplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s1">&#39;vasp&#39;</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pyprocar</span><span class="o">.</span><span class="n">autobandsplot</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;vasp&quot;</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
 <li><img src="../../_images/sphx_glr_plot_autobands_001.png" srcset="../../_images/sphx_glr_plot_autobands_001.png" alt="Defect 0" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_autobands_002.png" srcset="../../_images/sphx_glr_plot_autobands_002.png" alt="Defect 1" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset[&#39;wyckoffs&#39;]) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-  warnings.warn(
-2 orbitals. (Some of) They are unknow (if you did &#39;filter&#39; them it is OK).
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2 orbitals. (Some of) They are unknow (if you did &#39;filter&#39; them it is OK).
 [[0, 0.953], [0, 0.956]]
 []
 
@@ -583,8 +582,6 @@ and the associated localized states.</p>
             Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
             ----------------------------------------------------------------------------------------------------------
 
-C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset[&#39;wyckoffs&#39;]) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-  warnings.warn(
 2 orbitals. (Some of) They are unknow (if you did &#39;filter&#39; them it is OK).
 
             WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
@@ -605,7 +602,7 @@ C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:
             ----------------------------------------------------------------------------------------------------------
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 22.194 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 23.127 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-band-structure-plot-autobands-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/3b7521f82ed503140f6ba66d69ec9d0a/plot_autobands.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_autobands.ipynb</span></code></a></p>
@@ -641,11 +638,11 @@ C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:
       </div>
     </a>
     <a class="right-next"
-       href="plot_compare_bands.html"
+       href="plot_noncolinear_vasp.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Comparing band structures</p>
+        <p class="prev-next-title">Plotting non colinear band structures in VASP</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

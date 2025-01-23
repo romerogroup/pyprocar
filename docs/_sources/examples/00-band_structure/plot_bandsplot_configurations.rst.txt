@@ -42,19 +42,27 @@ Before diving into plotting, we need to download the example files. Use the foll
                                 calc_type='bands'
                                )
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-36
+.. GENERATED FROM PYTHON SOURCE LINES 26-44
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
     # Define the directory containing the example data
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
-    code='vasp'
-    spins=[0,1]
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "Fe",
+        "vasp",
+        "spin-polarized-colinear",
+        "bands",
+    )
+    code = "vasp"
+    spins = [0, 1]
 
 
 
@@ -63,7 +71,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-52
+.. GENERATED FROM PYTHON SOURCE LINES 45-60
 
 .. code-block:: Python
 
@@ -76,11 +84,11 @@ Before diving into plotting, we need to download the example files. Use the foll
     #
 
     # Path to the configuration files in the package
-    config_path = os.path.join(pyprocar.__path__[0], 'cfg')
+    config_path = os.path.join(pyprocar.__path__[0], "cfg")
     print(f"Configuration files are located at: {config_path}")
 
     # Print the configurations
-    pyprocar.bandsplot(code=code,dirname=data_dir,fermi=5.590136,print_plot_opts=True)
+    pyprocar.bandsplot(code=code, dirname=data_dir, fermi=5.590136, print_plot_opts=True)
 
 
 
@@ -149,14 +157,12 @@ Before diving into plotting, we need to download the example files. Use the foll
     major_x_tick_params : {'which': 'major', 'axis': 'x', 'direction': 'in'}
     multiple_locator_y_major_value : None
     multiple_locator_y_minor_value : None
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-76
+.. GENERATED FROM PYTHON SOURCE LINES 61-84
 
 .. code-block:: Python
 
@@ -171,15 +177,15 @@ Before diving into plotting, we need to download the example files. Use the foll
     pyprocar.bandsplot(
         code=code,
         dirname=data_dir,
-        mode='parametric',
+        mode="parametric",
         fermi=5.590136,
         atoms=[0],
-        orbitals=[4,5,6,7,8],
-        cmap='viridis',  # Colormap
+        orbitals=[4, 5, 6, 7, 8],
+        cmap="viridis",  # Colormap
         clim=[0, 1],  # Color limits
-        fermi_color='red',  # Fermi line color
-        fermi_linestyle='--',  # Fermi line linestyle
-        fermi_linewidth=2.0  # Fermi line linewidth
+        fermi_color="red",  # Fermi line color
+        fermi_linestyle="--",  # Fermi line linestyle
+        fermi_linewidth=2.0,  # Fermi line linewidth
     )
 
 
@@ -205,14 +211,12 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 77-95
+.. GENERATED FROM PYTHON SOURCE LINES 85-103
 
 .. code-block:: Python
 
@@ -226,12 +230,12 @@ Before diving into plotting, we need to download the example files. Use the foll
     pyprocar.bandsplot(
         code=code,
         dirname=data_dir,
-        mode='scatter',
+        mode="scatter",
         fermi=5.590136,
         atoms=[0],
-        orbitals=[4,5,6,7,8],
-        marker=['v','o'],  # Marker style
-        markersize=[10,5]  # Marker size list for the 2 spin plots
+        orbitals=[4, 5, 6, 7, 8],
+        marker=["v", "o"],  # Marker style
+        markersize=[10, 5],  # Marker size list for the 2 spin plots
     )
 
 
@@ -256,14 +260,12 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-114
+.. GENERATED FROM PYTHON SOURCE LINES 104-121
 
 .. code-block:: Python
 
@@ -277,14 +279,13 @@ Before diving into plotting, we need to download the example files. Use the foll
     pyprocar.bandsplot(
         code=code,
         dirname=data_dir,
-        mode='scatter',
+        mode="scatter",
         fermi=5.590136,
         atoms=[0],
-        orbitals=[4,5,6,7,8],
+        orbitals=[4, 5, 6, 7, 8],
         figure_size=(10, 6),  # Figure size (width, height)
-        dpi=300  # Dots per inch
+        dpi=300,  # Dots per inch
     )
-
 
 
 
@@ -307,8 +308,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 1000x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -317,7 +316,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.357 seconds)
+   **Total running time of the script:** (0 minutes 2.433 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_bandsplot_configurations.py:

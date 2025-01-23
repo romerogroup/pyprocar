@@ -78,6 +78,8 @@ fermiHandler.plot_fermi_cross_section(
     spin_texture=True,
     arrow_size=0.5,
     show=True,
+    max_distance=0.3,  # This parameter controls the max distance to search for adjacent points for interpolation.
+    # Lowering could speed the ploting, but too low could make the interpolation fail
 )
 
 ###############################################################################

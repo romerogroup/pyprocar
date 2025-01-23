@@ -56,6 +56,9 @@ fermiHandler = pyprocar.FermiHandler(code="vasp", dirname=data_dir, apply_symmet
 fermiHandler.plot_fermi_surface(
     mode="spin_texture",
     spin_texture=True,
-    arrow_size=0.1,
+    supercell=[2, 2, 2],
+    texture_size=0.2,
     show=True,
+    max_distance=0.3,  # This parameter controls the max distance to search for adjacent points for interpolation.
+    # Lowering could speed the ploting, but too low could make the interpolation fail
 )

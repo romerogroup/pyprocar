@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:02.219** total execution time for 2 files **from examples\02-bands_dos**:
+**00:02.324** total execution time for 2 files **from examples\02-bands_dos**:
 
 .. container::
 
@@ -33,8 +33,8 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_02-bands_dos_plot_bandsdosplot_configurations.py` (``plot_bandsdosplot_configurations.py``)
-     - 00:01.877
+     - 00:02.004
      - 0.0
    * - :ref:`sphx_glr_examples_02-bands_dos_plot_bandsdosplot.py` (``plot_bandsdosplot.py``)
-     - 00:00.342
+     - 00:00.320
      - 0.0

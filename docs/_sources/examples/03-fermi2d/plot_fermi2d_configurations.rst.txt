@@ -38,15 +38,18 @@ Before diving into plotting, we need to download the example files. Use the foll
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-28
+.. GENERATED FROM PYTHON SOURCE LINES 22-31
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-colinear", "fermi"
+    )
 
 
 
@@ -55,7 +58,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 29-44
+.. GENERATED FROM PYTHON SOURCE LINES 32-47
 
 .. code-block:: Python
 
@@ -68,11 +71,11 @@ Before diving into plotting, we need to download the example files. Use the foll
     #
 
     # Path to the configuration files in the package
-    config_path = os.path.join(pyprocar.__path__[0], 'cfg')
+    config_path = os.path.join(pyprocar.__path__[0], "cfg")
     print(f"Configuration files are located at: {config_path}")
 
     # Print the configurations
-    pyprocar.fermi2D(code='vasp', dirname=data_dir,fermi=5.599480, print_plot_opts=True)
+    pyprocar.fermi2D(code="vasp", dirname=data_dir, fermi=5.599480, print_plot_opts=True)
 
 
 
@@ -96,7 +99,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -116,7 +119,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -153,8 +156,6 @@ Before diving into plotting, we need to download the example files. Use the foll
     dpi : {'description': 'The dpi value to save the image as', 'value': 'figure'}
     x_label : {'description': 'The x label of the plot', 'value': '$k_{x}$  ($\\AA^{-1}$)'}
     y_label : {'description': 'The x label of the plot', 'value': '$k_{y}$  ($\\AA^{-1}$)'}
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
                 ----------------------------------------------------------------------------------------------------------
@@ -165,7 +166,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-65
+.. GENERATED FROM PYTHON SOURCE LINES 48-70
 
 .. code-block:: Python
 
@@ -177,16 +178,18 @@ Before diving into plotting, we need to download the example files. Use the foll
     # We'll adjust the colormap, color limits.
     #
 
-    pyprocar.fermi2D(code='vasp',
-                   fermi=5.599480,
-                   dirname=data_dir,
-                   spin_texture=True,
-                   spin_projection='x',
-                   arrow_size=3,
-                   arrow_density=10,
-                   plot_color_bar=True,
-                   cmap='jet',
-                   clim=[0, 1])
+    pyprocar.fermi2D(
+        code="vasp",
+        fermi=5.599480,
+        dirname=data_dir,
+        spin_texture=True,
+        spin_projection="x",
+        arrow_size=3,
+        arrow_density=10,
+        plot_color_bar=True,
+        cmap="jet",
+        clim=[0, 1],
+    )
 
 
 
@@ -210,7 +213,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -230,7 +233,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -260,7 +263,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-86
+.. GENERATED FROM PYTHON SOURCE LINES 71-92
 
 .. code-block:: Python
 
@@ -272,18 +275,19 @@ Before diving into plotting, we need to download the example files. Use the foll
     #
 
 
-    pyprocar.fermi2D(code='vasp',
-                    dirname=data_dir,
-                    fermi=5.599480,
-                    spin_texture=True,
-                    spin_projection='z',
-                    arrow_size=3,
-                    arrow_density=10,
-                    plot_color_bar=True,
-                    cmap='jet',
-                    clim=[0, 1],
-                    dpi=300)
-
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        fermi=5.599480,
+        spin_texture=True,
+        spin_projection="z",
+        arrow_size=3,
+        arrow_density=10,
+        plot_color_bar=True,
+        cmap="jet",
+        clim=[0, 1],
+        dpi=300,
+    )
 
 
 
@@ -305,7 +309,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -325,7 +329,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\Fe\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -358,7 +362,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 13.906 seconds)
+   **Total running time of the script:** (0 minutes 14.125 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_fermi2d_configurations.py:

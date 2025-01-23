@@ -40,27 +40,28 @@ Before diving into plotting, we need to download the example files. Use the foll
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 24-42
+.. GENERATED FROM PYTHON SOURCE LINES 24-43
 
 .. code-block:: Python
 
 
     import pyvista
+
     # You do not need this. This is to ensure an image is rendered off screen when generating example gallery.
     pyvista.OFF_SCREEN = True
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "fermi"
+    )
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot.
-    # Symmetry only works for specific space groups currently. 
+    # Symmetry only works for specific space groups currently.
     # For the actual calculations turn off symmetry and set 'apply_symmetry'=False.
-    fermiHandler = pyprocar.FermiHandler(
-                                        code="vasp",
-                                        dirname=data_dir,
-                                        apply_symmetry=True)
+    fermiHandler = pyprocar.FermiHandler(code="vasp", dirname=data_dir, apply_symmetry=True)
 
 
 
@@ -70,8 +71,6 @@ Before diving into plotting, we need to download the example files. Use the foll
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
@@ -80,7 +79,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-65
+.. GENERATED FROM PYTHON SOURCE LINES 44-64
 
 .. code-block:: Python
 
@@ -99,12 +98,10 @@ Before diving into plotting, we need to download the example files. Use the foll
     #
 
     # Path to the configuration files in the package
-    config_path = os.path.join(pyprocar.__path__[0], 'cfg')
+    config_path = os.path.join(pyprocar.__path__[0], "cfg")
     print(f"Configuration files are located at: {config_path}")
 
-    fermiHandler.plot_fermi_surface(mode="plain",
-                                    show=True,
-                                    print_plot_opts=True)
+    fermiHandler.plot_fermi_surface(mode="plain", show=True, print_plot_opts=True)
 
 
 
@@ -175,7 +172,7 @@ Before diving into plotting, we need to download the example files. Use the foll
     supercell: [1, 1, 1]
     projection_accuracy: high
     interpolation_factor: 1
-    max_distance: 0.2
+    max_distance: 0.3
     cross_section_slice_linewidth: 5.0
     cross_section_slice_show_area: False
     isoslider_title: Energy iso-value
@@ -190,7 +187,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-82
+.. GENERATED FROM PYTHON SOURCE LINES 65-84
 
 .. code-block:: Python
 
@@ -201,16 +198,19 @@ Before diving into plotting, we need to download the example files. Use the foll
     # This section demonstrates how to customize the appearance of the 3D Fermi surface in parametric mode.
     # We'll adjust the colormap, color limits, and other settings.
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0]
-    fermiHandler.plot_fermi_surface(mode="parametric",
-                                  atoms=atoms,
-                                  orbitals=orbitals,
-                                  spins=spins,
-                                  surface_cmap='viridis',
-                                  surface_clim=[0, 1],
-                                  show=True)
+    atoms = [0]
+    orbitals = [4, 5, 6, 7, 8]
+    spins = [0]
+    fermiHandler.plot_fermi_surface(
+        mode="parametric",
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        surface_cmap="viridis",
+        surface_clim=[0, 1],
+        show=True,
+    )
+
 
 
 .. image-sg:: /examples/04-fermi3d/images/sphx_glr_plot_fermi3d_configurations_002.png
@@ -240,7 +240,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.744 seconds)
+   **Total running time of the script:** (0 minutes 4.564 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_configurations.py:

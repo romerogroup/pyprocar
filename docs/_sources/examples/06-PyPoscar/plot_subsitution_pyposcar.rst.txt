@@ -34,19 +34,22 @@ Specifically, we will:
 
 Before diving in, make sure to have `pyvista`, `numpy`, and `pyprocar` installed.
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-30
+.. GENERATED FROM PYTHON SOURCE LINES 18-33
 
 .. code-block:: Python
 
 
     import os
     from itertools import product
+
     import numpy as np
     import pyvista as pv
+
     import pyprocar.pyposcar as p
-    from pyprocar.utils import ROOT
+    from pyprocar.utils import DATA_DIR
+
     # Define the data directory
-    data_dir=os.path.join(ROOT,'data','examples','PyPoscar','00-Poscar')
+    data_dir = os.path.join(DATA_DIR, "examples", "PyPoscar", "00-Poscar")
     # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
     pv.OFF_SCREEN = True
 
@@ -57,12 +60,12 @@ Before diving in, make sure to have `pyvista`, `numpy`, and `pyprocar` installed
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-33
+.. GENERATED FROM PYTHON SOURCE LINES 34-36
 
 Reading and Parsing the POSCAR File
 ++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-52
+.. GENERATED FROM PYTHON SOURCE LINES 36-55
 
 .. code-block:: Python
 
@@ -72,18 +75,18 @@ Reading and Parsing the POSCAR File
     a.parse()
 
     # Display lattice, elements, and positions
-    print('Lattice:')
+    print("Lattice:")
     print(a.lat)
-    print('\nElements:')
+    print("\nElements:")
     print(a.elm)
-    print('\nPositions in Direct coordinates')
+    print("\nPositions in Direct coordinates")
     print(a.dpos)
 
 
     # Convert positions to Cartesian coordinates for visualization
     atoms_before = pv.PolyData(np.dot(a.dpos, a.lat))
-    atoms_before['atoms'] = a.elm
-    labels_before = [elm + f':{point}' for elm, point in zip(a.elm, a.dpos)]
+    atoms_before["atoms"] = a.elm
+    labels_before = [elm + f":{point}" for elm, point in zip(a.elm, a.dpos)]
 
 
 
@@ -113,35 +116,40 @@ Reading and Parsing the POSCAR File
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-55
+.. GENERATED FROM PYTHON SOURCE LINES 56-58
 
 Atom Substitution
 +++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-76
+.. GENERATED FROM PYTHON SOURCE LINES 58-84
 
 .. code-block:: Python
 
 
     # Substitute the second B atom with an N atom
-    print('\n\nChanging the the second atom from B to N\n' + '-'*40)
+    print("\n\nChanging the the second atom from B to N\n" + "-" * 40)
     new_pos = a.dpos[1]
     a.remove(atoms=1)
-    a.add(position=new_pos, element='N', direct=True)
-    print('\nElements after substitution:')
+    a.add(position=new_pos, element="N", direct=True)
+    print("\nElements after substitution:")
     print(a.elm)
-    print('\nPositions in Direct coordinates after substitution:')
+    print("\nPositions in Direct coordinates after substitution:")
     print(a.dpos)
 
     # Define the unit cell using lattice vectors
     unit_cell_comb = list(product([0, 1], repeat=3))
-    unit_cell = np.array([comb[0]*a.lat[0] + comb[1]*a.lat[1] + comb[2]*a.lat[2] for comb in unit_cell_comb])
+    unit_cell = np.array(
+        [
+            comb[0] * a.lat[0] + comb[1] * a.lat[1] + comb[2] * a.lat[2]
+            for comb in unit_cell_comb
+        ]
+    )
     unit_cell = pv.PolyData(unit_cell)
 
     # Convert positions to Cartesian coordinates for visualization
     atoms_after = pv.PolyData(np.dot(a.dpos, a.lat))
-    atoms_after['atoms'] = a.elm
-    labels_after = [elm + f':{point}' for elm, point in zip(a.elm, a.dpos)]
+    atoms_after["atoms"] = a.elm
+    labels_after = [elm + f":{point}" for elm, point in zip(a.elm, a.dpos)]
 
 
 
@@ -171,12 +179,12 @@ Atom Substitution
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 77-79
+.. GENERATED FROM PYTHON SOURCE LINES 85-87
 
 Visualization of Atomic Structures
 ++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-96
+.. GENERATED FROM PYTHON SOURCE LINES 87-136
 
 .. code-block:: Python
 
@@ -185,15 +193,47 @@ Visualization of Atomic Structures
     plotter = pv.Plotter(shape=(1, 2), border=False)
     # Before substitution
     plotter.subplot(0, 0)
-    plotter.add_mesh(unit_cell.delaunay_3d().extract_feature_edges(), color='black', line_width=5, render_lines_as_tubes=True)
-    plotter.add_point_labels(points=atoms_before.points, labels=labels_before, show_points=False, always_visible=True)
-    plotter.add_mesh(atoms_before, scalars='atoms', point_size=30, render_points_as_spheres=True, show_scalar_bar=False)
+    plotter.add_mesh(
+        unit_cell.delaunay_3d().extract_feature_edges(),
+        color="black",
+        line_width=5,
+        render_lines_as_tubes=True,
+    )
+    plotter.add_point_labels(
+        points=atoms_before.points,
+        labels=labels_before,
+        show_points=False,
+        always_visible=True,
+    )
+    plotter.add_mesh(
+        atoms_before,
+        scalars="atoms",
+        point_size=30,
+        render_points_as_spheres=True,
+        show_scalar_bar=False,
+    )
     plotter.add_title("Before substitution")
     # After substitution
     plotter.subplot(0, 1)
-    plotter.add_mesh(unit_cell.delaunay_3d().extract_feature_edges(), color='black', line_width=5, render_lines_as_tubes=True)
-    plotter.add_point_labels(points=atoms_after.points, labels=labels_after, show_points=False, always_visible=True)
-    plotter.add_mesh(atoms_after, scalars='atoms', point_size=30, render_points_as_spheres=True, show_scalar_bar=False)
+    plotter.add_mesh(
+        unit_cell.delaunay_3d().extract_feature_edges(),
+        color="black",
+        line_width=5,
+        render_lines_as_tubes=True,
+    )
+    plotter.add_point_labels(
+        points=atoms_after.points,
+        labels=labels_after,
+        show_points=False,
+        always_visible=True,
+    )
+    plotter.add_mesh(
+        atoms_after,
+        scalars="atoms",
+        point_size=30,
+        render_points_as_spheres=True,
+        show_scalar_bar=False,
+    )
     plotter.add_title("After substitution")
     plotter.show()
 
@@ -209,32 +249,57 @@ Visualization of Atomic Structures
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 97-99
+.. GENERATED FROM PYTHON SOURCE LINES 137-139
 
 Creating GIFs for Visualization
 +++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-116
+.. GENERATED FROM PYTHON SOURCE LINES 139-181
 
 .. code-block:: Python
+
 
 
     # Define a function to create a GIF visualization of the atomic structure
     def create_gif(atoms, labels, unit_cell, save_file):
         plotter = pv.Plotter()
-        title = save_file.split(os.sep)[-1].split('.')[0]
+        title = save_file.split(os.sep)[-1].split(".")[0]
         plotter.add_title(title)
-        plotter.add_mesh(unit_cell.delaunay_3d().extract_feature_edges(), color='black', line_width=5, render_lines_as_tubes=True)
-        plotter.add_point_labels(points=atoms.points, labels=labels, show_points=False, always_visible=True)
-        plotter.add_mesh(atoms, scalars='atoms', point_size=30, render_points_as_spheres=True, show_scalar_bar=False)
+        plotter.add_mesh(
+            unit_cell.delaunay_3d().extract_feature_edges(),
+            color="black",
+            line_width=5,
+            render_lines_as_tubes=True,
+        )
+        plotter.add_point_labels(
+            points=atoms.points, labels=labels, show_points=False, always_visible=True
+        )
+        plotter.add_mesh(
+            atoms,
+            scalars="atoms",
+            point_size=30,
+            render_points_as_spheres=True,
+            show_scalar_bar=False,
+        )
         path = plotter.generate_orbital_path(n_points=36)
         plotter.open_gif(os.path.join(data_dir, save_file))
         plotter.orbit_on_path(path, write_frames=True, viewup=[0, 0, 1], step=0.05)
         plotter.close()
 
+
     # Create GIFs for atomic structures before and after substitution
-    create_gif(atoms=atoms_before, labels=labels_before, unit_cell=unit_cell, save_file='atoms_before.gif')
-    create_gif(atoms=atoms_after, labels=labels_after, unit_cell=unit_cell, save_file='atoms_after.gif')
+    create_gif(
+        atoms=atoms_before,
+        labels=labels_before,
+        unit_cell=unit_cell,
+        save_file="atoms_before.gif",
+    )
+    create_gif(
+        atoms=atoms_after,
+        labels=labels_after,
+        unit_cell=unit_cell,
+        save_file="atoms_after.gif",
+    )
 
 
 
@@ -262,7 +327,7 @@ Creating GIFs for Visualization
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.688 seconds)
+   **Total running time of the script:** (0 minutes 8.542 seconds)
 
 
 .. _sphx_glr_download_examples_06-PyPoscar_plot_subsitution_pyposcar.py:

@@ -23,21 +23,22 @@ Before diving into plotting, we need to download the example files. Use the foll
 """
 
 import pyvista
+
 # You do not need this. This is to ensure an image is rendered off screen when generating example gallery.
 pyvista.OFF_SCREEN = True
 
 import os
+
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "fermi"
+)
 
 # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot.
-# Symmetry only works for specific space groups currently. 
+# Symmetry only works for specific space groups currently.
 # For the actual calculations turn off symmetry and set 'apply_symmetry'=False.
-fermiHandler = pyprocar.FermiHandler(
-                                    code="vasp",
-                                    dirname=data_dir,
-                                    apply_symmetry=True)
+fermiHandler = pyprocar.FermiHandler(code="vasp", dirname=data_dir, apply_symmetry=True)
 
 ###############################################################################
 
@@ -55,12 +56,10 @@ fermiHandler = pyprocar.FermiHandler(
 #
 
 # Path to the configuration files in the package
-config_path = os.path.join(pyprocar.__path__[0], 'cfg')
+config_path = os.path.join(pyprocar.__path__[0], "cfg")
 print(f"Configuration files are located at: {config_path}")
 
-fermiHandler.plot_fermi_surface(mode="plain",
-                                show=True,
-                                print_plot_opts=True)
+fermiHandler.plot_fermi_surface(mode="plain", show=True, print_plot_opts=True)
 
 ###############################################################################
 
@@ -70,13 +69,15 @@ fermiHandler.plot_fermi_surface(mode="plain",
 # This section demonstrates how to customize the appearance of the 3D Fermi surface in parametric mode.
 # We'll adjust the colormap, color limits, and other settings.
 
-atoms=[0]
-orbitals=[4,5,6,7,8]
-spins=[0]
-fermiHandler.plot_fermi_surface(mode="parametric",
-                              atoms=atoms,
-                              orbitals=orbitals,
-                              spins=spins,
-                              surface_cmap='viridis',
-                              surface_clim=[0, 1],
-                              show=True)
+atoms = [0]
+orbitals = [4, 5, 6, 7, 8]
+spins = [0]
+fermiHandler.plot_fermi_surface(
+    mode="parametric",
+    atoms=atoms,
+    orbitals=orbitals,
+    spins=spins,
+    surface_cmap="viridis",
+    surface_clim=[0, 1],
+    show=True,
+)

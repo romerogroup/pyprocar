@@ -54,11 +54,11 @@ First, we will import the necessary libraries and set up our data directory path
 
 
     import os
+
     import pyprocar
 
     # Define the directory containing the example data
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}hBN-CNCN"
-
+    data_dir = os.path.join(pyprocar.utils.DATA_DIR, "examples", "hBN-CNCN")
 
 
 
@@ -72,10 +72,10 @@ First, we will import the necessary libraries and set up our data directory path
 
 Plotting in Atomic Mode
 -----------------------
-The atomic mode is used to plot the energy levels at a specific k-point. In this example, we focus on the GAMMA point. 
-The plot will display energy levels for specific atoms in the range of -6 to 6 eV. 
+The atomic mode is used to plot the energy levels at a specific k-point. In this example, we focus on the GAMMA point.
+The plot will display energy levels for specific atoms in the range of -6 to 6 eV.
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-57
+.. GENERATED FROM PYTHON SOURCE LINES 45-58
 
 .. code-block:: Python
 
@@ -85,13 +85,14 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
     # Plot the atomic bands
     pyprocar.bandsplot(
-        code='vasp',  # Specify the DFT code used. In this case, it's VASP.
+        code="vasp",  # Specify the DFT code used. In this case, it's VASP.
         dirname=data_dir,
-        mode='atomic',
+        mode="atomic",
         elimit=[-6, 6],  # Energy range for the plot
         clim=[-0.4, 0.4],  # Color limit for the plot
         atoms=atoms,  # Atoms for which we want to plot the energy levels
     )
+
 
 
 .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_atomic_levels_001.png
@@ -113,8 +114,6 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
                 ----------------------------------------------------------------------------------------------------------
@@ -132,7 +131,7 @@ The plot will display energy levels for specific atoms in the range of -6 to 6 e
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.093 seconds)
+   **Total running time of the script:** (0 minutes 1.129 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_atomic_levels.py:

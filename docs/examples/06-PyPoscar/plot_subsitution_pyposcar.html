@@ -54,7 +54,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Modifying a POSCAR File: Scaling, Supercells, and Defects" href="plot_utils_pyposcar.html" />
-    <link rel="prev" title="Analyzing Radial Distribution Functions (RDF)" href="plot_rdf_cutoff_pyposcar.html" />
+    <link rel="prev" title="Finding defects in a POSCAR file" href="plot_finding_defects_pyposcar.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="6.2.1" />
@@ -384,24 +384,24 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_autobands.html">Autobands plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_2d_bands.html">Plotting 2D band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../01-dos/index.html">Density of States</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_colinear_dos.html">Plotting density of states</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -417,12 +417,12 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../04-fermi3d/index.html">Fermi 3D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_plain.html">Plotting fermi3d plain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_de_hass_van_alphen.html">Showing how to get van alphen fequencies from the fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
 </ul>
@@ -436,8 +436,8 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">PyPoscar</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_clusters_pyposcar.html">Visualizing Clusters in Bi2Se3 Slab</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_rdf_cutoff_pyposcar.html">Analyzing Radial Distribution Functions (RDF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Substituting Atoms in a POSCAR File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_utils_pyposcar.html">Modifying a POSCAR File: Scaling, Supercells, and Defects</a></li>
 </ul>
@@ -519,12 +519,15 @@ Specifically, we will:</p>
 <p>Before diving in, make sure to have <cite>pyvista</cite>, <cite>numpy</cite>, and <cite>pyprocar</cite> installed.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
+
 <span class="kn">import</span> <span class="nn">pyprocar.pyposcar</span> <span class="k">as</span> <span class="nn">p</span>
-<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">DATA_DIR</span>
+
 <span class="c1"># Define the data directory</span>
-<span class="n">data_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span><span class="s1">&#39;PyPoscar&#39;</span><span class="p">,</span><span class="s1">&#39;00-Poscar&#39;</span><span class="p">)</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="s2">&quot;PyPoscar&quot;</span><span class="p">,</span> <span class="s2">&quot;00-Poscar&quot;</span><span class="p">)</span>
 <span class="c1"># You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.</span>
 <span class="n">pv</span><span class="o">.</span><span class="n">OFF_SCREEN</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
@@ -536,18 +539,18 @@ Specifically, we will:</p>
 <span class="n">a</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
 
 <span class="c1"># Display lattice, elements, and positions</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Lattice:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Lattice:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Elements:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Elements:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Positions in Direct coordinates&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Positions in Direct coordinates&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">)</span>
 
 
 <span class="c1"># Convert positions to Cartesian coordinates for visualization</span>
 <span class="n">atoms_before</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">))</span>
-<span class="n">atoms_before</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">elm</span>
-<span class="n">labels_before</span> <span class="o">=</span> <span class="p">[</span><span class="n">elm</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;:</span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">elm</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">)]</span>
+<span class="n">atoms_before</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">elm</span>
+<span class="n">labels_before</span> <span class="o">=</span> <span class="p">[</span><span class="n">elm</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;:</span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">elm</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">)]</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Lattice:
@@ -572,24 +575,29 @@ Positions in Direct coordinates
 <section id="atom-substitution">
 <h2>Atom Substitution<a class="headerlink" href="#atom-substitution" title="Link to this heading">#</a></h2>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Substitute the second B atom with an N atom</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">Changing the the second atom from B to N</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">40</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Changing the the second atom from B to N</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
 <span class="n">new_pos</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">a</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">a</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">new_pos</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Elements after substitution:&#39;</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">new_pos</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Elements after substitution:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">elm</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Positions in Direct coordinates after substitution:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Positions in Direct coordinates after substitution:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">)</span>
 
 <span class="c1"># Define the unit cell using lattice vectors</span>
 <span class="n">unit_cell_comb</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">unit_cell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">comb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">comb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">comb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">unit_cell_comb</span><span class="p">])</span>
+<span class="n">unit_cell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">comb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">comb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">comb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">unit_cell_comb</span>
+    <span class="p">]</span>
+<span class="p">)</span>
 <span class="n">unit_cell</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">unit_cell</span><span class="p">)</span>
 
 <span class="c1"># Convert positions to Cartesian coordinates for visualization</span>
 <span class="n">atoms_after</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">lat</span><span class="p">))</span>
-<span class="n">atoms_after</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">elm</span>
-<span class="n">labels_after</span> <span class="o">=</span> <span class="p">[</span><span class="n">elm</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;:</span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">elm</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">)]</span>
+<span class="n">atoms_after</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">elm</span>
+<span class="n">labels_after</span> <span class="o">=</span> <span class="p">[</span><span class="n">elm</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;:</span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">elm</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">elm</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">dpos</span><span class="p">)]</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Changing the the second atom from B to N
@@ -615,15 +623,47 @@ Positions in Direct coordinates after substitution:
 <span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">border</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="c1"># Before substitution</span>
 <span class="n">plotter</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">unit_cell</span><span class="o">.</span><span class="n">delaunay_3d</span><span class="p">()</span><span class="o">.</span><span class="n">extract_feature_edges</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">render_lines_as_tubes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">plotter</span><span class="o">.</span><span class="n">add_point_labels</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">atoms_before</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels_before</span><span class="p">,</span> <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">always_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">atoms_before</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="s1">&#39;atoms&#39;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">unit_cell</span><span class="o">.</span><span class="n">delaunay_3d</span><span class="p">()</span><span class="o">.</span><span class="n">extract_feature_edges</span><span class="p">(),</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">render_lines_as_tubes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_point_labels</span><span class="p">(</span>
+    <span class="n">points</span><span class="o">=</span><span class="n">atoms_before</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels_before</span><span class="p">,</span>
+    <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">always_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">atoms_before</span><span class="p">,</span>
+    <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;atoms&quot;</span><span class="p">,</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">plotter</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="s2">&quot;Before substitution&quot;</span><span class="p">)</span>
 <span class="c1"># After substitution</span>
 <span class="n">plotter</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">unit_cell</span><span class="o">.</span><span class="n">delaunay_3d</span><span class="p">()</span><span class="o">.</span><span class="n">extract_feature_edges</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">render_lines_as_tubes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">plotter</span><span class="o">.</span><span class="n">add_point_labels</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">atoms_after</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels_after</span><span class="p">,</span> <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">always_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">atoms_after</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="s1">&#39;atoms&#39;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">unit_cell</span><span class="o">.</span><span class="n">delaunay_3d</span><span class="p">()</span><span class="o">.</span><span class="n">extract_feature_edges</span><span class="p">(),</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">render_lines_as_tubes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_point_labels</span><span class="p">(</span>
+    <span class="n">points</span><span class="o">=</span><span class="n">atoms_after</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels_after</span><span class="p">,</span>
+    <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">always_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">atoms_after</span><span class="p">,</span>
+    <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;atoms&quot;</span><span class="p">,</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">plotter</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="s2">&quot;After substitution&quot;</span><span class="p">)</span>
 <span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -634,26 +674,50 @@ Positions in Direct coordinates after substitution:
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a function to create a GIF visualization of the atomic structure</span>
 <span class="k">def</span> <span class="nf">create_gif</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">unit_cell</span><span class="p">,</span> <span class="n">save_file</span><span class="p">):</span>
     <span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
-    <span class="n">title</span> <span class="o">=</span> <span class="n">save_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">save_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">plotter</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">unit_cell</span><span class="o">.</span><span class="n">delaunay_3d</span><span class="p">()</span><span class="o">.</span><span class="n">extract_feature_edges</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">render_lines_as_tubes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">plotter</span><span class="o">.</span><span class="n">add_point_labels</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">always_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">scalars</span><span class="o">=</span><span class="s1">&#39;atoms&#39;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">unit_cell</span><span class="o">.</span><span class="n">delaunay_3d</span><span class="p">()</span><span class="o">.</span><span class="n">extract_feature_edges</span><span class="p">(),</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">render_lines_as_tubes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_point_labels</span><span class="p">(</span>
+        <span class="n">points</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">show_points</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">always_visible</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">atoms</span><span class="p">,</span>
+        <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;atoms&quot;</span><span class="p">,</span>
+        <span class="n">point_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_scalar_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">generate_orbital_path</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
     <span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">save_file</span><span class="p">))</span>
     <span class="n">plotter</span><span class="o">.</span><span class="n">orbit_on_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">write_frames</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viewup</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
     <span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+
 <span class="c1"># Create GIFs for atomic structures before and after substitution</span>
-<span class="n">create_gif</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms_before</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels_before</span><span class="p">,</span> <span class="n">unit_cell</span><span class="o">=</span><span class="n">unit_cell</span><span class="p">,</span> <span class="n">save_file</span><span class="o">=</span><span class="s1">&#39;atoms_before.gif&#39;</span><span class="p">)</span>
-<span class="n">create_gif</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms_after</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels_after</span><span class="p">,</span> <span class="n">unit_cell</span><span class="o">=</span><span class="n">unit_cell</span><span class="p">,</span> <span class="n">save_file</span><span class="o">=</span><span class="s1">&#39;atoms_after.gif&#39;</span><span class="p">)</span>
+<span class="n">create_gif</span><span class="p">(</span>
+    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms_before</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels_before</span><span class="p">,</span>
+    <span class="n">unit_cell</span><span class="o">=</span><span class="n">unit_cell</span><span class="p">,</span>
+    <span class="n">save_file</span><span class="o">=</span><span class="s2">&quot;atoms_before.gif&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">create_gif</span><span class="p">(</span>
+    <span class="n">atoms</span><span class="o">=</span><span class="n">atoms_after</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">labels_after</span><span class="p">,</span>
+    <span class="n">unit_cell</span><span class="o">=</span><span class="n">unit_cell</span><span class="p">,</span>
+    <span class="n">save_file</span><span class="o">=</span><span class="s2">&quot;atoms_after.gif&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
 <li><img src="../../_images/sphx_glr_plot_subsitution_pyposcar_002.gif" srcset="../../_images/sphx_glr_plot_subsitution_pyposcar_002.gif" alt="plot subsitution pyposcar" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_subsitution_pyposcar_003.gif" srcset="../../_images/sphx_glr_plot_subsitution_pyposcar_003.gif" alt="plot subsitution pyposcar" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.688 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.542 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-06-pyposcar-plot-subsitution-pyposcar-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c36ddad0d6a8eda5e730849b832d4505/plot_subsitution_pyposcar.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_subsitution_pyposcar.ipynb</span></code></a></p>
@@ -680,12 +744,12 @@ Positions in Direct coordinates after substitution:
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_rdf_cutoff_pyposcar.html"
+       href="plot_finding_defects_pyposcar.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Analyzing Radial Distribution Functions (RDF)</p>
+        <p class="prev-next-title">Finding defects in a POSCAR file</p>
       </div>
     </a>
     <a class="right-next"

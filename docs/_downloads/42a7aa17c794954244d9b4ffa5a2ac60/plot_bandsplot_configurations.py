@@ -25,13 +25,21 @@ Before diving into plotting, we need to download the example files. Use the foll
 """
 
 import os
+
 import pyprocar
 
 # Define the directory containing the example data
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}spin-polarized-colinear{os.sep}bands"
-code='vasp'
-spins=[0,1]
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR,
+    "examples",
+    "Fe",
+    "vasp",
+    "spin-polarized-colinear",
+    "bands",
+)
+code = "vasp"
+spins = [0, 1]
 
 ###############################################################################
 
@@ -43,11 +51,11 @@ spins=[0,1]
 #
 
 # Path to the configuration files in the package
-config_path = os.path.join(pyprocar.__path__[0], 'cfg')
+config_path = os.path.join(pyprocar.__path__[0], "cfg")
 print(f"Configuration files are located at: {config_path}")
 
 # Print the configurations
-pyprocar.bandsplot(code=code,dirname=data_dir,fermi=5.590136,print_plot_opts=True)
+pyprocar.bandsplot(code=code, dirname=data_dir, fermi=5.590136, print_plot_opts=True)
 
 ###############################################################################
 
@@ -61,15 +69,15 @@ pyprocar.bandsplot(code=code,dirname=data_dir,fermi=5.590136,print_plot_opts=Tru
 pyprocar.bandsplot(
     code=code,
     dirname=data_dir,
-    mode='parametric',
+    mode="parametric",
     fermi=5.590136,
     atoms=[0],
-    orbitals=[4,5,6,7,8],
-    cmap='viridis',  # Colormap
+    orbitals=[4, 5, 6, 7, 8],
+    cmap="viridis",  # Colormap
     clim=[0, 1],  # Color limits
-    fermi_color='red',  # Fermi line color
-    fermi_linestyle='--',  # Fermi line linestyle
-    fermi_linewidth=2.0  # Fermi line linewidth
+    fermi_color="red",  # Fermi line color
+    fermi_linestyle="--",  # Fermi line linestyle
+    fermi_linewidth=2.0,  # Fermi line linewidth
 )
 
 
@@ -84,12 +92,12 @@ pyprocar.bandsplot(
 pyprocar.bandsplot(
     code=code,
     dirname=data_dir,
-    mode='scatter',
+    mode="scatter",
     fermi=5.590136,
     atoms=[0],
-    orbitals=[4,5,6,7,8],
-    marker=['v','o'],  # Marker style
-    markersize=[10,5]  # Marker size list for the 2 spin plots
+    orbitals=[4, 5, 6, 7, 8],
+    marker=["v", "o"],  # Marker style
+    markersize=[10, 5],  # Marker size list for the 2 spin plots
 )
 
 ###############################################################################
@@ -103,11 +111,10 @@ pyprocar.bandsplot(
 pyprocar.bandsplot(
     code=code,
     dirname=data_dir,
-    mode='scatter',
+    mode="scatter",
     fermi=5.590136,
     atoms=[0],
-    orbitals=[4,5,6,7,8],
+    orbitals=[4, 5, 6, 7, 8],
     figure_size=(10, 6),  # Figure size (width, height)
-    dpi=300  # Dots per inch
+    dpi=300,  # Dots per inch
 )
-

@@ -37,18 +37,26 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-26
+.. GENERATED FROM PYTHON SOURCE LINES 24-25
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-32
+.. GENERATED FROM PYTHON SOURCE LINES 25-38
 
 .. code-block:: Python
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}BiSb_monolayer{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "BiSb_monolayer",
+        "vasp",
+        "non-colinear",
+        "fermi",
+    )
 
 
 
@@ -57,26 +65,27 @@ importing pyprocar and specifying local data_dir
 
 
 
+.. GENERATED FROM PYTHON SOURCE LINES 39-42
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-36
-
-energy = 0.60 sx projection no arrows 
+energy = 0.60 sx projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-46
+.. GENERATED FROM PYTHON SOURCE LINES 42-54
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=0.60,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   no_arrow=True,
-                   spin_projection='x',
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=0.60,
+        fermi=-1.1904,
+        spin_texture=True,
+        no_arrow=True,
+        spin_projection="x",
+        plot_color_bar=True,
+    )
 
 
 
@@ -99,7 +108,7 @@ energy = 0.60 sx projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -119,7 +128,7 @@ energy = 0.60 sx projection no arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -139,8 +148,6 @@ energy = 0.60 sx projection no arrows
                 Here is a list modes : plain , plain_bands , parametric
                 --------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 WARNING : Make sure the kmesh has kz points with kz=0.0 +- 0.01
                 ----------------------------------------------------------------------------------------------------------
@@ -151,25 +158,27 @@ energy = 0.60 sx projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-50
+.. GENERATED FROM PYTHON SOURCE LINES 55-58
 
-energy = 0.60 sy projection no arrows 
+energy = 0.60 sy projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-61
+.. GENERATED FROM PYTHON SOURCE LINES 58-71
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=0.60,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   no_arrow=True,
-                   spin_projection='y',
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=0.60,
+        fermi=-1.1904,
+        spin_texture=True,
+        no_arrow=True,
+        spin_projection="y",
+        plot_color_bar=True,
+    )
 
 
 
@@ -193,7 +202,7 @@ energy = 0.60 sy projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -213,7 +222,7 @@ energy = 0.60 sy projection no arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -243,25 +252,27 @@ energy = 0.60 sy projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-65
+.. GENERATED FROM PYTHON SOURCE LINES 72-75
 
-energy = 0.60 sz projection no arrows 
+energy = 0.60 sz projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-75
+.. GENERATED FROM PYTHON SOURCE LINES 75-87
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=0.60,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   no_arrow=True,
-                   spin_projection='z',
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=0.60,
+        fermi=-1.1904,
+        spin_texture=True,
+        no_arrow=True,
+        spin_projection="z",
+        plot_color_bar=True,
+    )
 
 
 
@@ -284,7 +295,7 @@ energy = 0.60 sz projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -304,7 +315,7 @@ energy = 0.60 sz projection no arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -334,25 +345,27 @@ energy = 0.60 sz projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-79
+.. GENERATED FROM PYTHON SOURCE LINES 88-91
 
-energy = -0.90 sx projection no arrows 
+energy = -0.90 sx projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-89
+.. GENERATED FROM PYTHON SOURCE LINES 91-103
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=-0.90,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   no_arrow=True,
-                   spin_projection='x',
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=-0.90,
+        fermi=-1.1904,
+        spin_texture=True,
+        no_arrow=True,
+        spin_projection="x",
+        plot_color_bar=True,
+    )
 
 
 
@@ -375,7 +388,7 @@ energy = -0.90 sx projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -395,7 +408,7 @@ energy = -0.90 sx projection no arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -425,25 +438,27 @@ energy = -0.90 sx projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-93
+.. GENERATED FROM PYTHON SOURCE LINES 104-107
 
-energy = -0.90 sy projection no arrows 
+energy = -0.90 sy projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 93-104
+.. GENERATED FROM PYTHON SOURCE LINES 107-120
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=-0.90,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   no_arrow=True,
-                   spin_projection='y',
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=-0.90,
+        fermi=-1.1904,
+        spin_texture=True,
+        no_arrow=True,
+        spin_projection="y",
+        plot_color_bar=True,
+    )
 
 
 
@@ -467,7 +482,7 @@ energy = -0.90 sy projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -487,7 +502,7 @@ energy = -0.90 sy projection no arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -517,25 +532,27 @@ energy = -0.90 sy projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-108
+.. GENERATED FROM PYTHON SOURCE LINES 121-124
 
-energy = -0.90 sz projection no arrows 
+energy = -0.90 sz projection no arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-119
+.. GENERATED FROM PYTHON SOURCE LINES 124-137
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=-0.90,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   no_arrow=True,
-                   spin_projection='z',
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=-0.90,
+        fermi=-1.1904,
+        spin_texture=True,
+        no_arrow=True,
+        spin_projection="z",
+        plot_color_bar=True,
+    )
 
 
 
@@ -559,7 +576,7 @@ energy = -0.90 sz projection no arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -579,7 +596,7 @@ energy = -0.90 sz projection no arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -609,26 +626,28 @@ energy = -0.90 sz projection no arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-123
+.. GENERATED FROM PYTHON SOURCE LINES 138-141
 
-energy = 0.60 sx projection with arrows 
+energy = 0.60 sx projection with arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-134
+.. GENERATED FROM PYTHON SOURCE LINES 141-154
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=0.60,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   spin_projection='x',
-                   arrow_size=3,
-                   arrow_density=6,
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=0.60,
+        fermi=-1.1904,
+        spin_texture=True,
+        spin_projection="x",
+        arrow_size=3,
+        arrow_density=6,
+        plot_color_bar=True,
+    )
 
 
 
@@ -651,7 +670,7 @@ energy = 0.60 sx projection with arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -671,7 +690,7 @@ energy = 0.60 sx projection with arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -701,26 +720,28 @@ energy = 0.60 sx projection with arrows
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-138
+.. GENERATED FROM PYTHON SOURCE LINES 155-158
 
-energy = -0.90 sx projection with arrows 
+energy = -0.90 sx projection with arrows
 +++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-148
+.. GENERATED FROM PYTHON SOURCE LINES 158-170
 
 .. code-block:: Python
 
 
-    pyprocar.fermi2D(code = 'vasp',
-                   dirname=data_dir,
-                   energy=-0.90,
-                   fermi=-1.1904,
-                   spin_texture=True,
-                   spin_projection='x',
-                   arrow_size=3,
-                   arrow_density=6,
-                   plot_color_bar=True)
+    pyprocar.fermi2D(
+        code="vasp",
+        dirname=data_dir,
+        energy=-0.90,
+        fermi=-1.1904,
+        spin_texture=True,
+        spin_projection="x",
+        arrow_size=3,
+        arrow_density=6,
+        plot_color_bar=True,
+    )
 
 
 
@@ -742,7 +763,7 @@ energy = -0.90 sx projection with arrows
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -762,7 +783,7 @@ energy = -0.90 sx projection with arrows
     - Logan Lang
     - Freddy Farah
     
-    dirname         :  C:\Users\lllang\Desktop\Current_Projects\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
+    dirname         :  Z:\data\pyprocar\data\examples\BiSb_monolayer\vasp\non-colinear\fermi
     bands           :  None
     atoms           :  None
     orbitals        :  None
@@ -795,7 +816,7 @@ energy = -0.90 sx projection with arrows
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 1.724 seconds)
+   **Total running time of the script:** (1 minutes 3.790 seconds)
 
 
 .. _sphx_glr_download_examples_03-fermi2d_plot_rashba_spin_spliting.py:

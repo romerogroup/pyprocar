@@ -38,9 +38,10 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-colinear',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-25
+.. GENERATED FROM PYTHON SOURCE LINES 23-26
 
 .. code-block:: Python
+
 
     # sphinx_gallery_thumbnail_number = 1
 
@@ -51,12 +52,13 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-31
+.. GENERATED FROM PYTHON SOURCE LINES 27-33
 
 .. code-block:: Python
 
 
     import pyvista
+
     # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
     pyvista.OFF_SCREEN = True
 
@@ -67,30 +69,28 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-33
+.. GENERATED FROM PYTHON SOURCE LINES 34-35
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-51
+.. GENERATED FROM PYTHON SOURCE LINES 35-51
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}fermi"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-colinear", "fermi"
+    )
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
-    # Symmetry only works for specfic space groups currently. 
+    # Symmetry only works for specfic space groups currently.
     # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
-    fermiHandler = pyprocar.FermiHandler(
-                                        code="vasp",
-                                        dirname=data_dir,
-                                        apply_symmetry=True)
-
-
+    fermiHandler = pyprocar.FermiHandler(code="vasp", dirname=data_dir, apply_symmetry=True)
 
 
 
@@ -101,8 +101,6 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
@@ -118,16 +116,19 @@ Spin Texture mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-62
+.. GENERATED FROM PYTHON SOURCE LINES 56-65
 
 .. code-block:: Python
 
-    fermiHandler.plot_fermi_surface(mode="spin_texture",
-                                  spin_texture=True,
-                                  arrow_size=0.1,
-                                  show=True,)
-
-
+    fermiHandler.plot_fermi_surface(
+        mode="spin_texture",
+        spin_texture=True,
+        supercell=[2, 2, 2],
+        texture_size=0.2,
+        show=True,
+        max_distance=0.3,  # This parameter controls the max distance to search for adjacent points for interpolation.
+        # Lowering could speed the ploting, but too low could make the interpolation fail
+    )
 
 
 
@@ -159,7 +160,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.979 seconds)
+   **Total running time of the script:** (0 minutes 10.006 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_spin_texture.py:

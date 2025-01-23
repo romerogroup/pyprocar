@@ -54,18 +54,35 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Comparing band structures example.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in VASP.">
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_compare_bands_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_vasp_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Comparing band structures</div>
+      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in VASP</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_qe_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
     </div>
 
 
@@ -88,23 +105,6 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in VASP.">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_vasp_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in VASP</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="Often it is needed to search for localized modes within the band structure, typical examples are surface/interface states and defect levels.  The usual procedure for detecting them is looking for bands with a large projection around the atoms at the surface or defect.  This procedure is both cumbersome for the user and error-prone. For instance, the lowest unoccupied levels of the neutral C_N defect in h-BN has practically no projection on the defect atom and its nearest neighbors.  This delayed its identification as a single-photon emitter.[jara2021,auburger2021]  A much simpler way to detect these localized levels is by means of the Inverse Participation Ratio, defined as">
 
 .. only:: html
@@ -122,18 +122,18 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plotting non colinear band structures in Quantum Espresso.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Comparing band structures example.">
 
 .. only:: html
 
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_noncolinear_qe_thumb.png
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_compare_bands_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py`
+  :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Plotting non colinear band structures in Quantum Espresso</div>
+      <div class="sphx-glr-thumbnail-title">Comparing band structures</div>
     </div>
 
 
@@ -190,23 +190,6 @@ These examples demonstrate the band structure plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the bandsplot function.">
-
-.. only:: html
-
-  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_bandsplot_configurations_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting 2D band structure example.">
 
 .. only:: html
@@ -219,6 +202,23 @@ These examples demonstrate the band structure plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting 2D band structure</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting band structures using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the bandsplot function.">
+
+.. only:: html
+
+  .. image:: /examples/00-band_structure/images/thumb/sphx_glr_plot_bandsplot_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
     </div>
 
 
@@ -276,23 +276,6 @@ These examples demonstrate the density of states plotting capabilities.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of states (DOS) using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the dosplot function.">
-
-.. only:: html
-
-  .. image:: /examples/01-dos/images/thumb/sphx_glr_plot_dosplot_configurations_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="Plotting density example.">
 
 .. only:: html
@@ -322,6 +305,23 @@ These examples demonstrate the density of states plotting capabilities.
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Plotting spin-polarized density of states</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates how to utilize various configurations for plotting the density of states (DOS) using the pyprocar package. It provides a structured way to explore and demonstrate different configurations for the dosplot function.">
+
+.. only:: html
+
+  .. image:: /examples/01-dos/images/thumb/sphx_glr_plot_dosplot_configurations_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_01-dos_plot_dosplot_configurations.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting with Configurations in pyprocar</div>
     </div>
 
 
@@ -489,23 +489,6 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_spin_texture_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin_texture.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Plotting fermi3d spin_texture</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
-
-.. only:: html
-
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_plain_thumb.png
     :alt:
 
@@ -540,6 +523,23 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_spin_texture_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin_texture.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plotting fermi3d spin_texture</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Symmetry does not currently work! Make sure for fermi surface calculations turn off symmetry">
+
+.. only:: html
+
   .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_isovalue_gif_thumb.gif
     :alt:
 
@@ -557,14 +557,14 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_spin-polarized_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_de_hass_van_alphen_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin-polarized.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_de_hass_van_alphen.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Plotting fermi3d spin-polarized</div>
+      <div class="sphx-glr-thumbnail-title">Showing how to get van alphen fequencies from the fermi surface</div>
     </div>
 
 
@@ -574,14 +574,14 @@ Symmetry does not currently work! Make sure for fermi surface calculations turn 
 
 .. only:: html
 
-  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_de_hass_van_alphen_thumb.png
+  .. image:: /examples/04-fermi3d/images/thumb/sphx_glr_plot_fermi3d_spin-polarized_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_04-fermi3d_plot_de_hass_van_alphen.py`
+  :ref:`sphx_glr_examples_04-fermi3d_plot_fermi3d_spin-polarized.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Showing how to get van alphen fequencies from the fermi surface</div>
+      <div class="sphx-glr-thumbnail-title">Plotting fermi3d spin-polarized</div>
     </div>
 
 
@@ -742,23 +742,6 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to automatically find defects in a POSCAR file">
-
-.. only:: html
-
-  .. image:: /examples/06-PyPoscar/images/thumb/sphx_glr_plot_finding_defects_pyposcar_thumb.gif
-    :alt:
-
-  :ref:`sphx_glr_examples_06-PyPoscar_plot_finding_defects_pyposcar.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Finding defects in a POSCAR file</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the radial distribution functions (RDF) of an atomic structure. The RDF provides insights into the probability of finding an atom at a certain distance from another. This can be useful for understanding the local environment of atoms.">
 
 .. only:: html
@@ -771,6 +754,23 @@ These examples demonstrate the PyPoscar module
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Analyzing Radial Distribution Functions (RDF)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to automatically find defects in a POSCAR file">
+
+.. only:: html
+
+  .. image:: /examples/06-PyPoscar/images/thumb/sphx_glr_plot_finding_defects_pyposcar_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_examples_06-PyPoscar_plot_finding_defects_pyposcar.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Finding defects in a POSCAR file</div>
     </div>
 
 

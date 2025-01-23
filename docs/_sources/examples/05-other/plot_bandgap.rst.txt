@@ -43,9 +43,10 @@ The bandgap calculation should be done for non-self consistent (band structure) 
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-31
+.. GENERATED FROM PYTHON SOURCE LINES 28-32
 
 .. code-block:: Python
+
 
     # sphinx_gallery_thumbnail_number = 1
 
@@ -57,20 +58,24 @@ The bandgap calculation should be done for non-self consistent (band structure) 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-33
+.. GENERATED FROM PYTHON SOURCE LINES 33-34
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-41
+.. GENERATED FROM PYTHON SOURCE LINES 34-46
 
 .. code-block:: Python
 
 
     import os
+
     import numpy as np
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "bands"
+    )
 
     band_gap = pyprocar.bandgap(dirname=data_dir, code="vasp")
 
@@ -81,8 +86,6 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
     Band Gap = 0 eV 
 
 
@@ -91,7 +94,7 @@ importing pyprocar and specifying local data_dir
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.132 seconds)
+   **Total running time of the script:** (0 minutes 0.119 seconds)
 
 
 .. _sphx_glr_download_examples_05-other_plot_bandgap.py:

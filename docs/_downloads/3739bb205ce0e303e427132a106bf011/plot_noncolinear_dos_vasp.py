@@ -22,9 +22,12 @@ First download the example files with the code below. Then replace data_dir belo
 ###############################################################################
 # importing pyprocar and specifying local data_dir
 import os
+
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}dos"
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-colinear", "dos"
+)
 
 
 ###############################################################################
@@ -32,19 +35,20 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 # +++++++++++++++++++++++++++++++++++++++
 #
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
-# 
 #
 #
-atoms=[0]
-orbitals=[4,5,6,7,8]
-spins=[0]
+#
+atoms = [0]
+orbitals = [4, 5, 6, 7, 8]
+spins = [0]
 
 pyprocar.dosplot(
-                code='vasp', 
-                mode='parametric',
-                fermi=5.5962,
-                atoms=atoms,
-                orbitals=orbitals,
-                clim=[0,1],
-                spins=spins,
-                dirname=data_dir)
+    code="vasp",
+    mode="parametric",
+    fermi=5.5962,
+    atoms=atoms,
+    orbitals=orbitals,
+    clim=[0, 1],
+    spins=spins,
+    dirname=data_dir,
+)

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**03:59.403** total execution time for 11 files **from examples\00-band_structure**:
+**04:02.801** total execution time for 11 files **from examples\00-band_structure**:
 
 .. container::
 
@@ -33,35 +33,35 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_00-band_structure_plot_2d_bands.py` (``plot_2d_bands.py``)
-     - 02:44.803
+     - 02:44.356
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_autobands.py` (``plot_autobands.py``)
-     - 00:22.194
+     - 00:23.127
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_ipr.py` (``plot_ipr.py``)
-     - 00:20.169
+     - 00:21.526
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_unfolding.py` (``plot_unfolding.py``)
-     - 00:19.262
+     - 00:20.196
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_colinear.py` (``plot_colinear.py``)
-     - 00:02.716
+     - 00:02.830
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_bandsplot_configurations.py` (``plot_bandsplot_configurations.py``)
-     - 00:02.357
-     - 0.0
-   * - :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py` (``plot_spin_polarized.py``)
-     - 00:02.101
+     - 00:02.433
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_vasp.py` (``plot_noncolinear_vasp.py``)
-     - 00:01.839
+     - 00:02.320
      - 0.0
-   * - :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py` (``plot_compare_bands.py``)
-     - 00:01.453
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_spin_polarized.py` (``plot_spin_polarized.py``)
+     - 00:02.218
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_noncolinear_qe.py` (``plot_noncolinear_qe.py``)
-     - 00:01.416
+     - 00:01.505
+     - 0.0
+   * - :ref:`sphx_glr_examples_00-band_structure_plot_compare_bands.py` (``plot_compare_bands.py``)
+     - 00:01.161
      - 0.0
    * - :ref:`sphx_glr_examples_00-band_structure_plot_atomic_levels.py` (``plot_atomic_levels.py``)
-     - 00:01.093
+     - 00:01.129
      - 0.0

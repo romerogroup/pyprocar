@@ -36,18 +36,26 @@ First, specify the data directory where the band structure data is located.
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='2d_bands')
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-26
+.. GENERATED FROM PYTHON SOURCE LINES 24-25
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-33
+.. GENERATED FROM PYTHON SOURCE LINES 25-39
 
 .. code-block:: Python
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}graphene{os.sep}vasp{os.sep}non-spin-polarized{os.sep}2d_bands"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "graphene",
+        "vasp",
+        "non-spin-polarized",
+        "2d_bands",
+    )
 
 
 
@@ -57,29 +65,40 @@ importing pyprocar and specifying local data_dir
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 34-36
+.. GENERATED FROM PYTHON SOURCE LINES 40-42
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-50
+.. GENERATED FROM PYTHON SOURCE LINES 42-68
 
 .. code-block:: Python
 
-    spins=[0]
-    handler = pyprocar.BandStructure2DHandler(code='vasp',
-                                              dirname=data_dir,
-                                              fermi=-0.795606,
-                                              apply_symmetry=False,
-                                              )
-    handler.plot_band_structure(mode='plain',
-                                add_fermi_plane=True,
-                                bands=[3,4],
-                                fermi_plane_size=4,
-                                energy_lim=[-2.5,0.8],
-                                extended_zone_directions=[[1,0,0],[0,1,0],[-1,0,0],[0,-1,0],[1,-1,0],[-1,1,0],[-1,-1,0],[[1,1,0]]],
-                                spins=spins)
+    spins = [0]
+    handler = pyprocar.BandStructure2DHandler(
+        code="vasp",
+        dirname=data_dir,
+        fermi=-0.795606,
+        apply_symmetry=False,
+    )
+    handler.plot_band_structure(
+        mode="plain",
+        add_fermi_plane=True,
+        bands=[3, 4],
+        fermi_plane_size=4,
+        energy_lim=[-2.5, 0.8],
+        extended_zone_directions=[
+            [1, 0, 0],
+            [0, 1, 0],
+            [-1, 0, 0],
+            [0, -1, 0],
+            [1, -1, 0],
+            [-1, 1, 0],
+            [-1, -1, 0],
+            [[1, 1, 0]],
+        ],
+        spins=spins,
+    )
 
 
 
@@ -94,8 +113,6 @@ Plain mode
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -116,24 +133,25 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-53
+.. GENERATED FROM PYTHON SOURCE LINES 69-71
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-63
+.. GENERATED FROM PYTHON SOURCE LINES 71-82
 
 .. code-block:: Python
 
 
-    atoms=[0,1]
-    orbitals=[1,2,3]
-    spins=[0]
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
-    handler.plot_band_structure(mode='parametric',
-                               atoms=atoms,
-                               orbitals=orbitals,
-                               spins=spins)
+    atoms = [0, 1]
+    orbitals = [1, 2, 3]
+    spins = [0]
+    handler = pyprocar.BandStructure2DHandler(
+        code="vasp", dirname=data_dir, fermi=-0.795606, apply_symmetry=False
+    )
+    handler.plot_band_structure(
+        mode="parametric", atoms=atoms, orbitals=orbitals, spins=spins
+    )
 
 
 
@@ -148,8 +166,6 @@ Parametric mode
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -168,24 +184,28 @@ Parametric mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-66
+.. GENERATED FROM PYTHON SOURCE LINES 83-85
 
 Property Projection mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-76
+.. GENERATED FROM PYTHON SOURCE LINES 85-99
 
 .. code-block:: Python
 
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-0.795606,apply_symmetry=False)
-    handler.plot_band_structure(mode='property_projection',
-                               property_name='band_velocity',
-                               bands=[3,4],
-                               fermi_plane_size=4,
-                               scalar_bar_position_x=0.3,
-                               energy_lim=[-2.5,0.8],
-                               scalar_bar_title=r'Band Velocity ($\frac{m}{s}$)',
-                               add_fermi_plane=True,)
+    handler = pyprocar.BandStructure2DHandler(
+        code="vasp", dirname=data_dir, fermi=-0.795606, apply_symmetry=False
+    )
+    handler.plot_band_structure(
+        mode="property_projection",
+        property_name="band_velocity",
+        bands=[3, 4],
+        fermi_plane_size=4,
+        scalar_bar_position_x=0.3,
+        energy_lim=[-2.5, 0.8],
+        scalar_bar_title=r"Band Velocity ($\frac{m}{s}$)",
+        add_fermi_plane=True,
+    )
 
 
 
@@ -200,8 +220,6 @@ Property Projection mode
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -223,35 +241,44 @@ Property Projection mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 77-79
+.. GENERATED FROM PYTHON SOURCE LINES 100-102
 
 Spin Texture mode
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-99
+.. GENERATED FROM PYTHON SOURCE LINES 102-131
 
 .. code-block:: Python
 
 
-    data_dir =  os.path.join(pyprocar.utils.ROOT,'data','examples','BiSb_monolayer','vasp','non-colinear','fermi')
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "BiSb_monolayer",
+        "vasp",
+        "non-colinear",
+        "fermi",
+    )
 
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    handler = pyprocar.BandStructure2DHandler(code='vasp',dirname=data_dir,fermi=-1.1904,apply_symmetry=False)
-    handler.plot_band_structure(mode='spin_texture',
-                               spin_texture=True,
-                               atoms=atoms,
-                               orbitals=orbitals,
-                               add_fermi_plane=True,
-                               fermi_plane_size=2,
-                               energy_lim=[-2,2],
-                               fermi_text_position=[0,0.5,0],
-                               scalar_bar_position_x=0.3,
-
-                               clip_brillouin_zone_factor=1,
-                               surface_clim=[-0.5,0.5])
-
+    atoms = [0]
+    orbitals = [4, 5, 6, 7, 8]
+    handler = pyprocar.BandStructure2DHandler(
+        code="vasp", dirname=data_dir, fermi=-1.1904, apply_symmetry=False
+    )
+    handler.plot_band_structure(
+        mode="spin_texture",
+        spin_texture=True,
+        atoms=atoms,
+        orbitals=orbitals,
+        add_fermi_plane=True,
+        fermi_plane_size=2,
+        energy_lim=[-2, 2],
+        fermi_text_position=[0, 0.5, 0],
+        scalar_bar_position_x=0.3,
+        clip_brillouin_zone_factor=1,
+        surface_clim=[-0.5, 0.5],
+    )
 
 
 
@@ -265,8 +292,6 @@ Spin Texture mode
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     ----------------------------------------------------------------------------------------------------------
                     There are additional plot options that are defined in a configuration file. 
@@ -288,7 +313,7 @@ Spin Texture mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 44.803 seconds)
+   **Total running time of the script:** (2 minutes 44.356 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_2d_bands.py:

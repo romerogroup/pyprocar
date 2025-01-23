@@ -22,9 +22,17 @@ First download the example files with the code below. Then replace data_dir belo
 ###############################################################################
 # importing pyprocar and specifying local data_dir
 import os
+
 import pyprocar
 
-data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-colinear{os.sep}bands"
+data_dir = os.path.join(
+    pyprocar.utils.DATA_DIR,
+    "examples",
+    "Fe",
+    "vasp",
+    "non-colinear",
+    "bands",
+)
 
 
 ###########################
@@ -34,30 +42,25 @@ data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}
 # +++++++++++++++++++++++++++++++++++++++
 #
 #
-pyprocar.bandsplot(
-                code='vasp', 
-                mode='plain',
-                fermi=5.596151,
-                dirname=data_dir)
+pyprocar.bandsplot(code="vasp", mode="plain", fermi=5.596151, dirname=data_dir)
 
 ###############################################################################
 # Parametric mode
 # +++++++++++++++++++++++++++++++++++++++
 #
 # For details on the meaning of the indices of the atomic projection please refer to the user guide :ref:'atomic_projections'
-# 
+#
 
-atoms=[0]
-orbitals=[4,5,6,7,8]
-spins=[0]
+atoms = [0]
+orbitals = [4, 5, 6, 7, 8]
+spins = [0]
 
 pyprocar.bandsplot(
-                code='vasp', 
-                mode='parametric',
-                fermi=5.596151,
-                atoms=atoms,
-                orbitals=orbitals,
-                spins=spins,
-                dirname=data_dir)
-
-
+    code="vasp",
+    mode="parametric",
+    fermi=5.596151,
+    atoms=atoms,
+    orbitals=orbitals,
+    spins=spins,
+    dirname=data_dir,
+)

@@ -46,17 +46,32 @@ First download the example files with the code below. Then replace data_dir belo
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-39
+.. GENERATED FROM PYTHON SOURCE LINES 30-54
 
 .. code-block:: Python
 
     import os
-    import pyprocar
 
     import numpy as np
 
-    supercell_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}MgB2_unfold{os.sep}vasp{os.sep}non-spin-polarized{os.sep}supercell_bands"
-    primitive_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}MgB2_unfold{os.sep}vasp{os.sep}non-spin-polarized{os.sep}primitive_bands"
+    import pyprocar
+
+    supercell_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "MgB2_unfold",
+        "vasp",
+        "non-spin-polarized",
+        "supercell_bands",
+    )
+    primitive_dir = os.path.join(
+        pyprocar.utils.DATA_DIR,
+        "examples",
+        "MgB2_unfold",
+        "vasp",
+        "non-spin-polarized",
+        "primitive_bands",
+    )
 
 
 
@@ -66,22 +81,19 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-42
+.. GENERATED FROM PYTHON SOURCE LINES 55-57
 
 Plotting primitive bands
 +++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-51
+.. GENERATED FROM PYTHON SOURCE LINES 57-63
 
 .. code-block:: Python
 
 
     pyprocar.bandsplot(
-                    code='vasp', 
-                    mode='plain',
-                    fermi=4.993523,
-                    elimit=[-15,5],
-                    dirname=primitive_dir)
+        code="vasp", mode="plain", fermi=4.993523, elimit=[-15, 5], dirname=primitive_dir
+    )
 
 
 
@@ -106,38 +118,36 @@ Plotting primitive bands
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 1 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-59
+.. GENERATED FROM PYTHON SOURCE LINES 64-71
 
 Unfolding of the supercell bands
 +++++++++++++++++++++++++++++++++++++++
 
-Here we do unfolding of the supercell bands. In this calculation, 
+Here we do unfolding of the supercell bands. In this calculation,
 the POSCAR and KPOINTS will be different from the primitive cell
 For the POSCAR, we create a 2 2 2 supercell from the primitive.
 For the KPOINTS, the paths need to be changed to reflect the change in the unitcell
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-69
+.. GENERATED FROM PYTHON SOURCE LINES 71-81
 
 .. code-block:: Python
 
 
     pyprocar.unfold(
-            code='vasp',
-            mode='plain',
-            unfold_mode='both',
-            fermi=5.033090,
-            dirname= supercell_dir,
-            elimit=[-15,5],
-            supercell_matrix=np.diag([2, 2, 2]))
-        
-        
+        code="vasp",
+        mode="plain",
+        unfold_mode="both",
+        fermi=5.033090,
+        dirname=supercell_dir,
+        elimit=[-15, 5],
+        supercell_matrix=np.diag([2, 2, 2]),
+    )
+
 
 
 .. image-sg:: /examples/00-band_structure/images/sphx_glr_plot_unfolding_002.png
@@ -158,7 +168,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -187,10 +197,6 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 --------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 900x600 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>)
 
@@ -199,7 +205,7 @@ For the KPOINTS, the paths need to be changed to reflect the change in the unitc
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 19.262 seconds)
+   **Total running time of the script:** (0 minutes 20.196 seconds)
 
 
 .. _sphx_glr_download_examples_00-band_structure_plot_unfolding.py:

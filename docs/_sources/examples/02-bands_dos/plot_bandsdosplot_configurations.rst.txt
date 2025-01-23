@@ -44,16 +44,21 @@ Before diving into plotting, we need to download the example files. Use the foll
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='dos')
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-35
+.. GENERATED FROM PYTHON SOURCE LINES 28-40
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
-    bands_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
-    dos_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}dos"
+    bands_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "bands"
+    )
+    dos_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "dos"
+    )
 
 
 
@@ -62,7 +67,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-63
+.. GENERATED FROM PYTHON SOURCE LINES 41-69
 
 .. code-block:: Python
 
@@ -71,27 +76,28 @@ Before diving into plotting, we need to download the example files. Use the foll
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #
     # This section demonstrates how to plot both band structures and DOS side by side using default settings.
-    # The keywords that work for `bandsplot` and `dosplot` will also work in `bandsdosplot`. 
+    # The keywords that work for `bandsplot` and `dosplot` will also work in `bandsdosplot`.
     # These keyword arguments can be set in `bands_settings` and `dos_settings` as demonstrated below.
     #
 
 
     bands_settings = {
-                      'mode':'plain',
-                      'fermi':5.599480, # This will overide the default fermi value found in bands directory
-                      'dirname': bands_dir
-                      }
+        "mode": "plain",
+        "fermi": 5.599480,  # This will overide the default fermi value found in bands directory
+        "dirname": bands_dir,
+    }
 
     dos_settings = {
-                   'mode':'plain',
-                   'fermi':5.599480,   # This will overide the default fermi value found in dos directory
-                   'dirname': dos_dir
-                    }
+        "mode": "plain",
+        "fermi": 5.599480,  # This will overide the default fermi value found in dos directory
+        "dirname": dos_dir,
+    }
 
-    pyprocar.bandsdosplot(code='vasp',
-                    bands_settings=bands_settings,
-                    dos_settings=dos_settings,
-                    )
+    pyprocar.bandsdosplot(
+        code="vasp",
+        bands_settings=bands_settings,
+        dos_settings=dos_settings,
+    )
 
 
 
@@ -114,7 +120,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -143,8 +149,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
@@ -153,14 +157,12 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-102
+.. GENERATED FROM PYTHON SOURCE LINES 70-109
 
 .. code-block:: Python
 
@@ -173,34 +175,35 @@ Before diving into plotting, we need to download the example files. Use the foll
     #
 
     bands_settings = {
-        'mode': 'scatter',
-        'dirname': bands_dir,
-        'fermi':5.599480, # This will overide the default fermi value found in bands directory
-        'atoms':[0],
-        'orbitals':[4,5,6,7,8],
-        'cmap': 'viridis',
-        'clim': [0, 1],
-        'fermi_color': 'red',
-        'fermi_linestyle': '--',
-        'fermi_linewidth': 2.0
+        "mode": "scatter",
+        "dirname": bands_dir,
+        "fermi": 5.599480,  # This will overide the default fermi value found in bands directory
+        "atoms": [0],
+        "orbitals": [4, 5, 6, 7, 8],
+        "cmap": "viridis",
+        "clim": [0, 1],
+        "fermi_color": "red",
+        "fermi_linestyle": "--",
+        "fermi_linewidth": 2.0,
     }
 
     dos_settings = {
-        'mode': 'parametric',
-        'dirname': dos_dir,
-        'fermi':5.599480,   # This will overide the default fermi value found in dos directory
-        'atoms':[0],
-        'orbitals':[4,5,6,7,8],
-        'cmap': 'viridis',
-        'clim': [0, 1],
-        'marker': ['v', 'o'],
-        'markersize': [10, 5]
+        "mode": "parametric",
+        "dirname": dos_dir,
+        "fermi": 5.599480,  # This will overide the default fermi value found in dos directory
+        "atoms": [0],
+        "orbitals": [4, 5, 6, 7, 8],
+        "cmap": "viridis",
+        "clim": [0, 1],
+        "marker": ["v", "o"],
+        "markersize": [10, 5],
     }
 
-    pyprocar.bandsdosplot(code='vasp',
-                    bands_settings=bands_settings,
-                    dos_settings=dos_settings,
-                    )
+    pyprocar.bandsdosplot(
+        code="vasp",
+        bands_settings=bands_settings,
+        dos_settings=dos_settings,
+    )
 
 
 
@@ -223,7 +226,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -252,8 +255,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
@@ -262,14 +263,12 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 1650x550 with 3 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-127
+.. GENERATED FROM PYTHON SOURCE LINES 110-128
 
 .. code-block:: Python
 
@@ -280,23 +279,17 @@ Before diving into plotting, we need to download the example files. Use the foll
     # This section demonstrates how to adjust the overall figure size and dots per inch (DPI) for the combined plot.
     #
 
-    bands_settings = {
-        'mode': 'scatter',
-        'dirname': bands_dir
-    }
+    bands_settings = {"mode": "scatter", "dirname": bands_dir}
 
-    dos_settings = {
-        'mode': 'parametric',
-        'dirname': dos_dir
-    }
+    dos_settings = {"mode": "parametric", "dirname": dos_dir}
 
-    pyprocar.bandsdosplot(code='vasp',
-                    bands_settings=bands_settings,
-                    dos_settings=dos_settings,
-                    figure_size=(12, 7),
-                    dpi=300
-                    )
-
+    pyprocar.bandsdosplot(
+        code="vasp",
+        bands_settings=bands_settings,
+        dos_settings=dos_settings,
+        figure_size=(12, 7),
+        dpi=300,
+    )
 
 
 
@@ -318,7 +311,7 @@ Before diving into plotting, we need to download the example files. Use the foll
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -347,8 +340,6 @@ Before diving into plotting, we need to download the example files. Use the foll
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
                 ----------------------------------------------------------------------------------------------------------
@@ -361,8 +352,6 @@ Before diving into plotting, we need to download the example files. Use the foll
 
                 Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the energy by the Fermi energy.
                 ----------------------------------------------------------------------------------------------------------
@@ -375,7 +364,7 @@ Before diving into plotting, we need to download the example files. Use the foll
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.877 seconds)
+   **Total running time of the script:** (0 minutes 2.004 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot_configurations.py:

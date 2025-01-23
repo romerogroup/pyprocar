@@ -93,7 +93,7 @@ p.show()
 ###############################################################################
 # Projections
 # +++++++++++++++++++++++++++
-print(ebs.projected.shape)
+print(f"Electron projected shape: {ebs.projected.shape}")
 kpoints["band_0-atom_0-orbital_5-spin-0"] = ebs.projected[:, 0, 0, 0, 4, 0]
 
 p = pv.Plotter()
@@ -109,8 +109,8 @@ p.show()
 ###############################################################################
 # Gradients
 # +++++++++++++++++++++++++++
-print(ebs.bands_gradient.shape)
-kpoints["band_0-gradients"] = ebs.bands_gradient[:, :, 0, 0]
+print(f"Band gradient shape: {ebs.bands_gradient.shape}")
+kpoints["band_0-gradients"] = ebs.bands_gradient[:, 0, 0, :]
 
 # Use the Glyph filter to generate arrows for the vectors
 arrows = kpoints.glyph(orient="band_0-gradients", scale=False, factor=0.08)
@@ -121,8 +121,9 @@ p.show()
 ###############################################################################
 # Band/Fermi velocities
 # +++++++++++++++++++++++++++
-print(ebs.fermi_velocity.shape)
-kpoints["band_0-band_velocity"] = ebs.fermi_velocity[:, :, 0, 0]
+print(f"Fermi velocity shape: {ebs.fermi_velocity.shape}")
+print(f"Fermi speed shape: {ebs.fermi_speed.shape}")
+kpoints["band_0-band_velocity"] = ebs.fermi_velocity[:, 0, 0, :]
 kpoints["band_0-band_speed"] = ebs.fermi_speed[:, 0, 0]
 
 arrows = kpoints.glyph(orient="band_0-band_velocity", scale=False, factor=0.08)
@@ -141,7 +142,9 @@ p.show()
 ###############################################################################
 # Effective mass
 # +++++++++++++++++++++++++++
-print(ebs.harmonic_average_effective_mass.shape)
+print(
+    f"Harmonic average effective mass shape: {ebs.harmonic_average_effective_mass.shape}"
+)
 kpoints["band_0-harmonic_average_effective_mass"] = ebs.harmonic_average_effective_mass[
     :, 0, 0
 ]

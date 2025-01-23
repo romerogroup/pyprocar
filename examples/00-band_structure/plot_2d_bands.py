@@ -101,8 +101,7 @@ handler.plot_band_structure(
 # +++++++++++++++++++++++++++++++++++++++
 
 data_dir = os.path.join(
-    pyprocar.utils.ROOT,
-    "data",
+    pyprocar.utils.DATA_DIR,
     "examples",
     "BiSb_monolayer",
     "vasp",

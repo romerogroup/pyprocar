@@ -38,9 +38,10 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='fermi')
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-25
+.. GENERATED FROM PYTHON SOURCE LINES 23-26
 
 .. code-block:: Python
+
 
     # sphinx_gallery_thumbnail_number = 2
 
@@ -51,12 +52,13 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-31
+.. GENERATED FROM PYTHON SOURCE LINES 27-33
 
 .. code-block:: Python
 
 
     import pyvista
+
     # You do not need this. This is to ensure an image is rendered off screen when generating exmaple gallery.
     pyvista.OFF_SCREEN = True
 
@@ -67,28 +69,28 @@ First download the example files with the code below. Then replace data_dir belo
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-33
+.. GENERATED FROM PYTHON SOURCE LINES 34-35
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-48
+.. GENERATED FROM PYTHON SOURCE LINES 35-50
 
 .. code-block:: Python
 
 
     import os
+
     import pyprocar
 
-    data_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}fermi"
+    data_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "fermi"
+    )
 
 
     # First create the FermiHandler object, this loads the data into memory. Then you can call class methods to plot
-    # Symmetry only works for specfic space groups currently. 
+    # Symmetry only works for specfic space groups currently.
     # For the actual calculations turn off symmetry and set 'apply_symmetry'=False
-    fermiHandler = pyprocar.FermiHandler(
-                                        code="vasp",
-                                        dirname=data_dir,
-                                        apply_symmetry=True)
+    fermiHandler = pyprocar.FermiHandler(code="vasp", dirname=data_dir, apply_symmetry=True)
 
 
 
@@ -98,8 +100,6 @@ importing pyprocar and specifying local data_dir
 
  .. code-block:: none
 
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                     WARNING : Fermi Energy not set! Set `fermi={value}`. By default, using fermi energy found in given directory.
                     ---------------------------------------------------------------------------------------------------------------
@@ -108,21 +108,22 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-53
+.. GENERATED FROM PYTHON SOURCE LINES 51-55
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-59
+.. GENERATED FROM PYTHON SOURCE LINES 55-62
 
 .. code-block:: Python
 
 
-    fermiHandler.plot_fermi_surface(mode="plain",
-                                    show=True,)
-
+    fermiHandler.plot_fermi_surface(
+        mode="plain",
+        show=True,
+    )
 
 
 
@@ -153,28 +154,28 @@ Plain mode
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-64
+.. GENERATED FROM PYTHON SOURCE LINES 63-67
 
 Parametric mode
 +++++++++++++++++++++++++++++++++++++++
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-75
+.. GENERATED FROM PYTHON SOURCE LINES 67-78
 
 .. code-block:: Python
 
 
-    atoms=[0]
-    orbitals=[4,5,6,7,8]
-    spins=[0]
-    fermiHandler.plot_fermi_surface(mode="parametric",
-                                  atoms=atoms,
-                                  orbitals=orbitals,
-                                  spins=spins,
-                                  show=True,)
-
-
+    atoms = [0]
+    orbitals = [4, 5, 6, 7, 8]
+    spins = [0]
+    fermiHandler.plot_fermi_surface(
+        mode="parametric",
+        atoms=atoms,
+        orbitals=orbitals,
+        spins=spins,
+        show=True,
+    )
 
 
 
@@ -205,7 +206,7 @@ Parametric mode
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.601 seconds)
+   **Total running time of the script:** (0 minutes 4.578 seconds)
 
 
 .. _sphx_glr_download_examples_04-fermi3d_plot_fermi3d_plain.py:

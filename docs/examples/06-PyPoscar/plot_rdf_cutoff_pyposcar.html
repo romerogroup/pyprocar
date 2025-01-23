@@ -53,8 +53,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/06-PyPoscar/plot_rdf_cutoff_pyposcar';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Substituting Atoms in a POSCAR File" href="plot_subsitution_pyposcar.html" />
-    <link rel="prev" title="Finding defects in a POSCAR file" href="plot_finding_defects_pyposcar.html" />
+    <link rel="next" title="Finding defects in a POSCAR file" href="plot_finding_defects_pyposcar.html" />
+    <link rel="prev" title="Visualizing Clusters in Bi2Se3 Slab" href="plot_clusters_pyposcar.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="6.2.1" />
@@ -384,24 +384,24 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../00-band_structure/index.html">Band Structure</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_autobands.html">Autobands plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_vasp.html">Plotting non colinear band structures in VASP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_noncolinear_qe.html">Plotting non colinear band structures in Quantum Espresso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_atomic_levels.html">Plotting Atomic Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_ipr.html">Plotting Inverse participation ratio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_compare_bands.html">Comparing band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_unfolding.html">Unfolding Band Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_spin_polarized.html">Plotting spin polarized band structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_colinear.html">Plotting band structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_2d_bands.html">Plotting 2D band structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00-band_structure/plot_bandsplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../01-dos/index.html">Density of States</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_vasp.html">Plotting non colinear dos in VASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_noncolinear_dos_qe.html">Plotting non colinear dos in Quantum Espresso</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_colinear_dos.html">Plotting density of states</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_spin_polarized_dos.html">Plotting spin-polarized density of states</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01-dos/plot_dosplot_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../02-bands_dos/index.html">Bands and Dos plot</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -417,12 +417,12 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../04-fermi3d/index.html">Fermi 3D</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_plain.html">Plotting fermi3d plain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isoslider.html">Plotting fermi3d isoslider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin_texture.html">Plotting fermi3d spin_texture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_isovalue_gif.html">Plotting fermi3d isovalue_gif</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_de_hass_van_alphen.html">Showing how to get van alphen fequencies from the fermi surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_spin-polarized.html">Plotting fermi3d spin-polarized</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_configurations.html">Plotting with Configurations in <cite>pyprocar</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../04-fermi3d/plot_fermi3d_cross_section.html">Plotting fermi3d cross_section</a></li>
 </ul>
@@ -436,8 +436,8 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">PyPoscar</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_clusters_pyposcar.html">Visualizing Clusters in Bi2Se3 Slab</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Analyzing Radial Distribution Functions (RDF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_finding_defects_pyposcar.html">Finding defects in a POSCAR file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_subsitution_pyposcar.html">Substituting Atoms in a POSCAR File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_utils_pyposcar.html">Modifying a POSCAR File: Scaling, Supercells, and Defects</a></li>
 </ul>
@@ -516,47 +516,53 @@ to download the full example code.</p>
 <li><p>Visualize the results using <cite>matplotlib</cite>.</p></li>
 </ol>
 <p>Let’s dive in!</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pyprocar.pyposcar</span> <span class="k">as</span> <span class="nn">p</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
 
-<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]</span>
+<span class="kn">import</span> <span class="nn">pyprocar.pyposcar</span> <span class="k">as</span> <span class="nn">p</span>
+<span class="kn">from</span> <span class="nn">pyprocar.utils</span> <span class="kn">import</span> <span class="n">DATA_DIR</span>
 
-<span class="n">data_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span><span class="s1">&#39;PyPoscar&#39;</span><span class="p">,</span><span class="s1">&#39;04-rdf&#39;</span><span class="p">)</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]</span>
+
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="s2">&quot;PyPoscar&quot;</span><span class="p">,</span> <span class="s2">&quot;04-rdf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <section id="parsing-the-poscar-file">
 <h2>Parsing the POSCAR file<a class="headerlink" href="#parsing-the-poscar-file" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span><span class="s1">&#39;POSCAR-AGNR-defect.vasp&#39;</span><span class="p">))</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">Poscar</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;POSCAR-AGNR-defect.vasp&quot;</span><span class="p">))</span>
 <span class="n">a</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="computing-rdf-and-kde-curves">
 <h2>Computing RDF and KDE Curves<a class="headerlink" href="#computing-rdf-and-kde-curves" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">my_rdf</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">rdf</span><span class="o">.</span><span class="n">RDF</span><span class="p">(</span><span class="n">poscar</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">my_rdf</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">rdf</span><span class="o">.</span><span class="n">RDF</span><span class="p">(</span><span class="n">poscar</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
 <span class="n">thresholdSp</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">neighbor_thresholdSp</span>
 
-<span class="c1">#Calculates KDE curves for each species interaction</span>
+<span class="c1"># Calculates KDE curves for each species interaction</span>
 <span class="n">spCurves</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">KDE_CurveSp</span><span class="p">()</span>
-<span class="c1">#All calculations share the same kde space</span>
+<span class="c1"># All calculations share the same kde space</span>
 <span class="n">domain</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">KDE_space</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CutOff values for each interaction&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">inter</span><span class="p">,</span> <span class="n">cutoff</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">my_rdf</span><span class="o">.</span><span class="n">interactions</span><span class="p">,</span> <span class="n">thresholdSp</span><span class="p">):</span>
-  <span class="nb">print</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="n">cutoff</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">inter</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
 
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;As you can see most interactions have meaaningfull values,&#39;</span>
-      <span class="s1">&#39; but there is no way to defene nearest neighbors for others (e.g. H-B).&#39;</span>
-      <span class="s1">&#39; A large cutoff is provided in these cases.&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;As you can see most interactions have meaaningfull values,&quot;</span>
+    <span class="s2">&quot; but there is no way to defene nearest neighbors for others (e.g. H-B).&quot;</span>
+    <span class="s2">&quot; A large cutoff is provided in these cases.&quot;</span>
+<span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Note: The class for finding nearest neighbors uses a database to ignore these large distances as `nearest neighbors`&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Note: The class for finding nearest neighbors uses a database to ignore these large distances as `nearest neighbors`&quot;</span>
+<span class="p">)</span>
 
-<span class="n">NeighborsClass</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">latticeUtils</span><span class="o">.</span><span class="n">Neighbors</span><span class="p">(</span><span class="n">poscar</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">NeighborsClass</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">latticeUtils</span><span class="o">.</span><span class="n">Neighbors</span><span class="p">(</span><span class="n">poscar</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
 <span class="n">NeighborsClass</span><span class="o">.</span><span class="n">estimateMaxBondDist</span><span class="p">()</span>
 <span class="n">Neighbor_threshold</span> <span class="o">=</span> <span class="n">NeighborsClass</span><span class="o">.</span><span class="n">d_Max</span>
 </pre></div>
@@ -577,16 +583,16 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 </section>
 <section id="visualizing-the-results">
 <h2>Visualizing the Results<a class="headerlink" href="#visualizing-the-results" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">height_ratios</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">height_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 
-<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
 
-<span class="c1">#fig,axes = plt.subplots(2,2)</span>
+<span class="c1"># fig,axes = plt.subplots(2,2)</span>
 
 
-<span class="c1">#This is the kde curve for all the distances in POSCAR</span>
+<span class="c1"># This is the kde curve for all the distances in POSCAR</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">KDE_Curve</span><span class="p">())</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;General KDE curve&quot;</span><span class="p">)</span>
 
@@ -594,7 +600,7 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spCurves</span><span class="p">):</span>
     <span class="n">label</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">interactions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
     <span class="n">c</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">c</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
     <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Species KDE curves&quot;</span><span class="p">)</span>
     <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
@@ -604,31 +610,38 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The DataBase Thresholds are:&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">Neighbor_threshold</span><span class="p">)</span>
 
-<span class="c1">#Distances for Histogram</span>
+<span class="c1"># Distances for Histogram</span>
 
 <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">distances</span>
 <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span>
 <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span>
 <span class="n">bins</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">n</span><span class="p">,</span> <span class="n">bins</span> <span class="p">,</span> <span class="n">patches</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">,</span> <span class="n">edgecolor</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="n">n</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">patches</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 
-<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Distance Between Atoms&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Distance Between Atoms&quot;</span><span class="p">)</span>
 
-<span class="c1">#Plotting CutOff point vertical lines</span>
+<span class="c1"># Plotting CutOff point vertical lines</span>
 
 <span class="n">labels</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">interactions</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <span class="n">Plotlabels</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">interaction</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
-    <span class="n">Plotlabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interaction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">interaction</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Plotlabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interaction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">interaction</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
 <span class="n">cc</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
 <span class="n">var_cutoffs</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cutOff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thresholdSp</span><span class="p">):</span>
     <span class="n">c</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-    <span class="n">var_cutoffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">cutOff</span><span class="p">,</span><span class="n">cutOff</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">],</span><span class="n">color</span> <span class="o">=</span> <span class="n">c</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">my_rdf</span><span class="o">.</span><span class="n">interactions</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-<span class="n">leg1</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;CutOff points&#39;</span><span class="p">,</span><span class="n">handles</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">var_cutoffs</span><span class="p">],</span><span class="n">labels</span> <span class="o">=</span> <span class="n">Plotlabels</span><span class="p">,</span>  <span class="n">loc</span> <span class="o">=</span> <span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+    <span class="n">var_cutoffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">cutOff</span><span class="p">,</span> <span class="n">cutOff</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">my_rdf</span><span class="o">.</span><span class="n">interactions</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="p">)</span>
+<span class="n">leg1</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;CutOff points&quot;</span><span class="p">,</span>
+    <span class="n">handles</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">var_cutoffs</span><span class="p">],</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">Plotlabels</span><span class="p">,</span>
+    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">cc</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
 <span class="n">data_cutoffs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -636,12 +649,14 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cutOff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Neighbor_threshold</span><span class="p">):</span>
     <span class="n">c</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-    <span class="n">data_cutoffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">cutOff</span><span class="p">,</span><span class="n">cutOff</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">],</span><span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;dotted&#39;</span><span class="p">))</span>
+    <span class="n">data_cutoffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">cutOff</span><span class="p">,</span> <span class="n">cutOff</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
 
-<span class="c1">#leg2 = ax3.legend(title = &#39;DataBased CutOff&#39;, handles = [x[0] for x in data_cutoffs], labels = color_label,loc = &#39;upper right&#39;)</span>
+<span class="c1"># leg2 = ax3.legend(title = &#39;DataBased CutOff&#39;, handles = [x[0] for x in data_cutoffs], labels = color_label,loc = &#39;upper right&#39;)</span>
 
 <span class="n">ax3</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">leg1</span><span class="p">)</span>
-<span class="c1">#ax3.add_artist(leg2)</span>
+<span class="c1"># ax3.add_artist(leg2)</span>
 
 <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -651,15 +666,15 @@ Note: The class for finding nearest neighbors uses a database to ignore these la
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_rdf_cutoff_pyposcar_001.png" srcset="../../_images/sphx_glr_plot_rdf_cutoff_pyposcar_001.png" alt="General KDE curve, Species KDE curves" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_cutoff_pyposcar.py:86: MatplotlibDeprecationWarning: Passing label as a length 2 sequence when plotting a single dataset is deprecated in Matplotlib 3.9 and will error in 3.11.  To keep the current behavior, cast the sequence to string before passing.
-  ax2.plot(domain, curve, label = label, color = c)
+<img src="../../_images/sphx_glr_plot_rdf_cutoff_pyposcar_001.png" srcset="../../_images/sphx_glr_plot_rdf_cutoff_pyposcar_001.png" alt="General KDE curve, Species KDE curves" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_cutoff_pyposcar.py:91: MatplotlibDeprecationWarning: Passing label as a length 2 sequence when plotting a single dataset is deprecated in Matplotlib 3.9 and will error in 3.11.  To keep the current behavior, cast the sequence to string before passing.
+  ax2.plot(domain, curve, label=label, color=c)
 The DataBase Thresholds are:
 {0.7725483399593904, 1.8348023074035522, 1.9434419177103412, 1.7744469683442248, 1.3036753236814713, 1.4123149339882604, 1.2433199846221439, 2.0520815280171307, 1.883086578651014, 1.7140916292848973}
-C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_cutoff_pyposcar.py:119: MatplotlibDeprecationWarning: Passing label as a length 2 sequence when plotting a single dataset is deprecated in Matplotlib 3.9 and will error in 3.11.  To keep the current behavior, cast the sequence to string before passing.
-  var_cutoffs.append(ax3.plot([cutOff,cutOff], [0,1000],color = c, label = my_rdf.interactions[i]))
+C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_cutoff_pyposcar.py:125: MatplotlibDeprecationWarning: Passing label as a length 2 sequence when plotting a single dataset is deprecated in Matplotlib 3.9 and will error in 3.11.  To keep the current behavior, cast the sequence to string before passing.
+  ax3.plot([cutOff, cutOff], [0, 1000], color=c, label=my_rdf.interactions[i])
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.625 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.531 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-06-pyposcar-plot-rdf-cutoff-pyposcar-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/c3caa44ef3b6c685adf075dede68f1ff/plot_rdf_cutoff_pyposcar.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rdf_cutoff_pyposcar.ipynb</span></code></a></p>
@@ -686,20 +701,20 @@ C:\Users\lllang\Desktop\Current_Projects\pyprocar\examples\06-PyPoscar\plot_rdf_
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_finding_defects_pyposcar.html"
+       href="plot_clusters_pyposcar.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Finding defects in a POSCAR file</p>
+        <p class="prev-next-title">Visualizing Clusters in Bi2Se3 Slab</p>
       </div>
     </a>
     <a class="right-next"
-       href="plot_subsitution_pyposcar.html"
+       href="plot_finding_defects_pyposcar.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Substituting Atoms in a POSCAR File</p>
+        <p class="prev-next-title">Finding defects in a POSCAR file</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

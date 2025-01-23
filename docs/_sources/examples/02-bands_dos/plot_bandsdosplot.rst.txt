@@ -42,19 +42,24 @@ First download the example files with the code below. Then replace data_dir belo
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='dos')
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-31
+.. GENERATED FROM PYTHON SOURCE LINES 29-30
 
 importing pyprocar and specifying local data_dir
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-36
+.. GENERATED FROM PYTHON SOURCE LINES 30-41
 
 .. code-block:: Python
 
     import os
+
     import pyprocar
 
-    bands_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}bands"
-    dos_dir = f"{pyprocar.utils.ROOT}{os.sep}data{os.sep}examples{os.sep}Fe{os.sep}vasp{os.sep}non-spin-polarized{os.sep}dos"
+    bands_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "bands"
+    )
+    dos_dir = os.path.join(
+        pyprocar.utils.DATA_DIR, "examples", "Fe", "vasp", "non-spin-polarized", "dos"
+    )
 
 
 
@@ -62,37 +67,37 @@ importing pyprocar and specifying local data_dir
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-42
+
+.. GENERATED FROM PYTHON SOURCE LINES 42-47
 
 Plain mode
 +++++++++++++++++++++++++++++++++++++++
-The keywords that works for bandsplot and dosplot will work in bandsdosplot. 
+The keywords that works for bandsplot and dosplot will work in bandsdosplot.
 These keyword arguments can be set in bands_settings and dos_settings as done below.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-61
+.. GENERATED FROM PYTHON SOURCE LINES 47-65
 
 .. code-block:: Python
 
 
     bands_settings = {
-                      'mode':'plain',
-                      'fermi':5.599480, # This will overide the default fermi value found in bands directory
-                      'dirname': bands_dir
-                      }
+        "mode": "plain",
+        "fermi": 5.599480,  # This will overide the default fermi value found in bands directory
+        "dirname": bands_dir,
+    }
 
     dos_settings = {
-                   'mode':'plain',
-                   'fermi':5.599480,   # This will overide the default fermi value found in dos directory
-                   'dirname': dos_dir
-                    }
+        "mode": "plain",
+        "fermi": 5.599480,  # This will overide the default fermi value found in dos directory
+        "dirname": dos_dir,
+    }
 
-    pyprocar.bandsdosplot(code='vasp',
-                    bands_settings=bands_settings,
-                    dos_settings=dos_settings,
-                    )
-
-
+    pyprocar.bandsdosplot(
+        code="vasp",
+        bands_settings=bands_settings,
+        dos_settings=dos_settings,
+    )
 
 
 
@@ -114,7 +119,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
            |___/
     A Python library for electronic structure pre/post-processing.
 
-    Version 6.3.1 created on Jun 10th, 2021
+    Version 6.3.2 created on Jun 10th, 2021
 
     Please cite:
      Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,
@@ -143,8 +148,6 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
                 Here is a list modes : plain , parametric , scatter , atomic , overlay , overlay_species , overlay_orbitals
                 ----------------------------------------------------------------------------------------------------------
             
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
                 --------------------------------------------------------
                 There are additional plot options that are defined in a configuration file. 
@@ -153,8 +156,6 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
                 Here is a list modes : plain , parametric , parameteric_line , stack , stack_orbitals , stack_species , overlay , overlay_orbitals , overlay_species
                 --------------------------------------------------------
-    C:\Users\lllang\miniconda3\envs\pyprocar_dev\lib\site-packages\spglib\spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['wyckoffs']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
-      warnings.warn(
 
     (<Figure size 1650x550 with 2 Axes>, <Axes: xlabel='K vector', ylabel='E - E$_F$ (eV)'>, <Axes: xlabel='DOS'>)
 
@@ -163,7 +164,7 @@ These keyword arguments can be set in bands_settings and dos_settings as done be
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.342 seconds)
+   **Total running time of the script:** (0 minutes 0.320 seconds)
 
 
 .. _sphx_glr_download_examples_02-bands_dos_plot_bandsdosplot.py:

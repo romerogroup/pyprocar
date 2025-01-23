@@ -33,23 +33,6 @@ These examples demonstrate the PyPoscar module
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to automatically find defects in a POSCAR file">
-
-.. only:: html
-
-  .. image:: /examples/06-PyPoscar/images/thumb/sphx_glr_plot_finding_defects_pyposcar_thumb.gif
-    :alt:
-
-  :ref:`sphx_glr_examples_06-PyPoscar_plot_finding_defects_pyposcar.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Finding defects in a POSCAR file</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll explore the radial distribution functions (RDF) of an atomic structure. The RDF provides insights into the probability of finding an atom at a certain distance from another. This can be useful for understanding the local environment of atoms.">
 
 .. only:: html
@@ -62,6 +45,23 @@ These examples demonstrate the PyPoscar module
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Analyzing Radial Distribution Functions (RDF)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we&#x27;ll demonstrate how to automatically find defects in a POSCAR file">
+
+.. only:: html
+
+  .. image:: /examples/06-PyPoscar/images/thumb/sphx_glr_plot_finding_defects_pyposcar_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_examples_06-PyPoscar_plot_finding_defects_pyposcar.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Finding defects in a POSCAR file</div>
     </div>
 
 
@@ -110,8 +110,8 @@ These examples demonstrate the PyPoscar module
    :hidden:
 
    /examples/06-PyPoscar/plot_clusters_pyposcar
-   /examples/06-PyPoscar/plot_finding_defects_pyposcar
    /examples/06-PyPoscar/plot_rdf_cutoff_pyposcar
+   /examples/06-PyPoscar/plot_finding_defects_pyposcar
    /examples/06-PyPoscar/plot_subsitution_pyposcar
    /examples/06-PyPoscar/plot_utils_pyposcar
 
