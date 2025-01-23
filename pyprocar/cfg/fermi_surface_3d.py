@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional,Tuple
 from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Tuple
 
-from pyprocar.cfg.base import PlotType, BaseConfig
+from pyprocar.cfg.base import BaseConfig, PlotType
+
 
 class FermiSurfaceMode(Enum):
     """
@@ -17,9 +18,11 @@ class FermiSurfaceMode(Enum):
     SPIN_TEXTURE : str
         Enhances the Fermi surface representation with spin texture information
     """
+
     PLAIN = "plain"
     PARAMETRIC = "parametric"
     SPIN_TEXTURE = "spin_texture"
+
 
 class FermiSurfaceProperty(Enum):
     """
@@ -34,9 +37,11 @@ class FermiSurfaceProperty(Enum):
     HARMONIC_AVERAGE_EFFECTIVE_MASS : str
         Displays the harmonic average of the effective mass of electrons, reflecting the electron mobility.
     """
+
     FERMI_SPEED = "fermi_speed"
     FERMI_VELOCITY = "fermi_velocity"
     HARMONIC_AVERAGE_EFFECTIVE_MASS = "harmonic_effective_mass"
+
 
 @dataclass
 class FermiSurface3DConfig(BaseConfig):
@@ -72,8 +77,8 @@ class FermiSurface3DConfig(BaseConfig):
     surface_bands_colors : List[str], optional (default [])
         List of colors for each band in the surface plot.
 
-    
-    
+
+
     Spin Settings
     ---------------------
     spin_colors : Tuple[str], optional (None, None)
@@ -193,19 +198,19 @@ class FermiSurface3DConfig(BaseConfig):
     # Basic Plot Settings
     mode: FermiSurfaceMode = FermiSurfaceMode.PLAIN
     property: FermiSurfaceProperty = FermiSurfaceProperty.FERMI_SPEED
-    background_color: str = 'white'
+    background_color: str = "white"
     plotter_offscreen: bool = False
     plotter_camera_pos: List[int] = field(default_factory=lambda: [1, 1, 1])
 
     # Surface Appearance
-    surface_cmap: str = 'jet'  # Colormap for the surface
+    surface_cmap: str = "jet"  # Colormap for the surface
     surface_color: Optional[str] = None  # Specific color for the surface
     surface_opacity: float = 1.0
     surface_clim: Optional[List[float]] = None
     surface_bands_colors: List[str] = field(default_factory=list)
 
     # Spin Settings
-    spin_colors: Optional[Tuple[str]] = (None,None)
+    spin_colors: Optional[Tuple[str]] = (None, None)
     arrow_size: int = 3  # Size of arrows for spin texture
     texture_cmap: str = "jet"
     texture_color: Optional[str] = None
@@ -237,25 +242,25 @@ class FermiSurface3DConfig(BaseConfig):
     scalar_bar_label_font_size: Optional[float] = None
     scalar_bar_position_x: float = 0.4
     scalar_bar_position_y: float = 0.01
-    scalar_bar_color: str = 'black'
-    property_name: str = 'fermi_speed'
+    scalar_bar_color: str = "black"
+    property_name: str = "fermi_speed"
 
     # Advanced Configurations
     fermi_tolerance: float = 0.1
     extended_zone_directions: Optional[List[List[int]]] = None
     supercell: List[int] = field(default_factory=lambda: [1, 1, 1])
-    projection_accuracy: str = 'high'
+    projection_accuracy: str = "high"
     interpolation_factor: int = 1
-    max_distance: float = 0.2
+    max_distance: float = 0.3
 
     # Cross section Settings
     cross_section_slice_linewidth: float = 5.0
     cross_section_slice_show_area: bool = False
 
     # Isoslider Settings
-    isoslider_title: str = 'Energy iso-value'
-    isoslider_style: str = 'modern'
-    isoslider_color: str = 'black'
+    isoslider_title: str = "Energy iso-value"
+    isoslider_style: str = "modern"
+    isoslider_color: str = "black"
 
     # Miscellaneous
     orbit_gif_n_points: int = 36
@@ -263,9 +268,8 @@ class FermiSurface3DConfig(BaseConfig):
     orbit_mp4_n_points: int = 36
     orbit_mp4_step: float = 0.05
 
-
     def __post_init__(self):
-        """This method is immediately called after the object is initialized. 
+        """This method is immediately called after the object is initialized.
         It is useful to validate the data and set default values.
         """
         self.plot_type = PlotType.FERMI_SURFACE_3D
