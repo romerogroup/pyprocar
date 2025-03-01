@@ -366,7 +366,7 @@ class FermiSurface:
         for i_band, (contour, spinX, spinY, spinZ) in enumerate(zip(cont, sx, sy, sz)):
             # The previous interp. yields the level curves, nothing more is
             # useful from there
-            paths = contour.collections[0].get_paths()
+            paths = contour.get_paths()
             if paths:
                 verts=[path.vertices for path in paths]
                 points = np.concatenate(verts)
