@@ -12,12 +12,15 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mpcolors
 from matplotlib import cm
 
-from ..core import ProcarSymmetry, FermiSurface
-from ..utils import welcome, ROOT
-from .. import io
+from pyprocar.core import ProcarSymmetry, FermiSurface
+from pyprocar.utils import welcome, ROOT
+from pyprocar import io
+from pyprocar.utils.plot_utils import DEFAULT_COLOR_MAP
 
 with open(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_2d.yml'), 'r') as file:
     plot_opt = yaml.safe_load(file)
+
+plot_opt['cmap'] = DEFAULT_COLOR_MAP
 
 def fermi2D(
     code:str,
@@ -158,8 +161,6 @@ def fermi2D(
             ----------------------------------------------------------------------------------------------------------
             """
     )
-
-
 
     if structure.rotations is not None:
         ebs.ibz2fbz(structure.rotations)

@@ -12,9 +12,8 @@ plot_color_bar:
 
 cmap:  
   description: The colormap used for the plot.
-  value: jet
+  value: magma
 
-  value: jet
 clim:
     description: The color scale for the color bar
     value: 

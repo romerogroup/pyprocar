@@ -75,7 +75,8 @@ class FermiSurface:
         self.log.debug("FermiSurface.init: ...Done")
 
         config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_2d.yml'))
-        config_manager.update_config(kwargs)  
+        
+        config_manager.update_config(kwargs)
         self.config=config_manager.get_config()
         return None
 
