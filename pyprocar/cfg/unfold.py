@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional,Tuple
+from typing import Dict, Any, List, Optional, Tuple
 from enum import Enum, auto
 
 from pyprocar.cfg.base import PlotType, BaseConfig
+
 
 class UnfoldPlotMode(Enum):
     """
@@ -21,12 +22,13 @@ class UnfoldPlotMode(Enum):
     OVERLAY : str
         Represents the band structure in an overlay plot, where the colors are the selected projections
     OVERLAY_SPECIES : str
-        Represents the band structure in an overlay plot, where the colors are 
+        Represents the band structure in an overlay plot, where the colors are
         the different projection of the species.
     OVERLAY_ORBITALS : str
-        Represents the band structure in an overlay plot, where  the colors are 
+        Represents the band structure in an overlay plot, where  the colors are
         the different projection of the orbitals.
     """
+
     PLAIN = "plain"
     PARAMETRIC = "parametric"
     SACATTER = "scatter"
@@ -34,6 +36,7 @@ class UnfoldPlotMode(Enum):
     OVERLAY = "overlay"
     OVERLAY_SPECIES = "overlay_species"
     OVERLAY_ORBITALS = "overlay_orbitals"
+
 
 class UnfoldMode(Enum):
     """
@@ -48,6 +51,7 @@ class UnfoldMode(Enum):
     COLOR : str
         Represents the band structure in a simple, where the colors are the different bands.
     """
+
     BOTH = "both"
     THICKNESS = "thickness"
     COLOR = "color"
@@ -71,7 +75,7 @@ class UnfoldingConfig(BaseConfig):
         Color of the Fermi line on the plot.
     grid_color: str, optional (default 'grey')
         Color of the grid lines on the plot.
-    
+
     Line Styles
     -----------
     fermi_linestyle: str, optional (default 'dotted')
@@ -147,17 +151,19 @@ class UnfoldingConfig(BaseConfig):
     __post_init__():
         Post-initialization to validate the data and set default values.
     """
-    modes: List[str] = field(default_factory=lambda: [mode.value for mode in UnfoldMode])
+    modes: List[str] = field(
+        default_factory=lambda: [mode.value for mode in UnfoldMode]
+    )
     # Basic Plot Settings
-    color: str = 'black'
-    spin_colors: Tuple[str] = ('blue', 'red')
-    fermi_color: str = 'blue'
-    grid_color: str = 'grey'
+    color: str = "#eeeeee"
+    spin_colors: Tuple[str] = ("blue", "red")
+    fermi_color: str = "blue"
+    grid_color: str = "grey"
 
     # Line Styles
-    fermi_linestyle: str = 'dotted'
-    grid_linestyle: str = 'solid'
-    linestyle: List[str] = field(default_factory=lambda: ['solid', 'dashed'])
+    fermi_linestyle: str = "dotted"
+    grid_linestyle: str = "solid"
+    linestyle: List[str] = field(default_factory=lambda: ["solid", "dashed"])
 
     # Line Widths
     fermi_linewidth: int = 1
@@ -165,33 +171,72 @@ class UnfoldingConfig(BaseConfig):
     linewidth: List[float] = field(default_factory=lambda: [1.0, 1.0])
 
     # Markers
-    marker: List[str] = field(default_factory=lambda: ['o', 'v', '^', 'D'])
+    marker: List[str] = field(default_factory=lambda: ["o", "v", "^", "D"])
     markersize: List[float] = field(default_factory=lambda: [0.2, 0.2])
 
     # Color and Opacity Settings
-    cmap: str = 'jet'
-    clim: Optional[Tuple[float]] = None
+    cmap: str = "jet"
+    clim: Optional[Tuple[float, float]] = (0.0, 1.0)
     opacity: List[float] = field(default_factory=lambda: [1.0, 1.0])
     plot_color_bar: bool = True
 
     # Grid and Legend
     grid: bool = False
-    grid_axis: str = 'both'
-    grid_which: str = 'major'
+    grid_axis: str = "both"
+    grid_which: str = "major"
     legend: bool = True
 
     # Labels and Title
-    label: List[str] = field(default_factory=lambda: [r'$\uparrow$', r'$\downarrow$'])
+    label: List[str] = field(default_factory=lambda: [r"$\uparrow$", r"$\downarrow$"])
     title: Optional[str] = None
 
     # Miscellaneous
     figure_size: Tuple[int] = (9, 6)
-    dpi: str = 'figure'
+    dpi: str = "figure"
     savefig: Optional[str] = None
 
     # Advanced Configurations
     weighted_color: bool = True
     weighted_width: bool = False
+
+    # label params
+    x_label_params: Dict[str, any] = field(default_factory=lambda: {})
+    y_label_params: Dict[str, any] = field(default_factory=lambda: {})
+    title_params: Dict[str, any] = field(default_factory=lambda: {})
+
+    # x tick parameters
+    major_x_tick_params: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "direction": "in",
+            "length": 4,
+            "width": 1,
+            "colors": "black",
+        }
+    )
+
+    # y tick parameters
+    major_y_tick_params: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "direction": "in",
+            "length": 4,
+            "width": 1,
+            "colors": "black",
+        }
+    )
+    minor_y_tick_params: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "direction": "in",
+            "length": 2,
+            "width": 1,
+            "colors": "black",
+        }
+    )
+
+    # locators
+    major_y_locator = None
+    minor_y_locator = None
+    multiple_locator_y_major_value: float = None
+    multiple_locator_y_minor_value: float = None
 
     def __post_init__(self):
         """Post-initialization to validate the data and set default values."""

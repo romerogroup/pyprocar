@@ -7,5 +7,5 @@ email = 'fvmunoz@gmail.com, alromero@mail.wvu.edu, smsingh@mix.wvu.edu, ukh0001@
 url = 'https://github.com/romerogroup/pyprocar'
 download_url = 'https://github.com/romerogroup/pyprocar/archive/6.2.1.tar.gz'
 status = 'development'
-copyright = 'Copyright 2021'
-date = 'Jun 10th, 2021'
+copyright = 'Copyright 2025'
+date = 'Mar 6th, 2025'

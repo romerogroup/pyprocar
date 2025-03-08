@@ -4,78 +4,79 @@ import yaml
 import numpy as np
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.utils import welcome,ROOT
+from pyprocar.utils import welcome, ROOT
 from pyprocar.utils.defaults import settings
 from pyprocar.utils.info import orbital_names
 from pyprocar.plotter import EBSPlot
 from pyprocar import io
 
 
-with open(os.path.join(ROOT,'pyprocar','cfg','unfold.yml'), 'r') as file:
+with open(os.path.join(ROOT, "pyprocar", "cfg", "unfold.yml"), "r") as file:
     plot_opt = yaml.safe_load(file)
 
+
 def unfold(
-        code="vasp",
-        dirname=".",
-        mode="plain",
-        unfold_mode="both",
-        transformation_matrix=np.diag([2, 2, 2]),
-        spins=None,
-        atoms=None,
-        orbitals=None,
-        items=None,
-        projection_mask=None,
-        unfold_mask=None,
-        fermi=None,
-        fermi_shift=0,
-        interpolation_factor=1,
-        interpolation_type="cubic",
-        vmax=None,
-        vmin=None,
-        kticks=None,
-        knames=None,
-        kdirect=True,
-        elimit=None,
-        ax=None,
-        show=True,
-        savefig=None,
-        old=False,
-        savetab="unfold_result.csv",
-        print_plot_opts:bool=False,
-        **kwargs,
+    code="vasp",
+    dirname=".",
+    mode="plain",
+    unfold_mode="both",
+    transformation_matrix=np.diag([2, 2, 2]),
+    spins=None,
+    atoms=None,
+    orbitals=None,
+    items=None,
+    projection_mask=None,
+    unfold_mask=None,
+    fermi=None,
+    fermi_shift=0,
+    interpolation_factor=1,
+    interpolation_type="cubic",
+    vmax=None,
+    vmin=None,
+    kticks=None,
+    knames=None,
+    kdirect=True,
+    elimit=None,
+    ax=None,
+    show=True,
+    savefig=None,
+    old=False,
+    savetab="unfold_result.csv",
+    print_plot_opts: bool = False,
+    **kwargs,
 ):
     """
 
-        Parameters
-        ----------
-        fname: PROCAR filename.
-        poscar: POSCAR filename
-        outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
-        supercell_matrix: supercell matrix from primitive cell to supercell
-        ispin: For non-spin polarized system, ispin=None.
-           For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.
-        fermi: Fermi energy
-        fermi_shift: Shift the bands by the Fermi energy.
-        elimit: range of energy to be plotted.
-        kticks: the indices of K points which has labels given in knames.
-        knames: see kticks
-        print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.
-        show_band: whether to plot the bands before unfolding.
-        width: the width of the unfolded band.
-        color: color of the unfoled band.
-        savetab: the csv file name of which  the table of unfolding result will be written into.
-        savefig: the file name of which the figure will be saved.
-        exportplt: flag to export plot as matplotlib.pyplot object.
+    Parameters
+    ----------
+    fname: PROCAR filename.
+    poscar: POSCAR filename
+    outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
+    supercell_matrix: supercell matrix from primitive cell to supercell
+    ispin: For non-spin polarized system, ispin=None.
+       For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.
+    fermi: Fermi energy
+    fermi_shift: Shift the bands by the Fermi energy.
+    elimit: range of energy to be plotted.
+    kticks: the indices of K points which has labels given in knames.
+    knames: see kticks
+    print_kpts: print all the kpoints to screen. This is to help find the kticks and knames.
+    show_band: whether to plot the bands before unfolding.
+    width: the width of the unfolded band.
+    color: color of the unfoled band.
+    savetab: the csv file name of which  the table of unfolding result will be written into.
+    savefig: the file name of which the figure will be saved.
+    exportplt: flag to export plot as matplotlib.pyplot object.
 
-        """
+    """
     welcome()
-    default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE)
-    config=ConfigManager.merge_configs(default_config, kwargs)
-    modes_txt=' , '.join(config.modes)
+    default_config = ConfigFactory.create_config(PlotType.UNFOLD)
+    config = ConfigManager.merge_configs(default_config, kwargs)
+    modes_txt = " , ".join(config.modes)
 
-    message=f"""
+    message = f"""
             --------------------------------------------------------
-            There are additional plot options that are defined in a configuration file. 
+            There are additional plot options that are defined in a configuration file.
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
@@ -84,10 +85,10 @@ def unfold(
             """
     print(message)
     if print_plot_opts:
-        for key,value in plot_opt.items():
-            print(key,':',value)
-    
-    parser = io.Parser(code = code, dir = dirname)
+        for key, value in plot_opt.items():
+            print(key, ":", value)
+
+    parser = io.Parser(code=code, dir=dirname)
     ebs = parser.ebs
     structure = parser.structure
     kpath = parser.kpath
@@ -96,53 +97,60 @@ def unfold(
         ebs.bands -= fermi
         ebs.bands += fermi_shift
         fermi_level = fermi_shift
-        y_label=r"E - E$_F$ (eV)"
+        y_label = r"E - E$_F$ (eV)"
     else:
-        y_label=r"E (eV)"
-        print("""
+        y_label = r"E (eV)"
+        print(
+            """
             WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
             ----------------------------------------------------------------------------------------------------------
-            """)
+            """
+        )
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins, config=config)
-    
-    labels=None
 
-    
+    labels = None
 
     if mode is not None:
-        if ebs.projected_phase is None :
-            raise ValueError("The provided electronic band structure file does not include phases")
-        ebs_plot.ebs.unfold(transformation_matrix=transformation_matrix, structure=structure)
-    if unfold_mode == 'both':
+        if ebs.projected_phase is None:
+            raise ValueError(
+                "The provided electronic band structure file does not include phases"
+            )
+        ebs_plot.ebs.unfold(
+            transformation_matrix=transformation_matrix, structure=structure
+        )
+    if unfold_mode == "both":
         width_weights = ebs_plot.ebs.weights
         width_mask = unfold_mask
         color_weights = ebs_plot.ebs.weights
         color_mask = unfold_mask
-    elif unfold_mode == 'thickness':
+    elif unfold_mode == "thickness":
         width_weights = ebs_plot.ebs.weights
         width_mask = unfold_mask
         color_weights = None
         color_mask = None
-    elif unfold_mode == 'color':
-        width_weights=None
-        width_mask=None
+    elif unfold_mode == "color":
+        width_weights = None
+        width_mask = None
         color_weights = ebs_plot.ebs.weights
         color_mask = unfold_mask
-    else :
-        raise ValueError("Invalid unfold_mode was selected: {unfold_mode} please select from the following 'both', 'thickness','color'")
+    else:
+        raise ValueError(
+            "Invalid unfold_mode was selected: {unfold_mode} please select from the following 'both', 'thickness','color'"
+        )
     labels = []
     if mode == "plain":
         ebs_plot.plot_bands()
-        ebs_plot.plot_parameteric(color_weights=color_weights,
-                width_weights=width_weights,
-                color_mask=color_mask,
-                width_mask=width_mask,
-                spins=spins)
-        ebs_plot.handles = ebs_plot.handles[:ebs_plot.nspins]
+        ebs_plot.plot_parameteric(
+            color_weights=color_weights,
+            width_weights=width_weights,
+            color_mask=color_mask,
+            width_mask=width_mask,
+            spins=spins,
+        )
+        ebs_plot.handles = ebs_plot.handles[: ebs_plot.nspins]
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
-
 
         if mode == "overlay_species":
 
@@ -235,7 +243,7 @@ def unfold(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                spins=spins
+                spins=spins,
             )
         elif mode == "scatter":
             ebs_plot.plot_scatter(
@@ -243,7 +251,7 @@ def unfold(
                 width_weights=width_weights,
                 color_mask=color_mask,
                 width_mask=width_mask,
-                spins=spins
+                spins=spins,
             )
 
         else:
@@ -264,7 +272,6 @@ def unfold(
     if show:
         ebs_plot.show()
     return ebs_plot.fig, ebs_plot.ax
-
 
 
 #     if efermi is not None:

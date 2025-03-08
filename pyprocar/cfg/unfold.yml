@@ -5,13 +5,13 @@ spin_colors:
   - red
 color:
   description: The colors for the plot lines.
-  value: 'black'
+  value: '#eeeeee'
 cmap:
   description: The colormap used for the plot.
   value: jet
 clim:
     description: The color scale for the color bar
-    value: 
+    value:
     -
     -
 fermi_color:
@@ -84,7 +84,7 @@ savefig:
   value: null
 title:
   description: The title for the plot. If null, no title will be displayed.
-  value: 
+  value:
 weighted_color:
   description: If true, the color of the lines will be weighted.
   value: true
@@ -99,3 +99,19 @@ figure_size:
 dpi:
   description: The resolution in dots per inch. If 'figure', use the figure's dpi value.
   value: 'figure'
+
+major_x_tick_params:
+  direction: in
+  length: 4
+  width: 1
+  colors: black
+major_y_tick_params:
+  direction: in
+  length: 4
+  width: 1
+  colors: black
+minor_y_tick_params:
+  direction: in
+  length: 2
+  width: 1
+  colors: black
