@@ -1,6 +1,29 @@
 
 ___
 
+# v6.3.3 (03-01-2025)
+
+##### Bugs
+- Fix Fermi surface contour path extraction method
+
+##### New Features
+- None identified
+
+##### Documentation updates
+- Minor formatting improvements in docstrings and code structure
+- Updated example scripts and notebooks
+- Update _version.py and CHANGELOG.md due to new release
+
+##### Maintenance
+- Adjusted default colormap in fermi_surface_2d.yml
+- Refactor data directory paths in examples to use os.path.join for improved readability and consistency. Updated multiple scripts to ensure compatibility with the new path structure.
+- Minor code style adjustments in the Structure class
+- Merge branch 'main' of github.com:romerogroup/pyprocar into main
+
+___
+
+___
+
 # 6.3.2 (01-12-2025)
 
 ##### Bugs

@@ -4,6 +4,8 @@ from enum import Enum, auto
 
 from pyprocar.cfg.base import PlotType, BaseConfig
 
+from pyprocar.utils.plot_utils import DEFAULT_COLORS, wes_anderson_palettes, create_colormap
+
 
 class FermiSurface2DMode(Enum):
     """
@@ -103,7 +105,7 @@ class FermiSurface2DConfig(BaseConfig):
     plot_color_bar: bool = False
 
     # Plot Appearance
-    cmap: str = 'jet'
+    cmap: str = "jet"
     clim: Optional[Tuple[float, float]] = field(default_factory=lambda: (None, None))
     color: List[str] = field(default_factory=lambda: ['blue', 'red'])
     linestyle: List[str] = field(default_factory=lambda: ['solid', 'dashed'])

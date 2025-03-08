@@ -13,12 +13,20 @@ import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
+from pyprocar import io
+from pyprocar.core import FermiSurface, ProcarSymmetry
+from pyprocar.utils import ROOT, welcome
+from pyprocar.utils.plot_utils import DEFAULT_COLOR_MAP
+
 from .. import io
 from ..core import FermiSurface, ProcarSymmetry
 from ..utils import ROOT, welcome
 
 with open(os.path.join(ROOT, "pyprocar", "cfg", "fermi_surface_2d.yml"), "r") as file:
     plot_opt = yaml.safe_load(file)
+
+
+plot_opt["cmap"] = DEFAULT_COLOR_MAP
 
 
 def fermi2D(
