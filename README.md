@@ -54,8 +54,6 @@ How to cite
 -----------
 If you have used PyProcar in your work, please cite:
 
-[Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz, and Aldo H. Romero. "PyProcar: A Python library for electronic structure pre/post-processing". Computer Physics Communications 251 (2020): 107080.](https://www.sciencedirect.com/science/article/pii/S0010465519303935)
-
 - U. Herath, P. Tavadze, X. He, E. Bousquet, S. Singh, F. Muñoz, and A. H. Romero, PyProcar: A Python library for electronic structure pre/post-processing, Computer Physics Communications 251, 107080 (2020). DOI: <https://doi.org/10.1016/j.cpc.2019.107080>
 
 - L. Lang, P. Tavadze, A. Tellez, E. Bousquet, H. Xu, F. Muñoz, N. Vasquez, U. Herath, and A. H. Romero, Expanding PyProcar for new features, maintainability, and reliability, Computer Physics Communications 297, 109063 (2024). DOI: <https://doi.org/10.1016/j.cpc.2023.109063>
