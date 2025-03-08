@@ -113,12 +113,13 @@ class EBSPlot:
 
         """
         logger.info("___Getting x values___")
+        self.values_dict[f"k_current"] = []
         pos = 0
         if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
             logger.info(
                 "Kpath exists and nsegments == ngrids. Creating path from kpath"
             )
-
+            k_current = None
             for isegment in range(self.kpath.nsegments):
                 kstart, kend = self.kpath.special_kpoints[isegment]
                 if self.kdirect is False:
@@ -128,12 +129,20 @@ class EBSPlot:
                 distance = np.linalg.norm(kend - kstart)
                 if isegment == 0:
                     x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
+                    k_current = kstart
+                    self.values_dict[f"k_current"].append(k_current.tolist())
                 else:
                     x = np.append(
                         x,
                         np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
                         axis=0,
                     )
+                    
+                k_unit_dir = (kend - kstart) / distance
+                for i in range(x.shape[0]):
+                    k_current += k_unit_dir * distance
+                    self.values_dict[f"k_current"].append(k_current.tolist())
+                    
                 pos += distance
         else:
             logger.info(
@@ -179,15 +188,14 @@ class EBSPlot:
                 values_dict[f"bands_{band_name}"] = self.ebs.bands[:, iband, ispin]
 
         values_dict["kpath_values"] = self.x
-        tick_names = []
+        values_dict["kpath_tick_names"] = []
         for i, x in enumerate(self.x):
             tick_name = ""
             if self.kpath is not None:
                 for i_tick, tick_position in enumerate(self.kpath.tick_positions):
                     if i == tick_position:
                         tick_name = self.kpath.tick_names[i_tick]
-                tick_names.append(tick_name)
-        values_dict["kpath_tick_names"] = tick_names
+                values_dict["kpath_tick_names"].append(tick_name)
         self.values_dict = values_dict
 
     def plot_scatter(
@@ -654,7 +662,6 @@ class EBSPlot:
             self.kpath.tick_names if self.kpath is not None else tick_names,
             color,
         )
-        self.kpath = None
 
         if self.kpath is not None:
             if tick_positions is None:
@@ -900,8 +907,17 @@ class EBSPlot:
             raise ValueError(f"The file type must be {possible_file_types}")
         if self.values_dict is None:
             raise ValueError("The data has not been plotted yet")
-
-        column_names = list(self.values_dict.keys())
+        
+        logger.info("___Exporting data to %s___", filename)
+ 
+        values_dict = {}
+        for key, value in self.values_dict.items():
+            logger.debug("Column: %s, Type: %s, Shape: %s", key, type(value), len(value))
+            
+            if len(value) != 0:
+                values_dict[key] = value
+            
+        column_names = list(values_dict.keys())
         sorted_column_names = [None] * len(column_names)
         index = 0
         for column_name in column_names:
@@ -909,6 +925,9 @@ class EBSPlot:
                 sorted_column_names[index] = column_name
                 index += 1
             if "kpath_tick_names" == column_name:
+                sorted_column_names[index] = column_name
+                index += 1
+            if "k_current" == column_name:
                 sorted_column_names[index] = column_name
                 index += 1
         for ispin in range(2):
@@ -923,16 +942,16 @@ class EBSPlot:
 
         column_names.sort()
         if file_type == "csv":
-            df = pd.DataFrame(self.values_dict)
+            df = pd.DataFrame(values_dict)
             df.to_csv(filename, columns=sorted_column_names, index=False)
         elif file_type == "txt":
-            df = pd.DataFrame(self.values_dict)
+            df = pd.DataFrame(values_dict)
             df.to_csv(filename, columns=sorted_column_names, sep="\t", index=False)
         elif file_type == "json":
             with open(filename, "w") as outfile:
-                for key, value in self.values_dict.items():
-                    self.values_dict[key] = value.tolist()
-                json.dump(self.values_dict, outfile)
+                for key, value in values_dict.items():
+                    values_dict[key] = value.tolist()
+                json.dump(values_dict, outfile)
         elif file_type == "dat":
-            df = pd.DataFrame(self.values_dict)
+            df = pd.DataFrame(values_dict)
             df.to_csv(filename, columns=sorted_column_names, sep=" ", index=False)
