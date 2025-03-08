@@ -74,8 +74,8 @@ markersize:
 opacity:
   description: The opacities for the plot lines.
   value:
-  - 1.0
-  - 1.0
+  - 0.3
+  - 0.3
 plot_color_bar:
   description: If true, a color bar will be shown on the plot.
   value: true

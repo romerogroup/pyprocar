@@ -177,7 +177,7 @@ class UnfoldingConfig(BaseConfig):
     # Color and Opacity Settings
     cmap: str = "jet"
     clim: Optional[Tuple[float, float]] = (0.0, 1.0)
-    opacity: List[float] = field(default_factory=lambda: [1.0, 1.0])
+    opacity: List[float] = field(default_factory=lambda: [0.3, 0.3])
     plot_color_bar: bool = True
 
     # Grid and Legend

@@ -10,14 +10,14 @@ def welcome():
     print(
         "Please cite:\n\
 - Uthpala Herath, Pedram Tavadze, Xu He, Eric Bousquet, Sobhit Singh, Francisco Muñoz and Aldo Romero.,\n \
-  PyProcar: A Python library for electronic structure pre/post-processing.,\n \
-  Computer Physics Communications 251, 107080 (2020).\n"
+ PyProcar: A Python library for electronic structure pre/post-processing.,\n \
+ Computer Physics Communications 251, 107080 (2020).\n"
     )
     print(
         "\
 - L. Lang, P. Tavadze, A. Tellez, E. Bousquet, H. Xu, F. Muñoz, N. Vasquez, U. Herath, and A. H. Romero,\n \
-  Expanding PyProcar for new features, maintainability, and reliability.,\n \
-  Computer Physics Communications 297, 109063 (2024)."
+ Expanding PyProcar for new features, maintainability, and reliability.,\n \
+ Computer Physics Communications 297, 109063 (2024)."
     )
 
     dev_string = """
