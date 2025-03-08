@@ -35,7 +35,19 @@ class KPath:
         for x in knames:
             if "$" in x[0] or "$" in x[1]:
                 latex = ""
-        self.knames = [[latex + x[0] + latex, latex + x[1] + latex] for x in knames]
+        
+        self.knames = []   
+        for kname_segment in knames:
+            kname_start = kname_segment[0]
+            kname_end = kname_segment[1]
+            
+            if "gamma" in kname_start.lower():
+                kname_start = r"\Gamma"
+            if "gamma" in kname_end.lower():
+                kname_end = r"\Gamma"
+            
+            kname_segment=[latex + kname_start + latex, latex + kname_end + latex]
+            self.knames.append(kname_segment)
 
         self.special_kpoints = special_kpoints
         self.ngrids = ngrids
