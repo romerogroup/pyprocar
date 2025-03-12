@@ -13,9 +13,11 @@ import numpy as np
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.utils import ROOT
-
 from pyprocar import io
+from pyprocar.utils.log_utils import set_verbose_level
+from pyprocar.utils import data_utils
 
+user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
 
 np.set_printoptions(threshold=sys.maxsize)
