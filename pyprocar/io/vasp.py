@@ -1926,7 +1926,13 @@ class VaspXML(collections.abc.Mapping):
         """Returns an array for each varray tag in vaspxml """
         ret = []
         for ielement in xml_tree:
-            ret.append([float(x) for x in ielement.text.split()])
+            tmp=[]
+            for x in ielement.text.split():
+                try:
+                    tmp.append(float(x))
+                except ValueError:
+                    tmp.append(0.0)
+            ret.append(tmp)
         return ret
 
     def get_params(self, xml_tree, dest):

@@ -243,12 +243,13 @@ class Parser:
         None
             None
         """
+        logger.info(f"Parsing VASP files in {self.dir}")
         
-        outcar = f"{self.dir}{os.sep}OUTCAR"
-        poscar = f"{self.dir}{os.sep}POSCAR"
-        procar = f"{self.dir}{os.sep}PROCAR"
-        kpoints = f"{self.dir}{os.sep}KPOINTS"
-        vasprun = f"{self.dir}{os.sep}vasprun.xml"
+        outcar = os.path.join(self.dir, "OUTCAR")
+        poscar = os.path.join(self.dir, "POSCAR")
+        procar = os.path.join(self.dir, "PROCAR")
+        kpoints = os.path.join(self.dir, "KPOINTS")
+        vasprun = os.path.join(self.dir, "vasprun.xml")
 
         repairhandle = UtilsProcar()
         repairhandle.ProcarRepair(procar, procar)
@@ -257,16 +258,16 @@ class Parser:
 
         try:
             poscar = vasp.Poscar(poscar,rotations = outcar.rotations)
-        except:
+        except Exception as e:
+            logger.exception(f"Error parsing poscar file \n{e}")
             poscar = vasp.Poscar(poscar,rotations = None)
 
         try:
             kpoints = vasp.Kpoints(kpoints)
             self.kpath = kpoints.kpath
         except Exception as e:
+            logger.exception(f"Error parsing kpoints file \n{e}")
             self.kpath=None
-
-    
 
         procar = vasp.Procar(
                             filename=procar,
@@ -282,7 +283,8 @@ class Parser:
         
         try:
             vasprun = vasp.VaspXML(filename = vasprun)
-        except:
+        except Exception as e:
+            logger.exception(f"Error parsing vasprun.xml file \n{e}")
             pass
         
         self.ebs = procar.ebs
@@ -292,6 +294,7 @@ class Parser:
         try:
             self.dos = vasprun.dos
         except Exception as e:
+            logger.exception(f"Error extracting dos from vasprun.xml file \n{e}")
             self.dos = None
 
         return None
