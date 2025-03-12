@@ -50,6 +50,7 @@ dependencies = [
     "ase",
     "PyYAML",
     "gdown",
+    "dill",
     "variconfig",
 ]
 
