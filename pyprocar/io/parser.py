@@ -1,12 +1,16 @@
 import os
 
 import numpy as np
+import logging
 
 from ..core import ElectronicBandStructure
 from ..core import DensityOfStates
 from ..core import Structure
 from ..utils import UtilsProcar
 from . import vasp, qe, abinit, lobster, siesta, frmsf, bxsf, elk, dftbplus
+
+
+logger = logging.getLogger(__name__)
 
 class Parser:
     """
@@ -54,8 +58,8 @@ class Parser:
             self.parse_dftbplus()
             
         if self.ebs:
+            # self.ebs.bands = self.ebs.bands - self.ebs.efermi
             self.ebs.bands += self.ebs.efermi
-
         if self.dos:
             self.dos.energies += self.dos.efermi
         return None
