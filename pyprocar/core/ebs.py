@@ -9,20 +9,22 @@ Created on Sat Jan 16 2021
 """
 
 from typing import List
+import logging
 import itertools
+
 import copy
 from scipy.interpolate import CubicSpline
-
 import numpy as np
 import networkx as nx
 from matplotlib import pylab as plt
 import pyvista
 
-from .kpath import KPath
-from .brillouin_zone import BrillouinZone
-from ..utils import  mathematics
+from pyprocar.core.kpath import KPath
+from pyprocar.core.brillouin_zone import BrillouinZone
+from pyprocar.utils import  mathematics
 from pyprocar.utils.unfolder import Unfolder
-from pyprocar.utils import LOGGER
+
+logger = logging.getLogger(__name__)
 
 HBAR_EV = 6.582119 *10**(-16) #eV*s
 HBAR_J = 1.0545718 *10**(-34) #eV*s
@@ -75,7 +77,7 @@ class ElectronicBandStructure:
         labels:List=None,
         reciprocal_lattice:np.ndarray=None,
         ):
-        LOGGER.info('Initializing the ElectronicBandStructure object')
+        logger.info('Initializing the ElectronicBandStructure object')
         
         self._kpoints = kpoints
         self._kpoints_cartesian = self.reduced_to_cartesian(kpoints,reciprocal_lattice)   
@@ -127,24 +129,24 @@ class ElectronicBandStructure:
 
         # if self.is_mesh:
         #     self._sort_by_kpoints()
-        LOGGER.info('Subtracting Fermi Energy from Bands')
-        LOGGER.info(f'Is Mesh: {self.is_mesh}')
-        LOGGER.info(f'Fermi Energy: {self.efermi}')
-        LOGGER.info(f'Kpoints shape: {self.kpoints.shape}')
-        LOGGER.info(f'Bands shape: {self.bands.shape}')
+        logger.info('Subtracting Fermi Energy from Bands')
+        logger.info(f'Is Mesh: {self.is_mesh}')
+        logger.info(f'Fermi Energy: {self.efermi}')
+        logger.info(f'Kpoints shape: {self.kpoints.shape}')
+        logger.info(f'Bands shape: {self.bands.shape}')
         if self.projected is not None:
-            LOGGER.info(f'Projected shape: {self.projected.shape}')
+            logger.info(f'Projected shape: {self.projected.shape}')
         if self.projected_phase is not None:
-            LOGGER.info(f'Projected phase shape: {self.projected_phase.shape}')
+            logger.info(f'Projected phase shape: {self.projected_phase.shape}')
         if self.kpath is not None:
-            LOGGER.info(f"Kpath: {self.kpath}")
+            logger.info(f"Kpath: {self.kpath}")
         if self.labels is not None:
-            LOGGER.info(f"Kpath: {self.labels}")
+            logger.info(f"Kpath: {self.labels}")
         if self.reciprocal_lattice is not None:
-            LOGGER.info(f"Reciprocal lattice: {self.reciprocal_lattice}")
+            logger.info(f"Reciprocal lattice: {self.reciprocal_lattice}")
         if self.weights is not None:
-            LOGGER.info(f"Weights: {self.weights}")
-        LOGGER.info('Initialized the ElectronicBandStructure object')
+            logger.info(f"Weights: {self.weights}")
+        logger.info('Initialized the ElectronicBandStructure object')
 
     def __str__(self):
         ret = 'Enectronic Band Structure     \n'
@@ -1357,10 +1359,10 @@ class ElectronicBandStructure:
         if rotAxis == "z" or rotAxis == "Z":
             rotAxis = [0, 0, 1]
         rotAxis = np.array(rotAxis, dtype=float)
-        LOGGER.debug("rotAxis : " + str(rotAxis))
+        logger.debug("rotAxis : " + str(rotAxis))
         rotAxis = rotAxis / np.linalg.norm(rotAxis)
-        LOGGER.debug("rotAxis Normalized : " + str(rotAxis))
-        LOGGER.debug("Angle : " + str(angle))
+        logger.debug("rotAxis Normalized : " + str(rotAxis))
+        logger.debug("Angle : " + str(angle))
         angle = angle * np.pi / 180
         # defining a quaternion for rotatoin
         angle = angle / 2
@@ -1368,23 +1370,23 @@ class ElectronicBandStructure:
         qRot = np.array((np.cos(angle), rotAxis[0], rotAxis[1], rotAxis[2]))
         qRotI = np.array((np.cos(angle), -rotAxis[0], -rotAxis[1], -rotAxis[2]))
 
-        LOGGER.debug("Rot. quaternion : " + str(qRot))
-        LOGGER.debug("Rot. quaternion conjugate : " + str(qRotI))
+        logger.debug("Rot. quaternion : " + str(qRot))
+        logger.debug("Rot. quaternion conjugate : " + str(qRotI))
 
         # converting self.kpoints into quaternions
         w = np.zeros((len(kpoints), 1))
         qvectors = np.column_stack((w, kpoints)).transpose()
-        LOGGER.debug(
+        logger.debug(
             "Kpoints-> quaternions (transposed):\n" + str(qvectors.transpose())
         )
         qvectors = q_multi(qRot, qvectors)
         qvectors = q_multi(qvectors, qRotI).transpose()
         kpoints = qvectors[:, 1:]
-        LOGGER.debug("Rotated kpoints :\n" + str(qvectors))
+        logger.debug("Rotated kpoints :\n" + str(qvectors))
 
         # rotating the spin vector (if exist)
         sxShape, syShape, szShape = sx.shape, sy.shape, sz.shape
-        LOGGER.debug("Spin vector Shapes : " + str((sxShape, syShape, szShape)))
+        logger.debug("Spin vector Shapes : " + str((sxShape, syShape, szShape)))
         # The first entry has to be an array of 0s, w could do the work,
         # but if len(self.sx)==0 qvectors will have a non-defined length
         qvectors = (
@@ -1393,14 +1395,14 @@ class ElectronicBandStructure:
             sy.flatten(),
             sz.flatten(),
         )
-        LOGGER.debug("Spin vector quaternions: \n" + str(qvectors))
+        logger.debug("Spin vector quaternions: \n" + str(qvectors))
         qvectors = q_multi(qRot, qvectors)
         qvectors = q_multi(qvectors, qRotI)
-        LOGGER.debug("Spin quaternions after rotation:\n" + str(qvectors))
+        logger.debug("Spin quaternions after rotation:\n" + str(qvectors))
         sx, sy, sz = qvectors[1], qvectors[2], qvectors[3]
         sx.shape, sy.shape, sz.shape = sxShape, syShape, szShape
 
-        LOGGER.debug("GeneralRotation: ...Done")
+        logger.debug("GeneralRotation: ...Done")
         return (kpoints, sx, sy, sz)
 
     def rot_symmetry_z(self, order, kpoints, bands, projected, sx, sy, sz):
@@ -1428,16 +1430,16 @@ class ElectronicBandStructure:
             sz = sz
 
         
-        LOGGER.debug("RotSymmetryZ:...")
+        logger.debug("RotSymmetryZ:...")
         rotations = [
             self.general_rotation(360 * i / order, store=False) for i in range(order)
         ]
         rotations = list(zip(*rotations))
-        LOGGER.debug(
+        logger.debug(
             "self.kpoints.shape (before concat.): " + str(kpoints.shape)
         )
         kpoints = np.concatenate(rotations[0], axis=0)
-        LOGGER.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
+        logger.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
         sx = np.concatenate(rotations[1], axis=0)
         sy = np.concatenate(rotations[2], axis=0)
         sz = np.concatenate(rotations[3], axis=0)
@@ -1446,7 +1448,7 @@ class ElectronicBandStructure:
         bandsChar = list(zip(*bandsChar))
         bands = np.concatenate(bandsChar[0], axis=0)
         projected = np.concatenate(bandsChar[1], axis=0)
-        LOGGER.debug("RotSymmZ:...Done")
+        logger.debug("RotSymmZ:...Done")
 
         return (kpoints, bands, projected, sx, sy, sz)
 
@@ -1468,10 +1470,10 @@ class ElectronicBandStructure:
         if sz is not None:
             sz = sz
 
-        LOGGER.debug("Mirror:...")
+        logger.debug("Mirror:...")
         newK = kpoints * np.array([1, -1, 1])
         kpoints = np.concatenate((kpoints, newK), axis=0)
-        LOGGER.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
+        logger.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
         newSx = -1 * sx
         newSy = 1 * sy
         newSz = 1 * sz
@@ -1486,7 +1488,7 @@ class ElectronicBandStructure:
         projected = np.concatenate((projected, projected), axis=0)
         print("self.projected", projected.shape)
         print("self.bands", bands.shape)
-        LOGGER.debug("Mirror:...Done")
+        logger.debug("Mirror:...Done")
 
         return (kpoints, bands, projected, sx, sy, sz)
 
@@ -1496,16 +1498,16 @@ class ElectronicBandStructure:
         reciprocal space.
 
         """
-        LOGGER.debug("Translate():  ...")
+        logger.debug("Translate():  ...")
         if len(newOrigin) == 1:
             newOrigin = int(newOrigin[0])
             newOrigin = kpoints[newOrigin]
         # Make sure newOrigin is a numpy array
         newOrigin = np.array(newOrigin, dtype=float)
-        LOGGER.debug("newOrigin: " + str(newOrigin))
+        logger.debug("newOrigin: " + str(newOrigin))
         kpoints = kpoints - newOrigin
-        LOGGER.debug("new Kpoints:\n" + str(kpoints))
-        LOGGER.debug("Translate(): ...Done")
+        logger.debug("new Kpoints:\n" + str(kpoints))
+        logger.debug("Translate(): ...Done")
         return kpoints
 
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh,axis):

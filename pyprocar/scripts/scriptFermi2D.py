@@ -6,6 +6,7 @@ __date__ = "December 01, 2020"
 import copy
 import os
 from typing import List
+import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,21 +14,19 @@ import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
+
 from pyprocar import io
 from pyprocar.core import FermiSurface, ProcarSymmetry
 from pyprocar.utils import ROOT, welcome
-from pyprocar.utils.plot_utils import DEFAULT_COLOR_MAP
-
-from .. import io
-from ..core import FermiSurface, ProcarSymmetry
-from ..utils import ROOT, welcome
+from pyprocar.utils import data_utils
+from pyprocar.utils.log_utils import set_verbose_level
 
 with open(os.path.join(ROOT, "pyprocar", "cfg", "fermi_surface_2d.yml"), "r") as file:
     plot_opt = yaml.safe_load(file)
 
 
-plot_opt["cmap"] = DEFAULT_COLOR_MAP
-
+user_logger = logging.getLogger("user")
+logger = logging.getLogger(__name__)
 
 def fermi2D(
     code: str,
@@ -50,6 +49,8 @@ def fermi2D(
     exportplt: bool = False,
     savefig: str = None,
     print_plot_opts: bool = False,
+    use_cache: bool = True,
+    verbose:int = 1,
     **kwargs,
 ):
     """This function plots the 2d fermi surface in the z = 0 plane
@@ -108,70 +109,75 @@ def fermi2D(
     RuntimeError
         invalid option --translate
     """
+    set_verbose_level(verbose)
+    
+    user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    
     welcome()
     # Turn interactive plotting off
     plt.ioff()
+    
+    user_logger.info("_"*100)
+    user_logger.info("### Parameters ###")
 
     if len(translate) != 3 and len(translate) != 1:
-        print("Error: --translate option is invalid! (", translate, ")")
+        logger.error(f"Error: --translate option is invalid! ({translate})")
         raise RuntimeError("invalid option --translate")
 
-    print("dirname         : ", dirname)
-    print("bands           : ", band_indices)
-    print("atoms           : ", atoms)
-    print("orbitals        : ", orbitals)
-    print("spin comp.      : ", spins)
-    print("energy          : ", energy)
-    print("rot. symmetry   : ", rot_symm)
-    print("origin (trasl.) : ", translate)
-    print("rotation        : ", rotation)
-    print("save figure     : ", savefig)
-    print("spin_texture    : ", spin_texture)
-
+    user_logger.info(f"dirname         : {dirname}")
+    user_logger.info(f"bands           : {band_indices}")
+    user_logger.info(f"atoms           : {atoms}")
+    user_logger.info(f"orbitals        : {orbitals}")
+    user_logger.info(f"spin comp.      : {spins}")
+    user_logger.info(f"energy          : {energy}")
+    user_logger.info(f"rot. symmetry   : {rot_symm}")
+    user_logger.info(f"origin (trasl.) : {translate}")
+    user_logger.info(f"rotation        : {rotation}")
+    user_logger.info(f"save figure     : {savefig}")
+    user_logger.info(f"spin_texture    : {spin_texture}")
+    user_logger.info("_"*100)
+    
     modes = ["plain", "plain_bands", "parametric"]
     modes_txt = " , ".join(modes)
     message = f"""
-            --------------------------------------------------------
             There are additional plot options that are defined in a configuration file. 
             You can change these configurations by passing the keyword argument to the function
             To print a list of plot options set print_plot_opts=True
 
-            Here is a list modes : {modes_txt}
-            --------------------------------------------------------
-            """
-    print(message)
+            Here is a list modes : {modes_txt}"""
+    user_logger.info(message)
+    
+    
     if print_plot_opts:
         for key, value in plot_opt.items():
-            print(key, ":", value)
+            user_logger.info(f"{key} : {value}")
 
+    user_logger.info("_"*100)
     parser = io.Parser(code=code, dir=dirname)
     ebs = parser.ebs
     structure = parser.structure
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
+        logger.info(f"No fermi given, using the found fermi energy: {ebs.efermi}")
         fermi = ebs.efermi
+        
     if fermi is not None:
+        logger.info(f"Shifting Fermi energy to zero: {fermi}")
         ebs.bands -= fermi
         ebs.bands += fermi_shift
         fermi_level = fermi_shift
     else:
-        print(
-            """
-            WARNING : `fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.
-            ----------------------------------------------------------------------------------------------------------
-            """
-        )
-    print(
-        f"""
-            WARNING : Make sure the kmesh has kz points with kz={k_z_plane} +- {k_z_plane_tol}
-            ----------------------------------------------------------------------------------------------------------
-            """
-    )
-
+        user_logger.warning("`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.")
+        
+    
     if structure.rotations is not None:
+        logger.info(f"Detected symmetry operations ({structure.rotations.shape}). Applying to ebs to get full BZ")
         ebs.ibz2fbz(structure.rotations)
+        
 
+    logger.debug(f"EBS: {str(ebs)}")
+    
     # Shifting all kpoint to first Brillouin zone
     bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
     ebs.kpoints = ebs.kpoints + bound_ops
@@ -190,10 +196,23 @@ def fermi2D(
             kpoints[:, 2] > k_z_plane - k_z_plane_tol,
         )
     )
+    
+    user_logger.info(f"Initial kpoints shape: {ebs.kpoints.shape}")
+    user_logger.info(f"Initial bands shape: {ebs.bands.shape}")
+    user_logger.info(f"Initial projected shape: {ebs.projected.shape}")
+    
     kpoints = kpoints[i_kpoints_near_z_0, :][0]
     ebs.bands = ebs.bands[i_kpoints_near_z_0, :][0]
     ebs.projected = ebs.projected[i_kpoints_near_z_0, :][0]
-    print("_____________________________________________________")
+    
+
+    user_logger.warning(f"Make sure the kmesh has the correct number of kz points"
+                    f"with kz={k_z_plane} +- {k_z_plane_tol}.")
+    
+    user_logger.info(f"Kpoints in the kz={k_z_plane} plane: {kpoints.shape}")
+    user_logger.info(f"Bands in the kz={k_z_plane} plane: {ebs.bands.shape}")
+    user_logger.info(f"Projected in the kz={k_z_plane} plane: {ebs.projected.shape}")
+    
     for i_spin in spins:
         indices = np.where(
             np.logical_and(
@@ -202,7 +221,7 @@ def fermi2D(
             )
         )
         if len(indices) != 0:
-            print(f"Useful band indices for spin-{i_spin} : {indices[0]}")
+            user_logger.info(f"Band indices near iso-surface: spin-{i_spin} | bands-{indices[0]}")
 
     if spin_texture is False:
         # processing the data
@@ -210,10 +229,17 @@ def fermi2D(
             orbitals = np.arange(ebs.norbitals, dtype=int)
         if atoms is None and ebs.projected is not None:
             atoms = np.arange(ebs.natoms, dtype=int)
+            
+        user_logger.info(f"Spins for projections: {spins}")
+        user_logger.info(f"Atoms for projections: {atoms}")
+        user_logger.info(f"Orbitals for projections: {orbitals}")
+        
         projected = ebs.ebs_sum(
             spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
         )
         projected = projected[:, :, spins]
+        
+        logger.info(f"projection shape after ebs_sum: {projected.shape}")
     else:
         # first get the sdp reduced array for all spin components.
         stData = []
@@ -221,27 +247,22 @@ def fermi2D(
         ebsY = copy.deepcopy(ebs)
         ebsZ = copy.deepcopy(ebs)
 
-        ebsX.projected = ebsX.ebs_sum(
+        projected = ebs.ebs_sum(
             spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
         )
-        ebsY.projected = ebsY.ebs_sum(
-            spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
-        )
-        ebsZ.projected = ebsZ.ebs_sum(
-            spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
-        )
-
-        ebsX.projected = ebsX.projected[:, :, [1]][:, :, 0]
-        ebsY.projected = ebsY.projected[:, :, [2]][:, :, 0]
-        ebsZ.projected = ebsZ.projected[:, :, [3]][:, :, 0]
+        ebsX.projected = copy.deepcopy(projected)[:, :, [1]][:, :, 0]
+        ebsY.projected = copy.deepcopy(projected)[:, :, [2]][:, :, 0]
+        ebsZ.projected = copy.deepcopy(projected)[:, :, [3]][:, :, 0]
+        
+        logger.info(f"ebsX.projected shape after ebs_sum: {ebsX.projected.shape}")
+        logger.info(f"ebsY.projected shape after ebs_sum: {ebsY.projected.shape}")
+        logger.info(f"ebsZ.projected shape after ebs_sum: {ebsZ.projected.shape}")
 
         stData.append(ebsX.projected)
         stData.append(ebsY.projected)
         stData.append(ebsZ.projected)
 
-        projected = ebs.ebs_sum(
-            spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
-        )
+    
     # Once the PROCAR is parsed and reduced to 2x2 arrays, we can apply
     # symmetry operations to unfold the Brillouin Zone
     # kpoints = data.kpoints

@@ -464,7 +464,7 @@ class FermiSurface:
                 tmp = self.config['spin_projection']['value'].split('^')
                 label = f'S$_{tmp[0]}$ projection'
             cbar.ax.set_ylabel(label, rotation=270)
-        plt.axis("equal")
+
         
         xlimits = x_limits[0] - abs(x_limits[0])*0.1, x_limits[1] + abs(x_limits[1])*0.1
         ylimits = y_limits[0] - abs(y_limits[0])*0.1, y_limits[1] + abs(y_limits[1])*0.1

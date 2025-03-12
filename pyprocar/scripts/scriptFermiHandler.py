@@ -5,15 +5,18 @@ __date__ = "March 31, 2020"
 
 import os
 import sys
+import logging
 from typing import List, Tuple
 import yaml
 import numpy as np
 
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.utils import ROOT, LOGGER
+from pyprocar.utils import ROOT
 
-from .. import io
+from pyprocar import io
+
+logger = logging.getLogger(__name__)
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -224,10 +227,10 @@ class FermiHandler:
             surface=self.data_handler.get_surface_data(property_name=config.property_name,fermi=e_value)
             e_surfaces.append(surface)
 
-            LOGGER.debug(f'___Getting surface for {e_value}__')
-            LOGGER.debug(f'Surface shape: {surface.points.shape}')
-            LOGGER.debug(f'Surface shape: {surface.point_data}')
-            LOGGER.debug(f'Surface shape: {surface.point_data}')
+            logger.debug(f'___Getting surface for {e_value}__')
+            logger.debug(f'Surface shape: {surface.points.shape}')
+            logger.debug(f'Surface shape: {surface.point_data}')
+            logger.debug(f'Surface shape: {surface.point_data}')
             
 
         visualizer = FermiVisualizer(self.data_handler,config)
@@ -294,10 +297,10 @@ class FermiHandler:
         e_surfaces = []
         for e_value in energy_values:
             surface=self.data_handler.get_surface_data(fermi=e_value,property_name=config.property_name)
-            LOGGER.debug(f'___Getting surface for {e_value}__')
-            LOGGER.debug(f'Surface shape: {surface.points.shape}')
-            LOGGER.debug(f'Surface shape: {surface.point_data}')
-            LOGGER.debug(f'Surface shape: {surface.point_data}')
+            logger.debug(f'___Getting surface for {e_value}__')
+            logger.debug(f'Surface shape: {surface.points.shape}')
+            logger.debug(f'Surface shape: {surface.point_data}')
+            logger.debug(f'Surface shape: {surface.point_data}')
             e_surfaces.append(surface)
 
         visualizer = FermiVisualizer(self.data_handler,config)

@@ -15,7 +15,7 @@ from pyprocar.utils import strings
 # Loading configuration settings
 from pyprocar.utils.config import ConfigManager
 from pyprocar.utils.config import LOG_DIR,DATA_DIR,ROOT,PKG_DIR,CONFIG
-from pyprocar.utils.log_config import setup_logging
+from pyprocar.utils.log_utils import setup_logging
 
 # Initialize logger
-LOGGER = setup_logging(log_dir=LOG_DIR,apply_filter=CONFIG['APPLY_LOG_FILTER'], log_level=CONFIG['log_level'])
+setup_logging()

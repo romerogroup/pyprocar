@@ -3,6 +3,7 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
+import logging
 from typing import List
 
 import numpy as np
@@ -12,7 +13,7 @@ import pyvista as pv
 
 from .surface import Surface
 
-from pyprocar.utils import LOGGER
+logger = logging.getLogger(__name__)
 
 class Isosurface(Surface):
     """
@@ -81,7 +82,7 @@ class Isosurface(Surface):
             transform_matrix:np.ndarray=None,
             boundaries=None,
         ):
-        LOGGER.info(f'____ Initializing Isosurface ____')
+        logger.info(f'____ Initializing Isosurface ____')
 
         self.XYZ = np.array(XYZ)
         self.V = V

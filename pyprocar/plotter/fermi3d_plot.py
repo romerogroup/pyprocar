@@ -1,7 +1,7 @@
-import os
+
 import copy
 from typing import List
-
+import logging
 
 import numpy as np
 import pyvista as pv
@@ -29,7 +29,9 @@ from pyvista.plotting.utilities.algorithms import (
 )
 
 from pyprocar.core.fermisurface3D import FermiSurface3D
-from pyprocar.utils import ROOT, LOGGER
+from pyprocar.utils import ROOT
+
+logger = logging.getLogger(__name__)
 
 # TODO: Decouple FermiDataHandler from FermiVisualizer
 # TODO: Normalize data does not work.
@@ -55,8 +57,8 @@ class FermiDataHandler:
         spins : List[int]
             List of spins
         """
-        LOGGER.info('___Determining spin projections___')
-        LOGGER.info(f'Initial spins: {spins}')
+        logger.info('___Determining spin projections___')
+        logger.info(f'Initial spins: {spins}')
         if spins is None:
             if self.initial_ebs.bands.shape[2] == 1 or np.all(self.initial_ebs.bands[:,:,1]==0):
                 spins = [0]
@@ -70,13 +72,13 @@ class FermiDataHandler:
         else:
             spin_pol=[0]
 
-        LOGGER.info(f'Final spins: {spins}.')
-        LOGGER.info(f'Final spin_pol: {spin_pol}. This is intented ')
-        LOGGER.info(f'____End of spin projections processing___')
+        logger.info(f'Final spins: {spins}.')
+        logger.info(f'Final spin_pol: {spin_pol}. This is intented ')
+        logger.info(f'____End of spin projections processing___')
         return spins , spin_pol
     
     def _process_data_for_parametric_mode(self,spins,atoms,orbitals,bands_to_keep):
-        LOGGER.info('___Processing data for parametric mode___')
+        logger.info('___Processing data for parametric mode___')
         spd = []
         if orbitals is None and self.initial_ebs.projected is not None:
             orbitals = np.arange(self.initial_ebs.norbitals, dtype=int)
@@ -95,16 +97,16 @@ class FermiDataHandler:
             spd.append( spin_bands_projections)
         spd = np.array(spd).T
         spins = np.arange(spd.shape[2])
-        LOGGER.info(f'Orbitals considered: {orbitals}')
-        LOGGER.info(f'Atoms considered: {atoms}')
-        LOGGER.info(f'Final spins: {spins}')
-        LOGGER.info(f'spd after summing over the projections shape: {spd.shape}')
-        LOGGER.info(f'First kpoint and bands: {spd[0,0,:]}')
-        LOGGER.info(f'____End of parametric mode processing___')
+        logger.info(f'Orbitals considered: {orbitals}')
+        logger.info(f'Atoms considered: {atoms}')
+        logger.info(f'Final spins: {spins}')
+        logger.info(f'spd after summing over the projections shape: {spd.shape}')
+        logger.info(f'First kpoint and bands: {spd[0,0,:]}')
+        logger.info(f'____End of parametric mode processing___')
         return spd, spins
     
     def _determine_bands_near_fermi(self,fermi_tolerance):
-        LOGGER.info('___Determining bands near fermi___')
+        logger.info('___Determining bands near fermi___')
     
         band_near_fermi = []
         for iband in range(len(self.initial_ebs.bands[0,:,0])):
@@ -113,22 +115,22 @@ class FermiDataHandler:
             if fermi_surface_test != 0:
                 band_near_fermi.append(iband)
 
-        LOGGER.info(f'Bands Near Fermi : {band_near_fermi}')
-        LOGGER.info(f'____End of bands near fermi processing___')
+        logger.info(f'Bands Near Fermi : {band_near_fermi}')
+        logger.info(f'____End of bands near fermi processing___')
         return band_near_fermi
     
     def _process_spd(self,mode,spins,atoms,orbitals,bands_to_keep):
-        LOGGER.info('___Processing spd___')
+        logger.info('___Processing spd___')
         if mode == "parametric":
             spd, spins = self._process_data_for_parametric_mode(spins,atoms,orbitals,bands_to_keep)
         else:
             spd = np.zeros(shape = (self.initial_ebs.nkpoints,len(bands_to_keep),len(spins)))
-        LOGGER.debug(f'spd after summing over the projections shape: {spd.shape}')
-        LOGGER.info(f'____End of spd processing___')
+        logger.debug(f'spd after summing over the projections shape: {spd.shape}')
+        logger.info(f'____End of spd processing___')
         return spd
     
     def _process_spd_spin_texture(self,spin_texture,spins,atoms,orbitals,bands_to_keep):
-        LOGGER.info('___Processing spd_spin_texture___')
+        logger.info('___Processing spd_spin_texture___')
         spd_spin = []
         if spin_texture:
             ebs = copy.deepcopy(self.initial_ebs)
@@ -141,7 +143,7 @@ class FermiDataHandler:
             spd_spin = np.array(spd_spin)[:,:,:,0]
             spd_spin = np.swapaxes(spd_spin, 0, 1)
             spd_spin = np.swapaxes(spd_spin, 0, 2)
-            LOGGER.debug(f'spd_spin after summing over the projections shape: {spd_spin.shape}')
+            logger.debug(f'spd_spin after summing over the projections shape: {spd_spin.shape}')
         else:
             for iband in bands_to_keep:
                 spd_spin.append(None)
@@ -149,11 +151,11 @@ class FermiDataHandler:
             spd_spin=None
 
         
-        LOGGER.info(f'____End of spd_spin_texture processing___')
+        logger.info(f'____End of spd_spin_texture processing___')
         return spd_spin
     
     def _initialize_properties(self,property_name):
-        LOGGER.info('___Initializing properties___')
+        logger.info('___Initializing properties___')
         if property_name:
             current_emplemented_properties = ['fermi_velocity', 'fermi_speed' ,'harmonic_effective_mass']
             if property_name not in current_emplemented_properties:
@@ -167,7 +169,7 @@ class FermiDataHandler:
                 elif property_name=='harmonic_effective_mass':
                     self.ebs.bands_hessian
                 
-        LOGGER.info(f'____End of properties initialization___')
+        logger.info(f'____End of properties initialization___')
 
     def _get_spin_pol_indices(self, fermi_surfaces):
         """
@@ -215,7 +217,7 @@ class FermiDataHandler:
         return spins_band_index, spins_index
     
     def _merge_fermi_surfaces(self, fermi_surfaces):
-        LOGGER.info(f'____ Merging Fermi Surfaces of different spins ____')
+        logger.info(f'____ Merging Fermi Surfaces of different spins ____')
         # Gets the spin-band and spin indices for the the combines fermi surfaces
         spins_band_index, spins_index = self._get_spin_pol_indices(fermi_surfaces)
         fermi_surface=None
@@ -227,7 +229,7 @@ class FermiDataHandler:
 
         fermi_surface.point_data['band_index']= np.array(spins_band_index)
         fermi_surface.point_data['spin_index']= np.array(spins_index)
-        LOGGER.info(f'____Finished Merging Fermi Surfaces of different spins ____')
+        logger.info(f'____Finished Merging Fermi Surfaces of different spins ____')
         return fermi_surface
     
     def process_data(self,
@@ -259,7 +261,7 @@ class FermiDataHandler:
         _type_
             _description_
         """
-        LOGGER.info('___Processing data fermi surface___')
+        logger.info('___Processing data fermi surface___')
 
         bands_to_keep = bands
         if bands_to_keep is None:
@@ -274,14 +276,14 @@ class FermiDataHandler:
         self.spd_spin=spd_spin
         self.bands_to_keep=bands_to_keep
         self.spins=spins
-        LOGGER.info(f'____ Finished Processing Data ____')
+        logger.info(f'____ Finished Processing Data ____')
         return spd, spd_spin, bands_to_keep, spins
     
     def get_surface_data(self,
                     property_name=None,
                     fermi:float=None,
                     fermi_shift: float=0.0):
-        LOGGER.info(f'____ Getting Fermi Surface Data ____')
+        logger.info(f'____ Getting Fermi Surface Data ____')
         if self.config.mode is None:
             raise "You must call process data function before get_surface"
 
@@ -291,7 +293,7 @@ class FermiDataHandler:
         for ispin, spin in enumerate(self.spin_pol):
             ebs=copy.copy(self.ebs)
             ebs.bands=ebs.bands[:,self.bands_to_keep,spin]
-            LOGGER.debug(f'Bands shape for spin {spin}: {ebs.bands.shape}')
+            logger.debug(f'Bands shape for spin {spin}: {ebs.bands.shape}')
 
             fermi_surface3D = FermiSurface3D(
                                             ebs=ebs,
@@ -320,7 +322,7 @@ class FermiDataHandler:
             fermi_surfaces.append(fermi_surface3D)
 
         self.fermi_surface=self._merge_fermi_surfaces(fermi_surfaces)
-        LOGGER.info(f'____ Retrieived Fermi Surface Data ____')
+        logger.info(f'____ Retrieived Fermi Surface Data ____')
         return self.fermi_surface
     
 class FermiVisualizer:
@@ -370,11 +372,11 @@ class FermiVisualizer:
             )
     
     def add_surface(self,surface):
-        LOGGER.info(f'____ Adding Surface to Plotter ____')
+        logger.info(f'____ Adding Surface to Plotter ____')
         surface=self._setup_band_colors(surface)
 
         if self.config.spin_colors != (None,None):
-            LOGGER.debug(f'Adding surface with spin colors: {self.config.spin_colors}')
+            logger.debug(f'Adding surface with spin colors: {self.config.spin_colors}')
             spin_colors=[]
             for spin_index in surface.point_data['spin_index']:
                 if spin_index == 0:
@@ -391,12 +393,12 @@ class FermiVisualizer:
             
 
         elif self.config.surface_color:
-            LOGGER.debug(f'Adding surface with color: {self.config.surface_color}')
+            logger.debug(f'Adding surface with color: {self.config.surface_color}')
             self.plotter.add_mesh(surface,
                                 color=self.config.surface_color,
                                 opacity=self.config.surface_opacity)
         else:
-            LOGGER.debug(f'Adding surface with scalars: {self.data_handler.scalars_name}')
+            logger.debug(f'Adding surface with scalars: {self.data_handler.scalars_name}')
             # if self.config.surface_clim:
                 # self._normalize_data(surface,scalars_name=self.data_handler.scalars_name)
             self.plotter.add_mesh(surface,
@@ -672,18 +674,18 @@ class FermiVisualizer:
         pv.save_meshio(filename, surface)
     
     def _setup_band_colors(self,fermi_surface):
-        LOGGER.info(f'____ Setting up Band Colors ____')
+        logger.info(f'____ Setting up Band Colors ____')
 
         band_colors = self.config.surface_bands_colors
         if self.config.surface_bands_colors == []:
             band_colors=self._generate_band_colors(fermi_surface)
 
         fermi_surface = self._apply_fermi_surface_band_colors(fermi_surface,band_colors)
-        LOGGER.info(f'____ Finished Setting up Band Colors ____')
+        logger.info(f'____ Finished Setting up Band Colors ____')
         return fermi_surface
     
     def _generate_band_colors(self,fermi_surface):
-        LOGGER.info(f'____ Generating Band Colors ____')
+        logger.info(f'____ Generating Band Colors ____')
         # Generate unique rgba values for the bands
         unique_band_index = np.unique(fermi_surface.point_data['band_index'])
         nsurface = len(unique_band_index)
@@ -691,13 +693,13 @@ class FermiVisualizer:
         cmap = cm.get_cmap(self.config.surface_cmap)
         solid_color_surface = np.arange(nsurface ) / nsurface
         band_colors = np.array([cmap(norm(x)) for x in solid_color_surface[:]]).reshape(-1, 4)
-        LOGGER.debug(f'Band Colors: {band_colors}')
-        LOGGER.debug(f'Band Colors shape: {band_colors.shape}')
-        LOGGER.info(f'____ Finished Generating Band Colors ____')
+        logger.debug(f'Band Colors: {band_colors}')
+        logger.debug(f'Band Colors shape: {band_colors.shape}')
+        logger.info(f'____ Finished Generating Band Colors ____')
         return band_colors
     
     def _apply_fermi_surface_band_colors(self,fermi_surface,band_colors):
-        LOGGER.info(f'____ Applying Band Colors ____')
+        logger.info(f'____ Applying Band Colors ____')
         unique_band_index = np.unique(fermi_surface.point_data['band_index'])
 
         if len(band_colors) != len(unique_band_index):
@@ -720,7 +722,7 @@ class FermiVisualizer:
             band_colors.append(band_color)
 
         fermi_surface.point_data['bands']=band_colors
-        LOGGER.info(f'____ Finished Applying Band Colors ____')
+        logger.info(f'____ Finished Applying Band Colors ____')
         return fermi_surface
     
     def _setup_plotter(self):
