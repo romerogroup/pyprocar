@@ -743,7 +743,7 @@ class EBSPlot:
         self.ax.tick_params(**self.config.major_y_tick_params)
         self.ax.tick_params(**self.config.minor_y_tick_params)
 
-    def set_xlim(self, interval: List[float] = None):
+    def set_xlim(self, interval: List[float] = None, ktick_interval: List[float] = None):
         """A method to set the x limit
 
         Parameters
@@ -753,6 +753,11 @@ class EBSPlot:
         """
         if interval is None:
             interval = (self.x[0], self.x[-1])
+        if ktick_interval:
+            ktick_start = ktick_interval[0]
+            ktick_end = ktick_interval[1]
+            interval = (self.x[ktick_start], self.x[ktick_end])
+        
         self.ax.set_xlim(interval)
 
     def set_ylim(self, interval: List[float] = None):

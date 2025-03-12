@@ -4,6 +4,7 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 from typing import List
+import logging
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ from pyprocar import io
 from pyprocar.plotter import EBSPlot
 from pyprocar.utils import welcome
 
+logger = logging.getLogger(__name__)
 
 def bandsplot(
     code: str,
@@ -38,6 +40,8 @@ def bandsplot(
     print_plot_opts:bool=False,
     export_data_file:str=None,
     export_append_mode:bool=True,
+    ktick_limit:List[float]=None,
+    x_limit:List[float]=None,
     **kwargs
     ):
     """A function to plot the band structutre
@@ -318,7 +322,7 @@ def bandsplot(
             
     ebs_plot.set_xticks(kticks, knames)
     ebs_plot.set_yticks(interval=elimit)
-    ebs_plot.set_xlim()
+    ebs_plot.set_xlim(interval=x_limit, ktick_interval=ktick_limit)
     ebs_plot.set_ylim(elimit)
     ebs_plot.set_ylabel(label=y_label)
 
