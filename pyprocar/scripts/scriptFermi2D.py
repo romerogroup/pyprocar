@@ -98,6 +98,10 @@ def fermi2D(
         Boolean value where to return the matplotlib.pyplot state plt, by default False
     print_plot_opts: bool, optional
         Boolean to print the plotting options
+    use_cache: bool, optional
+        Boolean to use cache for EBS
+    verbose: int, optional
+        Verbosity level
 
     Returns
     -------
@@ -112,6 +116,7 @@ def fermi2D(
     set_verbose_level(verbose)
     
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
+    user_logger.info("_"*100)
     
     welcome()
     # Turn interactive plotting off
@@ -153,9 +158,29 @@ def fermi2D(
             user_logger.info(f"{key} : {value}")
 
     user_logger.info("_"*100)
-    parser = io.Parser(code=code, dir=dirname)
-    ebs = parser.ebs
-    structure = parser.structure
+    ebs_pkl_filepath = os.path.join(dirname, 'ebs.pkl')
+    
+    if not use_cache and os.path.exists(ebs_pkl_filepath):
+        logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
+        os.remove(ebs_pkl_filepath)
+
+    if not os.path.exists(ebs_pkl_filepath):
+        logger.info(f"Parsing EBS from {dirname}")
+        
+        parser = io.Parser(code=code, dir=dirname)
+        ebs = parser.ebs
+        structure = parser.structure
+    
+        if structure.rotations is not None:
+            logger.info(f"Detected symmetry operations ({structure.rotations.shape}). Applying to ebs to get full BZ")
+            ebs.ibz2fbz(structure.rotations)
+        
+        data_utils.save_pickle(ebs, ebs_pkl_filepath)
+        
+    else:
+        logger.info(f"Loading EBS from cached Pickle files in {dirname}")
+        
+        ebs = data_utils.load_pickle(ebs_pkl_filepath)
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
@@ -170,12 +195,6 @@ def fermi2D(
     else:
         user_logger.warning("`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy.")
         
-    
-    if structure.rotations is not None:
-        logger.info(f"Detected symmetry operations ({structure.rotations.shape}). Applying to ebs to get full BZ")
-        ebs.ibz2fbz(structure.rotations)
-        
-
     logger.debug(f"EBS: {str(ebs)}")
     
     # Shifting all kpoint to first Brillouin zone

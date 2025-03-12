@@ -6,6 +6,7 @@ import logging.config
 def set_verbose_level(verbose:int):
     user_logger=logging.getLogger("user")
     package_logger=logging.getLogger("pyprocar")
+    
     if verbose==0:
         user_logger.setLevel(logging.CRITICAL)
         package_logger.setLevel(logging.CRITICAL)
@@ -42,7 +43,7 @@ logging_config = {
     'disable_existing_loggers': False,
     'formatters': {
         'simple': {
-            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            'format': '[%(levelname)s] %(asctime)s - %(name)s[%(lineno)d] - %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S'
         },
         'user': {
