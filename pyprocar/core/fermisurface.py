@@ -21,6 +21,9 @@ from matplotlib.collections import LineCollection
 
 from pyprocar.utils import ROOT, ConfigManager
 
+
+logger = logging.getLogger(__name__)
+
 class FermiSurface:
     """This object is used to help plot the 2d fermi surface
 
@@ -46,7 +49,6 @@ class FermiSurface:
     def __init__(self, kpoints, bands, spd, 
         band_indices:List[List]=None, 
         band_colors:List[List]=None, 
-        loglevel=logging.WARNING,
         **kwargs):
         
         # Since some time ago Kpoints are in cartesian coords (ready to use)
@@ -59,20 +61,12 @@ class FermiSurface:
         self.useful = None  # List of useful bands (filled in findEnergy)
         self.energy = None
 
-        self.log = logging.getLogger("FermiSurface")
-        self.log.setLevel(loglevel)
-        self.ch = logging.StreamHandler()
-        self.ch.setFormatter(
-            logging.Formatter("%(name)s::%(levelname)s: " "%(message)s")
-        )
-        self.ch.setLevel(logging.DEBUG)
-        self.log.addHandler(self.ch)
 
-        self.log.debug("FermiSurface.init: ...")
-        self.log.info("Kpoints.shape : " + str(self.kpoints.shape))
-        self.log.info("bands.shape   : " + str(self.bands.shape))
-        self.log.info("spd.shape     : " + str(self.spd.shape))
-        self.log.debug("FermiSurface.init: ...Done")
+        logger.debug("FermiSurface.init: ...")
+        logger.info("Kpoints.shape : " + str(self.kpoints.shape))
+        logger.info("bands.shape   : " + str(self.bands.shape))
+        logger.info("spd.shape     : " + str(self.spd.shape))
+        logger.debug("FermiSurface.init: ...Done")
 
         config_manager=ConfigManager(os.path.join(ROOT,'pyprocar','cfg','fermi_surface_2d.yml'))
         
@@ -99,9 +93,9 @@ class FermiSurface:
             If no bands are found, raise an error.
         """
 
-        self.log.debug("FindEnergy: ...")
+        logger.debug("FindEnergy: ...")
         self.energy = energy
-        self.log.info("Energy   : " + str(energy))
+        logger.info("Energy   : " + str(energy))
 
 
         self.band_indices
@@ -113,27 +107,27 @@ class FermiSurface:
 
             indices = np.where( np.logical_and(bands.min(axis=0) < energy, bands.max(axis=0) > energy))
             self.useful_bands_by_spins.append(indices[0])
-        self.log.info("set of useful bands    : " + str(self.useful_bands_by_spins))
+        logger.info("set of useful bands    : " + str(self.useful_bands_by_spins))
         
         if len(self.useful_bands_by_spins) == 1:
             bands = self.bands[:,self.useful_bands_by_spins[0],:]
-            self.log.debug("new bands.shape : " + str(bands.shape))
+            logger.debug("new bands.shape : " + str(bands.shape))
             if len(bands) == 0:
-                self.log.error("No bands found in that range. Check your data. Returning")
+                logger.error("No bands found in that range. Check your data. Returning")
                 raise RuntimeError("No bands to plot")
         else:
             bands_up = self.bands[:,self.useful_bands_by_spins[0],0]
             bands_down= self.bands[:,self.useful_bands_by_spins[1],1]
-            self.log.debug("new bands_up.shape : " + str(bands_up.shape))
-            self.log.debug("new bands_down.shape : " + str(bands_down.shape))
+            logger.debug("new bands_up.shape : " + str(bands_up.shape))
+            logger.debug("new bands_down.shape : " + str(bands_down.shape))
             if len(bands_up) == 0:
-                self.log.error("No bands found in that range for spin up. Check your data. Returning")
+                logger.error("No bands found in that range for spin up. Check your data. Returning")
                 raise RuntimeError("No bands to plot")
             if len(bands_down) == 0:
-                self.log.error("No bands found in that range for spin down. Check your data. Returning")
+                logger.error("No bands found in that range for spin down. Check your data. Returning")
                 raise RuntimeError("No bands to plot")
 
-        self.log.debug("FindEnergy: ...Done")
+        logger.debug("FindEnergy: ...Done")
         return None
 
     def plot(self,mode:str, interpolation=500):
@@ -158,7 +152,7 @@ class FermiSurface:
         RuntimeError
             Raise error if find energy was not called before plotting.
         """
-        self.log.debug("Plot: ...")
+        logger.debug("Plot: ...")
         from scipy.interpolate import griddata
 
         if self.useful_bands_by_spins is None:
@@ -167,12 +161,12 @@ class FermiSurface:
         
         # selecting components of K-points
         x, y = self.kpoints[:, 0], self.kpoints[:, 1]
-        self.log.debug("k_x[:10], k_y[:10] values" + str([x[:10], y[:10]]))
+        logger.debug("k_x[:10], k_y[:10] values" + str([x[:10], y[:10]]))
 
         # and new, interpolated component
         xmax, xmin = x.max(), x.min()
         ymax, ymin = y.max(), y.min()
-        self.log.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
+        logger.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
         xnew, ynew = np.mgrid[
             xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j
         ]
@@ -208,7 +202,7 @@ class FermiSurface:
             # Interpolating band energies on to new grid
             bnew = []
             for i_band, band in enumerate(bands):
-                self.log.debug("Interpolating ...")
+                logger.debug("Interpolating ...")
                 bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
             bnew = np.array(bnew)
 
@@ -268,7 +262,7 @@ class FermiSurface:
             cbar.ax.set_ylabel('Atomic Orbital Projections', labelpad=10, rotation=270)
 
         plt.axis("equal")
-        self.log.debug("Plot: ...Done")
+        logger.debug("Plot: ...Done")
         # return plots
 
     def spin_texture(self, sx, sy, sz, 
@@ -302,7 +296,7 @@ class FermiSurface:
             Raise error if find energy was not called before plotting.
         """
 
-        self.log.debug("spin_texture: ...")
+        logger.debug("spin_texture: ...")
     
         if self.useful_bands_by_spins is None:
             raise RuntimeError("self.find_energy() must be called before plotting")
@@ -329,7 +323,9 @@ class FermiSurface:
         # and new, interpolated component
         xmax, xmin = x.max(), x.min()
         ymax, ymin = y.max(), y.min()
-        self.log.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
+        
+        logger.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
+        
         xnew, ynew = np.mgrid[
             xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j
         ]
@@ -337,7 +333,7 @@ class FermiSurface:
         # interpolation
         bnew = []
         for band in bands:
-            self.log.debug("Interpolating ...")
+            logger.debug("Interpolating ...")
             bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
 
         # Normalizing
@@ -363,7 +359,8 @@ class FermiSurface:
             for z in bnew
         ]
 
-        plt.axis("equal")
+        x_limits = [0,0]
+        y_limits = [0,0]
         for i_band, (contour, spinX, spinY, spinZ) in enumerate(zip(cont, sx, sy, sz)):
             # The previous interp. yields the level curves, nothing more is
             # useful from there
@@ -371,13 +368,15 @@ class FermiSurface:
             if paths:
                 verts=[path.vertices for path in paths]
                 points = np.concatenate(verts)
+                x_limits = [min(x_limits[0], points[:, 0].min()), max(x_limits[1], points[:, 0].max())]
+                y_limits = [min(y_limits[0], points[:, 1].min()), max(y_limits[1], points[:, 1].max())]
 
 
-                self.log.debug("Fermi surf. points.shape: " + str(points.shape))
+                logger.debug("Fermi surf. points.shape: " + str(points.shape))
                 newSx = griddata((x, y), spinX, (points[:, 0], points[:, 1]))
                 newSy = griddata((x, y), spinY, (points[:, 0], points[:, 1]))
                 newSz = griddata((x, y), spinZ, (points[:, 0], points[:, 1]))
-                self.log.info("newSx.shape: " + str(newSx.shape))
+                logger.info("newSx.shape: " + str(newSx.shape))
                 if self.config['arrow_size']['value'] is not None:
                     # This is so the density scales the way you think. increasing number means increasing density. 
                     # The number in the numerator is so it scales reasonable with 0-20
@@ -455,7 +454,7 @@ class FermiSurface:
                             norm=norm,
                         )
                 
-            
+        
         if self.config['plot_color_bar']['value']:
             cbar = plt.colorbar()
             if len(self.config['spin_projection']['value'].split('^')) == 2:
@@ -466,10 +465,15 @@ class FermiSurface:
                 label = f'S$_{tmp[0]}$ projection'
             cbar.ax.set_ylabel(label, rotation=270)
         plt.axis("equal")
+        
+        xlimits = x_limits[0] - abs(x_limits[0])*0.1, x_limits[1] + abs(x_limits[1])*0.1
+        ylimits = y_limits[0] - abs(y_limits[0])*0.1, y_limits[1] + abs(y_limits[1])*0.1
+        plt.xlim(xlimits)
+        plt.ylim(ylimits)
         font = {"size": 16}
         plt.rc("font", **font)
 
-        self.log.debug("st: ...Done")
+        logger.debug("st: ...Done")
         return None
 
     def add_axes_labels(self):
