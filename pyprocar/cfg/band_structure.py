@@ -1,9 +1,9 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional,Tuple
 from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Tuple
 
+from pyprocar.cfg.base import BaseConfig, PlotType
 
-from pyprocar.cfg.base import PlotType, BaseConfig
 
 class BandStructureMode(Enum):
     """
@@ -197,11 +197,13 @@ class BandStructureConfig(BaseConfig):
     weighted_color: bool = True
     weighted_width: bool = False
     figure_size: Tuple[int] = field(default_factory=lambda: (9, 6))
-    dpi: str = 'figure'
+    dpi: int = 300
 
 
     colorbar_tick_params: Dict[str, any] = field(default_factory=lambda: {})
     colorbar_label_params: Dict[str, any] = field(default_factory=lambda: {})
+    
+    x_label: str = 'K vector'
     x_label_params: Dict[str, any] = field(default_factory=lambda: {})
     y_label_params: Dict[str, any] = field(default_factory=lambda: {})
     title_params: Dict[str, any] = field(default_factory=lambda: {})
