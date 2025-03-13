@@ -6,40 +6,55 @@ __date__ = "March 31, 2020"
 import inspect
 from typing import List
 
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
-from .scriptDosplot import dosplot
-from .scriptBandsplot import bandsplot
-from ..utils import welcome
-from ..io import vasp, qe 
 from pyprocar.utils.info import orbital_names
-from ..plotter import DOSPlot, EBSPlot
-from ..utils.defaults import settings
 
-bands_settings = {key:value for key,value in zip(inspect.getfullargspec(bandsplot).args,inspect.getfullargspec(bandsplot).defaults)}
-dos_settings = {key:value for key,value in zip(inspect.getfullargspec(dosplot).args,inspect.getfullargspec(dosplot).defaults)}
+from ..io import qe, vasp
+from ..plotter import DOSPlot, EBSPlot
+from ..utils import welcome
+from ..utils.defaults import settings
+from .scriptBandsplot import bandsplot
+from .scriptDosplot import dosplot
+
+bands_settings = {
+    key: value
+    for key, value in zip(
+        inspect.getfullargspec(bandsplot).args,
+        inspect.getfullargspec(bandsplot).defaults,
+    )
+}
+dos_settings = {
+    key: value
+    for key, value in zip(
+        inspect.getfullargspec(dosplot).args, inspect.getfullargspec(dosplot).defaults
+    )
+}
+
 
 def bandsdosplot(
-    bands_settings:dict=bands_settings,
-    dos_settings:dict=dos_settings,
-    dos_limit:List[int]=None,
-    elimit:List[int]=None,
-    k_limit = None,
-    grid:bool=False,
-    code:str="vasp",
-    lobster:bool=False,
-    savefig:str=None,
-    title:str=None,
-    title_fontsize:float=16,
+    bands_settings: dict = bands_settings,
+    dos_settings: dict = dos_settings,
+    dos_limit: List[int] = None,
+    elimit: List[int] = None,
+    k_limit=None,
+    grid: bool = False,
+    code: str = "vasp",
+    lobster: bool = False,
+    savefig: str = None,
+    title: str = None,
+    title_fontsize: float = 16,
     discontinuities=None,
-    draw_fermi:bool=True,
-    plot_color_bar:bool=True,
-    repair:bool=True,
-    show:bool=True,
-    **kwargs
-    ):
+    draw_fermi: bool = True,
+    plot_color_bar: bool = True,
+    repair: bool = True,
+    show: bool = True,
+    dpi: int = 300,
+    figsize=(16.5, 5.5),
+    **kwargs,
+):
     """A function to plot the band structure and the density of states in the same plot
 
     Parameters
@@ -80,26 +95,27 @@ def bandsdosplot(
 
     welcome()
 
-
-    #inital settings
-    bands_settings['code'] = code
-    dos_settings['code'] = code
-    dos_settings['orientation'] = 'vertical'
-    bands_settings['show'] = False
-    dos_settings['show'] = False
+    # inital settings
+    bands_settings["code"] = code
+    dos_settings["code"] = code
+    dos_settings["orientation"] = "vertical"
+    bands_settings["show"] = False
+    dos_settings["show"] = False
 
     # parses old elements
     # bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)
 
-    #plots bandsplot and dosplot
+    # plots bandsplot and dosplot
     ebs_plot_fig, ebs_plot_ax = bandsplot(**bands_settings)
     edos_plot_fig, edos_plot_ax = dosplot(**dos_settings)
 
-    plt.close('all')
-    fig = plt.figure(figsize = (16.5,5.5), clear = True)
+    plt.close("all")
+    fig = plt.figure(figsize=figsize, clear=True, dpi=dpi)
 
     # combines bandsplot and dos plot
-    ax_ebs,ax_dos = combine_axes(ebs_plot_fig, edos_plot_fig, fig, plot_color_bar = plot_color_bar)
+    ax_ebs, ax_dos = combine_axes(
+        ebs_plot_fig, edos_plot_fig, fig, plot_color_bar=plot_color_bar
+    )
 
     # axes opitions
     if elimit is not None:
@@ -113,25 +129,36 @@ def bandsdosplot(
         ax_ebs.grid()
         ax_dos.grid()
     if draw_fermi:
-        ax_ebs.axhline(y=0, color=settings.dos.fermi_color, linestyle=settings.dos.fermi_linestyle, linewidth=settings.dos.fermi_linewidth)
-        ax_dos.axhline(y=0, color=settings.dos.fermi_color, linestyle=settings.dos.fermi_linestyle, linewidth=settings.dos.fermi_linewidth)
-    
+        ax_ebs.axhline(
+            y=0,
+            color=settings.dos.fermi_color,
+            linestyle=settings.dos.fermi_linestyle,
+            linewidth=settings.dos.fermi_linewidth,
+        )
+        ax_dos.axhline(
+            y=0,
+            color=settings.dos.fermi_color,
+            linestyle=settings.dos.fermi_linestyle,
+            linewidth=settings.dos.fermi_linewidth,
+        )
+
     if title is not None:
         fig.suptitle(title, title_fontsize=title_fontsize)
-        
 
     if savefig:
-        plt.savefig(savefig)#), bbox_inches="tight")
+        fig.set_size_inches(figsize)
+        plt.savefig(savefig, dpi=dpi)
         plt.clf()
     if show:
         plt.show()
 
     return fig, ax_ebs, ax_dos
 
-def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
+
+def combine_axes(fig_ebs, fig_dos, fig, plot_color_bar=True):
 
     # Changes link of axes to old to new figure. Then adds the axes to the current figure
-    
+
     ax_ebs = fig_ebs.axes[0]
     ax_dos = fig_dos.axes[0]
 
@@ -143,7 +170,7 @@ def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
     fig.axes.append(ax_dos)
     fig.add_axes(ax_dos)
 
-    ax_color_bar = None 
+    ax_color_bar = None
     if len(fig_ebs.axes) != 1 and plot_color_bar:
         ax_color_bar = fig_ebs.axes[1]
         ax_color_bar.figure = fig
@@ -155,33 +182,32 @@ def combine_axes(fig_ebs,fig_dos,fig, plot_color_bar = True):
         fig.axes.append(ax_color_bar)
         fig.add_axes(ax_color_bar)
 
-    #Changeing location of dos plot
+    # Changeing location of dos plot
     dos_position = list(fig.axes[1].get_position().bounds)
     ebs_position = list(fig.axes[0].get_position().bounds)
-    dos_position[0] = ebs_position[0] + ebs_position[3]  + 0.025
+    dos_position[0] = ebs_position[0] + ebs_position[3] + 0.025
 
     fig.axes[1].set_position(dos_position)
 
-    #Formating dos plot to be comatible with band structure plot
+    # Formating dos plot to be comatible with band structure plot
     fig.axes[1].axes.set_ylabel("")
     fig.axes[1].axes.set_yticklabels([])
     fig.axes[1].sharey(fig.axes[0])
 
     fig.axes[1].axes.get_yaxis().set_visible(False)
 
-    
-
-    #Handles existing colorbars
+    # Handles existing colorbars
     if ax_color_bar is not None:
         dos_position = list(fig.axes[1].get_position().bounds)
         color_bar_position = list(fig.axes[2].get_position().bounds)
 
-        color_bar_position[0] = dos_position[0] + dos_position[3]  - 0.1
+        color_bar_position[0] = dos_position[0] + dos_position[3] - 0.1
         fig.axes[2].set_position(color_bar_position)
 
-    return fig.axes[0],fig.axes[1]
+    return fig.axes[0], fig.axes[1]
 
-def parse_kwargs(kwargs,bands_settings, dos_settings):
+
+def parse_kwargs(kwargs, bands_settings, dos_settings):
     for key, value in kwargs.items():
         if key == "dos_file":
             dos_settings["filename"] = value
@@ -215,7 +241,7 @@ def parse_kwargs(kwargs,bands_settings, dos_settings):
             dos_settings["orbitals"] = value
 
         if key == "bands_spin":
-           dos_settings["spins"] = value
+            dos_settings["spins"] = value
         if key == "dos_spin":
             dos_settings["spins"] = value
         if key == "dos_labels":
@@ -245,13 +271,4 @@ def parse_kwargs(kwargs,bands_settings, dos_settings):
         if key == "kdirect":
             bands_settings["kdirect"] = value
 
-
-
     return bands_settings, dos_settings
-
-
-
-        
-            
-
-
