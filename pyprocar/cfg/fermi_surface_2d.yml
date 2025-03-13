@@ -40,6 +40,10 @@ arrow_color:
   description: The linestyles for the spin plot lines.
   value:
 
+contour_alpha:
+  description: The alpha value for the spin texture contour
+  value: 1.0
+
 arrow_density:
   description: The arrow density for the spin texture
   value: 10
