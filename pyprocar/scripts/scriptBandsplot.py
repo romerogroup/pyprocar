@@ -226,6 +226,9 @@ def bandsplot(
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
         weights = []
         if mode == "overlay_species":
+            if orbitals is None:
+                orbitals = list(np.arange(len(ebs_plot.ebs.projected[0][0]), dtype=int))
+
             user_logger.info("Plotting bands in overlay species mode")
             for ispc in structure.species:
                 labels.append(ispc)
@@ -405,7 +408,9 @@ def bandsplot(
 
     ebs_plot.set_title()
     ebs_plot.grid()
+
     ebs_plot.legend(labels)
+
     if savefig is not None:
         ebs_plot.save(savefig)
     if show:

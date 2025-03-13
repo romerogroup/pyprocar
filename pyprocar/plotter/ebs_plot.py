@@ -508,6 +508,7 @@ class EBSPlot:
                     )
                     lc.set_array(weight[:, iband, ispin])
                     lc.set_linewidth(weight[:, iband, ispin] * linewidth[ispin])
+
                     self.ax.add_collection(lc)
 
                     band_name = f"band-{iband}_spinChannel-{str(ispin)}"
