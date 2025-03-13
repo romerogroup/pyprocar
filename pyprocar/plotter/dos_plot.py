@@ -9,6 +9,7 @@ import os
 from typing import List
 
 import matplotlib as mpl
+import matplotlib.patches as mpatches
 import matplotlib.pylab as plt
 import numpy as np
 import pandas as pd
@@ -266,6 +267,7 @@ class DOSPlot:
                     + f"_spinProjection-{spin_string}"
                 ] = scaled_dos_spin_projected
 
+            handle = mpatches.Patch(color=color, label=label)
             self.handles.append(handle)
             self.labels.append(label)
 
@@ -343,6 +345,7 @@ class DOSPlot:
                     + f"_spinProjection-{spin_string}"
                 ] = scaled_dos_spin_projected
 
+            handle = mpatches.Patch(color=color, label=label)
             self.handles.append(handle)
             self.labels.append(label)
 
@@ -434,6 +437,7 @@ class DOSPlot:
                     + f"_spinProjection-{spin_string}"
                 ] = scaled_dos_spin_projected
 
+            handle = mpatches.Patch(color=color, label=label)
             self.handles.append(handle)
             self.labels.append(label)
 
@@ -1035,6 +1039,20 @@ class DOSPlot:
                 linestyle=self.config.fermi_linestyle,
                 linewidth=self.config.fermi_linewidth,
             )
+        return None
+
+    def draw_baseline(self, value, orientation: str = "horizontal"):
+        """A method to draw the baseline
+
+        Parameters
+        ----------
+        value : float
+            The value of the baseline
+        """
+        if orientation == "horizontal":
+            self.ax.axhline(y=value, **self.config.baseline_params)
+        elif orientation == "vertical":
+            self.ax.axvline(x=value, **self.config.baseline_params)
         return None
 
     def grid(self):

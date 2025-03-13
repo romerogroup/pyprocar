@@ -181,6 +181,16 @@ class DensityOfStatesConfig(BaseConfig):
     grid_linestyle: str = "solid"
     grid_linewidth: float = 1
     grid_which: str = "major"
+    draw_baseline: bool = True
+    baseline_params: Dict[str, Any] = field(
+        default_factory=lambda: {
+            "color": "black",
+            "alpha": 0.3,
+            "linestyle": "solid",
+            "linewidth": 1,
+        }
+    )
+
     legend: bool = True
     linestyle: List[str] = field(default_factory=lambda: ["solid", "dashed"])
     linewidth: List[float] = field(default_factory=lambda: [1, 1])

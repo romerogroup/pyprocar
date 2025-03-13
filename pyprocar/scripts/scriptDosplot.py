@@ -454,6 +454,9 @@ def dosplot(
     edos_plot.set_yticks()
     edos_plot.grid()
 
+    if config.draw_baseline:
+        edos_plot.draw_baseline(value=0, orientation=orientation)
+
     if labels:
         labels = labels
     else:
