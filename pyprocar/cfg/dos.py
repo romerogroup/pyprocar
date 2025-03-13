@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional,Tuple
 from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Tuple
 
-from pyprocar.cfg.base import PlotType, BaseConfig
+from pyprocar.cfg.base import BaseConfig, PlotType
+
 
 class DOSMode(Enum):
     """
@@ -25,12 +26,13 @@ class DOSMode(Enum):
     OVERLAY : str
         Represents the density of states in an overlay plot, where the colors are the selected projections
     OVERLAY_ORBITALS : str
-        Represents the density of states in an overlay plot, where the colors are 
+        Represents the density of states in an overlay plot, where the colors are
         the different projection of the orbitals.
     OVERLAY_SPECIES : str
-        Represents the density of states in an overlay plot, where the colors are 
+        Represents the density of states in an overlay plot, where the colors are
         the different projection of the species.
     """
+
     PLAIN = "plain"
     PARAMETRIC = "parametric"
     PARAMETRIC_LINE = "parameteric_line"
@@ -41,7 +43,7 @@ class DOSMode(Enum):
     OVERLAY_ORBITALS = "overlay_orbitals"
     OVERLAY_SPECIES = "overlay_species"
 
-    
+
 @dataclass
 class DensityOfStatesConfig(BaseConfig):
     """
@@ -144,49 +146,73 @@ class DensityOfStatesConfig(BaseConfig):
     >>> custom_config = DensityOfStatesConfig(colors=['red', 'blue'], fermi_color='black', fermi_linestyle='dotted')
     """
 
-    modes: List[str] = field(default_factory=lambda: [mode.value for mode in DOSMode]) 
+    modes: List[str] = field(default_factory=lambda: [mode.value for mode in DOSMode])
     # Basic Plot Settings
-    cmap: str = 'jet'
-    colors: List[str] = field(default_factory=lambda: [
-                             'red', 'green', 'blue', 'cyan', 'magenta', 'yellow',
-                             'orange', 'purple', 'brown', 'navy', 'maroon', 'olive'])
-    colorbar_title: str = 'Atomic Orbital Projections'
+    cmap: str = "jet"
+    colors: List[str] = field(
+        default_factory=lambda: [
+            "red",
+            "green",
+            "blue",
+            "cyan",
+            "magenta",
+            "yellow",
+            "orange",
+            "purple",
+            "brown",
+            "navy",
+            "maroon",
+            "olive",
+        ]
+    )
+    colorbar_title: str = "Atomic Orbital Projections"
     colorbar_title_size: int = 15
     colorbar_title_padding: int = 20
     colorbar_tick_labelsize: int = 10
-    fermi_color: str = 'black'
-    fermi_linestyle: str = 'dotted'
+    fermi_color: str = "black"
+    fermi_linestyle: str = "dotted"
     fermi_linewidth: float = 1
     figure_size: Tuple[int, int] = (9, 6)
-    font: str = 'Arial'
+    font: str = "Arial"
     font_size: int = 16
     grid: bool = False
-    grid_axis: str = 'both'
-    grid_color: str = 'grey'
-    grid_linestyle: str = 'solid'
+    grid_axis: str = "both"
+    grid_color: str = "grey"
+    grid_linestyle: str = "solid"
     grid_linewidth: float = 1
-    grid_which: str = 'major'
+    grid_which: str = "major"
     legend: bool = True
-    linestyle: List[str] = field(default_factory=lambda: ['solid', 'dashed'])
+    linestyle: List[str] = field(default_factory=lambda: ["solid", "dashed"])
     linewidth: List[float] = field(default_factory=lambda: [1, 1])
-    marker: List[str] = field(default_factory=lambda: ['o', 'v', '^', 'D'])
+    marker: List[str] = field(default_factory=lambda: ["o", "v", "^", "D"])
     markersize: List[float] = field(default_factory=lambda: [0.2, 0.2])
     opacity: List[float] = field(default_factory=lambda: [1.0, 1.0])
     plot_bar: bool = True
     plot_color_bar: bool = True
     plot_total: bool = True
     savefig: Optional[str] = None
-    spin_colors: List[str] = field(default_factory=lambda: ['black', 'red'])
-    spin_labels: List[str] = field(default_factory=lambda: [r'$\uparrow$', r'$\downarrow$'])
+    spin_colors: List[str] = field(default_factory=lambda: ["black", "red"])
+    spin_labels: List[str] = field(
+        default_factory=lambda: [r"$\uparrow$", r"$\downarrow$"]
+    )
     title: Optional[str] = None
     verbose: bool = True
     weighted_color: bool = True
     weighted_width: bool = False
     clim: Optional[Tuple[float, float]] = None
-    stack_y_label: str = 'DOS'
-    x_label: str = ''
-    y_label: str = ''
-    dpi: str = 'figure'
+    stack_y_label: str = "DOS"
+    x_label: str = ""
+    y_label: str = ""
+    dpi: int = 300
+
+    x_label_params: Dict[str, Any] = field(default_factory=lambda: {})
+    y_label_params: Dict[str, Any] = field(default_factory=lambda: {})
+    legend_params: Dict[str, Any] = field(default_factory=lambda: {})
+
+    major_x_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
+    minor_x_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
+    major_y_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
+    minor_y_tick_params: Dict[str, Any] = field(default_factory=lambda: {})
 
     def __post_init__(self):
         """This method is immediately called after the object is initialized.
@@ -199,4 +225,3 @@ class DensityOfStatesConfig(BaseConfig):
         Returns a dictionary of the configuration settings.
         """
         return asdict(self)
-
