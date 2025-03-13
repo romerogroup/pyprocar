@@ -9,6 +9,7 @@ import os
 from typing import List
 
 import matplotlib as mpl
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -137,12 +138,12 @@ class EBSPlot:
                         np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
                         axis=0,
                     )
-                    
+
                 k_unit_dir = (kend - kstart) / distance
                 for i in range(x.shape[0]):
                     k_current += k_unit_dir * distance
                     self.values_dict[f"k_current"].append(k_current.tolist())
-                    
+
                 pos += distance
         else:
             logger.info(
@@ -432,7 +433,9 @@ class EBSPlot:
             # if color_weights is not None:
             #     handle.set_color(color_map[iweight][:-1].lower())
             handle.set_linewidth(linewidth)
-            self.handles.append(handle)
+
+            # mpatches.Patch(color='red', label='The red data')
+            self.handles.append(mpatches.Patch(color="red", label="The red data"))
 
         if self.config.plot_color_bar and color_weights is not None:
             self.cb = self.fig.colorbar(lc, ax=self.ax)
@@ -477,7 +480,9 @@ class EBSPlot:
             spins = range(self.ebs.nspins)
         if self.ebs.is_non_collinear:
             spins = [0]
+
         for iweight, weight in enumerate(weights):
+            cmap = plt.get_cmap(color_map[iweight])
             vmin = self.config.clim[0]
             vmax = self.config.clim[1]
             if vmin is None:
@@ -497,13 +502,13 @@ class EBSPlot:
                     segments = np.delete(segments, np.where(x[1:] == x[:-1])[0], axis=0)
                     lc = LineCollection(
                         segments,
-                        cmap=plt.get_cmap(color_map[iweight]),
+                        cmap=cmap,
                         norm=norm,
                         alpha=self.config.opacity[ispin],
                     )
                     lc.set_array(weight[:, iband, ispin])
                     lc.set_linewidth(weight[:, iband, ispin] * linewidth[ispin])
-                    handle = self.ax.add_collection(lc)
+                    self.ax.add_collection(lc)
 
                     band_name = f"band-{iband}_spinChannel-{str(ispin)}"
                     projection_name = labels[iweight]
@@ -513,9 +518,11 @@ class EBSPlot:
                             weight[:, iband, ispin]
                         )
 
-            handle.set_color(color_map[iweight][:-1].lower())
-            handle.set_linewidth(linewidth)
-            self.handles.append(handle)
+            self.handles.append(
+                mpatches.Patch(
+                    color=color_map[iweight][:-1].lower(), label=labels[iweight]
+                )
+            )
 
             if self.config.plot_color_bar:
                 self.cb = self.fig.colorbar(lc, ax=self.ax)
@@ -679,7 +686,7 @@ class EBSPlot:
         if tick_names is not None:
             self.ax.set_xticklabels(tick_names)
 
-            self.ax.tick_params(**self.config.major_x_tick_params)
+        self.ax.tick_params(**self.config.major_x_tick_params)
 
     def set_yticks(
         self, major: float = None, minor: float = None, interval: List[float] = None
@@ -743,7 +750,9 @@ class EBSPlot:
         self.ax.tick_params(**self.config.major_y_tick_params)
         self.ax.tick_params(**self.config.minor_y_tick_params)
 
-    def set_xlim(self, interval: List[float] = None, ktick_interval: List[float] = None):
+    def set_xlim(
+        self, interval: List[float] = None, ktick_interval: List[float] = None
+    ):
         """A method to set the x limit
 
         Parameters
@@ -757,7 +766,7 @@ class EBSPlot:
             ktick_start = ktick_interval[0]
             ktick_end = ktick_interval[1]
             interval = (self.x[ktick_start], self.x[ktick_end])
-        
+
         self.ax.set_xlim(interval)
 
     def set_ylim(self, interval: List[float] = None):
@@ -775,7 +784,7 @@ class EBSPlot:
             )
         self.ax.set_ylim(interval)
 
-    def set_xlabel(self, label: str = "K vector"):
+    def set_xlabel(self, label: str = None):
         """A method to set the x label
 
         Parameters
@@ -783,7 +792,9 @@ class EBSPlot:
         label : str, optional
             String fo the x label name, by default "K vector"
         """
-        self.ax.set_xlabel(label, **self.config.x_label_params)
+        if label is None:
+            label = self.config.x_label
+            self.ax.set_xlabel(label, **self.config.x_label_params)
 
     def set_ylabel(self, label: str = r"E - E$_F$ (eV)"):
         """A method to set the y label
@@ -912,16 +923,18 @@ class EBSPlot:
             raise ValueError(f"The file type must be {possible_file_types}")
         if self.values_dict is None:
             raise ValueError("The data has not been plotted yet")
-        
+
         logger.info("___Exporting data to %s___", filename)
- 
+
         values_dict = {}
         for key, value in self.values_dict.items():
-            logger.debug("Column: %s, Type: %s, Shape: %s", key, type(value), len(value))
-            
+            logger.debug(
+                "Column: %s, Type: %s, Shape: %s", key, type(value), len(value)
+            )
+
             if len(value) != 0:
                 values_dict[key] = value
-            
+
         column_names = list(values_dict.keys())
         sorted_column_names = [None] * len(column_names)
         index = 0
