@@ -138,8 +138,7 @@ class FermiHandler:
                 To print a list of plot options set print_plot_opts=True
 
                 Here is a list modes : {modes_txt}
-                Here is a list of properties: {props_txt}
-                """
+                Here is a list of properties: {props_txt}"""
 
     def plot_fermi_surface(
         self,
@@ -199,31 +198,53 @@ class FermiHandler:
         )
 
         visualizer = FermiVisualizer(self.data_handler, config)
-        visualizer.add_brillouin_zone(fermi_surface)
 
-        visualizer.add_texture(
-            fermi_surface,
-            scalars_name=visualizer.data_handler.scalars_name,
-            vector_name=visualizer.data_handler.vector_name,
-        )
+        if config.show_brillouin_zone:
+            visualizer.add_brillouin_zone(fermi_surface)
+
+        if (
+            visualizer.data_handler.scalars_name == "spin_magnitude"
+            or visualizer.data_handler.scalars_name == "Fermi Velocity Vector_magnitude"
+        ):
+            visualizer.add_texture(
+                fermi_surface,
+                scalars_name=visualizer.data_handler.scalars_name,
+                vector_name=visualizer.data_handler.vector_name,
+            )
 
         visualizer.add_surface(fermi_surface)
 
-        if mode != "plain" or spin_texture:
+        if (mode != "plain" or spin_texture) and config.show_scalar_bar:
             visualizer.add_scalar_bar(name=visualizer.data_handler.scalars_name)
 
-        visualizer.add_axes()
+        if config.show_axes:
+            visualizer.add_axes()
+
         visualizer.set_background_color()
 
+        if save_2d:
+            visualizer.savefig(filename=save_2d)
+            return None
+
         # save and showing setting
-        if show and save_gif is None and save_mp4 is None and save_3d is None:
-            visualizer.show(filename=save_2d)
+        if show and (save_gif is None and save_mp4 is None and save_3d is None):
+            user_message = visualizer.show()
+            user_logger.info(user_message)
+
         if save_gif is not None:
-            visualizer.save_gif(filename=save_gif)
+            visualizer.save_gif(
+                filename=save_gif, save_gif_config=config.save_gif_config
+            )
         if save_mp4:
-            visualizer.save_gif(filename=save_mp4)
+            visualizer.save_mp4(
+                filename=save_mp4, save_mp4_config=config.save_mp4_config
+            )
         if save_3d:
-            visualizer.save_mesh(filename=save_3d, surface=fermi_surface)
+            visualizer.save_mesh(
+                filename=save_3d,
+                surface=fermi_surface,
+                save_mesh_config=config.save_mesh_config,
+            )
 
     def plot_fermi_isoslider(
         self,
@@ -309,8 +330,14 @@ class FermiHandler:
         visualizer.add_isoslider(e_surfaces, energy_values)
 
         # save and showing setting
+        if save_2d:
+            visualizer.savefig(filename=save_2d)
+            return None
+
+        # save and showing setting
         if show:
-            visualizer.show(filename=save_2d)
+            user_message = visualizer.show()
+            user_logger.info(user_message)
 
     def create_isovalue_gif(
         self,

@@ -219,13 +219,14 @@ class FermiSurface3DConfig(BaseConfig):
     texture_opacity: float = 1.0
 
     # Brillouin Zone Styling
+    show_brillouin_zone: bool = True
     brillouin_zone_style: str = "wireframe"
     brillouin_zone_line_width: float = 3.5
     brillouin_zone_color: str = "black"
     brillouin_zone_opacity: float = 1.0
 
     # Axes and Labels
-    add_axes: bool = True
+    show_axes: bool = True
     x_axes_label: str = "Kx"
     y_axes_label: str = "Ky"
     z_axes_label: str = "Kz"
@@ -233,16 +234,21 @@ class FermiSurface3DConfig(BaseConfig):
     axes_line_width: float = 6
 
     # Scalar Bar Configurations
-    add_scalar_bar: bool = True
-    scalar_bar_labels: int = 6
-    scalar_bar_italic: bool = False
-    scalar_bar_bold: bool = False
-    scalar_bar_title: Optional[str] = None
-    scalar_bar_title_font_size: Optional[float] = None
-    scalar_bar_label_font_size: Optional[float] = None
-    scalar_bar_position_x: float = 0.4
-    scalar_bar_position_y: float = 0.01
-    scalar_bar_color: str = "black"
+    show_scalar_bar: bool = True
+    scalar_bar_config: dict = field(
+        default_factory=lambda: {
+            "italic": False,
+            "bold": False,
+            "title_font_size": 15,
+            "label_font_size": 10,
+            "width": 0.5,
+            "height": 0.05,
+            "position_x": 0.48,
+            "position_y": 0.02,
+            "color": "black",
+        }
+    )
+
     property_name: str = "fermi_speed"
 
     # Advanced Configurations
@@ -263,10 +269,27 @@ class FermiSurface3DConfig(BaseConfig):
     isoslider_color: str = "black"
 
     # Miscellaneous
-    orbit_gif_n_points: int = 36
-    orbit_gif_step: float = 0.05
-    orbit_mp4_n_points: int = 36
-    orbit_mp4_step: float = 0.05
+    save_gif_config: dict = field(
+        default_factory=lambda: {
+            "generate_orbital_path_kwargs": {"n_points": 36},
+            "open_gif_kwargs": {},
+            "orbit_on_path_kwargs": {"step": 0.05, "viewup": [0, 0, 1]},
+        }
+    )
+
+    save_mp4_config: dict = field(
+        default_factory=lambda: {
+            "generate_orbital_path_kwargs": {"n_points": 36},
+            "open_movie_kwargs": {},
+            "orbit_on_path_kwargs": {"step": 0.05, "viewup": [0, 0, 1]},
+        }
+    )
+
+    save_mesh_config: dict = field(
+        default_factory=lambda: {
+            "save_meshio_kwargs": {},
+        }
+    )
 
     def __post_init__(self):
         """This method is immediately called after the object is initialized.
