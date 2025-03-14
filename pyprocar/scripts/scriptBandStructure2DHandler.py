@@ -189,6 +189,7 @@ class BandStructure2DHandler:
         k_z_plane=0,
         k_z_plane_tol=0.0001,
         show=True,
+        render_offscreen=False,
         save_2d=None,
         save_gif=None,
         save_mp4=None,
@@ -214,6 +215,16 @@ class BandStructure2DHandler:
             Boolean to plot spin texture, by default False
         print_plot_opts: bool, optional
             Boolean to print the plotting options
+        render_offscreen: bool, optional
+            Boolean to render the plot offscreen, by default False
+        save_2d: str, optional
+            The path to save the 2d plot, by default None
+        save_gif: str, optional
+            The path to save the gif, by default None
+        save_mp4: str, optional
+            The path to save the mp4, by default None
+        save_3d: str, optional
+            The path to save the 3d plot, by default None
         """
 
         config = ConfigManager.merge_configs(self.default_config, kwargs)
@@ -249,34 +260,61 @@ class BandStructure2DHandler:
             property_name=property_name
         )
         visualizer = BandStructure2DVisualizer(self.data_handler, config=config)
-        visualizer.add_brillouin_zone(band_structure_surface)
-        band_structure_surface = visualizer.clip_broullin_zone(band_structure_surface)
-        visualizer.add_texture(
-            band_structure_surface,
-            scalars_name=visualizer.data_handler.scalars_name,
-            vector_name=visualizer.data_handler.vector_name,
-        )
+        visualizer.plotter.off_screen = render_offscreen
+
+        if config.show_brillouin_zone:
+            visualizer.add_brillouin_zone(band_structure_surface)
+
+        if config.clip_brillouin_zone:
+            band_structure_surface = visualizer.clip_brillouin_zone(
+                band_structure_surface
+            )
+
+        if (
+            visualizer.data_handler.scalars_name == "spin_magnitude"
+            or visualizer.data_handler.scalars_name == "Band Velocity Vector_magnitude"
+        ):
+            visualizer.add_texture(
+                band_structure_surface,
+                scalars_name=visualizer.data_handler.scalars_name,
+                vector_name=visualizer.data_handler.vector_name,
+            )
+
         visualizer.add_surface(band_structure_surface)
-        if mode != "plain" or spin_texture:
+
+        if (mode != "plain" or spin_texture) and config.show_scalar_bar:
             visualizer.add_scalar_bar(name=visualizer.data_handler.scalars_name)
 
-        visualizer.add_grid(z_label=self.energy_label)
-        visualizer.add_axes()
+        if config.show_grid:
+            visualizer.add_grid(z_label=self.energy_label)
+
+        if config.show_axes:
+            visualizer.add_axes()
 
         if self.fermi_level is not None:
             visualizer.add_fermi_plane(value=self.fermi_level)
 
         visualizer.set_background_color()
 
-        # save and showing setting
-        if show and save_gif is None and save_mp4 is None and save_3d is None:
-            visualizer.show(filename=save_2d)
-        if save_gif is not None:
-            visualizer.save_gif(filename=save_gif)
+        if save_2d:
+            visualizer.savefig(filename=save_2d)
+            return None
+
+            # save and showing setting
+        if show and (save_gif is None and save_mp4 is None and save_3d is None):
+            user_message = visualizer.show()
+            user_logger.info(user_message)
+
+        if save_gif:
+            visualizer.save_gif(filename=save_gif, **config.save_gif_config)
         if save_mp4:
-            visualizer.save_gif(filename=save_mp4)
+            visualizer.save_mp4(filename=save_mp4, **config.save_mp4_config)
         if save_3d:
-            visualizer.save_mesh(filename=save_3d, surface=band_structure_surface)
+            visualizer.save_mesh(
+                filename=save_3d,
+                surface=band_structure_surface,
+                **config.save_mesh_config,
+            )
 
         visualizer.close()
 

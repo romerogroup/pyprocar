@@ -1,6 +1,7 @@
 import copy
 import logging
 import os
+from functools import partial
 from typing import List, Tuple
 
 import numpy as np
@@ -253,35 +254,24 @@ class BandStructure2DVisualizer:
 
         self._setup_plotter()
 
-    def add_scalar_bar(self, name):
-        if self.config.scalar_bar_title:
-            name = self.config.scalar_bar_title
-        else:
-            name = name
+    def add_scalar_bar(self, name=None, scalar_bar_config=None):
+        if scalar_bar_config is None:
+            scalar_bar_config = self.config.scalar_bar_config
 
-        if self.config.add_scalar_bar:
-            self.plotter.add_scalar_bar(
-                title=name,
-                n_labels=self.config.scalar_bar_labels,
-                italic=self.config.scalar_bar_italic,
-                bold=self.config.scalar_bar_bold,
-                title_font_size=self.config.scalar_bar_title_font_size,
-                label_font_size=self.config.scalar_bar_label_font_size,
-                position_x=self.config.scalar_bar_position_x,
-                position_y=self.config.scalar_bar_position_y,
-                color=self.config.scalar_bar_color,
-            )
+        if scalar_bar_config["title"] is None:
+            scalar_bar_config["title"] = name
+
+        self.plotter.add_scalar_bar(**scalar_bar_config)
 
     def add_axes(self):
-        if self.config.add_axes:
-            self.plotter.add_axes(
-                xlabel=self.config.x_axes_label,
-                ylabel=self.config.y_axes_label,
-                zlabel=self.config.z_axes_label,
-                color=self.config.axes_label_color,
-                line_width=self.config.axes_line_width,
-                labels_off=False,
-            )
+        self.plotter.add_axes(
+            xlabel=self.config.x_axes_label,
+            ylabel=self.config.y_axes_label,
+            zlabel=self.config.z_axes_label,
+            color=self.config.axes_label_color,
+            line_width=self.config.axes_line_width,
+            labels_off=False,
+        )
 
     def add_brillouin_zone(self, surface):
         self.plotter.add_mesh(
@@ -338,31 +328,28 @@ class BandStructure2DVisualizer:
     def add_texture(self, surface, scalars_name, vector_name):
 
         arrows = None
-        if (
-            scalars_name == "spin_magnitude"
-            or scalars_name == "Band Velocity Vector_magnitude"
-        ):
-            arrows = surface.glyph(
-                orient=vector_name,
-                scale=self.config.texture_scale,
-                factor=self.config.texture_size,
+
+        arrows = surface.glyph(
+            orient=vector_name,
+            scale=self.config.texture_scale,
+            factor=self.config.texture_size,
+        )
+        if self.config.texture_color is None:
+            self.plotter.add_mesh(
+                arrows,
+                scalars=scalars_name,
+                cmap=self.config.texture_cmap,
+                show_scalar_bar=False,
+                opacity=self.config.texture_opacity,
             )
-            if self.config.texture_color is None:
-                self.plotter.add_mesh(
-                    arrows,
-                    scalars=scalars_name,
-                    cmap=self.config.texture_cmap,
-                    show_scalar_bar=False,
-                    opacity=self.config.texture_opacity,
-                )
-            else:
-                self.plotter.add_mesh(
-                    arrows,
-                    scalars=scalars_name,
-                    color=self.config.texture_color,
-                    show_scalar_bar=False,
-                    opacity=self.config.texture_opacity,
-                )
+        else:
+            self.plotter.add_mesh(
+                arrows,
+                scalars=scalars_name,
+                color=self.config.texture_color,
+                show_scalar_bar=False,
+                opacity=self.config.texture_opacity,
+            )
 
         return arrows
 
@@ -498,17 +485,15 @@ class BandStructure2DVisualizer:
             p.show(screenshot=save_2d_slice, interactive=False)
 
     def add_grid(self, z_label=None):
-        if self.config.grid:
+        if z_label is None:
+            z_label = self.config.grid_ztitle
 
-            if z_label is None:
-                z_label = self.config.grid_ztitle
-
-            self.plotter.show_grid(
-                ytitle=self.config.grid_ytitle,
-                xtitle=self.config.grid_xtitle,
-                ztitle=z_label,
-                font_size=self.config.grid_font_size,
-            )
+        self.plotter.show_grid(
+            ytitle=self.config.grid_ytitle,
+            xtitle=self.config.grid_xtitle,
+            ztitle=z_label,
+            font_size=self.config.grid_font_size,
+        )
 
     def add_fermi_plane(self, value: float):
         if self.config.add_fermi_plane:
@@ -538,48 +523,79 @@ class BandStructure2DVisualizer:
     def close(self):
         self.plotter.close()
 
-    def show(self, filename=None):
-        if filename:
-            file_extentions = filename.split()
-            if self.config.plotter_offscreen:
-                self.plotter.off_screen = True
-                self.plotter.show(cpos=self.config.plotter_camera_pos, auto_close=False)
-                self.plotter.show(screenshot=filename)
-            else:
-                image = self.plotter.show(
-                    cpos=self.config.plotter_camera_pos, screenshot=True
-                )
-                im = Image.fromarray(image)
-                im.save(filename)
+    def show(self, **kwargs):
+        logger.info("Showing plot")
+
+        cpos = self.plotter.show(return_cpos=True, **kwargs)
+        self.plotter.camera_position = cpos
+        user_message = (
+            f"To save an image of where the camera is at time when the window closes,\n"
+        )
+        user_message += f"set the `save_2d` parameter and set `plotter_camera_pos` to the following: \n {cpos}"
+        return user_message
+
+    def savefig(self, filename, **kwargs):
+        logger.info("Saving plot")
+
+        if self.config.plotter_camera_pos:
+            self.plotter.camera_position = self.config.plotter_camera_pos
         else:
-            self.plotter.show(cpos=self.config.plotter_camera_pos)
+            self.plotter.view_isometric()
 
-    def save_gif(self, filename):
-        path = self.plotter.generate_orbital_path(
-            n_points=self.config.orbit_gif_n_points
-        )
-        self.plotter.open_gif(filename)
-        self.plotter.orbit_on_path(
-            path,
-            write_frames=True,
-            viewup=[0, 0, 1],
-            step=self.config.orbit_gif_step,
-        )
+        # Get the file extension
+        file_extension = os.path.splitext(filename)[1].lower()
+        if file_extension in [".pdf", ".eps", ".ps", ".tex", ".svg"]:
+            self.plotter.save_graphic(filename)
+        else:
+            self.plotter.screenshot(filename)
 
-    def save_mp4(self, filename):
-        path = self.plotter.generate_orbital_path(
-            n_points=self.config.orbit_mp4_n_points
-        )
-        self.plotter.open_movie(filename)
-        self.plotter.orbit_on_path(
-            path,
-            write_frames=True,
-            viewup=[0, 0, 1],
-            step=self.config.orbit_mp4_step,
-        )
+    def save_gif(
+        self,
+        filename,
+        generate_orbital_path_kwargs=None,
+        open_gif_kwargs=None,
+        orbit_on_path_kwargs=None,
+    ):
 
-    def save_mesh(self, filename, surface):
-        pv.save_meshio(filename, surface)
+        if generate_orbital_path_kwargs is None:
+            generate_orbital_path_kwargs = self.config.save_gif_config[
+                "generate_orbital_path_kwargs"
+            ]
+        if open_gif_kwargs is None:
+            open_gif_kwargs = self.config.save_gif_config["open_gif_kwargs"]
+        if orbit_on_path_kwargs is None:
+            orbit_on_path_kwargs = self.config.save_gif_config["orbit_on_path_kwargs"]
+
+        path = self.plotter.generate_orbital_path(**generate_orbital_path_kwargs)
+        self.plotter.open_gif(filename, **open_gif_kwargs)
+        self.plotter.orbit_on_path(path, write_frames=True, **orbit_on_path_kwargs)
+
+    def save_mp4(
+        self,
+        filename,
+        generate_orbital_path_kwargs=None,
+        open_movie_kwargs=None,
+        orbit_on_path_kwargs=None,
+    ):
+
+        if generate_orbital_path_kwargs is None:
+            generate_orbital_path_kwargs = self.config.save_mp4_config[
+                "generate_orbital_path_kwargs"
+            ]
+        if open_movie_kwargs is None:
+            open_movie_kwargs = self.config.save_mp4_config["open_movie_kwargs"]
+        if orbit_on_path_kwargs is None:
+            orbit_on_path_kwargs = self.config.save_mp4_config["orbit_on_path_kwargs"]
+
+        path = self.plotter.generate_orbital_path(**generate_orbital_path_kwargs)
+        self.plotter.open_movie(filename, **open_movie_kwargs)
+        self.plotter.orbit_on_path(path, write_frames=True, **orbit_on_path_kwargs)
+
+    def save_mesh(self, filename, surface, save_meshio_kwargs=None):
+        if save_meshio_kwargs is None:
+            save_meshio_kwargs = {}
+
+        pv.save_meshio(filename, surface, **save_meshio_kwargs)
 
     def _setup_band_colors(self, fermi_surface):
         band_colors = self.config.surface_bands_colors
@@ -682,7 +698,7 @@ class BandStructure2DVisualizer:
         x_norm = x_min + ((x - vmin) * (vmax - x_min)) / (x_max - x_min)
         return x_norm
 
-    def clip_broullin_zone(self, surface):
+    def clip_brillouin_zone(self, surface):
         if self.config.clip_brillouin_zone:
 
             for normal, center in zip(

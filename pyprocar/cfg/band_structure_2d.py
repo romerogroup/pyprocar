@@ -79,6 +79,10 @@ class Bandstructure2DConfig(BaseConfig):
         Specifies the color of the Brillouin zone lines.
     brillouin_zone_opacity: float, optional (default 1.0)
         Controls the opacity of the Brillouin zone lines.
+    clip_brillouin_zone: bool, optional (default True)
+        Whether to clip the Brillouin zone.
+    clip_brillouin_zone_factor: float, optional (default 1.5)
+        The factor to clip the Brillouin zone by.
     extended_zone_directions: Optional[List[List[int]]], optional
         List of directions to extend the surface in.
     supercell: List[int], optional (default [1, 1, 1])
@@ -96,7 +100,7 @@ class Bandstructure2DConfig(BaseConfig):
         Flag to determine if texture scaling is applied.
     texture_opacity: float, optional (default 1.0)
         Opacity of the texture.
-    add_axes: bool, optional (default True)
+    show_axes: bool, optional (default True)
         Flag to determine if axes are added to the plot.
     x_axes_label: str, optional (default 'Kx')
         Label for the x-axis.
@@ -128,7 +132,7 @@ class Bandstructure2DConfig(BaseConfig):
 
     Grid Configuration
     -----------------
-    grid: bool, optional (default True)
+    show_grid: bool, optional (default True)
         Whether to show grid lines.
     grid_xtitle: str, optional (default 'k$_{x}$ ($\AA^{-1}$)')
         X-axis grid title.
@@ -156,30 +160,31 @@ class Bandstructure2DConfig(BaseConfig):
 
     Scalar Bar Configuration
     -----------------------
-    add_scalar_bar: bool, optional (default True)
+    show_scalar_bar: bool, optional (default True)
         Whether to show the scalar bar (colorbar).
-    scalar_bar_labels: int, optional (default 6)
-        Number of labels on the scalar bar.
+    scalar_bar_config: dict, optional (default {})
+        Configuration for the scalar bar. See the PyVista documentation for
+        `add_scalar_bar`(https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.add_scalar_bar#pyvista.Plotter.add_scalar_bar)`_
+        for more information
 
     Animation Configuration
     ----------------------
-    orbit_gif_n_points: int, optional (default 36)
-        Number of points for GIF orbit animation.
-    orbit_gif_step: float, optional (default 0.05)
-        Step size for GIF orbit animation.
-    orbit_mp4_n_points: int, optional (default 36)
-        Number of points for MP4 orbit animation.
-    orbit_mp4_step: float, optional (default 0.05)
-        Step size for MP4 orbit animation.
+    save_gif_config: dict, optional (default {})
+        Configuration for the GIF animation. The arguments are
+        `generate_orbital_path_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.generate_orbital_path)_` : dict
+        `orbit_on_path_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.orbit_on_path)_` : dict
+        `open_gif_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.open_gif)_` : dict
 
-    Isoslider Configuration
-    ----------------------
-    isoslider_title: str, optional (default 'Energy iso-value')
-        Title for the isoslider.
-    isoslider_style: str, optional (default 'modern')
-        Style of the isoslider.
-    isoslider_color: str, optional (default 'black')
-        Color of the isoslider.
+    save_mp4_config: dict, optional (default {})
+        Configuration for the MP4 animation. The arguments are
+        `generate_orbital_path_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.generate_orbital_path)_`
+        `open_movie_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.open_movie)_`
+        `orbit_on_path_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.orbit_on_path)_`
+
+    save_mesh_config: dict, optional (default {})
+        Configuration for the mesh saving. The arguments are
+        `save_meshio_kwargs (https://docs.pyvista.org/api/plotting/_autosummary/pyvista.plotter.save_meshio)_`
+
 
     Cross Section Configuration
     -------------------------
@@ -203,7 +208,7 @@ class Bandstructure2DConfig(BaseConfig):
     # Basic Plot Settings
     background_color: str = "white"
     plotter_offscreen: bool = False
-    plotter_camera_pos: List[int] = field(default_factory=lambda: [1, 1, 1])
+    plotter_camera_pos: List[int] = None
 
     # Surface Appearance
     surface_cmap: str = "jet"
@@ -214,6 +219,7 @@ class Bandstructure2DConfig(BaseConfig):
     surface_clim: Optional[List[float]] = None
 
     # Brillouin Zone Styling
+    show_brillouin_zone: bool = True
     brillouin_zone_style: str = "wireframe"
     brillouin_zone_line_width: float = 3.5
     brillouin_zone_color: str = "black"
@@ -238,24 +244,29 @@ class Bandstructure2DConfig(BaseConfig):
     # Advanced Configurations
     projection_accuracy: str = "high"
     interpolation_factor: int = 1
-    scalar_bar_title: str = "Atomic Orbital Projections"
-    scalar_bar_title_size: int = 15
-    scalar_bar_title_padding: int = 20
-    scalar_bar_tick_labelsize: int = 10
-    scalar_bar_italic: bool = False
-    scalar_bar_bold: bool = False
-    scalar_bar_title_font_size: int = 15
-    scalar_bar_label_font_size: int = 10
-    scalar_bar_position_x: float = 0.4
-    scalar_bar_position_y: float = 0.01
-    scalar_bar_color: str = "black"
+
+    # Scalar Bar Configuration
+    show_scalar_bar: bool = True
+    scalar_bar_config: dict = field(
+        default_factory=lambda: {
+            "title": "Atomic Orbital Projections",
+            "italic": False,
+            "bold": False,
+            "title_font_size": 15,
+            "label_font_size": 10,
+            "position_x": 0.4,
+            "position_y": 0.01,
+            "color": "black",
+        }
+    )
 
     # Axes Configuration
+    show_axes: bool = True
     axes_label_color: str = "black"
     axes_line_width: float = 6.0
 
     # Grid Configuration
-    grid: bool = True
+    show_grid: bool = True
     grid_xtitle: str = "k$_{x}$ ($\AA^{-1}$)"
     grid_ytitle: str = "k$_{y}$ ($\AA^{-1}$)"
     grid_ztitle: str = "Energy (eV)"
@@ -269,15 +280,28 @@ class Bandstructure2DConfig(BaseConfig):
     show_fermi_plane_text: bool = True
     fermi_text_position: List[float] = field(default_factory=lambda: [0, 2, 0])
 
-    # Scalar Bar Configuration
-    add_scalar_bar: bool = True
-    scalar_bar_labels: int = 6
-
     # Animation Configuration
-    orbit_gif_n_points: int = 36
-    orbit_gif_step: float = 0.05
-    orbit_mp4_n_points: int = 36
-    orbit_mp4_step: float = 0.05
+    save_gif_config: dict = field(
+        default_factory=lambda: {
+            "generate_orbital_path_kwargs": {"n_points": 36},
+            "open_gif_kwargs": {},
+            "orbit_on_path_kwargs": {"step": 0.05, "viewup": [0, 0, 1]},
+        }
+    )
+
+    save_mp4_config: dict = field(
+        default_factory=lambda: {
+            "generate_orbital_path_kwargs": {"n_points": 36},
+            "open_movie_kwargs": {},
+            "orbit_on_path_kwargs": {"step": 0.05, "viewup": [0, 0, 1]},
+        }
+    )
+
+    save_mesh_config: dict = field(
+        default_factory=lambda: {
+            "save_meshio_kwargs": {},
+        }
+    )
 
     # Isoslider Configuration
     isoslider_title: str = "Energy iso-value"
