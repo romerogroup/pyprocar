@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional, Tuple
 from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Tuple
 
-from pyprocar.cfg.base import PlotType, BaseConfig
+from pyprocar.cfg.band_structure import BandStructureConfig
+from pyprocar.cfg.base import BaseConfig, PlotType
 
 
 class UnfoldPlotMode(Enum):
@@ -58,7 +59,7 @@ class UnfoldMode(Enum):
 
 
 @dataclass
-class UnfoldingConfig(BaseConfig):
+class UnfoldingConfig(BandStructureConfig):
     r"""
     Configuration class for plotting unfolding diagrams with various visual properties.
 
@@ -151,6 +152,7 @@ class UnfoldingConfig(BaseConfig):
     __post_init__():
         Post-initialization to validate the data and set default values.
     """
+
     modes: List[str] = field(
         default_factory=lambda: [mode.value for mode in UnfoldMode]
     )
