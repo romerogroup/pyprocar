@@ -1,6 +1,24 @@
 
 ___
 
+# v6.4.1 (03-16-2025)
+
+##### Bugs
+- Removed logging statements in the Structure class due to issues with handling fractional coordinates being None.
+
+##### New Features
+- None identified
+
+##### Documentation updates
+- Updated _version.py and CHANGELOG.md for new release.
+
+##### Maintenance
+- Merged branch 'main' of github.com:romerogroup/pyprocar into main.
+
+___
+
+___
+
 # v6.4.0 (03-16-2025)
 
 ##### Bugs
