@@ -155,7 +155,7 @@ class ElectronicBandStructure:
         if self.labels is not None:
             logger.info(f"Kpath: {self.labels}")
         if self.reciprocal_lattice is not None:
-            logger.info(f"Reciprocal lattice: {self.reciprocal_lattice}")
+            logger.info(f"Reciprocal lattice: \n{self.reciprocal_lattice}")
         if self.weights is not None:
             logger.info(f"Weights: {self.weights}")
         logger.info("Initialized the ElectronicBandStructure object")
@@ -827,7 +827,10 @@ class ElectronicBandStructure:
         return array
 
     @staticmethod
-    def calculate_nd_scalar_derivatives(scalar_array, reciprocal_lattice):
+    def calculate_nd_scalar_derivatives(
+        scalar_array,
+        reciprocal_lattice,
+    ):
         """Transforms the derivatives to cartesian coordinates
             (n,j,k,...)->(n,j,k,...,3)
 
@@ -843,8 +846,32 @@ class ElectronicBandStructure:
         np.ndarray
             The transformed derivatives
         """
+        # expanded_freq_mesh = []
+
+        # for i in range(ndim):
+        #     # Start with the original frequency mesh component
+        #     component = freq_mesh[i]
+
+        #     # For each extra dimension in scalar_grid, expand the frequency mesh
+        #     for dim_size in extra_dims:
+        #         component = np.expand_dims(component, axis=-1)
+        #         # Repeat the values along the new axis
+        #         component = np.repeat(component, dim_size, axis=-1)
+
+        #     expanded_freq_mesh.append(component)
+        # return fourier_reciprocal_gradient(scalar_array, reciprocal_lattice)
+
         letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
         scalar_diffs = calculate_scalar_differences(scalar_array)
+
+        del_k1 = 1 / scalar_diffs.shape[0]
+        del_k2 = 1 / scalar_diffs.shape[1]
+        del_k3 = 1 / scalar_diffs.shape[2]
+
+        scalar_diffs[..., 0] = scalar_diffs[..., 0] / del_k1
+        scalar_diffs[..., 1] = scalar_diffs[..., 1] / del_k2
+        scalar_diffs[..., 2] = scalar_diffs[..., 2] / del_k3
+
         n_dim = len(scalar_diffs.shape[3:]) - 1
         transform_matrix_einsum_string = "ij"
         dim_letters = "".join(letters[0:n_dim])
@@ -858,7 +885,13 @@ class ElectronicBandStructure:
             + transformed_scalar_string
         )
         logger.debug(f"ein_sum_string: {ein_sum_string}")
-        scalar_gradients = np.einsum(ein_sum_string, reciprocal_lattice, scalar_diffs)
+
+        scalar_gradients = np.einsum(
+            ein_sum_string,
+            np.linalg.inv(reciprocal_lattice.T).T,
+            scalar_diffs,
+        )
+        # scalar_gradients = np.einsum(ein_sum_string, reciprocal_lattice.T, scalar_diffs)
 
         return scalar_gradients
 
@@ -1711,6 +1744,214 @@ def q_multi(q1, q2):
     y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
     z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
     return np.array((w, x, y, z))
+
+
+def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
+    """
+    Calculate the reciprocal space gradient of a scalar field using Fourier methods.
+    It first finds the gradient in the fractional basis,
+    and then transforms to cartesian coordinates through the reciprocal lattice vectors.
+    Units of angstoms and eV are assumed.
+
+    Parameters:
+    -----------
+    scalar_grid : ndarray
+        N-dimensional array of scalar values on a mesh grid
+    dk_values : tuple or list
+        Grid spacing in each dimension
+    reciprocal_lattice : ndarray, optional
+        Reciprocal lattice vectors for non-orthogonal grids
+
+    Returns:
+    --------
+    gradient : list of ndarrays
+        List of gradient components, one for each dimension
+    """
+    # Get dimensions of the grid
+    scalar_grid_shape = scalar_grid.shape
+    ndim = reciprocal_lattice.shape[0]
+
+    # Create frequency meshgrid
+
+    nx = scalar_grid_shape[0]
+    ny = scalar_grid_shape[1]
+    nz = scalar_grid_shape[2]
+
+    dk_values = np.array([1 / nx, 1 / ny, 1 / nz])
+
+    wavenumbers = []
+    for i in range(ndim):
+        wavenumbers_1d_full = (
+            np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
+        )
+        wavenumbers.append(wavenumbers_1d_full)
+
+    freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
+    # Get the shape of scalar_grid beyond the first 3 dimensions (if any)
+    extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
+
+    # Expand freq_mesh to match the expected scalar_gradient_grid_shape
+    # First, create a list to hold the expanded dimensions
+    # expanded_freq_mesh = []
+
+    # for i in range(ndim):
+    #     # Start with the original frequency mesh component
+    #     component = freq_mesh[i]
+
+    #     # For each extra dimension in scalar_grid, expand the frequency mesh
+    #     for dim_size in extra_dims:
+    #         component = np.expand_dims(component, axis=-1)
+    #         # Repeat the values along the new axis
+    #         component = np.repeat(component, dim_size, axis=-1)
+
+    #     expanded_freq_mesh.append(component)
+
+    # # Replace the original freq_mesh with the expanded version
+    # freq_mesh = np.stack(expanded_freq_mesh)
+    # print(freq_mesh.shape)
+    scalar_gradient_grid_shape = (3, *scalar_grid_shape)
+    print(scalar_gradient_grid_shape)
+    # Standard orthogonal case
+    derivative_operator = freq_mesh * 1j
+    spectral_derivative = np.fft.ifftn(
+        derivative_operator * np.fft.fftn(scalar_grid),
+        s=(3, nx, ny, nz),
+    )
+
+    derivatives = np.real(spectral_derivative)
+
+    print(derivatives.shape)
+    derivatives = np.moveaxis(derivatives, 0, -1)
+
+    print(f"Derivatives shape: {derivatives.shape}")
+    # cart_derivatives = np.dot(derivatives, np.linalg.inv(reciprocal_lattice.T))
+
+    transform_matrix_einsum_string = "ij"
+    ndim = len(derivatives.shape[3:]) - 1
+    letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    dim_letters = "".join(letters[0:ndim])
+    scalar_array_einsum_string = "uvw" + dim_letters + "j"
+    transformed_scalar_string = "uvw" + dim_letters + "i"
+    ein_sum_string = (
+        transform_matrix_einsum_string
+        + ","
+        + scalar_array_einsum_string
+        + "->"
+        + transformed_scalar_string
+    )
+    logger.debug(f"ein_sum_string: {ein_sum_string}")
+
+    cart_derivatives = np.einsum(
+        ein_sum_string,
+        np.linalg.inv(reciprocal_lattice.T).T,
+        derivatives,
+    )
+
+    return cart_derivatives
+
+
+# def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
+#     """
+#     Calculate the reciprocal space gradient of a scalar field using Fourier methods.
+#     It first finds the gradient in the fractional basis,
+#     and then transforms to cartesian coordinates through the reciprocal lattice vectors.
+#     Units of angstoms and eV are assumed.
+
+#     Parameters:
+#     -----------
+#     scalar_grid : ndarray
+#         N-dimensional array of scalar values on a mesh grid
+#     dk_values : tuple or list
+#         Grid spacing in each dimension
+#     reciprocal_lattice : ndarray, optional
+#         Reciprocal lattice vectors for non-orthogonal grids
+
+#     Returns:
+#     --------
+#     gradient : list of ndarrays
+#         List of gradient components, one for each dimension
+#     """
+#     # Get dimensions of the grid
+#     scalar_grid_shape = scalar_grid.shape
+#     ndim = reciprocal_lattice.shape[0]
+
+#     # Create frequency meshgrid
+
+#     nx = scalar_grid_shape[0]
+#     ny = scalar_grid_shape[1]
+#     nz = scalar_grid_shape[2]
+
+#     dk_values = np.array([1 / nx, 1 / ny, 1 / nz])
+
+#     wavenumbers = []
+#     for i in range(ndim):
+#         wavenumbers_1d_full = (
+#             np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
+#         )
+#         wavenumbers.append(wavenumbers_1d_full)
+
+#     freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
+#     # Get the shape of scalar_grid beyond the first 3 dimensions (if any)
+#     extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
+
+#     # Expand freq_mesh to match the expected scalar_gradient_grid_shape
+#     # First, create a list to hold the expanded dimensions
+#     expanded_freq_mesh = []
+
+#     for i in range(ndim):
+#         # Start with the original frequency mesh component
+#         component = freq_mesh[i]
+
+#         # For each extra dimension in scalar_grid, expand the frequency mesh
+#         for dim_size in extra_dims:
+#             component = np.expand_dims(component, axis=-1)
+#             # Repeat the values along the new axis
+#             component = np.repeat(component, dim_size, axis=-1)
+
+#         expanded_freq_mesh.append(component)
+
+#     # Replace the original freq_mesh with the expanded version
+#     freq_mesh = np.stack(expanded_freq_mesh)
+#     print(freq_mesh.shape)
+#     scalar_gradient_grid_shape = (3, *scalar_grid_shape)
+#     print(scalar_gradient_grid_shape)
+#     # Standard orthogonal case
+#     derivative_operator = freq_mesh * 1j
+#     spectral_derivative = np.fft.ifftn(
+#         derivative_operator * np.fft.fftn(scalar_grid),
+#         s=scalar_gradient_grid_shape,
+#     )
+
+#     derivatives = np.real(spectral_derivative)
+
+#     print(derivatives.shape)
+#     derivatives = np.moveaxis(derivatives, 0, -1)
+
+#     print(f"Derivatives shape: {derivatives.shape}")
+#     # cart_derivatives = np.dot(derivatives, np.linalg.inv(reciprocal_lattice.T))
+
+#     transform_matrix_einsum_string = "ij"
+#     ndim = len(derivatives.shape[3:]) - 1
+#     letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+#     dim_letters = "".join(letters[0:ndim])
+#     scalar_array_einsum_string = "uvw" + dim_letters + "j"
+#     transformed_scalar_string = "uvw" + dim_letters + "i"
+#     ein_sum_string = (
+#         transform_matrix_einsum_string
+#         + ","
+#         + scalar_array_einsum_string
+#         + "->"
+#         + transformed_scalar_string
+#     )
+#     logger.debug(f"ein_sum_string: {ein_sum_string}")
+
+#     cart_derivatives = np.einsum(
+#         ein_sum_string,
+#         np.linalg.inv(reciprocal_lattice.T).T,
+#         derivatives,
+#     )
+
+#     return cart_derivatives
 
 
 # def reorder(self, plot=True, cutoff=0.2):

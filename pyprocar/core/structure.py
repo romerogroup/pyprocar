@@ -3,6 +3,7 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
+import logging
 
 import numpy as np
 import spglib
@@ -14,6 +15,8 @@ from pyprocar.utils import elements
 # TODO add __str__ method
 
 N_AVOGADRO = 6.022140857e23
+
+logger = logging.getLogger(__name__)
 
 
 class Structure:
@@ -74,6 +77,12 @@ class Structure:
             self.get_wyckoff_positions()
 
         self.rotations = rotations
+
+        logger.info(
+            f"fractional_coordinates shape: {self.fractional_coordinates.shape}"
+        )
+
+        logger.info(f"lattice: \n {self.lattice}")
 
         return None
 
@@ -268,14 +277,16 @@ class Structure:
             The reciprocal lattice matrix corresponding the the crystal lattice
         """
         reciprocal_lattice = np.zeros_like(self.lattice)
+
         a = self.lattice[0, :]
         b = self.lattice[1, :]
         c = self.lattice[2, :]
         volume = self.volume * 1e30
 
-        a_star = (2 * np.pi) * np.cross(b, c) / volume
-        b_star = (2 * np.pi) * np.cross(c, a) / volume
-        c_star = (2 * np.pi) * np.cross(a, b) / volume
+        a_star = np.cross(b, c) / volume
+        b_star = np.cross(c, a) / volume
+        c_star = np.cross(a, b) / volume
+
         reciprocal_lattice[0, :] = a_star
         reciprocal_lattice[1, :] = b_star
         reciprocal_lattice[2, :] = c_star
