@@ -249,13 +249,14 @@ class Bandstructure2DConfig(BaseConfig):
     show_scalar_bar: bool = True
     scalar_bar_config: dict = field(
         default_factory=lambda: {
-            "title": "Atomic Orbital Projections",
             "italic": False,
             "bold": False,
             "title_font_size": 15,
             "label_font_size": 10,
-            "position_x": 0.4,
-            "position_y": 0.01,
+            "width": 0.5,
+            "height": 0.05,
+            "position_x": 0.48,
+            "position_y": 0.02,
             "color": "black",
         }
     )

@@ -186,21 +186,33 @@ class BandStructure2DataHandler:
                 band_structure_2D.project_band_speed(
                     band_speed=ebs.fermi_speed[..., ispin]
                 )
+                if self.config.scalar_bar_config.get("title") is None:
+                    self.config.scalar_bar_config["title"] = "Band Speed"
             elif self.property_name == "band_velocity":
                 band_structure_2D.project_band_velocity(
                     band_velocity=ebs.fermi_velocity[..., ispin, :]
                 )
+                if self.config.scalar_bar_config.get("title") is None:
+                    self.config.scalar_bar_config["title"] = "Band Velocity"
             elif self.property_name == "harmonic_effective_mass":
                 band_structure_2D.project_harmonic_effective_mass(
                     harmonic_effective_mass=ebs.harmonic_average_effective_mass[
                         ..., ispin
                     ]
                 )
+                if self.config.scalar_bar_config.get("title") is None:
+                    self.config.scalar_bar_config["title"] = "Harmonic Effective Mass"
             if self.mode == "parametric":
                 band_structure_2D.project_atomic_projections(self.spd[..., ispin])
+                if self.config.scalar_bar_config.get("title") is None:
+                    self.config.scalar_bar_config["title"] = (
+                        "Atomic Orbital Projections"
+                    )
 
             if self.mode == "spin_texture":
                 band_structure_2D.project_spin_texture_atomic_projections(self.spd_spin)
+                if self.config.scalar_bar_config.get("title") is None:
+                    self.config.scalar_bar_config["title"] = "Spin Texture Projections"
 
             if self.config.extended_zone_directions:
                 band_structure_2D.extend_surface(
