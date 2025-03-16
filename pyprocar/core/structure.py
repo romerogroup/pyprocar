@@ -78,12 +78,6 @@ class Structure:
 
         self.rotations = rotations
 
-        logger.info(
-            f"fractional_coordinates shape: {self.fractional_coordinates.shape}"
-        )
-
-        logger.info(f"lattice: \n {self.lattice}")
-
         return None
 
     @property
