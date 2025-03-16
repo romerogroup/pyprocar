@@ -1,6 +1,36 @@
 
 ___
 
+# v6.4.0 (03-16-2025)
+
+##### Bugs
+- Improved error handling and logging in parser and vasp modules. Update file path construction to use os.path.join for better compatibility. Improve exception handling to log specific errors when parsing VASP files.
+
+##### New Features
+- Enhance logging format in log_utils.py by including the function name in log messages for improved traceability during debugging.
+- Update FermiSurface3DConfig and FermiSurface3D class by adjusting texture size and enhancing logging for better debugging.
+- Enhance ElectronicBandStructure class by improving logging for reciprocal lattice and adding a new method for calculating the reciprocal space gradient of a scalar field using Fourier methods.
+- Add baseline drawing functionality to DOSPlot and configuration options for baseline parameters in DensityOfStatesConfig.
+- Add logging support in parser and vasp modules for improved debugging and traceability.
+- Enhance FermiSurface3DConfig and FermiVisualizer by introducing new configuration options for displaying the Brillouin zone and axes.
+- Enhance Bandstructure2DConfig and BandStructure2DVisualizer by adding new configuration options for clipping the Brillouin zone and saving animations.
+
+##### Documentation
+- Update version.
+- Update README.md.
+- Update _version.py and CHANGELOG.md due to new release.
+
+##### Maintenance
+- Refactor various classes and methods for improved logging, code clarity, maintainability, organization, and consistency.
+- Standardize parameter formatting and enhance logging messages.
+- Introduce verbosity control and cache management for data parsing in multiple modules.
+- Refactor logging implementation across multiple modules to use a centralized logger instance.
+- Merge branches and pull requests for better integration.
+
+___
+
+___
+
 # v6.3.3 (03-01-2025)
 
 ##### Bugs
