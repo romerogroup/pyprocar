@@ -48,7 +48,7 @@ logging_config = {
     "disable_existing_loggers": False,
     "formatters": {
         "simple": {
-            "format": "[%(levelname)s] %(asctime)s - %(name)s[%(lineno)d] - %(message)s",
+            "format": "[%(levelname)s] %(asctime)s - %(name)s[%(lineno)d][%(funcName)s] - %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
         "user": {
