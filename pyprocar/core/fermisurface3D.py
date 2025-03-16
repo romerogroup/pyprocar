@@ -503,9 +503,6 @@ class FermiSurface3D(Surface):
         """
         logger.info(f"____Starting Projecting atomic projections___")
         logger.debug(f"spd shape at this point: {spd.shape}")
-        logger.debug(
-            f"First 5 spd values coresponding to the first 5 kpoints: {spd[:5,:]}"
-        )
 
         scalars_array = []
         count = 0
@@ -515,15 +512,10 @@ class FermiSurface3D(Surface):
         scalars_array = np.vstack(scalars_array).T
 
         logger.info(
-            f"First 5 scalar array coresponding to the first 5 kpoints: {scalars_array[:5,:]}"
-        )
-        logger.info(
             f"scalars_array shape after the creation of the array from the spd: {scalars_array.shape}"
         )
 
         self._project_color(scalars_array=scalars_array, scalar_name="scalars")
-
-        logger.info(f"____Ending Projecting atomic projections___")
 
     def project_spin_texture_atomic_projections(self, spd_spin):
         """
@@ -531,49 +523,51 @@ class FermiSurface3D(Surface):
         """
         logger.info(f"____Starting Projecting spin texture___")
         vectors_array = spd_spin
+        logger.debug(f"spin texture array shape: {vectors_array.shape}")
         self._create_vector_texture(vectors_array=vectors_array, vectors_name="spin")
-        logger.info(f"___End of projecting spin texture___")
 
     def project_fermi_velocity(self, fermi_velocity):
         """
         Method to calculate atomic spin texture projections of the surface.
         """
-        logger.info(f"____Starting Projecting fermi velocity___")
-        vectors_array = fermi_velocity.swapaxes(1, 2)
+        logger.info(f"____project_fermi_velocity___")
+
+        logger.debug(f"Fermi velocity shape: {fermi_velocity.shape}")
+        vectors_array = fermi_velocity
         self._create_vector_texture(
             vectors_array=vectors_array, vectors_name="Fermi Velocity Vector"
         )
-        logger.info(f"___End of projecting fermi velocity___")
 
     def project_fermi_speed(self, fermi_speed):
         """
         Method to calculate the fermi speed of the surface.
         """
-        logger.info(f"____Starting Projecting fermi speed___")
+        logger.info(f"____Projecting Fermi Speed to Surface___")
         scalars_array = []
         count = 0
         for iband in range(len(self.isosurfaces)):
             count += 1
             scalars_array.append(fermi_speed[:, iband])
+
         scalars_array = np.vstack(scalars_array).T
+        logger.debug(f"fermi_speed_array shape: {scalars_array.shape}")
         self._project_color(scalars_array=scalars_array, scalar_name="Fermi Speed")
-        logger.info(f"___End of projecting fermi speed___")
 
     def project_harmonic_effective_mass(self, harmonic_effective_mass):
         """
         Method to calculate the atomic projections of the surface.
         """
-        logger.info(f"____Starting Projecting harmonic effective mass___")
+        logger.info(f"____Projecting harmonic effective mass to surface___")
         scalars_array = []
         count = 0
         for iband in range(len(self.isosurfaces)):
             count += 1
             scalars_array.append(harmonic_effective_mass[:, iband])
         scalars_array = np.vstack(scalars_array).T
+        logger.debug(f"harmonic_effective_mass_array shape: {scalars_array.shape}")
         self._project_color(
             scalars_array=scalars_array, scalar_name="Harmonic Effective Mass"
         )
-        logger.info(f"___End of projecting harmonic effective mass___")
 
     def extend_surface(
         self,
@@ -601,4 +595,3 @@ class FermiSurface3D(Surface):
                 )
             # Clearing unneeded surface from memory
             del surface
-        logger.info(f"___End of extending surface___")

@@ -214,7 +214,7 @@ class FermiSurface3DConfig(BaseConfig):
     arrow_size: int = 3  # Size of arrows for spin texture
     texture_cmap: str = "jet"
     texture_color: Optional[str] = None
-    texture_size: float = 0.1
+    texture_size: float = 0.05
     texture_scale: bool = False
     texture_opacity: float = 1.0
 
