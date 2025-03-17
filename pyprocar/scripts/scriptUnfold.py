@@ -1,16 +1,15 @@
-import os
-import yaml
 import logging
+import os
 
 import numpy as np
+import yaml
 
+from pyprocar import io
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.utils import welcome, ROOT
+from pyprocar.plotter import EBSPlot
+from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.defaults import settings
 from pyprocar.utils.info import orbital_names
-from pyprocar.plotter import EBSPlot
-from pyprocar import io
-from pyprocar.utils import data_utils
 from pyprocar.utils.log_utils import set_verbose_level
 
 user_logger = logging.getLogger("user")
@@ -79,10 +78,10 @@ def unfold(
     verbose: verbosity level.
     """
     set_verbose_level(verbose)
-    
+
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
-    user_logger.info("_"*100)
-    
+    user_logger.info("_" * 100)
+
     welcome()
     default_config = ConfigFactory.create_config(PlotType.UNFOLD)
     config = ConfigManager.merge_configs(default_config, kwargs)
@@ -100,13 +99,13 @@ def unfold(
         for key, value in plot_opt.items():
             user_logger.info(f"{key} : {value}")
 
-    user_logger.info("_"*100)
-    
+    user_logger.info("_" * 100)
+
     # Creating pickle files for cache parsed data
-    ebs_pkl_filepath = os.path.join(dirname, 'ebs.pkl')
-    structure_pkl_filepath = os.path.join(dirname, 'structure.pkl')
-    kpath_pkl_filepath = os.path.join(dirname, 'kpath.pkl')
-    
+    ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
+    structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
+    kpath_pkl_filepath = os.path.join(dirname, "kpath.pkl")
+
     if not use_cache:
         if os.path.exists(ebs_pkl_filepath):
             logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
@@ -117,11 +116,11 @@ def unfold(
         if os.path.exists(kpath_pkl_filepath):
             logger.info(f"Removing existing kpath file: {kpath_pkl_filepath}")
             os.remove(kpath_pkl_filepath)
-            
+
     if not os.path.exists(ebs_pkl_filepath):
         logger.info(f"Parsing EBS from {dirname}")
-        
-        parser = io.Parser(code = code, dir = dirname)
+
+        parser = io.Parser(code=code, dir=dirname)
         ebs = parser.ebs
         structure = parser.structure
         kpath = parser.kpath
@@ -130,8 +129,10 @@ def unfold(
         data_utils.save_pickle(structure, structure_pkl_filepath)
         data_utils.save_pickle(kpath, kpath_pkl_filepath)
     else:
-        logger.info(f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}")
-        
+        logger.info(
+            f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}"
+        )
+
         ebs = data_utils.load_pickle(ebs_pkl_filepath)
         structure = data_utils.load_pickle(structure_pkl_filepath)
         kpath = data_utils.load_pickle(kpath_pkl_filepath)
@@ -164,43 +165,39 @@ def unfold(
         )
     if unfold_mode == "both":
         logger.info("Unfolding bands in both modes")
-        
+
         width_weights = ebs_plot.ebs.weights
         width_mask = unfold_mask
         color_weights = ebs_plot.ebs.weights
         color_mask = unfold_mask
     elif unfold_mode == "thickness":
         logger.info("Unfolding bands in thickness mode")
-        
+
         width_weights = ebs_plot.ebs.weights
         width_mask = unfold_mask
         color_weights = None
         color_mask = None
     elif unfold_mode == "color":
         logger.info("Unfolding bands in color mode")
-        
+
         width_weights = None
         width_mask = None
         color_weights = ebs_plot.ebs.weights
         color_mask = unfold_mask
     else:
         raise ValueError(
-            "Invalid unfold_mode was selected: {unfold_mode} please select from the following 'both', 'thickness','color'"
+            f"Invalid unfold_mode was selected: {unfold_mode} please select from the following 'both', 'thickness','color'"
         )
-        
+
     if color_weights is not None:
         logger.debug(f"color_weights: {color_weights.shape}")
     if width_weights is not None:
         logger.debug(f"width_weights: {width_weights.shape}")
-    if color_mask is not None:
-        logger.debug(f"color_mask: {color_mask.shape}")
-    if width_mask is not None:
-        logger.debug(f"width_mask: {width_mask.shape}")
-    
+
     labels = []
     if mode == "plain":
         logger.info("Plotting bands in plain mode")
-        
+
         ebs_plot.plot_bands()
         ebs_plot.plot_parameteric(
             color_weights=color_weights,
@@ -211,12 +208,12 @@ def unfold(
         )
         ebs_plot.handles = ebs_plot.handles[: ebs_plot.nspins]
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
-        
+
         weights = []
 
         if mode == "overlay_species":
             logger.info("Plotting bands in overlay species mode")
-            
+
             for ispc in structure.species:
                 labels.append(ispc)
                 atoms = np.where(structure.atoms == ispc)[0]
@@ -229,7 +226,7 @@ def unfold(
                 weights.append(w)
         if mode == "overlay_orbitals":
             logger.info("Plotting bands in overlay orbitals mode")
-            
+
             for iorb in ["s", "p", "d", "f"]:
                 if iorb == "f" and not ebs_plot.ebs.norbitals > 9:
                     continue
@@ -245,7 +242,7 @@ def unfold(
 
         elif mode == "overlay":
             logger.info("Plotting bands in overlay mode")
-            
+
             if isinstance(items, dict):
                 items = [items]
 
@@ -306,7 +303,7 @@ def unfold(
         width_weights = ebs_plot.ebs.weights
         if mode == "parametric":
             logger.info("Plotting bands in parametric mode")
-            
+
             ebs_plot.plot_parameteric(
                 color_weights=color_weights,
                 width_weights=width_weights,
@@ -316,7 +313,7 @@ def unfold(
             )
         elif mode == "scatter":
             logger.info("Plotting bands in scatter mode")
-            
+
             ebs_plot.plot_scatter(
                 color_weights=color_weights,
                 width_weights=width_weights,
@@ -326,7 +323,9 @@ def unfold(
             )
 
         else:
-            user_logger.warning(f"Selected mode {mode} not valid. Please check the spelling")
+            user_logger.warning(
+                f"Selected mode {mode} not valid. Please check the spelling"
+            )
 
     ebs_plot.set_xticks(kticks, knames)
     ebs_plot.set_yticks(interval=elimit)
