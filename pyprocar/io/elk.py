@@ -7,7 +7,7 @@ import re
 import os
 
 from pathlib import Path
-from typing import Union, List, Tuple, Optional
+from typing import Union, List, Tuple, Optional, Dict
 
 import numpy as np
 
@@ -178,6 +178,49 @@ class ElkParser:
     def _read_kpoints_info(self):
         
         self.nkpoints=int(re.findall("plot1d\n\s*[0-9]*\s*([0-9]*)", self.elkin)[0])
+
+def read_elkin(elkin_path: str = "elk.in") -> Dict[str, str]:
+    """
+    Reads and parses the elk.in file.
+
+    Parameters
+    ----------
+    elkin_path : str, optional
+        Path to the elk.in file, by default "elk.in"
+
+    Returns
+    -------
+    Dict[str, str]
+        A dictionary containing the parsed key-value pairs from the elk.in file.
+
+    Examples
+    --------
+    >>> parsed_data = read_elkin("path/to/elk.in")
+    >>> print(parsed_data['some_key'])
+    'some_value'
+    """
+
+    # Initialize a dictionary to store the parsed data
+    parsed_data = {}
+
+    # Open the elk.in file for reading
+    with open(elkin_path, 'r') as rf:
+        # Iterate through each line in the file
+        for line in rf:
+            # Remove leading and trailing whitespace
+            line = line.strip()
+
+            # Skip empty lines or comments
+            if not line or line.startswith('#'):
+                continue
+
+            # Split the line into key and value
+            key, value = line.split('=')
+
+            # Store the key-value pair in the parsed_data dictionary
+            parsed_data[key.strip()] = value.strip()
+
+    return parsed_data
 
 
         raw_ticks = re.findall("plot1d\n\s*([0-9]*)\s*([0-9]*)", self.elkin)[0]
