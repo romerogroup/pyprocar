@@ -13,11 +13,7 @@ import itertools
 import logging
 from typing import List
 
-import networkx as nx
 import numpy as np
-import pyvista
-from matplotlib import pylab as plt
-from scipy.interpolate import CubicSpline
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.kpath import KPath
@@ -77,12 +73,16 @@ class ElectronicBandStructure:
         kpath: KPath = None,
         labels: List = None,
         reciprocal_lattice: np.ndarray = None,
+        shift_to_efermi: bool = True,
     ):
         logger.info("Initializing the ElectronicBandStructure object")
 
         self._kpoints = kpoints
         self._kpoints_cartesian = self.reduced_to_cartesian(kpoints, reciprocal_lattice)
-        self._bands = bands - efermi
+        if shift_to_efermi:
+            self._bands = bands - efermi
+        else:
+            self._bands = bands
         self._efermi = efermi
 
         self._projected = projected
@@ -161,12 +161,37 @@ class ElectronicBandStructure:
         logger.info("Initialized the ElectronicBandStructure object")
 
     def __str__(self):
-        ret = "Enectronic Band Structure     \n"
-        ret += "------------------------     \n"
-        ret += "Total number of kpoints  = {}\n".format(self.nkpoints)
+        ret = "\n Electronic Band Structure     \n"
+        ret += "============================\n"
+        ret += "Total number of kpoints   = {}\n".format(self.nkpoints)
         ret += "Total number of bands    = {}\n".format(self.nbands)
         ret += "Total number of atoms    = {}\n".format(self.natoms)
         ret += "Total number of orbitals = {}\n".format(self.norbitals)
+        if self.is_mesh and self.n_kx is not None:
+            ret += f"nkx,nky,nkz = ({self.n_kx},{self.n_ky},{self.n_kz})\n"
+        ret += "\nArray Shapes: \n"
+        ret += "------------------------     \n"
+        ret += "Kpoints shape  = {}\n".format(self.kpoints.shape)
+        ret += "Bands shape    = {}\n".format(self.bands.shape)
+        if self.projected is not None:
+            ret += "Projected shape = {}\n".format(self.projected.shape)
+        if self.projected_phase is not None:
+            ret += "Projected phase shape = {}\n".format(self.projected_phase.shape)
+        if self.weights is not None:
+            ret += "Weights shape = {}\n".format(self.weights.shape)
+        if self.kpath is not None:
+            ret += "Kpath = {}\n".format(self.kpath)
+        if self.labels is not None:
+            ret += "Labels = {}\n".format(self.labels)
+        if self.reciprocal_lattice is not None:
+            ret += "Reciprocal Lattice = \n {}\n".format(self.reciprocal_lattice)
+
+        ret += "\nAdditional information: \n"
+        ret += "------------------------     \n"
+        ret += "Fermi Energy = {}\n".format(self.efermi)
+        ret += "Is Mesh = {}\n".format(self.is_mesh)
+        ret += "Has Phase = {}\n".format(self.has_phase)
+
         return ret
 
     @property
@@ -929,33 +954,10 @@ class ElectronicBandStructure:
 
         return e_mass
 
-    @staticmethod
-    def interpolate_mesh_grid(self, mesh_grid, interpolation_factor=2):
-        """This function will interpolate an Nd, 3d mesh grid
-        [...,nx,ny,nz]
-
-        Parameters
-        ----------
-        mesh_grid : np.ndarray
-            The mesh grid to interpolate
-        """
-        scalar_dims = mesh_grid.shape[:-3]
-        new_mesh = None
-        for i, idx in enumerate(np.ndindex(scalar_dims)):
-            # Creating slicing list. idx are the scalar dimensions, last 3 are the grid
-            mesh_idx = list(idx)
-            tmp = [slice(None)] * 3
-            mesh_idx.extend(tmp)
-            new_grid = mathematics.fft_interpolate(
-                mesh_grid[mesh_idx], interpolation_factor=interpolation_factor
-            )
-
-            if i == 0:
-                new_dim = np.append(scalar_dims, new_grid.shape, axis=0)
-                new_mesh = np.zeros(shape=(new_dim))
-
-            new_mesh[mesh_idx] = new_grid
-        return new_mesh
+    def shift_fermi_energy(self, shift_value):
+        self.efermi += shift_value
+        self.bands += shift_value
+        return copy.deepcopy(self)
 
     def update_weights(self, weights):
         self.weights = weights
@@ -1125,6 +1127,9 @@ class ElectronicBandStructure:
         n_kpoints = self.kpoints.shape[0]
         n_rotations = rotations.shape[0]
 
+        logger.debug(f"Number of kpoints in ibz: {n_kpoints}")
+        logger.debug(f"Number of rotations: {n_rotations}")
+
         # Calculate new shape for kpoints and all properties
         total_points = n_kpoints * n_rotations
         new_shape = (total_points, 3)
@@ -1179,6 +1184,7 @@ class ElectronicBandStructure:
                 setattr(self, prop, new_properties[prop][unique_indices])
                 setattr(self, "bz_" + prop, new_properties[prop][unique_indices])
 
+        logger.debug(f"Number of kpoints in full BZ: {self.kpoints.shape[0]}")
         self._sort_by_kpoints()
         return None
 
@@ -1311,19 +1317,27 @@ class ElectronicBandStructure:
         """
         Reduces the bands to those near the fermi energy
         """
+        logger.info("____Reducing bands near fermi energy____")
         energy_level = 0
         full_band_index = []
-        for iband in range(len(self.bands[0, :, 0])):
-            fermi_surface_test = len(
-                np.where(
-                    np.logical_and(
-                        self.bands[:, iband, 0] >= energy_level - tolerance,
-                        self.bands[:, iband, 0] <= energy_level + tolerance,
-                    )
-                )[0]
-            )
-            if fermi_surface_test != 0:
-                full_band_index.append(iband)
+        bands_spin_index = {}
+        for ispin in range(self.nspins):
+            bands_spin_index[ispin] = []
+            for iband in range(len(self.bands[0, :, 0])):
+                fermi_surface_test = len(
+                    np.where(
+                        np.logical_and(
+                            self.bands[:, iband, ispin] >= energy_level - tolerance,
+                            self.bands[:, iband, ispin] <= energy_level + tolerance,
+                        )
+                    )[0]
+                )
+                if fermi_surface_test != 0:
+                    bands_spin_index[ispin].append(iband)
+
+                    if iband not in full_band_index:  # Avoid duplicates
+                        full_band_index.append(iband)
+
         if bands:
             full_band_index = bands
 
@@ -1333,6 +1347,12 @@ class ElectronicBandStructure:
             if original_value is not None:
                 value = original_value[:, full_band_index, ...]
                 setattr(self, prop, value)
+
+        debug_message = f"Bands near fermi. "
+        debug_message += f"Spin-0 {bands_spin_index[0]} |"
+        if self.nspins > 1:
+            debug_message += f" Spin-1 {bands_spin_index[1]}"
+        logger.debug(debug_message)
         return None
 
     def plot_kpoints(
@@ -1368,6 +1388,7 @@ class ElectronicBandStructure:
         None
             None
         """
+        import pyvista
 
         p = pyvista.Plotter()
         if show_brillouin_zone:
@@ -1607,6 +1628,103 @@ class ElectronicBandStructure:
         logger.debug("new Kpoints:\n" + str(kpoints))
         logger.debug("Translate(): ...Done")
         return kpoints
+
+    def interpolate(self, interpolation_factor=2):
+        """Interpolates the band structure meshes and properties using FFT interpolation.
+        Creates and returns a new ElectronicBandStructure instance with interpolated data.
+
+        Parameters
+        ----------
+        interpolation_factor : int, optional
+            Factor by which to interpolate the mesh, by default 2
+
+        Returns
+        -------
+        ElectronicBandStructure
+            New instance with interpolated data
+        """
+        logger.info(f"Interpolating band structure by factor {interpolation_factor}")
+
+        if not self.is_mesh:
+            raise ValueError("Interpolation only works for mesh band structures")
+
+        # Calculate new mesh dimensions
+        nkx, nky, nkz = (
+            self.kpoints_mesh.shape[0],
+            self.kpoints_mesh.shape[1],
+            self.kpoints_mesh.shape[2],
+        )
+
+        unique_x = self.kpoints_mesh[:, 0, 0, 0]
+        unique_y = self.kpoints_mesh[0, :, 0, 1]
+        unique_z = self.kpoints_mesh[0, 0, :, 2]
+
+        xmin, xmax = np.min(unique_x), np.max(unique_x)
+        ymin, ymax = np.min(unique_y), np.max(unique_y)
+        zmin, zmax = np.min(unique_z), np.max(unique_z)
+
+        new_x = np.linspace(xmin, xmax, nkx * interpolation_factor)
+        new_y = np.linspace(ymin, ymax, nky * interpolation_factor)
+        new_z = np.linspace(zmin, zmax, nkz * interpolation_factor)
+
+        new_kpoints_mesh = np.array(np.meshgrid(new_z, new_y, new_x, indexing="ij"))
+        new_kpoints = new_kpoints_mesh.reshape(-1, 3)
+
+        # Interpolate bands mesh
+        new_bands_mesh = mathematics.fft_interpolate_nd_3dmesh(
+            self.bands_mesh,
+            interpolation_factor,
+        )
+        new_bands = self.mesh_to_array(new_bands_mesh)
+
+        # Initialize properties to interpolate
+        new_projected = None
+        new_projected_phase = None
+        new_weights = None
+
+        # Interpolate projected if it exists
+        if self.projected is not None:
+            new_projected_mesh = mathematics.fft_interpolate_nd_3dmesh(
+                self.projected_mesh,
+                interpolation_factor,
+            )
+            new_projected = self.mesh_to_array(new_projected_mesh)
+
+        # Interpolate projected_phase if it exists
+        if self.projected_phase is not None:
+            new_projected_phase_mesh = mathematics.fft_interpolate_nd_3dmesh(
+                self.projected_phase_mesh,
+                interpolation_factor,
+            )
+            new_projected_phase = self.mesh_to_array(new_projected_phase_mesh)
+
+        # Interpolate weights if they exist
+        if self.weights is not None:
+            new_weights_mesh = mathematics.fft_interpolate_nd_3dmesh(
+                self.weights_mesh,
+                interpolation_factor,
+            )
+            new_weights = self.mesh_to_array(new_weights_mesh)
+
+        # Create new instance with interpolated data
+        interpolated_ebs = ElectronicBandStructure(
+            kpoints=new_kpoints,
+            bands=new_bands,
+            efermi=self.efermi,
+            projected=new_projected,
+            projected_phase=new_projected_phase,
+            weights=new_weights,
+            kpath=self.kpath,
+            labels=self.labels,
+            reciprocal_lattice=self.reciprocal_lattice,
+            n_kx=len(new_x),
+            n_ky=len(new_y),
+            n_kz=len(new_z),
+            shift_to_efermi=False,
+        )
+
+        logger.info("Finished interpolating band structure")
+        return interpolated_ebs
 
 
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
@@ -1848,250 +1966,3 @@ def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
     )
 
     return cart_derivatives
-
-
-# def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
-#     """
-#     Calculate the reciprocal space gradient of a scalar field using Fourier methods.
-#     It first finds the gradient in the fractional basis,
-#     and then transforms to cartesian coordinates through the reciprocal lattice vectors.
-#     Units of angstoms and eV are assumed.
-
-#     Parameters:
-#     -----------
-#     scalar_grid : ndarray
-#         N-dimensional array of scalar values on a mesh grid
-#     dk_values : tuple or list
-#         Grid spacing in each dimension
-#     reciprocal_lattice : ndarray, optional
-#         Reciprocal lattice vectors for non-orthogonal grids
-
-#     Returns:
-#     --------
-#     gradient : list of ndarrays
-#         List of gradient components, one for each dimension
-#     """
-#     # Get dimensions of the grid
-#     scalar_grid_shape = scalar_grid.shape
-#     ndim = reciprocal_lattice.shape[0]
-
-#     # Create frequency meshgrid
-
-#     nx = scalar_grid_shape[0]
-#     ny = scalar_grid_shape[1]
-#     nz = scalar_grid_shape[2]
-
-#     dk_values = np.array([1 / nx, 1 / ny, 1 / nz])
-
-#     wavenumbers = []
-#     for i in range(ndim):
-#         wavenumbers_1d_full = (
-#             np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
-#         )
-#         wavenumbers.append(wavenumbers_1d_full)
-
-#     freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
-#     # Get the shape of scalar_grid beyond the first 3 dimensions (if any)
-#     extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
-
-#     # Expand freq_mesh to match the expected scalar_gradient_grid_shape
-#     # First, create a list to hold the expanded dimensions
-#     expanded_freq_mesh = []
-
-#     for i in range(ndim):
-#         # Start with the original frequency mesh component
-#         component = freq_mesh[i]
-
-#         # For each extra dimension in scalar_grid, expand the frequency mesh
-#         for dim_size in extra_dims:
-#             component = np.expand_dims(component, axis=-1)
-#             # Repeat the values along the new axis
-#             component = np.repeat(component, dim_size, axis=-1)
-
-#         expanded_freq_mesh.append(component)
-
-#     # Replace the original freq_mesh with the expanded version
-#     freq_mesh = np.stack(expanded_freq_mesh)
-#     print(freq_mesh.shape)
-#     scalar_gradient_grid_shape = (3, *scalar_grid_shape)
-#     print(scalar_gradient_grid_shape)
-#     # Standard orthogonal case
-#     derivative_operator = freq_mesh * 1j
-#     spectral_derivative = np.fft.ifftn(
-#         derivative_operator * np.fft.fftn(scalar_grid),
-#         s=scalar_gradient_grid_shape,
-#     )
-
-#     derivatives = np.real(spectral_derivative)
-
-#     print(derivatives.shape)
-#     derivatives = np.moveaxis(derivatives, 0, -1)
-
-#     print(f"Derivatives shape: {derivatives.shape}")
-#     # cart_derivatives = np.dot(derivatives, np.linalg.inv(reciprocal_lattice.T))
-
-#     transform_matrix_einsum_string = "ij"
-#     ndim = len(derivatives.shape[3:]) - 1
-#     letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
-#     dim_letters = "".join(letters[0:ndim])
-#     scalar_array_einsum_string = "uvw" + dim_letters + "j"
-#     transformed_scalar_string = "uvw" + dim_letters + "i"
-#     ein_sum_string = (
-#         transform_matrix_einsum_string
-#         + ","
-#         + scalar_array_einsum_string
-#         + "->"
-#         + transformed_scalar_string
-#     )
-#     logger.debug(f"ein_sum_string: {ein_sum_string}")
-
-#     cart_derivatives = np.einsum(
-#         ein_sum_string,
-#         np.linalg.inv(reciprocal_lattice.T).T,
-#         derivatives,
-#     )
-
-#     return cart_derivatives
-
-
-# def reorder(self, plot=True, cutoff=0.2):
-#     nspins = self.nspins
-#     if self.is_non_collinear:
-#         nspins = 1
-#         # projected = np.sum(self.projected, axis=-1).reshape(self.nkpoints,
-#         #                                                     self.nbands,
-#         #                                                     self.natoms,
-#         #                                                     self.nprincipals,
-#         #                                                     self.norbitals,
-#         #                                                     nspins)
-#         projected = self.projected
-#         projected_phase = self.projected_phase
-
-#     else:
-#         projected = self.projected
-#         projected_phase = self.projected_phase
-#     new_bands = np.zeros_like(self.bands)
-#     new_projected = np.zeros_like(self.projected)
-#     new_projected_phase = np.zeros_like(self.projected_phase)
-#     for ispin in range(nspins):
-#         # DG = nx.Graph()
-#         # X = np.arange(self.nkpoints)
-#         # DG.add_nodes_from(
-#         #     [
-#         #         ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
-#         #         for i, j in itertools.product(
-#         #             range(self.nkpoints), range(self.nbands)
-#         #         )
-#         #     ]
-#         # )
-#         # pos = nx.get_node_attributes(DG, "pos")
-#         # S = np.zeros(shape=(self.nkpoints, self.nbands, self.nbands))
-#         for ikpoint in range(1, self.nkpoints):
-#             order = []
-#             for iband in range(self.nbands):
-#                 prj = []
-#                 idx = []
-#                 for jband in range(self.nbands):# range(max(0, iband-2), min(iband+2, self.nbands-1)):
-#                     psi_i = projected_phase[ikpoint, iband, :, :, :, ispin].flatten() # |psi(k,iband)>=\sum u(atom, n, ml)
-#                     psi_j = projected_phase[ikpoint-1, jband, :, :, :, ispin].flatten() # |psi(k+1,jband)>
-#                     psi_i /= np.absolute(psi_i).sum()
-#                     psi_j /= np.absolute(psi_j).sum()
-#                     # diff = np.absolute(psi_i-psi_j).sum()
-#                     diff = np.absolute(np.vdot(psi_i, psi_j))
-#                     prj.append(diff)
-#                     if iband == jband and  prj[-1] < cutoff:
-#                         prj[-1] = cutoff
-#                     idx.append(jband)
-#                 jband = idx[np.argmax(prj)]
-#                 self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]
-#         # for ikpoint in range(1, self.nkpoints):
-#         #     order = []
-#         #     for iband in range(self.nbands):
-#         #         prj = []
-#         #         idx = []
-#         #         slope =
-#         #         for jband in range(max(0, iband-2), min(iband+2, self.nbands-1)):
-#         #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
-#         #             dE = self.bands[ikpoint + 1, jband, ispin]
-#         #                 - self.bands[ikpoint, iband, ispin]
-#         #             )
-#         #             dEdK = (dE / dK)
-
-#         #             prj.append(dEdk)
-#         #             if iband == jband and  prj[-1] < cutoff:
-#         #                 prj[-1] = cutoff
-#         #             idx.append(jband)
-#         #         jband = idx[np.argmax(prj)]
-#         #         self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]
-#     #             prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
-#     #                                                                               self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
-#     #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
-#     #             if dK == 0:
-#     #                 continue
-#     #             prj = np.repeat(
-#     #                 np.sqrt(projected[ikpoint, iband, :, :, :, ispin].astype(np.complex_)).reshape(
-#     #                     1, -1
-#     #                 ),
-#     #                 self.nbands,
-#     #                 axis=0,
-#     #             )
-#     #             prj /= np.linalg.norm(prj[0])
-#     #             prj_1 = np.sqrt(
-#     #                 projected[ikpoint + 1, :, :, :, :, ispin].astype(np.complex_).reshape(
-#     #                     self.nbands, -1
-#     #                 )
-#     #             )
-#     #             prj_1 = prj_1.T / np.linalg.norm(prj_1, axis=1)
-#     #             prj_1 = prj_1.T
-#     #             # return prj, prj_1
-#     #             # prod = prj*prj_1
-#     #             # prod = prod.sum(axis=-1)
-#     #             # prod = prod.sum(axis=-1)
-#     #             # prod = prod.sum(axis=-1)
-#     #             # return prj, prj_1
-#     #             # # prod = np.exp(-1*prod* 1/(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]))
-#     #             # prod = np.exp(-1/abs(prod))
-#     #             # prod = np.exp(-1*abs(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]+e))
-#     #             dots = np.array([np.vdot(x, y) for x, y in zip(prj, prj_1)])
-
-#     #             diff = np.linalg.norm(prj - prj_1, axis=1)
-#     #             dE = np.abs(
-#     #                 self.bands[ikpoint + 1, :, ispin]
-#     #                 - self.bands[ikpoint, iband, ispin]
-#     #             )
-#     #             dEdK = (dE / dK)
-#     #             jband = np.argsort(diff)
-#     #             counter = 0
-#     #             # while jband[counter] in order:
-#     #             #     counter+=1
-#     #             order.append(jband[counter])
-
-#     #             # if iband !=0 and jband== 0:
-#     #             #     print(ikpoint, iband)
-
-#     #             # print(iband, self.bands[ikpoint, iband, ispin], jband, self.bands[ikpoint, jband, ispin])
-
-#     #             # diffs.append(diff)
-#     #             # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
-#     #             DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
-
-#     #     if plot:
-#     #         plt.figure(figsize=(16, 9))
-#     #         nodes = nx.draw_networkx_nodes(
-#     #             DG, pos, node_size=5, node_color=["blue", "red"][ispin])
-#     #         edges = nx.draw_networkx_edges(
-#     #             DG,
-#     #             pos,
-#     #             edge_color='red'
-#     #         )
-#     #         plt.show()
-#     # #         if len(order) == 0:
-#     # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
-#     # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
-#     # #         else :
-#     # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
-#     # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
-
-#     # # self.bands = new_bands
-#     # # self.projected = new_projected
-#     return
