@@ -38,6 +38,7 @@ class FermiHandler:
         fermi: float = None,
         repair: bool = False,
         apply_symmetry: bool = True,
+        ebs_interpolation_factor=1,
         use_cache: bool = True,
         verbose: int = 1,
     ):
@@ -128,6 +129,11 @@ class FermiHandler:
         else:
             self.e_fermi = fermi
 
+        if ebs_interpolation_factor != 1:
+            self.ebs = self.ebs.interpolate(
+                interpolation_factor=ebs_interpolation_factor
+            )
+
         modes = ["plain", "parametric", "spin_texture", "overlay"]
         props = ["fermi_speed", "fermi_velocity", "harmonic_effective_mass"]
         modes_txt = " , ".join(modes)
@@ -148,6 +154,7 @@ class FermiHandler:
         orbitals=None,
         spins=None,
         spin_texture=False,
+        fermi_shift=0.0,
         show=True,
         save_2d=None,
         save_gif=None,
@@ -194,7 +201,9 @@ class FermiHandler:
             spin_texture=spin_texture,
         )
         fermi_surface = self.data_handler.get_surface_data(
-            fermi=self.e_fermi, property_name=config.property_name
+            fermi=self.e_fermi,
+            property_name=config.property_name,
+            fermi_shift=fermi_shift,
         )
 
         visualizer = FermiVisualizer(self.data_handler, config)
