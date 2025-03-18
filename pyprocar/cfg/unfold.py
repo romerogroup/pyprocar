@@ -240,6 +240,9 @@ class UnfoldingConfig(BandStructureConfig):
     multiple_locator_y_major_value: float = None
     multiple_locator_y_minor_value: float = None
 
+    weighted_width: bool = False
+    weighted_color: bool = True
+
     def __post_init__(self):
         """Post-initialization to validate the data and set default values."""
         self.plot_type = PlotType.UNFOLD

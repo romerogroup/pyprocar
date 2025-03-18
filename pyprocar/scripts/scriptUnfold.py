@@ -8,7 +8,6 @@ from pyprocar import io
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
 from pyprocar.plotter import EBSPlot
 from pyprocar.utils import ROOT, data_utils, welcome
-from pyprocar.utils.defaults import settings
 from pyprocar.utils.info import orbital_names
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -190,9 +189,9 @@ def unfold(
         )
 
     if color_weights is not None:
-        logger.debug(f"color_weights: {color_weights.shape}")
+        logger.debug(f"color_weights shape: {color_weights.shape}")
     if width_weights is not None:
-        logger.debug(f"width_weights: {width_weights.shape}")
+        logger.debug(f"width_weights shape: {width_weights.shape}")
 
     labels = []
     if mode == "plain":
@@ -289,11 +288,11 @@ def unfold(
             atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
         )
 
-        if settings.ebs.weighted_color:
+        if config.weighted_color:
             color_weights = weights
         else:
             color_weights = None
-        if settings.ebs.weighted_width:
+        if config.weighted_width:
             width_weights = weights
         else:
             width_weights = None
