@@ -378,15 +378,20 @@ class EBSPlot:
 
         if width_mask is not None or color_mask is not None:
             if width_mask is not None:
+                logger.info(f"___Applying width mask___")
                 mbands = np.ma.masked_array(
-                    self.ebs.bands, np.abs(width_weights) < width_mask
+                    self.ebs.bands,
+                    np.abs(width_weights) < width_mask,
                 )
             if color_mask is not None:
+                logger.info(f"___Applying color mask___")
                 mbands = np.ma.masked_array(
-                    self.ebs.bands, np.abs(color_weights) < color_mask
+                    self.ebs.bands,
+                    np.abs(color_weights) < color_mask,
                 )
         else:
             # Faking a mask, all elemtnet are included
+            logger.info(f"___No mask applied___")
             mbands = np.ma.masked_array(self.ebs.bands, False)
         if color_weights is not None:
             vmin = self.config.clim[0]
