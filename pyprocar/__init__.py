@@ -1,23 +1,20 @@
-from .version import (
-    author as __author__,
-    copyright as __copyright__,
-    email as __email__,
-    status as __status__,
-    date as __date__,
+from pyprocar import core, io, plotter, pyposcar, utils
+from pyprocar._version import __version__
+from pyprocar.io import *
+from pyprocar.scripts import *
+from pyprocar.utils import physics_constants, welcome
+from pyprocar.utils.defaults import Settings
+from pyprocar.utils.download_examples import (
+    download_dev_data,
+    download_example,
+    download_examples,
 )
-
-from ._version import __version__
-
-from .scripts import *
-from .io import *
-from . import io
-from . import core
-from . import utils
-from . import plotter
-from . import pyposcar
-from .utils.download_examples import download_examples, download_example, download_dev_data
-from .utils.defaults import Settings
-from .utils import welcome
+from pyprocar.utils.physics_constants import *
+from pyprocar.version import author as __author__
+from pyprocar.version import copyright as __copyright__
+from pyprocar.version import date as __date__
+from pyprocar.version import email as __email__
+from pyprocar.version import status as __status__
 
 # TODO change all n* variables to n_* variable (norbital to n_orbital)
 # TODO create a function in utils that does ProcarFileFilter
