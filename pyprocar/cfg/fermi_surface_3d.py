@@ -197,7 +197,8 @@ class FermiSurface3DConfig(BaseConfig):
 
     # Basic Plot Settings
     mode: FermiSurfaceMode = FermiSurfaceMode.PLAIN
-    property: FermiSurfaceProperty = FermiSurfaceProperty.FERMI_SPEED
+    property: FermiSurfaceProperty = None
+    property_name: str = None
     background_color: str = "white"
     plotter_offscreen: bool = False
     plotter_camera_pos: List[int] = field(default_factory=lambda: [1, 1, 1])
@@ -248,8 +249,6 @@ class FermiSurface3DConfig(BaseConfig):
             "color": "black",
         }
     )
-
-    property_name: str = "fermi_speed"
 
     # Advanced Configurations
     fermi_tolerance: float = 0.1
