@@ -181,7 +181,7 @@ class FermiDataHandler:
         logger.info(f"____End of spd_spin_texture processing___")
         return spd_spin
 
-    def _initialize_properties(self, property_name):
+    def _initialize_properties(self, property_name=None):
         logger.info("___Initializing properties___")
         if property_name:
             current_emplemented_properties = [
@@ -199,8 +199,6 @@ class FermiDataHandler:
                     self.ebs.fermi_speed
                 elif property_name == "harmonic_effective_mass":
                     self.ebs.bands_hessian
-
-        logger.info(f"____End of properties initialization___")
 
     def _get_spin_pol_indices(self, fermi_surfaces):
         """
@@ -251,6 +249,9 @@ class FermiDataHandler:
 
     def _merge_fermi_surfaces(self, fermi_surfaces):
         logger.info(f"____ Merging Fermi Surfaces of different spins ____")
+        if fermi_surfaces[0].is_empty_mesh():
+            logger.warning("No Fermi surface found. Skipping merging.")
+            return fermi_surfaces[0]
         # Gets the spin-band and spin indices for the the combines fermi surfaces
         spins_band_index, spins_index = self._get_spin_pol_indices(fermi_surfaces)
         fermi_surface = None
@@ -260,9 +261,6 @@ class FermiDataHandler:
             else:
                 fermi_surface.merge(surface, merge_points=False, inplace=True)
 
-        fermi_surface.point_data["band_index"] = np.array(spins_band_index)
-        fermi_surface.point_data["spin_index"] = np.array(spins_index)
-        logger.info(f"____Finished Merging Fermi Surfaces of different spins ____")
         return fermi_surface
 
     def process_data(
@@ -315,7 +313,6 @@ class FermiDataHandler:
         self.spd_spin = spd_spin
         self.bands_to_keep = bands_to_keep
         self.spins = spins
-        logger.info(f"____ Finished Processing Data ____")
         return spd, spd_spin, bands_to_keep, spins
 
     def get_surface_data(
@@ -330,7 +327,9 @@ class FermiDataHandler:
         fermi_surfaces = []
         for ispin, spin in enumerate(self.spin_pol):
             ebs = copy.copy(self.ebs)
+            ebs.properties_from_scratch = True
             ebs.bands = ebs.bands[:, self.bands_to_keep, spin]
+
             logger.debug(f"Bands shape for spin {spin}: {ebs.bands.shape}")
 
             fermi_surface3D = FermiSurface3D(
@@ -342,6 +341,10 @@ class FermiDataHandler:
                 supercell=self.config.supercell,
                 max_distance=self.config.max_distance,
             )
+            if fermi_surface3D.is_empty_mesh():
+                fermi_surfaces.append(fermi_surface3D)
+                continue
+
             self.property_name = property_name
 
             band_to_surface_indices = list(
@@ -355,6 +358,8 @@ class FermiDataHandler:
                 if self.config.scalar_bar_config.get("title") is None:
                     self.config.scalar_bar_config["title"] = "Fermi Speed"
             elif self.property_name == "fermi_velocity":
+                logger.debug(f"ebs.fermi_velocity shape: {ebs.fermi_velocity.shape}")
+
                 fermi_surface3D.project_fermi_velocity(
                     fermi_velocity=ebs.fermi_velocity[
                         ..., band_to_surface_indices, ispin, :
@@ -432,7 +437,10 @@ class FermiVisualizer:
         )
 
     def add_surface(self, surface):
-        logger.info(f"____ Adding Surface to Plotter ____")
+        logger.info(f"____Adding Surface to Plotter____")
+        if surface.is_empty_mesh():
+            logger.warning("No Fermi surface found. Skipping surface addition.")
+            return None
         surface = self._setup_band_colors(surface)
 
         if self.config.spin_colors != (None, None):
@@ -481,6 +489,8 @@ class FermiVisualizer:
             )
 
     def add_texture(self, fermi_surface, scalars_name, vector_name):
+        if vector_name not in fermi_surface.point_data:
+            return None
 
         arrows = fermi_surface.glyph(
             orient=vector_name,
@@ -552,11 +562,12 @@ class FermiVisualizer:
         initial_e_value = energy_values[0]
 
         self.plotter.add_text(f"Energy Value : {initial_e_value:.4f} eV", color="black")
-        arrows = self.add_texture(
-            surface,
-            scalars_name=self.data_handler.scalars_name,
-            vector_name=self.data_handler.vector_name,
-        )
+        if self.data_handler.vector_name:
+            arrows = self.add_texture(
+                surface,
+                scalars_name=self.data_handler.scalars_name,
+                vector_name=self.data_handler.vector_name,
+            )
         self.add_surface(surface)
         if self.config.mode != "plain":
             self.add_scalar_bar(name=self.data_handler.scalars_name)

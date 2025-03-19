@@ -99,17 +99,19 @@ class FermiSurface3D(Surface):
         self._input_checks()
         self.brillouin_zone = self._get_brillouin_zone(self.supercell)
         self.isosurfaces = self._generate_isosurfaces()
-        self.surface = self._combine_isosurfaces()
+        self.surface = self._combine_isosurfaces(self.isosurfaces)
 
         # Initialize the Fermi Surface
         super().__init__(verts=self.surface.points, faces=self.surface.faces)
 
         # Storing band indices in the initialized surface
-        self.point_data["band_index"] = self.surface.point_data["band_index"]
-        self.cell_data["band_index"] = self.surface.cell_data["band_index"]
+        if "band_index" in self.surface.point_data:
+            self.point_data["band_index"] = self.surface.point_data["band_index"]
+        if "band_index" in self.surface.cell_data:
+            self.cell_data["band_index"] = self.surface.cell_data["band_index"]
         self.fermi_surface_area = self.area
 
-        logger.info(f"___End of initialization FermiSurface3D object___")
+        logger.info("___End of initialization FermiSurface3D object___")
         return None
 
     def _input_checks(self):
@@ -120,16 +122,22 @@ class FermiSurface3D(Surface):
         isosurfaces = []
         self.band_isosurface_index_map = {}
         for iband in range(self.ebs.bands.shape[1]):
-            isosurface_band = Isosurface(
-                XYZ=self.ebs.kpoints,
-                V=self.ebs.bands[:, iband],
-                isovalue=self.fermi,
-                algorithm="lewiner",
-                interpolation_factor=self.interpolation_factor,
-                padding=self.supercell,
-                transform_matrix=self.ebs.reciprocal_lattice,
-                boundaries=self.brillouin_zone,
-            )
+            logger.debug(f"ebs.bands_mesh shape: {self.ebs.bands_mesh.shape}")
+            try:
+                isosurface_band = Isosurface(
+                    XYZ=self.ebs.kpoints,
+                    # V=self.ebs.bands[:, iband],
+                    V_matrix=self.ebs.bands_mesh[:, :, :, iband],
+                    isovalue=self.fermi,
+                    algorithm="lewiner",
+                    interpolation_factor=self.interpolation_factor,
+                    padding=self.supercell,
+                    transform_matrix=self.ebs.reciprocal_lattice,
+                    boundaries=self.brillouin_zone,
+                )
+            except Exception as e:
+                logger.exception(f"Error generating isosurface for band {iband}: {e}")
+                continue
             # Check to see if the generated isosurface has points
             if isosurface_band.points.shape[0] == 0:
                 continue
@@ -152,12 +160,16 @@ class FermiSurface3D(Surface):
             f"self.ebs.bands shape: {self.ebs.bands.shape} after removing bands with no isosurfaces"
         )
         logger.info(f"Band Isosurface index map: {self.band_isosurface_index_map}")
-        logger.info(f"____End of generating isosurfaces for each band___")
         return isosurfaces
 
-    def _combine_isosurfaces(self):
+    def _combine_isosurfaces(self, isosurfaces: List[Isosurface]):
         logger.info(f"____Combining isosurfaces___")
-        isosurfaces = copy.deepcopy(self.isosurfaces)
+
+        if len(isosurfaces) == 0:
+            logger.debug("No isosurfaces found. Returning empty mesh.")
+            return pv.PolyData()
+
+        isosurfaces = copy.deepcopy(isosurfaces)
 
         surface_band_indices_points = []
         surface_band_indices_cells = []
@@ -185,11 +197,6 @@ class FermiSurface3D(Surface):
             band_indices_cells_list = [i_surface] * n_cells
             surface_band_indices_cells.extend(band_indices_cells_list)
 
-        if surface == None:
-            raise ValueError(
-                "No Fermi surface found. The structure is probably not metallic, so there will be no Fermi surface."
-            )
-
         # Setting band indices on the points of the combined surfaces
         surface_band_indices_points.reverse()
         surface.point_data["band_index"] = np.array(surface_band_indices_points)
@@ -198,12 +205,16 @@ class FermiSurface3D(Surface):
         surface_band_indices_cells.reverse()
         surface.cell_data["band_index"] = np.array(surface_band_indices_cells)
 
-        logger.info(f"___End of combining isosurfaces___")
         return surface
 
     def _get_brillouin_zone(self, supercell: List[int]):
         """Returns the BrillouinZone of the material
         brillouin_zone
+
+        Parameters
+        ----------
+        supercell : List[int]
+            The supercell to use for the BrillouinZone
 
         Returns
         -------
@@ -228,6 +239,7 @@ class FermiSurface3D(Surface):
         """
         logger.info(f"____Starting Projecting vector texture___")
         logger.debug(f"isosurfaces: {len(self.isosurfaces)}")
+        logger.debug(f"vectors_array shape: {vectors_array.shape}")
         final_vectors_X = []
         final_vectors_Y = []
         final_vectors_Z = []
@@ -412,6 +424,10 @@ class FermiSurface3D(Surface):
 
         # Return only the points that satisfy the distance criterion
         return mask
+
+    def is_empty_mesh(self):
+        logger.warning("No Fermi surface found. Skipping surface addition.")
+        return self.points.shape[0] == 0
 
     def _project_color(self, scalars_array: np.ndarray, scalar_name: str = "scalars"):
         """

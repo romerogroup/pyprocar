@@ -105,6 +105,7 @@ class ElectronicBandStructure:
         self.ibz_projected_phase = None
         self.ibz_weights = None
 
+        self.properties_from_scratch = False
         self.initial_band_properties = ["bands", "projected", "projected_phase"]
         self.band_derived_properties = [
             "bands_gradient",
@@ -131,9 +132,14 @@ class ElectronicBandStructure:
         for prop in self.band_derived_properties:
             setattr(self, "_" + prop, None)
 
-        self._n_kx = n_kx
-        self._n_ky = n_ky
-        self._n_kz = n_kz
+        if self.is_mesh:
+            self._n_kx = len(np.unique(kpoints[:, 0]))
+            self._n_ky = len(np.unique(kpoints[:, 1]))
+            self._n_kz = len(np.unique(kpoints[:, 2]))
+        else:
+            self._n_kx = n_kx
+            self._n_ky = n_ky
+            self._n_kz = n_kz
 
         self._kx_map = None
         self._ky_map = None
@@ -549,7 +555,7 @@ class ElectronicBandStructure:
         return self._kpoints_cartesian_mesh
 
     @property
-    def bands_mesh(self, force_update=False):
+    def bands_mesh(self):
         """
         Bands mesh is a numpy array that stores each band in a mesh grid.
         Shape = [n_kx,n_ky,n_kz,n_bands]
@@ -560,7 +566,7 @@ class ElectronicBandStructure:
             Bands mesh is a numpy array that stores each band in a mesh grid.
             Shape = [n_kx,n_ky,n_kz,n_bands]
         """
-        if self._bands_mesh is None or force_update:
+        if self._bands_mesh is None or self.properties_from_scratch:
             self._bands_mesh = self.array_to_mesh(
                 self.bands, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
             )
