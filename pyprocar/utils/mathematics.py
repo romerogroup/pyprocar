@@ -336,7 +336,6 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
         nz * interpolation_factor,
     )
     new_fft = np.zeros(new_shape, dtype=complex)
-    print(new_fft.shape)
     # Calculate half-dimensions for proper frequency component placement
     nx_half = nx // 2
     ny_half = ny // 2
