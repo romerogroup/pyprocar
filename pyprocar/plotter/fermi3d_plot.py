@@ -504,6 +504,7 @@ class FermiVisualizer:
                 arrows,
                 scalars=scalars_name,
                 cmap=self.config.texture_cmap,
+                clim=self.config.texture_clim,
                 show_scalar_bar=False,
                 opacity=self.config.texture_opacity,
             )
@@ -751,7 +752,7 @@ class FermiVisualizer:
         if save_2d_slice:
 
             slice_2d = self.plotter.plane_sliced_meshes[0]
-
+            logger.debug(f"slice_2d point_data: \n {slice_2d.point_data}")
             self.plotter.close()
             point1 = slice_2d.points[0, :]
             point2 = slice_2d.points[1, :]
@@ -777,8 +778,13 @@ class FermiVisualizer:
                         show_scalar_bar=False,
                         name="arrows",
                     )
-            p.add_mesh(slice_2d, line_width=self.config.cross_section_slice_linewidth)
-            p.remove_scalar_bar()
+            p.add_mesh(
+                slice_2d,
+                line_width=self.config.cross_section_slice_linewidth,
+                cmap=self.config.surface_cmap,
+            )
+            if not self.config.show_scalar_bar:
+                p.remove_scalar_bar()
             # p.set_background(background_color)
             p.view_vector(normal_vec)
             p.show(screenshot=save_2d_slice, interactive=False)

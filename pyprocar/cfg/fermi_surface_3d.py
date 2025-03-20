@@ -217,6 +217,7 @@ class FermiSurface3DConfig(BaseConfig):
     texture_color: Optional[str] = None
     texture_size: float = 0.05
     texture_scale: bool = False
+    texture_clim: Optional[List[float]] = None
     texture_opacity: float = 1.0
 
     # Brillouin Zone Styling
