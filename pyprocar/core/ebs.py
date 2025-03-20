@@ -145,8 +145,9 @@ class ElectronicBandStructure:
         self._ky_map = None
         self._kz_map = None
 
-        # if self.is_mesh:
-        #     self._sort_by_kpoints()
+        if self.is_mesh:
+            self._sort_by_kpoints()
+
         logger.info("Subtracting Fermi Energy from Bands")
         logger.info(f"Is Mesh: {self.is_mesh}")
         logger.info(f"Fermi Energy: {self.efermi}")
