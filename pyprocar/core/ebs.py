@@ -1329,7 +1329,8 @@ class ElectronicBandStructure:
         if self.is_non_collinear:
             nspins = [0]
         else:
-            nspins = self.nspins
+
+            nspins = [ispin for ispin in range(self.nspins)]
 
         for ispin in nspins:
             bands_spin_index[ispin] = []
