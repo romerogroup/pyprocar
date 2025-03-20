@@ -189,6 +189,7 @@ class BandStructure2DHandler:
         k_z_plane=0,
         k_z_plane_tol=0.0001,
         show=True,
+        k_plane_scale=2 * np.pi,
         render_offscreen=False,
         save_2d=None,
         save_gif=None,
@@ -262,6 +263,13 @@ class BandStructure2DHandler:
         visualizer = BandStructure2DVisualizer(self.data_handler, config=config)
         visualizer.plotter.off_screen = render_offscreen
 
+        k_plane_scale_transform = np.eye(4)
+
+        k_plane_scale_transform[0, 0] = k_plane_scale * k_plane_scale_transform[0, 0]
+        k_plane_scale_transform[1, 1] = k_plane_scale * k_plane_scale_transform[1, 1]
+        band_structure_surface.transform(k_plane_scale_transform)
+
+        band_structure_surface.brillouin_zone.transform(k_plane_scale_transform)
         if config.show_brillouin_zone:
             visualizer.add_brillouin_zone(band_structure_surface)
 
