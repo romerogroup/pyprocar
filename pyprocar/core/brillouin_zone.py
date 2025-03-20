@@ -234,6 +234,47 @@ class BrillouinZone2D(pv.PolyData):
         self._fix_normals_direction()
         return None
 
+    @property
+    def centers(self):
+        return self.cell_centers().points
+
+    @property
+    def faces_array(self):
+        """
+        The faces listed in a list of list which contains the faces.
+
+
+        Returns
+        -------
+        new_faces : list
+            A list of faces
+
+        """
+        new_faces = []
+
+        face = []
+        count = 0
+
+        for iverts_in_face, verts_in_face in enumerate(self.faces):
+            if iverts_in_face == 0:
+                num_verts = verts_in_face
+                face = [num_verts]
+            else:
+
+                if count == num_verts:
+                    count = 0
+                    new_faces.append(face)
+                    num_verts = verts_in_face
+                    face = [num_verts]
+                elif iverts_in_face == len(self.faces) - 1:
+                    face.append(verts_in_face)
+                    new_faces.append(face)
+                else:
+                    count += 1
+                    face.append(verts_in_face)
+
+        return new_faces
+
     def wigner_seitz(self):
         """Calculates the wigner Seitz cell in the form of a tuple containing the verts and faces of the cell
 
