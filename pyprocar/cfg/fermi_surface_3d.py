@@ -34,13 +34,13 @@ class FermiSurfaceProperty(Enum):
         Visualizes the scalar speed at which electrons travel at the Fermi level.
     FERMI_VELOCITY : str
         Visualizes the vector velocity of electrons moving at the Fermi level.
-    HARMONIC_AVERAGE_EFFECTIVE_MASS : str
-        Displays the harmonic average of the effective mass of electrons, reflecting the electron mobility.
+    AVG_INV_EFFECTIVE_MASS : str
+        Displays the average inverse effective mass of electrons, reflecting the electron mobility.
     """
 
     FERMI_SPEED = "fermi_speed"
     FERMI_VELOCITY = "fermi_velocity"
-    HARMONIC_AVERAGE_EFFECTIVE_MASS = "harmonic_effective_mass"
+    AVG_INV_EFFECTIVE_MASS = "avg_inv_effective_mass"
 
 
 @dataclass

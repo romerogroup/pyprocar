@@ -111,7 +111,7 @@ class ElectronicBandStructure:
             "bands_gradient",
             "bands_hessian",
             "fermi_velocity",
-            "harmonic_average_effective_mass",
+            "avg_inv_effective_mass",
             "fermi_speed",
         ]
         self.band_dependent_properties = (
@@ -506,25 +506,25 @@ class ElectronicBandStructure:
         return self._fermi_speed
 
     @property
-    def harmonic_average_effective_mass(self):
+    def avg_inv_effective_mass(self):
         """
-        harmonic average effective mass is a numpy array that stores
-        each harmonic average effective mass in a list that corresponds to the self.kpoints
+        average inverse effective mass is a numpy array that stores
+        each average inverse effective mass in a list that corresponds to the self.kpoints
         Shape = [n_kpoints,n_bands],
 
         Returns
         -------
         np.ndarray
-            harmonic average effective mass is a numpy array that stores
-            each harmonic average effective mass in a list that corresponds to the self.kpoints
+            average inverse effective mass is a numpy array that stores
+            each average inverse effective mass in a list that corresponds to the self.kpoints
             Shape = [n_kpoints,n_bands],
         """
 
-        if self._harmonic_average_effective_mass is None:
-            self._harmonic_average_effective_mass = self.mesh_to_array(
-                mesh=self.harmonic_average_effective_mass_mesh
+        if self._avg_inv_effective_mass is None:
+            self._avg_inv_effective_mass = self.mesh_to_array(
+                mesh=self.avg_inv_effective_mass_mesh
             )
-        return self._harmonic_average_effective_mass
+        return self._avg_inv_effective_mass
 
     @property
     def kpoints_mesh(self):
@@ -736,21 +736,21 @@ class ElectronicBandStructure:
         return self._fermi_speed_mesh
 
     @property
-    def harmonic_average_effective_mass_mesh(self):
+    def avg_inv_effective_mass_mesh(self):
         """
-        harmonic average effective mass mesh is a numpy array that stores each
-        harmonic average effective mass mesh in a mesh grid.
+        Average Inverse effective mass mesh is a numpy array that stores each
+        average inverse effective mass mesh in a mesh grid.
         Shape = [n_bands,n_kx,n_ky,n_kz],
 
         Returns
         -------
         np.ndarray
-            harmonic average effective mass mesh is a numpy array that stores
-            each harmonic average effective mass in a mesh grid.
+            average inverse effective mass mesh is a numpy array that stores
+            each average inverse effective mass in a mesh grid.
             Shape = [n_bands,n_kx,n_ky,n_kz],
         """
 
-        if self._harmonic_average_effective_mass_mesh is None:
+        if self._avg_inv_effective_mass_mesh is None:
             # n_i, n_j, n_k, n_bands, n_spins, n_grad_1, n_grad_2, = self.bands_hessian_mesh.shape
             # self._harmonic_average_effective_mass_mesh = np.zeros(shape=( n_i, n_j, n_k, n_bands, n_spins))
             # print(self.bands_hessian_mesh.shape)
@@ -761,13 +761,11 @@ class ElectronicBandStructure:
             #                 for i in range(n_i):
             #                     hessian = self.bands_hessian_mesh[i,j,k,iband,ispin,...] * EV_TO_J / HBAR_J**2
             #                     self._harmonic_average_effective_mass_mesh[i,j,k,iband,ispin] = harmonic_average_effective_mass(hessian)
-            self._harmonic_average_effective_mass_mesh = (
-                self.calculate_harmonic_average_effective_mass(
-                    self.bands_hessian_mesh * EV_TO_J / HBAR_J**2
-                )
+            self._avg_inv_effective_mass_mesh = self.calculate_avg_inv_effective_mass(
+                self.bands_hessian_mesh
             )
 
-        return self._harmonic_average_effective_mass_mesh
+        return self._avg_inv_effective_mass_mesh
 
     @property
     def bands_integral(self):
@@ -943,7 +941,7 @@ class ElectronicBandStructure:
         return integral
 
     @staticmethod
-    def calculate_harmonic_average_effective_mass(hessian):
+    def calculate_avg_inv_effective_mass(hessian):
         # letters=['a','b','c','d','e','f','g','h']
         # scalar_diffs=calculate_scalar_differences(self.bands_gradient_mesh)
         # n_dim=len(scalar_diffs.shape[3:])-1
@@ -954,10 +952,9 @@ class ElectronicBandStructure:
         # ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
         # band_hessians=np.einsum(ein_sum_string, self.reciprocal_lattice, scalar_diffs)
         # Calculate the trace of each 3x3 matrix along the last two axes
-        trace_tensor = np.trace(hessian, axis1=-2, axis2=-1)
-
+        m_inv = (np.trace(hessian, axis1=-2, axis2=-1) * EV_TO_J / HBAR_J**2) / 3
         # Calculate the harmonic average effective mass for each element
-        e_mass = 3 * trace_tensor**-1 / FREE_ELECTRON_MASS
+        e_mass = FREE_ELECTRON_MASS * m_inv
 
         return e_mass
 
@@ -1328,7 +1325,13 @@ class ElectronicBandStructure:
         energy_level = 0
         full_band_index = []
         bands_spin_index = {}
-        for ispin in range(self.nspins):
+
+        if self.is_non_collinear:
+            nspins = [0]
+        else:
+            nspins = self.nspins
+
+        for ispin in nspins:
             bands_spin_index[ispin] = []
             for iband in range(len(self.bands[0, :, 0])):
                 fermi_surface_test = len(
@@ -1357,7 +1360,7 @@ class ElectronicBandStructure:
 
         debug_message = f"Bands near fermi. "
         debug_message += f"Spin-0 {bands_spin_index[0]} |"
-        if self.nspins > 1:
+        if self.nspins > 1 and not self.is_non_collinear:
             debug_message += f" Spin-1 {bands_spin_index[1]}"
         logger.debug(debug_message)
         return None

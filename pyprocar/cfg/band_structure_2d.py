@@ -41,7 +41,7 @@ class BandStructure2DProperty(Enum):
 
     FERMI_SPEED = "fermi_speed"
     FERMI_VELOCITY = "fermi_velocity"
-    HARMONIC_AVERAGE_EFFECTIVE_MASS = "harmonic_average_effective_mass"
+    AVG_INV_EFFECTIVE_MASS = "avg_inv_effective_mass"
 
 
 @dataclass
@@ -234,6 +234,7 @@ class Bandstructure2DConfig(BaseConfig):
     texture_color: Optional[str] = None
     texture_size: float = 0.1
     texture_scale: bool = False
+    texture_clim: Optional[List[float]] = None
     texture_opacity: float = 1.0
     add_axes: bool = True
     x_axes_label: str = "Kx"

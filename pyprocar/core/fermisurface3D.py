@@ -569,20 +569,20 @@ class FermiSurface3D(Surface):
         logger.debug(f"fermi_speed_array shape: {scalars_array.shape}")
         self._project_color(scalars_array=scalars_array, scalar_name="Fermi Speed")
 
-    def project_harmonic_effective_mass(self, harmonic_effective_mass):
+    def project_avg_inv_effective_mass(self, avg_inv_effective_mass):
         """
         Method to calculate the atomic projections of the surface.
         """
-        logger.info(f"____Projecting harmonic effective mass to surface___")
+        logger.info(f"____Projecting avg inverse effective mass to surface___")
         scalars_array = []
         count = 0
         for iband in range(len(self.isosurfaces)):
             count += 1
-            scalars_array.append(harmonic_effective_mass[:, iband])
+            scalars_array.append(avg_inv_effective_mass[:, iband])
         scalars_array = np.vstack(scalars_array).T
-        logger.debug(f"harmonic_effective_mass_array shape: {scalars_array.shape}")
+        logger.debug(f"avg_inv_effective_mass_array shape: {scalars_array.shape}")
         self._project_color(
-            scalars_array=scalars_array, scalar_name="Harmonic Effective Mass"
+            scalars_array=scalars_array, scalar_name="Avg Inverse Effective Mass"
         )
 
     def extend_surface(

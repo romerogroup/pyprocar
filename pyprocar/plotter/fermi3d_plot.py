@@ -187,18 +187,18 @@ class FermiDataHandler:
             current_emplemented_properties = [
                 "fermi_velocity",
                 "fermi_speed",
-                "harmonic_effective_mass",
+                "avg_inv_effective_mass",
             ]
             if property_name not in current_emplemented_properties:
                 tmp = f"You must choose one of the following properies : {current_emplemented_properties}"
                 raise ValueError(tmp)
             else:
                 if property_name == "fermi_velocity":
-                    self.ebs.bands_gradient
+                    self.ebs.fermi_velocity
                 elif property_name == "fermi_speed":
                     self.ebs.fermi_speed
-                elif property_name == "harmonic_effective_mass":
-                    self.ebs.bands_hessian
+                elif property_name == "avg_inv_effective_mass":
+                    self.ebs.avg_inv_effective_mass
 
     def _get_spin_pol_indices(self, fermi_surfaces):
         """
@@ -367,14 +367,16 @@ class FermiDataHandler:
                 )
                 if self.config.scalar_bar_config.get("title") is None:
                     self.config.scalar_bar_config["title"] = "Fermi Velocity"
-            elif self.property_name == "harmonic_effective_mass":
-                fermi_surface3D.project_harmonic_effective_mass(
-                    harmonic_effective_mass=ebs.harmonic_average_effective_mass[
+            elif self.property_name == "avg_inv_effective_mass":
+                fermi_surface3D.project_avg_inv_effective_mass(
+                    avg_inv_effective_mass=ebs.avg_inv_effective_mass[
                         ..., band_to_surface_indices, ispin
                     ]
                 )
                 if self.config.scalar_bar_config.get("title") is None:
-                    self.config.scalar_bar_config["title"] = "Harmonic Effective Mass"
+                    self.config.scalar_bar_config["title"] = (
+                        "Avg Inverse Effective Mass"
+                    )
             if self.config.mode == "parametric":
                 fermi_surface3D.project_atomic_projections(
                     self.spd[:, band_to_surface_indices, ispin]
@@ -925,9 +927,9 @@ class FermiVisualizer:
                 scalars = "Fermi Velocity Vector_magnitude"
                 vector_name = "Fermi Velocity Vector"
                 text = "Fermi Speed"
-            elif self.config.property_name == "harmonic_effective_mass":
-                scalars = "Harmonic Effective Mass"
-                text = "Harmonic Effective Mass"
+            elif self.config.property_name == "avg_inv_effective_mass":
+                scalars = "Avg Inverse Effective Mass"
+                text = "Avg Inverse Effective Mass"
                 vector_name = None
             else:
                 print("Please select a property")

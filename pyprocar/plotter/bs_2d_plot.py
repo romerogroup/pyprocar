@@ -130,6 +130,9 @@ class BandStructure2DataHandler:
             ebs.projected = ebs.ebs_sum(
                 spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
             )
+            # z_projection = ebs.projected[:, iband, [3]],
+
+            # z_projecti
             for iband in bands_to_keep:
                 spd_spin.append(
                     [
@@ -141,6 +144,8 @@ class BandStructure2DataHandler:
             spd_spin = np.array(spd_spin)[:, :, :, 0]
             spd_spin = np.swapaxes(spd_spin, 0, 1)
             spd_spin = np.swapaxes(spd_spin, 0, 2)
+
+            spd_spin[:, :, 2] = 0
         else:
             for iband in bands_to_keep:
                 spd_spin.append(None)
@@ -161,7 +166,7 @@ class BandStructure2DataHandler:
             current_emplemented_properties = [
                 "band_velocity",
                 "band_speed",
-                "harmonic_effective_mass",
+                "avg_inv_effective_mass",
             ]
             if property_name not in current_emplemented_properties:
                 tmp = f"You must choose one of the following properies : {current_emplemented_properties}"
@@ -194,14 +199,14 @@ class BandStructure2DataHandler:
                 )
                 if self.config.scalar_bar_config.get("title") is None:
                     self.config.scalar_bar_config["title"] = "Band Velocity"
-            elif self.property_name == "harmonic_effective_mass":
-                band_structure_2D.project_harmonic_effective_mass(
-                    harmonic_effective_mass=ebs.harmonic_average_effective_mass[
-                        ..., ispin
-                    ]
+            elif self.property_name == "avg_inv_effective_mass":
+                band_structure_2D.project_avg_inv_effective_mass(
+                    avg_inv_effective_mass=ebs.avg_inv_effective_mass[..., ispin]
                 )
                 if self.config.scalar_bar_config.get("title") is None:
-                    self.config.scalar_bar_config["title"] = "Harmonic Effective Mass"
+                    self.config.scalar_bar_config["title"] = (
+                        "Avg Inverse Effective Mass"
+                    )
             if self.mode == "parametric":
                 band_structure_2D.project_atomic_projections(self.spd[..., ispin])
                 if self.config.scalar_bar_config.get("title") is None:
@@ -351,6 +356,7 @@ class BandStructure2DVisualizer:
                 arrows,
                 scalars=scalars_name,
                 cmap=self.config.texture_cmap,
+                clim=self.config.texture_clim,
                 show_scalar_bar=False,
                 opacity=self.config.texture_opacity,
             )
@@ -684,9 +690,9 @@ class BandStructure2DVisualizer:
                 scalars = "Band Velocity Vector_magnitude"
                 vector_name = "Band Velocity Vector"
                 text = "Band Speed"
-            elif self.data_handler.property_name == "harmonic_effective_mass":
-                scalars = "Harmonic Effective Mass"
-                text = "Harmonic Effective Mass"
+            elif self.data_handler.property_name == "avg_inv_effective_mass":
+                scalars = "Avg Inverse Effective Mass"
+                text = "Avg Inverse Effective Mass"
                 vector_name = None
             else:
                 print("Please select a property")
