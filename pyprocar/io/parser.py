@@ -6,6 +6,7 @@ import numpy as np
 from ..core import DensityOfStates, ElectronicBandStructure, Structure
 from ..utils import UtilsProcar
 from . import abinit, bxsf, dftbplus, elk, frmsf, lobster, qe, siesta, vasp
+from pyprocar.utils.log_utils import set_verbose_level
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +23,12 @@ class Parser:
     dos: DensityOfStates = None
     structure: Structure = None
 
-    def __init__(self, code: str, dir: str):
+    def __init__(self, code: str, dir: str, verbose=2):
         self.code = code
         self.dir = dir
 
         self.parse()
+        set_verbose_level(verbose)
 
     def parse(self):
         """Handles which DFT parser to use"""

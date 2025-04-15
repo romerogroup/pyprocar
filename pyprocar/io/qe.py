@@ -7,12 +7,15 @@ import re
 import copy
 import os 
 import math
+import logging
 
 import xml.etree.ElementTree as ET
 import numpy as np
 
 from pyprocar.core import DensityOfStates, Structure, ElectronicBandStructure, KPath
 from pyprocar.utils.units import HARTREE_TO_EV, AU_TO_ANG
+
+logger = logging.getLogger(__name__)
 
 class QEParser():
     """The class is used to parse Quantum Expresso files. 
@@ -529,7 +532,7 @@ class QEParser():
         scf_filename=os.path.basename(scf_in_file_path).split('.')[0]
         self.scf_out = os.path.join(dirname,f'{scf_filename}.out')
 
-        outdir = re.findall("outdir\s*=\s*'\S*?([A-Za-z]*)'",  scf_in)[0]
+        outdir = re.findall("outdir\s*=\s*'\S*?(.*)'",  scf_in)[0]
         prefix = re.findall("prefix\s*=\s*'(.*)'", scf_in)[0]
         xml_filename =  prefix + ".xml"
         
@@ -538,6 +541,7 @@ class QEParser():
             atomic_proj_xml = os.path.join(dirname,"atomic_proj.xml")
 
         output_xml=os.path.join(dirname,outdir,xml_filename)
+        logger.info(f"output_xml: {output_xml}")
         if not os.path.exists(output_xml):
             output_xml = os.path.join(dirname,xml_filename)
 
