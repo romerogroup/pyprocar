@@ -158,6 +158,7 @@ sphinx/source/examples/
 my_tests/
 /logs/
 data/
+/data
 reports/
 notebooks/
 venv_docs/
