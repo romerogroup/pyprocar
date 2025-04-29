@@ -63,9 +63,9 @@ jobs:
       if: success() 
       run: |
         PACKAGE_NAME=$(basename $(dirname $(find . -name '_version.py' | head -n 1)))
-        git add $PACKAGE_NAME/_version.py
+
         git add CHANGELOG.md
-        git commit -m "Update _version.py and CHANGELOG.md due to new release"
+        git commit -m "Update CHANGELOG.md due to new release"
 
     - name: Push changes
       if: success()
