@@ -71,7 +71,7 @@ class Outcar(collections.abc.Mapping):
             n_kx
         """
         try:
-            raw_text = re.findall("generate\s*k-points\s*for:\s*(.*)", self.file_str)[
+            raw_text = re.findall(r"generate\s*k-points\s*for:\s*(.*)", self.file_str)[
                 -1
             ]
             self.n_kx = int(raw_text.split()[0])
@@ -131,56 +131,100 @@ class Outcar(collections.abc.Mapping):
             The rotation matrices
         """
 
-        txt = self.file_str.split("\n")
+        sym_ops = self.get_symmetry_operations()
 
-        has_new_rotation_format = False
-        i_rotation_lines = []
-        begin_table = None
-        end_table = None
-        for i, line in enumerate(txt):
-            if "isymop" in line:
-                has_new_rotation_format = True
-                i_rotation_lines.append(i)
-            if "irot" in line:
-                begin_table = i + 1
-            if "Subroutine" in line:
-                end_table = i - 1
-        if begin_table is None or end_table is None:
-            return None
         rotations = []
-        if has_new_rotation_format:
-            for i_rotation_line in i_rotation_lines:
-                raw_rotation_lines = txt[i_rotation_line : i_rotation_line + 3]
-                rotation = []
-                for i, raw_rotation_line in enumerate(raw_rotation_lines):
-                    if i == 0:
-                        r_ij = [
-                            float(value)
-                            for value in raw_rotation_line.split(":")[-1].split()
-                        ]
+        for sym_op in sym_ops:
+            rotations.append(sym_op["rotation"])
 
+        return np.array(rotations)
+
+    def get_symmetry_operations(self):
+
+        n_spg_operations = int(
+            re.search(r"Found\s+(\d+)\s+space group operations", self.file_str).group(1)
+        )
+
+        logger.debug(f"n_spg_operations: {n_spg_operations}")
+
+        vasp54_block_match = re.search(
+            r"Space group operators:\s*\n"  # header line
+            r"([ \t]*irot[\s\S]+?)"  # from the column headers …
+            r"(?=\n\S|\Z)",  # … up to the next blank/non-indented line
+            self.file_str,
+            flags=re.IGNORECASE,
+        )
+
+        vasp60_block_pattern = re.compile(
+            r"""
+            irot\s*:\s*(?P<irot>\d+)          # 1) operator index
+            .*?                               # skip down to isymop
+            isymop:\s*
+            (?P<r1>-?\d+\s+-?\d+\s+-?\d+)\s*  # 2) first row of 3 ints
+            (?P<r2>-?\d+\s+-?\d+\s+-?\d+)\s*  # 3) second row
+            (?P<r3>-?\d+\s+-?\d+\s+-?\d+)     # 4) third row
+            .*?                               # skip to gtrans
+            gtrans:\s*
+            (?P<g1>-?\d+\.\d+)\s+
+            (?P<g2>-?\d+\.\d+)\s+
+            (?P<g3>-?\d+\.\d+)
+            .*?                               # skip to ptrans
+            ptrans:\s*
+            (?P<p1>-?\d+\.\d+)\s+
+            (?P<p2>-?\d+\.\d+)\s+
+            (?P<p3>-?\d+\.\d+)
+            .*?                               # skip to rotmap
+            rotmap:\s*\n                      # the “rotmap:” line might stand alone
+            (?P<rotmap>                       # now capture one or more “( a-> b )” entries
+            (?:[ \t]*\(\s*\d+\s*->\s*\d+\s*\)\s*)+
+            )
+            (?=\n\n)                       # stop at double new line
+        """,
+            re.VERBOSE | re.DOTALL,
+        )
+
+        vasp60_block_matches = vasp60_block_pattern.findall(self.file_str)
+
+        if vasp54_block_match:
+            logger.info("Detected Space Group Operators in a format from VASP 5.4")
+            spg_operators = []
+            block = vasp54_block_match.group(1).rstrip()
+            logger.debug(f"space group operators block: \n{block}")
+            headers = None
+            for i, line in enumerate(block.splitlines()):
+                values = line.split()
+                if i == 0:
+                    headers = values
+                    continue
+
+                spg_operator = {}
+                for ispg, value in enumerate(values):
+
+                    column_name = headers[ispg]
+                    if column_name == "irot":
+                        value = int(value)
                     else:
-                        r_ij = [float(value) for value in raw_rotation_line.split()]
+                        value = float(value)
+                    spg_operator[column_name] = value
 
-                    rotation.append(r_ij)
-                rotation = np.array(rotation)
-                rotations.append(rotation.T)
-        else:
-            operators = np.zeros((end_table - begin_table, 9))
-            for i, line in enumerate(txt[begin_table:end_table]):
-                str_list = line.split()
-                num_list = [float(s) for s in str_list]
-                operator = np.array(num_list)
-                operators[i, :] = operator
+                spg_operators.append(spg_operator)
 
-            for operator in operators:
-                det_A = operator[1]
+            sym_ops = []
+            for operator in spg_operators:
+                sym_op = {}
+                irot = operator["irot"]
+                det_A = operator["det(A)"]
                 # convert alpha to radians
-                alpha = np.pi * operator[2] / 180.0
+                alpha = np.pi * operator["alpha"] / 180.0
                 # get rotation axis
-                x = operator[3]
-                y = operator[4]
-                z = operator[5]
+                x = operator["n_x"]
+                y = operator["n_y"]
+                z = operator["n_z"]
+                tau_x = operator["tau_x"]
+                tau_y = operator["tau_y"]
+                tau_z = operator["tau_z"]
+
+                gtrans = np.array([tau_x, tau_y, tau_z])
 
                 R = (
                     np.array(
@@ -205,68 +249,74 @@ class Outcar(collections.abc.Mapping):
                     * det_A
                 )
 
-                # R = self.reciprocal_lattice.dot(R).dot(np.linalg.inv(self.reciprocal_lattice))
                 R = (
                     np.linalg.inv(self.reciprocal_lattice.T)
                     .dot(R)
                     .dot(self.reciprocal_lattice.T)
                 )
-                R = np.round_(R, decimals=3)
-                rotations.append(R)
-        return np.array(rotations)
+                R = np.round(R, decimals=3)
 
-    def get_symmetry_operations(self):
+                sym_op["irot"] = irot
+                sym_op["rotation"] = R
+                sym_op["gtrans"] = gtrans
+                sym_op["ptrans"] = None
+                sym_op["rotmap"] = None
 
-        txt = self.file_str.split("\n")
-        has_new_rotation_format = False
-        i_rotation_lines = []
-        for i, line in enumerate(txt):
-            if "isymop" in line:
-                has_new_rotation_format = True
-                i_rotation_lines.append(i)
-            if "irot" in line:
-                begin_table = i + 1
-            if "Subroutine" in line:
-                end_table = i - 1
+                sym_ops.append(sym_op)
 
-        n_sym_ops = len(i_rotation_lines)
-        rotations_ops = np.zeros(shape=(n_sym_ops, 3, 3))
-        gtrans_ops = np.zeros(shape=(n_sym_ops, 3))
-        ptrans_ops = np.zeros(shape=(n_sym_ops, 3))
-        symmetry_operations = []
-        for i_sym_op, i_rotation_line in enumerate(i_rotation_lines):
-            i_gtrans_line = i_rotation_line + 4
-            i_ptrans_line = i_rotation_line + 6
+            return sym_ops
 
-            # Gets the symmetry translation
-            raw_gtrans_line = txt[i_gtrans_line].split(":")[-1].split()
-            raw_ptrans_line = txt[i_ptrans_line].split(":")[-1].split()
-            gtrans = np.array([float(value) for value in raw_gtrans_line])
-            ptrans = np.array([float(value) for value in raw_ptrans_line])
+        elif vasp60_block_matches:
+            logger.info("Detected Space Group Operators in a format from VASP 6.*")
+            logger.debug(f"vasp60_block_matches: \n{vasp60_block_matches}")
+            sym_ops = []
+            for vasp60_block_match in vasp60_block_matches:
+                sym_op = {}
+                irot = int(vasp60_block_match[0])
+                r1 = np.array([int(val) for val in vasp60_block_match[1].split()])
+                r2 = np.array([int(val) for val in vasp60_block_match[2].split()])
+                r3 = np.array([int(val) for val in vasp60_block_match[3].split()])
+                g1 = float(vasp60_block_match[4])
+                g2 = float(vasp60_block_match[5])
+                g3 = float(vasp60_block_match[6])
+                gtrans = np.array([g1, g2, g3])
+                p1 = float(vasp60_block_match[7])
+                p2 = float(vasp60_block_match[8])
+                p3 = float(vasp60_block_match[9])
+                ptrans = np.array([p1, p2, p3])
+                rotmap = vasp60_block_match[10].strip()
 
-            # Gets the symmetry rotations
-            rotation = []
-            raw_rotation_lines = txt[i_rotation_line : i_rotation_line + 3]
-            for i, raw_rotation_line in enumerate(raw_rotation_lines):
-                if i == 0:
-                    r_ij = [
-                        float(value)
-                        for value in raw_rotation_line.split(":")[-1].split()
-                    ]
-                else:
-                    r_ij = [float(value) for value in raw_rotation_line.split()]
+                rotation = np.array([r1, r2, r3])
+                rotation = np.array(rotation)
 
-                rotation.append(r_ij)
-            rotation = np.array(rotation)
+                sym_op["irot"] = irot
+                sym_op["rotation"] = rotation.T
+                sym_op["gtrans"] = gtrans
+                sym_op["ptrans"] = ptrans
+                sym_op["rotmap"] = rotmap
 
-            rotations_ops[i_sym_op, :, :] = rotation.T
-            gtrans_ops[i_sym_op, :] = gtrans
-            ptrans_ops[i_sym_op, :] = ptrans
+                sym_ops.append(sym_op)
 
-            sym_op = (rotation.T, gtrans, ptrans)
-            symmetry_operations.append(sym_op)
+            return sym_ops
 
-        return symmetry_operations
+        else:
+            logger.info("No space group operators block found")
+            return None
+
+    def to_dict(self):
+        tmp_dict = {}
+        symops = self.get_symmetry_operations()
+        for symop in symops:
+            for key in symop.keys():
+                if isinstance(symop[key], np.ndarray):
+                    symop[key] = symop[key].tolist()
+        tmp_dict["symops"] = symops
+        tmp_dict["efermi"] = self.efermi
+        if self.reciprocal_lattice is not None:
+            tmp_dict["reciprocal_lattice"] = self.reciprocal_lattice.tolist()
+        if self.rotations is not None:
+            tmp_dict["rotations"] = self.rotations.tolist()
+        return tmp_dict
 
     def __contains__(self, x):
         return x in self.variables
@@ -341,7 +391,7 @@ class Poscar(collections.abc.Mapping):
                     potcar = rf.read()
 
                 species = re.findall(
-                    "\s*PAW[PBE_\s]*([A-Z][a-z]*)[_a-z]*[0-9]*[a-zA-Z]*[0-9]*.*\s[0-9.]*",
+                    r"\s*PAW[PBE_\s]*([A-Z][a-z]*)[_a-z]*[0-9]*[a-zA-Z]*[0-9]*.*\s[0-9.]*",
                     potcar,
                 )[::2]
 
@@ -453,7 +503,7 @@ class Kpoints(collections.abc.Mapping):
 
                 temp = np.array(
                     re.findall(
-                        "([0-9.-]+)\s*([0-9.-]+)\s*([0-9.-]+)(.*)", self.file_str
+                        r"([0-9.-]+)\s*([0-9.-]+)\s*([0-9.-]+)(.*)", self.file_str
                     )
                 )
                 temp_special_kp = temp[:, :3].astype(float)
