@@ -155,6 +155,9 @@ sphinx/source/examples/
 # PyTests
 .pytest_cache/
 
+
+pyprocar/_version.py
+
 my_tests/
 /logs/
 data/
