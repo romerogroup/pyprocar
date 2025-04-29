@@ -1,6 +1,38 @@
 
 ___
 
+# v6.4.2 (04-29-2025)
+
+##### Bugs
+- None identified
+
+##### New Features
+- Added unit tests for VASP OUTCAR file parsing
+- Added texture_clim parameter to FermiSurface3DConfig and updated FermiVisualizer for texture scaling
+- Added properties to BrillouinZone2D for cell centers and face arrays
+- Added FermiSurface class for 3D visualization of Fermi surfaces
+- Added interpolation functions for 3D meshes using FFT
+- Added weighted options to UnfoldingConfig and updated logging in scriptUnfold.py
+
+##### Documentation
+- Deleted updating_pyprocar.md
+- Updated _version.py and CHANGELOG.md due to new release
+
+##### Maintenance
+- Updated workflow for releases
+- Removed generated version file from repository
+- Updated .gitignore to exclude pyprocar version file
+- Updated .gitignore to include linked data directory
+- Refactored various classes for improved readability, organization, and functionality
+- Enhanced EBSPlot class with improved masking and logging
+- Merged branch 'main' of github.com:romerogroup/pyprocar into main
+- Updated .gitignore to include pyrightconfig.json and .cursor
+- Removed logging size of color and width mask
+
+___
+
+___
+
 # v6.4.1 (03-16-2025)
 
 ##### Bugs
