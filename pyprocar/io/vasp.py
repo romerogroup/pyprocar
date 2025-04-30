@@ -301,7 +301,7 @@ class Outcar(collections.abc.Mapping):
 
         else:
             logger.info("No space group operators block found")
-            return None
+            return []
 
     def to_dict(self):
         tmp_dict = {}
