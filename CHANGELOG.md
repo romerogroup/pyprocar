@@ -1,6 +1,24 @@
 
 ___
 
+# v6.4.3 (04-30-2025)
+
+##### Bugs
+- Fixed issue in VASP where it returns an empty list for missing symmetry group operators
+
+##### New features
+- None identified
+
+##### Documentation updates
+- Updated CHANGELOG.md due to new release
+
+##### Maintenance
+- Merged branch 'main' of github.com:romerogroup/pyprocar into main
+
+___
+
+___
+
 # v6.4.2 (04-29-2025)
 
 ##### Bugs
