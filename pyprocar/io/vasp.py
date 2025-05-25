@@ -133,6 +133,9 @@ class Outcar(collections.abc.Mapping):
 
         sym_ops = self.get_symmetry_operations()
 
+        if sym_ops is None:
+            return None
+
         rotations = []
         for sym_op in sym_ops:
             rotations.append(sym_op["rotation"])
@@ -140,10 +143,14 @@ class Outcar(collections.abc.Mapping):
         return np.array(rotations)
 
     def get_symmetry_operations(self):
-
-        n_spg_operations = int(
-            re.search(r"Found\s+(\d+)\s+space group operations", self.file_str).group(1)
+        raw_spg_ops = re.search(
+            r"Found\s+(\d+)\s+space group operations", self.file_str
         )
+
+        if raw_spg_ops is None:
+            return None
+
+        n_spg_operations = int(raw_spg_ops.group(1))
 
         logger.debug(f"n_spg_operations: {n_spg_operations}")
 
@@ -492,7 +499,7 @@ class Kpoints(collections.abc.Mapping):
                 self.kgrid = [int(x) for x in kgrid.split()]
                 shift = rf.readline()
                 shift = shift[: shift.find("!")]
-                self.kshift = [int(x) for x in shift.split()]
+                self.kshift = [int(float(x)) for x in shift.split()]
 
             elif self.mode == "line":
                 if rf.readline()[0].lower() == "c":
