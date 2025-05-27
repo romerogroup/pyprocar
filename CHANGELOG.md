@@ -1,6 +1,24 @@
 
 ___
 
+# v6.4.5 (05-27-2025)
+
+##### Bugs
+- Handled case of no rotations provided in ibz2fbz method
+
+##### New features
+- None identified
+
+##### Documentation updates
+- Updated CHANGELOG.md due to new release
+
+##### Maintenance
+- Merged branch 'main' of github.com:romerogroup/pyprocar into main
+
+___
+
+___
+
 # v6.4.4 (05-25-2025)
 
 ##### Bugs
