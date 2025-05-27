@@ -1125,6 +1125,9 @@ class ElectronicBandStructure:
             The number of decimals to round the kpoints
             to when checking for uniqueness
         """
+        if len(rotations) == 0:
+            logger.warning("No rotations provided, skipping ibz2fbz")
+            return None
         if not self.is_mesh:
             raise ValueError("This function only works for meshes")
 
