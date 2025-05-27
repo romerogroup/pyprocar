@@ -1,6 +1,24 @@
 
 ___
 
+# v6.4.4 (05-25-2025)
+
+##### Bugs
+- Handled missing symmetry operations gracefully in the VASP module
+
+##### New Features
+- None identified
+
+##### Documentation updates
+- Updated CHANGELOG.md due to new release
+
+##### Maintenance
+- None identified
+
+___
+
+___
+
 # v6.4.3 (04-30-2025)
 
 ##### Bugs
