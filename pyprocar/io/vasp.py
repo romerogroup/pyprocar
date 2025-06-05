@@ -337,6 +337,66 @@ class Outcar(collections.abc.Mapping):
     def __len__(self):
         return self.variables.__len__()
 
+    def __repr__(self):
+        # Try to grab the Fermi energy; if not found, fall back to “unknown”
+        try:
+            ef = f"{self.efermi:.3f} eV"
+        except Exception:
+            ef = "unknown"
+
+        # Grid dimensions (n_kx,n_ky,n_kz)
+        nkx = self.n_kx or "?"
+        nky = self.n_ky or "?"
+        nkz = self.n_kz or "?"
+
+        # How many symmetry operations did we actually parse?
+        symops = self.get_symmetry_operations()
+        n_sym = len(symops) if symops is not None else 0
+
+        return (
+            f"Outcar(filename={self.filename!r}, "
+            f"nk=({nkx},{nky},{nkz}), "
+            f"E_f={ef}, "
+            f"symops={n_sym})"
+        )
+
+    def __str__(self):
+        lines = []
+        lines.append(f"OUTCAR summary for: {self.filename}")
+        lines.append("-" * (len(lines[-1])))
+
+        # 1) k-point grid (if known)
+        if self.n_kx is not None:
+            lines.append(f"  • k‐point grid = ({self.n_kx}, {self.n_ky}, {self.n_kz})")
+        else:
+            lines.append("  • k‐point grid = unknown")
+
+        # 2) Fermi energy
+        try:
+            lines.append(f"  • E Fermi   = {self.efermi:.3f} eV")
+        except Exception:
+            lines.append("  • E Fermi   = not found")
+
+        # 3) Reciprocal‐lattice vectors (last set, if present)
+        if hasattr(self, "reciprocal_lattice") and self.reciprocal_lattice is not None:
+            recip = self.reciprocal_lattice
+            # print as 3×3 matrix
+            lines.append("  • Reciprocal lattice (Å⁻¹):")
+            for row in recip:
+                lines.append("      " + "  ".join(f"{x: .4f}" for x in row))
+        else:
+            lines.append("  • Reciprocal lattice = not found")
+
+        # 4) Number of symmetry operations
+        symops = self.get_symmetry_operations()
+        if symops is None:
+            lines.append("  • Symmetry ops   = none parsed")
+        else:
+            n_sym = len(symops)
+            lines.append(f"  • Symmetry ops   = {n_sym} operation{'s' if n_sym != 1 else ''}")
+
+        return "\n".join(lines)
+
 
 class Poscar(collections.abc.Mapping):
     """
@@ -694,6 +754,7 @@ class Procar(collections.abc.Mapping):
         self._read()
         if self.has_phase:
             self.carray = self.spd_phase[:, :, :, :-1, 1:-1]
+            
 
         self.ebs = ElectronicBandStructure(
             kpoints=self.kpoints,

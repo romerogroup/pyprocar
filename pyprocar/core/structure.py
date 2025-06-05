@@ -79,7 +79,7 @@ class Structure:
         self.rotations = rotations
 
         return None
-
+    
     @property
     def volume(self):
         """
@@ -343,7 +343,7 @@ class Structure:
         """
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
         wyckoffs_temp = np.array(
-            spglib.get_symmetry_dataset(self._spglib_cell, symprec).wyckoffs
+            spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
         )
         group = np.zeros(shape=(self.natoms), dtype=int)
         counter = 0
@@ -531,3 +531,50 @@ class Structure:
             The transformed structure
         """
         return self.transform(matrix)
+
+    def __repr__(self):
+        if self.atoms is None or self.lattice is None:
+            return "Structure(incomplete)"
+
+        unique, counts = np.unique(self.atoms, return_counts=True)
+        counts_str = " ".join(f"{u}:{c}" for u, c in zip(unique, counts))
+
+        return (
+            f"Structure({counts_str}; "
+            f"a={self.a:.3f}, b={self.b:.3f}, c={self.c:.3f}; "
+            f"α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f})"
+        )
+
+    
+    def __str__(self):
+        if self.atoms is None or self.lattice is None or self.fractional_coordinates is None:
+            return "Incomplete Structure"
+
+        # 1) Species and counts
+        unique, counts = np.unique(self.atoms, return_counts=True)
+        counts_line = "Species: " + " ".join(f"{u}:{c}" for u, c in zip(unique, counts))
+
+        # 2) Lattice matrix
+        lattice_lines = ["Lattice:"]
+        for row in self.lattice:
+            lattice_lines.append("  " + "  ".join(f"{x:.3f}" for x in row))
+
+        # 3) Coordinate table (fractional)
+        coord_lines = ["Coordinates (fractional):"] 
+        for i, (atom, coord) in enumerate(zip(self.atoms, self.fractional_coordinates)):
+            coord_lines.append(
+                f"  {i:2d}  {atom}  " + "  ".join(f"{x:.3f}" for x in coord)
+            )
+
+        # 4) Lattice parameters
+        abc_line = f"a = {self.a:.3f}, b = {self.b:.3f}, c = {self.c:.3f}"
+        angles_line = (
+            f"α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f})"
+        )
+
+        return "\n".join(
+            [  counts_line]
+            + [abc_line, angles_line]
+            + lattice_lines
+            + coord_lines
+        )

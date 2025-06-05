@@ -326,11 +326,11 @@ def bandsplot(
         projection_labels = []
         projection_label = ""
         atoms_labels = ""
-        if atoms:
+        if atoms is not None:
             atoms_labels = ",".join(str(x) for x in atoms)
             projection_label += f"atoms-{atoms_labels}"
         orbital_labels = ""
-        if orbitals:
+        if orbitals is not None:
             orbital_labels = ",".join(str(x) for x in orbitals)
             if len(projection_label) != 0:
                 projection_label += "_"

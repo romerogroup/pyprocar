@@ -79,7 +79,7 @@ class ElectronicBandStructure:
 
         self._kpoints = kpoints
         self._kpoints_cartesian = self.reduced_to_cartesian(kpoints, reciprocal_lattice)
-        if shift_to_efermi:
+        if shift_to_efermi and efermi is not None:
             self._bands = bands - efermi
         else:
             self._bands = bands
@@ -167,39 +167,138 @@ class ElectronicBandStructure:
             logger.info(f"Weights: {self.weights}")
         logger.info("Initialized the ElectronicBandStructure object")
 
+    # def __str__(self):
+    #     ret = "\n Electronic Band Structure     \n"
+    #     ret += "============================\n"
+    #     ret += "Total number of kpoints   = {}\n".format(self.nkpoints)
+    #     ret += "Total number of bands    = {}\n".format(self.nbands)
+    #     ret += "Total number of atoms    = {}\n".format(self.natoms)
+    #     ret += "Total number of orbitals = {}\n".format(self.norbitals)
+    #     if self.is_mesh and self.n_kx is not None:
+    #         ret += f"nkx,nky,nkz = ({self.n_kx},{self.n_ky},{self.n_kz})\n"
+    #     ret += "\nArray Shapes: \n"
+    #     ret += "------------------------     \n"
+    #     ret += "Kpoints shape  = {}\n".format(self.kpoints.shape)
+    #     ret += "Bands shape    = {}\n".format(self.bands.shape)
+    #     if self.projected is not None:
+    #         ret += "Projected shape = {}\n".format(self.projected.shape)
+    #     if self.projected_phase is not None:
+    #         ret += "Projected phase shape = {}\n".format(self.projected_phase.shape)
+    #     if self.weights is not None:
+    #         ret += "Weights shape = {}\n".format(self.weights.shape)
+    #     if self.kpath is not None:
+    #         ret += "Kpath = {}\n".format(self.kpath)
+    #     if self.labels is not None:
+    #         ret += "Labels = {}\n".format(self.labels)
+    #     if self.reciprocal_lattice is not None:
+    #         ret += "Reciprocal Lattice = \n {}\n".format(self.reciprocal_lattice)
+
+    #     ret += "\nAdditional information: \n"
+    #     ret += "------------------------     \n"
+    #     ret += "Fermi Energy = {}\n".format(self.efermi)
+    #     ret += "Is Mesh = {}\n".format(self.is_mesh)
+    #     ret += "Has Phase = {}\n".format(self.has_phase)
+
+        # return ret
+        
     def __str__(self):
-        ret = "\n Electronic Band Structure     \n"
-        ret += "============================\n"
-        ret += "Total number of kpoints   = {}\n".format(self.nkpoints)
-        ret += "Total number of bands    = {}\n".format(self.nbands)
-        ret += "Total number of atoms    = {}\n".format(self.natoms)
-        ret += "Total number of orbitals = {}\n".format(self.norbitals)
-        if self.is_mesh and self.n_kx is not None:
-            ret += f"nkx,nky,nkz = ({self.n_kx},{self.n_ky},{self.n_kz})\n"
-        ret += "\nArray Shapes: \n"
-        ret += "------------------------     \n"
-        ret += "Kpoints shape  = {}\n".format(self.kpoints.shape)
-        ret += "Bands shape    = {}\n".format(self.bands.shape)
+        lines = ["ElectronicBandStructure Summary",
+                 "================================"]
+
+        # 1) Basic counts
+        lines.append(f"  • k‐points      = {self.nkpoints}")
+        lines.append(f"  • bands         = {self.nbands}")
         if self.projected is not None:
-            ret += "Projected shape = {}\n".format(self.projected.shape)
-        if self.projected_phase is not None:
-            ret += "Projected phase shape = {}\n".format(self.projected_phase.shape)
-        if self.weights is not None:
-            ret += "Weights shape = {}\n".format(self.weights.shape)
-        if self.kpath is not None:
-            ret += "Kpath = {}\n".format(self.kpath)
-        if self.labels is not None:
-            ret += "Labels = {}\n".format(self.labels)
+            lines.append(f"  • atoms         = {self.natoms}")
+            lines.append(f"  • orbitals      = {self.norbitals}")
+            lines.append(f"  • spins         = {self.nspins}")
+        # 2) Mesh vs. path
+        mode = "mesh grid" if self.is_mesh else "k‐path"
+        lines.append(f"  • sampling mode = {mode}")
+        if self.is_mesh and self.n_kx is not None:
+            lines.append(f"    –  nkx, nky, nkz = ({self.n_kx}, {self.n_ky}, {self.n_kz})")
+
+        # 3) Fermi energy
+        lines.append(f"  • E Fermi     = {self.efermi} eV")
+
+        # 4) Reciprocal lattice summary (if present): print its lengths
         if self.reciprocal_lattice is not None:
-            ret += "Reciprocal Lattice = \n {}\n".format(self.reciprocal_lattice)
+            # compute lengths of the three reciprocal vectors
+            recip = self.reciprocal_lattice
+            a_star = np.linalg.norm(recip[0])
+            b_star = np.linalg.norm(recip[1])
+            c_star = np.linalg.norm(recip[2])
+            lines.append(
+                "  • Reciprocal Lattice lengths:"
+                f" a*={a_star:.3f}, b*={b_star:.3f}, c*={c_star:.3f} (Å⁻¹)"
+            )
 
-        ret += "\nAdditional information: \n"
-        ret += "------------------------     \n"
-        ret += "Fermi Energy = {}\n".format(self.efermi)
-        ret += "Is Mesh = {}\n".format(self.is_mesh)
-        ret += "Has Phase = {}\n".format(self.has_phase)
+        # 5) k‐path labels / explicit path (if not a mesh)
+        if self.kpath is not None:
+            label_list = self.labels or []
+            labels_str = ", ".join(label_list) if label_list else "–"
+            lines.append(f"  • K‐path labels  = {labels_str}")
 
-        return ret
+        # 6) Array shapes
+        lines.append("\nArray shapes:")
+        lines.append("  • Kpoints        = " + str(self.kpoints.shape))
+        lines.append("  • Bands          = " + str(self.bands.shape))
+        if self.projected is not None:
+            lines.append("  • Projected      = " + str(self.projected.shape))
+        if self.projected_phase is not None:
+            lines.append("  • Proj. phase    = " + str(self.projected_phase.shape))
+        if self.weights is not None:
+            lines.append("  • Weights        = " + str(self.weights.shape))
+
+        # 7) Band extrema relative to Fermi
+        #    (only if bands array isn’t empty)
+        if self.bands.size:
+            all_energies = self.bands.flatten()
+            ev_max = np.max(all_energies)
+            ev_min = np.min(all_energies)
+            lines.append(
+                "\nBand extrema:"
+                f"  min = {ev_min:.3f} eV,  max = {ev_max:.3f} eV"
+            )
+
+        # 8) Phase info and mesh flag
+        lines.append(f"  • Has phase proj = {self.has_phase}")
+        return "\n".join(lines)
+
+
+    def __repr__(self):
+        # Basic counts
+        nk = self.nkpoints
+        nb = self.nbands
+        na = self.natoms if hasattr(self, "natoms") else None
+        no = self.norbitals if hasattr(self, "norbitals") else None
+        ns = self.nspins if hasattr(self, "nspins") else None
+
+        # Mesh vs path
+        mesh_flag = "mesh" if self.is_mesh else "kpath"
+
+        # Fermi energy
+        ef = f"{self.efermi:.3f}" if self.efermi is not None else "None"
+
+        # Reciprocal‐lattice shape (or None)
+        if self.reciprocal_lattice is None:
+            rl = "None"
+        else:
+            rl = f"{tuple(self.reciprocal_lattice.shape)}"
+
+        # Band‐structure path labels (if present)
+        lbl = self.labels if self.labels is not None else "None"
+
+        return (
+            f"ElectronicBandStructure("
+            f"{nk} kpts × {nb} bands, "
+            f"{na} atoms, {no} orbitals, {ns} spins; "
+            f"{mesh_flag}; "
+            f"E Fermi={ef} eV; "
+            f"reciprocal_lattice={rl}; "
+            f"labels={lbl})"
+        )
+
 
     @property
     def nkpoints(self):

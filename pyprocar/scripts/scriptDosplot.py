@@ -6,7 +6,7 @@ __date__ = "March 31, 2020"
 
 import logging
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,25 +25,25 @@ logger = logging.getLogger(__name__)
 
 def dosplot(
     code: str = "vasp",
-    dirname: str = None,
+    dirname: Optional[str] = None,
     mode: str = "plain",
     orientation: str = "horizontal",
-    spins: List[int] = None,
-    atoms: List[int] = None,
-    orbitals: List[int] = None,
+    spins: Optional[List[int]] = None,
+    atoms: Optional[List[int]] = None,
+    orbitals: Optional[List[int]] = None,
     items: dict = {},
-    normalize_dos_mode: str = None,
-    fermi: float = None,
+    normalize_dos_mode: Optional[str] = None,
+    fermi: Optional[float] = None,
     fermi_shift: float = 0,
-    elimit: List[float] = None,
-    dos_limit: List[float] = None,
-    savefig: str = None,
-    labels: List[str] = None,
+    elimit: Optional[List[float]] = None,
+    dos_limit: Optional[List[float]] = None,
+    savefig: Optional[str] = None,
+    labels: Optional[List[str]] = None,
     projection_mask=None,
     ax: plt.Axes = None,
     show: bool = True,
     print_plot_opts: bool = False,
-    export_data_file: str = None,
+    export_data_file: Optional[str] = None,
     export_append_mode: bool = True,
     use_cache: bool = True,
     verbose: int = 1,
@@ -323,12 +323,10 @@ def dosplot(
         parser = io.Parser(code=code, dir=dirname)
         dos = parser.dos
         structure = parser.structure
-
-        data_utils.save_pickle(dos, dos_pkl_filepath)
-        data_utils.save_pickle(structure, structure_pkl_filepath)
+    
     else:
         logger.info(f"Loading DOS and Structure from cached Pickle files in {dirname}")
-
+    if use_cache:
         dos = data_utils.load_pickle(dos_pkl_filepath)
         structure = data_utils.load_pickle(structure_pkl_filepath)
 

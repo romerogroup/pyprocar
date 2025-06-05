@@ -19,8 +19,6 @@ from scipy.integrate import trapezoid
 from sympy.physics.quantum.cg import CG
 
 
-# TODO When PEP 646 is introduced in numpy. need to update the python typing.
-
 class DensityOfStates:
     """A class that contains density of states calculated by the a density
         functional theory calculation.
@@ -335,6 +333,22 @@ class DensityOfStates:
                 integral=trapezoid(y, x=self.energies)
                 self.total[i] = self.total[i] / integral
         return None
+    
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"n_dos={self.n_dos}, "
+            f"n_spins={self.n_spins}, "
+            f"efermi={self.efermi!r})"
+        )
+
+    def __str__(self):
+        return (
+            f"DensityOfStates with {self.n_dos} points sampling in Energy, "
+            f"{self.n_spins} spin channel{'s' if self.n_spins != 1 else ''}, "
+            f"efermi={self.efermi}"
+        )
+
 def interpolate(x, y, factor=2):
     """
     Interplates the function y=f(x) by increasing the x points by the factor.
