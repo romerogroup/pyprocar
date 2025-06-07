@@ -235,19 +235,6 @@ def fermi2D(
     user_logger.info(f"Bands in the kz={k_z_plane} plane: {ebs.bands.shape}")
     user_logger.info(f"Projected in the kz={k_z_plane} plane: {ebs.projected.shape}")
 
-    for i_spin in spins:
-        indices = np.where(
-            np.logical_and(
-                ebs.bands[:, i_spin].min(axis=0) < energy,
-                ebs.bands[:, i_spin].max(axis=0) > energy,
-            )
-        )
-
-        if len(indices) != 0:
-            user_logger.info(
-                f"Band indices near iso-surface: spin-{i_spin} | bands-{indices[0]}"
-            )
-
     if spin_texture is False:
         # processing the data
         if orbitals is None and ebs.projected is not None:

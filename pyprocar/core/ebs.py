@@ -298,6 +298,24 @@ class ElectronicBandStructure:
             return False
 
     @property
+    def spin_channels(self):
+        """The number of spin channels
+
+        Returns
+        -------
+        int
+            The number of spin channels
+        """
+
+        # Spin channels only apply for colinear spin-polarized calculations
+        if not self.is_non_collinear and self.nspins == 2:
+            return [0, 1]
+
+        # Only 1 spin channel for non-spin-polarized and non-collinear calculations
+        else:
+            return [0]
+
+    @property
     def efermi(self):
         return self._efermi
 

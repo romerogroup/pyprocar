@@ -22,6 +22,22 @@ from skimage import measure
 from pyprocar.utils import ROOT, ConfigManager
 
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
+
+
+def validate_band_indices(band_indices):
+    """Validate the band indices"""
+    if band_indices is None:
+        return None
+    elif all(isinstance(x, list) for x in band_indices):
+        return band_indices
+    elif all(isinstance(x, int) for x in band_indices):
+        return [band_indices]
+    else:
+        raise ValueError(
+            "Invalid band indices. Band indices must be a list of lists of integers or a list of integers. This represents selecting the bands for each spin.\n"
+            "Example: \n [[0,1], [2,3]] means that the first band is selected for the first spin and the second band is selected for the second spin."
+        )
 
 
 class FermiSurface:
@@ -73,6 +89,8 @@ class FermiSurface:
         logger.info("spd.shape     : " + str(self.spd.shape))
         logger.debug("FermiSurface.init: ...Done")
 
+        self.band_indices = validate_band_indices(band_indices)
+
         config_manager = ConfigManager(
             os.path.join(ROOT, "pyprocar", "cfg", "fermi_surface_2d.yml")
         )
@@ -99,47 +117,34 @@ class FermiSurface:
         RuntimeError
             If no bands are found, raise an error.
         """
-
-        logger.debug("FindEnergy: ...")
         self.energy = energy
         logger.info("Energy   : " + str(energy))
 
-        self.band_indices
-
         # searching for bands crossing the desired energy
+        bands_to_plot = False
         self.useful_bands_by_spins = []
         for i_spin in range(self.bands.shape[2]):
             bands = self.bands[:, :, i_spin]
 
             indices = np.where(
                 np.logical_and(bands.min(axis=0) < energy, bands.max(axis=0) > energy)
+            )[0]
+            self.useful_bands_by_spins.append(indices)
+
+            if len(indices) != 0:
+                bands_to_plot = True
+                print(
+                    f"Band indices near iso-surface: (bands.shape={bands.shape}) spin-{i_spin} | bands-{indices}"
+                )
+        if not bands_to_plot:
+            user_logger.error(
+                f"Could not find any bands crossing the energy ({energy} eV) relative to the fermi energy.\n"
+                "Please check the energy and the bands:\n\n"
+                "1. Try shifting the energy to find crossings of the bands and the energy.\n"
+                "2. Check the density of states to see where the bands are in terms of energy.\n"
+                "3. Check the bands to see if they are crossing the energy."
             )
-            self.useful_bands_by_spins.append(indices[0])
-        logger.info("set of useful bands    : " + str(self.useful_bands_by_spins))
-
-        if len(self.useful_bands_by_spins) == 1:
-            bands = self.bands[:, self.useful_bands_by_spins[0], :]
-            logger.debug("new bands.shape : " + str(bands.shape))
-            if len(bands) == 0:
-                logger.error("No bands found in that range. Check your data. Returning")
-                raise RuntimeError("No bands to plot")
-        else:
-            bands_up = self.bands[:, self.useful_bands_by_spins[0], 0]
-            bands_down = self.bands[:, self.useful_bands_by_spins[1], 1]
-            logger.debug("new bands_up.shape : " + str(bands_up.shape))
-            logger.debug("new bands_down.shape : " + str(bands_down.shape))
-            if len(bands_up) == 0:
-                logger.error(
-                    "No bands found in that range for spin up. Check your data. Returning"
-                )
-                raise RuntimeError("No bands to plot")
-            if len(bands_down) == 0:
-                logger.error(
-                    "No bands found in that range for spin down. Check your data. Returning"
-                )
-                raise RuntimeError("No bands to plot")
-
-        logger.debug("FindEnergy: ...Done")
+            raise RuntimeError("No bands to plot")
         return None
 
     def plot(self, mode: str, interpolation=500):
@@ -216,8 +221,9 @@ class FermiSurface:
 
             # Interpolating band energies on to new grid
             bnew = []
+            logger.debug("Interpolating ...")
             for i_band, band in enumerate(bands):
-                logger.debug("Interpolating ...")
+
                 bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
             bnew = np.array(bnew)
 
@@ -359,7 +365,8 @@ class FermiSurface:
         bnew = []
         for band in bands:
             logger.debug("Interpolating ...")
-            bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
+            interp_bands = griddata((x, y), band, (xnew, ynew), method="cubic")
+            bnew.append(interp_bands)
 
         # Normalizing
         vmin = self.config["clim"]["value"][0]
@@ -383,6 +390,9 @@ class FermiSurface:
             )
             for z in bnew
         ]
+
+        if len(cont) == 0:
+            raise RuntimeError("Could not find any contours at this energy")
 
         x_limits = [0, 0]
         y_limits = [0, 0]
