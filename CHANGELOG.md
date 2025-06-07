@@ -1,6 +1,24 @@
 
 ___
 
+# v6.4.6 (06-07-2025)
+
+##### Bugs
+- None identified
+
+##### New Features
+- Added band indices validation in fermisurface
+
+##### Documentation updates
+- Updated CHANGELOG.md due to new release
+
+##### Maintenance
+- None identified
+
+___
+
+___
+
 # v6.4.5 (05-27-2025)
 
 ##### Bugs
