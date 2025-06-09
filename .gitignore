@@ -160,7 +160,9 @@ pyprocar/_version.py
 
 my_tests/
 /logs/
-data/
+/data/
+/tests/data/
+/tests/data.zip
 /data
 reports/
 notebooks/
