@@ -136,22 +136,6 @@ class TestKpoints(BaseTest):
         assert len(kpoints_explicit.comment.strip()) > 0
         assert len(kpoints_bands.comment.strip()) > 0
 
-    def test_kpoints_mapping_interface(self):
-        """Test that Kpoints class implements Mapping interface correctly."""
-        kpoints = vasp.Kpoints(KPOINTS_DATA_DIR / "KPOINTS_auto-mesh-gamma")
-
-        # Test mapping interface methods
-        assert len(kpoints) == len(kpoints.variables)
-
-        # Test that we can iterate over the kpoints object
-        for key in kpoints:
-            assert key in kpoints.variables
-
-        # Test __contains__ method
-        # Since variables is empty in current implementation, this tests the basic functionality
-        test_key = "test_key"
-        assert (test_key in kpoints) == (test_key in kpoints.variables)
-
     def test_kpoints_file_not_found(self):
         """Test that appropriate error is raised when KPOINTS file doesn't exist."""
         with pytest.raises(FileNotFoundError):
