@@ -91,7 +91,7 @@ class Parser:
             None
         """
 
-        parser = bxsf.BxsfParser(infile="in.frmsf")
+        parser = bxsf.BxsfParser(filepaths="in.frmsf")
 
         self.ebs = parser.ebs
         self.kpath = parser.kpath
@@ -115,7 +115,7 @@ class Parser:
         #     self.dos = None
 
         try:
-            parser = elk.ElkParser(path=self.dir)
+            parser = elk.ElkParser(dirpath=self.dir)
             self.dos = parser.dos
             self.structure = parser.structure
 
@@ -127,7 +127,7 @@ class Parser:
         if not self.dos:
 
             try:
-                parser = elk.ElkParser(path=self.dir)
+                parser = elk.ElkParser(dirpath=self.dir)
                 self.ebs = parser.ebs
                 self.kpath = parser.kpath
                 self.structure = parser.structure
@@ -146,7 +146,7 @@ class Parser:
         None
             None
         """
-        parser = frmsf.FrmsfParser(infile="in.frmsf")
+        parser = frmsf.FrmsfParser(filepath="in.frmsf")
 
         self.ebs = parser.ebs
         self.kpath = parser.kpath
@@ -165,7 +165,7 @@ class Parser:
         """
         code_type = self.code.split("_")[1]
         parser = lobster.LobsterParser(
-            dirname=self.dir, code=code_type, dos_interpolation_factor=None
+            dirpath=self.dir, code=code_type, dos_interpolation_factor=None
         )
 
         self.ebs = parser.ebs
@@ -209,7 +209,7 @@ class Parser:
         """
 
         parser = siesta.SiestaParser(
-            fdf_filename=str(self.dir / "SIESTA.fdf"),
+            fdf_filepath=self.dir / "SIESTA.fdf",
         )
 
         self.ebs = parser.ebs
