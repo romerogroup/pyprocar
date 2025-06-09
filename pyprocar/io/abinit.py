@@ -23,10 +23,10 @@ class AbinitOutput(collections.abc.Mapping):
     lattice vectors and structure from the Abinit output file.
     """
 
-    def __init__(self, abinit_output: Union[str, Path]):
+    def __init__(self, abinit_output_filepath: Union[str, Path]):
 
         # variables
-        self.abinit_output = Path(abinit_output)
+        self.abinit_output_filepath = Path(abinit_output_filepath)
         self.fermi = None
         self.reclat = None  # reciprocal lattice vectors
         self.nspin = None  # spin
@@ -51,7 +51,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readFermi(self):
         """Reads the Fermi energy from the Abinit output file."""
 
-        with open(self.abinit_output, "r") as rf:
+        with open(self.abinit_output_filepath, "r") as rf:
             data = rf.read()
             self.fermi = float(
                 re.findall(
@@ -72,7 +72,7 @@ class AbinitOutput(collections.abc.Mapping):
         from the Abinit output file. This is used to calculate
         the k-path in cartesian coordinates if required."""
 
-        with open(self.abinit_output, "r") as rf:
+        with open(self.abinit_output_filepath, "r") as rf:
             data = rf.read()
             lattice_block = re.findall(r"G\([1,2,3]\)=\s*([0-9.\s-]*)", data)
             lattice_block = lattice_block[3:]
@@ -86,7 +86,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readCoordinates(self):
         """Reads the coordinates as given by the xred keyword."""
 
-        with open(self.abinit_output, "r") as rf:
+        with open(self.abinit_output_filepath, "r") as rf:
             data = rf.read()
             coordinate_block = re.findall(r"xred\s*([+-.0-9E\s]*)", data)[-1].split()
 
@@ -106,7 +106,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readLattice(self):
         """Reads the lattice vectors from rprim keyword and scales with acell."""
 
-        with open(self.abinit_output, "r") as rf:
+        with open(self.abinit_output_filepath, "r") as rf:
             data = rf.read()
 
             # acell
@@ -131,7 +131,7 @@ class AbinitOutput(collections.abc.Mapping):
     def _readAtoms(self):
         """Reads atomic elements used and puts them in an array according to their composition."""
 
-        with open(self.abinit_output, "r") as rf:
+        with open(self.abinit_output_filepath, "r") as rf:
             data = rf.read()
 
             # Getting typat and znucl
@@ -170,24 +170,24 @@ class AbinitProcar(collections.abc.Mapping):
     def __init__(
         self,
         dirpath: Union[str, Path],
-        inFiles: Union[list, None] = None,
-        abinit_output: Union[str, Path] = None,
+        infilepaths: Union[list, None] = None,
+        abinit_output_filepath: Union[str, Path] = None,
     ):
         self.dirpath = Path(dirpath)
-        self.inFiles = inFiles
-        self.abinit_output = Path(abinit_output)
+        self.infilepaths = infilepaths
+        self.abinit_output_filepath = Path(abinit_output_filepath)
 
         # Preparing files for merging
         # reading in all PROCAR_* files and putting it into a list if not provided.
-        if inFiles is None:
-            inFiles = sorted(self.dirpath.glob("PROCAR_*"))
+        if infilepaths is None:
+            infilepaths = sorted(self.dirpath.glob("PROCAR_*"))
 
         procar_filepath = self.dirpath / "PROCAR"
-        if isinstance(inFiles, list):
+        if isinstance(infilepaths, list):
             self._mergeparallel(
-                inputfiles=inFiles,
-                outputfile=procar_filepath,
-                abinit_output=self.abinit_output,
+                inputfilepaths=infilepaths,
+                outputfilepath=procar_filepath,
+                abinit_output_filepath=self.abinit_output_filepath,
             )
         else:
             pass
@@ -195,24 +195,28 @@ class AbinitProcar(collections.abc.Mapping):
         # Use VASP Procar parser following PROCAR merge
         self.abinitprocarobject = Procar(filepath=procar_filepath)
 
-    def _mergeparallel(self, inputfiles=None, outputfile=None, abinit_output=None):
+    def _mergeparallel(
+        self, inputfilepaths=None, outputfilepath=None, abinit_output_filepath=None
+    ):
         """This merges Procar files seperated between k-point ranges.
         Happens with parallel Abinit runs.
         """
         print("Merging parallel files...")
-        filenames = sorted(inputfiles)
+        filepaths = sorted(inputfilepaths)
 
         # creating an instance of the AbinitParser class
-        if abinit_output:
-            abinitparserobject = AbinitOutput(abinit_output=abinit_output)
+        if abinit_output_filepath:
+            abinitparserobject = AbinitOutput(
+                abinit_output_filepath=abinit_output_filepath
+            )
             nspin = int(abinitparserobject.nspin)
         else:
             raise IOError("Abinit output file not found.")
 
         if nspin != 2:
-            with open(outputfile, "w") as outfile:
-                for fname in filenames:
-                    with open(fname) as infile:
+            with open(outputfilepath, "w") as outfile:
+                for filepath in filepaths:
+                    with open(filepath) as infile:
                         for line in infile:
                             outfile.write(line)
 
@@ -220,23 +224,23 @@ class AbinitProcar(collections.abc.Mapping):
             # for spin polarized calculations the spin down segments are saved in the
             # second half of the PROCAR's but in reverse k-point order. So we have to
             # fix the order and merge the second half of the PROCAR's.
-            spinup_list = filenames[: int(len(filenames) / 2)]
-            spindown_list = filenames[int(len(filenames) / 2) :]
+            spinup_filepaths = filepaths[: int(len(filepaths) / 2)]
+            spindown_filepaths = filepaths[int(len(filepaths) / 2) :]
 
             # reading the second line of the header to set as the separating line
             # in the colinear spin PROCAR.
-            fp = open(spinup_list[0], "r")
+            fp = open(spinup_filepaths[0], "r")
             header1 = fp.readline()
             header2 = fp.readline()
             fp.close()
 
             # second half of PROCAR files in reverse order.
-            spindown_list.reverse()
+            spindown_filepaths.reverse()
 
             # Writing new PROCAR with first spin up, header2 and then
             # spin down (reversed).
-            with open(outputfile, "w") as outfile:
-                for spinupfile in spinup_list:
+            with open(outputfilepath, "w") as outfile:
+                for spinupfile in spinup_filepaths:
                     with open(spinupfile) as infile:
                         for line in infile:
                             outfile.write(line)
@@ -248,24 +252,24 @@ class AbinitProcar(collections.abc.Mapping):
                         for line in infile:
                             outfile.write(line)
 
-    def _fixformat(self, inputfile=None, outputfile=None):
+    def _fixformat(self, inputfilepath=None, outputfilepath=None):
         """Fixes the formatting of Abinit's Procar
         when the tot projection is not summed and spin directions
         not seperated.
         """
         print("Fixing formatting errors...")
         # removing existing temporary fixed file
-        if os.path.exists(outputfile):
-            os.remove(outputfile)
+        if os.path.exists(outputfilepath):
+            os.remove(outputfilepath)
 
         ####### Fixing the parallel PROCARs from Abinit ##########
 
-        rf = open(inputfile, "r")
+        rf = open(inputfilepath, "r")
         data = rf.read()
         rf.close()
 
         # reading headers
-        rffl = open(inputfile, "r")
+        rffl = open(inputfilepath, "r")
         first_line = rffl.readline()
         rffl.close()
 
@@ -273,7 +277,7 @@ class AbinitProcar(collections.abc.Mapping):
         header = re.findall("#\sof\s.*", data)[0]
 
         # writing to PROCAR
-        fp = open(outputfile, "a")
+        fp = open(outputfilepath, "a")
         fp.write(first_line)
         fp.write(str(header) + "\n\n")
 
@@ -578,19 +582,19 @@ class AbinitParser:
     ):
 
         self.dirpath = Path(dirpath)
-        abinit_output = self.dirpath / "abinit.out"
-        abinit_kpoints = self.dirpath / "KPOINTS"
+        abinit_output_filepath = self.dirpath / "abinit.out"
+        abinit_kpoints_filepath = self.dirpath / "KPOINTS"
 
-        self.abinit_output = AbinitOutput(abinit_output=abinit_output)
+        self.abinit_output = AbinitOutput(abinit_output_filepath=abinit_output_filepath)
         try:
-            self.abinit_kpoints = AbinitKpoints(filepath=abinit_kpoints)
+            self.abinit_kpoints = AbinitKpoints(filepath=abinit_kpoints_filepath)
         except FileNotFoundError as e:
             logger.debug(f"No KPOINTS file found in {self.dirpath}")
             self.abinit_kpoints = {}
 
         self.abinit_procar = AbinitProcar(
             dirpath=self.dirpath,
-            abinit_output=abinit_output,
+            abinit_output_filepath=abinit_output_filepath,
         )
 
         try:
