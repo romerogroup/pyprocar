@@ -38,12 +38,12 @@ def parse_dos_block(dos_block: str) -> Tuple[np.array, np.array]:
 
 
 class ElkParser:
-    def __init__(self, path, kdirect=True):
+    def __init__(self, dirpath: Union[str, Path], kdirect: bool = True):
 
         # elk specific input parameters
-        self.dir = path
-        self.fin = os.path.join(self.dir, "elk.in")
-        self.file_names = []
+        self.dirpath = Path(dirpath)
+        self.elkin_filepath = self.dirpath / "elk.in"
+        self.filepaths = []
         self.elkin = None
         self.nbands = None
 
@@ -90,7 +90,7 @@ class ElkParser:
         # NOTE: before calling to `self._readOrbital` the case '4'
         # is marked as '1'
 
-        rf = open(self.fin, "r")
+        rf = open(self.elkin_filepath, "r")
         self.elkin = rf.read()
         rf.close()
 
@@ -106,7 +106,7 @@ class ElkParser:
 
         has_time_reversal = True
 
-        # Checks if file_names exists, if not it is not a bands calculation
+        # Checks if filepaths exists, if not it is not a bands calculation
         if self.is_bands_calculation:
             self.kpath = KPath(
                 knames=self.knames,
@@ -227,16 +227,14 @@ class ElkParser:
 
         if 20 in self.tasks:
             self.is_bands_calculation = True
-            self.file_names.append(os.path.join(self.dir, "BANDS.OUT"))
+            self.filepaths.append(self.dirpath / "BANDS.OUT")
         if 21 in self.tasks or 22 in self.tasks:
             self.is_bands_calculation = True
             ispc = 1
             for spc in self.composition:
                 for iatom in range(self.composition[spc]):
-                    self.file_names.append(
-                        os.path.join(
-                            self.dir, "BAND_S{:02d}_A{:04d}.OUT".format(ispc, iatom + 1)
-                        )
+                    self.filepaths.append(
+                        self.dirpath / f"BAND_S{ispc:02d}_A{iatom + 1:04d}.OUT"
                     )
                 ispc += 1
 
@@ -267,13 +265,13 @@ class ElkParser:
         """
         if np.any([x in self.tasks for x in [20, 21, 22]]):
 
-            rf = open(self.file_names[0], "r")
+            rf = open(self.filepaths[0], "r")
             lines = rf.readlines()
             rf.close()
 
             raw_nbands = int(len(lines) / (self.nkpoints + 1))
 
-            rf = open(os.path.join(self.dir, "BANDLINES.OUT"), "r")
+            rf = open(self.dirpath / "BANDLINES.OUT", "r")
             bandLines = rf.readlines()
             rf.close()
 
@@ -308,7 +306,7 @@ class ElkParser:
             if not self.kdirect:
                 self.kpoints = np.dot(self.kpoints, self.reclat)
 
-            rf = open(self.file_names[0], "r")
+            rf = open(self.filepaths[0], "r")
             lines = rf.readlines()
             rf.close()
 
@@ -346,14 +344,14 @@ class ElkParser:
                 )
             )
             idx_bands_out = None
-            for ifile in range(len(self.file_names)):
-                if self.file_names[ifile] == os.path.join(self.dir, "BANDS.OUT"):
+            for ifile in range(len(self.filepaths)):
+                if self.filepaths[ifile] == self.dirpath / "BANDS.OUT":
                     idx_bands_out = ifile
             if idx_bands_out != None:
-                del self.file_names[idx_bands_out]
+                del self.filepaths[idx_bands_out]
 
             for ifile in range(self.natom):
-                rf = open(self.file_names[ifile], "r")
+                rf = open(self.filepaths[ifile], "r")
                 lines = rf.readlines()
                 rf.close()
                 iline = 0
@@ -405,13 +403,13 @@ class ElkParser:
         DesityOfStates
             Returns a DensityOfStates object from pyprocar.core.dos
         """
-        if not os.path.exists(os.path.join(self.dir, "TDOS.OUT")):
+        if not os.path.exists(self.dirpath / "TDOS.OUT"):
 
             return None
         tdos = []
         pdos = {}
         n_atoms = 0
-        for i_file in Path(self.dir).iterdir():
+        for i_file in self.dirpath.iterdir():
             if i_file.name == "TDOS.OUT":
                 with open(i_file, "r") as f:
                     data = f.read()
@@ -472,7 +470,7 @@ class ElkParser:
         """
         Returns the fermi energy read from FERMI.OUT
         """
-        with open(os.path.join(self.dir, "EFERMI.OUT"), "r") as rf:
+        with open(self.dirpath / "EFERMI.OUT", "r") as rf:
             self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         return self.fermi
 
@@ -480,7 +478,7 @@ class ElkParser:
         """
         Returns the reciprocal lattice read from LATTICE.OUT
         """
-        with open(os.path.join(self.dir, "LATTICE.OUT"), "r") as rf:
+        with open(self.dirpath / "LATTICE.OUT", "r") as rf:
             data = rf.read()
 
         lattice_block = re.findall(r"matrix\s*:([-+\s0-9.]*)Inverse", data)
