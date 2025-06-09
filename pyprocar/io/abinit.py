@@ -1,29 +1,36 @@
-import re
-import glob
 import collections
+import glob
+import logging
 import os
+import re
+from functools import cached_property
+from pathlib import Path
+from typing import Union
 
-from numpy import array
 import numpy as np
+from numpy import array
 
-from ..core import Structure, DensityOfStates, ElectronicBandStructure, KPath
-from ..utils import elements
-from .vasp import Procar, Kpoints
+from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.io.vasp import Kpoints, Procar, VaspParser
+from pyprocar.utils import elements
 
-class Output(collections.abc.Mapping):
+logger = logging.getLogger(__name__)
+user_logger = logging.getLogger("user")
+
+
+class AbinitOutput(collections.abc.Mapping):
     """This class contains methods to parse the fermi energy, reciprocal
     lattice vectors and structure from the Abinit output file.
     """
 
-    def __init__(self, abinit_output=None):
+    def __init__(self, abinit_output: Union[str, Path]):
 
         # variables
-        self.abinit_output = abinit_output
+        self.abinit_output = Path(abinit_output)
         self.fermi = None
         self.reclat = None  # reciprocal lattice vectors
         self.nspin = None  # spin
         self.coordinates = None  # reduced atomic coordinates
-        self.variables = {}
 
         # call parsing functions
         self._readFermi()
@@ -136,59 +143,21 @@ class Output(collections.abc.Mapping):
 
             self.atoms = [elements.atomic_symbol(znucl[x - 1]) for x in typat]
 
-    def __contains__(self, x):
-        return x in self.variables
+    def __contains__(self, key):
+        return key in self.__dict__
 
-    def __getitem__(self, x):
-        return self.variables.__getitem__(x)
+    def __getitem__(self, key):
+        return self.__dict__[key]
 
     def __iter__(self):
-        return self.variables.__iter__()
+        return self.__dict__.__iter__()
 
     def __len__(self):
-        return self.variables.__len__()
+        return self.__dict__.__len__()
 
 
-class AbinitKpoints(collections.abc.Mapping):
+class AbinitKpoints(Kpoints):
     """This class parses the k-point information."""
-
-    def __init__(self, filename="KPOINTS", has_time_reversal=True):
-        self.variables = {}
-        self.filename=filename
-        # calling parser
-        self._parse_kpoints()
-
-        self.kpath=None
-        if self.abinitkpointsobject.knames:
-            self.kpath = KPath(
-                knames=self.abinitkpointsobject.knames,
-                special_kpoints=self.abinitkpointsobject.special_kpoints,
-                ngrids=self.abinitkpointsobject.ngrids,
-                has_time_reversal=has_time_reversal,
-            )
-
-    def _parse_kpoints(self):
-        """Reads KPOINTS file.
-        Abinit has multiple way of defining the
-        k-path. For the time being, we suggest to use
-        a KPOINTS file similar to VASP to obtain the
-        k-path for PyProcar from an Abinit calculation.
-        """
-
-        
-        self.abinitkpointsobject = Kpoints(filename=self.filename, has_time_reversal=True)
-
-    def __contains__(self, x):
-        return x in self.variables
-
-    def __getitem__(self, x):
-        return self.variables.__getitem__(x)
-
-    def __iter__(self):
-        return self.variables.__iter__()
-
-    def __len__(self):
-        return self.variables.__len__()
 
 
 class AbinitProcar(collections.abc.Mapping):
@@ -200,28 +169,22 @@ class AbinitProcar(collections.abc.Mapping):
 
     def __init__(
         self,
-        dirname=None,
-        inFiles=None,
-        abinit_output=None,
-        reciprocal_lattice=None,
-        kpath=None,
-        efermi=None,
+        dirpath: Union[str, Path],
+        inFiles: Union[list, None] = None,
+        abinit_output: Union[str, Path] = None,
     ):
-        self.variables = {}
+        self.dirpath = Path(dirpath)
         self.inFiles = inFiles
-        self.abinit_output = abinit_output
-        self.reciprocal_lattice = reciprocal_lattice
-        self.kpath = kpath
-        self.efermi = efermi
+        self.abinit_output = Path(abinit_output)
 
         # Preparing files for merging
         # reading in all PROCAR_* files and putting it into a list if not provided.
         if inFiles is None:
-            tmp_str = os.path.join(dirname, "PROCAR_*")
+            tmp_str = self.dirpath / "PROCAR_*"
             inFiles = sorted(glob.glob(tmp_str))
         else:
             inFiles = inFiles
-        filename = os.path.join(dirname, "PROCAR")
+        filename = self.dirpath / "PROCAR"
         if isinstance(inFiles, list):
             self._mergeparallel(
                 inputfiles=inFiles,
@@ -231,16 +194,8 @@ class AbinitProcar(collections.abc.Mapping):
         else:
             pass
 
-
         # Use VASP Procar parser following PROCAR merge
-        self.abinitprocarobject = Procar(
-            filename=filename,
-            structure=None,
-            reciprocal_lattice=self.reciprocal_lattice,
-            kpath=self.kpath,
-            efermi=self.efermi,
-            interpolation_factor=1,
-        )
+        self.abinitprocarobject = Procar(filepath=filename)
 
     def _mergeparallel(self, inputfiles=None, outputfile=None, abinit_output=None):
         """This merges Procar files seperated between k-point ranges.
@@ -251,7 +206,7 @@ class AbinitProcar(collections.abc.Mapping):
 
         # creating an instance of the AbinitParser class
         if abinit_output:
-            abinitparserobject = Output(abinit_output=abinit_output)
+            abinitparserobject = AbinitOutput(abinit_output=abinit_output)
             nspin = int(abinitparserobject.nspin)
         else:
             raise IOError("Abinit output file not found.")
@@ -296,7 +251,6 @@ class AbinitProcar(collections.abc.Mapping):
                             outfile.write(line)
 
     def _fixformat(self, inputfile=None, outputfile=None):
-
         """Fixes the formatting of Abinit's Procar
         when the tot projection is not summed and spin directions
         not seperated.
@@ -438,25 +392,25 @@ class AbinitProcar(collections.abc.Mapping):
                     total_count += 1
         fp.close()
 
-    def __contains__(self, x):
-        return x in self.variables
+    def __contains__(self, key):
+        return key in self.__dict__
 
-    def __getitem__(self, x):
-        return self.variables.__getitem__(x)
+    def __getitem__(self, key):
+        return self.__dict__[key]
 
     def __iter__(self):
-        return self.variables.__iter__()
+        return self.__dict__.__iter__()
 
     def __len__(self):
-        return self.variables.__len__()
+        return self.__dict__.__len__()
 
 
 class AbinitDOSParser:
     def __init__(
         self,
-        dirname: str = "",
+        dirpath: Union[str, Path],
     ):
-        self.dirname = dirname
+        self.dirpath = Path(dirpath)
 
         self.dos_total, self.energies, self.fermi = self._parse_total_dos()
         self.projected = self._parse_projected_dos_files()
@@ -470,7 +424,7 @@ class AbinitDOSParser:
         )
 
     def _parse_total_dos(self):
-        self.total_dos_filename = glob.glob(self.dirname + "/abinito_DOS_TOTAL*")[0]
+        self.total_dos_filename = glob.glob(self.dirpath / "abinito_DOS_TOTAL*")[0]
 
         with open(self.total_dos_filename) as f:
             text_lines = f.readlines()
@@ -535,7 +489,7 @@ class AbinitDOSParser:
         return dos_total, energies, fermi
 
     def _parse_projected_dos_files(self):
-        self.projected_dos_filenames = glob.glob(self.dirname + "/abinito_DOS_AT*")
+        self.projected_dos_filenames = glob.glob(self.dirpath / "abinito_DOS_AT*")
 
         n_atoms = len(self.projected_dos_filenames)
         projected = [0] * n_atoms
@@ -617,3 +571,80 @@ class AbinitDOSParser:
             dos_atom_projections = dos_up[:, :, None]
 
         return dos_atom_projections, atom_index
+
+
+class AbinitParser:
+    def __init__(
+        self,
+        dirpath: Union[str, Path],
+    ):
+
+        self.dirpath = Path(dirpath)
+        abinit_output = self.dirpath / "abinit.out"
+        abinit_kpoints = self.dirpath / "KPOINTS"
+
+        self.abinit_output = AbinitOutput(abinit_output=abinit_output)
+        self.abinit_kpoints = AbinitKpoints(filepath=abinit_kpoints)
+        self.abinit_procar = AbinitProcar(
+            dirname=self.dirpath,
+            abinit_output=abinit_output,
+        )
+        self.abinit_dos = AbinitDOSParser(dirname=self.dirpath)
+
+    @cached_property
+    def version(self):
+        version = None
+        if self.abinit_output:
+            version = self.abinit_output.version
+        return version
+
+    @cached_property
+    def version_tuple(self):
+        return tuple(int(x) for x in self.version.split("."))
+
+    @property
+    def ebs(self):
+        if self.abinit_procar is None:
+            user_logger.warning(
+                "Issue with the abinit procar file. Either it was not found or there is an issue with the parser"
+            )
+            return None
+        if self.abinit_output is None:
+            user_logger.warning(
+                "Issue with with the abinit output file. Either it was not found or there is an issue with the parser"
+            )
+            return None
+
+        return ElectronicBandStructure(
+            kpoints=self.abinit_procar.abinitprocarobject.kpoints,
+            bands=self.abinit_procar.abinitprocarobject.bands,
+            projected=self._spd2projected(self.abinit_procar.abinitprocarobject.spd),
+            efermi=self.abinit_output.efermi,
+            kpath=self.abinit_kpoints.kpath,
+            n_kx=self.abinit_kpoints.ngrids[0],
+            n_ky=self.abinit_kpoints.ngrids[1],
+            n_kz=self.abinit_kpoints.ngrids[2],
+            projected_phase=self._spd2projected(
+                self.abinit_procar.abinitprocarobject.spd_phase
+            ),
+            labels=self.abinit_procar.abinitprocarobject.orbital_names_old[:-1],
+            reciprocal_lattice=self.abinit_output.reciprocal_lattice,
+        )
+
+    @property
+    def dos(self):
+        if self.abinit_dos is None:
+            user_logger.warning(
+                "Issue with Parsing the DOS. Either it was not found or there is an issue with the parser"
+            )
+            return None
+        return self.abinit_dos.dos
+
+    @property
+    def structure(self):
+        if self.abinit_output is None:
+            user_logger.warning(
+                "Issue with Parsing the Structure. Either it was not found or there is an issue with the parser"
+            )
+            return None
+        return self.abinit_output.structure
