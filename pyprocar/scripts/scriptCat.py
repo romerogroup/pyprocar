@@ -99,7 +99,7 @@ def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None
 
     # creating an instance of the AbinitParser class
     if abinit_output:
-        abinitparserobject = AbinitOutput(abinit_output=abinit_output)
+        abinitparserobject = AbinitOutput(abinit_output_filepath=abinit_output)
         nspin = int(abinitparserobject.nspin)
     else:
         nspin = int(nspin)

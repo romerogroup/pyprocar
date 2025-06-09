@@ -19,9 +19,9 @@ class Parser:
     This class will handle getting the main inputs (ebs,dos,structure,kpath,reciprocal_lattice) from the various dft parsers.
     """
 
-    def __init__(self, code: str, dir: Union[str, Path], verbose: int = 2):
+    def __init__(self, code: str, dirpath: Union[str, Path], verbose: int = 2):
         self.code = code
-        self.dir = Path(dir)
+        self.dirpath = Path(dirpath)
 
         self.ebs = None
         self.dos = None
@@ -73,7 +73,7 @@ class Parser:
         None
             None
         """
-        abinit_parser = abinit.AbinitParser(dirpath=self.dir)
+        abinit_parser = abinit.AbinitParser(dirpath=self.dirpath)
 
         self.dos = abinit_parser.dos
         self.ebs = abinit_parser.ebs
@@ -109,13 +109,13 @@ class Parser:
             None
         """
         # try:
-        #     dos = elk.read_dos(path = self.dir)
+        #     dos = elk.read_dos(path = self.dirpath)
         #     self.dos = dos
         # except:
         #     self.dos = None
 
         try:
-            parser = elk.ElkParser(dirpath=self.dir)
+            parser = elk.ElkParser(dirpath=self.dirpath)
             self.dos = parser.dos
             self.structure = parser.structure
 
@@ -127,7 +127,7 @@ class Parser:
         if not self.dos:
 
             try:
-                parser = elk.ElkParser(dirpath=self.dir)
+                parser = elk.ElkParser(dirpath=self.dirpath)
                 self.ebs = parser.ebs
                 self.kpath = parser.kpath
                 self.structure = parser.structure
@@ -165,7 +165,7 @@ class Parser:
         """
         code_type = self.code.split("_")[1]
         parser = lobster.LobsterParser(
-            dirpath=self.dir, code=code_type, dos_interpolation_factor=None
+            dirpath=self.dirpath, code=code_type, dos_interpolation_factor=None
         )
 
         self.ebs = parser.ebs
@@ -185,7 +185,7 @@ class Parser:
         """
 
         parser = qe.QEParser(
-            dirpath=self.dir,
+            dirpath=self.dirpath,
             scf_in_filepath="scf.in",
             bands_in_filepath="bands.in",
             pdos_in_filepath="pdos.in",
@@ -209,7 +209,7 @@ class Parser:
         """
 
         parser = siesta.SiestaParser(
-            fdf_filepath=self.dir / "SIESTA.fdf",
+            fdf_filepath=self.dirpath / "SIESTA.fdf",
         )
 
         self.ebs = parser.ebs
@@ -227,13 +227,13 @@ class Parser:
         None
             None
         """
-        logger.info(f"Parsing VASP files in {self.dir}")
+        logger.info(f"Parsing VASP files in {self.dirpath}")
 
-        outcar = self.dir / "OUTCAR"
-        poscar = self.dir / "POSCAR"
-        procar = self.dir / "PROCAR"
-        kpoints = self.dir / "KPOINTS"
-        vasprun = self.dir / "vasprun.xml"
+        outcar = self.dirpath / "OUTCAR"
+        poscar = self.dirpath / "POSCAR"
+        procar = self.dirpath / "PROCAR"
+        kpoints = self.dirpath / "KPOINTS"
+        vasprun = self.dirpath / "vasprun.xml"
 
         parser = vasp.VaspParser(
             outcar=outcar,
@@ -264,7 +264,7 @@ class Parser:
         """
         # This creates the vasp files, if needed
         parser = dftbplus.DFTBParser(
-            dirname=self.dir,
+            dirname=self.dirpath,
             eigenvec_filename="eigenvec.out",
             bands_filename="band.out",
             detailed_out="detailed.out",

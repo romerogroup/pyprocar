@@ -3,12 +3,14 @@ import numpy as np
 from .. import io
 
 
-def bandgap(procar:str=None, 
-            dirname:str =None, 
-            outcar:str=None, 
-            code:str="vasp", 
-            fermi:float=None, 
-            repair:bool=True):
+def bandgap(
+    procar: str = None,
+    dirname: str = None,
+    outcar: str = None,
+    code: str = "vasp",
+    fermi: float = None,
+    repair: bool = True,
+):
     """A function to find the band gap
 
     Parameters
@@ -32,7 +34,7 @@ def bandgap(procar:str=None,
 
     bandGap = None
 
-    parser = io.Parser(code = code, dir = dirname)
+    parser = io.Parser(code=code, dirpath=dirname)
     ebs = parser.ebs
 
     if fermi is None:

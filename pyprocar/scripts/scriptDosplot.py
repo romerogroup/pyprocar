@@ -320,7 +320,7 @@ def dosplot(
     if not os.path.exists(dos_pkl_filepath):
         logger.info(f"Parsing DOS from {dirname}")
 
-        parser = io.Parser(code=code, dir=dirname)
+        parser = io.Parser(code=code, dirpath=dirname)
         dos = parser.dos
         structure = parser.structure
 

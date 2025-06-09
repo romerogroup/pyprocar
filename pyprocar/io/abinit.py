@@ -240,15 +240,15 @@ class AbinitProcar(collections.abc.Mapping):
             # Writing new PROCAR with first spin up, header2 and then
             # spin down (reversed).
             with open(outputfilepath, "w") as outfile:
-                for spinupfile in spinup_filepaths:
-                    with open(spinupfile) as infile:
+                for spinup_filepath in spinup_filepaths:
+                    with open(spinup_filepath) as infile:
                         for line in infile:
                             outfile.write(line)
                 outfile.write("\n")
                 outfile.write(header2)
                 outfile.write("\n")
-                for spindownfile in spindown_list:
-                    with open(spindownfile) as infile:
+                for spindown_filepath in spindown_filepaths:
+                    with open(spindown_filepath) as infile:
                         for line in infile:
                             outfile.write(line)
 

@@ -119,7 +119,7 @@ class TestParsers(BaseTest):
 
         parser = io.Parser(
             code=calc_test_case.code,
-            dir=calc_test_case.path,
+            dirpath=calc_test_case.path,
         )
         dos_calc_types = [CalcType.DOS.value]
         if calc_test_case.calc_type not in dos_calc_types:
@@ -148,7 +148,7 @@ class TestParsers(BaseTest):
 
         parser = io.Parser(
             code=calc_test_case.code,
-            dir=calc_test_case.path,
+            dirpath=calc_test_case.path,
         )
 
         ebs_calc_types = [
