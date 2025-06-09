@@ -120,7 +120,7 @@ class Parser:
             self.structure = parser.structure
 
         except Exception as e:
-
+            logger.debug(e)
             self.dos = None
             self.structure = None
 
@@ -132,6 +132,7 @@ class Parser:
                 self.kpath = parser.kpath
                 self.structure = parser.structure
             except Exception as e:
+                logger.debug(e)
                 self.ebs = None
                 self.kpath = None
                 self.structure = None
