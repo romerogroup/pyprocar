@@ -11,12 +11,15 @@ Created on Sat Jan 16 2021
 import copy
 import itertools
 import logging
+from dataclasses import dataclass
+from pathlib import Path
 from typing import List
 
 import numpy as np
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.kpath import KPath
+from pyprocar.core.serializer import get_serializer
 from pyprocar.utils import mathematics
 from pyprocar.utils.unfolder import Unfolder
 
@@ -167,6 +170,61 @@ class ElectronicBandStructure:
             logger.info(f"Weights: {self.weights}")
         logger.info("Initialized the ElectronicBandStructure object")
 
+    def __eq__(self, other):
+        kpoints_equal = np.allclose(self.kpoints, other.kpoints)
+        bands_equal = np.allclose(self.bands, other.bands)
+        projected_equal = np.allclose(self.projected, other.projected)
+
+        projected_phase_equal = True
+        if self.projected_phase is not None and other.projected_phase is not None:
+            projected_phase_equal = np.allclose(
+                self.projected_phase, other.projected_phase
+            )
+
+        weights_equal = True
+        if self.weights is not None and other.weights is not None:
+            weights_equal = np.allclose(self.weights, other.weights)
+
+        n_kx_equal = True
+        if self.n_kx is not None and other.n_kx is not None:
+            n_kx_equal = self.n_kx == other.n_kx
+        n_ky_equal = True
+        if self.n_ky is not None and other.n_ky is not None:
+            n_ky_equal = self.n_ky == other.n_ky
+        n_kz_equal = True
+        if self.n_kz is not None and other.n_kz is not None:
+            n_kz_equal = self.n_kz == other.n_kz
+
+        reciprocal_lattice_equal = np.allclose(
+            self.reciprocal_lattice, other.reciprocal_lattice
+        )
+
+        fermi_energy_equal = self.efermi == other.efermi
+
+        is_noncollinear_equal = self.is_non_collinear == other.is_non_collinear
+
+        is_nspin_equal = self.nspins == other.nspins
+
+        is_mesh_equal = self.is_mesh == other.is_mesh
+
+        ebs_equal = (
+            kpoints_equal
+            and bands_equal
+            and projected_equal
+            and projected_phase_equal
+            and weights_equal
+            and reciprocal_lattice_equal
+            and fermi_energy_equal
+            and n_kx_equal
+            and n_ky_equal
+            and n_kz_equal
+            and is_noncollinear_equal
+            and is_nspin_equal
+            and is_mesh_equal
+        )
+
+        return ebs_equal
+
     def __str__(self):
         ret = "\n Electronic Band Structure     \n"
         ret += "============================\n"
@@ -274,12 +332,12 @@ class ElectronicBandStructure:
 
     @property
     def nspins(self):
-        """The number of spin channels
+        """The number of spin projections
 
         Returns
         -------
         int
-            The number of spin channels
+            The number of spin projections
         """
         return self.projected.shape[5]
 
@@ -1757,6 +1815,15 @@ class ElectronicBandStructure:
 
         logger.info("Finished interpolating band structure")
         return interpolated_ebs
+
+    def save(self, path: Path):
+        serializer = get_serializer(path)
+        serializer.save(self, path)
+
+    @classmethod
+    def load(cls, path: Path):
+        serializer = get_serializer(path)
+        return serializer.load(path)
 
 
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):

@@ -4,11 +4,13 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import spglib
 from scipy.spatial import ConvexHull
 
+from pyprocar.core.serializer import get_serializer
 from pyprocar.core.surface import Surface
 from pyprocar.utils import elements
 
@@ -79,6 +81,25 @@ class Structure:
         self.rotations = rotations
 
         return None
+
+    def __eq__(self, other):
+        atoms_equal = all(self.atoms == other.atoms)
+
+        fractional_coordinates_equal = True
+        if (
+            self.fractional_coordinates is not None
+            and other.fractional_coordinates is not None
+        ):
+            fractional_coordinates_equal = np.allclose(
+                self.fractional_coordinates, other.fractional_coordinates
+            )
+
+        lattice_equal = True
+        if self.lattice is not None and other.lattice is not None:
+            lattice_equal = np.allclose(self.lattice, other.lattice)
+
+        structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
+        return structure_equal
 
     @property
     def volume(self):
@@ -531,3 +552,12 @@ class Structure:
             The transformed structure
         """
         return self.transform(matrix)
+
+    def save(self, path: Path):
+        serializer = get_serializer(path)
+        serializer.save(self, path)
+
+    @classmethod
+    def load(cls, path: Path):
+        serializer = get_serializer(path)
+        return serializer.load(path)
