@@ -29,22 +29,27 @@ Commit messages from the PR:
 {commit_messages}
 
 Generate a concise commit message that summarizes the changes made in this pull request.
+The git message should focus on the intent of the changes, not the technical details.
+After describing the intent, it should focus on a high level summary of the changes
 
-Follow these guidelines:
+Follow these formatting rules:
 1. Use imperative mood (e.g., "Add feature" not "Added feature")
-2. Keep the first line under 50 characters
+2. Keep the first line under 72 characters
 3. If needed, add a longer description after a blank line
-4. Focus on the "what" and "why" of the changes
-5. Use semantic prefixes like feat:, fix:, docs:, refactor:, etc.
-6. Be specific and clear
+4. Use semantic prefixes like feat:, fix:, docs:, refactor:, etc.
+5. Use the present tense
+6. Be specific and clear, but concise
 
-Return ONLY the commit message, nothing else.
+Example:
 
-Example format:
-feat: Add user authentication system
+feat: Add user authentication and session management
 
-Implement OAuth2-based authentication with JWT tokens.
-Includes login, logout, and session management.
+This commit introduces a complete user authentication flow, enabling users to sign up, log in, and log out. The primary goal is to secure user-specific data and create personalized experiences.
+
+- Implement email/password login and registration forms.
+- Add server-side logic for validating credentials and creating user sessions.
+- Introduce a new `auth` module to handle all authentication-related logic.
+- Create protected routes that require a valid user session to access.
 
 Closes #{pr_number}
 """
