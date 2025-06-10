@@ -126,6 +126,7 @@ def create_or_update_summary_comment(
 
     # Create comment body with marker
     comment_body = f"""{COMMENT_MARKER}
+    
 ## 📋 Pull Request Summary
 
 *Last updated: {current_date} (Event: {event_type})*
