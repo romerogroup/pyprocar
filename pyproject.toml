@@ -52,6 +52,7 @@ dependencies = [
     "gdown",
     "dill",
     "variconfig",
+    "huggingface_hub[hf_transfer,cli]",
 ]
 
 [project.optional-dependencies]
@@ -61,7 +62,7 @@ tests = [
     "pytest-cov",
     "pymatgen",
     "PyGithub",
-    "huggingface_hub[hf_transfer,cli]",
+    
 ]
 
 docs = [
