@@ -1,6 +1,0 @@
-export\_data
-============
-
-.. currentmodule:: pyprocar.plotter
-
-.. automethod:: DOSPlot.export_data
