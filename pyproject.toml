@@ -61,7 +61,7 @@ tests = [
     "pytest-cov",
     "pymatgen",
     "PyGithub",
-    "huggingface_hub[cli]",
+    "huggingface_hub[hf_transfer,cli]",
 ]
 
 docs = [

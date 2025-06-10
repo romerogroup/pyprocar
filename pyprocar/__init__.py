@@ -4,11 +4,7 @@ from pyprocar.io import *
 from pyprocar.scripts import *
 from pyprocar.utils import physics_constants, welcome
 from pyprocar.utils.defaults import Settings
-from pyprocar.utils.download_examples import (
-    download_dev_data,
-    download_example,
-    download_examples,
-)
+from pyprocar.utils.download_examples import download_test_data
 from pyprocar.utils.physics_constants import *
 from pyprocar.version import author as __author__
 from pyprocar.version import copyright as __copyright__
