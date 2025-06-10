@@ -1,238 +1,220 @@
 import os
 import shutil
-import gdown
+import zipfile
+from pathlib import Path
+from typing import Union
 
-# TODO Zip file in google drive then download
-# TODO Save dir path to temp
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
+from huggingface_hub import HfApi, snapshot_download
 
-examples_dict = {"Fe" :
-                    {"qe": 
-                        {
-                        'non-colinear':
-                            {
-                            'bands':'1Eo1VUuT6rmEKMy2-NtYo2kVH5Vc4PeFJ',
-                            'dos':'1y1Q0w31iN_HAUDnm4lcTdqPfWKggYDRE',
-                            'fermi':'1XLiYwN_W3AFAzbGOGfGVn-ha5tXFwYLw'},
-                        'non-spin-polarized':
-                            {
-                            'bands':'1__DI_iqS3zFVerDMh9WjqXy8oE2XaJkK?usp=share_link',
-                            'dos':'1nuczS9sHhLn8UXSeoF0mS4XwxtZUEcgW',
-                            'fermi':'1hjGeVXfNoqSDUMBc5TF0qzgGUfgaTg0s'},
-                        'spin-polarized-colinear':
-                            {
-                            'bands':'1DdkLmwXQZL4S0VXiht6XQmgGPP8h_HPZ',
-                            'dos':'186oZvQEh6AYre2h6FjzGQ8AWIcc50KGL',
-                            'fermi':'1rF70CtYDapE1WdHATpsvUFyKAabB_Tn5'}
-                        },
-                    "vasp": 
-                        {
-                        'non-colinear':
-                            {
-                            'bands':'1y6Ww79kGd8hUbqcZWI0RauzfVWlhwhf7',
-                            'dos':'1laWtxShW7XQUpmofOk0tX4rwAghuC4II',
-                            'fermi':'1Kk56kv2pPqK4nqiTnhDm8FeTfjMoOi7P'},
-                        'non-spin-polarized':
-                            {
-                            'bands':'1Lt-u4hFT5k97kFz9-0WY5V_XK_o2oYPl',
-                            'dos':'1Ipsz1ya9Zm_k8u6hDyCA9-COtGyyEOLN',
-                            'fermi':'1pEK9Q7DfzgHk1DCW3JnyHyXLcubw0sil'},
-                        'spin-polarized-colinear':
-                            {
-                            'bands':'1Be3OSRmf3JcACA5aA8GfZGDgJdu5beRH',
-                            'dos':'1EDxuW7JjIk9Q-gvOrAY9QFxPOGQt_V-W',
-                            'fermi':'1BzALZKEC19mxOYgMPJ7XRjQTNQmBZKCe'}
-                        },
-
-                    "abinit": 
-                        {
-                        'non-colinear':
-                            {
-                            'bands':'1OgQSeyfa54fQ2QfUACA6tWlPPtys9sfU',
-                            'dos':'1N_LeMUiOfPIM6eiMzhp4vKfSuxJ3sJjA',
-                            'fermi':'1N_LeMUiOfPIM6eiMzhp4vKfSuxJ3sJjA'},
-                        'non-spin-polarized':
-                            {
-                            'bands':'1Re6N2rj9AnzefmJOYLeUecMHbH2eMRWu',
-                            'dos':'1QSlfRP7s3C14Kr2NAOr_MvXgBbfHCKPc',
-                            'fermi':'1QSlfRP7s3C14Kr2NAOr_MvXgBbfHCKPc'},
-                        'spin-polarized-colinear':
-                            {
-                            'bands':'1M9z1EXRdghrTo9nIArHnSMRXExK77N-E',
-                            'dos':'1L5dq7BOEEege88BeLY89Sl5MN0VmpTY9',
-                            'fermi':'1L5dq7BOEEege88BeLY89Sl5MN0VmpTY9'}
-                        }
+REPO_ID = "lllangWV/pyprocar_test_data"
+REPO_TYPE = "dataset"
 
 
-                    },
+def compress_dirpath(dirpath: Union[str, Path], output_path: Union[str, Path] = None):
+    """Compress test data directory into a zip archive.
 
-                "BiSb_monolayer" :
-                    {"vasp": 
-                        {
-                        'non-colinear':
-                            {
-                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF'
-                            },
+    Parameters
+    ----------
+        dirpath (Union[str, Path]): Path to the test data directory to compress
+        output_path (Union[str, Path]): Path to the compressed test data archive
+    """
 
+    dirpath = Path(dirpath)
+    if not dirpath.exists():
+        raise FileNotFoundError(f"Test data directory not found: {dirpath}")
 
-                    },
-                },
-
-                "auto" :
-                    {"vasp": 
-                        {
-                        'non-spin-polarized':
-                            {
-                            'bands':'1AM-Tzu58hiTs8TetuAQEqWvdR1sPaTKx',
-                            },
+    archive_path = output_path or dirpath.with_suffix(".zip")
+    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for file in dirpath.rglob("*"):
+            zipf.write(file, file.relative_to(dirpath.parent))
 
 
-                    },
-                },
+def uncompress_dirpath(dirpath: Union[str, Path]):
+    """Uncompress test data from a zip archive.
 
-                "hBN-CNN" :
-                    {"vasp": 
-                        {
-                        'spin-polarized-colinear':
-                            {
-                            'gamma':'1K6VivyRJS4i-7BXv8yQBlrFYkcjAn28o',
-                            },
+    Parameters
+    ----------
+        dirpath (Union[str, Path]): Path to the compressed test data archive.
+    """
 
+    archive_path = Path(dirpath)
+    if not archive_path.exists():
+        raise FileNotFoundError(f"Test data archive not found: {dirpath}")
 
-                    },
-                },
-
-                "Bi2Se3-spinorbit-surface" :
-                    {"vasp": 
-                        {
-                        'spin-polarized-colinear':
-                            {
-                            'bands':'1kfyM9Zm0ccel3BevEbiGr2oSkqmJzt_P',
-                            },
+    with zipfile.ZipFile(archive_path, "r") as zipf:
+        zipf.extractall(path=archive_path.parent)
 
 
-                    },
-                },
+def compress_test_data(data_dirpath: Union[str, Path]):
+    """Compress test data with custom logic for different directories.
 
-                "NV-center" :
-                    {"vasp": 
-                        {
-                        'spin-polarized-colinear':
-                            {
-                            'bands':'1vLIpdsfSbmJTmskFjcqM3m6l-P__hBOT',
-                            },
+    - codes, io, issues directories are compressed as whole directories
+    - examples directory: compress directories that are 3 levels deep
+    """
+    CODES_DIRPATH = data_dirpath / "codes"
+    EXAMPLES_DIRPATH = data_dirpath / "examples"
+    IO_DIRPATH = data_dirpath / "io"
+    ISSUES_DIRPATH = data_dirpath / "issues"
 
+    # Compress codes, io, and issues directories as whole directories
+    for dirpath in [CODES_DIRPATH, IO_DIRPATH, ISSUES_DIRPATH]:
+        if dirpath.exists() and dirpath.is_dir():
+            print(f"Compressing {dirpath.name} directory...")
+            compress_dirpath(dirpath)
 
-                    },
-                },
-
-                "MgB2" :
-                    {"vasp": 
-                        {
-                        'non-spin-polarized':
-                            {
-                            'primitive_bands':'1YSzbw7eluTyTjWZp5XqrRWmLEszBsQUZ',
-                            'supercell_bands':'1CK_aY7YrxtwX6II0lvtj5K_1BcEdt202',
-                            },
-
-
-                    },
-                },
-
-                "BiSb_monolayer" :
-                    {"vasp": 
-                        {
-                        'non-colinear':
-                            {
-                            'fermi':'192XJLLpd7knvazhJPbhcV0Jb75NZM7OF',
-                            },
+    # For examples directory, compress directories that are 3 levels deep
+    if EXAMPLES_DIRPATH.exists() and EXAMPLES_DIRPATH.is_dir():
+        print("Compressing examples subdirectories...")
+        for level1_dir in EXAMPLES_DIRPATH.iterdir():
+            if level1_dir.is_dir():
+                for level2_dir in level1_dir.iterdir():
+                    print(f"Compressing {level2_dir.relative_to(data_dirpath)}...")
+                    if "zip" in level2_dir.name:
+                        continue
+                    if level2_dir.is_dir():
+                        shutil.make_archive(level2_dir, "zip", level2_dir)
+                    else:
+                        compress_dirpath(level2_dir)
 
 
-                    },
-                },
+def uncompress_test_data(data_dirpath: Union[str, Path]):
+    """Uncompress test data with custom logic for different directories.
 
-                "Au" :
-                    {"vasp": 
-                        {
-                        'non-spin-polarized':
-                            {
-                            'fermi':'1JsBV203UazBd4s1wO3LW2YYRBMuLKsWO',
-                            },
+    - codes, io, issues directories are uncompressed from whole directory zip files
+    - examples directory: uncompress directories that were compressed at level 2
 
+    Parameters
+    ----------
+        data_dirpath (Union[str, Path]): Path to the directory containing compressed test data
+    """
+    data_dirpath = Path(data_dirpath)
 
-                    },
-                },
-    }
+    # Uncompress codes, io, and issues directories from whole directory zip files
+    for dir_name in ["codes", "io", "issues"]:
+        zip_path = data_dirpath / f"{dir_name}.zip"
+        if zip_path.exists():
+            print(f"Uncompressing {dir_name} directory...")
+            uncompress_dirpath(zip_path)
+            # Remove the zip file after extraction
+            zip_path.unlink()
 
+    # For examples directory, uncompress directories that were compressed at level 2
+    examples_dirpath = data_dirpath / "examples"
+    if examples_dirpath.exists() and examples_dirpath.is_dir():
+        print("Uncompressing examples subdirectories...")
+        for level1_dir in examples_dirpath.iterdir():
+            if level1_dir.is_dir():
+                for level2_dir in level1_dir.iterdir():
+                    if level2_dir.is_file() and level2_dir.suffix == ".zip":
+                        print(
+                            f"Uncompressing {level2_dir.relative_to(data_dirpath)}..."
+                        )
+                        # Create directory with same name as zip (without .zip extension)
+                        extract_dir = level2_dir.with_suffix("")
+                        extract_dir.mkdir(exist_ok=True)
 
-def download_examples(save_dir=''):
-    if save_dir != '':
-        output = f"{save_dir}{os.sep}examples.zip"
-        to = f"{save_dir}{os.sep}examples{os.sep}"
-    else:
-        output='examples.zip'
-        to = f"examples{os.sep}"
-        
-    gdown.download(id="1AAcJ17ghTVcw_nRICX5IAwhqmtaRP6fd", output=output)
-    gdown.extractall(output, to = to)
+                        # Extract the zip file to the new directory
+                        with zipfile.ZipFile(level2_dir, "r") as zip_ref:
+                            zip_ref.extractall(extract_dir)
 
-def download_dev_data(examples_dirname: str = 'examples'):
-    project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    data_dir = os.path.join(project_dir, 'data')
-
-    material_name = 'Fe'
-
-    print('Storing development data in', data_dir)
-    if not os.path.exists(data_dir):
-        os.mkdir(data_dir) 
-
-    # output = f"{data_dir}{os.sep}{examples_dirname}"
-    to = f"{data_dir}{os.sep}{examples_dirname}{os.sep}{material_name}"
-
-    print('___Starting download___')
-    url  = f'https://drive.google.com/drive/folders/1FQ5suC2e-Wp9LfWQqeb_2pRJDO00QQvQ'
-    gdown.download_folder(url=url, output=to,use_cookies=False,remaining_ok=True)
-
-    print('___Download Finished___')
-    return None 
-
-def download_example(material: str,
-                    code: str, 
-                    spin_calc_type: str,
-                    calc_type: str,
-                    save_dir: str ='' ):
-
-    materials = list(examples_dict.keys())
-    codes = list(examples_dict['Fe'].keys())
-    spin_calc_types = list(examples_dict['Fe']['qe'].keys())
-    calc_types = list(examples_dict['Fe']['qe']['non-spin-polarized'].keys())
-
-    if material not in materials:
-        raise Exception(f"material must be in {materials}")
-    if code not in codes:
-        raise Exception(f"code must be in {codes}")
-    if spin_calc_type not in spin_calc_types:
-        raise Exception(f"spin_calc_type must be in {spin_calc_types}")
-    # if calc_type not in calc_types:
-    #     raise Exception(f"calc_type must be in {calc_types}")
-
-    url  = f'https://drive.google.com/drive/folders/{examples_dict[material][code][spin_calc_type][calc_type]}'
-
-    dir_name = f'{material}{os.sep}{code}{os.sep}{spin_calc_type}{os.sep}'
+                        # Remove the zip file after extraction
+                        level2_dir.unlink()
 
 
-    
-    if save_dir != '':
-        output = f"{save_dir}{os.sep}{dir_name}.zip"
-        to = f"{save_dir}{os.sep}{dir_name}{os.sep}"
-    else:
-        output=f'{dir_name}.zip'
-        to = f"{dir_name}{os.sep}"
+def download_test_data(relpath: str, output_path: Union[str, Path] = "."):
+    """
+    Download test data from:
+    https://huggingface.co/datasets/lllangWV/pyprocar_test_data/tree/main/
 
-    print(f"Saving to : {to} ")
+    Parameters
+    ----------
+        relpath (str): Path to the file to download from the Hugging Face Hub.
+        This should be relative to the root `data/issues` directory.
 
-    gdown.download_folder(url=url, output=to,use_cookies=False,remaining_ok=True)
+        output_path (str): Path to the directory to download the examples to.
+    """
 
-    final_dir = to + calc_type
-    return final_dir
+    output_path = Path(output_path)
 
+    pattern = relpath + "*"
+
+    download_dirpath = snapshot_download(
+        repo_id=REPO_ID,
+        repo_type=REPO_TYPE,
+        local_dir=output_path,
+        allow_patterns=[pattern],
+    )
+
+    download_dirpath = Path(download_dirpath)
+
+    uncompress_test_data(download_dirpath / "data")
+
+    shutil.rmtree(output_path / ".cache")
+
+    return download_dirpath
+
+
+def remove_zip_files(dirpath: Union[str, Path]):
+    """Remove all zip files from a directory and its subdirectories.
+
+    Parameters
+    ----------
+    dirpath : Union[str, Path]
+        Path to the directory from which to remove all zip files recursively.
+
+    Examples
+    --------
+    >>> remove_zip_files("./my_directory")
+    >>> remove_zip_files(Path("./data"))
+    """
+    dirpath = Path(dirpath)
+
+    if not dirpath.exists():
+        raise FileNotFoundError(f"Directory not found: {dirpath}")
+
+    if not dirpath.is_dir():
+        raise ValueError(f"Path is not a directory: {dirpath}")
+
+    # Find all zip files recursively
+    zip_filepaths = list(dirpath.rglob("*.zip"))
+
+    if not zip_filepaths:
+        print(f"No zip files found in {dirpath}")
+        return
+
+    print(f"Found {len(zip_filepaths)} zip files to remove...")
+
+    # Remove each zip file
+    for filepath in zip_filepaths:
+        try:
+            filepath.unlink()
+            print(f"Removed: {filepath.relative_to(dirpath)}")
+        except Exception as e:
+            print(f"Failed to remove {filepath.relative_to(dirpath)}: {e}")
+
+    print(f"Finished removing zip files from {dirpath}")
+
+
+def upload_test_data_to_hf(data_dirpath: Union[str, Path]):
+    """Upload test data to Hugging Face Hub.
+
+    Compresses the test data directory and uploads it to the Hugging Face Hub.
+
+    Parameters
+    ----------
+        data_dirpath (Union[str, Path]): Path to the directory containing test data to upload
+    """
+
+    compress_test_data(data_dirpath)
+    api = HfApi()
+    api.upload_folder(
+        folder_path=str(data_dirpath),
+        path_in_repo="data",
+        repo_id=REPO_ID,
+        repo_type=REPO_TYPE,
+        allow_patterns=["*.zip"],
+    )
+
+    remove_zip_files(data_dirpath)

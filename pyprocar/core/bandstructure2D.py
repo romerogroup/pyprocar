@@ -17,7 +17,8 @@ from matplotlib import cm
 from matplotlib import colors as mpcolors
 from scipy.spatial import KDTree
 
-from . import BrillouinZone2D, Surface
+from pyprocar.core.brillouin_zone import BrillouinZone2D
+from pyprocar.core.surface import Surface
 
 np.set_printoptions(threshold=sys.maxsize)
 

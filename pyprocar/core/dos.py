@@ -1,4 +1,4 @@
-"""This module defines an object to handle the density of states in a DFT 
+"""This module defines an object to handle the density of states in a DFT
 calculations.
 """
 
@@ -10,56 +10,58 @@ __maintainer__ = "Logan Lang, Pedram Tavadze"
 __email__ = "petavazohi@mix.wvu.edu"
 __status__ = "Production"
 
+from pathlib import Path
 from typing import List
 
 import numpy as np
 import numpy.typing as npt
-from scipy.interpolate import CubicSpline
 from scipy.integrate import trapezoid
+from scipy.interpolate import CubicSpline
 from sympy.physics.quantum.cg import CG
 
+from pyprocar.core.serializer import get_serializer
 
 # TODO When PEP 646 is introduced in numpy. need to update the python typing.
 
+
 class DensityOfStates:
     """A class that contains density of states calculated by the a density
-        functional theory calculation.
+    functional theory calculation.
 
-        Parameters
-        ----------
-        energies : np.ndarray, 
-            Points on energy spectrum. shape = (n_dos, )
-        total : np.ndarray
-            Densities at each point. shape = (n_dos, )
-        efermi : float
-            Fermi energy of the system.
-        projected : np.ndarray, optional
-            Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
-            ``i_principal`` works like the principal quantum number n. The last
-            index should be the total. (i_principal = -1)
-            n = i_principal => 0, 1, 2, 3, -1 => s, p, d, total
-            ``i_orbital`` works similar to angular quantum number l, but not the
-            same. i_orbital follows this order
-            (0, 1, 2, 3, 4, 5, 6, 7, 8) => s, py, pz, px, dxy, dyz, dz2, dxz, dx2-y2.
-            ``i_spin`` works as magnetic quantum number.
-            m = 0, 1, for spin up and down, by default None.
-        interpolation_factor : int, optional
-            The number of density of states points will increase by this factor
-            in the interpolation, by default 1.
-            
+    Parameters
+    ----------
+    energies : np.ndarray,
+        Points on energy spectrum. shape = (n_dos, )
+    total : np.ndarray
+        Densities at each point. shape = (n_dos, )
+    efermi : float
+        Fermi energy of the system.
+    projected : np.ndarray, optional
+        Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
+        ``i_principal`` works like the principal quantum number n. The last
+        index should be the total. (i_principal = -1)
+        n = i_principal => 0, 1, 2, 3, -1 => s, p, d, total
+        ``i_orbital`` works similar to angular quantum number l, but not the
+        same. i_orbital follows this order
+        (0, 1, 2, 3, 4, 5, 6, 7, 8) => s, py, pz, px, dxy, dyz, dz2, dxz, dx2-y2.
+        ``i_spin`` works as magnetic quantum number.
+        m = 0, 1, for spin up and down, by default None.
+    interpolation_factor : int, optional
+        The number of density of states points will increase by this factor
+        in the interpolation, by default 1.
+
     """
+
     def __init__(
-        self, 
+        self,
         energies: npt.NDArray[np.float64],
-        total: npt.NDArray[np.float64], 
+        total: npt.NDArray[np.float64],
         efermi: float,
-        projected: npt.NDArray[np.float64] = None, 
+        projected: npt.NDArray[np.float64] = None,
         interpolation_factor: int = 1,
         # interpolation_kind: str = 'cubic',
-        ):
-                
+    ):
 
-        
         self.energies = energies
         self.total = total
         self.efermi = efermi
@@ -77,7 +79,9 @@ class DensityOfStates:
             for i_atom in range(len(projected)):
                 for i_principal in range(len(projected[i_atom])):
                     for i_orbital in range(len(projected[i_atom][i_principal])):
-                        for i_spin in range(len(projected[i_atom][i_principal][i_orbital])):
+                        for i_spin in range(
+                            len(projected[i_atom][i_principal][i_orbital])
+                        ):
                             x = energies
                             y = projected[i_atom][i_principal][i_orbital][i_spin]
                             xs, ys = interpolate(x, y, factor=interpolation_factor)
@@ -89,6 +93,24 @@ class DensityOfStates:
         self.total = np.array(self.total)
         self.projected = np.array(self.projected)
 
+    def __eq__(self, other):
+        energies_equal = np.allclose(self.energies, other.energies)
+        total_equal = np.allclose(self.total, other.total)
+        efermi_equal = self.efermi == other.efermi
+        projected_equal = np.allclose(self.projected, other.projected)
+
+        n_spins_equal = self.n_spins == other.n_spins
+
+        dos_equal = (
+            energies_equal
+            and total_equal
+            and efermi_equal
+            and projected_equal
+            and n_spins_equal
+        )
+
+        return dos_equal
+
     @property
     def n_dos(self):
         """The number of dos values
@@ -99,7 +121,7 @@ class DensityOfStates:
             The number of dos values
         """
         return len(self.energies)
-    
+
     @property
     def n_energies(self):
         """The number of energy values
@@ -121,7 +143,7 @@ class DensityOfStates:
             The number of spin channels
         """
         return len(self.total)
-    
+
     @property
     def is_non_collinear(self):
         """Boolean for if this is non-colinear calc
@@ -131,24 +153,26 @@ class DensityOfStates:
         bool
             Boolean for if this is non-colinear calc
         """
-        if self.n_spins == 3 or self.n_spins==4:
+        if self.n_spins == 3 or self.n_spins == 4:
             return True
         else:
             return False
 
-    def dos_sum(self, 
-                atoms:List[int]=None,
-                principal_q_numbers:List[int]=[-1],  
-                orbitals:List[int]=None,
-                spins:List[int]=None,
-                sum_noncolinear:bool=True):
+    def dos_sum(
+        self,
+        atoms: List[int] = None,
+        principal_q_numbers: List[int] = [-1],
+        orbitals: List[int] = None,
+        spins: List[int] = None,
+        sum_noncolinear: bool = True,
+    ):
         """
-        
+
         .. code-block::
             :linenos:
 
             Orbital table
-            
+
             +-------+-----+------+------+------+------+------+------+------+------+
             |n-lm   |  0  |   1  |  2   |   3  |   4  |   5  |   6  |   7  |   8  |
             +=======+=====+======+======+======+======+======+======+======+======+
@@ -162,7 +186,7 @@ class DensityOfStates:
             +=======+=====+======+======+======+======+======+======+======+======+
             |  ...  | ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |  ... |
             +=======+=====+======+======+======+======+======+======+======+======+
-        
+
 
 
         Parameters
@@ -186,7 +210,7 @@ class DensityOfStates:
         """
 
         projected = self.projected
-        
+
         principal_q_numbers = np.array(principal_q_numbers)
         if atoms is None:
             atoms = np.arange(len(projected), dtype=int)
@@ -197,7 +221,7 @@ class DensityOfStates:
         # print(orbitals)
         # Adjusting for spin type calculation
         if self.n_spins == 2:
-            ret = np.zeros(shape=( 2, self.n_dos))
+            ret = np.zeros(shape=(2, self.n_dos))
             for iatom in atoms:
                 for iprinc in principal_q_numbers:
                     for ispin in spins:
@@ -226,19 +250,19 @@ class DensityOfStates:
         n_orbitals = self.projected.shape[2]
 
         if n_orbitals == 18:
-            basis = 'jm basis'
+            basis = "jm basis"
         elif n_orbitals == 9:
-            basis = 'spd basis'
+            basis = "spd basis"
         elif n_orbitals == 9:
-            basis = 'spdf basis'
+            basis = "spdf basis"
         else:
-            basis = 'I do not know'
+            basis = "I do not know"
         return basis
 
     def coupled_to_uncoupled_basis(self):
         """
         Converts coupled projections to uncoupled projections. This assumes the orbitals are order by
-        
+
         .. code-block::
             :linenos:
 
@@ -282,37 +306,49 @@ class DensityOfStates:
         -------
         ret :  None
             None
-        
+
         """
         n_atoms = self.projected.shape[0]
         n_principle = self.projected.shape[1]
         n_uncoupled_orbitals = self.projected.shape[2]
         n_spins = self.projected.shape[3]
         n_energy = self.projected.shape[4]
-        
-        uncoupled_projected = np.zeros(shape = (n_atoms,n_principle,n_uncoupled_orbitals,2,n_energy)  )
 
-        def x(proj_1,proj_2,clebsh_1,clebsch_2,clebsch_3,clebsch_4):
+        uncoupled_projected = np.zeros(
+            shape=(n_atoms, n_principle, n_uncoupled_orbitals, 2, n_energy)
+        )
+
+        def x(proj_1, proj_2, clebsh_1, clebsch_2, clebsch_3, clebsch_4):
             a = proj_2
-            b = clebsch_4 * (proj_1 - (clebsh_1/clebsch_3) * proj_2 ) / (clebsch_2 - (clebsh_1/clebsch_3) )
+            b = (
+                clebsch_4
+                * (proj_1 - (clebsh_1 / clebsch_3) * proj_2)
+                / (clebsch_2 - (clebsh_1 / clebsch_3))
+            )
             return (a - b) / clebsch_3
 
-        def y(proj_1,proj_2,clebsh_1,clebsch_2,clebsch_3,clebsch_4):
+        def y(proj_1, proj_2, clebsh_1, clebsch_2, clebsch_3, clebsch_4):
             a = proj_1
-            b = (clebsh_1/clebsch_3) * proj_2
-            c = clebsch_2 - (clebsh_1/clebsch_3)
+            b = (clebsh_1 / clebsch_3) * proj_2
+            c = clebsch_2 - (clebsh_1 / clebsch_3)
             return (a - b) / c
 
-        paired_uncoupled_obritals = [[0,1], [2,3], [4, 5, 6, 7], [8,9,10,11], [12,13,14,15,16,17]]
-        print(float(CG(j1=1/2, m1=-1/2, j2=1/2, m2=+1/2, j3=1, m3=0).doit()))
+        paired_uncoupled_obritals = [
+            [0, 1],
+            [2, 3],
+            [4, 5, 6, 7],
+            [8, 9, 10, 11],
+            [12, 13, 14, 15, 16, 17],
+        ]
+        print(float(CG(j1=1 / 2, m1=-1 / 2, j2=1 / 2, m2=+1 / 2, j3=1, m3=0).doit()))
 
-        uncoupled_projected[:,:,0,:,:] = self.projected[:,:,0,:,:] + self.projected[:,:,1,:,:]
+        uncoupled_projected[:, :, 0, :, :] = (
+            self.projected[:, :, 0, :, :] + self.projected[:, :, 1, :, :]
+        )
 
-
-        
         return None
 
-    def normalize_dos(self,mode='max'):
+    def normalize_dos(self, mode="max"):
         """
         Normalizes the density of states.
 
@@ -322,19 +358,30 @@ class DensityOfStates:
             None
             The density of states is normalized.
         """
-        possible_modes=['max','integral']
+        possible_modes = ["max", "integral"]
         if mode not in possible_modes:
             raise ValueError(f"The mode must be {possible_modes}")
-        if mode=='max':
+        if mode == "max":
             for i in range(len(self.total)):
                 self.total[i] = self.total[i] / np.max(self.total[i])
-        elif mode=='integral':
+        elif mode == "integral":
             for i in range(len(self.total)):
                 y = self.total[i]
                 x = self.energies
-                integral=trapezoid(y, x=self.energies)
+                integral = trapezoid(y, x=self.energies)
                 self.total[i] = self.total[i] / integral
         return None
+
+    def save(self, path: Path):
+        serializer = get_serializer(path)
+        serializer.save(self, path)
+
+    @classmethod
+    def load(cls, path: Path):
+        serializer = get_serializer(path)
+        return serializer.load(path)
+
+
 def interpolate(x, y, factor=2):
     """
     Interplates the function y=f(x) by increasing the x points by the factor.

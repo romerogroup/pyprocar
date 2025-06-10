@@ -96,7 +96,7 @@ class FermiHandler:
         if not os.path.exists(ebs_pkl_filepath):
             logger.info(f"Parsing EBS from {dirname}")
 
-            parser = io.Parser(code=code, dir=dirname)
+            parser = io.Parser(code=code, dirpath=dirname)
             ebs = parser.ebs
             structure = parser.structure
 

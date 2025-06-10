@@ -5,7 +5,7 @@
 Example of finding the bandgap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ElectronicBandStructure is used to handle the information 
+The ElectronicBandStructure is used to handle the information
 related to the electronic band structure.
 
 .. code-block::
@@ -17,9 +17,9 @@ related to the electronic band structure.
 .. code-block::
    :caption: Downloading example
 
-    data_dir = pyprocar.download_example(save_dir='', 
+    data_dir = pyprocar.download_example(save_dir='',
                                 material='Fe',
-                                code='vasp', 
+                                code='vasp',
                                 spin_calc_type='non-spin-polarized',
                                 calc_type='bands')
 """
@@ -48,7 +48,7 @@ data_dir = os.path.join(
 ###############################################################################
 # Initialize the parser object and get the ElectronicBandStructure
 
-parser = pyprocar.io.Parser(code="vasp", dir=data_dir)
+parser = pyprocar.io.Parser(code="vasp", dirpath=data_dir)
 ebs = parser.ebs
 e_fermi = parser.ebs.efermi
 structure = parser.structure

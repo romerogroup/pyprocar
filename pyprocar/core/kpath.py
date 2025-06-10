@@ -11,10 +11,16 @@ from ..utils import mathematics
 
 # TODO Add fmt option to other codes in write_to_file
 
+
 class KPath:
     def __init__(
-        self, knames=None, kticks= None, special_kpoints=None, ngrids=None, has_time_reversal=True,
-        ):
+        self,
+        knames=None,
+        kticks=None,
+        special_kpoints=None,
+        ngrids=None,
+        has_time_reversal=True,
+    ):
         """
         The Kpath object to handle labels and ticks for band structure
 
@@ -35,24 +41,40 @@ class KPath:
         for x in knames:
             if "$" in x[0] or "$" in x[1]:
                 latex = ""
-        
-        self.knames = []   
+
+        self.knames = []
         for kname_segment in knames:
             kname_start = kname_segment[0]
             kname_end = kname_segment[1]
-            
+
             if "gamma" in kname_start.lower():
                 kname_start = r"\Gamma"
             if "gamma" in kname_end.lower():
                 kname_end = r"\Gamma"
-            
-            kname_segment=[latex + kname_start + latex, latex + kname_end + latex]
+
+            kname_segment = [latex + kname_start + latex, latex + kname_end + latex]
             self.knames.append(kname_segment)
 
         self.special_kpoints = special_kpoints
         self.ngrids = ngrids
         self.kticks = kticks
         self.has_time_reversal = has_time_reversal
+
+    def __eq__(self, other):
+        knames_equal = self.knames == other.knames
+        special_kpoints_equal = np.allclose(self.special_kpoints, other.special_kpoints)
+        ngrids_equal = self.ngrids == other.ngrids
+        kticks_equal = self.kticks == other.kticks
+        has_time_reversal_equal = self.has_time_reversal == other.has_time_reversal
+
+        kpath_equal = (
+            knames_equal
+            and special_kpoints_equal
+            and ngrids_equal
+            and kticks_equal
+            and has_time_reversal_equal
+        )
+        return kpath_equal
 
     @property
     def nsegments(self):
@@ -97,7 +119,7 @@ class KPath:
         if len(self.knames) == 1:
             return tick_names
         for isegment in range(1, self.nsegments):
-            if self.knames[isegment][0] != self.knames[isegment-1][1]:
+            if self.knames[isegment][0] != self.knames[isegment - 1][1]:
                 tick_names[-1] += "|" + self.knames[isegment][0]
             tick_names.append(self.knames[isegment][1])
         return tick_names
@@ -123,7 +145,7 @@ class KPath:
 
     def get_optimized_kpoints_transformed(
         self, transformation_matrix, same_grid_size=False
-        ):
+    ):
         """
         A method to get the optimized kpoints after a transformation
 
@@ -201,7 +223,8 @@ class KPath:
         )
 
     def get_kpoints_transformed(
-        self, transformation_matrix,
+        self,
+        transformation_matrix,
     ):
         """A method to get the transformed kpoints
 
@@ -270,13 +293,15 @@ class KPath:
         ret = "K-Path\n"
         ret += "------\n"
         for isegment in range(self.nsegments):
-            ret += "{:>2}. {:<9}: ({:>.2f} {:>.2f} {:>.2f}) -> {:<9}: ({:>.2f} {:>.2f} {:>.2f})\n".format(isegment+1,
-                                                                                                          self.knames[isegment][0],
-                                                                                                          self.special_kpoints[isegment][0][0],
-                                                                                                          self.special_kpoints[isegment][0][1],
-                                                                                                          self.special_kpoints[isegment][0][2],
-                                                                                                          self.knames[isegment][1],
-                                                                                                          self.special_kpoints[isegment][1][0],
-                                                                                                          self.special_kpoints[isegment][1][1],
-                                                                                                          self.special_kpoints[isegment][1][2])
+            ret += "{:>2}. {:<9}: ({:>.2f} {:>.2f} {:>.2f}) -> {:<9}: ({:>.2f} {:>.2f} {:>.2f})\n".format(
+                isegment + 1,
+                self.knames[isegment][0],
+                self.special_kpoints[isegment][0][0],
+                self.special_kpoints[isegment][0][1],
+                self.special_kpoints[isegment][0][2],
+                self.knames[isegment][1],
+                self.special_kpoints[isegment][1][0],
+                self.special_kpoints[isegment][1][1],
+                self.special_kpoints[isegment][1][2],
+            )
         return ret
