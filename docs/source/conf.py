@@ -13,7 +13,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import shutil
 import sys
+from distutils.sysconfig import get_python_lib
+from pathlib import Path
 
 from pyprocar.version import version
 
@@ -24,6 +27,52 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "PyProcar"
 copyright = "2020, Romero Group"
 author = "Uthpala Herath"
+
+
+sys.path.insert(0, os.path.abspath("."))
+
+SRC_DIR = Path(__file__).parent
+REPO_ROOT = SRC_DIR.parent.parent
+SRC_EXAMPLES_PATH = SRC_DIR / "examples"
+REPO_EXAMPLES_PATH = REPO_ROOT / "examples"
+CONTRIBUTING_PATH = REPO_ROOT / "CONTRIBUTING.md"
+
+
+print(f"REPO_ROOT: {REPO_ROOT}")
+print(f"SRC_DIR: {SRC_DIR}")
+print(f"SRC_EXAMPLES_PATH: {SRC_EXAMPLES_PATH}")
+
+
+# Copy Repo Examples to docs source directory
+if SRC_EXAMPLES_PATH.exists():
+    shutil.rmtree(SRC_EXAMPLES_PATH)
+shutil.copytree(REPO_EXAMPLES_PATH, SRC_EXAMPLES_PATH)
+
+shutil.copy(CONTRIBUTING_PATH, SRC_DIR / "CONTRIBUTING.md")
+
+
+if os.environ.get("READTHEDOCS") == "True":
+
+    site_path = get_python_lib()
+    ffmpeg_path = os.path.join(site_path, "imageio_ffmpeg", "binaries")
+    print("########")
+    print("good1")
+    [ffmpeg_bin] = [
+        file for file in os.listdir(ffmpeg_path) if file.startswith("ffmpeg-")
+    ]
+    print("########*****")
+    print("good2")
+    try:
+        os.symlink(
+            os.path.join(ffmpeg_path, ffmpeg_bin), os.path.join(ffmpeg_path, "ffmpeg")
+        )
+    except FileExistsError:
+        print("File is already there!!!!!!!")
+    else:
+        print("file created :)")
+    print("good3")
+    os.environ["PATH"] += os.pathsep + ffmpeg_path
+    print("good4")
 
 
 # The full version, including alpha/beta/rc tags
@@ -52,7 +101,7 @@ if not os.path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
-os.environ['PYVISTA_BUILDING_GALLERY'] = 'true'
+os.environ["PYVISTA_BUILDING_GALLERY"] = "true"
 
 
 # -- General configuration ---------------------------------------------------
@@ -71,18 +120,23 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
     "sphinx.ext.githubpages",
-    'sphinx.ext.intersphinx',
-    "sphinx.ext.mathjax", 
-    "sphinx.ext.napoleon", 
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
     "pyvista.ext.plot_directive",
-    'sphinx.ext.viewcode',
-    
-    'sphinx_copybutton',
-    'sphinx_design',
-    'sphinx_gallery.gen_gallery',
-    'numpydoc'
+    "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
+    "sphinx_gallery.gen_gallery",
+    "numpydoc",
+    "sphinxcontrib.youtube",
+    "sphinxcontrib.video",
+    "sphinx_new_tab_link",
+    "myst_parser",
+    "nbsphinx",
 ]
-
+nbsphinx_allow_errors = True
+pygments_style = "sphinx"
 # Used to set up examples sections
 sphinx_gallery_conf = {
     # convert rst to md for ipynb
@@ -100,16 +154,22 @@ napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
 napoleon_custom_sections = [
-    ('My Custom Section', 'params_style'),  # Custom section treated like parameters
-    ('Plot Appearance', 'params_style'),  # Custom section treated like parameters
-    ('Surface Configuration', 'params_style'),  # Custom section treated like parameters
-    ('Spin Settings', 'params_style'),  # Custom section treated like parameters
-    ('Axes and Labels', 'params_style'),  # Custom section treated like parameters
-    ('Brillouin Zone Styling', 'params_style'),  # Custom section treated like parameters
-    ('Advanced Configurations', 'params_style'),  # Custom section treated like parameters
-    ('Isoslider Settings', 'params_style'),  # Custom section treated like parameters
-    ('Miscellaneous', 'params_style'),  # Custom section treated like parameters
-    'Methods'
+    ("My Custom Section", "params_style"),  # Custom section treated like parameters
+    ("Plot Appearance", "params_style"),  # Custom section treated like parameters
+    ("Surface Configuration", "params_style"),  # Custom section treated like parameters
+    ("Spin Settings", "params_style"),  # Custom section treated like parameters
+    ("Axes and Labels", "params_style"),  # Custom section treated like parameters
+    (
+        "Brillouin Zone Styling",
+        "params_style",
+    ),  # Custom section treated like parameters
+    (
+        "Advanced Configurations",
+        "params_style",
+    ),  # Custom section treated like parameters
+    ("Isoslider Settings", "params_style"),  # Custom section treated like parameters
+    ("Miscellaneous", "params_style"),  # Custom section treated like parameters
+    "Methods",
 ]
 
 
@@ -125,7 +185,7 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
@@ -135,7 +195,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'en'
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -151,7 +211,11 @@ pygments_style = "sphinx"
 # a list of builtin themes.
 #
 # import pydata_sphinx_theme
-html_theme = "pydata_sphinx_theme"
+html_title = f"PyProcar Docs: v{version}"
+html_theme = "furo"
+
+html_logo = os.path.join("media", "images", "PyProcar-logo.png")
+html_static_path = []
 # html_theme_path = ["_themes", ]
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -160,7 +224,7 @@ html_theme = "pydata_sphinx_theme"
 #
 html_theme_options = {
     "github_url": "https://github.com/romerogroup/pyprocar",
-    "icon_links": [ 
+    "icon_links": [
         {
             "name": "Contributing",
             "url": "https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst",
@@ -171,8 +235,25 @@ html_theme_options = {
             "url": "https://doi.org/10.1016/j.cpc.2019.107080",
             "icon": "fa fa-file-text fa-fw",
         },
-    ]
+    ],
 }
+
+
+html_context = {
+    "logo_link": "index.html",  # Specify the link for the logo if needed
+}
+
+html_css_files = ["css/custom.css", "notebook.css"]
+
+html_js_files = ["js/custom.js"]
+
+pygments_dark_style = "monokai_colors.ManimMonokaiStyle"
+
+if not os.path.exists("media/images"):
+    os.makedirs("media/images")
+
+if not os.path.exists("media/videos/480p30"):
+    os.makedirs("media/videos/480p30")
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -218,8 +299,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "PyProcar.tex", "PyProcar Documentation", "Uthpala Herath",
-     "manual"),
+    (master_doc, "PyProcar.tex", "PyProcar Documentation", "Uthpala Herath", "manual"),
 ]
 
 # -- Options for manual page output ------------------------------------------
@@ -248,5 +328,3 @@ texinfo_documents = [
 # -- Extension configuration -------------------------------------------------
 
 # skip building the osmnx example if osmnx is not installed
-
-
