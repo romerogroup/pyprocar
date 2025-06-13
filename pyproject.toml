@@ -53,6 +53,7 @@ dependencies = [
     "dill",
     "variconfig",
     "huggingface_hub[hf_transfer,cli]",
+    "pyvista[jupyter]"
 ]
 
 [project.optional-dependencies]
@@ -100,10 +101,13 @@ documentation = "https://romerogroup.github.io/pyprocar/"
 Issues = "https://github.com/romerogroup/pyprocar/issues"
 Changelog = "https://github.com/romerogroup/pyprocar/CHANGELOG.md"
 
+[project.scripts]
+pyprocar-download = "scripts.download:main"
+
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyprocar*"]
+include = ["pyprocar*", "scripts*"]
 exclude = ["pyprocar.tests*"]
 
 

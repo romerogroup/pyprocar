@@ -47,7 +47,8 @@ temp/
 
 #examples
 #examples*/
-#examples*
+#examples*/
+examples/**/data/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -164,6 +165,7 @@ my_tests/
 /tests/data/
 /tests/data.zip
 /data
+
 reports/
 notebooks/
 venv_docs/
