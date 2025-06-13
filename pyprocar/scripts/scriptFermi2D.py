@@ -279,8 +279,12 @@ def fermi2D(
     # kpoints = data.kpoints
     # bands = data.bands
     # character = data.spd
+    if ebs.is_non_collinear:
+        spin_channels = [0]
+    else:
+        spin_channels = spins
 
-    bands = ebs.bands
+    bands = ebs.bands[..., spin_channels]
     character = projected
 
     if spin_texture is True:
