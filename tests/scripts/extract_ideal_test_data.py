@@ -24,7 +24,7 @@ for calc_test_case in ALL_TEST_CASES:
 
     parser = io.Parser(
         code=calc_test_case.code,
-        dir=calc_test_case.path,
+        dirpath=calc_test_case.path,
     )
 
     if calc_type in DOS_CALC_TYPES:
