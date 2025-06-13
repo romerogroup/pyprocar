@@ -19,18 +19,30 @@ from scipy.signal import argrelextrema
 
 
 class AutoBandsPlot:
-    def __init__(self, code="vasp", dirname="."):
+    def __init__(self, code="vasp", dirname=".", fermi: int = None):
+
         self.parser = io.Parser(code="vasp", dirpath=dirname)
         self.code = code
         self.ebs = self.parser.ebs
+
+        codes_with_scf_fermi = ["qe", "elk"]
+        if code in codes_with_scf_fermi and fermi is None:
+            logger.info(
+                f"No fermi given, using the found fermi energy: {self.ebs.efermi}"
+            )
+            fermi = self.ebs.efermi
+        elif fermi is None:
+            fermi = 0
+        self.fermi = fermi
+
         self.dirname = dirname
         self.structure = self.parser.structure
-        self.kpath = self.parser.kpath
+        self.kpath = self.ebs.kpath
         self.ispin = self.ebs.bands.shape[-1]
-        self.bands_up = self.ebs.bands[:, :, 0] - self.ebs.efermi
+        self.bands_up = self.ebs.bands[:, :, 0] - fermi
         self.bands_down = None
         if self.ispin == 2:
-            self.bands_down = self.ebs.bands[:, :, 1] - self.ebs.efermi
+            self.bands_down = self.ebs.bands[:, :, 1] - fermi
 
         self.IPR = self.ebs.ebs_ipr()
         self.pIPR = self.ebs.ebs_ipr_atom()
@@ -417,6 +429,7 @@ class AutoBandsPlot:
             bandsplot(
                 code=self.code,
                 dirname=self.dirname,
+                fermi=self.fermi,
                 mode="plain",
                 spins=spins,
                 elimit=self.eLim,
@@ -430,6 +443,7 @@ class AutoBandsPlot:
                 code=self.code,
                 dirname=self.dirname,
                 mode="parametric",
+                fermi=self.fermi,
                 spins=spins,
                 elimit=self.eLim,
                 atoms=atoms,
@@ -443,6 +457,7 @@ class AutoBandsPlot:
             bandsplot(
                 code=self.code,
                 dirname=self.dirname,
+                fermi=self.fermi,
                 mode="parametric",
                 spins=spins,
                 elimit=self.eLim,
@@ -453,5 +468,5 @@ class AutoBandsPlot:
             )
 
 
-def autobandsplot(code="vasp", dirname="."):
-    a = AutoBandsPlot(code=code, dirname=dirname)
+def autobandsplot(code="vasp", dirname=".", fermi: int = None):
+    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi)
