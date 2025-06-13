@@ -127,7 +127,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
     "sphinx_design",
-    "sphinx_gallery.gen_gallery",
+    # "sphinx_gallery.gen_gallery",
     "numpydoc",
     "sphinxcontrib.youtube",
     "sphinxcontrib.video",
@@ -138,16 +138,16 @@ extensions = [
 nbsphinx_allow_errors = True
 pygments_style = "sphinx"
 # Used to set up examples sections
-sphinx_gallery_conf = {
-    # convert rst to md for ipynb
-    "pypandoc": True,
-    # path to your examples scripts
-    "examples_dirs": ["../../examples/"],
-    # path where to save gallery generated examples
-    "gallery_dirs": ["examples"],
-    "doc_module": "pyprocar",
-    "image_scrapers": ("pyvista", "matplotlib"),
-}
+# sphinx_gallery_conf = {
+#     # convert rst to md for ipynb
+#     "pypandoc": True,
+#     # path to your examples scripts
+#     "examples_dirs": ["../../examples/"],
+#     # path where to save gallery generated examples
+#     "gallery_dirs": ["examples"],
+#     "doc_module": "pyprocar",
+#     "image_scrapers": ("pyvista", "matplotlib"),
+# }
 
 # Configuration for the Napoleon extension
 napoleon_use_ivar = True
@@ -184,7 +184,7 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 # source_suffix = ".rst"
 
 # The master toctree document.
