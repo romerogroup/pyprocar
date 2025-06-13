@@ -170,3 +170,15 @@ class TestParsers(BaseTest):
 
         assert ebs == expected_ebs
         assert structure == expected_structure
+
+        if calc_test_case.calc_type == CalcType.BANDS.value:
+            assert ebs.kpath is not None
+
+    def test_fermi2d(self, calc_test_case: CalcInfo):
+        """Test parsing of Procar file."""
+        # You can now easily access all the parameters for the current test run
+        print(
+            f"\nTesting: {calc_test_case.mat_system} "
+            f"({calc_test_case.code} v{calc_test_case.version}) - "
+            f"{calc_test_case.mag_type}/{calc_test_case.calc_type}"
+        )
