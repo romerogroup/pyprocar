@@ -205,6 +205,11 @@ class FermiHandler:
             property_name=config.property_name,
             fermi_shift=fermi_shift,
         )
+        if fermi_surface is None:
+            user_logger.warning(
+                f"No Fermi surface found for spin {spins}. Skipping plotting."
+            )
+            return None
 
         visualizer = FermiVisualizer(self.data_handler, config)
 
