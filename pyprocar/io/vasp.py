@@ -110,14 +110,16 @@ class Outcar(collections.abc.Mapping):
             return the reciprocal lattice vectors
         """
 
-        reciprocal_lattice = re.findall(
-            r"reciprocal\s*lattice\s*vectors\s*([-.\s\d]*)", self.file_str
-        )[-1]
-        reciprocal_lattice = reciprocal_lattice.split()
-        reciprocal_lattice = np.array(reciprocal_lattice, dtype=float)
-        # up to now I have, both direct and rec. lattices (3+3=6 columns)
-        reciprocal_lattice = np.reshape(reciprocal_lattice, (3, 6))
-        reciprocal_lattice = reciprocal_lattice[:, 3:]
+        match = re.search(
+            r"reciprocal lattice vectors[\s\S]+?(?=\n\s?\n\s?)", self.file_str
+        )
+        numbers = re.findall(r"[-]?\d+\.\d+", match.group(0))
+
+        # Create a NumPy array from the found numbers, reshape it to 3 rows and 6 columns
+        all_vectors = np.array(numbers, dtype=float).reshape(3, 6)
+
+        # Slice the array to get the last 3 columns,
+        reciprocal_lattice = all_vectors[:, 3:]
         return reciprocal_lattice
 
     @cached_property
@@ -158,7 +160,15 @@ class Outcar(collections.abc.Mapping):
         vasp54_block_match = re.search(
             r"Space group operators:\s*\n"  # header line
             r"([ \t]*irot[\s\S]+?)"  # from the column headers …
-            r"(?=\n\S|\Z)",  # … up to the next blank/non-indented line
+            r"(?=\n\s?\n\s?)",  # … up to the next blank/non-indented line
+            self.file_str,
+            flags=re.IGNORECASE,
+        )
+
+        vasp544_block_match = re.search(
+            r"Space group operators:\s*\n"  # header line
+            r"([ \t]*irot[\s\S]+?)"  # from the column headers …
+            r"(?=\n\s\n\s)",  # … up to the next blank/non-indented line
             self.file_str,
             flags=re.IGNORECASE,
         )
@@ -198,6 +208,7 @@ class Outcar(collections.abc.Mapping):
             spg_operators = []
             block = vasp54_block_match.group(1).rstrip()
             logger.debug(f"space group operators block: \n{block}")
+
             headers = None
             for i, line in enumerate(block.splitlines()):
                 values = line.split()
@@ -2083,6 +2094,7 @@ class VaspParser:
         if procar_filepath.exists():
             self.procar = Procar(procar)
         if kpoints_filepath.exists():
+            print(f"Parsing KPOINTS file: {kpoints_filepath}")
             self.kpoints = Kpoints(kpoints)
         if poscar_filepath.exists():
             self.poscar = Poscar(poscar)
