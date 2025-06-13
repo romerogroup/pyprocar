@@ -6,7 +6,9 @@ from typing import Union
 
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
-from huggingface_hub import HfApi, snapshot_download
+from concurrent.futures import ThreadPoolExecutor
+
+from huggingface_hub import HfApi, hf_hub_download, list_repo_files, snapshot_download
 
 REPO_ID = "lllangWV/pyprocar_test_data"
 REPO_TYPE = "dataset"
@@ -40,11 +42,16 @@ def uncompress_dirpath(dirpath: Union[str, Path]):
     """
 
     archive_path = Path(dirpath)
+    if archive_path.suffix == ".zip":
+        outpath = archive_path.with_suffix("")
+    else:
+        outpath = archive_path
+
     if not archive_path.exists():
         raise FileNotFoundError(f"Test data archive not found: {dirpath}")
 
     with zipfile.ZipFile(archive_path, "r") as zipf:
-        zipf.extractall(path=archive_path.parent)
+        zipf.extractall(path=outpath)
 
 
 def compress_test_data(data_dirpath: Union[str, Path]):
@@ -123,7 +130,9 @@ def uncompress_test_data(data_dirpath: Union[str, Path]):
                         level2_dir.unlink()
 
 
-def download_test_data(relpath: str, output_path: Union[str, Path] = "."):
+def download_test_data(
+    relpath: str, output_path: Union[str, Path] = ".", force: bool = False
+):
     """
     Download test data from:
     https://huggingface.co/datasets/lllangWV/pyprocar_test_data/tree/main/
@@ -135,25 +144,53 @@ def download_test_data(relpath: str, output_path: Union[str, Path] = "."):
 
         output_path (str): Path to the directory to download the examples to.
     """
+    full_data_path = output_path / relpath
+    if full_data_path.exists() and not force:
+        print(f"Data already exists at {full_data_path}")
+        return full_data_path
 
     output_path = Path(output_path)
+
+    # Ensure the output directory exists - this is critical for Jupyter notebooks
+    output_path.mkdir(parents=True, exist_ok=True)
 
     pattern = relpath + "*"
 
     download_dirpath = snapshot_download(
         repo_id=REPO_ID,
         repo_type=REPO_TYPE,
-        local_dir=output_path,
         allow_patterns=[pattern],
     )
+    download_path = Path(download_dirpath)
+    data_dir = download_path / "data"
 
-    download_dirpath = Path(download_dirpath)
+    dataset_cache_dir = download_path.parent.parent
 
-    uncompress_test_data(download_dirpath / "data")
+    shutil.copytree(data_dir, output_path / "data", dirs_exist_ok=True)
+    shutil.rmtree(dataset_cache_dir)
 
-    shutil.rmtree(output_path / ".cache")
+    data_dir = output_path / "data"
+    # print(data_dir)
+    # uncompress_test_data(data_dir)
 
-    return download_dirpath
+    uncompress_dirpath(full_data_path.with_suffix(".zip"))
+
+    os.remove(full_data_path.with_suffix(".zip"))
+
+    # Handle cache directory cleanup more safely
+    cache_dir = output_path / ".cache"
+    if cache_dir.exists():
+        shutil.rmtree(cache_dir)
+
+    return full_data_path
+
+
+def download_from_hf(
+    relpath: str, output_path: Union[str, Path] = ".", force: bool = False
+):
+    with ThreadPoolExecutor(1) as executor:
+        future = executor.submit(download_test_data, relpath, output_path, force)
+        return future.result()
 
 
 def remove_zip_files(dirpath: Union[str, Path]):
