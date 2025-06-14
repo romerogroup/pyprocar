@@ -18,4 +18,5 @@ section, please be sure to head over to the `Contributors Graph`_.
 License
 -------------------------------------
 
-.. include:: ../../../LICENSE
+.. literalinclude:: ../../../LICENSE
+   :linenos:
