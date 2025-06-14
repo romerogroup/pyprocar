@@ -129,7 +129,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     # "sphinx_gallery.gen_gallery",
-    "sphinxcontrib.pdfembed",
+    # "sphinxcontrib.pdfembed",
     "numpydoc",
     "sphinxcontrib.youtube",
     "sphinxcontrib.video",
