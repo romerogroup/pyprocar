@@ -60,6 +60,46 @@ where :math:`\sigma^i` are the Pauli matrices with :math:`i = x, y , z` and the 
 	\end{bmatrix}
 
 
+PyProcar Architecture Overview
+==============================
+
+PyProcar is designed with a modular architecture that efficiently processes DFT data from various codes and transforms it into publication-ready visualizations. The library follows a clear data flow from input parsing to output generation.
+
+.. figure:: ../_static/images/pyprocar_structure_overview.png
+   :align: center
+   :width: 100%
+   
+   PyProcar library architecture overview showing the data flow from DFT codes through the IO module to core data objects and finally to plotting functions.
+
+The PyProcar workflow consists of three main components:
+
+**IO Module**: The input/output module serves as the interface between PyProcar and various DFT codes (VASP, Quantum Espresso, ABINIT, ELK, Lobster, and Siesta). This module contains specialized parsers for each DFT code that extract the necessary information from their respective output files and convert it into a standardized format.
+
+**Core Data Objects**: The parsed data is organized into core data structures that provide a unified representation regardless of the originating DFT code. These objects include:
+
+- **ElectronicBandStructure**: Contains band energies, k-points, and electronic structure information
+- **DensityOfStates**: Stores density of states data for total and projected calculations  
+- **KPath**: Manages k-point paths for band structure calculations
+- **Structure**: Holds atomic positions, lattice parameters, and crystallographic information
+- **FermiSurface**: Contains Fermi surface data for 2D and 3D visualizations
+
+**Plotting Module**: The visualization layer takes the core data objects and generates publication-quality plots. This module includes specialized plotting functions for band structures, density of states, Fermi surfaces, and other electronic structure properties. The consistent data format from the core objects ensures that all plotting functions work seamlessly regardless of the original DFT code used.
+
+**Scripts Module**: To provide users with a streamlined interface for common plotting tasks, PyProcar includes a collection of high-level scripts that utilize the plotting module. These scripts offer convenient, one-line commands for generating standard electronic structure visualizations:
+
+- **pyprocar.bandsplot()**: Creates band structure plots with optional projections
+- **pyprocar.dosplot()**: Generates density of states plots with various styling options  
+- **pyprocar.fermi2D()**: Produces 2D Fermi surface cross-sections
+- **pyprocar.fermi3D()**: Creates interactive 3D Fermi surface visualizations
+- **pyprocar.bandsdosplot()**: Combines band structure and DOS in a single figure
+- **pyprocar.unfold()**: Visualizes unfolded band structures for supercells
+- **pyprocar.filter()**: Applies filtering to electronic structure data
+- **pyprocar.repair()**: Repairs and processes band structure data
+
+These scripts abstract away the complexity of directly interfacing with the core data objects and plotting functions, making PyProcar accessible to users who want quick, publication-ready results without extensive programming. Each script automatically handles data parsing, processing, and visualization with sensible defaults while still allowing for extensive customization through optional parameters.
+
+This modular design allows users to easily switch between different DFT codes while maintaining the same analysis and visualization workflow, making PyProcar a versatile tool for electronic structure analysis.
+
 Further Details
 ===============
 .. toctree::

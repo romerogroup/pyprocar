@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "PyProcar"
 copyright = "2020, Romero Group"
 author = "Uthpala Herath"
+version = __version__
 
 
 sys.path.insert(0, os.path.abspath("."))
