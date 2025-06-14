@@ -18,7 +18,7 @@ import sys
 from distutils.sysconfig import get_python_lib
 from pathlib import Path
 
-from pyprocar.version import version
+from pyprocar import __version__
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -76,7 +76,7 @@ if os.environ.get("READTHEDOCS") == "True":
 
 
 # The full version, including alpha/beta/rc tags
-release = version
+release = __version__
 
 
 # -- pyvista configuration ---------------------------------------------------
@@ -128,6 +128,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     # "sphinx_gallery.gen_gallery",
+    "sphinxcontrib.pdfembed",
     "numpydoc",
     "sphinxcontrib.youtube",
     "sphinxcontrib.video",
