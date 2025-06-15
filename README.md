@@ -1,14 +1,11 @@
-[![PyPI version](https://badge.fury.io/py/pyprocar.svg)](https://badge.fury.io/py/pyprocar)
-[![conda-forge version](https://img.shields.io/conda/v/conda-forge/pyprocar.svg?label=conda-forge&colorB=027FD5)](https://anaconda.org/conda-forge/pyprocar)
-[![Build Status](https://travis-ci.org/romerogroup/pyprocar.svg?branch=master)](https://travis-ci.org/romerogroup/pyprocar)
-[![HitCount](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar.svg)](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar)
+[![PyPI version](https://badge.fury.io/py/pyprocar.svg)]([pypi-version])
+[![conda-forge version](https://img.shields.io/conda/v/conda-forge/pyprocar.svg?label=conda-forge&colorB=027FD5)]([conda-forge-version])
+[![Build Status](https://travis-ci.org/romerogroup/pyprocar.svg?branch=master)]([build-status])
+[![HitCount](http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar.svg)]([hitcount])
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/pyprocar)
 
-Notice
-===========
-- **New Release** We recently updated to a new version 'v6.2.1'.
-- **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
 
+[Documentation][docs] | [PyPI][pypi] | [GitHub][github]
 
 PyProcar
 ===========
@@ -23,13 +20,85 @@ Currently supports:
 4. Abinit (DOS Stll in development)
 5. Lobster (Stll in development)
 
-![](welcome.png)
+
+Notice
+===========
+- **New Release** We recently updated to a new version 'v6.2.1'.
+- **Support for Previous Versions**: For users who prefer to continue with an older version, we have conveniently archived the previous releases on GitHub, and provided a link to the corresponding documentation.
+
+
+## Showcase: What PyProcar Can Do
+
+PyProcar is capable of performing a multitude of tasks including plotting plain and spin/atom/orbital projected band structures and Fermi surfaces- both in 2D and 3D, Fermi velocity plots, unfolding bands of a super cell, comparing band structures from multiple DFT calculations, plotting partial density of states and generating a k-path for a given crystal structure.
+
+### Crystal Field Splitting in SrVO₃
+
+<div align="center">
+<img src="docs/source/_static/images/SrVO3_Crystal Field Splitting.png" alt="SrVO3 Crystal Field Splitting" width="600"/>
+<p><strong>What is being plotted:</strong> Orbital-projected band structure showing crystal field splitting of d-orbitals in SrVO₃, illustrating how PyProcar can decompose electronic bands by orbital character to reveal crystal field effects in transition metal compounds.</p>
+</div>
+
+### Dirac Point Identification in Graphene
+
+<div align="center">
+<img src="docs/source/_static/images/Graphene_Dirac Point.png" alt="Graphene Dirac Point" width="600"/>
+<p><strong>What is being plotted:</strong> Band structure of Graphene highlighting the Dirac points where conduction and valence bands meet, showcasing PyProcar's capability to identify and analyze topological features and linear dispersion relations in 2D materials.</p>
+</div>
+
+### Fermi Surface Analysis - Gold Van Alphen Frequencies
+
+<div align="center">
+<img src="docs/source/_static/images/Gold_Van Alphen.png" alt="Gold Van Alphen Frequencies" width="600"/>
+<p><strong>What is being plotted:</strong> Fermi surface cross-sections and Van Alphen oscillation frequencies for Gold, demonstrating PyProcar's ability to analyze the topology of Fermi surfaces and calculate quantum oscillation properties in metals.</p>
+</div>
+
+### Spin-Orbit Coupling and Rashba Effect in BiSb Monolayer
+
+<div align="center">
+<img src="docs/source/_static/images/bisb_monolayer_Spin Rashba.PNG" alt="BiSb Monolayer Spin Rashba Effect" width="600"/>
+<p><strong>What is being plotted:</strong> Spin-resolved band structure of BiSb monolayer showing the Rashba spin-orbit coupling effect, demonstrating PyProcar's ability to visualize spin-polarized electronic structures and analyze spin-orbit interactions in topological materials.</p>
+</div>
+
+### Band Structure Visualization
+
+<div align="center">
+<img src="docs/source/_static/images/bands_showcase.png" alt="Band Structure Showcase" width="600"/>
+<p><strong>What is being plotted:</strong> Electronic band structure showing energy bands along high-symmetry k-points, demonstrating PyProcar's capability to generate clean, publication-ready band structure plots with customizable styling and projection options.</p>
+</div>
+
+### 2D Band Structure Analysis
+
+<div align="center">
+<img src="docs/source/_static/images/bands2d_showcase.png" alt="2D Band Structure Showcase" width="600"/>
+<p><strong>What is being plotted:</strong> Two-dimensional band structure visualization showing energy dispersion across the entire Brillouin zone, highlighting PyProcar's ability to create comprehensive 2D band maps for analyzing electronic properties and band topology.</p>
+</div>
+
+### Density of States Analysis
+
+<div align="center">
+<img src="docs/source/_static/images/dos_showcase.png" alt="Density of States Showcase" width="600"/>
+<p><strong>What is being plotted:</strong> Density of states (DOS) with orbital and species projections, showcasing PyProcar's ability to decompose the total DOS into atomic and orbital contributions for detailed electronic structure analysis.</p>
+</div>
+
+### 2D Fermi Surface Mapping
+
+<div align="center">
+<img src="docs/source/_static/images/fermi2d_showcase.png" alt="2D Fermi Surface Showcase" width="600"/>
+<p><strong>What is being plotted:</strong> Two-dimensional Fermi surface cross-sections showing the topology of the Fermi level, demonstrating PyProcar's capability to visualize Fermi surfaces in 2D planes with high resolution and customizable projections.</p>
+</div>
+
+### 3D Fermi Surface Visualization
+
+<div align="center">
+<img src="docs/source/_static/images/fermi3d_showcase.png" alt="3D Fermi Surface Showcase" width="600"/>
+<p><strong>What is being plotted:</strong> Three-dimensional Fermi surface rendering showing the complete topology of electronic states at the Fermi level, highlighting PyProcar's advanced 3D visualization capabilities for comprehensive Fermi surface analysis and interactive exploration.</p>
+</div>
 
 Documentation
 -------------
 
 For versions 6.1.0 and above, the documentation is found here:
-https://romerogroup.github.io/pyprocar/
+[docs]
 
 
 The prior documentation is found here:
@@ -139,3 +208,20 @@ Changelog
 --------------
 
 For the old changelog, see [CHANGELOG.md](CHANGELOG.md)
+
+
+---
+
+[docs]: https://romerogroup.readthedocs.io//pyprocar/
+[pypi]: https://pypi.org/project/pyprocar/
+[github]: https://github.com/romerogroup/pyprocar
+[contributing]: https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.md
+[license]: https://github.com/romerogroup/pyprocar/blob/main/LICENSE
+
+
+[pypi-version]: https://badge.fury.io/py/pyprocar
+[conda-forge-version]: https://img.shields.io/conda/v/conda-forge/pyprocar.svg?label=conda-forge&colorB=027FD5
+[build-status]: https://travis-ci.org/romerogroup/pyprocar
+[hitcount]: http://hits.dwyl.com/uthpalaherath/romerogroup/pyprocar
+[pypi-downloads]: https://img.shields.io/pypi/dm/pyprocar
+
