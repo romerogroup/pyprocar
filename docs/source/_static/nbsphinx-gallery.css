@@ -45,8 +45,25 @@
 
 /* Styling for the title text */
 .nbsphinx-gallery .gallery-text {
-    font-size: 2.6rem;
-    font-weight: 700; /* Even bolder font for the title */
+    font-size: 2.6rem !important;
+    font-weight: 700 !important; /* Even bolder font for the title */
     line-height: 1.3;
     margin-top: 8px; /* Add some space above the title */
+}
+
+/* Additional selectors to target the actual title elements */
+.nbsphinx-gallery > a > div:not(:first-child),
+.nbsphinx-gallery > a > span,
+.nbsphinx-gallery > a > p,
+.nbsphinx-gallery > a h1,
+.nbsphinx-gallery > a h2,
+.nbsphinx-gallery > a h3,
+.nbsphinx-gallery > a h4,
+.nbsphinx-gallery > a h5,
+.nbsphinx-gallery > a h6 {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
 }
