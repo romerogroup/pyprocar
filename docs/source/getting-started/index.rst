@@ -56,7 +56,7 @@ Paper
 .. grid:: 2
 
    .. grid-item-card:: 1st Publication
-      :link: authors_ref
+      :link: https://www.sciencedirect.com/science/article/abs/pii/S0010465519303935?via%3Dihub
       :link-type: ref
       :class-title: pyprocar-card-title
 
@@ -67,7 +67,7 @@ Paper
          :target: https://www.sciencedirect.com/science/article/abs/pii/S0010465519303935?via%3Dihub
 
    .. grid-item-card:: 2nd Publication
-      :link: authors_ref
+      :link: https://www.sciencedirect.com/science/article/abs/pii/S0010465523004083
       :link-type: ref
       :class-title: pyprocar-card-title
 
