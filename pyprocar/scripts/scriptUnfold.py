@@ -82,6 +82,8 @@ def unfold(
     user_logger.info("_" * 100)
 
     welcome()
+    if vmin is not None and vmax is not None:
+        kwargs["clim"] = (vmin, vmax)
     default_config = ConfigFactory.create_config(PlotType.UNFOLD)
     config = ConfigManager.merge_configs(default_config, kwargs)
     modes_txt = " , ".join(config.modes)
@@ -122,11 +124,10 @@ def unfold(
         parser = io.Parser(code=code, dirpath=dirname)
         ebs = parser.ebs
         structure = parser.structure
-        kpath = parser.kpath
+        kpath = ebs.kpath
 
         data_utils.save_pickle(ebs, ebs_pkl_filepath)
         data_utils.save_pickle(structure, structure_pkl_filepath)
-        data_utils.save_pickle(kpath, kpath_pkl_filepath)
     else:
         logger.info(
             f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}"
@@ -134,7 +135,7 @@ def unfold(
 
         ebs = data_utils.load_pickle(ebs_pkl_filepath)
         structure = data_utils.load_pickle(structure_pkl_filepath)
-        kpath = data_utils.load_pickle(kpath_pkl_filepath)
+        kpath = ebs.kpath
 
     if fermi is not None:
         ebs.bands -= fermi
@@ -254,7 +255,7 @@ def unfold(
                             for iorb in it[ispc]:
                                 orbitals = np.append(
                                     orbitals, orbital_names[iorb]
-                                ).astype(np.int)
+                                ).astype(int)
                             labels.append(ispc + "-" + "".join(it[ispc]))
                         else:
                             orbitals = it[ispc]
@@ -266,16 +267,14 @@ def unfold(
                             spins=spins,
                         )
                         weights.append(w)
-        ebs_plot.plot_parameteric_overlay(
-            spins=spins, vmin=vmin, vmax=vmax, weights=weights
-        )
+        ebs_plot.plot_parameteric_overlay(spins=spins, weights=weights, labels=labels)
     else:
         if atoms is not None and isinstance(atoms[0], str):
             atoms_str = atoms
             atoms = []
             for iatom in np.unique(atoms_str):
                 atoms = np.append(atoms, np.where(structure.atoms == iatom)[0]).astype(
-                    np.int
+                    int
                 )
 
         if orbitals is not None and isinstance(orbitals[0], str):
@@ -283,7 +282,22 @@ def unfold(
 
             orbitals = []
             for iorb in orbital_str:
-                orbitals = np.append(orbitals, orbital_names[iorb]).astype(np.int)
+                orbitals = np.append(orbitals, orbital_names[iorb]).astype(int)
+
+        projection_labels = []
+        projection_label = ""
+        atoms_labels = ""
+        if atoms is not None:
+            atoms_labels = ",".join(str(x) for x in atoms)
+            projection_label += f"atoms-{atoms_labels}"
+        orbital_labels = ""
+        if orbitals is not None:
+            orbital_labels = ",".join(str(x) for x in orbitals)
+            if len(projection_label) != 0:
+                projection_label += "_"
+        projection_label += f"orbitals-{orbital_labels}"
+        projection_labels.append(projection_label)
+
         weights = ebs_plot.ebs.ebs_sum(
             atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
         )
@@ -309,6 +323,7 @@ def unfold(
                 color_mask=color_mask,
                 width_mask=width_mask,
                 spins=spins,
+                labels=projection_labels,
             )
         elif mode == "scatter":
             logger.info("Plotting bands in scatter mode")
@@ -319,6 +334,7 @@ def unfold(
                 color_mask=color_mask,
                 width_mask=width_mask,
                 spins=spins,
+                labels=projection_labels,
             )
 
         else:

@@ -789,7 +789,7 @@ class DOSPlot:
         self.ax.plot(
             data["x"],
             data["y"],
-            color="black",
+            color=self.config.color,
             alpha=self.config.opacity[spin_channel],
             linestyle=self.config.linestyle[spin_channel],
             label=self.config.spin_labels[spin_channel],

@@ -42,14 +42,14 @@ class QEParser:
 
     def __init__(
         self,
-        dirpath: Union[str, Path] = "",
+        dirpath: Union[str, Path] = ".",
         scf_in_filepath: Union[str, Path] = "scf.in",
         bands_in_filepath: Union[str, Path] = "bands.in",
         pdos_in_filepath: Union[str, Path] = "pdos.in",
         kpdos_in_filepath: Union[str, Path] = "kpdos.in",
         atomic_proj_xml_filepath: Union[str, Path] = "atomic_proj.xml",
     ):
-        self.dirpath = dirpath
+        self.dirpath = Path(dirpath).resolve()
 
         # Handles the pathing to the files
         (
@@ -500,9 +500,10 @@ class QEParser:
                 elif ihs == self.nhigh_sym - 2:
                     self.ngrids.append(grid_current + 1)
 
-                # Skipping the last high symmetry point
-                elif ihs == self.nhigh_sym - 1:
-                    continue
+                # I have no idea why I skip the last high symmetry point. I think it had to do with disconinuous points.
+                # Need to code test case for this. Otherwise leave it as is.
+                # elif ihs == self.nhigh_sym - 1:
+                #     continue
                 self.kticks.append(tick_Count - 1)
                 tick_Count += grid_current
 
@@ -531,7 +532,6 @@ class QEParser:
                 self.modified_knames.append(
                     [self.knames[itick], self.knames[itick + 1]]
                 )
-
         has_time_reversal = True
         self.kpath = KPath(
             knames=self.modified_knames,

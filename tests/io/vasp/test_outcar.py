@@ -17,12 +17,23 @@ set_verbose_level(VERBOSE)
 OUTCAR_DATA_DIR = DATA_DIR / "io" / "vasp" / "outcar"
 
 
+def get_test_id(outcar_filepath: Path) -> str:
+    """Creates a nice, readable ID for each test run."""
+    return f"{outcar_filepath.stem}"
+
+
+outcar_files = []
+for filepath in OUTCAR_DATA_DIR.glob("OUTCAR_*"):
+    print(filepath)
+    suffix = filepath.suffix
+    if suffix in [".json", ".py"]:
+        continue
+    outcar_files.append(filepath)
+
+
 @pytest.fixture(
-    params=[
-        OUTCAR_DATA_DIR / "OUTCAR_v54",
-        OUTCAR_DATA_DIR / "OUTCAR_v62",
-        OUTCAR_DATA_DIR / "OUTCAR_v64",
-    ]
+    params=outcar_files,
+    ids=get_test_id,
 )
 def outcar_filepath(request):
     """Fixture that provides OUTCAR file paths for testing."""

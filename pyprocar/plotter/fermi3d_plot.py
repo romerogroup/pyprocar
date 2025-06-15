@@ -220,13 +220,17 @@ class FermiDataHandler:
         spins_band_index = []
         spins_index = []
         # Iterate over the fermi surfaces
+        spin_band_index = []
         for ispin, surface in enumerate(fermi_surfaces):
-            if ispin == 0:
-                # Get the band indices for the first spin
+            if surface.points.shape[0] == 0:
+                logger.debug(
+                    f"No Fermi surface found for spin {ispin}. Skipping adding spin_band_index "
+                )
+                continue
+
+            if spin_band_index is None:
                 spin_band_index = list(surface.point_data["band_index"])
-            elif ispin == 1:
-                # Get the band indices for the second spin
-                # and add the number of unique bands for the first spin provide unique indexing
+            else:
                 spin_band_index = list(
                     surface.point_data["band_index"] + len(np.unique(spin_band_index))
                 )
@@ -249,14 +253,14 @@ class FermiDataHandler:
 
     def _merge_fermi_surfaces(self, fermi_surfaces):
         logger.info(f"____ Merging Fermi Surfaces of different spins ____")
-        if fermi_surfaces[0].is_empty_mesh():
-            logger.warning("No Fermi surface found. Skipping merging.")
-            return fermi_surfaces[0]
         # Gets the spin-band and spin indices for the the combines fermi surfaces
         spins_band_index, spins_index = self._get_spin_pol_indices(fermi_surfaces)
         fermi_surface = None
         for i, surface in enumerate(fermi_surfaces):
-            if i == 0:
+            if surface.points.shape[0] == 0:
+                logger.debug(f"No Fermi surface found for spin {i}. Skipping merging.")
+                continue
+            if fermi_surface is None:
                 fermi_surface = surface
             else:
                 fermi_surface.merge(surface, merge_points=False, inplace=True)

@@ -117,7 +117,7 @@ class BandStructure2D(Surface):
         return surface
 
     @staticmethod
-    def _keep_points_near_subset(points, subset, max_distance=0.2):
+    def _keep_points_near_subset(points, subset, max_distance=0.3):
         """
         Keep only the points that are within a specified distance of any point in the subset.
 

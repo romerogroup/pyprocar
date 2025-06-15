@@ -52,6 +52,8 @@ dependencies = [
     "gdown",
     "dill",
     "variconfig",
+    "huggingface_hub[hf_transfer,cli]",
+    "pyvista[jupyter]"
 ]
 
 [project.optional-dependencies]
@@ -61,7 +63,7 @@ tests = [
     "pytest-cov",
     "pymatgen",
     "PyGithub",
-    "huggingface_hub[hf_transfer,cli]",
+    
 ]
 
 docs = [
@@ -78,6 +80,7 @@ docs = [
     "imageio-ffmpeg",
     "sphinx", 
     "sphinx_rtd_theme",
+    "myst_parser",
     "nbsphinx",
     "sphinx-new-tab-link",
     "sphinxcontrib-youtube",
@@ -88,37 +91,9 @@ docs = [
 
 # Combine docs and tests, plus add any dev-specific packages
 dev = [
-    # Additional dev-specific packages
-    "setuptools-scm",
-    "wheel",
-    "build",
-    "openai",
-    # Include all test dependencies
-    "pytest",
-    "pytest-cov",
-    "pymatgen",
-    "PyGithub",
-    # Include all docs dependencies
-    "sphinx_design",
-    "sphinx-copybutton",
-    "sphinx-gallery",
-    "numpydoc",
-    "pypandoc",
-    "pydata-sphinx-theme",
-    "sphinxcontrib-yaml",
-    "sphinxcontrib-autoyaml",
-    "python-dotenv",
-    "ipython",
-    "imageio-ffmpeg",
-    "sphinx", 
-    "sphinx_rtd_theme",
-    "nbsphinx",
-    "sphinx-new-tab-link",
-    "sphinxcontrib-youtube",
-    "sphinxcontrib-video",
-    "pandoc",
-    "furo"
+    "pyprocar[docs,tests]"
 ]
+
 
 [project.urls]
 homepage = "https://github.com/romerogroup/pyprocar"
@@ -126,10 +101,13 @@ documentation = "https://romerogroup.github.io/pyprocar/"
 Issues = "https://github.com/romerogroup/pyprocar/issues"
 Changelog = "https://github.com/romerogroup/pyprocar/CHANGELOG.md"
 
+[project.scripts]
+pyprocar-download = "scripts.download:main"
+
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyprocar*"]
+include = ["pyprocar*", "scripts*"]
 exclude = ["pyprocar.tests*"]
 
 

@@ -48,6 +48,7 @@ def bandsplot(
     x_limit: List[float] = None,
     use_cache: bool = True,
     verbose: int = 1,
+    quiet_welcome: bool = False,
     **kwargs,
 ):
     """A function to plot the band structutre
@@ -99,6 +100,8 @@ def bandsplot(
         data will be overwritten.
     print_plot_opts: bool, optional
         Boolean to print the plotting options
+    quiet_welcome: bool, optional
+        Boolean to not print the welcome message
     use_cache: bool, optional
         Boolean to use cache for EBS
     verbose: int, optional
@@ -110,7 +113,8 @@ def bandsplot(
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
 
-    welcome()
+    if not quiet_welcome:
+        welcome()
 
     default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE)
     config = ConfigManager.merge_configs(default_config, kwargs)
@@ -124,7 +128,8 @@ def bandsplot(
 
             Here is a list modes : {modes_txt}
             """
-    user_logger.info(message)
+    if not quiet_welcome:
+        user_logger.info(message)
 
     if print_plot_opts:
         for key, value in default_config.as_dict().items():
@@ -137,6 +142,7 @@ def bandsplot(
     kpath_pkl_filepath = os.path.join(dirname, "kpath.pkl")
 
     if not use_cache:
+        user_logger.warning(f"Not using cache, removing existing cache files")
         if os.path.exists(structure_pkl_filepath):
             logger.info(f"Removing existing structure file: {structure_pkl_filepath}")
             os.remove(structure_pkl_filepath)
@@ -153,11 +159,10 @@ def bandsplot(
         parser = io.Parser(code=code, dirpath=dirname)
         ebs = parser.ebs
         structure = parser.structure
-        kpath = parser.kpath
+        kpath = ebs.kpath
 
         data_utils.save_pickle(ebs, ebs_pkl_filepath)
         data_utils.save_pickle(structure, structure_pkl_filepath)
-        data_utils.save_pickle(kpath, kpath_pkl_filepath)
     else:
         logger.info(
             f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}"
@@ -165,7 +170,7 @@ def bandsplot(
 
         ebs = data_utils.load_pickle(ebs_pkl_filepath)
         structure = data_utils.load_pickle(structure_pkl_filepath)
-        kpath = data_utils.load_pickle(kpath_pkl_filepath)
+        kpath = ebs.kpath
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:

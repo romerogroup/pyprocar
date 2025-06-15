@@ -48,7 +48,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
 
-        CHANGELOG=$(python scripts/github_workflow/workflow_generate_changlog_on_recent_tag.py)
+        CHANGELOG=$(python .github/scripts/workflow_generate_changlog_on_recent_tag.py)
         echo "CHANGELOG<<EOF" >> $GITHUB_ENV
         echo "$CHANGELOG" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
@@ -81,7 +81,7 @@ jobs:
         CHANGELOG: ${{ env.CHANGELOG }}
       run: |
         
-        python scripts/github_workflow/workflow_update_release_body.py
+        python .github/scripts/workflow_update_release_body.py
     
     - uses: actions/checkout@v3
       with:
@@ -112,4 +112,4 @@ jobs:
         TAG: ${{ github.event.release.tag_name }}
       run: |
 
-        python scripts/github_workflow/workflow_delete_release.py
+        python .github/scripts/workflow_delete_release.py

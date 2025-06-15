@@ -55,6 +55,8 @@ class DensityOfStatesConfig(BaseConfig):
         The colormap used for the plot.
     colors : List[str], optional
         List of colors for the plot lines.
+    color : List[str], optional
+        List of colors for the spin up and spin down lines.
     colorbar_title : str, optional
         Title of the colorbar.
     colorbar_title_size : int, optional
@@ -165,6 +167,8 @@ class DensityOfStatesConfig(BaseConfig):
             "olive",
         ]
     )
+
+    color: str = "black"
     colorbar_title: str = "Atomic Orbital Projections"
     colorbar_title_size: int = 15
     colorbar_title_padding: int = 20
