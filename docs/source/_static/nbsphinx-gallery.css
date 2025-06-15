@@ -70,6 +70,43 @@ p.rubric {
     margin-bottom: 1rem !important;
     margin-top: 2rem !important;
     line-height: 1.2 !important;
-    color: #333 !important;
+    /* Use CSS variables that adapt to theme, with fallbacks */
+    color: var(--color-foreground-primary, var(--color-brand-primary, #333)) !important;
+}
+
+/* Fallback for explicit dark mode support */
+@media (prefers-color-scheme: dark) {
+    h2.caption-text,
+    p.caption-text,
+    .caption-text,
+    .gallery-caption,
+    .nbsphinx-gallery-caption,
+    h2:has(+ .nbsphinx-gallery),
+    p:has(+ .nbsphinx-gallery),
+    .nbsphinx-gallery + h2,
+    .nbsphinx-gallery + p,
+    .toctree-wrapper p.caption,
+    .rubric,
+    h2.rubric,
+    p.rubric {
+        color: var(--color-foreground-primary, var(--color-brand-primary, #e0e0e0)) !important;
+    }
+}
+
+/* Additional Furo theme specific selectors */
+[data-theme="dark"] h2.caption-text,
+[data-theme="dark"] p.caption-text,
+[data-theme="dark"] .caption-text,
+[data-theme="dark"] .gallery-caption,
+[data-theme="dark"] .nbsphinx-gallery-caption,
+[data-theme="dark"] h2:has(+ .nbsphinx-gallery),
+[data-theme="dark"] p:has(+ .nbsphinx-gallery),
+[data-theme="dark"] .nbsphinx-gallery + h2,
+[data-theme="dark"] .nbsphinx-gallery + p,
+[data-theme="dark"] .toctree-wrapper p.caption,
+[data-theme="dark"] .rubric,
+[data-theme="dark"] h2.rubric,
+[data-theme="dark"] p.rubric {
+    color: var(--color-foreground-primary, #e0e0e0) !important;
 }
 
