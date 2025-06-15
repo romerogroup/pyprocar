@@ -1,0 +1,51 @@
+.nbsphinx-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Increased min-width for larger items */
+    gap: 20px; /* Increased gap for more breathing room */
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.nbsphinx-gallery > a {
+    background-color: #f8f9fa; /* A light background color for the card */
+    border: 1px solid #dee2e6; /* A more defined, solid border */
+    border-radius: 8px; /* Softer, rounded corners */
+    text-align: left; /* Align text to the left for better readability */
+    text-decoration: none; /* remove underline from links */
+    color: #212529; /* A dark color for the text for better contrast */
+    padding: 15px; /* Increased padding inside the card */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transitions for hover effects */
+    display: flex; /* Use flexbox for better content alignment */
+    flex-direction: column; /* Stack content vertically */
+}
+
+.nbsphinx-gallery > a:hover {
+    transform: translateY(-5px); /* Lift the card on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Add a shadow for depth on hover */
+    border-color: #007bff; /* Highlight with a primary color on hover */
+}
+
+/* Container for the thumbnail image */
+.nbsphinx-gallery > a > div:first-child {
+    height: 180px; /* A larger, fixed height for the image container */
+    display: flex;
+    align-items: center; /* Center the image vertically */
+    justify-content: center; /* Center the image horizontally */
+    margin-bottom: 15px; /* More space between the image and the title */
+    background-color: #ffffff; /* White background for the image area */
+    border-radius: 4px; /* Slightly rounded corners for the image container */
+    overflow: hidden; /* Hide anything that spills out of the image container */
+}
+
+.nbsphinx-gallery img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+}
+
+/* Styling for the title text */
+.nbsphinx-gallery .gallery-text {
+    font-size: 1rem;
+    font-weight: 600; /* Bolder font for the title */
+    line-height: 1.4;
+}

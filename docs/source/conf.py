@@ -245,7 +245,7 @@ html_context = {
     "logo_link": "index.html",  # Specify the link for the logo if needed
 }
 
-html_css_files = ["css/custom.css", "notebook.css"]
+html_css_files = ["css/custom.css", "notebook.css", "_static/nbsphinx-gallery.css"]
 
 html_js_files = ["js/custom.js"]
 
