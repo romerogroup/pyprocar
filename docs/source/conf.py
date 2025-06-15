@@ -205,7 +205,6 @@ language = "en"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -213,11 +212,16 @@ pygments_style = "sphinx"
 # a list of builtin themes.
 #
 # import pydata_sphinx_theme
+
+
+# https://pradyunsg.me/furo/customisation/logo/
 html_title = f"PyProcar Docs: v{version}"
 html_theme = "furo"
 
 html_logo = os.path.join("media", "images", "PyProcar-logo.png")
 html_static_path = []
+
+
 # html_theme_path = ["_themes", ]
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -225,17 +229,27 @@ html_static_path = []
 # documentation.
 #
 html_theme_options = {
+    "source_repository": "https://github.com/romerogroup/pyprocar/",
+    "source_branch": "main",
+    "source_directory": "docs/source",
     "github_url": "https://github.com/romerogroup/pyprocar",
-    "icon_links": [
+    "icon_links": [],
+    "footer_icons": [
         {
-            "name": "Contributing",
-            "url": "https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst",
-            "icon": "fa fa-gavel fa-fw",
+            "name": "GitHub",
+            "url": "https://github.com/romerogroup/pyprocar",
+            "html": "",
+            "class": "fa-brands fa-solid fa-github fa-2x",
         },
         {
             "name": "The Paper",
             "url": "https://doi.org/10.1016/j.cpc.2019.107080",
             "icon": "fa fa-file-text fa-fw",
+        },
+        {
+            "name": "Contributing",
+            "url": "https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.rst",
+            "icon": "fa fa-gavel fa-fw",
         },
     ],
 }
@@ -245,10 +259,17 @@ html_context = {
     "logo_link": "index.html",  # Specify the link for the logo if needed
 }
 
-html_css_files = ["css/custom.css", "notebook.css", "_static/nbsphinx-gallery.css"]
+html_css_files = [
+    "css/custom.css",
+    "notebook.css",
+    "_static/nbsphinx-gallery.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
+]
 
 html_js_files = ["js/custom.js"]
-
+pygments_style = "sphinx"
 pygments_dark_style = "monokai_colors.ManimMonokaiStyle"
 
 if not os.path.exists("media/images"):
