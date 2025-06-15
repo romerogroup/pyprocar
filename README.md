@@ -202,7 +202,7 @@ For the old changelog, see [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
-[docs]: https://romerogroup.readthedocs.io//pyprocar/
+[docs]: https://pyprocar.readthedocs.io/en/latest/
 [pypi]: https://pypi.org/project/pyprocar/
 [github]: https://github.com/romerogroup/pyprocar
 [contributing]: https://github.com/romerogroup/pyprocar/blob/main/CONTRIBUTING.md
