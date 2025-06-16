@@ -1,0 +1,17 @@
+name: Workflow B
+
+on:
+  workflow_run:
+    workflows: ["Workflow A"]
+    types:
+      - completed  # Runs when workflow A completes
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tasks after Workflow A
+        run: echo "Workflow A is complete, now running Workflow B tasks"

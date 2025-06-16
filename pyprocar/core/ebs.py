@@ -2,154 +2,262 @@
 """
 Created on Sat Jan 16 2021
 
+@author: Logan Lang
 @author: Pedram Tavadze
 @author: Freddy Farah
 
 """
 
-# from . import Structure
-from typing import List
-import itertools
 import copy
-from scipy.interpolate import CubicSpline
+import itertools
+import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import List
 
 import numpy as np
-import networkx as nx
-from matplotlib import pylab as plt
-import pyvista
 
-from .kpath import KPath
-from .brillouin_zone import BrillouinZone
-from ..utils import Unfolder, mathematics
+from pyprocar.core.brillouin_zone import BrillouinZone
+from pyprocar.core.kpath import KPath
+from pyprocar.core.serializer import get_serializer
+from pyprocar.utils import mathematics
+from pyprocar.utils.unfolder import Unfolder
 
-HBAR_EV = 6.582119 *10**(-16) #eV*s
-HBAR_J = 1.0545718 *10**(-34) #eV*s
-METER_ANGSTROM = 10**(-10) #m /A
-EV_TO_J = 1.602*10**(-19)
-FREE_ELECTRON_MASS = 9.11*10**-31 #  kg
+logger = logging.getLogger(__name__)
+
+HBAR_EV = 6.582119 * 10 ** (-16)  # eV*s
+HBAR_J = 1.0545718 * 10 ** (-34)  # eV*s
+METER_ANGSTROM = 10 ** (-10)  # m /A
+EV_TO_J = 1.602 * 10 ** (-19)
+FREE_ELECTRON_MASS = 9.11 * 10**-31  #  kg
+
+# TODO: Check hormonic average effective mass values
+# TODO: Check method to calculate the bands integral
+
+
 class ElectronicBandStructure:
     """This object stores electronic band structure informomration.
 
-        Parameters
-        ----------
-        kpoints : np.ndarray
-            The kpoints array. Will have the shape (n_kpoints, 3)
-        bands : np.ndarray
-            The bands array. Will have the shape (n_kpoints, n_bands)
-        efermi : float
-            The fermi energy
-        projected : np.ndarray, optional
-            The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
-        projected_phase : np.ndarray, optional
-            The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
-        kpath : KPath, optional
-            The kpath for band structure claculation, defaults to None
-        weights : np.ndarray, optional
-            The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
-        labels : List, optional
-            A list of orbital names, defaults to None
-        reciprocal_lattice : np.ndarray, optional
-            The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
-        shifted_to_efermi : bool, optional
-             Boolean to determine if the fermi energy is shifted, defaults to False
+    Parameters
+    ----------
+    kpoints : np.ndarray
+        The kpoints array. Will have the shape (n_kpoints, 3)
+    bands : np.ndarray
+        The bands array. Will have the shape (n_kpoints, n_bands)
+    efermi : float
+        The fermi energy
+    projected : np.ndarray, optional
+        The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+    projected_phase : np.ndarray, optional
+        The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
+    kpath : KPath, optional
+        The kpath for band structure claculation, defaults to None
+    weights : np.ndarray, optional
+        The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
+    labels : List, optional
+
+    reciprocal_lattice : np.ndarray, optional
+        The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
+    shifted_to_efermi : bool, optional
+         Boolean to determine if the fermi energy is shifted, defaults to False
     """
 
     def __init__(
         self,
-        kpoints:np.ndarray,
-        bands:np.ndarray,
-        efermi:float,
-        n_kx:int=None,
-        n_ky:int=None,
-        n_kz:int=None,
-        projected:np.ndarray = None,
-        projected_phase:np.ndarray =None,
-        weights:np.ndarray=None,
-        kpath:KPath=None,
-        labels:List=None,
-        reciprocal_lattice:np.ndarray=None,
-        ):
-        
-        
-        self.kpoints = kpoints
-        self.bands = bands - efermi
-        self.efermi = efermi
-        
-        self.projected = projected
-        self.projected_phase = projected_phase
-        self.reciprocal_lattice = reciprocal_lattice
-        self.kpath = kpath
+        kpoints: np.ndarray,
+        bands: np.ndarray,
+        efermi: float,
+        n_kx: int = None,
+        n_ky: int = None,
+        n_kz: int = None,
+        projected: np.ndarray = None,
+        projected_phase: np.ndarray = None,
+        weights: np.ndarray = None,
+        kpath: KPath = None,
+        labels: List = None,
+        reciprocal_lattice: np.ndarray = None,
+        shift_to_efermi: bool = True,
+    ):
+        logger.info("Initializing the ElectronicBandStructure object")
+
+        self._kpoints = kpoints
+        self._kpoints_cartesian = self.reduced_to_cartesian(kpoints, reciprocal_lattice)
+        if shift_to_efermi:
+            self._bands = bands - efermi
+        else:
+            self._bands = bands
+        self._efermi = efermi
+
+        self._projected = projected
+        self._projected_phase = projected_phase
+        self._reciprocal_lattice = reciprocal_lattice
+        self._weights = weights
+        self._kpath = kpath
+
+        self.is_mesh = True
+        if kpath is not None:
+            self.is_mesh = False
+        self.has_phase = False
         if self.projected_phase is not None:
             self.has_phase = True
-        else:
-            self.has_phase = False
         self.labels = labels
-        self.weights = weights
-        self.graph = None
 
-        self._n_kx=n_kx
-        self._n_ky=n_ky
-        self._n_kz=n_kz
-        
-        self._index_mesh=None
-        self._kpoints_mesh=None
-        self._kpoints_cartesian_mesh=None
-        self._bands_mesh=None
-        self._projected_mesh=None
-        self._projected_phase_mesh=None
-        self._weights_mesh=None
-        self._bands_gradient_mesh=None
-        self._bands_hessian_mesh=None
-        self._fermi_velocity_mesh=None
-        self._harmonic_average_effective_mass_mesh=None
-        self._fermi_speed_mesh=None
+        self.ibz_kpoints = None
+        self.ibz_bands = None
+        self.ibz_projected = None
+        self.ibz_projected_phase = None
+        self.ibz_weights = None
 
-        self._bands_gradient=None
-        self._bands_hessian=None
-        self._fermi_velocity=None
-        self._effective_mass=None
-        self._fermi_speed=None
-        self._harmonic_average_effective_mass=None
-          
-    @property
-    def n_kx(self):
-        """The number of unique kpoints in kx direction in the reduced basis
+        self.properties_from_scratch = False
+        self.initial_band_properties = ["bands", "projected", "projected_phase"]
+        self.band_derived_properties = [
+            "bands_gradient",
+            "bands_hessian",
+            "fermi_velocity",
+            "avg_inv_effective_mass",
+            "fermi_speed",
+        ]
+        self.band_dependent_properties = (
+            self.initial_band_properties + self.band_derived_properties
+        )
+        self.kpoint_properties = ["kpoints", "weights"]
+        self.initial_properties = self.kpoint_properties + self.initial_band_properties
+        self.all_mesh_properties = (
+            self.initial_properties
+            + self.band_derived_properties
+            + ["kpoints_cartesian"]
+        )
 
-        Returns
-        -------
-        int
-            The number of unique kpoints in kx direction in the reduced basis
-        """
+        # Initialize mesh properties
+        for prop in self.all_mesh_properties:
+            setattr(self, "_" + prop + "_mesh", None)
+        # Initialize array properties
+        for prop in self.band_derived_properties:
+            setattr(self, "_" + prop, None)
 
-        if self._n_kx==None:
-            self._n_kx=len( np.unique(self.kpoints[:,0]) )
-        return self._n_kx
-    
-    @property
-    def n_ky(self):
-        """The number of unique kpoints in kx direction in the reduced basis
+        if self.is_mesh:
+            self._n_kx = len(np.unique(kpoints[:, 0]))
+            self._n_ky = len(np.unique(kpoints[:, 1]))
+            self._n_kz = len(np.unique(kpoints[:, 2]))
+        else:
+            self._n_kx = n_kx
+            self._n_ky = n_ky
+            self._n_kz = n_kz
 
-        Returns
-        -------
-        int
-            The number of unique kpoints in kx direction in the reduced basis
-        """
-        if self._n_ky==None:
-            self._n_ky=len( np.unique(self.kpoints[:,1]) )
-        return self._n_ky
-    
-    @property
-    def n_kz(self):
-        """The number of unique kpoints in ky direction in the reduced basis
+        self._kx_map = None
+        self._ky_map = None
+        self._kz_map = None
 
-        Returns
-        -------
-        int
-            The number of unique kpoints in ky direction in the reduced basis
-        """
-        if self._n_kz==None:
-            self._n_kz=len( np.unique(self.kpoints[:,2]) )
-        return self._n_kz
+        if self.is_mesh:
+            self._sort_by_kpoints()
+
+        logger.info("Subtracting Fermi Energy from Bands")
+        logger.info(f"Is Mesh: {self.is_mesh}")
+        logger.info(f"Fermi Energy: {self.efermi}")
+        logger.info(f"Kpoints shape: {self.kpoints.shape}")
+        logger.info(f"Bands shape: {self.bands.shape}")
+        if self.projected is not None:
+            logger.info(f"Projected shape: {self.projected.shape}")
+        if self.projected_phase is not None:
+            logger.info(f"Projected phase shape: {self.projected_phase.shape}")
+        if self.kpath is not None:
+            logger.info(f"Kpath: {self.kpath}")
+        if self.labels is not None:
+            logger.info(f"Kpath: {self.labels}")
+        if self.reciprocal_lattice is not None:
+            logger.info(f"Reciprocal lattice: \n{self.reciprocal_lattice}")
+        if self.weights is not None:
+            logger.info(f"Weights: {self.weights}")
+        logger.info("Initialized the ElectronicBandStructure object")
+
+    def __eq__(self, other):
+        kpoints_equal = np.allclose(self.kpoints, other.kpoints)
+        bands_equal = np.allclose(self.bands, other.bands)
+        projected_equal = np.allclose(self.projected, other.projected)
+
+        projected_phase_equal = True
+        if self.projected_phase is not None and other.projected_phase is not None:
+            projected_phase_equal = np.allclose(
+                self.projected_phase, other.projected_phase
+            )
+
+        weights_equal = True
+        if self.weights is not None and other.weights is not None:
+            weights_equal = np.allclose(self.weights, other.weights)
+
+        n_kx_equal = True
+        if self.n_kx is not None and other.n_kx is not None:
+            n_kx_equal = self.n_kx == other.n_kx
+        n_ky_equal = True
+        if self.n_ky is not None and other.n_ky is not None:
+            n_ky_equal = self.n_ky == other.n_ky
+        n_kz_equal = True
+        if self.n_kz is not None and other.n_kz is not None:
+            n_kz_equal = self.n_kz == other.n_kz
+
+        reciprocal_lattice_equal = np.allclose(
+            self.reciprocal_lattice, other.reciprocal_lattice
+        )
+
+        fermi_energy_equal = self.efermi == other.efermi
+
+        is_noncollinear_equal = self.is_non_collinear == other.is_non_collinear
+
+        is_nspin_equal = self.nspins == other.nspins
+
+        is_mesh_equal = self.is_mesh == other.is_mesh
+
+        ebs_equal = (
+            kpoints_equal
+            and bands_equal
+            and projected_equal
+            and projected_phase_equal
+            and weights_equal
+            and reciprocal_lattice_equal
+            and fermi_energy_equal
+            and n_kx_equal
+            and n_ky_equal
+            and n_kz_equal
+            and is_noncollinear_equal
+            and is_nspin_equal
+            and is_mesh_equal
+        )
+
+        return ebs_equal
+
+    def __str__(self):
+        ret = "\n Electronic Band Structure     \n"
+        ret += "============================\n"
+        ret += "Total number of kpoints   = {}\n".format(self.nkpoints)
+        ret += "Total number of bands    = {}\n".format(self.nbands)
+        ret += "Total number of atoms    = {}\n".format(self.natoms)
+        ret += "Total number of orbitals = {}\n".format(self.norbitals)
+        if self.is_mesh and self.n_kx is not None:
+            ret += f"nkx,nky,nkz = ({self.n_kx},{self.n_ky},{self.n_kz})\n"
+        ret += "\nArray Shapes: \n"
+        ret += "------------------------     \n"
+        ret += "Kpoints shape  = {}\n".format(self.kpoints.shape)
+        ret += "Bands shape    = {}\n".format(self.bands.shape)
+        if self.projected is not None:
+            ret += "Projected shape = {}\n".format(self.projected.shape)
+        if self.projected_phase is not None:
+            ret += "Projected phase shape = {}\n".format(self.projected_phase.shape)
+        if self.weights is not None:
+            ret += "Weights shape = {}\n".format(self.weights.shape)
+        if self.kpath is not None:
+            ret += "Kpath = {}\n".format(self.kpath)
+        if self.labels is not None:
+            ret += "Labels = {}\n".format(self.labels)
+        if self.reciprocal_lattice is not None:
+            ret += "Reciprocal Lattice = \n {}\n".format(self.reciprocal_lattice)
+
+        ret += "\nAdditional information: \n"
+        ret += "------------------------     \n"
+        ret += "Fermi Energy = {}\n".format(self.efermi)
+        ret += "Is Mesh = {}\n".format(self.is_mesh)
+        ret += "Has Phase = {}\n".format(self.has_phase)
+
+        return ret
 
     @property
     def nkpoints(self):
@@ -161,6 +269,22 @@ class ElectronicBandStructure:
             The number of k points
         """
         return self.kpoints.shape[0]
+
+    @property
+    def n_kx(self):
+        """The number of unique kpoints in kx direction in the reduced basis"""
+
+        return self._n_kx
+
+    @property
+    def n_ky(self):
+        """The number of unique kpoints in kx direction in the reduced basis"""
+        return self._n_ky
+
+    @property
+    def n_kz(self):
+        """The number of unique kpoints in ky direction in the reduced basis"""
+        return self._n_kz
 
     @property
     def nbands(self):
@@ -208,12 +332,12 @@ class ElectronicBandStructure:
 
     @property
     def nspins(self):
-        """The number of spin channels
+        """The number of spin projections
 
         Returns
         -------
         int
-            The number of spin channels
+            The number of spin projections
         """
         return self.projected.shape[5]
 
@@ -232,64 +356,189 @@ class ElectronicBandStructure:
             return False
 
     @property
-    def kpoints_cartesian(self):
-        """Returns the kpoints in cartesian basis
+    def spin_channels(self):
+        """The number of spin channels
 
         Returns
         -------
-        np.ndarray
-            Returns the kpoints in cartesian basis
+        int
+            The number of spin channels
         """
+
+        # Spin channels only apply for colinear spin-polarized calculations
+        if not self.is_non_collinear and self.nspins == 2:
+            return [0, 1]
+
+        # Only 1 spin channel for non-spin-polarized and non-collinear calculations
+        else:
+            return [0]
+
+    @property
+    def efermi(self):
+        return self._efermi
+
+    @efermi.setter
+    def efermi(self, value):
+        """This is a setter for the efermi property.
+        If the efermi property gets changed, the bands_gradient and bands_hessian will be recalculated
+        """
+        self._efermi = value
+
+    @property
+    def kpoints(self):
+        """Returns the kpoints in fractional basis"""
+        return self._kpoints
+
+    @kpoints.setter
+    def kpoints(self, value):
+        """This is a setter for the kpoints property.
+        If the kpoints property gets changed, the cartesian kpoints will be recalculated
+        """
+        self._kpoints = value
+        self._kpoints_cartesian = self.reduced_to_cartesian(
+            self._kpoints, self._reciprocal_lattice
+        )
+        self._n_kx = len(np.unique(self.kpoints[:, 0]))
+        self._n_ky = len(np.unique(self.kpoints[:, 1]))
+        self._n_kz = len(np.unique(self.kpoints[:, 2]))
+
+    @property
+    def kpoints_cartesian(self):
+        return self._kpoints_cartesian
+
+    @kpoints_cartesian.setter
+    def kpoints_cartesian(self, value):
+        """This is a setter for the kpoints_cartesian property.
+        If the kpoints_cartesian property gets changed, the reciprocal kpoints will be recalculated
+        """
+        self._kpoints_cartesian = value
+
+    @property
+    def bands(self):
+        return self._bands
+
+    @bands.setter
+    def bands(self, value):
+        """This is a setter for the bands property.
+        If the bands property gets changed, the bands_gradient and bands_hessian will be recalculated
+        """
+        self._bands = value
+
+        # # If bands are changed, reset all the band derived properties
+        # for prop in self.band_derived_properties:
+        #     setattr(self, "_" + prop, None)
+
+    @property
+    def projected(self):
+        return self._projected
+
+    @projected.setter
+    def projected(self, value):
+        """This is a setter for the projected property.
+        If the projected property gets changed, the projected_gradient and projected_hessian will be recalculated
+        """
+        self._projected = value
+
+    @property
+    def projected_phase(self):
+        return self._projected_phase
+
+    @projected_phase.setter
+    def projected_phase(self, value):
+        """This is a setter for the projected_phase property.
+        If the projected_phase property gets changed, the projected_gradient and projected_hessian will be recalculated
+        """
+        self._projected_phase = value
+
+    @property
+    def weights(self):
+        return self._weights
+
+    @weights.setter
+    def weights(self, value):
+        """This is a setter for the weights property.
+        If the weights property gets changed, the projected_gradient and projected_hessian will be recalculated
+        """
+        self._weights = value
+
+    @property
+    def kpath(self):
+        return self._kpath
+
+    @kpath.setter
+    def kpath(self, value):
+        """This is a setter for the kpath property.
+        If the kpath property gets changed, the projected_gradient and projected_hessian will be recalculated
+        """
+        self._kpath = value
+
+    @property
+    def kx_map(self):
+        if self._kx_map is None:
+            unique_x = np.unique(self.kpoints[:, 0])
+            self._kx_map = {value: idx for idx, value in enumerate(unique_x)}
+        return self._kx_map
+
+    @property
+    def ky_map(self):
+        if self._ky_map is None:
+            unique_y = np.unique(self.kpoints[:, 1])
+            self._ky_map = {value: idx for idx, value in enumerate(unique_y)}
+        return self._ky_map
+
+    @property
+    def kz_map(self):
+        if self._kz_map is None:
+            unique_z = np.unique(self.kpoints[:, 2])
+            self._kz_map = {value: idx for idx, value in enumerate(unique_z)}
+        return self._kz_map
+
+    @property
+    def reciprocal_lattice(self):
+        return self._reciprocal_lattice
+
+    @property
+    def inv_reciprocal_lattice(self):
+        """Returns the inverse of the reciprocal lattice"""
         if self.reciprocal_lattice is not None:
-            return np.dot(self.kpoints, self.reciprocal_lattice)
+            return np.linalg.inv(self.reciprocal_lattice)
         else:
             print(
                 "Please provide a reciprocal lattice when initiating the Procar class"
             )
-            return
+            return None
 
-    @property
-    def kpoints_reduced(self):
-        """Returns the kpoints in fractional basis
-
-        Returns
-        -------
-        np.ndarray
-            Returns the kpoints in fractional basis
-        """
-        return self.kpoints
-    
     @property
     def bands_gradient(self):
         """
         Bands gradient is a numpy array that stores each band gradient a list that corresponds to the self.kpoints
-        Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz  
-        
+        Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz
+
         Returns
         -------
         np.ndarray
             Bands fradient is a numpy array that stores each band gradient in a list that corresponds to the self.kpoints
-            Shape = [n_kpoints,3,n_bands], 
-            where the second dimension represents d/dx,d/dy,d/dz  
+            Shape = [n_kpoints,3,n_bands],
+            where the second dimension represents d/dx,d/dy,d/dz
         """
 
         if self._bands_gradient is None:
             self._bands_gradient = self.mesh_to_array(mesh=self.bands_gradient_mesh)
         return self._bands_gradient
-    
+
     @property
     def bands_hessian(self):
         """
-        Bands hessian is a numpy array that stores each band hessian in a list that corresponds to the self.kpoints   
-        Shape = [n_kpoints,3,3,n_bands], 
-        where the second and third dimension represent d/dx,d/dy,d/dz  
-        
+        Bands hessian is a numpy array that stores each band hessian in a list that corresponds to the self.kpoints
+        Shape = [n_kpoints,3,3,n_bands],
+        where the second and third dimension represent d/dx,d/dy,d/dz
+
         Returns
         -------
         np.ndarray
             Bands hessian is a numpy array that stores each band hessian in a list that corresponds to the self.kpoints
-            Shape = [n_kpoints,3,3,n_bands], 
-            where the second and third dimension represent d/dx,d/dy,d/dz  
+            Shape = [n_kpoints,3,3,n_bands],
+            where the second and third dimension represent d/dx,d/dy,d/dz
         """
 
         if self._bands_hessian is None:
@@ -300,32 +549,32 @@ class ElectronicBandStructure:
     def fermi_velocity(self):
         """
         fermi_velocity is a numpy array that stores each fermi_velocity a list that corresponds to the self.kpoints
-        Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz  
-        
+        Shape = [n_kpoints,3,n_bands], where the second dimension represents d/dx,d/dy,d/dz
+
         Returns
         -------
         np.ndarray
             fermi_velocity is a numpy array that stores each fermi_velocity in a list that corresponds to the self.kpoints
-            Shape = [n_kpoints,3,n_bands], 
-            where the second dimension represents d/dx,d/dy,d/dz  
+            Shape = [n_kpoints,3,n_bands],
+            where the second dimension represents d/dx,d/dy,d/dz
         """
 
         if self._fermi_velocity is None:
             self._fermi_velocity = self.mesh_to_array(mesh=self.fermi_velocity_mesh)
         return self._fermi_velocity
-    
+
     @property
     def fermi_speed(self):
         """
         fermi speed is a numpy array that stores each fermi speed a list that corresponds to the self.kpoints
-        Shape = [n_kpoints,n_bands] 
-        
+        Shape = [n_kpoints,n_bands]
+
         Returns
         -------
         np.ndarray
-            fermi speed is a numpy array that stores each fermi speed 
+            fermi speed is a numpy array that stores each fermi speed
             in a list that corresponds to the self.kpoints
-            Shape = [n_kpoints,n_bands], 
+            Shape = [n_kpoints,n_bands],
         """
 
         if self._fermi_speed is None:
@@ -333,435 +582,342 @@ class ElectronicBandStructure:
         return self._fermi_speed
 
     @property
-    def harmonic_average_effective_mass(self):
+    def avg_inv_effective_mass(self):
         """
-        harmonic average effective mass is a numpy array that stores 
-        each harmonic average effective mass in a list that corresponds to the self.kpoints   
-        Shape = [n_kpoints,n_bands], 
-        
+        average inverse effective mass is a numpy array that stores
+        each average inverse effective mass in a list that corresponds to the self.kpoints
+        Shape = [n_kpoints,n_bands],
+
         Returns
         -------
         np.ndarray
-            harmonic average effective mass is a numpy array that stores 
-            each harmonic average effective mass in a list that corresponds to the self.kpoints
+            average inverse effective mass is a numpy array that stores
+            each average inverse effective mass in a list that corresponds to the self.kpoints
             Shape = [n_kpoints,n_bands],
         """
 
-        if self._harmonic_average_effective_mass is None:
-            self._harmonic_average_effective_mass=self.mesh_to_array(mesh=self.harmonic_average_effective_mass_mesh)
-        return self._harmonic_average_effective_mass
+        if self._avg_inv_effective_mass is None:
+            self._avg_inv_effective_mass = self.mesh_to_array(
+                mesh=self.avg_inv_effective_mass_mesh
+            )
+        return self._avg_inv_effective_mass
 
-    @property
-    def index_mesh(self):
-        """
-        Index mesh stores the the kpoints index in 
-        kpoints list at a particular grid point . 
-        Shape = [n_kx,n_ky,n_kz]
-
-        Returns
-        -------
-        np.ndarray
-            Index mesh stores the the kpoints index in 
-            kpoints list at a particular grid point .  Shape = [n_kx,n_ky,n_kz]
-
-        """
-        if self._index_mesh is None:
-            kx_unique = np.unique(self.kpoints[:,0])
-            ky_unique = np.unique(self.kpoints[:,1])
-            kz_unique = np.unique(self.kpoints[:,2])
-            n_kx = len(kx_unique)
-            n_ky = len(ky_unique)
-            n_kz = len(kz_unique)
-            self._index_mesh = np.zeros((n_kx,n_ky,n_kz),dtype=int)
-
-            for k in range(n_kz):
-                for j in range(n_ky):
-                    for i in range(n_kx):
-
-                        kx = kx_unique[i]
-                        ky = ky_unique[j]
-                        kz = kz_unique[k]
-
-                        where_x_true_indices = np.where(self.kpoints[:,0] == kx)[0]
-                        where_x_true_points = self.kpoints[where_x_true_indices]
-
-                        where_xy_true_indices = np.where(where_x_true_points[:,1] == ky)[0]
-                        where_xy_true_points = where_x_true_points[where_xy_true_indices]
-
-                        where_xyz_true_indices = np.where(where_xy_true_points[:,2] == kz)[0]
-                        where_xyz_true_points = where_xy_true_points[where_xyz_true_indices]
-
-                        original_index = where_x_true_indices[where_xy_true_indices[where_xyz_true_indices]]
-                        # print(original_index)
-                        self._index_mesh[i,j,k] = original_index
-        return self._index_mesh
-    
     @property
     def kpoints_mesh(self):
-        """Kpoint mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
+        """Kpoint mesh representation of the kpoints grid. Shape = [n_kx,n_ky,n_kz,3]
         Returns
         -------
         np.ndarray
-            Kpoint mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
+            Kpoint mesh representation of the kpoints grid. Shape = [n_kx,n_ky,n_kz,3]
         """
 
         if self._kpoints_mesh is None:
-            self._kpoints_mesh = self.create_nd_mesh(nd_list = self.kpoints)
+            self._kpoints_mesh = self.array_to_mesh(
+                self.kpoints, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
+            )
         return self._kpoints_mesh
-    
+
     @property
     def kpoints_cartesian_mesh(self):
-        """Kpoint cartesian mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
+        """Kpoint cartesian mesh representation of the kpoints grid. Shape = [n_kx,n_ky,n_kz,3]
         Returns
         -------
         np.ndarray
-            Kpoint cartesian mesh representation of the kpoints grid. Shape = [3,n_kx,n_ky,n_kz]
+            Kpoint cartesian mesh representation of the kpoints grid. Shape = [n_kx,n_ky,n_kz,3]
         """
         if self._kpoints_cartesian_mesh is None:
-            self._kpoints_cartesian_mesh = self.create_nd_mesh(nd_list = self.kpoints_cartesian)
+            self._kpoints_cartesian_mesh = self.array_to_mesh(
+                self.kpoints_cartesian, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
+            )
         return self._kpoints_cartesian_mesh
-    
+
     @property
-    def bands_mesh(self,force_update=False):
+    def bands_mesh(self):
         """
-        Bands mesh is a numpy array that stores each band in a mesh grid.   
-        Shape = [n_bands,n_kx,n_ky,n_kz]
+        Bands mesh is a numpy array that stores each band in a mesh grid.
+        Shape = [n_kx,n_ky,n_kz,n_bands]
 
         Returns
         -------
         np.ndarray
-            Bands mesh is a numpy array that stores each band in a mesh grid. 
-            Shape = [n_bands,n_kx,n_ky,n_kz]
+            Bands mesh is a numpy array that stores each band in a mesh grid.
+            Shape = [n_kx,n_ky,n_kz,n_bands]
         """
-
-        if self._bands_mesh is None or force_update:
-            self._bands_mesh = self.create_nd_mesh(nd_list = self.bands)
+        if self._bands_mesh is None or self.properties_from_scratch:
+            self._bands_mesh = self.array_to_mesh(
+                self.bands, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
+            )
         return self._bands_mesh
-    
+
     @property
     def projected_mesh(self):
         """
-        projected mesh is a numpy array that stores each projection in a mesh grid.   
-        Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]
+        projected mesh is a numpy array that stores each projection in a mesh grid.
+        Shape = [n_kx,n_ky,n_kz,n_bands,n_spins,n_atoms,n_orbitals]
 
         Returns
         -------
         np.ndarray
-            Projection mesh is a numpy array that stores each projection in a mesh grid. 
-            Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]
+            Projection mesh is a numpy array that stores each projection in a mesh grid.
+            Shape = [n_kx,n_ky,n_kz,n_bands,n_spins,n_atoms,n_orbitals]
         """
 
         if self._projected_mesh is None:
-            self._projected_mesh = self.create_nd_mesh(nd_list = self.projected)
+            self._projected_mesh = self.array_to_mesh(
+                self.projected, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
+            )
         return self._projected_mesh
-    
+
     @property
     def projected_phase_mesh(self):
         """
-        projected phase mesh is a numpy array that stores each projection phases in a mesh grid.   
-        Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]
+        projected phase mesh is a numpy array that stores each projection phases in a mesh grid.
+        Shape = [n_kx,n_ky,n_kz,n_bands,n_spins,n_atoms,n_orbitals]
 
         Returns
         -------
         np.ndarray
-            projected phase mesh is a numpy array that stores each projection phases in a mesh grid.  
-            Shape = [n_bands,n_spins,n_atoms,n_orbitals,n_kx,n_ky,n_kz]
+            projected phase mesh is a numpy array that stores each projection phases in a mesh grid.
+            Shape = [n_kx,n_ky,n_kz,n_bands,n_spins,n_atoms,n_orbitals]
         """
 
         if self._projected_phase_mesh is None:
-            self._projected_phase_mesh = self.create_nd_mesh(nd_list = self.projected_phase)
+            self._projected_phase_mesh = self.array_to_mesh(
+                self.projected_phase, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
+            )
         return self._projected_phase_mesh
 
     @property
     def weights_mesh(self):
         """
-        weights mesh is a numpy array that stores each weights in a mesh grid.   
-        Shape = [1,n_kx,n_ky,n_kz]
+        weights mesh is a numpy array that stores each weights in a mesh grid.
+        Shape = [n_kx,n_ky,n_kz,1]
 
         Returns
         -------
         np.ndarray
-            weights mesh is a numpy array that stores each weights in a mesh grid. 
-            Shape = [1,n_kx,n_ky,n_kz]
+            weights mesh is a numpy array that stores each weights in a mesh grid.
+            Shape = [n_kx,n_ky,n_kz,1]
         """
 
         if self._weights_mesh is None:
-            self._weights_mesh = self.create_nd_mesh(nd_list = self.weights)
+            self._weights_mesh = self.array_to_mesh(
+                self.weights, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz
+            )
         return self._weights_mesh
 
     @property
     def bands_gradient_mesh(self):
         """
-        Bands gradient mesh is a numpy array that stores each band gradient in a mesh grid.   
-        Shape = [3,n_bands,n_kx,n_ky,n_kz], where the first dimension represents d/dx,d/dy,d/dz  
-        
+        Bands gradient mesh is a numpy array that stores each band gradient in a mesh grid.
+        Shape = [3,n_bands,n_kx,n_ky,n_kz], where the first dimension represents d/dx,d/dy,d/dz
+
         Returns
         -------
         np.ndarray
             Bands fradient mesh is a numpy array that stores each band gradient in a mesh grid.
-            Shape = [3,n_bands,n_kx,n_ky,n_kz], 
-            where the first dimension represents d/dx,d/dy,d/dz  
+            Shape = [n_kx,n_ky,n_kz,3,n_bands],
+            where the first dimension represents d/dx,d/dy,d/dz
         """
 
         if self._bands_gradient_mesh is None:
-            n_bands, n_spins, n_i, n_j, n_k = self.bands_mesh.shape
+            band_gradients = self.calculate_nd_scalar_derivatives(
+                self.bands_mesh, self.reciprocal_lattice
+            )
 
-            band_gradients = np.zeros((3, n_bands, n_spins, n_i, n_j, n_k))
+            # print(np.array_equal(scalar_diffs,scalar_diffs_2))
+            # This is equivalent to the above
+            # n_i, n_j, n_k, n_bands, n_spins = self.bands_mesh.shape
+            # band_gradients_2 = np.zeros(( n_i, n_j, n_k ,n_bands, n_spins,3))
+            # scalar_diffs_2 = np.zeros(( n_i, n_j, n_k ,n_bands, n_spins,3))
+            # for i_band in range(n_bands):
+            #     for i_spin in range(n_spins):
+            #         band_gradients_2[:,:,:,i_band,i_spin,:]=self.calculate_scalar_gradient_2(self.bands_mesh[:,:,:,i_band,i_spin],
+            #         reciprocal_lattice=self.reciprocal_lattice)
 
-            for i_band in range(n_bands):
-                for i_spin in range(n_spins):
-                    band_gradients[:,i_band,i_spin,:,:,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_mesh[i_band,i_spin,:,:,:])
-            
+            #         scalar_diffs_2[:,:,:,i_band,i_spin,:]=self.calculate_scalar_diff_2(self.bands_mesh[:,:,:,i_band,i_spin])
+
             band_gradients *= METER_ANGSTROM
             self._bands_gradient_mesh = band_gradients
         return self._bands_gradient_mesh
-    
+
     @property
     def bands_hessian_mesh(self):
         """
-        Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.   
-        Shape = [3,3,n_bands,n_spin,n_kx,n_ky,n_kz], 
-        where the first and second dimension represent d/dx,d/dy,d/dz  
-        
+        Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.
+        Shape = [n_kx,n_ky,n_kz,n_bands,n_spin,3,3],
+        where the last two dimensions represent d/dx,d/dy,d/dz
+
         Returns
         -------
         np.ndarray
             Bands hessian mesh is a numpy array that stores each band hessian in a mesh grid.
-            Shape = [3,3,n_bands,n_spin,n_kx,n_ky,n_kz], 
-            where the first and second dimension represent d/dx,d/dy,d/dz  
+            Shape = [n_kx,n_ky,n_kzn_bands,n_spin,3,3],
+            where the first and second dimension represent d/dx,d/dy,d/dz
         """
 
         if self._bands_hessian_mesh is None:
-            n_dim, n_bands, n_spins, n_i, n_j, n_k = self.bands_gradient_mesh.shape
+            band_hessians = self.calculate_nd_scalar_derivatives(
+                self.bands_gradient_mesh, self.reciprocal_lattice
+            )
 
-            band_hessians = np.zeros((3, 3,n_bands, n_spins, n_i, n_j, n_k))
-
-            for i_dim in range(n_dim):
-                for i_band in range(n_bands):
-                    for i_spin in range(n_spins):
-                        band_hessians[:,i_dim,i_band,i_spin,:,:,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_gradient_mesh[i_dim,i_band,i_spin,:,:,:])
-            
+            # This is equivalent to the previous code
+            # n_i, n_j, n_k, n_bands, n_spins, n_dim = self.bands_gradient_mesh.shape
+            # band_hessians = np.zeros(( n_i, n_j, n_k, n_bands, n_spins, 3, 3))
+            # for i_dim in range(n_dim):
+            #     for i_band in range(n_bands):
+            #         for i_spin in range(n_spins):
+            #             # band_hessians[:,:,:,i_band,i_spin,i_dim,:] = self.calculate_scalar_gradient(scalar_mesh = self.bands_gradient_mesh[:,:,:,i_band,i_spin,i_dim],
+            #             #                                                                             mesh_grid=self.kpoints_cartesian_mesh)
+            #             band_hessians[:,:,:,i_band,i_spin,i_dim,:] = calculate_scalar_differences_2(scalar_mesh = self.bands_gradient_mesh[:,:,:,i_band,i_spin,i_dim],
+            #                                                                                         transform_matrix=self.reciprocal_lattice)
             band_hessians *= METER_ANGSTROM
             self._bands_hessian_mesh = band_hessians
         return self._bands_hessian_mesh
-    
+
     @property
     def fermi_velocity_mesh(self):
         """
-        Fermi Velocity mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.   
-        Shape = [3,n_bands,n_kx,n_ky,n_kz], where the first dimension represents d/dx,d/dy,d/dz  
-        
+        Fermi Velocity mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.
+        Shape = [n_bands,n_kx,n_ky,n_kz,3], where the first dimension represents d/dx,d/dy,d/dz
+
         Returns
         -------
         np.ndarray
             Fermi Velocity mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.
-            Shape = [3,n_bands,n_kx,n_ky,n_kz], 
-            where the first dimension represents d/dx,d/dy,d/dz  
+            Shape = [n_bands,n_kx,n_ky,n_kz,3],
+            where the first dimension represents d/dx,d/dy,d/dz
         """
 
         if self._fermi_velocity_mesh is None:
-            self._fermi_velocity_mesh =  self.bands_gradient_mesh / HBAR_EV
+            self._fermi_velocity_mesh = self.bands_gradient_mesh / HBAR_EV
         return self._fermi_velocity_mesh
-    
+
     @property
     def fermi_speed_mesh(self):
         """
-        Fermi speed mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.   
-        Shape = [n_bands,n_kx,n_ky,n_kz],
-        
+        Fermi speed mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.
+        Shape = [n_kx,n_ky,n_kz,n_bands,n_spins],
+
         Returns
         -------
         np.ndarray
-            Fermi speed mesh is a numpy array that stores each  Fermi Velocity in a mesh grid.
-            Shape = [n_bands,n_kx,n_ky,n_kz], 
+            Fermi speed mesh is a numpy array that stores each Fermi Velocity in a mesh grid.
+            Shape = [n_kx,n_ky,n_kz,n_bands,n_spins],
         """
 
         if self._fermi_speed_mesh is None:
-            n_grad_1, n_bands, n_spins, n_i, n_j, n_k = self.fermi_velocity_mesh.shape
+            self._fermi_speed_mesh = np.linalg.norm(self.fermi_velocity_mesh, axis=-1)
 
-            self._fermi_speed_mesh = np.zeros(shape=(n_bands, n_spins, n_i, n_j, n_k))
-            for iband in range(n_bands):
-                for ispin in range(n_spins):
-                    for k in range(n_k):
-                        for j in range(n_j):
-                            for i in range(n_i):
-                                self._fermi_speed_mesh[iband,ispin,i,j,k] =  np.linalg.norm(self.fermi_velocity_mesh[:,iband,ispin,i,j,k])
         return self._fermi_speed_mesh
-    
+
     @property
-    def harmonic_average_effective_mass_mesh(self):
+    def avg_inv_effective_mass_mesh(self):
         """
-        harmonic average effective mass mesh is a numpy array that stores each 
-        harmonic average effective mass mesh in a mesh grid.   
-        Shape = [n_bands,n_kx,n_ky,n_kz], 
-        
+        Average Inverse effective mass mesh is a numpy array that stores each
+        average inverse effective mass mesh in a mesh grid.
+        Shape = [n_bands,n_kx,n_ky,n_kz],
+
         Returns
         -------
         np.ndarray
-            harmonic average effective mass mesh is a numpy array that stores 
-            each harmonic average effective mass in a mesh grid.
-            Shape = [n_bands,n_kx,n_ky,n_kz], 
+            average inverse effective mass mesh is a numpy array that stores
+            each average inverse effective mass in a mesh grid.
+            Shape = [n_bands,n_kx,n_ky,n_kz],
         """
 
-        if self._harmonic_average_effective_mass_mesh is None:
-            n_grad_1,n_grad_2, n_bands, n_spins, n_i, n_j, n_k = self.bands_hessian_mesh.shape
+        if self._avg_inv_effective_mass_mesh is None:
+            # n_i, n_j, n_k, n_bands, n_spins, n_grad_1, n_grad_2, = self.bands_hessian_mesh.shape
+            # self._harmonic_average_effective_mass_mesh = np.zeros(shape=( n_i, n_j, n_k, n_bands, n_spins))
+            # print(self.bands_hessian_mesh.shape)
+            # for iband in range(n_bands):
+            #     for ispin in range(n_spins):
+            #         for k in range(n_k):
+            #             for j in range(n_j):
+            #                 for i in range(n_i):
+            #                     hessian = self.bands_hessian_mesh[i,j,k,iband,ispin,...] * EV_TO_J / HBAR_J**2
+            #                     self._harmonic_average_effective_mass_mesh[i,j,k,iband,ispin] = harmonic_average_effective_mass(hessian)
+            self._avg_inv_effective_mass_mesh = self.calculate_avg_inv_effective_mass(
+                self.bands_hessian_mesh
+            )
 
-            self._harmonic_average_effective_mass_mesh = np.zeros(shape=(n_bands, n_spins, n_i, n_j, n_k))
+        return self._avg_inv_effective_mass_mesh
 
-            for iband in range(n_bands):
-                for ispin in range(n_spins):
-                    for k in range(n_k):
-                        for j in range(n_j):
-                            for i in range(n_i):
-                                hessian = self.bands_hessian_mesh[...,iband,ispin,i,j,k] * EV_TO_J/ HBAR_J**2
-                                self._harmonic_average_effective_mass_mesh[iband,ispin,i,j,k] = harmonic_average_effective_mass(hessian)
-        return self._harmonic_average_effective_mass_mesh
-    
-    def calculate_scalar_gradient(self,scalar_mesh):
-        """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+    @property
+    def bands_integral(self):
+        return self.calculate_nd_scalar_integral(
+            self.bands_mesh, self.reciprocal_lattice
+        )
+
+    @staticmethod
+    def reduced_to_cartesian(kpoints, reciprocal_lattice):
+        if reciprocal_lattice is not None:
+            return np.dot(kpoints, reciprocal_lattice)
+        else:
+            print(
+                "Please provide a reciprocal lattice when initiating the Procar class"
+            )
+            return
+
+    @staticmethod
+    def cartesian_to_reduced(cartesian, reciprocal_lattice):
+        """Converts cartesian coordinates to fractional coordinates
 
         Parameters
         ----------
-        scalar_mesh : np.ndarray
-            The scalar mesh. shape = [n_kx,n_ky,n_kz]
+        cartesian : np.ndarray
+            The cartesian coordinates. shape = [N,3]
+        reciprocal_lattice : np.ndarray
+            The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
 
         Returns
         -------
         np.ndarray
-            scalar_gradient_mesh shape = [3,n_kx,n_ky,n_kz]
+            The fractional coordinates. shape = [N,3]
         """
-        n_kx=len(np.unique(self.kpoints[:,0]))
-        n_ky=len(np.unique(self.kpoints[:,1]))
-        n_kz=len(np.unique(self.kpoints[:,2]))
-        scalar_gradients =  np.zeros((3,n_kx,n_ky,n_kz))
-
-        # Calculate cartesian separations along each crystal direction
-        sep_vectors_i = np.abs(self.kpoints_cartesian[self.index_mesh[[0]*n_kx, :, :], :] - self.kpoints_cartesian[self.index_mesh[[1]*n_kx, :, :], :])
-        sep_vectors_j = np.abs(self.kpoints_cartesian[self.index_mesh[:, [0]*n_ky, :], :] - self.kpoints_cartesian[self.index_mesh[:, [1]*n_ky, :], :])
-
-        if n_kz>1:
-            sep_vectors_k = np.abs(self.kpoints_cartesian[self.index_mesh[:, :, [0]*n_kz], :] - self.kpoints_cartesian[self.index_mesh[:, :, [1]*n_kz], :])
+        if reciprocal_lattice is not None:
+            return np.dot(cartesian, np.linalg.inv(reciprocal_lattice))
         else:
-            sep_vectors_k=copy.copy(sep_vectors_j)
-            sep_vectors_k[:,:,:,:]=0
+            print(
+                "Please provide a reciprocal lattice when initiating the Procar class"
+            )
+            return
 
-        # Calculate indices with periodic boundary conditions
-        plus_one_indices_x = np.arange(n_kx) + 1
-        plus_one_indices_y = np.arange(n_ky) + 1
-        plus_one_indices_z = np.arange(n_kz) + 1
-
-        minus_one_indices_x = np.arange(n_kx) - 1
-        minus_one_indices_y = np.arange(n_ky) - 1
-        minus_one_indices_z = np.arange(n_kz) - 1
-
-        plus_one_indices_x[-1] = 0
-        plus_one_indices_y[-1] = 0
-        plus_one_indices_z[-1] = 0
-
-        minus_one_indices_x[0] = n_kx - 1
-        minus_one_indices_y[0] = n_ky - 1
-        minus_one_indices_z[0] = n_kz - 1
-
-        scalar_diffs_i = scalar_mesh[plus_one_indices_x,:,:] - scalar_mesh[minus_one_indices_x,:,:]
-        scalar_diffs_j = scalar_mesh[:,plus_one_indices_y,:] - scalar_mesh[:,minus_one_indices_y,:]
-        scalar_diffs_k = scalar_mesh[:,:,plus_one_indices_z] - scalar_mesh[:,:,minus_one_indices_z]
-        
-        # Calculating gradients
-        sep_vectors = [sep_vectors_i,sep_vectors_j,sep_vectors_k]
-        energy_diffs = [scalar_diffs_i,scalar_diffs_j,scalar_diffs_k]
-
-        # Calculate gradients
-        # sep_vectors = [sep_vectors_i,sep_vectors_j]
-        # energy_diffs = [scalar_diffs_i,scalar_diffs_j]
-        # if n_kz > 1:  # Only add sep_vectors_k and scalar_diffs_k in 3D
-        #     sep_vectors.append(sep_vectors_k)
-        #     energy_diffs.append(scalar_diffs_k)
-
-        for sep_vector,energy_diff in zip(sep_vectors,energy_diffs):
-            for i_coord in range(3):
-                
-                dx = sep_vector[:, :, :, i_coord]
-                tmp_grad = energy_diff / (2 * dx)
-                # Changing infinities to 0
-                tmp_grad = np.nan_to_num(tmp_grad, neginf=0,posinf=0) 
-                scalar_gradients[i_coord, :, :, :] += tmp_grad
-
-        if n_kz == 1:
-            scalar_gradients[2,:,:,:]=0
-        return scalar_gradients
-    
-    def calculate_scalar_integral(self,scalar_mesh):
-        """Calculate the scalar integral"""
-
-
-        edge1 = abs(self.kpoints_cartesian[self.index_mesh[1, 0, 0], :] - self.kpoints_cartesian[self.index_mesh[0, 0, 0], :])
-        edge2 = abs(self.kpoints_cartesian[self.index_mesh[0, 1, 0], :] - self.kpoints_cartesian[self.index_mesh[0, 0, 0], :])
-        edge3 = abs(self.kpoints_cartesian[self.index_mesh[0, 0, 1], :] - self.kpoints_cartesian[self.index_mesh[0, 0, 0], :])
-        
-        # Create a matrix with the edge vectors.
-        matrix = np.array([edge1, edge2, edge3]).T
-        
-        # Calculate the volume using the determinant of the matrix.
-        dv = abs(np.linalg.det(matrix))
-
-        # Compute the integral by summing up the product of scalar values and the volume of each grid cell.
-        integral = np.sum(scalar_mesh * dv)
-        
-        return integral
-
-    def create_nd_mesh(self, nd_list):
-
-        if nd_list is not  None:
-
-            nd_shape = list(nd_list.shape[1:])
-
-
-            n_kx=len(np.unique(self.kpoints[:,0]))
-            n_ky=len(np.unique(self.kpoints[:,1]))
-            n_kz=len(np.unique(self.kpoints[:,2]))
-            nd_shape.append(n_kx)
-            nd_shape.append(n_ky)
-            nd_shape.append(n_kz)
-            nd_mesh = np.zeros(nd_shape,dtype=nd_list.dtype)
-            non_grid_dims = nd_shape[:-3]
-            for i_dim, non_grid_dim in enumerate(non_grid_dims):
-                for i in range(non_grid_dim):
-                    for x in range(n_kx):
-                        for y in range(n_ky):
-                            for z in range(n_kz):
-                                # Forming slicing tuples for mesh
-                                mesh_idx = [ np.s_[:]]*nd_mesh.ndim
-                                mesh_idx[i_dim] = i
-                                mesh_idx[-3] = x
-                                mesh_idx[-2] = y
-                                mesh_idx[-1] = z
-
-                                # Forming slicing tuples for list
-                                list_idx = [ np.s_[:]]*nd_list.ndim
-                                list_idx[0] = self.index_mesh[x,y,z]
-                                list_idx[i_dim+1] = i
-                                
-                                # Assigning mesh values from list
-                                nd_mesh[ tuple(mesh_idx) ] = nd_list[ tuple(list_idx) ]
-        else:
-            nd_mesh = None
-        return nd_mesh
-    
-    def create_vector_mesh(self, vector_list):
-        vector_mesh = np.zeros((3,self.n_kx,self.n_ky,self.n_kz),dtype=float)
-        for i in range(3):
-            vector_mesh[i,:,:,:]= vector_list[ self.index_mesh, i ]
-        return vector_mesh
-    
-    def create_scaler_mesh(self, scalar_list):
-        scalar_mesh = np.zeros((1,self.n_kx,self.n_ky,self.n_kz),dtype=float)
-        scalar_mesh[0,:,:,:]= scalar_list[ self.index_mesh ]
-        return scalar_mesh
-
-    def mesh_to_array(self, mesh):
+    @staticmethod
+    def array_to_mesh(array, nkx, nky, nkz):
         """
-        Converts a mesh to a list that corresponds to ebs.kpoints  
+        Converts a list to a mesh that corresponds to ebs.kpoints
+        [n_kx*n_ky*n_kz,...]->[n_kx,n_ky,n_kz,...]. Make sure array is sorted by lexisort
 
+        Parameters
+        ----------
+        array : np.ndarray
+            The array to convert to a mesh
+        nkx : int
+            The number of kx points
+        nky : int
+            The number of ky points
+        nkz : int
+            The number of kz points
+
+        Returns
+        -------
+        np.ndarray
+           mesh
+        """
+        prop_shape = (
+            nkx,
+            nky,
+            nkz,
+        ) + array.shape[1:]
+        scalar_grid = array.reshape(prop_shape, order="C")
+        return scalar_grid
+
+    @staticmethod
+    def mesh_to_array(mesh):
+        """
+        Converts a mesh to a list that corresponds to ebs.kpoints
+        [n_kx,n_ky,n_kz,...]->[n_kx*n_ky*n_kz,...]
         Parameters
         ----------
         mesh : np.ndarray
@@ -771,23 +927,190 @@ class ElectronicBandStructure:
         np.ndarray
            lsit
         """
-        nkx, nky, nkz = mesh.shape[-3:]
-        tmp_shape=[nkx*nky*nkz]
-        tmp_shape.extend(mesh.shape[:-3])
-        tmp_array=np.zeros(shape=tmp_shape)
-        for k in range(nkz):
-            for j in range(nky):
-                for i in range(nkx):
-                    index=self.index_mesh[i,j,k]
-                    tmp_array[index,...]=mesh[...,i,j,k]
-        return tmp_array
+        nkx, nky, nkz = mesh.shape[:3]
+        prop_shape = (nkx * nky * nkz,) + mesh.shape[3:]
+        array = mesh.reshape(prop_shape)
+        return array
 
-    def ebs_sum(self, 
-                atoms:List[int]=None, 
-                principal_q_numbers:List[int]=[-1], 
-                orbitals:List[int]=None, 
-                spins:List[int]=None, 
-                sum_noncolinear:bool=True):
+    @staticmethod
+    def calculate_nd_scalar_derivatives(
+        scalar_array,
+        reciprocal_lattice,
+    ):
+        """Transforms the derivatives to cartesian coordinates
+            (n,j,k,...)->(n,j,k,...,3)
+
+        Parameters
+        ----------
+        derivatives : np.ndarray
+            The derivatives to transform
+        reciprocal_lattice : np.ndarray
+            The reciprocal lattice
+
+        Returns
+        -------
+        np.ndarray
+            The transformed derivatives
+        """
+        # expanded_freq_mesh = []
+
+        # for i in range(ndim):
+        #     # Start with the original frequency mesh component
+        #     component = freq_mesh[i]
+
+        #     # For each extra dimension in scalar_grid, expand the frequency mesh
+        #     for dim_size in extra_dims:
+        #         component = np.expand_dims(component, axis=-1)
+        #         # Repeat the values along the new axis
+        #         component = np.repeat(component, dim_size, axis=-1)
+
+        #     expanded_freq_mesh.append(component)
+        # return fourier_reciprocal_gradient(scalar_array, reciprocal_lattice)
+
+        letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        scalar_diffs = calculate_scalar_differences(scalar_array)
+
+        del_k1 = 1 / scalar_diffs.shape[0]
+        del_k2 = 1 / scalar_diffs.shape[1]
+        del_k3 = 1 / scalar_diffs.shape[2]
+
+        scalar_diffs[..., 0] = scalar_diffs[..., 0] / del_k1
+        scalar_diffs[..., 1] = scalar_diffs[..., 1] / del_k2
+        scalar_diffs[..., 2] = scalar_diffs[..., 2] / del_k3
+
+        n_dim = len(scalar_diffs.shape[3:]) - 1
+        transform_matrix_einsum_string = "ij"
+        dim_letters = "".join(letters[0:n_dim])
+        scalar_array_einsum_string = "uvw" + dim_letters + "j"
+        transformed_scalar_string = "uvw" + dim_letters + "i"
+        ein_sum_string = (
+            transform_matrix_einsum_string
+            + ","
+            + scalar_array_einsum_string
+            + "->"
+            + transformed_scalar_string
+        )
+        logger.debug(f"ein_sum_string: {ein_sum_string}")
+
+        scalar_gradients = np.einsum(
+            ein_sum_string,
+            np.linalg.inv(reciprocal_lattice.T).T,
+            scalar_diffs,
+        )
+        # scalar_gradients = np.einsum(ein_sum_string, reciprocal_lattice.T, scalar_diffs)
+
+        return scalar_gradients
+
+    @staticmethod
+    def calculate_nd_scalar_integral(scalar_mesh, reciprocal_lattice):
+        """Calculate the scalar integral"""
+        n1, n2, n3 = scalar_mesh.shape[:3]
+        volume_reduced_vector = np.array([1, 1, 1])
+        volume_cartesian_vector = np.dot(reciprocal_lattice, volume_reduced_vector)
+        volume = np.prod(volume_cartesian_vector)
+        dv = volume / (n1 * n2 * n3)
+
+        scalar_volume_avg = calculate_scalar_volume_averages(scalar_mesh)
+        # Compute the integral by summing up the product of scalar values and the volume of each grid cell.
+        integral = np.sum(scalar_volume_avg * dv, axis=(0, 1, 2))
+
+        return integral
+
+    @staticmethod
+    def calculate_avg_inv_effective_mass(hessian):
+        # letters=['a','b','c','d','e','f','g','h']
+        # scalar_diffs=calculate_scalar_differences(self.bands_gradient_mesh)
+        # n_dim=len(scalar_diffs.shape[3:])-1
+        # transform_matrix_einsum_string='ij'
+        # dim_letters=''.join(letters[0:n_dim])
+        # scalar_array_einsum_string='uvw' + dim_letters + 'j'
+        # transformed_scalar_string='uvw' + dim_letters + 'i'
+        # ein_sum_string=transform_matrix_einsum_string + ',' + scalar_array_einsum_string + '->' + transformed_scalar_string
+        # band_hessians=np.einsum(ein_sum_string, self.reciprocal_lattice, scalar_diffs)
+        # Calculate the trace of each 3x3 matrix along the last two axes
+        m_inv = (np.trace(hessian, axis1=-2, axis2=-1) * EV_TO_J / HBAR_J**2) / 3
+        # Calculate the harmonic average effective mass for each element
+        e_mass = FREE_ELECTRON_MASS * m_inv
+
+        return e_mass
+
+    def shift_fermi_energy(self, shift_value):
+        self.efermi += shift_value
+        self.bands += shift_value
+        return copy.deepcopy(self)
+
+    def update_weights(self, weights):
+        self.weights = weights
+        return
+
+    def ebs_ipr(self):
+        """_summary_
+
+        Returns
+        -------
+        ret : list float
+            The IPR projections
+        """
+        orbitals = np.arange(self.norbitals, dtype=int)
+        # sum over orbitals
+        proj = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
+        # keeping only the last principal quantum number
+        proj = proj[:, :, :, -1, :]
+        # selecting all atoms:
+        atoms = np.arange(self.natoms, dtype=int)
+        # the ipr is \frac{\sum_i |c_i|^4}{(\sum_i |c_i^2|)^2}
+        # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
+        num = np.absolute(proj) ** 2
+        num = np.sum(num[:, :, atoms, :], axis=-2)
+        den = np.absolute(proj) ** 1 + 0.0001  # avoiding zero
+        den = np.sum(den[:, :, atoms, :], axis=-2) ** 2
+        IPR = num / den
+        return IPR
+
+    def ebs_ipr_atom(self):
+        """
+        It returns the atom-resolved , pIPR:
+
+        pIPR_j =  \\frac{\|c_j\|^4}{(\\sum_i \|c_i^2\|)^2}
+
+        Clearly, \\( \\sum_j pIPR_j = IPR \\).
+
+        Mind: \( c_i \) is the wavefunction \( c(n,k)_i \), in pyprocar we already
+        have density projections, \( c_i^2 \).
+
+        *THIS QUANTITY IS NOT READY FOR PLOTTING*, please prefer `self.ebs_ipr()`
+
+        Returns
+        -------
+        ret : list float
+            The IPR projections
+
+        """
+        orbitals = np.arange(self.norbitals, dtype=int)
+        # sum over orbitals
+        proj = np.sum(self.projected[:, :, :, :, orbitals, :], axis=-2)
+        # keeping only the last principal quantum number
+        proj = proj[:, :, :, -1, :]
+        # selecting all atoms:
+        atoms = np.arange(self.natoms, dtype=int)
+
+        # the partial pIPR is \frac{|c_j|^4}{(\sum_i |c_i^2|)^2}
+        # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
+        num = np.absolute(proj) ** 2
+        den = np.absolute(proj)
+        den = np.sum(den[:, :, atoms, :], axis=-2) ** 2
+        pIPR = num / den[:, :, np.newaxis, :]
+        # print('pIPR', pIPR.shape)
+        return pIPR
+
+    def ebs_sum(
+        self,
+        atoms: List[int] = None,
+        principal_q_numbers: List[int] = [-1],
+        orbitals: List[int] = None,
+        spins: List[int] = None,
+        sum_noncolinear: bool = True,
+    ):
         """_summary_
 
         Parameters
@@ -847,10 +1170,279 @@ class ElectronicBandStructure:
             None
         """
         uf = Unfolder(
-            ebs=self, transformation_matrix=transformation_matrix, structure=structure,
+            ebs=self,
+            transformation_matrix=transformation_matrix,
+            structure=structure,
         )
         self.update_weights(uf.weights)
 
+        return None
+
+    def _sort_by_kpoints(self):
+        """Sorts the bands and projected arrays by kpoints"""
+        sorted_indices = np.lexsort(
+            (self.kpoints[:, 2], self.kpoints[:, 1], self.kpoints[:, 0])
+        )
+
+        for prop in self.initial_properties:
+            original_value = getattr(self, prop)
+            if original_value is not None:
+                setattr(self, prop, original_value[sorted_indices, ...])
+        return None
+
+    def ibz2fbz(self, rotations, decimals=4):
+        """Applys symmetry operations to the kpoints, bands, and projections
+
+        Parameters
+        ----------
+        rotations : np.ndarray
+            The point symmetry operations of the lattice
+        decimals : int
+            The number of decimals to round the kpoints
+            to when checking for uniqueness
+        """
+        if len(rotations) == 0:
+            logger.warning("No rotations provided, skipping ibz2fbz")
+            return None
+        if not self.is_mesh:
+            raise ValueError("This function only works for meshes")
+
+        n_kpoints = self.kpoints.shape[0]
+        n_rotations = rotations.shape[0]
+
+        logger.debug(f"Number of kpoints in ibz: {n_kpoints}")
+        logger.debug(f"Number of rotations: {n_rotations}")
+
+        # Calculate new shape for kpoints and all properties
+        total_points = n_kpoints * n_rotations
+        new_shape = (total_points, 3)
+
+        properties = self.initial_properties[2:]
+        # Initialize new arrays for kpoints and properties
+        new_kpoints = np.zeros(new_shape)
+
+        self.ibz_kpoints = self.kpoints
+        self.ibz_kpoints_cartesian = self.kpoints_cartesian
+        new_properties = {}
+        for prop in properties:
+
+            original_value = getattr(self, prop)
+            if original_value is not None:
+                setattr(self, f"ibz_{prop}", original_value.copy())
+
+                prop_shape = (total_points,) + original_value.shape[1:]
+                new_properties[prop] = np.zeros(prop_shape)
+
+        # Apply rotations and copy properties
+        for i, rotation in enumerate(rotations):
+            start_idx = i * n_kpoints
+            end_idx = start_idx + n_kpoints
+
+            # Rotate kpoints
+            rotated_kpoints = self.kpoints.dot(rotation.T)
+
+            new_kpoints[start_idx:end_idx] = rotated_kpoints
+
+            # Update properties
+            for prop in properties:
+                original_value = getattr(self, "ibz_" + prop)
+                if original_value is not None:
+                    new_properties[prop][start_idx:end_idx] = original_value
+
+        # Apply boundary conditions to kpoints
+        new_kpoints = -np.fmod(new_kpoints + 6.5, 1) + 0.5
+
+        # Floating point error can cause the kpoints to be off by 0.000001 or so
+        # causing the unique indices to misidentify the kpoints
+        new_kpoints = new_kpoints.round(decimals=decimals)
+        _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
+
+        # Update the object's properties keeping only the unique kpoints
+        self.kpoints = new_kpoints[unique_indices]
+        self.bz_kpoints = self.kpoints
+        self.bz_kpoints_cartesian = self.kpoints_cartesian
+        for prop in properties:
+            prop_value = getattr(self, prop)
+            if prop_value is not None:
+                setattr(self, prop, new_properties[prop][unique_indices])
+                setattr(self, "bz_" + prop, new_properties[prop][unique_indices])
+
+        logger.debug(f"Number of kpoints in full BZ: {self.kpoints.shape[0]}")
+        self._sort_by_kpoints()
+        return None
+
+    def ravel_array(self, mesh_grid):
+        shape = mesh_grid.shape
+        mesh_grid = mesh_grid.reshape(shape[:-3] + (-1,))
+        mesh_grid = np.moveaxis(mesh_grid, -1, 0)
+        return mesh_grid
+
+    def fix_collinear_spin(self):
+        """
+        Converts data from two spin channels to a single channel, adjusting the spin down values to negatives. This is typically used for plotting the Density of States (DOS).
+
+        Parameters
+        ----------
+        No parameters are required for this function.
+
+        Returns
+        -------
+        bool
+            Returns True if the function changed the data, False otherwise.
+        """
+
+        print("old bands.shape", self.bands.shape)
+        if self.bands.shape[2] != 2:
+            return False
+        shape = list(self.bands.shape)
+        shape[1] = shape[1] * 2
+        shape[-1] = 1
+        self.bands.shape = shape
+        print("new bands.shape", self.bands.shape)
+
+        if self.projected is not None:
+            print("old projected.shape", self.projected.shape)
+            self.projected[..., -1] = -self.projected[..., -1]
+            shape = list(self.projected.shape)
+            shape[1] = shape[1] * 2
+            shape[-1] = 1
+            self.projected.shape = shape
+            print("new projected.shape", self.projected.shape)
+
+        return True
+
+    def reduce_kpoints_to_plane(self, k_z_plane, k_z_plane_tol):
+        """
+        Reduces the kpoints to a plane
+        """
+
+        i_kpoints_near_z_0 = np.where(
+            np.logical_and(
+                self.kpoints_cartesian[:, 2] < k_z_plane + k_z_plane_tol,
+                self.kpoints_cartesian[:, 2] > k_z_plane - k_z_plane_tol,
+            )
+        )
+
+        for prop in self.initial_properties:
+            original_value = getattr(self, prop)
+            if original_value is not None:
+                setattr(self, prop, original_value[i_kpoints_near_z_0, ...][0])
+        return None
+
+    def expand_kpoints_to_supercell(self):
+        supercell_directions = list(list(itertools.product([1, 0, -1], repeat=2)))
+        initial_kpoints = copy.copy(self.kpoints)
+        initial_property_values = {}
+        # Do not use kpoints in intial properties
+        for prop in self.initial_properties[1:]:
+            initial_property_values[prop] = copy.copy(getattr(self, prop))
+
+        final_kpoints = copy.copy(initial_kpoints)
+        # final_bands=copy.copy(self.bands)
+        for supercell_direction in supercell_directions:
+            if supercell_direction != (0, 0):
+                new_kpoints = copy.copy(initial_kpoints)
+                new_kpoints[:, 0] = new_kpoints[:, 0] + supercell_direction[0]
+                new_kpoints[:, 1] = new_kpoints[:, 1] + supercell_direction[1]
+
+                final_kpoints = np.append(final_kpoints, new_kpoints, axis=0)
+                # Do not use kpoints in intial properties
+                for prop in self.initial_properties[1:]:
+                    original_value = getattr(self, prop)
+                    if original_value is not None:
+                        initial_value = initial_property_values[prop]
+                        new_values = np.append(original_value, initial_value, axis=0)
+                        setattr(self, prop, new_values)
+        self.kpoints = final_kpoints
+
+        self._sort_by_kpoints()
+
+    def expand_kpoints_to_supercell_by_axes(self, axes_to_expand=[0, 1, 2]):
+        # Validate input
+        if not set(axes_to_expand).issubset({0, 1, 2}):
+            raise ValueError("axes_to_expand must be a subset of [0, 1, 2]")
+
+        # Create supercell directions based on axes to expand
+        supercell_directions = list(
+            itertools.product([1, 0, -1], repeat=len(axes_to_expand))
+        )
+
+        initial_kpoints = copy.deepcopy(self.kpoints)
+        initial_property_values = {}
+
+        # Do not use kpoints in initial properties
+        for prop in self.initial_properties[1:]:
+            initial_property_values[prop] = copy.deepcopy(getattr(self, prop))
+
+        final_kpoints = copy.deepcopy(initial_kpoints)
+
+        for supercell_direction in supercell_directions:
+            if supercell_direction != tuple([0] * len(axes_to_expand)):
+                new_kpoints = copy.deepcopy(initial_kpoints)
+
+                for i, axis in enumerate(axes_to_expand):
+                    new_kpoints[:, axis] += supercell_direction[i]
+
+                final_kpoints = np.append(final_kpoints, new_kpoints, axis=0)
+
+                # Do not use kpoints in initial properties
+                for prop in self.initial_properties[1:]:
+                    original_value = getattr(self, prop)
+                    if original_value is not None:
+                        initial_value = initial_property_values[prop]
+                        new_values = np.append(original_value, initial_value, axis=0)
+                        setattr(self, prop, new_values)
+
+        self.kpoints = final_kpoints
+        self._sort_by_kpoints()
+
+    def reduce_bands_near_fermi(self, bands=None, tolerance=0.7):
+        """
+        Reduces the bands to those near the fermi energy
+        """
+        logger.info("____Reducing bands near fermi energy____")
+        energy_level = 0
+        full_band_index = []
+        bands_spin_index = {}
+
+        if self.is_non_collinear:
+            nspins = [0]
+        else:
+
+            nspins = [ispin for ispin in range(self.nspins)]
+
+        for ispin in nspins:
+            bands_spin_index[ispin] = []
+            for iband in range(len(self.bands[0, :, 0])):
+                fermi_surface_test = len(
+                    np.where(
+                        np.logical_and(
+                            self.bands[:, iband, ispin] >= energy_level - tolerance,
+                            self.bands[:, iband, ispin] <= energy_level + tolerance,
+                        )
+                    )[0]
+                )
+                if fermi_surface_test != 0:
+                    bands_spin_index[ispin].append(iband)
+
+                    if iband not in full_band_index:  # Avoid duplicates
+                        full_band_index.append(iband)
+
+        if bands:
+            full_band_index = bands
+
+        for prop in self.initial_band_properties:
+            original_value = getattr(self, prop)
+
+            if original_value is not None:
+                value = original_value[:, full_band_index, ...]
+                setattr(self, prop, value)
+
+        debug_message = f"Bands near fermi. "
+        debug_message += f"Spin-0 {bands_spin_index[0]} |"
+        if self.nspins > 1 and not self.is_non_collinear:
+            debug_message += f" Spin-1 {bands_spin_index[1]}"
+        logger.debug(debug_message)
         return None
 
     def plot_kpoints(
@@ -861,7 +1453,7 @@ class ElectronicBandStructure:
         point_size=4.0,
         render_points_as_spheres=True,
         transformation_matrix=None,
-        ):
+    ):
         """This needs to be moved to core.KPath and updated new implementation of pyvista PolyData
 
         This method will plot the K points in pyvista
@@ -886,19 +1478,25 @@ class ElectronicBandStructure:
         None
             None
         """
-        
+        import pyvista
+
         p = pyvista.Plotter()
         if show_brillouin_zone:
             if reduced:
                 brillouin_zone = BrillouinZone(
-                    np.diag([1, 1, 1]), transformation_matrix,
+                    np.diag([1, 1, 1]),
+                    transformation_matrix,
                 )
-                brillouin_zone_non = BrillouinZone(np.diag([1, 1, 1]),)
+                brillouin_zone_non = BrillouinZone(
+                    np.diag([1, 1, 1]),
+                )
             else:
                 brillouin_zone = BrillouinZone(
                     self.reciprocal_lattice, transformation_matrix
                 )
-                brillouin_zone_non = BrillouinZone(self.reciprocal_lattice,)
+                brillouin_zone_non = BrillouinZone(
+                    self.reciprocal_lattice,
+                )
 
             p.add_mesh(
                 brillouin_zone.pyvista_obj,
@@ -935,257 +1533,535 @@ class ElectronicBandStructure:
 
         p.show()
 
-        return None
+    def general_rotation(
+        self, angle, kpoints, sx, sy, sz, rotAxis=[0, 0, 1], store=True
+    ):
+        """Apply a rotation defined by an angle and an axis.
 
-    def ibz2fbz(self, rotations):
-        """Applys symmetry operations to the kpoints, bands, and projections
+        Returning value: (Kpoints, sx,sy,sz), the rotated Kpoints and spin
+                        vectors (if not the case, they will be empty
+                        arrays).
+
+        Arguments
+        angle: the rotation angle, must be in degrees!
+
+        rotAxis : a fixed Axis when applying the symmetry, usually it is
+        from Gamma to another point). It doesn't need to be normalized.
+        The RotAxis can be:
+        [x,y,z] : a cartesian vector in k-space.
+        'x': [1,0,0], a rotation in the yz plane.
+        'y': [0,1,0], a rotation in the zx plane.
+        'z': [0,0,1], a rotation in the xy plane
+
+        """
+        sx = np.array([])
+        if sx is not None:
+            sx = sx
+        sy = np.array([])
+        if sy is not None:
+            sy = sy
+        sz = np.array([])
+        if sz is not None:
+            sz = sz
+
+        if rotAxis == "x" or rotAxis == "X":
+            rotAxis = [1, 0, 0]
+        if rotAxis == "y" or rotAxis == "Y":
+            rotAxis = [0, 1, 0]
+        if rotAxis == "z" or rotAxis == "Z":
+            rotAxis = [0, 0, 1]
+        rotAxis = np.array(rotAxis, dtype=float)
+        logger.debug("rotAxis : " + str(rotAxis))
+        rotAxis = rotAxis / np.linalg.norm(rotAxis)
+        logger.debug("rotAxis Normalized : " + str(rotAxis))
+        logger.debug("Angle : " + str(angle))
+        angle = angle * np.pi / 180
+        # defining a quaternion for rotatoin
+        angle = angle / 2
+        rotAxis = rotAxis * np.sin(angle)
+        qRot = np.array((np.cos(angle), rotAxis[0], rotAxis[1], rotAxis[2]))
+        qRotI = np.array((np.cos(angle), -rotAxis[0], -rotAxis[1], -rotAxis[2]))
+
+        logger.debug("Rot. quaternion : " + str(qRot))
+        logger.debug("Rot. quaternion conjugate : " + str(qRotI))
+
+        # converting self.kpoints into quaternions
+        w = np.zeros((len(kpoints), 1))
+        qvectors = np.column_stack((w, kpoints)).transpose()
+        logger.debug(
+            "Kpoints-> quaternions (transposed):\n" + str(qvectors.transpose())
+        )
+        qvectors = q_multi(qRot, qvectors)
+        qvectors = q_multi(qvectors, qRotI).transpose()
+        kpoints = qvectors[:, 1:]
+        logger.debug("Rotated kpoints :\n" + str(qvectors))
+
+        # rotating the spin vector (if exist)
+        sxShape, syShape, szShape = sx.shape, sy.shape, sz.shape
+        logger.debug("Spin vector Shapes : " + str((sxShape, syShape, szShape)))
+        # The first entry has to be an array of 0s, w could do the work,
+        # but if len(self.sx)==0 qvectors will have a non-defined length
+        qvectors = (
+            0 * sx.flatten(),
+            sx.flatten(),
+            sy.flatten(),
+            sz.flatten(),
+        )
+        logger.debug("Spin vector quaternions: \n" + str(qvectors))
+        qvectors = q_multi(qRot, qvectors)
+        qvectors = q_multi(qvectors, qRotI)
+        logger.debug("Spin quaternions after rotation:\n" + str(qvectors))
+        sx, sy, sz = qvectors[1], qvectors[2], qvectors[3]
+        sx.shape, sy.shape, sz.shape = sxShape, syShape, szShape
+
+        logger.debug("GeneralRotation: ...Done")
+        return (kpoints, sx, sy, sz)
+
+    def rot_symmetry_z(self, order, kpoints, bands, projected, sx, sy, sz):
+        """Applies the given rotational crystal symmetry to the current
+        system. ie: to unfold the irreductible BZ to the full BZ.
+
+        Only rotations along z-axis are performed, you can use
+        self.GeneralRotation first.
+
+        The user is responsible of provide a useful input. The method
+        doesn't check the physics.
+
+        """
+        character = np.array([])
+        if character is not None:
+            character = character
+        sx = np.array([])
+        if sx is not None:
+            sx = sx
+        sy = np.array([])
+        if sy is not None:
+            sy = sy
+        sz = np.array([])
+        if sz is not None:
+            sz = sz
+
+        logger.debug("RotSymmetryZ:...")
+        rotations = [
+            self.general_rotation(360 * i / order, store=False) for i in range(order)
+        ]
+        rotations = list(zip(*rotations))
+        logger.debug("self.kpoints.shape (before concat.): " + str(kpoints.shape))
+        kpoints = np.concatenate(rotations[0], axis=0)
+        logger.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
+        sx = np.concatenate(rotations[1], axis=0)
+        sy = np.concatenate(rotations[2], axis=0)
+        sz = np.concatenate(rotations[3], axis=0)
+        # the bands and proj. character also need to be enlarged
+        bandsChar = [(bands, projected) for i in range(order)]
+        bandsChar = list(zip(*bandsChar))
+        bands = np.concatenate(bandsChar[0], axis=0)
+        projected = np.concatenate(bandsChar[1], axis=0)
+        logger.debug("RotSymmZ:...Done")
+
+        return (kpoints, bands, projected, sx, sy, sz)
+
+    def mirror_x(self, kpoints, bands, projected, sx, sy, sz):
+        """Applies the given rotational crystal symmetry to the current
+        system. ie: to unfold the irreductible BZ to the full BZ.
+
+        """
+        character = np.array([])
+        if character is not None:
+            character = character
+        sx = np.array([])
+        if sx is not None:
+            sx = sx
+        sy = np.array([])
+        if sy is not None:
+            sy = sy
+        sz = np.array([])
+        if sz is not None:
+            sz = sz
+
+        logger.debug("Mirror:...")
+        newK = kpoints * np.array([1, -1, 1])
+        kpoints = np.concatenate((kpoints, newK), axis=0)
+        logger.debug("self.kpoints.shape (after concat.): " + str(kpoints.shape))
+        newSx = -1 * sx
+        newSy = 1 * sy
+        newSz = 1 * sz
+        sx = np.concatenate((sx, newSx), axis=0)
+        sy = np.concatenate((sy, newSy), axis=0)
+        sz = np.concatenate((sz, newSz), axis=0)
+        print("self.sx", sx.shape)
+        print("self.sy", sy.shape)
+        print("self.sz", sz.shape)
+        # the bands and proj. character also need to be enlarged
+        bands = np.concatenate((bands, bands), axis=0)
+        projected = np.concatenate((projected, projected), axis=0)
+        print("self.projected", projected.shape)
+        print("self.bands", bands.shape)
+        logger.debug("Mirror:...Done")
+
+        return (kpoints, bands, projected, sx, sy, sz)
+
+    def translate(self, newOrigin, kpoints):
+        """Centers the Kpoints at newOrigin, newOrigin is either and index (of
+        some Kpoint) or the cartesian coordinates of one point in the
+        reciprocal space.
+
+        """
+        logger.debug("Translate():  ...")
+        if len(newOrigin) == 1:
+            newOrigin = int(newOrigin[0])
+            newOrigin = kpoints[newOrigin]
+        # Make sure newOrigin is a numpy array
+        newOrigin = np.array(newOrigin, dtype=float)
+        logger.debug("newOrigin: " + str(newOrigin))
+        kpoints = kpoints - newOrigin
+        logger.debug("new Kpoints:\n" + str(kpoints))
+        logger.debug("Translate(): ...Done")
+        return kpoints
+
+    def interpolate(self, interpolation_factor=2):
+        """Interpolates the band structure meshes and properties using FFT interpolation.
+        Creates and returns a new ElectronicBandStructure instance with interpolated data.
 
         Parameters
         ----------
-        rotations : np.ndarray
-            The point symmetry operations of the lattice
+        interpolation_factor : int, optional
+            Factor by which to interpolate the mesh, by default 2
+
+        Returns
+        -------
+        ElectronicBandStructure
+            New instance with interpolated data
         """
-        
-        full_kpoints=[]
-        full_projected=[]
-        full_bands=[]
-        full_weights=[]
-        full_projected_phases=[]
+        logger.info(f"Interpolating band structure by factor {interpolation_factor}")
 
-        # Used for indexing full_kpoints
-        ik=0
-        # for each symmetry operation
-        for i, rotation in enumerate(rotations):
-            # for each point
-            for j, kpoint in enumerate(self.kpoints):
-                # apply symmetry operation to kpoint
-                
-                new_kp = rotation.dot(kpoint)
-                # apply boundary conditions
-                new_kp = -np.fmod(new_kp + 6.5, 1 ) + 0.5
-                new_kp = np.around(new_kp,decimals=6)
-                new_kp=new_kp.tolist()
-                if new_kp not in full_kpoints:
-                    full_kpoints.append(new_kp)
-                    if self.bands is not None:
-                        band = self.bands[j].tolist()
-                        full_bands.append(band)
-                    if self.projected is not None:
-                        projection = self.projected[j].tolist()
-                        full_projected.append(projection)
-                    if self.weights is not None:
-                        weight = self.weights[j].tolist()
-                        full_weights.append(weight)
-                    if self.projected_phase is not None:
-                        projected_phase = self.projected_phase[j].tolist()
-                        full_projected_phases.append(projected_phase)
-        self.kpoints = np.array(full_kpoints)
-        self.bands = np.array(full_bands)
+        if not self.is_mesh:
+            raise ValueError("Interpolation only works for mesh band structures")
 
+        # Calculate new mesh dimensions
+        nkx, nky, nkz = (
+            self.kpoints_mesh.shape[0],
+            self.kpoints_mesh.shape[1],
+            self.kpoints_mesh.shape[2],
+        )
+
+        unique_x = self.kpoints_mesh[:, 0, 0, 0]
+        unique_y = self.kpoints_mesh[0, :, 0, 1]
+        unique_z = self.kpoints_mesh[0, 0, :, 2]
+
+        xmin, xmax = np.min(unique_x), np.max(unique_x)
+        ymin, ymax = np.min(unique_y), np.max(unique_y)
+        zmin, zmax = np.min(unique_z), np.max(unique_z)
+
+        new_x = np.linspace(xmin, xmax, nkx * interpolation_factor)
+        new_y = np.linspace(ymin, ymax, nky * interpolation_factor)
+        new_z = np.linspace(zmin, zmax, nkz * interpolation_factor)
+
+        new_kpoints_mesh = np.array(np.meshgrid(new_z, new_y, new_x, indexing="ij"))
+        new_kpoints = new_kpoints_mesh.reshape(-1, 3)
+
+        # Interpolate bands mesh
+        new_bands_mesh = mathematics.fft_interpolate_nd_3dmesh(
+            self.bands_mesh,
+            interpolation_factor,
+        )
+        new_bands = self.mesh_to_array(new_bands_mesh)
+
+        # Initialize properties to interpolate
+        new_projected = None
+        new_projected_phase = None
+        new_weights = None
+
+        # Interpolate projected if it exists
         if self.projected is not None:
-            self.projected = np.array(full_projected)
+            new_projected_mesh = mathematics.fft_interpolate_nd_3dmesh(
+                self.projected_mesh,
+                interpolation_factor,
+            )
+            new_projected = self.mesh_to_array(new_projected_mesh)
+
+        # Interpolate projected_phase if it exists
         if self.projected_phase is not None:
-            self.projected_phase = np.array(full_projected_phases)
+            new_projected_phase_mesh = mathematics.fft_interpolate_nd_3dmesh(
+                self.projected_phase_mesh,
+                interpolation_factor,
+            )
+            new_projected_phase = self.mesh_to_array(new_projected_phase_mesh)
+
+        # Interpolate weights if they exist
         if self.weights is not None:
-            self.weights = np.array(full_weights)
+            new_weights_mesh = mathematics.fft_interpolate_nd_3dmesh(
+                self.weights_mesh,
+                interpolation_factor,
+            )
+            new_weights = self.mesh_to_array(new_weights_mesh)
 
-        nk=self.kpoints.shape[0]
-        if self.n_kx:
-            if nk != self.n_kx*self.n_ky*self.n_kz:
+        # Create new instance with interpolated data
+        interpolated_ebs = ElectronicBandStructure(
+            kpoints=new_kpoints,
+            bands=new_bands,
+            efermi=self.efermi,
+            projected=new_projected,
+            projected_phase=new_projected_phase,
+            weights=new_weights,
+            kpath=self.kpath,
+            labels=self.labels,
+            reciprocal_lattice=self.reciprocal_lattice,
+            n_kx=len(new_x),
+            n_ky=len(new_y),
+            n_kz=len(new_z),
+            shift_to_efermi=False,
+        )
 
-                err_text="""
-                        nkpoints != n_kx*n_ky*n_kz
-                        Error trying to symmetrize the irreducible kmesh. 
-                        This is issue is most likely related to 
-                        how the DFT code using symmetry operations to reduce the kmesh.
-                        Check the recommendations for k-mesh type for the crystal system.
-                        If all else fails turn off symmetry.
-                        """
-                raise ValueError(err_text)
+        logger.info("Finished interpolating band structure")
+        return interpolated_ebs
 
-    def interpolate_mesh_grid(self, mesh_grid,interpolation_factor=2):
-        """This function will interpolate an Nd, 3d mesh grid
-        [...,nx,ny,nz]
+    def save(self, path: Path):
+        serializer = get_serializer(path)
+        serializer.save(self, path)
 
-        Parameters
-        ----------
-        mesh_grid : np.ndarray
-            The mesh grid to interpolate
-        """
-        scalar_dims=mesh_grid.shape[:-3]
-        new_mesh=None
-        for i, idx in enumerate(np.ndindex(scalar_dims)):
-            # Creating slicing list. idx are the scalar dimensions, last 3 are the grid
-            mesh_idx = list(idx)
-            tmp = [slice(None)]*3
-            mesh_idx.extend(tmp)
-            new_grid = mathematics.fft_interpolate(mesh_grid[mesh_idx], interpolation_factor=interpolation_factor)
-            
-            if i==0:
-                new_dim = np.append(scalar_dims,new_grid.shape,axis=0)
-                new_mesh=np.zeros(shape=(new_dim))
+    @classmethod
+    def load(cls, path: Path):
+        serializer = get_serializer(path)
+        return serializer.load(path)
 
-            new_mesh[mesh_idx]=new_grid
-        return new_mesh
-    
-    def ravel_array(self,mesh_grid):
-        shape = mesh_grid.shape
-        mesh_grid=mesh_grid.reshape(shape[:-3] + (-1,))
-        mesh_grid=np.moveaxis(mesh_grid,-1,0)
-        return mesh_grid
 
-    def __str__(self):
-        ret = 'Enectronic Band Structure     \n'
-        ret += '------------------------     \n'
-        ret += 'Total number of kpoints  = {}\n'.format(self.nkpoints)
-        ret += 'Total number of bands    = {}\n'.format(self.nbands)
-        ret += 'Total number of atoms    = {}\n'.format(self.natoms)
-        ret += 'Total number of orbitals = {}\n'.format(self.norbitals)
-        return ret
+def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
+    """Calculates the scalar differences over the
+    k mesh grid using central differences
 
-def harmonic_average_effective_mass(tensor):
-    inv_effective_mass_tensor = tensor
-    e_mass = 3*(inv_effective_mass_tensor[0,0] + inv_effective_mass_tensor[1,1] + inv_effective_mass_tensor[2,2])**-1 /FREE_ELECTRON_MASS
-    return e_mass
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz]
 
-    # def reorder(self, plot=True, cutoff=0.2):
-    #     nspins = self.nspins
-    #     if self.is_non_collinear:
-    #         nspins = 1
-    #         # projected = np.sum(self.projected, axis=-1).reshape(self.nkpoints,
-    #         #                                                     self.nbands,
-    #         #                                                     self.natoms,
-    #         #                                                     self.nprincipals,
-    #         #                                                     self.norbitals,
-    #         #                                                     nspins)
-    #         projected = self.projected
-    #         projected_phase = self.projected_phase
-            
-    #     else:
-    #         projected = self.projected
-    #         projected_phase = self.projected_phase
-    #     new_bands = np.zeros_like(self.bands)
-    #     new_projected = np.zeros_like(self.projected)
-    #     new_projected_phase = np.zeros_like(self.projected_phase)
-    #     for ispin in range(nspins):
-    #         # DG = nx.Graph()
-    #         # X = np.arange(self.nkpoints)
-    #         # DG.add_nodes_from(
-    #         #     [
-    #         #         ((i, j), {"pos": (X[i], self.bands[i, j, ispin])})
-    #         #         for i, j in itertools.product(
-    #         #             range(self.nkpoints), range(self.nbands)
-    #         #         )
-    #         #     ]
-    #         # )
-    #         # pos = nx.get_node_attributes(DG, "pos")
-    #         # S = np.zeros(shape=(self.nkpoints, self.nbands, self.nbands))
-    #         for ikpoint in range(1, self.nkpoints):
-    #             order = []
-    #             for iband in range(self.nbands):
-    #                 prj = []
-    #                 idx = []
-    #                 for jband in range(self.nbands):# range(max(0, iband-2), min(iband+2, self.nbands-1)):
-    #                     psi_i = projected_phase[ikpoint, iband, :, :, :, ispin].flatten() # |psi(k,iband)>=\sum u(atom, n, ml)
-    #                     psi_j = projected_phase[ikpoint-1, jband, :, :, :, ispin].flatten() # |psi(k+1,jband)>
-    #                     psi_i /= np.absolute(psi_i).sum()
-    #                     psi_j /= np.absolute(psi_j).sum()
-    #                     # diff = np.absolute(psi_i-psi_j).sum()
-    #                     diff = np.absolute(np.vdot(psi_i, psi_j))
-    #                     prj.append(diff)
-    #                     if iband == jband and  prj[-1] < cutoff:
-    #                         prj[-1] = cutoff
-    #                     idx.append(jband)
-    #                 jband = idx[np.argmax(prj)]
-    #                 self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]
-    #         # for ikpoint in range(1, self.nkpoints):
-    #         #     order = []
-    #         #     for iband in range(self.nbands):
-    #         #         prj = []
-    #         #         idx = []
-    #         #         slope = 
-    #         #         for jband in range(max(0, iband-2), min(iband+2, self.nbands-1)):
-    #         #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
-    #         #             dE = self.bands[ikpoint + 1, jband, ispin]
-    #         #                 - self.bands[ikpoint, iband, ispin]
-    #         #             ) 
-    #         #             dEdK = (dE / dK)
-                        
-    #         #             prj.append(dEdk)
-    #         #             if iband == jband and  prj[-1] < cutoff:
-    #         #                 prj[-1] = cutoff
-    #         #             idx.append(jband)
-    #         #         jband = idx[np.argmax(prj)]
-    #         #         self.bands[ikpoint, [iband, jband], ispin] = self.bands[ikpoint, [jband, iband], ispin]
-    #     #             prj = np.repeat(projected[ikpoint, iband, :, :, :, ispin].reshape(1,
-    #     #                                                                               self.natoms, self.nprincipals, self.norbitals), self.nbands, axis=0)
-    #     #             dK = np.linalg.norm(self.kpoints[ikpoint+1] -self.kpoints[ikpoint])
-    #     #             if dK == 0:
-    #     #                 continue
-    #     #             prj = np.repeat(
-    #     #                 np.sqrt(projected[ikpoint, iband, :, :, :, ispin].astype(np.complex_)).reshape(
-    #     #                     1, -1
-    #     #                 ),  
-    #     #                 self.nbands,
-    #     #                 axis=0,
-    #     #             )
-    #     #             prj /= np.linalg.norm(prj[0])
-    #     #             prj_1 = np.sqrt(
-    #     #                 projected[ikpoint + 1, :, :, :, :, ispin].astype(np.complex_).reshape(
-    #     #                     self.nbands, -1
-    #     #                 )
-    #     #             )
-    #     #             prj_1 = prj_1.T / np.linalg.norm(prj_1, axis=1)
-    #     #             prj_1 = prj_1.T
-    #     #             # return prj, prj_1
-    #     #             # prod = prj*prj_1
-    #     #             # prod = prod.sum(axis=-1)
-    #     #             # prod = prod.sum(axis=-1)
-    #     #             # prod = prod.sum(axis=-1)
-    #     #             # return prj, prj_1
-    #     #             # # prod = np.exp(-1*prod* 1/(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]))
-    #     #             # prod = np.exp(-1/abs(prod))
-    #     #             # prod = np.exp(-1*abs(self.bands[ikpoint+1, :, ispin]-self.bands[ikpoint, iband, ispin]+e))
-    #     #             dots = np.array([np.vdot(x, y) for x, y in zip(prj, prj_1)])
-                    
-    #     #             diff = np.linalg.norm(prj - prj_1, axis=1)
-    #     #             dE = np.abs(
-    #     #                 self.bands[ikpoint + 1, :, ispin]
-    #     #                 - self.bands[ikpoint, iband, ispin]
-    #     #             ) 
-    #     #             dEdK = (dE / dK)
-    #     #             jband = np.argsort(diff)
-    #     #             counter = 0
-    #     #             # while jband[counter] in order:
-    #     #             #     counter+=1
-    #     #             order.append(jband[counter])  
-                    
-    #     #             # if iband !=0 and jband== 0:
-    #     #             #     print(ikpoint, iband)
-                    
-    #     #             # print(iband, self.bands[ikpoint, iband, ispin], jband, self.bands[ikpoint, jband, ispin])
-                    
-    #     #             # diffs.append(diff)
-    #     #             # DG.add_weighted_edges_from([((ikpoint, iband),(ikpoint+1, x[0]),x[1]) for x in zip(range(self.nbands), prod)])
-    #     #             DG.add_edge((ikpoint, iband), (ikpoint + 1, jband[counter]))
-                    
-    #     #     if plot:
-    #     #         plt.figure(figsize=(16, 9))
-    #     #         nodes = nx.draw_networkx_nodes(
-    #     #             DG, pos, node_size=5, node_color=["blue", "red"][ispin])
-    #     #         edges = nx.draw_networkx_edges(
-    #     #             DG,
-    #     #             pos,
-    #     #             edge_color='red'
-    #     #         )
-    #     #         plt.show()
-    #     # #         if len(order) == 0:
-    #     # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1,:,ispin]
-    #     # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, :, :, :, :, :]
-    #     # #         else :
-    #     # #             new_bands[ikpoint+1,:,ispin] = self.bands[ikpoint+1, order,ispin]
-    #     # #             new_projected[ikpoint+1, :, :, :, :, :] = self.projected[ikpoint+1, order, :, :, :, :]
-                
-    #     # # self.bands = new_bands
-    #     # # self.projected = new_projected
-    #     return 
+    Returns
+    -------
+    np.ndarray
+        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
+    """
+    n = scalar_mesh.shape[axis]
+    # Calculate indices with periodic boundary conditions
+    plus_one_indices = np.arange(n) + 1
+    minus_one_indices = np.arange(n) - 1
+    plus_one_indices[-1] = 0
+    minus_one_indices[0] = n - 1
+
+    if axis == 0:
+        return (
+            scalar_mesh[plus_one_indices, ...] - scalar_mesh[minus_one_indices, ...]
+        ) / 2
+    elif axis == 1:
+        return (
+            scalar_mesh[:, plus_one_indices, :, ...]
+            - scalar_mesh[:, minus_one_indices, :, ...]
+        ) / 2
+    elif axis == 2:
+        return (
+            scalar_mesh[:, :, plus_one_indices, ...]
+            - scalar_mesh[:, :, minus_one_indices, ...]
+        ) / 2
+
+
+def calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis):
+    """Calculates the scalar differences over the
+    k mesh grid using central differences
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz]
+
+    Returns
+    -------
+    np.ndarray
+        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
+    """
+    n = scalar_mesh.shape[axis]
+
+    # Calculate indices with periodic boundary conditions
+    plus_one_indices = np.arange(n) + 1
+    zero_one_indices = np.arange(n)
+    plus_one_indices[-1] = 0
+    if axis == 0:
+        return (
+            scalar_mesh[zero_one_indices, ...] + scalar_mesh[plus_one_indices, ...]
+        ) / 2
+    elif axis == 1:
+        return (
+            scalar_mesh[:, zero_one_indices, :, ...]
+            + scalar_mesh[:, plus_one_indices, :, ...]
+        ) / 2
+    elif axis == 2:
+        return (
+            scalar_mesh[:, :, zero_one_indices, ...]
+            + scalar_mesh[:, :, plus_one_indices, ...]
+        ) / 2
+
+
+def calculate_scalar_volume_averages(scalar_mesh):
+    """Calculates the scalar averages over the k mesh grid in cartesian coordinates"""
+    scalar_sums_i = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=0)
+    scalar_sums_j = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=1)
+    scalar_sums_k = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=2)
+    scalar_sums = (scalar_sums_i + scalar_sums_j + scalar_sums_k) / 3
+    return scalar_sums
+
+
+def calculate_scalar_differences(scalar_mesh):
+    """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+
+    Uses gradient trnasformation matrix to calculate the gradient
+    scalar_differens are calculated by central differences
+
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz,...,3]
+    """
+    scalar_diffs_i = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=0)
+    scalar_diffs_j = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=1)
+    scalar_diffs_k = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=2)
+    scalar_diffs = np.array([scalar_diffs_i, scalar_diffs_j, scalar_diffs_k])
+    scalar_diffs = np.moveaxis(scalar_diffs, 0, -1)
+    return scalar_diffs
+
+
+def calculate_scalar_differences_2(scalar_mesh, transform_matrix):
+    """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+
+    Uses gradient trnasformation matrix to calculate the gradient
+    scalar_differens are calculated by central differences
+
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz,...,3]
+    """
+    scalar_diffs_i = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=0)
+    scalar_diffs_j = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=1)
+    scalar_diffs_k = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=2)
+    scalar_diffs = np.array([scalar_diffs_i, scalar_diffs_j, scalar_diffs_k])
+    scalar_diffs = np.moveaxis(scalar_diffs, 0, -1)
+
+    scalar_diffs_2 = np.einsum("ij,uvwj->uvwi", transform_matrix, scalar_diffs)
+    return scalar_diffs_2
+
+
+def q_multi(q1, q2):
+    """
+    Multiplication of quaternions, it doesn't fit in any other place
+    """
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+    x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+    y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
+    z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
+    return np.array((w, x, y, z))
+
+
+def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
+    """
+    Calculate the reciprocal space gradient of a scalar field using Fourier methods.
+    It first finds the gradient in the fractional basis,
+    and then transforms to cartesian coordinates through the reciprocal lattice vectors.
+    Units of angstoms and eV are assumed.
+
+    Parameters:
+    -----------
+    scalar_grid : ndarray
+        N-dimensional array of scalar values on a mesh grid
+    dk_values : tuple or list
+        Grid spacing in each dimension
+    reciprocal_lattice : ndarray, optional
+        Reciprocal lattice vectors for non-orthogonal grids
+
+    Returns:
+    --------
+    gradient : list of ndarrays
+        List of gradient components, one for each dimension
+    """
+    # Get dimensions of the grid
+    scalar_grid_shape = scalar_grid.shape
+    ndim = reciprocal_lattice.shape[0]
+
+    # Create frequency meshgrid
+
+    nx = scalar_grid_shape[0]
+    ny = scalar_grid_shape[1]
+    nz = scalar_grid_shape[2]
+
+    dk_values = np.array([1 / nx, 1 / ny, 1 / nz])
+
+    wavenumbers = []
+    for i in range(ndim):
+        wavenumbers_1d_full = (
+            np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
+        )
+        wavenumbers.append(wavenumbers_1d_full)
+
+    freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
+    # Get the shape of scalar_grid beyond the first 3 dimensions (if any)
+    extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
+
+    # Expand freq_mesh to match the expected scalar_gradient_grid_shape
+    # First, create a list to hold the expanded dimensions
+    # expanded_freq_mesh = []
+
+    # for i in range(ndim):
+    #     # Start with the original frequency mesh component
+    #     component = freq_mesh[i]
+
+    #     # For each extra dimension in scalar_grid, expand the frequency mesh
+    #     for dim_size in extra_dims:
+    #         component = np.expand_dims(component, axis=-1)
+    #         # Repeat the values along the new axis
+    #         component = np.repeat(component, dim_size, axis=-1)
+
+    #     expanded_freq_mesh.append(component)
+
+    # # Replace the original freq_mesh with the expanded version
+    # freq_mesh = np.stack(expanded_freq_mesh)
+    # print(freq_mesh.shape)
+    scalar_gradient_grid_shape = (3, *scalar_grid_shape)
+    print(scalar_gradient_grid_shape)
+    # Standard orthogonal case
+    derivative_operator = freq_mesh * 1j
+    spectral_derivative = np.fft.ifftn(
+        derivative_operator * np.fft.fftn(scalar_grid),
+        s=(3, nx, ny, nz),
+    )
+
+    derivatives = np.real(spectral_derivative)
+
+    print(derivatives.shape)
+    derivatives = np.moveaxis(derivatives, 0, -1)
+
+    print(f"Derivatives shape: {derivatives.shape}")
+    # cart_derivatives = np.dot(derivatives, np.linalg.inv(reciprocal_lattice.T))
+
+    transform_matrix_einsum_string = "ij"
+    ndim = len(derivatives.shape[3:]) - 1
+    letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    dim_letters = "".join(letters[0:ndim])
+    scalar_array_einsum_string = "uvw" + dim_letters + "j"
+    transformed_scalar_string = "uvw" + dim_letters + "i"
+    ein_sum_string = (
+        transform_matrix_einsum_string
+        + ","
+        + scalar_array_einsum_string
+        + "->"
+        + transformed_scalar_string
+    )
+    logger.debug(f"ein_sum_string: {ein_sum_string}")
+
+    cart_derivatives = np.einsum(
+        ein_sum_string,
+        np.linalg.inv(reciprocal_lattice.T).T,
+        derivatives,
+    )
+
+    return cart_derivatives

@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools_scm]
+local_scheme="no-local-version"
+version_file = "pyprocar/_version.py"
+
+
+[project]
+name = "PyProcar"
+authors = [
+    {name = "Francisco Muñoz", email = "fvmunoz@gmail.com"},
+    {name = "Logan Lang", email = "lllang@mix.wvu.edu"},
+    {name = "Aldo Romero", email = "alromero@mail.wvu.edu"},
+    {name = "Sobhit Singh", email = "smsingh@mix.wvu.edu"},
+    {name = "Uthpala Herath", email = "ukh0001@mix.wvu.edu"},
+    {name = "Pedram Tavadze", email = "petavazohi@mix.wvu.edu"},
+    {name = "Eric Bousquet", email = "eric.bousquet@uliege.be"},
+    {name = "Xu He", email = "mailhexu@gmail.com"},
+    {name = "Reese Boucher"},
+    {name = "Freddy Farah"}
+]
+
+description = "A Python library for electronic structure pre/post-processing."
+readme = {file = "README.md", content-type = "text/markdown"}  # Ensure this matches the file used
+license = {file = "LICENSE"}
+
+keywords = ["materials", "science", "plotting", "electronic structure", "DFT"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+dynamic = ["version"]
+
+requires-python = ">=3.8"
+dependencies = [
+    "matplotlib",
+    "numpy<2.0",
+    "pandas",
+    "scikit-image",
+    "scikit-learn",
+    "scipy",
+    "sympy",
+    "pyvista",
+    "trimesh",
+    "spglib",
+    "seekpath",
+    "ase",
+    "PyYAML",
+    "gdown",
+    "dill",
+    "variconfig",
+    "huggingface_hub[hf_transfer,cli]",
+    "pyvista[jupyter]"
+]
+
+[project.optional-dependencies]
+
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pymatgen",
+    "PyGithub",
+    
+]
+
+docs = [
+    "sphinx_design",
+    "sphinx-copybutton",
+    "sphinx-gallery",
+    "numpydoc",
+    "pypandoc",
+    "pydata-sphinx-theme",
+    "sphinxcontrib-yaml",
+    "sphinxcontrib-autoyaml",
+    "python-dotenv",
+    "ipython",
+    "imageio-ffmpeg",
+    "sphinx", 
+    "sphinx_rtd_theme",
+    "myst_parser",
+    "nbsphinx",
+    "sphinx-new-tab-link",
+    "sphinxcontrib-youtube",
+    "sphinxcontrib-video",
+    "pandoc",
+    "furo"
+]
+
+# Combine docs and tests, plus add any dev-specific packages
+dev = [
+    "pyprocar[docs,tests]"
+]
+
+
+[project.urls]
+homepage = "https://github.com/romerogroup/pyprocar"
+documentation = "https://romerogroup.github.io/pyprocar/"
+Issues = "https://github.com/romerogroup/pyprocar/issues"
+Changelog = "https://github.com/romerogroup/pyprocar/CHANGELOG.md"
+
+[project.scripts]
+pyprocar-download = "scripts.download:main"
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pyprocar*", "scripts*"]
+exclude = ["pyprocar.tests*"]
+
+
+
+
+

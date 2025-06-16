@@ -1,0 +1,6 @@
+/* cap all output at ~15 lines, then scroll */
+/* targets nbsphinx output areas too */
+.output_area pre {
+    max-height: calc(1.2em * 15) !important;
+    overflow-y: auto         !important;
+  }

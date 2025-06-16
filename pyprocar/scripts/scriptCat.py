@@ -4,26 +4,26 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 
-import os
-from typing import List
-import re
 import glob
+import os
+import re
+from typing import List
 
 import numpy as np
 
-from ..utils import welcome
-from ..utils import UtilsProcar
-from ..io import AbinitParser
+from ..io.abinit import AbinitOutput
+from ..utils import UtilsProcar, welcome
+
 
 def cat(
-    inFiles:List[str]=None,
-    outFile:str="PROCAR_merged",
-    gz:bool=False,
-    mergeparallel:bool=False,
-    fixformat:bool=False,
-    nspin:int=1,
-    abinit_output:str=None,
-    ):
+    inFiles: List[str] = None,
+    outFile: str = "PROCAR_merged",
+    gz: bool = False,
+    mergeparallel: bool = False,
+    fixformat: bool = False,
+    nspin: int = 1,
+    abinit_output: str = None,
+):
     """
     This module concatenates multiple PROCARs.
     If a list of input PROCAR files is not provided it will merge all the PROCAR_*
@@ -38,7 +38,7 @@ def cat(
     gz : bool, optional
         Boolean if output should be compressed to .gz file, by default False
     mergeparallel : bool, optional
-        Boolean for merging PROCARs generated 
+        Boolean for merging PROCARs generated
         from parallel Abinit calculations., by default False
     fixformat : bool, optional
         Boolean to fix formatting issues
@@ -91,7 +91,7 @@ def cat(
 
 
 def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None):
-    """ This merges Procar files seperated between k-point ranges.
+    """This merges Procar files seperated between k-point ranges.
     Happens with parallel Abinit runs.
     """
     print("Merging parallel files...")
@@ -99,7 +99,7 @@ def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None
 
     # creating an instance of the AbinitParser class
     if abinit_output:
-        abinitparserobject = AbinitParser(abinit_output=abinit_output)
+        abinitparserobject = AbinitOutput(abinit_output_filepath=abinit_output)
         nspin = int(abinitparserobject.nspin)
     else:
         nspin = int(nspin)
@@ -145,7 +145,6 @@ def _mergeparallel(inputfiles=None, outputfile=None, nspin=1, abinit_output=None
 
 
 def _fixformat(inputfile=None, outputfile=None):
-
     """Fixes the formatting of Abinit's Procar
     when the tot projection is not summed and spin directions
     not seperated.

@@ -1,0 +1,29 @@
+name: Run Script on Commit
+
+
+on:
+  push:
+    branches:
+      - main  # Change this to the branch you want to track commits on
+permissions:
+  contents: write  # This allows the workflow to push changes
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history so we can access all commit logs
+        
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Get package name
+      run: |
+        PACKAGE_NAME=$(basename $(dirname $(find . -name '_version.py' | head -n 1)))
+        echo "Detected package name: $PACKAGE_NAME"

@@ -1,0 +1,115 @@
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write  # This allows the workflow to push changes
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history so we can access all commit logs
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build openai python-dotenv requests
+
+    - name: Echo release id
+      run: |
+      
+        echo "RELEASE_ID=${{ github.event.release.id }}"
+        echo "REPO_NAME=${{ github.repository}}"
+        echo "TAG=${{ github.event.release.tag_name }}"
+    
+    - name: Test Build 
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }} 
+      run: python -m build
+
+    - name: This will processes the commit messages and write to the CHANGELOG.md file
+      if: success() 
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Pass the secret as an environment variable
+        TAG: ${{ github.event.release.tag_name }} 
+        REPO_NAME: ${{ github.repository }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+
+        CHANGELOG=$(python .github/scripts/workflow_generate_changlog_on_recent_tag.py)
+        echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+        echo "$CHANGELOG" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Configure git for committing
+      if: success() 
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+
+    - name: Commiting new version of the changelog and the version file
+      if: success() 
+      run: |
+        PACKAGE_NAME=$(basename $(dirname $(find . -name '_version.py' | head -n 1)))
+
+        git add CHANGELOG.md
+        git commit -m "Update CHANGELOG.md due to new release"
+
+    - name: Push changes
+      if: success()
+      run: |
+        git push origin HEAD:main
+
+    - name: Get the current release body
+      if: success() 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_ID: ${{ github.event.release.id }}
+        REPO_NAME: ${{ github.repository }}
+        CHANGELOG: ${{ env.CHANGELOG }}
+      run: |
+        
+        python .github/scripts/workflow_update_release_body.py
+    
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch full history
+
+    - name: Actual Build 
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }} 
+      run: | 
+        
+        python -m build
+
+    - name: Publish package
+      if: success()
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+    
+
+    # Add a failure cleanup step to delete the release if the workflow fails
+    - name: Delete release if failed
+      if: failure() 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_ID: ${{ github.event.release.id }}
+        REPO_NAME: ${{ github.repository }}
+        TAG: ${{ github.event.release.tag_name }}
+      run: |
+
+        python .github/scripts/workflow_delete_release.py

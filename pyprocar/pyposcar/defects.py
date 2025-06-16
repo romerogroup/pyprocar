@@ -127,7 +127,7 @@ class FindDefect:
     Delta_General_Norms = []
     #Here will be all norms separated by type of cluster
     All_type_norms = []
-    print("Cluster_total ", Total_ClusterDistanceMatrix)
+    # print("Cluster_total ", Total_ClusterDistanceMatrix)
     for type, idxs in zip(Cluster_set, Cluster_group_index):
       Delta_type_Norms = []
       idx_to_compare = itertools.combinations(idxs, 2)
@@ -163,8 +163,8 @@ class FindDefect:
       print("Max", np.max(norm_array))
       print("Promedio metodo con KDE", samples[maxima])
       print("Minimo KDE", samples[minima])
-      plt.plot(samples,scores)
-      plt.show()
+      # plt.plot(samples,scores)
+      # plt.show()
       
 
       
@@ -200,10 +200,21 @@ class FindDefect:
     else:
       self.defects['find_forgein_atoms'] = []
       return
+
+    # If there are just two atom types both have a comparable amount,
+    # just ignore them and return
+    if len(set(numberSp)) == 2 and max(numberSp)/min(numberSp) <= 2.0:
+      if self.verbose:
+        print('Two atom types with similar ratio, returning ')
+      self.defects['find_forgein_atoms'] = []
+      return
+        
+    
     # reshaping the data for machine learning
+    numberSp = np.array(numberSp)
     numberSp = numberSp.reshape(-1, 1)
     # print(numberSp)
-    # 
+    #
     kde = KernelDensity(kernel='gaussian', bandwidth=3).fit(numberSp)
     # The samples are chosen to have a `max-min-max` pattern (maybe
     # with extra -min-max blocks)
@@ -214,7 +225,6 @@ class FindDefect:
     # print(scores)
     # plt.plot(samples, scores)
     # plt.show()
-    self.verbose = True
     #
     # The local minima of the scores denotes the groups. argrelextrema
     # returns a tuple, only first entry is useful
@@ -233,7 +243,8 @@ class FindDefect:
     try: # perhaps there is no minumum
       lower_min = minima[0]
     except IndexError:
-      print('\n\ndefects.FindDefect.find_forgein_atoms(): No defect found')
+      if self.verbose:
+        print('\n\ndefects.FindDefect.find_forgein_atoms(): No defect found')
       self.defects['find_forgein_atoms'] = []
       self._set_all_defects()
       return
@@ -249,6 +260,8 @@ class FindDefect:
     defect_elements = []
     # detecting what elements are defects
     for (natoms, element) in zip(self.p.numberSp, self.p.typeSp):
+      if self.verbose:
+        print('natoms,', natoms, 'element,', element)
       if natoms <= lower_min:
         defect_elements.append(element)
     defects = []
@@ -326,7 +339,8 @@ class FindDefect:
     try:
       lower_min = minima[0]
     except IndexError:
-      print('\n\ndefects.FindDefect.nearest_neighbors_environment(): No defect found')
+      if self.verbose:
+        print('\n\ndefects.FindDefect.nearest_neighbors_environment(): No defect found')
       self.defects['nearest_neighbors_environment'] = []
       self._set_all_defects()
       return

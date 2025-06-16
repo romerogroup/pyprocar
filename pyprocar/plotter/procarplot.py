@@ -1,9 +1,9 @@
-import numpy as np
+import sys
 import re
 import logging
-import matplotlib.pyplot as plt
-import sys
 
+import numpy as np
+import matplotlib.pyplot as plt
 
 class ProcarPlot:
     """A depeciated class ot plot the band structure
@@ -399,8 +399,8 @@ class ProcarPlot:
         print("Atomic plot: bands.shape  :", self.bands.shape)
         print("Atomic plot: spd.shape    :", self.spd.shape)
         print("Atomic plot: kpoints.shape:", self.kpoints.shape)
-
-        #        print(self.kpoints)
+        
+        print("Foooooooooooooooooo", self.kpoints)
 
         fig, ax1 = self.parametricPlot(cmap, vmin, vmax, ax=ax)
 
@@ -410,5 +410,6 @@ class ProcarPlot:
         for i in range(len(self.bands[:, 0])):
             # print i, self.bands[i]
             ax1.text(0, self.bands[i, 0], str(i + 1))
-
+            bbox = txt.get_window_extent()
+            print('bbox', bbox)
         return fig, ax1

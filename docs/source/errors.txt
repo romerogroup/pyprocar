@@ -1,0 +1,4 @@
+Warning: In vtkDataSetAttributes.cxx, line 1523
+vtkPointData (0000029A1486D9F0): Can not set attribute Vectors. Incorrect number of components.
+
+

@@ -392,7 +392,7 @@ class poscar_modify:
       self.p._set_cartesian()
     return
 
-  
+
 
 class poscar_supercell:
   """ class to generate a supercell by providing a supercell matrix.
@@ -416,7 +416,8 @@ class poscar_supercell:
     if isinstance(poscar, str):
       self.poscar = Poscar(poscar)
     else:
-      self.poscar = poscar
+      import copy
+      self.poscar = copy.deepcopy(poscar)
     if self.poscar.loaded is False:
       self.poscar.parse()
 
@@ -444,7 +445,8 @@ class poscar_supercell:
 
     Poscar
         A Poscar object with the desired supercell. It is the same instance 
-        stored in this class
+        stored in this class. Note, the creation of `poscar_supercell` makes 
+        a deep copy of the `Poscar` instance provided
 
     """
     lat = self.poscar.lat
@@ -524,8 +526,7 @@ class poscar_supercell:
     if self.verbose:
       print( temp.shape)
     npos = temp[:]
-    
-    elem = elem*len(nuseful)
+    elem = list(elem)*len(nuseful)
     #print elem
     self.poscar.elm = elem
     self.poscar.lat = np.dot(scell, lat)

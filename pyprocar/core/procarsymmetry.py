@@ -1,9 +1,9 @@
-import numpy as np
+import sys
 import re
 import logging
-import matplotlib.pyplot as plt
-import sys
 
+import numpy as np
+import matplotlib.pyplot as plt
 
 class ProcarSymmetry:
     def __init__(

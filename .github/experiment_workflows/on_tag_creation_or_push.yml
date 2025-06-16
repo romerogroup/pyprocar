@@ -1,0 +1,46 @@
+name: Create Draft Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger this workflow on any tag push starting with 'v'
+
+  create:
+    tags:
+      - 'v*'  # Trigger this workflow on tag creation starting with 'v'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract tag name
+        id: get_tag
+        run: |
+          # Extract the tag name from the github.ref (which looks like refs/tags/v1.0.0)
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "Tag name is $TAG_NAME"
+          echo "::set-output name=tag::$TAG_NAME"
+
+      - name: Check if tag starts with 'v'
+        if: startsWith(steps.get_tag.outputs.tag, 'v')
+        run: echo "The tag starts with 'v': ${{ steps.get_tag.outputs.tag }}"
+
+      - name: Create draft release
+        if: startsWith(steps.get_tag.outputs.tag, 'v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/releases \
+            -d '{
+              "tag_name": "${{ steps.get_tag.outputs.tag }}",
+              "name": "${{ steps.get_tag.outputs.tag }}",
+              "body": "Release notes for version ${{ steps.get_tag.outputs.tag }}",
+              "draft": true,
+              "prerelease": false
+            }'

@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
-from .fermisurface import FermiSurface
-from .structure import Structure
-from .dos import DensityOfStates
-from .surface import Surface, boolean_add
-from .isosurface import Isosurface
-from .ebs import ElectronicBandStructure
-from .kpath import KPath
-from .brillouin_zone import BrillouinZone,BrillouinZone2D
-from .fermisurface3D import FermiSurface3D
-from .bandstructure2D import BandStructure2D
-
-from .procarsymmetry import ProcarSymmetry
-from .procarselect import ProcarSelect
-
-
- 
+from pyprocar.core.bandstructure2D import BandStructure2D
+from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
+from pyprocar.core.dos import DensityOfStates
+from pyprocar.core.ebs import ElectronicBandStructure
+from pyprocar.core.fermisurface import FermiSurface
+from pyprocar.core.fermisurface3D import FermiSurface3D
+from pyprocar.core.isosurface import Isosurface
+from pyprocar.core.kpath import KPath
+from pyprocar.core.procarselect import ProcarSelect
+from pyprocar.core.procarsymmetry import ProcarSymmetry
+from pyprocar.core.structure import Structure
+from pyprocar.core.surface import Surface, boolean_add

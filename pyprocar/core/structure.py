@@ -3,47 +3,53 @@ __maintainer__ = "Pedram Tavadze and Logan Lang"
 __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
+import logging
+from pathlib import Path
 
-import spglib
 import numpy as np
+import spglib
 from scipy.spatial import ConvexHull
 
-from ..utils import elements
-from .surface import Surface
+from pyprocar.core.serializer import get_serializer
+from pyprocar.core.surface import Surface
+from pyprocar.utils import elements
 
-# TODO add __str__ method 
+# TODO add __str__ method
 
 N_AVOGADRO = 6.022140857e23
 
+logger = logging.getLogger(__name__)
+
+
 class Structure:
+    """
+    Class to define a peridic crystal structure.
+
+    Parameters
+    ----------
+    atoms : list str
+        A list of atomic symbols, with the same order as the
+        ``fractional_coordinates``.
+    fractional_coordinates : list (n,3) float.
+        A (natom,3) list of fractional coordinatesd of atoms.
+    lattice : list (3,3) float.
+        A (3,3) matrix representing the lattice vectors.
+
+    Returns
+    -------
+    None.
 
     """
-        Class to define a peridic crystal structure.
 
-        Parameters
-        ----------
-        atoms : list str
-            A list of atomic symbols, with the same order as the
-            ``fractional_coordinates``.
-        fractional_coordinates : list (n,3) float.
-            A (natom,3) list of fractional coordinatesd of atoms.
-        lattice : list (3,3) float.
-            A (3,3) matrix representing the lattice vectors.
-
-        Returns
-        -------
-        None.
-
-    """
     def __init__(
         self,
         atoms=None,
         cartesian_coordinates=None,
         fractional_coordinates=None,
         lattice=None,
-        rotations=None
+        rotations=None,
     ):
-        
+
         if fractional_coordinates is not None:
             self.fractional_coordinates = np.array(fractional_coordinates)
             self.cartesian_coordinates = np.dot(fractional_coordinates, lattice)
@@ -73,8 +79,27 @@ class Structure:
             self.get_wyckoff_positions()
 
         self.rotations = rotations
-        
+
         return None
+
+    def __eq__(self, other):
+        atoms_equal = all(self.atoms == other.atoms)
+
+        fractional_coordinates_equal = True
+        if (
+            self.fractional_coordinates is not None
+            and other.fractional_coordinates is not None
+        ):
+            fractional_coordinates_equal = np.allclose(
+                self.fractional_coordinates, other.fractional_coordinates
+            )
+
+        lattice_equal = True
+        if self.lattice is not None and other.lattice is not None:
+            lattice_equal = np.allclose(self.lattice, other.lattice)
+
+        structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
+        return structure_equal
 
     @property
     def volume(self):
@@ -267,14 +292,16 @@ class Structure:
             The reciprocal lattice matrix corresponding the the crystal lattice
         """
         reciprocal_lattice = np.zeros_like(self.lattice)
+
         a = self.lattice[0, :]
         b = self.lattice[1, :]
         c = self.lattice[2, :]
         volume = self.volume * 1e30
 
-        a_star = (2 * np.pi) * np.cross(b, c) / volume
-        b_star = (2 * np.pi) * np.cross(c, a) / volume
-        c_star = (2 * np.pi) * np.cross(a, b) / volume
+        a_star = np.cross(b, c) / volume
+        b_star = np.cross(c, a) / volume
+        c_star = np.cross(a, b) / volume
+
         reciprocal_lattice[0, :] = a_star
         reciprocal_lattice[1, :] = b_star
         reciprocal_lattice[2, :] = c_star
@@ -305,7 +332,7 @@ class Structure:
         int
             The Space Group Number
         """
-        return spglib.get_symmetry_dataset(self._spglib_cell, symprec)["number"]
+        return spglib.get_symmetry_dataset(self._spglib_cell, symprec).number
 
     def get_space_group_international(self, symprec=1e-5):
         """Returns the international Space Group Number of the material
@@ -320,7 +347,7 @@ class Structure:
         str
             The international Space Group Number
         """
-        return spglib.get_symmetry_dataset(self._spglib_cell, symprec)["international"]
+        return spglib.get_symmetry_dataset(self._spglib_cell, symprec).international
 
     def get_wyckoff_positions(self, symprec=1e-5):
         """Returns the wyckoff positions
@@ -337,7 +364,7 @@ class Structure:
         """
         wyckoff_positions = np.empty(shape=(self.natoms), dtype="<U4")
         wyckoffs_temp = np.array(
-            spglib.get_symmetry_dataset(self._spglib_cell, symprec)["wyckoffs"]
+            spglib.get_symmetry_dataset(self._spglib_cell, symprec).wyckoffs
         )
         group = np.zeros(shape=(self.natoms), dtype=int)
         counter = 0
@@ -431,7 +458,7 @@ class Structure:
 
     def transform(
         self, transformation_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        ):
+    ):
         """Transform the crystla lattice by a transformation matrix
 
         Parameters
@@ -525,3 +552,12 @@ class Structure:
             The transformed structure
         """
         return self.transform(matrix)
+
+    def save(self, path: Path):
+        serializer = get_serializer(path)
+        serializer.save(self, path)
+
+    @classmethod
+    def load(cls, path: Path):
+        serializer = get_serializer(path)
+        return serializer.load(path)
