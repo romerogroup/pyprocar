@@ -360,3 +360,735 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     # Perform inverse FFT to get the interpolated result
     interpolated = np.real(np.fft.ifftn(new_fft)) * interpolation_factor**3
     return interpolated
+
+
+def pad_scalar_3d_mesh(scalar_mesh, padding=10, add_1_on_wrap=False):
+    """
+    Pad a 3D scalar mesh with wrapped boundary conditions.
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        Input mesh with shape (n_kx, n_ky, n_kz, ...)
+    padding : int
+        Number of padding cells on each side
+    add_1_on_wrap : bool
+        If True, add/subtract 1 when wrapping (for kpoints coordinates)
+
+    Returns
+    -------
+    np.ndarray
+        Padded mesh with shape (n_kx + 2*padding, n_ky + 2*padding, n_kz + 2*padding, ...)
+    """
+    n_kx, n_ky, n_kz = scalar_mesh.shape[:3]
+    padded_scalar_mesh = np.zeros(
+        shape=(
+            n_kx + 2 * padding,
+            n_ky + 2 * padding,
+            n_kz + 2 * padding,
+            *scalar_mesh.shape[3:],
+        )
+    )
+
+    # Place original mesh in the center
+    padded_scalar_mesh[
+        padding : padding + n_kx,
+        padding : padding + n_ky,
+        padding : padding + n_kz,
+        ...,
+    ] = scalar_mesh
+
+    if add_1_on_wrap:
+        # Define wrap regions and their coordinate adjustments
+        # Each tuple: (padded_slice, source_slice, coord_adjustments)
+        # coord_adjustments: [dx, dy, dz] where +1 means add 1, -1 means subtract 1, 0 means no change
+
+        regions = []
+
+        # 8 Corners
+        corners = [
+            # (padded_region, source_region, [dx, dy, dz])
+            (
+                np.s_[:padding, :padding, :padding],
+                np.s_[-padding:, -padding:, -padding:],
+                [-1, -1, -1],
+            ),
+            (
+                np.s_[-padding:, :padding, :padding],
+                np.s_[:padding, -padding:, -padding:],
+                [+1, -1, -1],
+            ),
+            (
+                np.s_[:padding, -padding:, :padding],
+                np.s_[-padding:, :padding, -padding:],
+                [-1, +1, -1],
+            ),
+            (
+                np.s_[-padding:, -padding:, :padding],
+                np.s_[:padding, :padding, -padding:],
+                [+1, +1, -1],
+            ),
+            (
+                np.s_[:padding, :padding, -padding:],
+                np.s_[-padding:, -padding:, :padding],
+                [-1, -1, +1],
+            ),
+            (
+                np.s_[-padding:, :padding, -padding:],
+                np.s_[:padding, -padding:, :padding],
+                [+1, -1, +1],
+            ),
+            (
+                np.s_[:padding, -padding:, -padding:],
+                np.s_[-padding:, :padding, :padding],
+                [-1, +1, +1],
+            ),
+            (
+                np.s_[-padding:, -padding:, -padding:],
+                np.s_[:padding, :padding, :padding],
+                [+1, +1, +1],
+            ),
+        ]
+
+        # 12 Edges (along each axis)
+        edges = [
+            # Edges along x-axis (y and z wrap)
+            (
+                np.s_[padding : padding + n_kx, :padding, :padding],
+                np.s_[:, -padding:, -padding:],
+                [0, -1, -1],
+            ),
+            (
+                np.s_[padding : padding + n_kx, -padding:, :padding],
+                np.s_[:, :padding, -padding:],
+                [0, +1, -1],
+            ),
+            (
+                np.s_[padding : padding + n_kx, :padding, -padding:],
+                np.s_[:, -padding:, :padding],
+                [0, -1, +1],
+            ),
+            (
+                np.s_[padding : padding + n_kx, -padding:, -padding:],
+                np.s_[:, :padding, :padding],
+                [0, +1, +1],
+            ),
+            # Edges along y-axis (x and z wrap)
+            (
+                np.s_[:padding, padding : padding + n_ky, :padding],
+                np.s_[-padding:, :, -padding:],
+                [-1, 0, -1],
+            ),
+            (
+                np.s_[-padding:, padding : padding + n_ky, :padding],
+                np.s_[:padding, :, -padding:],
+                [+1, 0, -1],
+            ),
+            (
+                np.s_[:padding, padding : padding + n_ky, -padding:],
+                np.s_[-padding:, :, :padding],
+                [-1, 0, +1],
+            ),
+            (
+                np.s_[-padding:, padding : padding + n_ky, -padding:],
+                np.s_[:padding, :, :padding],
+                [+1, 0, +1],
+            ),
+            # Edges along z-axis (x and y wrap)
+            (
+                np.s_[:padding, :padding, padding : padding + n_kz],
+                np.s_[-padding:, -padding:, :],
+                [-1, -1, 0],
+            ),
+            (
+                np.s_[-padding:, :padding, padding : padding + n_kz],
+                np.s_[:padding, -padding:, :],
+                [+1, -1, 0],
+            ),
+            (
+                np.s_[:padding, -padding:, padding : padding + n_kz],
+                np.s_[-padding:, :padding, :],
+                [-1, +1, 0],
+            ),
+            (
+                np.s_[-padding:, -padding:, padding : padding + n_kz],
+                np.s_[:padding, :padding, :],
+                [+1, +1, 0],
+            ),
+        ]
+
+        # 6 Faces
+        faces = [
+            # x faces
+            (
+                np.s_[:padding, padding : padding + n_ky, padding : padding + n_kz],
+                np.s_[-padding:, :, :],
+                [-1, 0, 0],
+            ),
+            (
+                np.s_[-padding:, padding : padding + n_ky, padding : padding + n_kz],
+                np.s_[:padding, :, :],
+                [+1, 0, 0],
+            ),
+            # y faces
+            (
+                np.s_[padding : padding + n_kx, :padding, padding : padding + n_kz],
+                np.s_[:, -padding:, :],
+                [0, -1, 0],
+            ),
+            (
+                np.s_[padding : padding + n_kx, -padding:, padding : padding + n_kz],
+                np.s_[:, :padding, :],
+                [0, +1, 0],
+            ),
+            # z faces
+            (
+                np.s_[padding : padding + n_kx, padding : padding + n_ky, :padding],
+                np.s_[:, :, -padding:],
+                [0, 0, -1],
+            ),
+            (
+                np.s_[padding : padding + n_kx, padding : padding + n_ky, -padding:],
+                np.s_[:, :, :padding],
+                [0, 0, +1],
+            ),
+        ]
+
+        # Apply all regions
+        for padded_slice, source_slice, coord_adj in corners + edges + faces:
+            source_data = scalar_mesh[source_slice]
+
+            # Apply coordinate adjustments for first 3 dimensions (assuming they are coordinates)
+            if source_data.shape[-1] >= 3:
+                for i in range(3):
+                    if coord_adj[i] != 0:
+                        padded_scalar_mesh[padded_slice + (..., i)] = (
+                            source_data[..., i] + coord_adj[i]
+                        )
+                    else:
+                        padded_scalar_mesh[padded_slice + (..., i)] = source_data[
+                            ..., i
+                        ]
+
+                # Copy any additional dimensions unchanged
+                if source_data.shape[-1] > 3:
+                    padded_scalar_mesh[padded_slice + (..., slice(3, None))] = (
+                        source_data[..., 3:]
+                    )
+            else:
+                # If less than 3 coordinate dimensions, just copy the data
+                padded_scalar_mesh[padded_slice] = source_data
+
+    else:
+        # Regular wrapping without +1/-1 adjustments - this can also be simplified
+        wrap_regions = [
+            # 8 Corners
+            (
+                np.s_[:padding, :padding, :padding],
+                np.s_[-padding:, -padding:, -padding:],
+            ),
+            (
+                np.s_[-padding:, :padding, :padding],
+                np.s_[:padding, -padding:, -padding:],
+            ),
+            (
+                np.s_[:padding, -padding:, :padding],
+                np.s_[-padding:, :padding, -padding:],
+            ),
+            (
+                np.s_[-padding:, -padding:, :padding],
+                np.s_[:padding, :padding, -padding:],
+            ),
+            (
+                np.s_[:padding, :padding, -padding:],
+                np.s_[-padding:, -padding:, :padding],
+            ),
+            (
+                np.s_[-padding:, :padding, -padding:],
+                np.s_[:padding, -padding:, :padding],
+            ),
+            (
+                np.s_[:padding, -padding:, -padding:],
+                np.s_[-padding:, :padding, :padding],
+            ),
+            (
+                np.s_[-padding:, -padding:, -padding:],
+                np.s_[:padding, :padding, :padding],
+            ),
+            # 12 Edges
+            (
+                np.s_[padding : padding + n_kx, :padding, :padding],
+                np.s_[:, -padding:, -padding:],
+            ),
+            (
+                np.s_[padding : padding + n_kx, -padding:, :padding],
+                np.s_[:, :padding, -padding:],
+            ),
+            (
+                np.s_[padding : padding + n_kx, :padding, -padding:],
+                np.s_[:, -padding:, :padding],
+            ),
+            (
+                np.s_[padding : padding + n_kx, -padding:, -padding:],
+                np.s_[:, :padding, :padding],
+            ),
+            (
+                np.s_[:padding, padding : padding + n_ky, :padding],
+                np.s_[-padding:, :, -padding:],
+            ),
+            (
+                np.s_[-padding:, padding : padding + n_ky, :padding],
+                np.s_[:padding, :, -padding:],
+            ),
+            (
+                np.s_[:padding, padding : padding + n_ky, -padding:],
+                np.s_[-padding:, :, :padding],
+            ),
+            (
+                np.s_[-padding:, padding : padding + n_ky, -padding:],
+                np.s_[:padding, :, :padding],
+            ),
+            (
+                np.s_[:padding, :padding, padding : padding + n_kz],
+                np.s_[-padding:, -padding:, :],
+            ),
+            (
+                np.s_[-padding:, :padding, padding : padding + n_kz],
+                np.s_[:padding, -padding:, :],
+            ),
+            (
+                np.s_[:padding, -padding:, padding : padding + n_kz],
+                np.s_[-padding:, :padding, :],
+            ),
+            (
+                np.s_[-padding:, -padding:, padding : padding + n_kz],
+                np.s_[:padding, :padding, :],
+            ),
+            # 6 Faces
+            (
+                np.s_[:padding, padding : padding + n_ky, padding : padding + n_kz],
+                np.s_[-padding:, :, :],
+            ),
+            (
+                np.s_[-padding:, padding : padding + n_ky, padding : padding + n_kz],
+                np.s_[:padding, :, :],
+            ),
+            (
+                np.s_[padding : padding + n_kx, :padding, padding : padding + n_kz],
+                np.s_[:, -padding:, :],
+            ),
+            (
+                np.s_[padding : padding + n_kx, -padding:, padding : padding + n_kz],
+                np.s_[:, :padding, :],
+            ),
+            (
+                np.s_[padding : padding + n_kx, padding : padding + n_ky, :padding],
+                np.s_[:, :, -padding:],
+            ),
+            (
+                np.s_[padding : padding + n_kx, padding : padding + n_ky, -padding:],
+                np.s_[:, :, :padding],
+            ),
+        ]
+
+        for padded_slice, source_slice in wrap_regions:
+            padded_scalar_mesh[padded_slice] = scalar_mesh[source_slice]
+
+    return padded_scalar_mesh
+
+
+def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
+    """Calculates the scalar differences over the
+    k mesh grid using central differences
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz]
+
+    Returns
+    -------
+    np.ndarray
+        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
+    """
+    n = scalar_mesh.shape[axis]
+    # Calculate indices with periodic boundary conditions
+    plus_one_indices = np.arange(n) + 1
+    minus_one_indices = np.arange(n) - 1
+    plus_one_indices[-1] = 0
+    minus_one_indices[0] = n - 1
+
+    if axis == 0:
+        return (
+            scalar_mesh[plus_one_indices, ...] - scalar_mesh[minus_one_indices, ...]
+        ) / 2
+    elif axis == 1:
+        return (
+            scalar_mesh[:, plus_one_indices, :, ...]
+            - scalar_mesh[:, minus_one_indices, :, ...]
+        ) / 2
+    elif axis == 2:
+        return (
+            scalar_mesh[:, :, plus_one_indices, ...]
+            - scalar_mesh[:, :, minus_one_indices, ...]
+        ) / 2
+
+
+def calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis):
+    """Calculates the scalar differences over the
+    k mesh grid using central differences
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz]
+
+    Returns
+    -------
+    np.ndarray
+        scalar_gradient_mesh shape = [n_kx,n_ky,n_kz]
+    """
+    n = scalar_mesh.shape[axis]
+
+    # Calculate indices with periodic boundary conditions
+    plus_one_indices = np.arange(n) + 1
+    zero_one_indices = np.arange(n)
+    plus_one_indices[-1] = 0
+    if axis == 0:
+        return (
+            scalar_mesh[zero_one_indices, ...] + scalar_mesh[plus_one_indices, ...]
+        ) / 2
+    elif axis == 1:
+        return (
+            scalar_mesh[:, zero_one_indices, :, ...]
+            + scalar_mesh[:, plus_one_indices, :, ...]
+        ) / 2
+    elif axis == 2:
+        return (
+            scalar_mesh[:, :, zero_one_indices, ...]
+            + scalar_mesh[:, :, plus_one_indices, ...]
+        ) / 2
+
+
+def calculate_scalar_volume_averages(scalar_mesh):
+    """Calculates the scalar averages over the k mesh grid in cartesian coordinates"""
+    scalar_sums_i = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=0)
+    scalar_sums_j = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=1)
+    scalar_sums_k = calculate_forward_averages_on_meshgrid_axis(scalar_mesh, axis=2)
+    scalar_sums = (scalar_sums_i + scalar_sums_j + scalar_sums_k) / 3
+    return scalar_sums
+
+
+def calculate_scalar_differences(scalar_mesh):
+    """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+
+    Uses gradient trnasformation matrix to calculate the gradient
+    scalar_differens are calculated by central differences
+
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz,...,3]
+    """
+    scalar_diffs_i = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=0)
+    scalar_diffs_j = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=1)
+    scalar_diffs_k = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=2)
+    scalar_diffs = np.array([scalar_diffs_i, scalar_diffs_j, scalar_diffs_k])
+    scalar_diffs = np.moveaxis(scalar_diffs, 0, -1)
+    return scalar_diffs
+
+
+def calculate_scalar_differences_2(scalar_mesh, transform_matrix):
+    """Calculates the scalar gradient over the k mesh grid in cartesian coordinates
+
+    Uses gradient trnasformation matrix to calculate the gradient
+    scalar_differens are calculated by central differences
+
+
+    Parameters
+    ----------
+    scalar_mesh : np.ndarray
+        The scalar mesh. shape = [n_kx,n_ky,n_kz,...,3]
+    """
+    scalar_diffs_i = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=0)
+    scalar_diffs_j = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=1)
+    scalar_diffs_k = calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis=2)
+    scalar_diffs = np.array([scalar_diffs_i, scalar_diffs_j, scalar_diffs_k])
+    scalar_diffs = np.moveaxis(scalar_diffs, 0, -1)
+
+    scalar_diffs_2 = np.einsum("ij,uvwj->uvwi", transform_matrix, scalar_diffs)
+    return scalar_diffs_2
+
+
+def calculate_3d_mesh_scalar_gradients(
+    scalar_array,
+    reciprocal_lattice,
+):
+    """Transforms the derivatives to cartesian coordinates
+        (n,j,k,...)->(n,j,k,...,3)
+
+    Parameters
+    ----------
+    derivatives : np.ndarray
+        The derivatives to transform
+    reciprocal_lattice : np.ndarray
+        The reciprocal lattice
+
+    Returns
+    -------
+    np.ndarray
+        The transformed derivatives
+    """
+    # expanded_freq_mesh = []
+
+    # for i in range(ndim):
+    #     # Start with the original frequency mesh component
+    #     component = freq_mesh[i]
+
+    #     # For each extra dimension in scalar_grid, expand the frequency mesh
+    #     for dim_size in extra_dims:
+    #         component = np.expand_dims(component, axis=-1)
+    #         # Repeat the values along the new axis
+    #         component = np.repeat(component, dim_size, axis=-1)
+
+    #     expanded_freq_mesh.append(component)
+    # return fourier_reciprocal_gradient(scalar_array, reciprocal_lattice)
+
+    letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    scalar_diffs = calculate_scalar_differences(scalar_array)
+
+    del_k1 = 1 / scalar_diffs.shape[0]
+    del_k2 = 1 / scalar_diffs.shape[1]
+    del_k3 = 1 / scalar_diffs.shape[2]
+
+    scalar_diffs[..., 0] = scalar_diffs[..., 0] / del_k1
+    scalar_diffs[..., 1] = scalar_diffs[..., 1] / del_k2
+    scalar_diffs[..., 2] = scalar_diffs[..., 2] / del_k3
+
+    n_dim = len(scalar_diffs.shape[3:]) - 1
+    transform_matrix_einsum_string = "ij"
+    dim_letters = "".join(letters[0:n_dim])
+    scalar_array_einsum_string = "uvw" + dim_letters + "j"
+    transformed_scalar_string = "uvw" + dim_letters + "i"
+    ein_sum_string = (
+        transform_matrix_einsum_string
+        + ","
+        + scalar_array_einsum_string
+        + "->"
+        + transformed_scalar_string
+    )
+    logger.debug(f"ein_sum_string: {ein_sum_string}")
+
+    scalar_gradients = np.einsum(
+        ein_sum_string,
+        np.linalg.inv(reciprocal_lattice.T).T,
+        scalar_diffs,
+    )
+    # scalar_gradients = np.einsum(ein_sum_string, reciprocal_lattice.T, scalar_diffs)
+
+    return scalar_gradients
+
+
+def calculate_3d_mesh_scalar_integral(scalar_mesh, reciprocal_lattice):
+    """Calculate the scalar integral"""
+    n1, n2, n3 = scalar_mesh.shape[:3]
+    volume_reduced_vector = np.array([1, 1, 1])
+    volume_cartesian_vector = np.dot(reciprocal_lattice, volume_reduced_vector)
+    volume = np.prod(volume_cartesian_vector)
+    dv = volume / (n1 * n2 * n3)
+
+    scalar_volume_avg = calculate_scalar_volume_averages(scalar_mesh)
+    # Compute the integral by summing up the product of scalar values and the volume of each grid cell.
+    integral = np.sum(scalar_volume_avg * dv, axis=(0, 1, 2))
+
+    return integral
+
+
+def q_multi(q1, q2):
+    """
+    Multiplication of quaternions, it doesn't fit in any other place
+    """
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+    x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+    y = w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2
+    z = w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2
+    return np.array((w, x, y, z))
+
+
+def fourier_reciprocal_gradient(scalar_grid, reciprocal_lattice):
+    """
+    Calculate the reciprocal space gradient of a scalar field using Fourier methods.
+    It first finds the gradient in the fractional basis,
+    and then transforms to cartesian coordinates through the reciprocal lattice vectors.
+    Units of angstoms and eV are assumed.
+
+    Parameters:
+    -----------
+    scalar_grid : ndarray
+        N-dimensional array of scalar values on a mesh grid
+    dk_values : tuple or list
+        Grid spacing in each dimension
+    reciprocal_lattice : ndarray, optional
+        Reciprocal lattice vectors for non-orthogonal grids
+
+    Returns:
+    --------
+    gradient : list of ndarrays
+        List of gradient components, one for each dimension
+    """
+    # Get dimensions of the grid
+    scalar_grid_shape = scalar_grid.shape
+    ndim = reciprocal_lattice.shape[0]
+
+    # Create frequency meshgrid
+
+    nx = scalar_grid_shape[0]
+    ny = scalar_grid_shape[1]
+    nz = scalar_grid_shape[2]
+
+    dk_values = np.array([1 / nx, 1 / ny, 1 / nz])
+
+    wavenumbers = []
+    for i in range(ndim):
+        wavenumbers_1d_full = (
+            np.fft.fftfreq(scalar_grid_shape[i], d=dk_values[i]) * 2 * np.pi
+        )
+        wavenumbers.append(wavenumbers_1d_full)
+
+    freq_mesh = np.stack(np.meshgrid(*wavenumbers, indexing="ij"))
+    # Get the shape of scalar_grid beyond the first 3 dimensions (if any)
+    extra_dims = scalar_grid_shape[3:] if len(scalar_grid_shape) > 3 else ()
+
+    # Expand freq_mesh to match the expected scalar_gradient_grid_shape
+    # First, create a list to hold the expanded dimensions
+    # expanded_freq_mesh = []
+
+    # for i in range(ndim):
+    #     # Start with the original frequency mesh component
+    #     component = freq_mesh[i]
+
+    #     # For each extra dimension in scalar_grid, expand the frequency mesh
+    #     for dim_size in extra_dims:
+    #         component = np.expand_dims(component, axis=-1)
+    #         # Repeat the values along the new axis
+    #         component = np.repeat(component, dim_size, axis=-1)
+
+    #     expanded_freq_mesh.append(component)
+
+    # # Replace the original freq_mesh with the expanded version
+    # freq_mesh = np.stack(expanded_freq_mesh)
+    # print(freq_mesh.shape)
+    scalar_gradient_grid_shape = (3, *scalar_grid_shape)
+    print(scalar_gradient_grid_shape)
+    # Standard orthogonal case
+    derivative_operator = freq_mesh * 1j
+    spectral_derivative = np.fft.ifftn(
+        derivative_operator * np.fft.fftn(scalar_grid),
+        s=(3, nx, ny, nz),
+    )
+
+    derivatives = np.real(spectral_derivative)
+
+    print(derivatives.shape)
+    derivatives = np.moveaxis(derivatives, 0, -1)
+
+    print(f"Derivatives shape: {derivatives.shape}")
+    # cart_derivatives = np.dot(derivatives, np.linalg.inv(reciprocal_lattice.T))
+
+    transform_matrix_einsum_string = "ij"
+    ndim = len(derivatives.shape[3:]) - 1
+    letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    dim_letters = "".join(letters[0:ndim])
+    scalar_array_einsum_string = "uvw" + dim_letters + "j"
+    transformed_scalar_string = "uvw" + dim_letters + "i"
+    ein_sum_string = (
+        transform_matrix_einsum_string
+        + ","
+        + scalar_array_einsum_string
+        + "->"
+        + transformed_scalar_string
+    )
+    logger.debug(f"ein_sum_string: {ein_sum_string}")
+
+    cart_derivatives = np.einsum(
+        ein_sum_string,
+        np.linalg.inv(reciprocal_lattice.T).T,
+        derivatives,
+    )
+
+    return cart_derivatives
+
+
+def ravel_array(mesh_grid):
+    shape = mesh_grid.shape
+    mesh_grid = mesh_grid.reshape(shape[:-3] + (-1,))
+    mesh_grid = np.moveaxis(mesh_grid, -1, 0)
+    return mesh_grid
+
+
+def array_to_mesh(array, nkx, nky, nkz, order="C"):
+    """
+    Converts a list to a mesh that corresponds to ebs.kpoints
+    [n_kx*n_ky*n_kz,...]->[n_kx,n_ky,n_kz,...]. Make sure array is sorted by lexisort
+
+    Parameters
+    ----------
+    array : np.ndarray
+        The array to convert to a mesh
+    nkx : int
+        The number of kx points
+    nky : int
+        The number of ky points
+    nkz : int
+        The number of kz points
+    order : str, optional
+        The order of the array. Defaults to "C"
+
+    Returns
+    -------
+    np.ndarray
+        mesh
+    """
+    prop_shape = (
+        nkx,
+        nky,
+        nkz,
+    ) + array.shape[1:]
+
+    try:
+        scalar_grid = array.reshape(prop_shape, order=order)
+    except ValueError:
+        error_msg = "This array can not be converted to a 3d mesh.\n"
+        error_msg += f"Array shape: {array.shape}\n"
+        error_msg += f"Prop shape: {prop_shape}\n"
+        error_msg += f"Order: {order}"
+        raise ValueError(error_msg)
+
+    return scalar_grid
+
+
+def mesh_to_array(mesh, order="C"):
+    """
+    Converts a mesh to a list that corresponds to ebs.kpoints
+    [n_kx,n_ky,n_kz,...]->[n_kx*n_ky*n_kz,...]
+    Parameters
+    ----------
+    mesh : np.ndarray
+        The mesh to convert to a list
+    order : str, optional
+        The order of the array. Defaults to "C"
+
+    Returns
+    -------
+    np.ndarray
+        lsit
+    """
+    if mesh is None:
+        return None
+    nkx, nky, nkz = mesh.shape[:3]
+    prop_shape = (nkx * nky * nkz,) + mesh.shape[3:]
+    array = mesh.reshape(prop_shape, order=order)
+    return array
