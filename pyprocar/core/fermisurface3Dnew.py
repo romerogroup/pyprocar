@@ -1,11 +1,13 @@
 import copy
 import logging
-from typing import Dict, List
+import re
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pyvista as pv
 from scipy import interpolate
 
+from pyprocar import io
 from pyprocar.cfg.fermi_surface_3d import FermiSurface3DConfig
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.utils.physics_constants import *
@@ -42,13 +44,19 @@ class FermiSurface(pv.PolyData):
         interpolation_factor: int = 1,
         projection_accuracy: str = "normal",
         max_distance: float = 0.2,
+        padding: int = 5,
         config: FermiSurface3DConfig = None,
     ):
         super().__init__()
         logger.info("___Initializing FermiSurface object___")
 
         # Store input parameters
-        self.ebs = copy.deepcopy(ebs)
+        # self.ebs = ebs
+
+        self.padding = padding
+        self._ebs = ebs
+        self._padded_ebs = ebs.pad(padding=self.padding, inplace=False)
+
         self.fermi_shift = fermi_shift
         self.fermi = fermi + fermi_shift
         self.interpolation_factor = interpolation_factor
@@ -63,20 +71,6 @@ class FermiSurface(pv.PolyData):
         logger.debug(f"Projection accuracy: {self.projection_accuracy}")
         logger.debug(f"Max distance: {self.max_distance}")
 
-        self._has_band_gradients = False
-        self._has_band_hessian = False
-        self.hessian_matrix_name_map = {
-            (0, 0): "dxdx",
-            (0, 1): "dxdy",
-            (0, 2): "dxdz",
-            (1, 0): "dydx",
-            (1, 1): "dydy",
-            (1, 2): "dydz",
-            (2, 0): "dzdx",
-            (2, 1): "dzdy",
-            (2, 2): "dzdz",
-        }
-
         # Initialize storage for surface data
         self.band_spin_surface_map = {}
         self.surface_band_spin_map = {}
@@ -89,35 +83,37 @@ class FermiSurface(pv.PolyData):
         logger.debug(f"nky: {self.nky}")
         logger.debug(f"nkz: {self.nkz}")
 
-        self.x_unique = np.unique(self.ebs.kpoints[:, 0])
-        self.y_unique = np.unique(self.ebs.kpoints[:, 1])
-        self.z_unique = np.unique(self.ebs.kpoints[:, 2])
+        self.padded_x_unique = np.unique(self.padded_ebs.kpoints[:, 0])
+        self.padded_y_unique = np.unique(self.padded_ebs.kpoints[:, 1])
+        self.padded_z_unique = np.unique(self.padded_ebs.kpoints[:, 2])
 
-        self.x_min = self.x_unique.min()
-        self.y_min = self.y_unique.min()
-        self.z_min = self.z_unique.min()
+        self.padded_x_min = self.padded_x_unique.min()
+        self.padded_y_min = self.padded_y_unique.min()
+        self.padded_z_min = self.padded_z_unique.min()
 
         self.x_spacing = 1 / self.nkx
         self.y_spacing = 1 / self.nky
         self.z_spacing = 1 / self.nkz
 
-        self.grid = pv.ImageData(
+        self.padded_grid = pv.ImageData(
             dimensions=(
-                self.nkx,
-                self.nky,
-                self.nkz,
+                self.padded_ebs.n_kx,
+                self.padded_ebs.n_ky,
+                self.padded_ebs.n_kz,
             ),
             spacing=(self.x_spacing, self.y_spacing, self.z_spacing),
-            origin=(self.x_min, self.y_min, self.z_min),
+            origin=(self.padded_x_min, self.padded_y_min, self.padded_z_min),
         )
 
         self.transform_to_cart = np.eye(4)
         self.transform_to_frac = np.eye(4)
-        self.transform_to_cart[:3, :3] = self.ebs.reciprocal_lattice.T
-        self.transform_to_frac[:3, :3] = np.linalg.inv(self.ebs.reciprocal_lattice.T)
+        self.transform_to_cart[:3, :3] = self.padded_ebs.reciprocal_lattice.T
+        self.transform_to_frac[:3, :3] = np.linalg.inv(
+            self.padded_ebs.reciprocal_lattice.T
+        )
 
         self.brillouin_zone = BrillouinZone(
-            self.ebs.reciprocal_lattice, np.array([1, 1, 1])
+            self.padded_ebs.reciprocal_lattice, np.array([1, 1, 1])
         )
 
         # Generate the surfaces
@@ -129,18 +125,18 @@ class FermiSurface(pv.PolyData):
         logger.info("___FermiSurface initialization complete___")
 
     @property
-    def has_band_gradients(self):
-        return self._has_band_gradients
+    def ebs(self):
+        return self._ebs
 
     @property
-    def has_band_hessian(self):
-        return self._has_band_hessian
+    def padded_ebs(self):
+        return self._padded_ebs
 
     @property
     def npoints(self):
         return self.points.shape[0]
 
-    def _generate_all_surfaces(self):
+    def _generate_all_surfaces(self, order="F"):
         """
         Generate isosurfaces for all bands and spins that cross the Fermi level.
 
@@ -165,17 +161,16 @@ class FermiSurface(pv.PolyData):
 
         fermi_surfaces = []
 
+        bands_mesh = self.padded_ebs.get_property("bands", as_mesh=True, order=order)
         # Get dimensions from bands_mesh
-        _, _, _, nbands, nspins = self.ebs.bands_mesh.shape
+        _, _, _, nbands, nspins = bands_mesh.shape
 
         for ispin in range(nspins):
             for iband in range(nbands):
-                scalar_mesh = self.ebs.bands_mesh[..., iband, ispin]
+                scalar_mesh = bands_mesh[..., iband, ispin]
 
                 try:
-                    surface = self._generate_single_surface(
-                        scalar_mesh, self.ebs.reciprocal_lattice
-                    )
+                    surface = self._generate_single_surface(scalar_mesh, order=order)
 
                     # Check if the surface is empty
                     if surface.points.shape[0] > 0:
@@ -210,13 +205,11 @@ class FermiSurface(pv.PolyData):
             for x in combined_surface.cell_data:
                 self.cell_data[x] = combined_surface.cell_data[x]
 
-        logger.info(f"___Generated {len(fermi_surfaces)} Fermi surfaces___")
-
     def _generate_single_surface(
         self,
         scalar_mesh: np.ndarray,
-        reciprocal_lattice: np.ndarray,
         method: str = "marching_cubes",
+        order: str = "F",
     ) -> pv.PolyData:
         """
         Generate a single isosurface for given band and spin.
@@ -225,8 +218,6 @@ class FermiSurface(pv.PolyData):
         ----------
         scalar_mesh : np.ndarray
             3D mesh of energy values
-        reciprocal_lattice : np.ndarray
-            Reciprocal lattice vectors
         method : str, optional
             Method for isosurface generation, by default "marching_cubes"
 
@@ -235,42 +226,20 @@ class FermiSurface(pv.PolyData):
         pv.PolyData
             Surface for the given band and spin
         """
-        padding = 1
 
-        padded_nkx = self.nkx + 2 * padding
-        padded_nky = self.nky + 2 * padding
-        padded_nkz = self.nkz + 2 * padding
-
-        # Adjust origin to account for padding
-        padded_origin = (
-            self.x_min - padding * self.x_spacing,
-            self.y_min - padding * self.y_spacing,
-            self.z_min - padding * self.z_spacing,
-        )
-
-        grid = pv.ImageData(
-            dimensions=(padded_nkx, padded_nky, padded_nkz),
-            spacing=(self.x_spacing, self.y_spacing, self.z_spacing),
-            origin=padded_origin,
-        )
-
-        padded_scalar_mesh = np.pad(
-            scalar_mesh,
-            pad_width=((padding, padding), (padding, padding), (padding, padding)),
-            mode="wrap",  # Use edge values for padding
-        )
-
+        grid = copy.deepcopy(self.padded_grid)
+        padded_scalar_mesh = scalar_mesh
         # Generate isosurface
         surface = grid.contour(
             [self.fermi],
-            scalars=padded_scalar_mesh.reshape(-1, order="F"),
+            scalars=padded_scalar_mesh.reshape(-1, order=order),
             method=method,
         )
 
         if surface.points.shape[0] > 0:
             # Transform to cartesian coordinates
             surface = surface.transform(
-                self.transform_to_cart, transform_all_input_vectors=False
+                self.transform_to_cart, transform_all_input_vectors=False, inplace=False
             )
 
             # Clip surface with each face of the Brillouin zone
@@ -361,9 +330,10 @@ class FermiSurface(pv.PolyData):
 
     def _interpolate_to_surface(
         self,
-        # unstructured_grid: pv.UnstructuredGrid = None,
         grid: pv.ImageData = None,
         meshgrids: Dict[str, np.ndarray] = None,
+        interpolate_by_band: bool = False,
+        save_band_data: bool = False,
     ):
         """
         Interpolate data from a grid or meshgrids onto the Fermi surface.
@@ -408,7 +378,7 @@ class FermiSurface(pv.PolyData):
 
         if meshgrids is not None:
             logger.info("___Interpolating to surface from meshgrids___")
-            grid = copy.deepcopy(self.grid)
+            grid = copy.deepcopy(self.padded_grid)
             for name, meshgrid in meshgrids.items():
                 grid.point_data[name] = meshgrid.reshape(-1, order="F")
             unstructured_grid = grid.cast_to_unstructured_grid()
@@ -418,483 +388,218 @@ class FermiSurface(pv.PolyData):
             unstructured_grid = grid.cast_to_unstructured_grid()
 
         unstructured_grid_cart = unstructured_grid.transform(
-            self.transform_to_cart, transform_all_input_vectors=True
+            self.transform_to_cart, transform_all_input_vectors=False, inplace=False
         )
 
-        logger.debug(
-            f"point_data to be interpolated: {unstructured_grid_cart.point_data.keys()}"
-        )
-        interpolated_grid = self.interpolate(
+        keys_to_interpolate = unstructured_grid_cart.point_data.keys()
+        logger.debug(f"point_data to be interpolated: {keys_to_interpolate}")
+
+        interpolated_surface = self.interpolate(
             unstructured_grid_cart,
             n_points=40,
-            # radius=0.5,
             sharpness=20,
             strategy="null_value",
         )
 
-        logger.debug(
-            f"self.point_data after interpolation: {interpolated_grid.point_data.keys()}"
-        )
-        if "vtkValidPointMask" in interpolated_grid.point_data:
-            interpolated_grid.point_data.pop("vtkValidPointMask")
+        if interpolate_by_band:
+            total_property_value = None
+            for incoming_key in keys_to_interpolate:
+                property_name = self.padded_ebs.extract_property_label(incoming_key)
 
-        self.point_data.update(interpolated_grid.point_data)
+                logger.debug(f"property_name: {property_name}")
+                logger.debug(f"incoming_key: {incoming_key}")
+                band_index, spin_index = self.padded_ebs.extract_band_index(
+                    incoming_key
+                )
 
-        return interpolated_grid
+                mask = self.band_spin_mask[(band_index, spin_index)]
 
-    def compute_mesh_derivatives(
+                point_data_array = interpolated_surface.point_data[incoming_key]
+
+                if point_data_array.ndim == 1:
+                    # For scalar data
+                    point_data_array[~mask] = 0
+                else:
+                    # For vector data
+                    point_data_array[~mask, :] = 0
+
+                interpolated_surface.point_data[incoming_key] = point_data_array
+
+                if property_name not in interpolated_surface.point_data:
+                    interpolated_surface.point_data[property_name] = point_data_array
+                else:
+                    interpolated_surface.point_data[property_name] += point_data_array
+
+                if not save_band_data:
+                    interpolated_surface.point_data.pop(incoming_key)
+
+        self.point_data.update(interpolated_surface.point_data)
+
+        return interpolated_surface
+
+    def _compute_property(self, name, property_value, save_band_data=False):
+
+        logger.debug(f"property_value: {property_value.shape}")
+
+        padded_grid = copy.deepcopy(self.padded_grid)
+        if self.is_band_property(property_value):
+            nbands, nspins = property_value.shape[1:3]
+            for iband in range(nbands):
+                for ispin in range(nspins):
+                    band_property_label = self.padded_ebs.get_band_property_label(
+                        name, iband, ispin
+                    )
+
+                    padded_grid.point_data[band_property_label] = property_value[
+                        :, iband, ispin, ...
+                    ]
+
+            self._interpolate_to_surface(
+                grid=padded_grid,
+                interpolate_by_band=True,
+                save_band_data=save_band_data,
+            )
+
+        else:
+            padded_grid.point_data[name] = property_value
+            self._interpolate_to_surface(grid=padded_grid)
+
+        is_point_data_vector = self.point_data[name].shape[-1] == 3
+        logger.debug(f"is_point_data_vector|{name}: {is_point_data_vector}")
+        if is_point_data_vector:
+            scalar_name = f"{name}-norm"
+            self.point_data[scalar_name] = np.linalg.norm(
+                self.point_data[name], axis=-1
+            )
+            self.set_active_scalars(scalar_name, preference="point")
+            self.set_active_vectors(name, preference="point")
+        else:
+            self.set_active_scalars(name, preference="point")
+
+    def is_band_property(self, property_value):
+        property_value_shape = list(property_value.shape)
+        if len(property_value_shape) >= 3:
+            nbands, nspins = property_value_shape[1], property_value_shape[2]
+            return (
+                nbands == self.padded_ebs.n_bands
+                and nspins == self.padded_ebs.n_spin_channels
+            )
+        else:
+            return False
+
+    def compute_property(
         self,
-        scalar_mesh_dict: Dict[str, np.ndarray] = None,
-        # vector_mesh_dict: Dict[str, np.ndarray] = None,
-        compute_hessian: bool = False,
+        property_name: str,
+        property=True,
+        gradient=False,
+        hessian=False,
+        save_band_data=False,
     ):
-        """
-        Compute derivatives of scalar fields on the mesh grid.
 
-        This method calculates the gradients and optionally the Hessian matrices
-        of scalar fields defined on the mesh grid. The results are interpolated
-        to the Fermi surface points and stored in the point_data dictionary.
-
-        Parameters
-        ----------
-        scalar_mesh_dict : Dict[str, np.ndarray], optional
-            Dictionary mapping field names to scalar meshes. Each scalar mesh should
-            have the same shape as the grid used to define the Fermi surface.
-        compute_hessian : bool, default=False
-            Whether to compute the Hessian matrices (second derivatives) in addition
-            to gradients. Hessians are useful for effective mass calculations.
-
-        Returns
-        -------
-        pyvista.UnstructuredGrid
-            The grid containing the computed derivatives as point data.
-
-        Notes
-        -----
-        The computed derivatives are stored in the point_data dictionary with keys:
-        - '{name}-gradient': Gradient vectors for each scalar field
-        - '{name}-hessian-dxdx', '{name}-hessian-dxdy', etc.: Components of the
-          Hessian matrix for each scalar field (if compute_hessian=True)
-        """
-        logger.info("___Computing mesh derivatives___")
-
-        def gradients_to_dict(gradient, prefix=""):
-            """A helper method to label the gradients into a dictionary."""
-            keys = np.array(
-                [
-                    f"{prefix}dxdx",
-                    f"{prefix}dxdy",
-                    f"{prefix}dxdz",
-                    f"{prefix}dydx",
-                    f"{prefix}dydy",
-                    f"{prefix}dydz",
-                    f"{prefix}dzdx",
-                    f"{prefix}dzdy",
-                    f"{prefix}dzdz",
-                ],
+        if property:
+            property_value = self.padded_ebs.get_property(
+                property_name, as_mesh=False, order="F"
             )
-            keys = keys.reshape((3, 3))[:, : gradient.shape[1]].ravel()
-            return dict(zip(keys, gradient.T))
-
-        grid = copy.deepcopy(self.grid)
-
-        # if scalar_mesh_dict is not None:
-        #     for name, scalar_mesh in scalar_mesh_dict.items():
-        #         grid.point_data[name] = scalar_mesh.reshape(-1, order="F")
-
-        # if vector_mesh_dict is not None:
-
-        for name, scalar_mesh in scalar_mesh_dict.items():
-            if name not in grid.point_data:
-                grid.point_data[name] = scalar_mesh.reshape(-1, order="F")
-
-            gradients_grid = grid.compute_derivative(scalars=name)
-            gradients_grid[f"{name}_gradient"] = gradients_grid.point_data.pop(
-                "gradient"
+            self._compute_property(property_name, property_value, save_band_data)
+            return self.point_data
+        if gradient:
+            gradient_value = self.padded_ebs.get_gradient(
+                property_name, as_mesh=False, order="F"
             )
-
-            if compute_hessian:
-                gradients_grid = gradients_grid.compute_derivative(
-                    scalars=f"{name}_gradient"
-                )
-                hessian_point_data = gradients_grid.point_data.pop("gradient")
-
-                hessian_dict = gradients_to_dict(
-                    hessian_point_data, prefix=f"{name}_hessian-"
-                )
-
-                gradients_grid.point_data.update(hessian_dict)
-
-            grid.point_data.update(gradients_grid.point_data)
-
-        logger.debug(f"gradients_point_data \n {gradients_grid.point_data.keys()}")
-
-        self._interpolate_to_surface(grid=grid)
-
-        return gradients_grid
-
-    def compute_band_derivatives(self, compute_hessian: bool = False):
-        """
-        Compute the derivatives of the bands mesh for the Fermi surface.
-
-        This method calculates the gradients and optionally the Hessian matrices
-        of the band energies at each point on the Fermi surface. The results are
-        stored in the point_data dictionary with appropriate keys.
-
-        For each band and spin combination that contributes to the Fermi surface,
-        this method:
-        1. Extracts the corresponding scalar mesh from the electronic band structure
-        2. Computes the derivatives using compute_mesh_derivatives
-        3. Aggregates the results into combined gradient and Hessian fields
-
-        Parameters
-        ----------
-        compute_hessian : bool, default=False
-            Whether to compute the Hessian matrices in addition to gradients.
-            The Hessian contains second derivatives that are useful for
-            effective mass calculations.
-
-        Returns
-        -------
-        None
-            Results are stored in the point_data dictionary with keys:
-            - 'band-gradient': Combined gradient vectors
-            - 'band-hessian-xx', 'band-hessian-xy', etc.: Components of the
-              Hessian matrix (if compute_hessian=True)
-        """
-        scalar_mesh_dict = {}
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            scalar_mesh = self.ebs.bands_mesh[..., iband, ispin]
-            scalar_mesh_dict[f"band-{iband}|spin-{ispin}"] = scalar_mesh
-
-        self.compute_mesh_derivatives(
-            scalar_mesh_dict=scalar_mesh_dict, compute_hessian=compute_hessian
-        )
-
-        n_points = self.points.shape[0]
-        band_gradients = np.zeros((n_points, 3))
-        band_hessian = np.zeros((9, n_points))
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            band_mask = self.band_spin_mask[(iband, ispin)]
-            band_gradients[band_mask, :] += self.point_data[
-                f"band-{iband}|spin-{ispin}_gradient"
-            ][band_mask, :]
-
-            if compute_hessian:
-                self._has_band_hessian = True
-                for i, name in enumerate(self.hessian_matrix_name_map.values()):
-                    band_hessian[i, band_mask] += self.point_data[
-                        f"band-{iband}|spin-{ispin}_hessian-{name}"
-                    ][band_mask]
-
-        self.point_data["band-gradient"] = band_gradients
-
-        for i, name in enumerate(self.hessian_matrix_name_map.values()):
-            self.point_data[f"band-hessian-{name}"] = band_hessian[i, :]
-
-        self._has_band_gradients = True
-
-    def compute_fermi_velocity(self):
-        """
-        Compute the Fermi velocity for each point on the Fermi surface.
-
-        This method calculates the Fermi velocity by taking the gradient of the band
-        energy at the Fermi level and converting it to SI velocity units. The calculation
-        follows the relation:
-
-        v_F = ∇E / ħ
-
-        where:
-        - ∇E is the gradient of the band energy
-        - ħ is the reduced Planck constant
-
-        The method stores the result in the point_data dictionary with the key
-        'fermi-velocity'.
-
-        Returns
-        -------
-        None
-            Results are stored in the point_data dictionary.
-        """
-        if not self.has_band_gradients:
-            self.compute_band_derivatives()
-
-        self.point_data["fermi-velocity"] = (
-            -self.point_data["band-gradient"] * METER_ANGSTROM / HBAR_EV
-        )
-        # self.point_data["fermi-velocity"] = (
-        #     np.dot(
-        #         self.point_data["band-gradient"],
-        #         np.linalg.inv(self.reciprocal_lattice).T,
-        #     )
-        #     * METER_ANGSTROM
-        #     / HBAR_EV
-        # )
-
-    def compute_fermi_speed(self):
-        """
-        Compute the Fermi speed (magnitude of Fermi velocity) for each point on the Fermi surface.
-
-        This method calculates the magnitude of the Fermi velocity vector for each point
-        on the Fermi surface. It first ensures that the Fermi velocity has been computed,
-        then calculates the Euclidean norm of each velocity vector. In SI units.
-
-        The method stores the result in the point_data dictionary with the key
-        'fermi-speed'.
-
-        Returns
-        -------
-        None
-            Results are stored in the point_data dictionary.
-        """
-        if "fermi-velocity" not in self.point_data:
-            self.compute_fermi_velocity()
-
-        self.point_data["fermi-speed"] = np.linalg.norm(
-            self.point_data["fermi-velocity"], axis=1
-        )
-
-        # self.point_data["band-gradient"] = band_gradients
-
-    def compute_average_inverse_effective_mass(self):
-        """
-        Compute the average inverse effective mass for each point on the Fermi surface.
-
-        This method calculates the average inverse effective mass by taking the trace
-        of the Hessian matrix and computing the inverse. The inverseeffective mass is expressed
-        in units of the free electron mass (m_e).
-
-        The calculation follows:
-        m* -1 = m_e * Tr(∇²E) / 3
-
-        where:
-        - Tr(∇²E) is the trace of the Hessian matrix of the band energy
-        - m_e is the free electron mass
-
-        The method stores the result in the point_data dictionary with the key
-        'avg-inv-effective-mass' for the overall surface and individual keys for
-        each band and spin combination.
-
-        Returns
-        -------
-        None
-            Results are stored in the point_data dictionary.
-        """
-        if not self.has_band_hessian:
-            self.compute_bands_mesh_derivatives(compute_hessian=True)
-
-        hessian_matrix = np.zeros((3, 3, self.points.shape[0]))
-        effective_masses_per_band_spin = {}
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            band_spin_name = f"band-{iband}|spin-{ispin}"
-            band_spin_prefix = f"{band_spin_name}_hessian"
-            for (i, j), name in self.hessian_matrix_name_map.items():
-                hessian_comp_name = f"{band_spin_prefix}-{name}"
-                hessian_matrix[i, j, :] = self.point_data[hessian_comp_name]
-
-            scale_factor = EV_TO_J * METER_ANGSTROM**2 / HBAR_J**2
-
-            hessian_matrix = hessian_matrix * scale_factor
-            hessian_xx = self.point_data[f"{band_spin_prefix}-dxdx"] * scale_factor
-            hessian_yy = self.point_data[f"{band_spin_prefix}-dydy"] * scale_factor
-            hessian_zz = self.point_data[f"{band_spin_prefix}-dzdz"] * scale_factor
-            m_inv = (hessian_xx + hessian_yy + hessian_zz) / 3
-
-            e_mass = 1 / m_inv
-
-            effective_masses_per_band_spin[(iband, ispin)] = e_mass
-
-            self.point_data[f"band-{iband}|spin-{ispin}_avg-inv-effective-mass"] = (
-                FREE_ELECTRON_MASS / e_mass
+            gradient_label = self.padded_ebs.get_property_gradient_label(property_name)
+            self._compute_property(gradient_label, gradient_value, save_band_data)
+        if hessian:
+            hessian_value = self.padded_ebs.get_hessian(
+                property_name, as_mesh=False, order="F"
             )
+            hessian_label = self.padded_ebs.get_property_hessian_label(property_name)
+            self._compute_property(hessian_label, hessian_value, save_band_data)
+        return self.point_data
 
-        n_points = self.points.shape[0]
-        total_effective_masses = np.zeros(n_points)
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            band_mask = self.band_spin_mask[(iband, ispin)]
-            band_spin_name = f"band-{iband}|spin-{ispin}_avg-inv-effective-mass"
-            total_effective_masses[band_mask] += self.point_data[band_spin_name][
-                band_mask
-            ]
-
-        self.point_data["avg-inv-effective-mass"] = total_effective_masses
-
-    def compute_atomic_projections(
+    def compute_atomic_projection(
         self,
         atoms: List[int] = None,
         orbitals: List[int] = None,
         spins: List[int] = None,
-        compute_derivative: bool = False,
-        compute_hessian: bool = False,
+        save_band_data: bool = False,
     ):
 
-        if orbitals is None and self.ebs.projected is not None:
-            orbitals = np.arange(self.ebs.norbitals, dtype=int)
-        if atoms is None and self.ebs.projected is not None:
-            atoms = np.arange(self.ebs.natoms, dtype=int)
+        property_value = self.padded_ebs.get_projected_sum(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+        )
 
-        if self.ebs.is_non_collinear:
-            projected = self.ebs.ebs_sum(
-                spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=True
-            )
-        else:
-            projected = self.ebs.ebs_sum(
-                spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
-            )
-        grid = copy.deepcopy(self.grid)
-        atom_names = "".join(str(atom) for atom in atoms)
-        orbital_names = "".join(str(orbital) for orbital in orbitals)
-        projection_name = f"atoms-{atom_names}|orbitals-{orbital_names}-projection"
-        scalar_mesh_dict = {}
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            band_spin_projection = projected[:, iband, ispin]
+        property_value = self.padded_ebs.get_property(
+            "projected_sum", as_mesh=False, order="F"
+        )
+        self._compute_property(
+            "projected_sum", property_value, save_band_data=save_band_data
+        )
+        return self.point_data
 
-            scalar_name = f"band-{iband}|spin-{ispin}|{projection_name}"
-            grid.point_data[scalar_name] = band_spin_projection
-
-            scalar_mesh_dict[scalar_name] = band_spin_projection.reshape(
-                (self.nkx, self.nky, self.nkz), order="F"
+    def compute_spin_texture(
+        self,
+        atoms: List[int] = None,
+        orbitals: List[int] = None,
+        save_band_data: bool = False,
+    ):
+        property_name = "spin_texture"
+        if not self.padded_ebs.is_non_collinear:
+            raise ValueError(
+                "Spin texture is only available for non-collinear calculations"
             )
 
-        if compute_derivative:
-            self.compute_mesh_derivatives(
-                scalar_mesh_dict=scalar_mesh_dict, compute_hessian=compute_hessian
+        padded_grid = copy.deepcopy(self.padded_grid)
+        spin_texture = self.padded_ebs.get_atomic_orbital_spin_texture(
+            atoms=atoms, orbitals=orbitals
+        )
+
+        self._compute_property(
+            "spin_texture", spin_texture, save_band_data=save_band_data
+        )
+
+    def extend_surface(
+        self, zone_directions: List[Union[List[int], Tuple[int, int, int]]]
+    ):
+        """
+        Method to extend the surface in the direction of a reciprocal lattice vecctor
+
+        Parameters
+        ----------
+        zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            List of directions to expand to, by default None
+        """
+        # The following code  creates exteneded surfaces in a given direction
+        print(
+            f"Warning. Extending the surface will disable the further calculation of properties.\n"
+            "Existing properties will still be available."
+        )
+        print(
+            f"To enable the calculation of properties, please create a new FermiSurface object.\n"
+        )
+
+        extended_surfaces = []
+
+        new_surface = copy.deepcopy(self)
+        initial_surface = copy.deepcopy(self)
+        for direction in zone_directions:
+            surface = copy.deepcopy(initial_surface)
+
+            new_surface += surface.translate(
+                np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
             )
-            projection_gradient = np.zeros((self.npoints, 3))
-            for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-                scalar_name = f"band-{iband}|spin-{ispin}|{projection_name}"
-                projection_gradient += self.point_data[f"{scalar_name}-gradient"]
 
-            self.point_data[f"{projection_name}-gradient"] = projection_gradient
+        return new_surface
 
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            band_mask = self.band_spin_mask[(iband, ispin)]
-            scalar_name = f"band-{iband}|spin-{ispin}|{projection_name}"
-            self.point_data[f"{projection_name}"][band_mask] += self.point_data[
-                f"{scalar_name}"
-            ][band_mask]
+    @classmethod
+    def from_code(cls, code, dirpath, fermi: float = None, **kwargs):
+        parser = io.Parser(code=code, dirpath=dirpath)
+        ebs = parser.ebs
+        ebs.reduce_bands_near_fermi()
+        ebs.ibz2fbz()
 
-        self._interpolate_to_surface(grid=grid)
+        if fermi is None:
+            fermi = ebs.efermi
 
-        return grid
-
-    # def project_vectors(self, vector_data: np.ndarray, name: str = "vectors"):
-
-    # def project_vectors(self, vector_data: np.ndarray, name: str = "vectors"):
-    #     """
-    #     Project vector data onto the Fermi surface.
-
-    #     Parameters
-    #     ----------
-    #     vector_data : np.ndarray
-    #         Vector data with shape matching ebs.bands_mesh
-    #     name : str, optional
-    #         Name for the vector field, by default "vectors"
-    #     """
-    #     if vector_data.shape[:-1] != self.ebs.bands_mesh.shape[:-1]:
-    #         raise ValueError("Vector data shape must match bands_mesh shape")
-
-    #     # Project vectors for each surface
-    #     for surface_idx, (iband, ispin) in self.surface_band_spin_map.items():
-    #         mask = (self.point_data["band_index"] == iband) & (
-    #             self.point_data["spin_index"] == ispin
-    #         )
-    #         points = self.points[mask]
-
-    #         # Get vectors for this band/spin
-    #         vectors = vector_data[..., iband, ispin, :]
-
-    #         # Interpolate vectors to surface points
-    #         interpolated_vectors = self._interpolate_to_surface(points, vectors)
-
-    #         # Store in point_data
-    #         if name not in self.point_data:
-    #             self.point_data[name] = np.zeros((self.n_points, 3))
-    #         self.point_data[name][mask] = interpolated_vectors
-
-    # def project_scalars(self, scalar_data: np.ndarray, name: str = "scalars"):
-    #     """
-    #     Project scalar data onto the Fermi surface.
-
-    #     Parameters
-    #     ----------
-    #     scalar_data : np.ndarray
-    #         Scalar data with shape matching ebs.bands_mesh
-    #     name : str
-    #         Name for the scalar field
-    #     """
-    #     if scalar_data.shape[:-1] != self.ebs.bands_mesh.shape[:-1]:
-    #         raise ValueError("Scalar data shape must match bands_mesh shape")
-
-    #     # Project scalars for each surface
-    #     for surface_idx, (iband, ispin) in self.surface_band_spin_map.items():
-    #         mask = (self.point_data["band_index"] == iband) & (
-    #             self.point_data["spin_index"] == ispin
-    #         )
-    #         points = self.points[mask]
-
-    #         # Get scalars for this band/spin
-    #         scalars = scalar_data[..., iband, ispin]
-
-    #         # Interpolate scalars to surface points
-    #         interpolated_scalars = self._interpolate_to_surface(
-    #             points, scalars, vector=False
-    #         )
-
-    #         # Store in point_data
-    #         if name not in self.point_data:
-    #             self.point_data[name] = np.zeros(self.n_points)
-    #         self.point_data[name][mask] = interpolated_scalars
-
-    # def _interpolate_grid_to_surface(
-    #     self, meshgrid: np.ndarray, vector: bool = True
-    # ) -> np.ndarray:
-    #     """Helper method to interpolate data to surface points"""
-    #     grid = copy.deepcopy(self.grid)
-
-    #     grid =
-    #     unstructured_grid_cart = grid.cast_to_unstructured_grid()
-    #     self = self.interpolate(
-    #         unstructured_grid_cart, radius=1, sharpness=10, strategy="mask_points"
-    #     )
-
-    #     return self
-
-    # def _interpolate_to_surface(
-    #     self, points: np.ndarray, data: np.ndarray, vector: bool = True
-    # ) -> np.ndarray:
-    #     """Helper method to interpolate data to surface points"""
-    # Create regular grid points
-    #     nkx, nky, nkz = self.ebs.bands_mesh.shape[:3]
-    #     x = np.linspace(0, 1, nkx)
-    #     y = np.linspace(0, 1, nky)
-    #     z = np.linspace(0, 1, nkz)
-
-    #     # Transform surface points to fractional coordinates
-    #     inv_lattice = np.linalg.inv(self.ebs.reciprocal_lattice)
-    #     frac_points = np.dot(points, inv_lattice.T)
-
-    #     if vector:
-    #         # Interpolate each component
-    #         interpolated = np.zeros((len(points), 3))
-    #         for i in range(3):
-    #             interpolated[:, i] = interpolate.interpn(
-    #                 (x, y, z),
-    #                 data[..., i],
-    #                 frac_points,
-    #                 method="linear",
-    #                 bounds_error=False,
-    #                 fill_value=None,
-    #             )
-    #     else:
-    #         # Interpolate scalar
-    #         interpolated = interpolate.interpn(
-    #             (x, y, z),
-    #             data,
-    #             frac_points,
-    #             method="linear",
-    #             bounds_error=False,
-    #             fill_value=None,
-    #         )
-
-    #     return interpolated
+        return cls(ebs, fermi=fermi, **kwargs)
