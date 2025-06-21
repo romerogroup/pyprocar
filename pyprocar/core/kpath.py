@@ -4,10 +4,12 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 
+from typing import List
+
 import numpy as np
 import pyvista
 
-from ..utils import mathematics
+from pyprocar.utils import mathematics
 
 # TODO Add fmt option to other codes in write_to_file
 
@@ -37,24 +39,7 @@ class KPath:
         has_time_reversal : bool, optional
             Determine if the kpoints contain time reversal symmetry, by default True
         """
-        latex = "$"
-        for x in knames:
-            if "$" in x[0] or "$" in x[1]:
-                latex = ""
-
-        self.knames = []
-        for kname_segment in knames:
-            kname_start = kname_segment[0]
-            kname_end = kname_segment[1]
-
-            if "gamma" in kname_start.lower():
-                kname_start = r"\Gamma"
-            if "gamma" in kname_end.lower():
-                kname_end = r"\Gamma"
-
-            kname_segment = [latex + kname_start + latex, latex + kname_end + latex]
-            self.knames.append(kname_segment)
-
+        self.knames = KPath._format_kpath_names(knames)
         self.special_kpoints = special_kpoints
         self.ngrids = ngrids
         self.kticks = kticks
@@ -142,6 +127,24 @@ class KPath:
                 )
             )
         return np.array(distances)
+
+    @staticmethod
+    def _format_kpath_names(knames: List[str]):
+        latex = "$"
+        for x in knames:
+            if "$" in x[0] or "$" in x[1]:
+                latex = ""
+        for kname_segment in knames:
+            kname_start = kname_segment[0]
+            kname_end = kname_segment[1]
+
+            if "gamma" in kname_start.lower():
+                kname_start = r"\Gamma"
+            if "gamma" in kname_end.lower():
+                kname_end = r"\Gamma"
+
+            kname_segment = [latex + kname_start + latex, latex + kname_end + latex]
+        return knames
 
     def get_optimized_kpoints_transformed(
         self, transformation_matrix, same_grid_size=False
