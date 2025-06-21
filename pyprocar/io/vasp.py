@@ -165,14 +165,6 @@ class Outcar(collections.abc.Mapping):
             flags=re.IGNORECASE,
         )
 
-        vasp544_block_match = re.search(
-            r"Space group operators:\s*\n"  # header line
-            r"([ \t]*irot[\s\S]+?)"  # from the column headers …
-            r"(?=\n\s\n\s)",  # … up to the next blank/non-indented line
-            self.file_str,
-            flags=re.IGNORECASE,
-        )
-
         vasp60_block_pattern = re.compile(
             r"""
             irot\s*:\s*(?P<irot>\d+)          # 1) operator index
@@ -287,7 +279,6 @@ class Outcar(collections.abc.Mapping):
 
         elif vasp60_block_matches:
             logger.info("Detected Space Group Operators in a format from VASP 6.*")
-            logger.debug(f"vasp60_block_matches: \n{vasp60_block_matches}")
             sym_ops = []
             for vasp60_block_match in vasp60_block_matches:
                 sym_op = {}
@@ -1139,14 +1130,14 @@ class Procar(collections.abc.Mapping):
         ----------
         spd : np.ndarray
             The spd array from the earlier parse. This has a structure simlar to the PROCAR output in vasp
-            Has the shape [n_kpoints,n_band,n_spins,n-orbital,n_atoms]
+            Has the shape [n_kpoints,n_band,n_spins,n_orbital,n_atoms]
         nprinciples : int, optional
             The prinicipal quantum numbers, by default 1
 
         Returns
         -------
         np.ndarray
-            The projected array. Has the shape [n_kpoints,n_band,n_atom,n_principal,n-orbital,n_spin]
+            The projected array. Has the shape [n_kpoints,n_band,n_spin, n_atom,n_principal,n_orbital]
         """
         # This function is for VASP
         # non-pol and colinear
@@ -1174,25 +1165,17 @@ class Procar(collections.abc.Mapping):
             nbands = int(spd.shape[1] / 2)
         else:
             nbands = spd.shape[1]
+
         projected = np.zeros(
-            shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
+            shape=(nkpoints, nbands, nspins, natoms, norbitals),
             dtype=spd.dtype,
         )
 
-        temp_spd = spd.copy()
-        # (nkpoints,nbands, nspin, natom, norbital)
-        temp_spd = np.swapaxes(temp_spd, 2, 4)
-        # (nkpoints,nbands, norbital , natom , nspin)
-        temp_spd = np.swapaxes(temp_spd, 2, 3)
-        # (nkpoints,nbands, natom, norbital, nspin)
-        # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
-        if nspins == 3:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
-        elif nspins == 2:
-            projected[:, :, :, 0, :, 0] = temp_spd[:, :nbands, :-1, 1:-1, 0]
-            projected[:, :, :, 0, :, 1] = temp_spd[:, nbands:, :-1, 1:-1, 0]
+        if nspins == 2:
+            projected[:, :, 0, :, :] = spd[:, :nbands, 0, :-1, 1:-1]
+            projected[:, :, 1, :, :] = spd[:, nbands:, 1, :-1, 1:-1]
         else:
-            projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+            projected[:, :, :, :, :] = spd[:, :, :, :-1, 1:-1]
 
         return projected
 
@@ -2083,11 +2066,11 @@ class VaspParser:
         poscar_filepath = Path(poscar)
         vasprun_filepath = Path(vasprun)
 
-        self.procar = None
-        self.outcar = None
-        self.kpoints = None
-        self.poscar = None
-        self.vasprun = None
+        self.procar = {}
+        self.outcar = {}
+        self.kpoints = {}
+        self.poscar = {}
+        self.vasprun = {}
 
         if outcar_filepath.exists():
             self.outcar = Outcar(outcar)
@@ -2127,23 +2110,20 @@ class VaspParser:
             )
             return None
         kgrid = self.kpoints.get("kgrid", None)
-        if kgrid is None:
-            n_kx, n_ky, n_kz = None, None, None
-        else:
-            n_kx, n_ky, n_kz = kgrid
+
         kpath = self.kpoints.get("kpath", None)
-        return ElectronicBandStructure(
+
+        return ElectronicBandStructure.from_data(
             kpoints=self.procar.kpoints,
             bands=self.procar.bands,
             projected=self.procar._spd2projected(self.procar.spd),
-            efermi=self.outcar.efermi,
-            kpath=kpath,
-            n_kx=n_kx,
-            n_ky=n_ky,
-            n_kz=n_kz,
             projected_phase=self.procar._spd2projected(self.procar.spd_phase),
-            labels=self.procar.orbitalNames[:-1],
+            efermi=self.outcar.efermi,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
+            orbital_names=self.procar.orbitalNames[:-1],
+            structure=self.structure,
+            kpath=kpath,
+            kgrid=kgrid,
         )
 
     @property
