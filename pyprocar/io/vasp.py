@@ -462,16 +462,8 @@ class Kpoints(collections.abc.Mapping):
         self.knames = None
         self.cartesian = False
         self.automatic = False
+        self.has_time_reversal = has_time_reversal
         self._parse_kpoints()
-        if self.knames is not None:
-            self.kpath = KPath(
-                knames=self.knames,
-                special_kpoints=self.special_kpoints,
-                ngrids=self.ngrids,
-                has_time_reversal=has_time_reversal,
-            )
-        else:
-            self.kpath = None
 
     def _parse_kpoints(self):
         """A helper method to parse the KOINTS file"""
@@ -2066,11 +2058,11 @@ class VaspParser:
         poscar_filepath = Path(poscar)
         vasprun_filepath = Path(vasprun)
 
-        self.procar = {}
-        self.outcar = {}
-        self.kpoints = {}
-        self.poscar = {}
-        self.vasprun = {}
+        self.procar = None
+        self.outcar = None
+        self.kpoints = None
+        self.poscar = None
+        self.vasprun = None
 
         if outcar_filepath.exists():
             self.outcar = Outcar(outcar)
@@ -2098,6 +2090,26 @@ class VaspParser:
         return tuple(int(x) for x in self.version.split("."))
 
     @property
+    def kpath(self):
+        if self.kpoints is None:
+            return None
+        
+        
+        kpoints = None
+        if self.procar:
+            kpoints = self.procar.kpoints
+            
+        if self.kpoints.knames is None:
+            return None
+
+        return KPath(
+            kpoints=kpoints,
+            segment_names=self.kpoints.knames,
+            n_grids=self.kpoints.ngrids,
+            reciprocal_lattice=self.outcar.reciprocal_lattice,
+        )
+
+    @property
     def ebs(self):
         if self.procar is None:
             user_logger.warning(
@@ -2111,7 +2123,6 @@ class VaspParser:
             return None
         kgrid = self.kpoints.get("kgrid", None)
 
-        kpath = self.kpoints.get("kpath", None)
 
         return ElectronicBandStructure.from_data(
             kpoints=self.procar.kpoints,
@@ -2122,7 +2133,7 @@ class VaspParser:
             reciprocal_lattice=self.outcar.reciprocal_lattice,
             orbital_names=self.procar.orbitalNames[:-1],
             structure=self.structure,
-            kpath=kpath,
+            kpath=self.kpath,
             kgrid=kgrid,
         )
 
