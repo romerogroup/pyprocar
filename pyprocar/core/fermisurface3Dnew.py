@@ -442,7 +442,7 @@ class FermiSurface(pv.PolyData):
         logger.debug(f"property_value: {property_value.shape}")
 
         padded_grid = copy.deepcopy(self.padded_grid)
-        if self.is_band_property(property_value):
+        if self.ebs.is_band_property(property_value):
             nbands, nspins = property_value.shape[1:3]
             for iband in range(nbands):
                 for ispin in range(nspins):
@@ -475,17 +475,6 @@ class FermiSurface(pv.PolyData):
             self.set_active_vectors(name, preference="point")
         else:
             self.set_active_scalars(name, preference="point")
-
-    def is_band_property(self, property_value):
-        property_value_shape = list(property_value.shape)
-        if len(property_value_shape) >= 3:
-            nbands, nspins = property_value_shape[1], property_value_shape[2]
-            return (
-                nbands == self.padded_ebs.n_bands
-                and nspins == self.padded_ebs.n_spin_channels
-            )
-        else:
-            return False
 
     def compute_property(
         self,
@@ -597,7 +586,6 @@ class FermiSurface(pv.PolyData):
         parser = io.Parser(code=code, dirpath=dirpath)
         ebs = parser.ebs
         ebs.reduce_bands_near_fermi()
-        ebs.ibz2fbz()
 
         if fermi is None:
             fermi = ebs.efermi
