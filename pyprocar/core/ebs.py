@@ -20,6 +20,7 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pyvista as pv
+from scipy.interpolate import griddata
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.kpath import KPath
@@ -237,6 +238,10 @@ class ElectronicBandStructure:
     @property
     def reciprocal_lattice(self):
         return self._reciprocal_lattice
+    
+    @property
+    def brillouin_zone(self):
+        return BrillouinZone(self.reciprocal_lattice, np.array([1, 1, 1]))
 
     @property
     def efermi(self):
@@ -360,6 +365,34 @@ class ElectronicBandStructure:
         """
         if self.n_spins == 4:
             return True
+        else:
+            return False
+
+    def is_band_property(self, property_value):
+        property_value_shape = list(property_value.shape)
+        if len(property_value_shape) >= 3:
+            nbands, nspins = property_value_shape[1], property_value_shape[2]
+            return nbands == self.n_bands and nspins == self.n_spin_channels
+        else:
+            return False
+
+    def is_orbital_property(self, property_value):
+        property_value_shape = list(property_value.shape)
+        if len(property_value_shape) >= 5:
+            nkpoints, nbands, nspins, natoms, norbitals = (
+                property_value_shape[0],
+                property_value_shape[1],
+                property_value_shape[2],
+                property_value_shape[3],
+                property_value_shape[4],
+            )
+            return (
+                nkpoints == self.n_kpoints
+                and nbands == self.n_bands
+                and nspins == self.n_spin_channels
+                and natoms == self.n_atoms
+                and norbitals == self.n_orbitals
+            )
         else:
             return False
 
@@ -609,6 +642,7 @@ class ElectronicBandStructure:
             "spin_texture",
         ]:
             property_value = getattr(self, property_name, None)
+            self._op_post_processing()
             return property_value
 
         property_value = self._properties.get(property_name, None)
@@ -631,6 +665,7 @@ class ElectronicBandStructure:
         except NotImplementedError:
             pass
         gradient = self._gradients.get(property_name, None)
+        self._op_post_processing()
         return gradient
 
     def get_hessian(
@@ -650,6 +685,7 @@ class ElectronicBandStructure:
         except NotImplementedError:
             pass
         hessian = self._hessians.get(property_name, None)
+        self._op_post_processing()
         return hessian
 
     def add_property(self, property_name: str, property_value: np.ndarray):
@@ -756,6 +792,9 @@ class ElectronicBandStructure:
                 hessians=kwargs.get("hessians", None),
             )
 
+    def _op_post_processing(self, **kwargs):
+        pass
+
     def reduce_bands_near_energy(
         self, energy: float, tolerance: float = 0.7, inplace=True
     ):
@@ -816,10 +855,11 @@ class ElectronicBandStructure:
             self._properties = property_dict
             self._gradients = gradient_dict
             self._hessians = hessian_dict
-            return self
+            ebs = self
+
         else:
             new_bands = property_dict.pop("bands")
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=self._kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -833,6 +873,9 @@ class ElectronicBandStructure:
                 kpath=self.__dict__.get("kpath", None),
                 kgrid=self.__dict__.get("kgrid", None),
             )
+
+        ebs._op_post_processing()
+        return ebs
 
     def reduce_bands_near_fermi(self, tolerance=0.7, inplace=True):
         """
@@ -871,10 +914,10 @@ class ElectronicBandStructure:
             self._properties = new_properties
             self._gradients = new_gradients
             self._hessians = new_hessians
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=self._kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -888,6 +931,8 @@ class ElectronicBandStructure:
                 kpath=self.__dict__.get("kpath", None),
                 kgrid=self.__dict__.get("kgrid", None),
             )
+        ebs._op_post_processing()
+        return ebs
 
     def fix_collinear_spin(self, inplace=True):
         """
@@ -946,10 +991,10 @@ class ElectronicBandStructure:
             self._properties = new_properties
             self._gradients = new_gradients
             self._hessians = new_hessians
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=self._kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -963,6 +1008,8 @@ class ElectronicBandStructure:
                 kpath=self.__dict__.get("kpath", None),
                 kgrid=self.__dict__.get("kgrid", None),
             )
+        ebs._op_post_processing()
+        return ebs
 
     def shift_bands(self, shift_value, inplace=False):
 
@@ -974,9 +1021,9 @@ class ElectronicBandStructure:
 
         if inplace:
             self._properties["bands"] = new_bands
-            return self
+            ebs = self
         else:
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=self._kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -990,6 +1037,8 @@ class ElectronicBandStructure:
                 kpath=self.__dict__.get("kpath", None),
                 kgrid=self.__dict__.get("kgrid", None),
             )
+        ebs._op_post_processing()
+        return ebs
 
     def unfold(self, transformation_matrix=None, structure=None, inplace=False):
         """The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.
@@ -1025,11 +1074,11 @@ class ElectronicBandStructure:
             self._properties = new_properties
             self._gradients = new_gradients
             self._hessians = new_hessians
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
 
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=self._kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -1043,13 +1092,36 @@ class ElectronicBandStructure:
                 kpath=self.__dict__.get("kpath", None),
                 kgrid=self.__dict__.get("kgrid", None),
             )
+        ebs._op_post_processing()
+        return ebs
 
 
-class ElectronicBandStructurePath(ElectronicBandStructure):
+class ElectronicBandStructurePath(ElectronicBandStructure, pv.PolyData):
 
     def __init__(self, kpath: KPath, **kwargs):
         super().__init__(**kwargs)
+        pv.PolyData.__init__(self, self._kpoints)
+        self._add_properties_to_point_data()
         self._kpath = kpath
+
+    def _add_properties_to_point_data(self):
+        for name, property_value in self._properties.items():
+            self.point_data[name] = property_value.reshape(
+                (self.n_kpoints, -1), order="C"
+            )
+        for name, property_value in self._gradients.items():
+            gradient_label = self.get_property_gradient_label(name)
+            self.point_data[gradient_label] = property_value.reshape(
+                (self.n_kpoints, -1), order="C"
+            )
+        for name, property_value in self._hessians.items():
+            hessian_label = self.get_property_hessian_label(name)
+            self.point_data[hessian_label] = property_value.reshape(
+                (self.n_kpoints, -1), order="C"
+            )
+
+    def _op_post_processing(self, **kwargs):
+        self._add_properties_to_point_data()
 
     def __str__(self):
         ret = super().__str__()
@@ -1057,6 +1129,13 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
         ret += "------------------------     \n"
         ret += "KPath = \n {}\n".format(self.kpath)
         return ret
+
+    def as_cart(self):
+        self.points = self.kpoints_cartesian
+
+    def as_frac(self):
+        self.points = self.kpoints
+
 
     @property
     def kpath(self):
@@ -1068,7 +1147,7 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
 
     @property
     def n_segments(self):
-        return self.kpath.nsegments
+        return self.kpath.n_segments
 
     @property
     def tick_positions(self):
@@ -1078,104 +1157,15 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
     def tick_names(self):
         return self.kpath.tick_names
 
-    def get_kpath_segments(self, isegments: List[int] = None, cartesian: bool = False):
-        if isegments is None:
-            isegments = list(range(self.n_segments))
-        kpath_segments = []
-        tick_position_segments = []
-        for isegment in isegments:
-            kpath_segment, tick_position_segment = self.get_kpath_segment(isegment)
-            kpath_segments.append(kpath_segment)
-            tick_position_segments.append(tick_position_segment)
-        return kpath_segments, tick_position_segments
-
-    def get_kpath_segment(self, isegment: List[int], cartesian: bool = False):
-        kpoints = self.kpoints_cartesian if cartesian else self.kpoints
-
-        tick_position_segment = np.arange(
-            self.tick_positions[isegment],
-            self.tick_positions[isegment + 1] + 1,
-            step=1,
-        )
-        kpath_segment = kpoints[tick_position_segment]
-
-        return kpath_segment, tick_position_segment
-
-    def get_continous_segments(self):
-        """
-        Gets the indices of the continuous segments in the kpath
-        """
-
-        kpath_segments, tick_position_segments = self.get_kpath_segments()
-
-        continuous_segments = []
-
-        for isegment, tick_position_segment in enumerate(tick_position_segments):
-            if isegment == 0:
-                continuous_segments.append(tick_position_segment)
-                continue
-
-            current_start_index = tick_position_segment[0]
-            prev_end_index = tick_position_segments[isegment - 1][-1]
-            if current_start_index == prev_end_index:
-                continuous_segments[-1] = np.concatenate(
-                    (continuous_segments[-1], tick_position_segment[1:])
-                )
-            else:
-                continuous_segments.append(tick_position_segment)
-        return continuous_segments
-
-    def get_kpath_distances(
-        self,
-        isegments: List[int] = None,
-        return_kpath_segments: bool = False,
-        return_continuous_segments: bool = False,
-        cartesian: bool = False,
-    ):
-        if return_kpath_segments and return_continuous_segments:
-            raise ValueError(
-                "Cannot return both kpath segments and continuous segments"
-            )
-
-        if isegments is None:
-            isegments = list(range(self.n_segments))
-        kpath_distances = []
-
-        k_path_segments, tick_position_segments = self.get_kpath_segments(
-            isegments=isegments, cartesian=cartesian
-        )
-
-        continuous_segments = self.get_continous_segments()
-
-        segment_max = 0
-        k_total = None
-        for k_indices in continuous_segments:
-            k_path_segment = self.kpoints_cartesian[k_indices]
-            k_diffs = np.gradient(k_path_segment, axis=0)
-            k_diffs = np.linalg.norm(k_diffs, axis=1)
-
-            k_distances = np.cumsum(k_diffs) + segment_max
-
-            segment_max = k_distances[-1]
-
-            if k_total is None:
-                k_total = k_distances
-            else:
-                k_total = np.concatenate((k_total, k_distances))
-
-        if return_kpath_segments:
-            k_segment_distances = []
-            for k_indices in tick_position_segments:
-                k_segment_distances.append(k_total[k_indices])
-            return k_segment_distances
-        elif return_continuous_segments:
-            k_segment_distances = []
-            for k_indices in continuous_segments:
-                k_segment_distances.append(k_total[k_indices])
-            return k_segment_distances
-        else:
-            return k_total
-
+    @property
+    def tick_names_latex(self):
+        return self.kpath.tick_names_latex
+    
+    @property
+    def special_kpoint_names(self):
+        return self.kpath.special_kpoint_names
+    
+    
     def compute_gradients(
         self,
         property_names: List[str] = None,
@@ -1209,7 +1199,7 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
                 if prop_name in self._gradients and not recalculate:
                     continue
 
-                continuous_segments = self.get_continous_segments()
+                continuous_segments = self.kpath.get_continuous_segments()
 
                 val_array = self.get_property(prop_name, as_mesh=False)
                 gradients = np.zeros(val_array.shape)
@@ -1248,15 +1238,186 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
                         edge_order=2,
                     )
                 self._hessians[prop_name] = hessians * METER_ANGSTROM
+                
+        self._op_post_processing()
+
+    def compute_property(
+        self,
+        property_name: str,
+        property=True,
+        gradient=False,
+        hessian=False,
+        atoms=None,
+        orbitals=None,
+        spins=None,
+    ):
+
+        if property:
+            property_value = self.get_property(property_name, as_mesh=False, order="F")
+            self._compute_property(property_name, property_value)
+            return self.point_data
+        if gradient:
+            gradient_value = self.get_gradient(property_name, as_mesh=False, order="F")
+            gradient_label = self.get_property_gradient_label(property_name)
+            self._compute_property(gradient_label, gradient_value)
+        if hessian:
+            hessian_value = self.get_hessian(property_name, as_mesh=False, order="F")
+            hessian_label = self.get_property_hessian_label(property_name)
+            self._compute_property(hessian_label, hessian_value)
+        return self.point_data
+
+    def _compute_property(
+        self, name, property_value, atoms=None, orbitals=None, spins=None
+    ):
+
+        logger.debug(f"property_value: {property_value.shape}")
+
+        self.point_data[name] = property_value
+
+        if self.is_band_property(property_value):
+            nbands, nspins = property_value.shape[1:3]
+            for iband in range(nbands):
+                for ispin in range(nspins):
+                    band_property_label = self.get_band_property_label(
+                        name, iband, ispin
+                    )
+
+                    self.point_data[band_property_label] = property_value[
+                        :, iband, ispin, ...
+                    ]
+
+        if self.is_orbital_property(property_value):
+            nkpoints, nbands, nspins, natoms, norbitals = (
+                property_value.shape[0],
+                property_value.shape[1],
+                property_value.shape[2],
+                property_value.shape[3],
+                property_value.shape[4],
+            )
+            for iband in range(nbands):
+                for ispin in range(nspins):
+                    for iatom in range(natoms):
+                        for iorbital in range(norbitals):
+                            atomic_orbital_label = self.get_atomic_orbital_label(
+                                iatom, iorbital
+                            )
+                            band_property_label = self.get_band_property_label(
+                                name, iband, ispin
+                            )
+
+                            band_orbital_label = (
+                                f"{band_property_label}-{atomic_orbital_label}"
+                            )
+
+        is_point_data_vector = self.point_data[name].shape[-1] == 3
+        logger.debug(f"is_point_data_vector|{name}: {is_point_data_vector}")
+        if is_point_data_vector:
+            scalar_name = f"{name}-norm"
+            self.point_data[scalar_name] = np.linalg.norm(
+                self.point_data[name], axis=-1
+            )
+            self.set_active_scalars(scalar_name, preference="point")
+            self.set_active_vectors(name, preference="point")
+        else:
+            self.set_active_scalars(name, preference="point")
+            
+    def as_kdist(self, as_segments=True):
+        kdistances = self.kpath.get_distances(as_segments=False, cumlative_across_segments=True)
+        n_bands = self.bands.shape[1]
+        n_spins = self.bands.shape[2]
+        n_kpoints = kdistances.shape[0]
+        k_indices = self.kpath.segment_indices
+        blocks=pv.MultiBlock()
+        
+        if as_segments:
+            for indices in k_indices:
+                n_indices = indices.shape[0]
+                print(n_indices)
+                for iband in range(n_bands):
+                    for ispin in range(n_spins):
+                        k_segment_distances=kdistances[indices]
+                        bands=self.bands[indices, iband, ispin]
+
+                        band_kpoints=np.zeros(shape=(n_indices, 3))
+                        band_kpoints[:, 0] = k_segment_distances
+                        band_kpoints[:, 1] = bands
+                        blocks.append(pv.PolyData(band_kpoints))
+        else:
+            for iband in range(n_bands):
+                for ispin in range(n_spins):
+                    bands=self.bands[:, iband, ispin]
+                    k_distances=kdistances.copy()
+                    band_kpoints=np.zeros(shape=(n_kpoints, 3))
+                    band_kpoints[:, 0] = k_distances
+                    band_kpoints[:, 1] = bands
+                    band_kpoints[:, 2] = ispin
+                    blocks.append(pv.PolyData(band_kpoints))
+        return blocks
+        
+
+    def compute_atomic_projection(
+        self,
+        atoms: List[int] = None,
+        orbitals: List[int] = None,
+        spins: List[int] = None,
+    ):
+
+        property_value = self.get_projected_sum(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
+        )
+
+        property_value = self.get_property("projected_sum")
+        self._compute_property("projected_sum", property_value)
+        return self.point_data
+
+    def plot(
+        self,
+        add_point_labels_args: dict = None,
+        bz_add_mesh_args: dict = None,
+        **kwargs,
+    ):
+        """
+        Plots the band structure.
+
+        """
+        self.as_cart()
+        add_point_labels_args = add_point_labels_args or {}
+        bz_add_mesh_args = bz_add_mesh_args or {}
+
+        special_kpoint_names = self.kpath.special_kpoint_names
+        special_kpoint_positions = self.kpath.get_special_kpoints(as_segments=False, cartesian=True)
+
+        p = pv.Plotter()
+        p.add_mesh(self, **kwargs)
+        p.add_point_labels(
+            special_kpoint_positions, special_kpoint_names, **add_point_labels_args
+        )
+
+        bz_add_mesh_args["style"] = bz_add_mesh_args.get("style", "wireframe")
+        bz_add_mesh_args["line_width"] = bz_add_mesh_args.get("line_width", 2.0)
+        bz_add_mesh_args["color"] = bz_add_mesh_args.get("color", "black")
+        bz_add_mesh_args["opacity"] = bz_add_mesh_args.get("opacity", 1.0)
+
+        p.add_mesh(
+            self.brillouin_zone,
+            **bz_add_mesh_args,
+        )
+        p.show()
+
 
 
 class ElectronicBandStructureMesh(ElectronicBandStructure):
-
     def __init__(self, kgrid: Tuple[int, int, int] = None, **kwargs):
         super().__init__(**kwargs)
         self._kgrid = kgrid
+ 
+            
 
-        if self.is_fbz:
+        if self.is_ibz:
+            self.ibz2fbz(inplace=True)
+        else:
             self.sort_by_kpoints(inplace=True)
 
     def __str__(self):
@@ -1362,6 +1523,8 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 self._hessians[prop_name] = mathematics.mesh_to_array(
                     mesh=hessians_mesh, **kwargs
                 )
+                
+        self._op_post_processing()
 
     def get_property(
         self, property_name: str, as_mesh=False, compute: bool = True, **kwargs
@@ -1451,11 +1614,11 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             self._gradients = new_gradients
             self._hessians = new_hessians
             self._kgrid = self.kgrid
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
 
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=new_kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -1468,6 +1631,8 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 hessians=new_hessians,
                 kgrid=self.kgrid,
             )
+        # ebs._op_post_processing()
+        return ebs
 
     def ibz2fbz(self, rotations=None, decimals=4, inplace=True):
         """Applys symmetry operations to the kpoints, bands, and projections
@@ -1553,7 +1718,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             )
             return ebs.sort_by_kpoints(inplace=inplace)
 
-    def reduce_kpoints_to_plane(
+    def reduce_kpoints_to_axis_plane(
         self, k_plane=0, k_plane_tol=0.01, axis=0, inplace=True
     ):
         """
@@ -1602,9 +1767,9 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             self._gradients = new_gradients
             self._hessians = new_hessians
             self._kgrid = kgrid
-            return self
+            ebs = self
         else:
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=new_kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -1617,6 +1782,54 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 hessians=new_hessians,
                 kgrid=kgrid,
             )
+        return ebs
+
+    def reduce_kpoints_to_plane(
+        self,
+        normal: np.ndarray,
+        origin: np.ndarray = None,
+        in_cartesian: bool = True,
+        plane_tol: float = 0.01,
+        grid_resolution: tuple = (20, 20), 
+    ):
+        """Reduces kpoints to those lying on a plane defined by normal and origin.
+
+        Parameters
+        ----------
+        normal : np.ndarray
+            Normal vector defining the plane (3D array)
+        origin : np.ndarray, optional
+            Origin point of the plane. If None, uses the center of the kpoint mesh
+        plane_tol : float, optional
+            Tolerance for determining if a kpoint lies on the plane, by default 0.01
+        grid_resolution : tuple, optional
+            Resolution of the grid for interpolation, by default (20, 20)
+ 
+        Returns
+        -------
+        ElectronicBandStructurePlane
+            Reduced band structure with kpoints on the specified plane
+        """
+        if origin is None:
+            origin = np.array([0, 0, 0])
+            
+        ebs_plane = ElectronicBandStructurePlane(normal=normal, 
+                                                 origin=origin, 
+                                                 in_cartesian=in_cartesian, 
+                                                 plane_tol=plane_tol,
+                                                 grid_resolution=grid_resolution,
+                                                 kpoints=self.kpoints,
+                                                 bands=self.bands,
+                                                 efermi=self._efermi,
+                                                 orbital_names=self._orbital_names,
+                                                 reciprocal_lattice=self._reciprocal_lattice,
+                                                 shifted_to_efermi=self._shifted_to_efermi,
+                                                 structure=self._structure,
+                                                 properties=self._properties,
+                                                 gradients=self._gradients,
+                                                 hessians=self._hessians,
+                                                 )
+        return ebs_plane
 
     def interpolate(self, interpolation_factor=2, inplace=True, order="F"):
         """Interpolates the band structure meshes and properties using FFT interpolation.
@@ -1708,10 +1921,10 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             self._gradients = new_gradients
             self._hessians = new_hessians
             self._kgrid = kgrid
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
-            return ElectronicBandStructure.from_data(
+            ebs= ElectronicBandStructure.from_data(
                 kpoints=new_kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -1724,6 +1937,8 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 hessians=new_hessians,
                 kgrid=kgrid,
             )
+        ebs._op_post_processing()
+        return ebs
 
     def expand_kpoints_to_supercell_by_axes(
         self, axes_to_expand=[0, 1, 2], inplace=True
@@ -1780,10 +1995,10 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             self._gradients = new_gradients
             self._hessians = new_hessians
             self._kgrid = self.kgrid
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=new_kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -1846,10 +2061,10 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             self._gradients = new_gradients
             self._hessians = new_hessians
             self._kgrid = kgrid
-            return self
+            ebs = self
         else:
             new_bands = new_properties.pop("bands")
-            return ElectronicBandStructure.from_data(
+            ebs = ElectronicBandStructure.from_data(
                 kpoints=new_kpoints,
                 bands=new_bands,
                 efermi=self._efermi,
@@ -1862,3 +2077,191 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 hessians=new_hessians,
                 kgrid=kgrid,
             )
+        ebs._op_post_processing()
+        return ebs
+    
+
+class ElectronicBandStructurePlane(ElectronicBandStructure):
+    def __init__(self, normal: np.ndarray, 
+                 origin: np.ndarray, 
+                 in_cartesian: bool=True, 
+                 plane_tol: float = 0.01, 
+                 grid_resolution: tuple = (20, 20), **kwargs):
+        super().__init__(**kwargs)
+        self._normal = normal
+        self._origin = origin
+        self._grid_resolution = grid_resolution
+        self._reduce_kpoints_to_plane(in_cartesian, plane_tol, grid_resolution)
+        
+    def _reduce_kpoints_to_plane(self, 
+                                 in_cartesian: bool, 
+                                 plane_tol: float = 0.01,
+                                 grid_resolution: tuple = (20, 20)):
+        if in_cartesian:
+            kpoints=self.kpoints_cartesian
+        else:
+            kpoints=self.kpoints
+            
+        if self.origin is None:
+            # Use center of kpoint mesh as origin
+            self.origin = np.mean(kpoints, axis=0)
+
+        # Normalize the normal vector
+        normal = self.normal / np.linalg.norm(self.normal)
+
+        # Calculate distance from each kpoint to the plane
+        # Distance = |(k - origin) · normal|
+        kpoints_shifted = kpoints - self.origin
+        distances = np.abs(np.dot(kpoints_shifted, normal))
+
+        # Find kpoints within tolerance of the plane
+        i_kpoints_on_plane = np.where(distances <= plane_tol)[0]
+        
+        
+        # 1. Create an orthonormal basis (u, v) for the plane
+        if np.abs(np.dot(normal, [0, 0, 1])) < 0.99:
+            v_temp = np.array([0, 0, 1])  # Not parallel to normal
+        else:
+            v_temp = np.array([0, 1, 0])  # Not parallel to normal
+        self._u = np.cross(normal, v_temp)
+        self._u /= np.linalg.norm(self._u)
+        self._v = np.cross(normal, self._u)
+        self._v /= np.linalg.norm(self._v)  # Ensure normalization
+
+        # 2. Project source k-points onto the 2D basis
+        source_kpoints_on_plane = kpoints[i_kpoints_on_plane]
+        kpoints_shifted = source_kpoints_on_plane - self.origin
+        source_kpoints_2d = np.column_stack(
+            [np.dot(kpoints_shifted, self._u), np.dot(kpoints_shifted, self._v)]
+        )
+
+        # 3. Create the target 2D mesh grid
+        u_coords = source_kpoints_2d[:, 0]
+        v_coords = source_kpoints_2d[:, 1]
+        
+     
+        grid_u, grid_v = np.mgrid[
+            u_coords.min() : u_coords.max() : complex(0, grid_resolution[0]),
+            v_coords.min() : v_coords.max() : complex(0, grid_resolution[1]),
+        ]
+        target_kpoints_2d = np.vstack([grid_u.ravel(), grid_v.ravel()]).T
+        
+        
+        new_properties, new_gradients, new_hessians = {}, {}, {}
+        for prop in self.property_names:
+            
+            prop_value=self.get_property(prop)
+            if prop_value is not None:
+                new_properties[prop] = ElectronicBandStructurePlane._interpolate_plane(
+                    source_kpoints_2d, target_kpoints_2d, prop_value[i_kpoints_on_plane, ...]
+                )
+            prop_gradient=self.get_gradient(prop, compute=False)
+            if prop_gradient is not None:
+                new_gradients[prop] = ElectronicBandStructurePlane._interpolate_plane(
+                    source_kpoints_2d, target_kpoints_2d, prop_gradient[i_kpoints_on_plane, ...]
+                )
+            prop_hessian=self.get_hessian(prop, compute=False)
+            if prop_hessian is not None:
+                new_hessians[prop] = ElectronicBandStructurePlane._interpolate_plane(
+                    source_kpoints_2d, target_kpoints_2d, prop_hessian[i_kpoints_on_plane, ...]
+                )
+        
+        # 6. Transform the 2D grid points back to 3D Cartesian space
+        new_kpoints = self.origin + target_kpoints_2d @ np.vstack([self._u, self._v])
+        
+        
+        if in_cartesian:
+            new_kpoints = cartesian_to_reduced(new_kpoints, self.reciprocal_lattice)
+            
+        self._kpoints_2d = target_kpoints_2d
+        self._grid_u = grid_u
+        self._grid_v = grid_v
+        self._u_coords = self._grid_u.ravel()
+        self._v_coords = self._grid_v.ravel()
+ 
+   
+        self._kpoints = new_kpoints
+        self._properties = new_properties
+        self._gradients = new_gradients
+        self._hessians = new_hessians
+        
+
+    @property
+    def normal(self):
+        return self._normal
+
+    @property
+    def origin(self):
+        return self._origin
+    
+    @property
+    def u(self):
+        return self._u
+    
+    @property
+    def v(self):
+        return self._v
+    
+    @property
+    def kpoints_2d(self):
+        return self._kpoints_2d
+    
+    @property
+    def grid_u(self):
+        return self._grid_u
+    
+    @property
+    def grid_v(self):
+        return self._grid_v
+    
+    @property
+    def u_coords(self):
+        return self._u_coords
+    
+    @property
+    def v_coords(self):
+        return self._v_coords
+    
+    @property
+    def grid_resolution(self):
+        return self._grid_resolution
+    
+    
+    
+    @staticmethod
+    def _interpolate_plane(source_kpoints_2d, target_kpoints_2d, data_on_plane, interpolation_method="linear"):
+        if data_on_plane is None:
+            return None
+        
+        original_shape = data_on_plane.shape
+        n_k, other_dims = original_shape[0], original_shape[1:]
+        data_flat = data_on_plane.reshape(n_k, -1)
+        
+        n_target = target_kpoints_2d.shape[0]
+        interpolated_flat = np.zeros((n_target, data_flat.shape[1]))
+        
+        # Interpolate each feature column
+        for i in range(data_flat.shape[1]):
+            interpolated_flat[:, i] = griddata(
+                source_kpoints_2d,
+                data_flat[:, i],
+                target_kpoints_2d,
+                method=interpolation_method,
+            )
+        
+        # Handle NaNs from interpolating outside the convex hull by filling
+        nan_mask = np.isnan(interpolated_flat[:, 0])
+        if np.any(nan_mask):
+            nan_indices = np.where(nan_mask)[0]
+            for i in range(data_flat.shape[1]):
+                fill_values = griddata(
+                    source_kpoints_2d,
+                    data_flat[:, i],
+                    target_kpoints_2d[nan_indices],
+                    method="nearest",
+                )
+                interpolated_flat[nan_indices, i] = fill_values
+        
+        return interpolated_flat.reshape((n_target,) + other_dims)
+
+
