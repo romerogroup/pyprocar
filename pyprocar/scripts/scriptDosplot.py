@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 
-from pyprocar import io
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.io import Parser
 from pyprocar.plotter import DOSPlot
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.info import orbital_names
@@ -320,7 +320,7 @@ def dosplot(
     if not os.path.exists(dos_pkl_filepath):
         logger.info(f"Parsing DOS from {dirname}")
 
-        parser = io.Parser(code=code, dirpath=dirname)
+        parser = Parser(code=code, dirpath=dirname)
         dos = parser.dos
         structure = parser.structure
 

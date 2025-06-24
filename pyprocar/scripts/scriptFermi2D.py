@@ -14,8 +14,8 @@ import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
-from pyprocar import io
 from pyprocar.core import FermiSurface, ProcarSymmetry
+from pyprocar.io import Parser
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -165,7 +165,7 @@ def fermi2D(
     if not os.path.exists(ebs_pkl_filepath):
         logger.info(f"Parsing EBS from {dirname}")
 
-        parser = io.Parser(code=code, dirpath=dirname)
+        parser = Parser(code=code, dirpath=dirname)
         ebs = parser.ebs
         structure = parser.structure
 

@@ -158,8 +158,6 @@ class EBSPlanePlotter:
         
         
         if show_colorbar and vector_colorbar_args:
-            
-            
             vector_colorbar_args["cmap"] = vector_colorbar_args.get("cmap", "coolwarm")
             self.set_vector_colorbar(**vector_colorbar_args)
 

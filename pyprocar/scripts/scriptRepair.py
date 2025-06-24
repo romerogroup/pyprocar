@@ -1,5 +1,4 @@
-from ..utils import UtilsProcar
-from ..utils import welcome
+from pyprocar.utils import UtilsProcar, welcome
 
 
 # calls ProcarRepair

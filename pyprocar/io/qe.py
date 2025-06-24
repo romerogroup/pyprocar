@@ -15,12 +15,13 @@ from typing import Union
 import numpy as np
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.io.base import BaseParser
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 
 
-class QEParser:
+class QEParser(BaseParser):
     """The class is used to parse Quantum Expresso files.
     The most important objects that comes from this parser are the .ebs and .dos
 
@@ -49,7 +50,13 @@ class QEParser:
         kpdos_in_filepath: Union[str, Path] = "kpdos.in",
         atomic_proj_xml_filepath: Union[str, Path] = "atomic_proj.xml",
     ):
-        self.dirpath = Path(dirpath).resolve()
+        super().__init__(dirpath=dirpath)
+        
+        scf_in_filepath = self.dirpath / scf_in_filepath
+        bands_in_filepath = self.dirpath / bands_in_filepath
+        pdos_in_filepath = self.dirpath / pdos_in_filepath
+        kpdos_in_filepath = self.dirpath / kpdos_in_filepath
+        atomic_proj_xml_filepath = self.dirpath / atomic_proj_xml_filepath
 
         # Handles the pathing to the files
         (

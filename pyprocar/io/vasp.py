@@ -13,6 +13,7 @@ import numpy as np
 from numpy import array
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.io.base import ParserInterface
 from pyprocar.utils.strings import remove_comment
 
 logger = logging.getLogger(__name__)
@@ -2041,9 +2042,10 @@ class VaspXML(collections.abc.Mapping):
         return len(self.__dict__)
 
 
-class VaspParser:
+class VaspParser(ParserInterface):
     def __init__(
         self,
+        dirpath: Union[str, Path],
         incar: Union[str, Path] = "INCAR",
         outcar: Union[str, Path] = "OUTCAR",
         procar: Union[str, Path] = "PROCAR",
@@ -2051,12 +2053,13 @@ class VaspParser:
         poscar: Union[str, Path] = "POSCAR",
         vasprun: Union[str, Path] = "vasprun.xml",
     ):
-        incar_filepath = Path(incar)
-        outcar_filepath = Path(outcar)
-        procar_filepath = Path(procar)
-        kpoints_filepath = Path(kpoints)
-        poscar_filepath = Path(poscar)
-        vasprun_filepath = Path(vasprun)
+        super().__init__(dirpath)
+        incar_filepath = self.dirpath / incar
+        outcar_filepath = self.dirpath / outcar
+        procar_filepath = self.dirpath / procar
+        kpoints_filepath = self.dirpath / kpoints
+        poscar_filepath = self.dirpath / poscar
+        vasprun_filepath = self.dirpath / vasprun
 
         self.procar = None
         self.outcar = None

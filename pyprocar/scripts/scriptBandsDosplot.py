@@ -10,14 +10,13 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from pyprocar.io import Parser
+from pyprocar.plotter import DOSPlot, EBSPlot
+from pyprocar.scripts.scriptBandsplot import bandsplot
+from pyprocar.scripts.scriptDosplot import dosplot
+from pyprocar.utils import welcome
+from pyprocar.utils.defaults import settings
 from pyprocar.utils.info import orbital_names
-
-from ..io import qe, vasp
-from ..plotter import DOSPlot, EBSPlot
-from ..utils import welcome
-from ..utils.defaults import settings
-from .scriptBandsplot import bandsplot
-from .scriptDosplot import dosplot
 
 bands_settings = {
     key: value

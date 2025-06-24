@@ -58,9 +58,12 @@ class Parser:
         elif self.code == "dftb+":
             self._parse_dftbplus()
 
-        if self.ebs:
+        
+        # if self.ebs:
+            # print(f"Shifting parsed bands by the fermi energy: {self.ebs.efermi}")
             # self.ebs.bands = self.ebs.bands - self.ebs.efermi
-            self.ebs.bands += self.ebs.efermi
+            # logger.warning(f"Shifting parsed bands by the fermi energy: {self.ebs.efermi}")
+            # self.ebs._properties["bands"] += self.ebs.efermi
         if self.dos:
             self.dos.energies += self.dos.efermi
         return None

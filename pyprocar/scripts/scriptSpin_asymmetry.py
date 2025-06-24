@@ -8,14 +8,13 @@ Created on Tue Aug 18 11:14:17 2020
 
 import numpy as np
 import pyvista
-from matplotlib import colors as mpcolors
 from matplotlib import cm
-from ..core import boolean_add
-from ..core import FermiSurface3D
-from ..utils import welcome
-from ..utils import UtilsProcar
-from ..io import ProcarParser
-from ..core import ProcarSelect
+from matplotlib import colors as mpcolors
+
+from pyprocar.core import FermiSurface3D, ProcarSelect, boolean_add
+from pyprocar.io import ProcarParser
+from pyprocar.utils import UtilsProcar, welcome
+
 
 def spin_asymmetry(procar='PROCAR',
                    outcar='OUTCAR',

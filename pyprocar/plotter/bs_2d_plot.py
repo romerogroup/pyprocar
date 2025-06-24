@@ -6,15 +6,10 @@ from typing import List, Tuple
 
 import numpy as np
 import pyvista as pv
-import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
-from PIL import Image
-from pyvista.core.filters import _get_output  # avoids circular import
 
-from pyprocar import io
 from pyprocar.core import BandStructure2D
-from pyprocar.utils import ROOT, ConfigManager
 
 logger = logging.getLogger(__name__)
 

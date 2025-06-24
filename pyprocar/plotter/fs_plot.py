@@ -1,7 +1,5 @@
-import copy
 import logging
 import os
-from collections.abc import Sequence
 from functools import partial
 from typing import List, Union
 
@@ -9,33 +7,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 import vtk
-from matplotlib import cm
-from matplotlib import colors as mpcolors
 from matplotlib.collections import LineCollection
-from matplotlib.colors import ListedColormap
-from PIL import Image
 from pyvista import ColorLike
 from pyvista.core.filters import _get_output
-from pyvista.core.utilities import (
-    NORMALS,
-    assert_empty_kwargs,
-    generate_plane,
-    get_array,
-    get_array_association,
-    try_callback,
-)
 from pyvista.plotting.utilities.algorithms import (
     add_ids_algorithm,
     algorithm_to_mesh_handler,
-    crinkle_algorithm,
-    outline_algorithm,
-    pointset_to_polydata_algorithm,
     set_algorithm_input,
 )
-from scipy.interpolate import griddata
-
-from pyprocar.core.fermisurface3Dnew import FermiSurface
-from pyprocar.utils import ROOT
 
 logger = logging.getLogger(__name__)
 

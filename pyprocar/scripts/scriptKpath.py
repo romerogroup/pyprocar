@@ -1,9 +1,10 @@
 """
 @author : Uthpala Herath
 """
-import seekpath
 import numpy as np
-from ..utils import welcome
+import seekpath
+
+from pyprocar.utils import welcome
 
 
 def kpath(

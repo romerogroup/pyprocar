@@ -5,7 +5,6 @@ __date__ = "March 31, 2020"
 
 import json
 import logging
-import os
 from typing import List
 
 import matplotlib as mpl
@@ -13,14 +12,12 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import yaml
 from matplotlib.collections import LineCollection
-from matplotlib.ticker import AutoMinorLocator, FormatStrFormatter, MultipleLocator
+from matplotlib.ticker import MultipleLocator
 
 from pyprocar.core import ElectronicBandStructure, KPath
 
 logger = logging.getLogger(__name__)
-
 
 class EBSPlot:
     """
@@ -64,8 +61,8 @@ class EBSPlot:
         self.values_dict = {}
 
         if self.spins is None:
-            self.spins = range(self.ebs.nspins)
-        self.nspins = len(self.spins)
+            self.spins = range(self.ebs.n_spins)
+        self.n_spins = len(self.spins)
         if self.ebs.is_non_collinear:
             self.spins = [0]
         self.handles = []
@@ -88,7 +85,7 @@ class EBSPlot:
         logger.debug("EBS: %s", self.ebs)
 
         # need to initiate kpath if kpath is not defined.
-        self.x = self._get_x()
+        self.x = self.ebs.kpath.get_distances(as_segments=False)
 
         self._initiate_plot_args()
 
@@ -102,59 +99,6 @@ class EBSPlot:
         self.set_ylabel()
         self.set_xlim()
         self.set_ylim()
-
-    def _get_x(self):
-        """
-        Provides the x axis data of the plots
-
-        Returns
-        -------
-        np.ndarray
-            x-axis data.
-
-        """
-        logger.info("___Getting x values___")
-        self.values_dict[f"k_current"] = []
-        pos = 0
-        if self.kpath is not None and self.kpath.nsegments == len(self.kpath.ngrids):
-            logger.info(
-                "Kpath exists and nsegments == ngrids. Creating path from kpath"
-            )
-            k_current = None
-            for isegment in range(self.kpath.nsegments):
-                kstart, kend = self.kpath.special_kpoints[isegment]
-                if self.kdirect is False:
-                    kstart = np.dot(self.ebs.reciprocal_lattice, kstart)
-                    kend = np.dot(self.ebs.reciprocal_lattice, kend)
-
-                distance = np.linalg.norm(kend - kstart)
-                if isegment == 0:
-                    x = np.linspace(pos, pos + distance, self.kpath.ngrids[isegment])
-                    k_current = kstart
-                    self.values_dict[f"k_current"].append(k_current.tolist())
-                else:
-                    x = np.append(
-                        x,
-                        np.linspace(pos, pos + distance, self.kpath.ngrids[isegment]),
-                        axis=0,
-                    )
-
-                k_unit_dir = (kend - kstart) / distance
-                for i in range(x.shape[0]):
-                    k_current += k_unit_dir * distance
-                    self.values_dict[f"k_current"].append(k_current.tolist())
-
-                pos += distance
-        else:
-            logger.info(
-                "Kpath does not exist or nsegments != ngrids. Creating x from kpoints"
-            )
-
-            x = np.arange(0, self.ebs.kpoints.shape[0])
-
-        return np.array(x).reshape(
-            -1,
-        )
 
     def plot_bands(self):
         """
@@ -173,7 +117,7 @@ class EBSPlot:
             else:
                 color = self.config.spin_colors[ispin]
 
-            for iband in range(self.ebs.nbands):
+            for iband in range(self.ebs.n_bands):
                 handle = self.ax.plot(
                     self.x,
                     self.ebs.bands[:, iband, ispin],
@@ -226,7 +170,7 @@ class EBSPlot:
         values_dict = {}
 
         if spins is None:
-            spins = range(self.ebs.nspins)
+            spins = range(self.ebs.n_spins)
         if self.ebs.is_non_collinear:
             spins = [0]
 
@@ -261,7 +205,7 @@ class EBSPlot:
                 vmax = color_weights[:, :, spins].max()
 
         for ispin in spins:
-            for iband in range(self.ebs.nbands):
+            for iband in range(self.ebs.n_bands):
                 if len(self.spins) == 1:
                     color = self.config.color
                 else:
@@ -372,7 +316,7 @@ class EBSPlot:
             linewidth = [l * 5 for l in self.config.linewidth]
 
         if spins is None:
-            spins = range(self.ebs.nspins)
+            spins = range(self.ebs.n_spins)
         if self.ebs.is_non_collinear:
             spins = [0]
 
@@ -403,7 +347,7 @@ class EBSPlot:
             norm = mpl.colors.Normalize(vmin, vmax)
 
         for ispin in spins:
-            for iband in range(self.ebs.nbands):
+            for iband in range(self.ebs.n_bands):
                 if len(self.spins) == 1:
                     color = self.config.color
                 else:
@@ -482,7 +426,7 @@ class EBSPlot:
         else:
             color_map = self.config.cmap
         if spins is None:
-            spins = range(self.ebs.nspins)
+            spins = range(self.ebs.n_spins)
         if self.ebs.is_non_collinear:
             spins = [0]
 
@@ -497,7 +441,7 @@ class EBSPlot:
             norm = mpl.colors.Normalize(vmin, vmax)
             for ispin in spins:
                 # plotting
-                for iband in range(self.ebs.nbands):
+                for iband in range(self.ebs.n_bands):
                     points = np.array(
                         [self.x, self.ebs.bands[:, iband, ispin]]
                     ).T.reshape(-1, 1, 2)
@@ -574,11 +518,10 @@ class EBSPlot:
         """
         if labels is None:
             labels = [""]
-        self.ebs.bands = np.vstack((self.ebs.bands, self.ebs.bands))
-        self.ebs.projected = np.vstack((self.ebs.projected, self.ebs.projected))
-        self.ebs.kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
-        self.ebs.kpoints[0][-1] += 1
-        self.x = self._get_x()
+        self.ebs._properties["bands"] = np.vstack((self.ebs.bands, self.ebs.bands))
+        self.ebs._properties["projected"] = np.vstack((self.ebs.projected, self.ebs.projected))
+        self.ebs._kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
+        self.ebs._kpoints[0][-1] += 1
         print("Atomic plot: bands.shape  :", self.ebs.bands.shape)
         print("Atomic plot: spd.shape    :", self.ebs.projected.shape)
         print("Atomic plot: kpoints.shape:", self.ebs.kpoints.shape)
@@ -592,7 +535,7 @@ class EBSPlot:
         # print('Energy range', emin, emax)
 
         if spins is None:
-            spins = range(self.ebs.nspins)
+            spins = range(self.ebs.n_spins)
         if self.ebs.is_non_collinear:
             spins = [0]
         # cointainers for the bounding boxes of the text elements
@@ -690,6 +633,7 @@ class EBSPlot:
             self.ax.set_xticks(self.x[tick_positions])
 
         if tick_names is not None:
+            logger.debug(f"tick_names: {tick_names}")
             self.ax.set_xticklabels(tick_names)
 
         self.ax.tick_params(**self.config.major_x_tick_params)

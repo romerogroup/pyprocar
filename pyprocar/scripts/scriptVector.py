@@ -1,9 +1,7 @@
-from ..utils import UtilsProcar
-from ..io import ProcarParser
-from ..core import ProcarSelect
-from ..plotter import ProcarPlot
-from ..core.fermisurface import FermiSurface
-from ..utils import welcome
+from pyprocar.core import FermiSurface, ProcarSelect
+from pyprocar.io import ProcarParser
+from pyprocar.plotter import ProcarPlot
+from pyprocar.utils import UtilsProcar, welcome
 
 
 def Vector(

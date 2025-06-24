@@ -11,8 +11,8 @@ from typing import List
 
 import numpy as np
 
-from ..io.abinit import AbinitOutput
-from ..utils import UtilsProcar, welcome
+from pyprocar.io.abinit import AbinitOutput
+from pyprocar.utils import UtilsProcar, welcome
 
 
 def cat(

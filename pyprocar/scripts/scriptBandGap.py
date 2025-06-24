@@ -1,6 +1,6 @@
 import numpy as np
 
-from .. import io
+from pyprocar.io import Parser
 
 
 def bandgap(
@@ -34,7 +34,7 @@ def bandgap(
 
     bandGap = None
 
-    parser = io.Parser(code=code, dirpath=dirname)
+    parser = Parser(code=code, dirpath=dirname)
     ebs = parser.ebs
 
     if fermi is None:

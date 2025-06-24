@@ -10,8 +10,8 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyprocar import io
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.io import Parser
 from pyprocar.plotter import EBSPlot
 from pyprocar.utils import data_utils, welcome
 from pyprocar.utils.info import orbital_names
@@ -156,7 +156,7 @@ def bandsplot(
     if not os.path.exists(ebs_pkl_filepath):
         logger.info(f"Parsing EBS from {dirname}")
 
-        parser = io.Parser(code=code, dirpath=dirname)
+        parser = Parser(code=code, dirpath=dirname)
         ebs = parser.ebs
         structure = parser.structure
         kpath = ebs.kpath
@@ -181,8 +181,8 @@ def bandsplot(
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
 
-        ebs.bands -= fermi
-        ebs.bands += fermi_shift
+        ebs._properties["bands"] -= fermi
+        ebs._properties["bands"] += fermi_shift
         fermi_level = fermi_shift
         y_label = r"E - E$_F$ (eV)"
     else:
@@ -206,7 +206,7 @@ def bandsplot(
 
     elif mode == "ipr":
         user_logger.info("Plotting bands in IPR mode")
-        weights = ebs_plot.ebs.ebs_ipr()
+        weights = ebs_plot.ebs.ebs_ipr
         if config.weighted_color:
             color_weights = weights
         else:
@@ -245,7 +245,6 @@ def bandsplot(
                 projection_labels.append(projection_label)
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
-                    principal_q_numbers=[-1],
                     orbitals=orbitals,
                     spins=spins,
                 )
@@ -253,7 +252,7 @@ def bandsplot(
         if mode == "overlay_orbitals":
             user_logger.info("Plotting bands in overlay orbitals mode")
             for iorb, orb in enumerate(["s", "p", "d", "f"]):
-                if orb == "f" and not ebs_plot.ebs.norbitals > 9:
+                if orb == "f" and not ebs_plot.ebs.n_orbitals > 9:
                     continue
                 orbitals = orbital_names[orb]
                 labels.append(orb)
@@ -266,7 +265,6 @@ def bandsplot(
                 projection_labels.append(projection_label)
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
-                    principal_q_numbers=[-1],
                     orbitals=orbitals,
                     spins=spins,
                 )
@@ -303,7 +301,6 @@ def bandsplot(
                         projection_labels.append(projection_label)
                         w = ebs_plot.ebs.ebs_sum(
                             atoms=atoms,
-                            principal_q_numbers=[-1],
                             orbitals=orbitals,
                             spins=spins,
                         )
@@ -343,8 +340,9 @@ def bandsplot(
         projection_labels.append(projection_label)
 
         weights = ebs_plot.ebs.ebs_sum(
-            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
+            atoms=atoms, orbitals=orbitals, spins=spins
         )
+        logger
         if config.weighted_color:
             color_weights = weights
         else:
@@ -400,6 +398,7 @@ def bandsplot(
             user_logger.warning(
                 f"Selected mode {mode} not valid. Please check the spelling"
             )
+            raise ValueError(f"Selected mode {mode} not valid. Please check the spelling")
 
     ebs_plot.set_xticks(kticks, knames)
     ebs_plot.set_yticks(interval=elimit)

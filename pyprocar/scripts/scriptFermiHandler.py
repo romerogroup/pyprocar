@@ -11,8 +11,8 @@ from typing import List, Tuple
 import numpy as np
 import yaml
 
-from pyprocar import io
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.io import Parser
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.log_utils import set_verbose_level
@@ -96,7 +96,7 @@ class FermiHandler:
         if not os.path.exists(ebs_pkl_filepath):
             logger.info(f"Parsing EBS from {dirname}")
 
-            parser = io.Parser(code=code, dirpath=dirname)
+            parser = Parser(code=code, dirpath=dirname)
             ebs = parser.ebs
             structure = parser.structure
 

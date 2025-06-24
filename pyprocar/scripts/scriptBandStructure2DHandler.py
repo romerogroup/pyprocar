@@ -17,10 +17,9 @@ import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
-from pyprocar import io
-
 # from pyprocar.fermisurface3d import fermisurface3D
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.io import Parser
 from pyprocar.plotter import BandStructure2DataHandler, BandStructure2DVisualizer
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.log_utils import set_verbose_level
@@ -115,7 +114,7 @@ class BandStructure2DHandler:
         if not os.path.exists(ebs_pkl_filepath):
             logger.info(f"Parsing EBS from {dirname}")
 
-            parser = io.Parser(code=code, dirpath=dirname)
+            parser = Parser(code=code, dirpath=dirname)
             ebs = parser.ebs
             structure = parser.structure
 

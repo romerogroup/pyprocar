@@ -1,8 +1,7 @@
 
 from typing import List
 
-from ..utils import ProcarFileFilter
-from ..utils import welcome
+from pyprocar.utils import ProcarFileFilter, welcome
 
 
 def filter(

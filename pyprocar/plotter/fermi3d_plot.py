@@ -10,25 +10,15 @@ from matplotlib import cm
 from matplotlib import colors as mpcolors
 from PIL import Image
 from pyvista.core.filters import _get_output
-from pyvista.core.utilities import (
-    NORMALS,
-    assert_empty_kwargs,
-    generate_plane,
-    get_array,
-    get_array_association,
-    try_callback,
-)
+from pyvista.core.utilities import generate_plane
 from pyvista.plotting.utilities.algorithms import (
     add_ids_algorithm,
     algorithm_to_mesh_handler,
     crinkle_algorithm,
-    outline_algorithm,
-    pointset_to_polydata_algorithm,
     set_algorithm_input,
 )
 
 from pyprocar.core.fermisurface3D import FermiSurface3D
-from pyprocar.utils import ROOT
 
 logger = logging.getLogger(__name__)
 

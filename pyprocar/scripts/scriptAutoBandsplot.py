@@ -3,12 +3,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .. import io
-from ..pyposcar.clusters import Clusters
-from ..pyposcar.defects import FindDefect
-from ..pyposcar.generalUtils import remove_flat_points
-from ..pyposcar.poscar import Poscar
-from ..scripts.scriptBandsplot import bandsplot
+from pyprocar.io import Parser
+from pyprocar.pyposcar.clusters import Clusters
+from pyprocar.pyposcar.defects import FindDefect
+from pyprocar.pyposcar.generalUtils import remove_flat_points
+from pyprocar.pyposcar.poscar import Poscar
+from pyprocar.scripts.scriptBandsplot import bandsplot
 
 try:
     from sklearn.neighbors.kde import KernelDensity

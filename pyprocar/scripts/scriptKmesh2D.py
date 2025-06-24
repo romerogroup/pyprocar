@@ -1,5 +1,7 @@
 import numpy as np
-from ..utils import welcome
+
+from pyprocar.utils import welcome
+
 
 def generate2dkmesh(x1:float, y1:float, x2:float, y2:float, z:float, nkx:int, nky:int,):
     """_summary_
