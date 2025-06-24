@@ -1094,6 +1094,12 @@ class ElectronicBandStructure:
             )
         ebs._op_post_processing()
         return ebs
+    
+    @classmethod
+    def from_code(cls, code: str, dirpath: str, **kwargs):
+        from pyprocar.io import Parser
+        parser = Parser(code=code, dirpath=dirpath)
+        return parser.ebs
 
 
 class ElectronicBandStructurePath(ElectronicBandStructure, pv.PolyData):
