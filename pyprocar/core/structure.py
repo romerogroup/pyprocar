@@ -78,7 +78,10 @@ class Structure:
         if self.has_complete_data:
             self.get_wyckoff_positions()
 
-        self.rotations = rotations
+        self._rotations = rotations
+        if self._rotations is None:
+            self._rotations = np.empty(shape=(0, 3, 3))
+            
 
         return None
 
@@ -100,6 +103,10 @@ class Structure:
 
         structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
         return structure_equal
+    
+    @property
+    def rotations(self):
+        return self._rotations
 
     @property
     def volume(self):
