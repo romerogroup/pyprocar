@@ -14,12 +14,13 @@ from typing import Union
 import numpy as np
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.io.base import BaseParser
 
 HARTREE_TO_EV = 27.211386245988  # eV/Hartree
 
 
-class SiestaParser:
-    def __init__(self, fdf_filepath: Union[str, Path]):
+class SiestaParser(BaseParser):
+    def __init__(self, dirpath: Union[str, Path], fdf_filepath: Union[str, Path]):
         """The class is used to parse information in a siesta calculation
 
         Parameters
@@ -27,15 +28,16 @@ class SiestaParser:
         fdf_file : str
             The .fdf file that has the inputs for the Siesta calculation
         """
-
-        self.dirname = Path(fdf_filepath).parent
+        super().__init__(dirpath)
+        fdf_filepath=Path(fdf_filepath)
+        self.fdf_filepath = self.dirpath / fdf_filepath.name
 
         # Parse some initial information
         # This contains kpath info, prefix for files, and structure info
         self._parse_fdf(fdf_filepath=fdf_filepath)
 
         # parses the bands file. This will initiate the bands array
-        bands_filepath = self.dirname / f"{self.prefix}.bands"
+        bands_filepath = self.dirpath / f"{self.prefix}.bands"
         self._parse_bands(bands_filepath=bands_filepath)
 
         # self._parse_struct_out(struct_out_file=f"{self.prefix}{os.sep}STRUCT_OUT")

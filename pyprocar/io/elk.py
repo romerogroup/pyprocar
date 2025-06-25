@@ -14,6 +14,7 @@ from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.ebs import ElectronicBandStructure
 from pyprocar.core.kpath import KPath
 from pyprocar.core.structure import Structure
+from pyprocar.io.base import BaseParser
 
 HARTREE_TO_EV = 27.211386245988
 
@@ -37,12 +38,14 @@ def parse_dos_block(dos_block: str) -> Tuple[np.array, np.array]:
     return X[:, 0], X[:, 1]
 
 
-class ElkParser:
-    def __init__(self, dirpath: Union[str, Path], kdirect: bool = True):
-
+class ElkParser(BaseParser):
+    def __init__(self, dirpath: Union[str, Path], elk_in_filepath: Union[str, Path] = "elk.in", kdirect: bool = True):
+        super().__init__(dirpath)
+        elk_in_filepath=Path(elk_in_filepath)
+        self.elk_in_filepath = self.dirpath / elk_in_filepath.name
+        
         # elk specific input parameters
-        self.dirpath = Path(dirpath)
-        self.elkin_filepath = self.dirpath / "elk.in"
+        self.elkin_filepath = self.elk_in_filepath
         self.filepaths = []
         self.elkin = None
         self.nbands = None
@@ -104,30 +107,45 @@ class ElkParser:
             self._read_bands()
         self._read_dos()
 
-        has_time_reversal = True
 
         # Checks if filepaths exists, if not it is not a bands calculation
         if self.is_bands_calculation:
-            self.kpath = KPath(
-                knames=self.knames,
-                special_kpoints=self.special_kpoints,
-                kticks=self.kticks,
-                ngrids=self.ngrids,
-                has_time_reversal=has_time_reversal,
+            self._kpath = KPath(
+                kpoints=self.kpoints,
+                n_grids=self.ngrids,
+                segment_names=self.knames,
+                reciprocal_lattice=self.reclat,
             )
 
-            self.ebs = ElectronicBandStructure(
+            self._ebs = ElectronicBandStructure.from_data(
                 kpoints=self.kpoints,
                 bands=self.bands,
                 projected=self._spd2projected(self.spd),
                 efermi=self.fermi,
-                kpath=self.kpath,
+                kpath=self._kpath,
                 projected_phase=None,
-                labels=self.orbital_names[:-1],
+                orbital_names=self.orbital_names[:-1],
                 reciprocal_lattice=self.reclat,
+                structure=self._structure,
             )
 
         return
+    
+    @property
+    def ebs(self):
+        return self._ebs
+    
+    @property
+    def kpath(self):
+        return self._kpath
+    
+    @property
+    def structure(self):
+        return self._structure
+    
+    @property
+    def dos(self):
+        return self._dos
 
     @property
     def spd_orb(self):
@@ -167,7 +185,7 @@ class ElkParser:
             self.lattice[i, :] = [float(coord) for coord in vec.strip().split()]
         self.lattice_constant = float(re.findall(r"scale\s*\n(.*)", self.elkin)[0])
         self.lattice *= self.lattice_constant
-        self.structure = Structure(
+        self._structure = Structure(
             atoms=self.atoms,
             lattice=self.lattice,
             fractional_coordinates=self.frac_coords,
@@ -462,9 +480,13 @@ class ElkParser:
                         dos_projected[iatom, 0, i_orbital, i_spin, :] = pdos[
                             f"S{i_spc:02d}"
                         ][f"A{i_atom_for_specie:04d}"][i_orbital + i_spin * n_orbitals]
+        
+        # By default elk subtracts the fermi energy from the energies.
+        # We add it back here.
+        energies += self.fermi
 
-        self.dos = DensityOfStates(energies, dos_total, self.fermi, dos_projected)
-        return self.dos
+        self._dos = DensityOfStates(energies, dos_total, self.fermi, dos_projected)
+        return self._dos
 
     def _read_fermi(self):
         """

@@ -11,11 +11,14 @@ from typing import Union
 
 import numpy as np
 
+from pyprocar.io.base import BaseParser
 
-class FrmsfParser:
-    def __init__(self, filepath: Union[str, Path] = Path("in.frmsf")):
 
-        self.filepath = Path(filepath)
+class FrmsfParser(BaseParser):
+    def __init__(self, dirpath: Union[str, Path], filepath: Union[str, Path] = Path("in.frmsf")):
+        super().__init__(dirpath)
+        filepath=Path(filepath)
+        self.filepath = self.dirpath / filepath.name
 
         rf = open(self.filepath)
         self.data = rf.readlines()

@@ -89,15 +89,15 @@ class QEParser(BaseParser):
 
         # Parsing density of states files
         if pdos_in_filepath.exists():
-            self.dos = self._parse_pdos(
+            self._dos = self._parse_pdos(
                 pdos_in_filepath=pdos_in_filepath, dirpath=self.dirpath
             )
         else:
-            self.dos = None
+            self._dos = None
         # Parsing information related to the bandstructure calculations kpath and klabels
         self.kticks = None
         self.knames = None
-        self.kpath = None
+        self._kpath = None
         if (
             xml_root.findall(".//input/control_variables/calculation")[0].text
             == "bands"
@@ -107,21 +107,45 @@ class QEParser(BaseParser):
                 self.bandsIn = f.read()
             self._get_kpoint_labels()
 
-        self.ebs = ElectronicBandStructure(
+        self._ebs = ElectronicBandStructure.from_data(
             kpoints=self.kpoints,
-            n_kx=self.nkx,
-            n_ky=self.nky,
-            n_kz=self.nkz,
             bands=self.bands,
             projected=self._spd2projected(self.spd),
             efermi=self.efermi,
-            kpath=self.kpath,
+            structure=self.structure,
             projected_phase=self._spd2projected(self.spd_phase),
-            labels=self.orbital_names[:-1],
+            orbital_names=self.orbital_names[:-1],
             reciprocal_lattice=self.reciprocal_lattice,
+            kpath=self._kpath,
+            kgrid=self._kgrid,
         )
 
         return None
+    
+    @property
+    def dos(self):
+        return self._dos
+    
+    @property
+    def ebs(self):
+        return self._ebs
+    
+  
+    
+    @property
+    def kpath(self):
+        return self._kpath
+    
+    @property
+    def structure(self):
+        """Returns a the last element of a list of pyprocar.core.Structure
+
+        Returns
+        -------
+        pyprocar.core.Structure
+            Returns a the last element of a list of pyprocar.core.Structure
+        """
+        return self.structures[-1]
 
     def kpoints_cart(self):
         """Returns the kpoints in cartesian coordinates
@@ -171,16 +195,7 @@ class QEParser(BaseParser):
         structures.append(st)
         return structures
 
-    @property
-    def structure(self):
-        """Returns a the last element of a list of pyprocar.core.Structure
-
-        Returns
-        -------
-        pyprocar.core.Structure
-            Returns a the last element of a list of pyprocar.core.Structure
-        """
-        return self.structures[-1]
+    
 
     @property
     def initial_structure(self):
@@ -286,7 +301,7 @@ class QEParser(BaseParser):
             else:
                 total_dos[0, ienergy] = float(raw_dos_block_by_energy.split()[2])
 
-        energies -= self.efermi
+        energies # -= self.efermi
         return energies, total_dos
 
     def _parse_dos_projections(self, wfc_filenames, n_energy):
@@ -540,12 +555,11 @@ class QEParser(BaseParser):
                     [self.knames[itick], self.knames[itick + 1]]
                 )
         has_time_reversal = True
-        self.kpath = KPath(
-            knames=self.modified_knames,
-            special_kpoints=self.special_kpoints,
-            kticks=self.kticks,
-            ngrids=self.ngrids,
-            has_time_reversal=has_time_reversal,
+        self._kpath = KPath(
+            kpoints=self.kpoints,
+            n_grids=self.ngrids,
+            segment_names=self.modified_knames,
+            reciprocal_lattice=self.reciprocal_lattice,
         )
 
     def _initialize_filenames(
@@ -1138,6 +1152,7 @@ class QEParser(BaseParser):
         self.nk1 = None
         self.nk2 = None
         self.nk3 = None
+        self._kgrid = None
         monkhorst_tag = main_xml_root.findall(
             ".//output/band_structure/starting_k_points"
         )[0][0]
@@ -1149,6 +1164,8 @@ class QEParser(BaseParser):
             self.nk1 = float(monkhorst_tag.attrib["k1"])
             self.nk2 = float(monkhorst_tag.attrib["k2"])
             self.nk3 = float(monkhorst_tag.attrib["k3"])
+            
+            self._kgrid = (self.nkx, self.nky, self.nkz)
 
         self.nks = int(main_xml_root.findall(".//output/band_structure/nks")[0].text)
         self.atm_wfc = int(

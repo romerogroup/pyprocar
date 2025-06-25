@@ -11,6 +11,7 @@ import numpy as np
 from numpy import array
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.io.base import BaseParser
 from pyprocar.io.vasp import Kpoints, Procar, VaspParser
 from pyprocar.utils import elements
 
@@ -575,26 +576,33 @@ class AbinitDOSParser:
         return dos_atom_projections, atom_index
 
 
-class AbinitParser:
+class AbinitParser(BaseParser):
     def __init__(
         self,
         dirpath: Union[str, Path],
+        abinit_output_filepath: Union[str, Path] = "abinit.out",
+        abinit_kpoints_filepath: Union[str, Path] = "KPOINTS",
+        **kwargs,
     ):
+        super().__init__(dirpath=dirpath, **kwargs)
 
-        self.dirpath = Path(dirpath)
-        abinit_output_filepath = self.dirpath / "abinit.out"
-        abinit_kpoints_filepath = self.dirpath / "KPOINTS"
+        abinit_output_filepath = Path(abinit_output_filepath)
+        abinit_kpoints_filepath = Path(abinit_kpoints_filepath)
 
-        self.abinit_output = AbinitOutput(abinit_output_filepath=abinit_output_filepath)
+        self.abinit_output_filepath = self.dirpath / abinit_output_filepath.name
+        self.abinit_kpoints_filepath = self.dirpath / abinit_kpoints_filepath.name
+
+        self.abinit_output = AbinitOutput(abinit_output_filepath=self.abinit_output_filepath)
+
         try:
-            self.abinit_kpoints = AbinitKpoints(filepath=abinit_kpoints_filepath)
+            self.abinit_kpoints = AbinitKpoints(filepath=self.abinit_kpoints_filepath)
         except FileNotFoundError as e:
             logger.debug(f"No KPOINTS file found in {self.dirpath}")
-            self.abinit_kpoints = {}
+            self.abinit_kpoints = None
 
         self.abinit_procar = AbinitProcar(
             dirpath=self.dirpath,
-            abinit_output_filepath=abinit_output_filepath,
+            abinit_output_filepath=self.abinit_output_filepath,
         )
 
         try:
@@ -602,6 +610,8 @@ class AbinitParser:
         except IndexError as e:
             logger.debug(f"No DOS files found in {self.dirpath}")
             self.abinit_dos = None
+            
+        
 
     @cached_property
     def version(self):
@@ -628,25 +638,17 @@ class AbinitParser:
             return None
         procar = self.abinit_procar.abinitprocarobject
 
-        kgrid = self.abinit_kpoints.get("kgrid", None)
-        if kgrid is None:
-            n_kx, n_ky, n_kz = None, None, None
-        else:
-            n_kx, n_ky, n_kz = kgrid
-        kpath = self.abinit_kpoints.get("kpath", None)
-
-        return ElectronicBandStructure(
+        return ElectronicBandStructure.from_data(
             kpoints=procar.kpoints,
             bands=procar.bands,
             projected=procar._spd2projected(procar.spd),
             efermi=self.abinit_output.fermi,
-            kpath=kpath,
-            n_kx=n_kx,
-            n_ky=n_ky,
-            n_kz=n_kz,
+            kpath=self.kpath,
+            kgrid=self.kgrid,
             projected_phase=procar._spd2projected(procar.spd_phase),
-            labels=procar.orbital_names_old[:-1],
-            reciprocal_lattice=self.abinit_output.lattice,
+            orbital_names=procar.orbital_names_old[:-1],
+            reciprocal_lattice=self.abinit_output.reclat,
+            structure=self.structure,
         )
 
     @property
@@ -666,3 +668,31 @@ class AbinitParser:
             )
             return None
         return self.abinit_output.structure
+    
+    @property
+    def kpath(self):
+        if self.abinit_kpoints is None:
+            return None
+        
+        
+        kpoints = None
+        if self.abinit_procar:
+            procar = self.abinit_procar.abinitprocarobject
+            kpoints = procar.kpoints
+            
+        if self.abinit_kpoints.knames is None:
+            return None
+
+        return KPath(
+            kpoints=kpoints,
+            segment_names=self.abinit_kpoints.knames,
+            n_grids=self.abinit_kpoints.ngrids,
+            reciprocal_lattice=self.abinit_output.reclat,
+        )
+
+    
+    @property
+    def kgrid(self):
+        if self.abinit_kpoints is None:
+            return None
+        return self.abinit_kpoints.kgrid

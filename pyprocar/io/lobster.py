@@ -6,6 +6,7 @@ from typing import Union
 import numpy as np
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.io.base import BaseParser
 
 from . import qe, vasp
 
@@ -17,7 +18,7 @@ def str2bool(v):
     return v.lower() in ("true")
 
 
-class LobsterParser:
+class LobsterParser(BaseParser):
     """The class helps parse the information from a lobster calculation
 
     Parameters

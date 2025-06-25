@@ -64,8 +64,8 @@ class Parser:
             # self.ebs.bands = self.ebs.bands - self.ebs.efermi
             # logger.warning(f"Shifting parsed bands by the fermi energy: {self.ebs.efermi}")
             # self.ebs._properties["bands"] += self.ebs.efermi
-        if self.dos:
-            self.dos.energies += self.dos.efermi
+        # if self.dos:
+        #     self.dos.energies += self.dos.efermi
         return None
 
     def _parse_abinit(self):

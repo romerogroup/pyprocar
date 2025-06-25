@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from typing import Union
 
@@ -18,33 +19,38 @@ from pyprocar.io.siesta import SiestaParser
 from pyprocar.io.vasp import VaspParser
 
 
-def get_parser(code: str, dirpath: Union[str, Path]):
+class CodeParser(Enum):
+    lobster = LobsterParser
+    abinit = AbinitParser
+    bxsf = BxsfParser
+    qe = QEParser
+    siesta = SiestaParser
+    vasp = VaspParser
+    elk = ElkParser
+    dftbplus = DFTBParser
+    
+    @classmethod
+    def as_list(cls):
+        return [code.name for code in cls]
+
+
+def get_parser(code: str, 
+               dirpath: Union[str, Path],
+               custom_parser: BaseParser = None,
+               **kwargs):
     """Handles which DFT parser to use"""
 
     is_lobster_calc = code.split("_")[0] == "lobster"
-    if is_lobster_calc:
-        parser = LobsterParser(dirpath=dirpath)
-
-    elif code == "abinit":
-        parser = AbinitParser(dirpath=dirpath)
-
-    elif code == "bxsf":
-        parser = BxsfParser(dirpath=dirpath)
-
-    elif code == "qe":
-        parser = QEParser(dirpath=dirpath)
-
-    elif code == "siesta":
-        parser = SiestaParser(dirpath=dirpath)
-
-    elif code == "vasp":
-        parser = VaspParser(dirpath=dirpath)
-
-    elif code == "elk":
-        parser = ElkParser(dirpath=dirpath)
-
-    elif code == "dftb+":
-        parser = DFTBParser(dirpath=dirpath)
+    
+    if code in CodeParser.as_list():
+        parser = CodeParser[code].value(dirpath=dirpath, **kwargs)
+    elif custom_parser is not None:
+        parser = custom_parser(dirpath=dirpath, **kwargs)
+    else:
+        msg=f"Invalid code: {code}. Valid codes are: \n"
+        for code in CodeParser.as_list():
+            msg += f"    {code}\n"
+        raise ValueError(msg)
 
     return parser
 
@@ -54,10 +60,10 @@ class Parser(BaseParser):
     This class will handle getting the main inputs (ebs,dos,structure,kpath,reciprocal_lattice) from the various dft parsers.
     """
 
-    def __init__(self, code: str, dirpath: Union[str, Path], verbose: int = 2):
+    def __init__(self, code: str, dirpath: Union[str, Path], **kwargs):
         super().__init__(dirpath=dirpath)
         self.code = code
-        self.parser=get_parser(code, dirpath)
+        self.parser=get_parser(code, self.dirpath, **kwargs)
 
     
     @property

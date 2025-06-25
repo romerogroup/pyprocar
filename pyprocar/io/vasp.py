@@ -13,7 +13,7 @@ import numpy as np
 from numpy import array
 
 from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
-from pyprocar.io.base import ParserInterface
+from pyprocar.io.base import BaseParser
 from pyprocar.utils.strings import remove_comment
 
 logger = logging.getLogger(__name__)
@@ -1444,7 +1444,7 @@ class VaspXML(collections.abc.Mapping):
             Returns the total dos dict
         """
         dos_total, labels = self._get_dos_total()
-        dos_total["energies"] -= self.fermi
+        dos_total["energies"]# -= self.fermi
 
         return dos_total
 
@@ -2042,7 +2042,7 @@ class VaspXML(collections.abc.Mapping):
         return len(self.__dict__)
 
 
-class VaspParser(ParserInterface):
+class VaspParser(BaseParser):
     def __init__(
         self,
         dirpath: Union[str, Path],
@@ -2054,12 +2054,20 @@ class VaspParser(ParserInterface):
         vasprun: Union[str, Path] = "vasprun.xml",
     ):
         super().__init__(dirpath)
-        incar_filepath = self.dirpath / incar
-        outcar_filepath = self.dirpath / outcar
-        procar_filepath = self.dirpath / procar
-        kpoints_filepath = self.dirpath / kpoints
-        poscar_filepath = self.dirpath / poscar
-        vasprun_filepath = self.dirpath / vasprun
+        
+        outcar_filepath = Path(outcar)
+        incar_filepath = Path(incar)
+        procar_filepath = Path(procar)
+        kpoints_filepath = Path(kpoints)
+        poscar_filepath = Path(poscar)
+        vasprun_filepath = Path(vasprun)
+        
+        self.incar_filepath = self.dirpath / incar_filepath.name
+        self.outcar_filepath = self.dirpath / outcar_filepath.name
+        self.procar_filepath = self.dirpath / procar_filepath.name
+        self.kpoints_filepath = self.dirpath / kpoints_filepath.name
+        self.poscar_filepath = self.dirpath / poscar_filepath.name
+        self.vasprun_filepath = self.dirpath / vasprun_filepath.name
 
         self.procar = None
         self.outcar = None
@@ -2067,17 +2075,16 @@ class VaspParser(ParserInterface):
         self.poscar = None
         self.vasprun = None
 
-        if outcar_filepath.exists():
-            self.outcar = Outcar(outcar)
-        if procar_filepath.exists():
-            self.procar = Procar(procar)
-        if kpoints_filepath.exists():
-            print(f"Parsing KPOINTS file: {kpoints_filepath}")
-            self.kpoints = Kpoints(kpoints)
-        if poscar_filepath.exists():
-            self.poscar = Poscar(poscar)
-        if vasprun_filepath.exists():
-            self.vasprun = VaspXML(vasprun)
+        if self.outcar_filepath.exists():
+            self.outcar = Outcar(self.outcar_filepath)
+        if self.procar_filepath.exists():
+            self.procar = Procar(self.procar_filepath)
+        if self.kpoints_filepath.exists():
+            self.kpoints = Kpoints(self.kpoints_filepath)
+        if self.poscar_filepath.exists():
+            self.poscar = Poscar(self.poscar_filepath)
+        if self.vasprun_filepath.exists():
+            self.vasprun = VaspXML(self.vasprun_filepath)
 
     @cached_property
     def version(self):

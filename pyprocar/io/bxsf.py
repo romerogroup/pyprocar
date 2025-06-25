@@ -9,10 +9,11 @@ from typing import List, Union
 
 import numpy as np
 
-from pyprocar.core import ElectronicBandStructure
+from pyprocar.core.ebs import ElectronicBandStructure
+from pyprocar.io.base import BaseParser
 
 
-class BxsfParser:
+class BxsfParser(BaseParser):
     """
     The class is used to parse the information inside bxsf files
 
@@ -25,7 +26,18 @@ class BxsfParser:
 
     """
 
-    def __init__(self, filepaths: Union[list[Path], Path] = Path("in.bxsf")):
+    def __init__(self, dirpath: Union[str, Path], filepaths: Union[List[Path], Path] = Path("in.bxsf")):
+        super().__init__(dirpath)
+        
+        if isinstance(filepaths, Path) or isinstance(filepaths, str):
+            self.filepaths=Path(filepaths)
+        elif isinstance(filepaths, list):
+            for filepath in filepaths:
+                filepath=Path(filepath)
+                filepath=self.dirpath / filepath.name
+                self.filepaths.append(filepath)
+        else:
+            raise ValueError(f"Invalid filepaths type: {type(filepaths)}")
 
         self.reciprocal_lattice = None
         self.origin = None
@@ -42,18 +54,40 @@ class BxsfParser:
         self.bands = None
 
         self.parse_bxsf(filepaths=filepaths)
+        
+        nx=np.unique(self.kpoints[:,0])
+        ny=np.unique(self.kpoints[:,1])
+        nz=np.unique(self.kpoints[:,2])
+        self._kgrid=(nx,ny,nz)
 
-        self.ebs = ElectronicBandStructure(
+        self._ebs = ElectronicBandStructure.from_data(
             kpoints=self.kpoints,
             bands=self.bands,
             projected=None,
             efermi=self.e_fermi,
             kpath=None,
+            kgrid=self._kgrid,
             projected_phase=None,
-            labels=None,
+            orbital_names=None,
             reciprocal_lattice=self.reciprocal_lattice,
-            interpolation_factor=None,
+            structure=None,
         )
+        return None
+    
+    @property
+    def ebs(self):
+        return self._ebs
+    
+    @property
+    def kpath(self):
+        return None
+    
+    @property
+    def structure(self):
+        return None
+    
+    @property
+    def dos(self):
         return None
 
     def parse_bxsf(self, filepaths: Union[list[Path], Path]):

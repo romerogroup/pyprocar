@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-import re
-import numpy as np
 import os
+import re
 
-from ..pyposcar.poscar import Poscar
+import numpy as np
+
+from pyprocar.io.base import BaseParser
+from pyprocar.pyposcar.poscar import Poscar
+
 
 class DFTB_evec:
   def __init__(self, filename, verbose): # , normalize=False):
@@ -686,7 +689,7 @@ class DFTB_input:
     return
 
 
-class DFTBParser:
+class DFTBParser(BaseParser):
   """The class parses the input form DFTB+.
     
     Parameters
@@ -704,14 +707,23 @@ class DFTBParser:
         The file with the list of kpoints, by default 'detailed.xml'
   """
   def __init__(self,
-               dirname:str = '',
+               dirpath:str = '',
                eigenvec_filename:str = 'eigenvec.out',
                bands_filename:str = 'band.out',
                detailed_out:str = 'detailed.out',
                detailed_xml:str = 'detailed.xml'
                ):
 
+    super().__init__(dirpath)
+    eigenvec_filepath=Path(eigenvec_filename)
+    bands_filepath=Path(bands_filename)
+    detailed_out_filepath=Path(detailed_out)
+    detailed_xml_filepath=Path(detailed_xml)
     
+    self.eigenvec_filename = self.dirpath / eigenvec_filepath
+    self.bands_filename = self.dirpath / bands_filepath
+    self.detailed_out = self.dirpath / detailed_out_filepath
+    self.detailed_xml = self.dirpath / detailed_xml_filepath
     
     # Searching for the Fermi level
     utils = DFTB_utils(verbose=False)
@@ -721,8 +733,8 @@ class DFTBParser:
     bands.load()
     
     # Loading the kpoints
-    if detailed_xml:
-      kpoints = utils.get_kpoints(detailed_xml)
+    if self.detailed_xml:
+      kpoints = utils.get_kpoints(self.detailed_xml)
       # otherwise, a plain set of kpoints is spanned. Physically meaningless
     else:
       Nkpoints = evec.Nkpoints
@@ -730,9 +742,9 @@ class DFTBParser:
       print('A list of k-points was not provided. Creating a fake and meaningless '
             'of K-points')
     
-    utils.writeOutcar(detailed_out=detailed_out, detailed_xml=detailed_xml)
+    utils.writeOutcar(detailed_out=self.detailed_out, detailed_xml=self.detailed_xml)
 
-    utils.writePoscar(detailed_xml=detailed_xml)
+    utils.writePoscar(detailed_xml=self.detailed_xml)
 
 
 
@@ -742,7 +754,7 @@ class DFTBParser:
     create_procar = True
     try:
       mtime_procar = os.path.getmtime('PROCAR')
-      mtime_evec = os.path.getmtime(eigenvec_filename)
+      mtime_evec = os.path.getmtime(self.eigenvec_filename)
       if mtime_evec > mtime_procar:
         create_procar = True        
       else:
@@ -756,7 +768,7 @@ class DFTBParser:
     print('Going to create a PROCAR file from eigenvec.txt, it migth take a'
           ' while but will be done done just once')
     
-    evec = DFTB_evec(filename = eigenvec_filename,
+    evec = DFTB_evec(filename = str(self.eigenvec_filename),
                            verbose = False)
     evec .load()
 
