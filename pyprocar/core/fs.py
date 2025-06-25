@@ -540,7 +540,7 @@ class FermiSurface(pv.PolyData):
             )
 
         padded_grid = copy.deepcopy(self.padded_grid)
-        spin_texture = self.padded_ebs.get_atomic_orbital_spin_texture(
+        spin_texture = self.padded_ebs.get_projected_spin_texture(
             atoms=atoms, orbitals=orbitals
         )
 
