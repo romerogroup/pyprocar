@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import Dict
 
 import numpy as np
 from scipy import ndimage
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import RegularGridInterpolator, griddata
 
 logger = logging.getLogger(__name__)
 
@@ -904,6 +905,133 @@ def calculate_3d_mesh_scalar_integral(scalar_mesh, reciprocal_lattice):
 
     return integral
 
+
+def interpolate_plane(source_2d_points, target_2d_points, data_on_plane, interpolation_method="linear"):
+    if data_on_plane is None:
+        return None
+    
+    original_shape = data_on_plane.shape
+    n_k, other_dims = original_shape[0], original_shape[1:]
+    data_flat = data_on_plane.reshape(n_k, -1)
+    
+    n_target = target_2d_points.shape[0]
+    interpolated_flat = np.zeros((n_target, data_flat.shape[1]))
+    
+    # Interpolate each feature column
+    for i in range(data_flat.shape[1]):
+        interpolated_flat[:, i] = griddata(
+            source_2d_points,
+            data_flat[:, i],
+            target_2d_points,
+            method=interpolation_method,
+        )
+    
+    # Handle NaNs from interpolating outside the convex hull by filling
+    nan_mask = np.isnan(interpolated_flat[:, 0])
+    if np.any(nan_mask):
+        nan_indices = np.where(nan_mask)[0]
+        for i in range(data_flat.shape[1]):
+            fill_values = griddata(
+                source_2d_points,
+                data_flat[:, i],
+                target_2d_points[nan_indices],
+                method="nearest",
+            )
+            interpolated_flat[nan_indices, i] = fill_values
+    
+    return interpolated_flat.reshape((n_target,) + other_dims)
+    
+def find_points_near_plane(points, normal, origin, plane_tol, return_indices=False):
+    if origin is None:
+        # Use center of kpoint mesh as origin
+        origin = np.array([0,0,0])
+
+    # Normalize the normal vector
+    normal = normal / np.linalg.norm(normal)
+
+    # Calculate distance from each kpoint to the plane
+    # Distance = |(k - origin) · normal|
+    points_shifted = points - origin
+    distances = np.abs(np.dot(points_shifted, normal))
+
+    # Find kpoints within tolerance of the plane
+    i_points_on_plane = np.where(distances <= plane_tol)[0]
+    
+    if return_indices:
+        return i_points_on_plane
+    else:
+        return points[i_points_on_plane]
+
+        
+def project_points_to_plane(points: np.ndarray,
+                            normal: np.ndarray, 
+                            origin: np.ndarray, 
+                            properties: Dict[str, np.ndarray],
+                            gradients: Dict[str, np.ndarray],
+                            hessians: Dict[str, np.ndarray],
+                            grid_resolution: tuple = (20,20),
+                            use_points_near_plane: bool = True,
+                            plane_tol:float = 0.01):
+    
+    if origin is None:
+        origin = np.array([0,0,0])
+    
+    normal = normal / np.linalg.norm(normal)
+    # 1. Create an orthonormal basis (u, v) for the plane
+    if np.abs(np.dot(normal, [0, 0, 1])) < 0.99:
+        v_temp = np.array([0, 0, 1])  # Not parallel to normal
+    else:
+        v_temp = np.array([0, 1, 0])  # Not parallel to normal
+    u = np.cross(v_temp, normal)
+    u /= np.linalg.norm(u)
+    v = np.cross(normal,u)
+    v /= np.linalg.norm(v)  # Ensure normalization
+
+    # 2. Project source k-points onto the 2D basis
+    i_points_near_plane = np.arange(len(points))
+    if use_points_near_plane:
+        i_points_near_plane = find_points_near_plane(points, normal, origin, plane_tol, return_indices=True)
+    
+    logger.debug(f"Points near plane shape: {points[i_points_near_plane].shape}")
+    points_shifted = points[i_points_near_plane] - origin
+    source_points_2d = np.column_stack(
+        [np.dot(points_shifted, u), np.dot(points_shifted, v)]
+    )
+
+    # 3. Create the target 2D mesh grid
+    u_coords = source_points_2d[:, 0]
+    v_coords = source_points_2d[:, 1]
+    
+    
+    grid_u, grid_v = np.mgrid[
+        u_coords.min() : u_coords.max() : complex(0, grid_resolution[0]),
+        v_coords.min() : v_coords.max() : complex(0, grid_resolution[1]),
+    ]
+    
+    target_points_2d = np.vstack([grid_u.ravel(), grid_v.ravel()]).T
+        
+        
+    new_properties, new_gradients, new_hessians = {}, {}, {}
+    for prop_name, prop_value in properties.items():
+        if prop_value is not None:
+            new_properties[prop_name] = interpolate_plane(
+                source_points_2d, target_points_2d, prop_value[i_points_near_plane, ...]
+            )
+            
+    for prop_name, prop_gradient in gradients.items():
+        if prop_gradient is not None:
+            new_gradients[prop_name] = interpolate_plane(
+                source_points_2d, target_points_2d, prop_gradient[i_points_near_plane, ...]
+            )
+            
+    for prop_name, prop_hessian in hessians.items():
+        if prop_hessian is not None:
+            new_hessians[prop_name] = interpolate_plane(
+                source_points_2d, target_points_2d, prop_hessian[i_points_near_plane, ...]
+            )
+    new_points = origin + target_points_2d @ np.vstack([u, v])
+        
+    return new_points, new_properties, new_gradients, new_hessians
 
 def q_multi(q1, q2):
     """
