@@ -56,7 +56,7 @@ class DensityOfStates:
         self,
         energies: npt.NDArray[np.float64],
         total: npt.NDArray[np.float64],
-        efermi: float,
+        efermi: float = 0.0,
         projected: npt.NDArray[np.float64] = None,
         interpolation_factor: int = 1,
         # interpolation_kind: str = 'cubic',
