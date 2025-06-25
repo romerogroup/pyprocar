@@ -37,8 +37,3 @@ for calc_test_case in ALL_TEST_CASES:
             parser.ebs.save(path / "ebs.pkl")
         else:
             user_logger.warning(f"No EBS found for {calc_test_case.get_id()}")
-
-    if parser.structure:
-        parser.structure.save(path / "structure.pkl")
-    else:
-        user_logger.warning(f"No structure found for {calc_test_case.get_id()}")
