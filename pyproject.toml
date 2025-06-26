@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 local_scheme="no-local-version"
 version_file = "pyprocar/_version.py"
+version_scheme="python-simplified-semver"
 
 
 [project]
@@ -25,8 +26,8 @@ authors = [
 
 description = "A Python library for electronic structure pre/post-processing."
 readme = {file = "README.md", content-type = "text/markdown"}  # Ensure this matches the file used
-license = {file = "LICENSE"}
-
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["materials", "science", "plotting", "electronic structure", "DFT"]
 classifiers = [
     "Programming Language :: Python :: 3",
