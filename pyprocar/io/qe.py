@@ -110,10 +110,10 @@ class QEParser(BaseParser):
         self._ebs = ElectronicBandStructure.from_data(
             kpoints=self.kpoints,
             bands=self.bands,
-            projected=self._spd2projected(self.spd),
+            projected=self.spd,
             efermi=self.efermi,
             structure=self.structure,
-            projected_phase=self._spd2projected(self.spd_phase),
+            projected_phase=self.spd_phase,
             orbital_names=self.orbital_names[:-1],
             reciprocal_lattice=self.reciprocal_lattice,
             kpath=self._kpath,
@@ -786,8 +786,8 @@ class QEParser(BaseParser):
                 self.n_k,
                 self.n_band,
                 self.n_spin,
-                self.n_atoms + 1,
-                self.n_orbitals + 2,
+                self.n_atoms,
+                self.n_orbitals,
             )
         )
 
@@ -801,19 +801,22 @@ class QEParser(BaseParser):
         projs, projs_phase = self._parse_projections_tag(
             atm_proj_root, nk, nbnd, natm, norb, nspin_channels, nspin_projections
         )
+        self.spd = projs
+        self.spd_phase = projs_phase
+        print(projs.shape)
+        print(projs_phase.shape)
+        # # maping the projections to the spd array. The spd array is the output of the PROCAR file
+        # self.spd[:, :, :, :-1, 1:-1] += projs[:, :, :, :, :]
+        # self.spd_phase[:, :, :, :-1, 1:-1] += projs_phase[:, :, :, :, :]
 
-        # maping the projections to the spd array. The spd array is the output of the PROCAR file
-        self.spd[:, :, :, :-1, 1:-1] += projs[:, :, :, :, :]
-        self.spd_phase[:, :, :, :-1, 1:-1] += projs_phase[:, :, :, :, :]
+        # # Adding atom index. This is a vasp output thing
+        # for ions in range(self.ionsCount):
+        #     self.spd[:, :, :, ions, 0] = ions + 1
 
-        # Adding atom index. This is a vasp output thing
-        for ions in range(self.ionsCount):
-            self.spd[:, :, :, ions, 0] = ions + 1
-
-        # The following fills the totals for the spd array. Again this is a vasp output thing.
-        self.spd[:, :, :, :, -1] = np.sum(self.spd[:, :, :, :, 1:-1], axis=4)
-        self.spd[:, :, :, -1, :] = np.sum(self.spd[:, :, :, :-1, :], axis=3)
-        self.spd[:, :, :, -1, 0] = 0
+        # # The following fills the totals for the spd array. Again this is a vasp output thing.
+        # self.spd[:, :, :, :, -1] = np.sum(self.spd[:, :, :, :, 1:-1], axis=4)
+        # self.spd[:, :, :, -1, :] = np.sum(self.spd[:, :, :, :-1, :], axis=3)
+        # self.spd[:, :, :, -1, 0] = 0
 
         return None
 
@@ -1320,27 +1323,42 @@ class QEParser(BaseParser):
         #     nbands = int(spd.shape[1] / 2)
         # else:
         #     nbands = spd.shape[1]
-        projected = np.zeros(
-            shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
-            dtype=spd.dtype,
-        )
+        # projected = np.zeros(
+        #     shape=(nkpoints, nbands, natoms, nprinciples, norbitals, nspins),
+        #     dtype=spd.dtype,
+        # )
         temp_spd = spd.copy()
-        # (nkpoints,nbands, nspin, natom, norbital)
-        temp_spd = np.swapaxes(temp_spd, 2, 4)
-        # (nkpoints,nbands, norbital , natom , nspin)
-        temp_spd = np.swapaxes(temp_spd, 2, 3)
-        # (nkpoints,nbands, natom, norbital, nspin)
-        # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
-        # if nspins == 3:
-        #     # Used if self.spins==3
-        #     projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
-        #     # Used if self.spins == 4
-        #     # projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, 1:]
+        
+        print(temp_spd.shape)
+        # # (nkpoints,nbands, nspin, natom, norbital)
+        # temp_spd = np.swapaxes(temp_spd, 2, 4)
+        # # (nkpoints,nbands, norbital , natom , nspin)
+        # temp_spd = np.swapaxes(temp_spd, 2, 3)
+        # # (nkpoints,nbands, natom, norbital, nspin)
+        # # projected[ikpoint][iband][iatom][iprincipal][iorbital][ispin]
+        # # if nspins == 3:
+        # #     # Used if self.spins==3
+        # #     projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+        # #     # Used if self.spins == 4
+        # #     # projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, 1:]
         if nspins == 2:
             projected[:, :, :, 0, :, 0] = temp_spd[:, :, :-1, 1:-1, 0]
             projected[:, :, :, 0, :, 1] = temp_spd[:, :, :-1, 1:-1, 1]
         else:
             projected[:, :, :, 0, :, :] = temp_spd[:, :, :-1, 1:-1, :]
+        
+        projected = np.zeros(
+            shape=(nkpoints, nbands, nspins, natoms, norbitals),
+            dtype=spd.dtype,
+        )
+
+            
+        # if nspins == 2:
+        #     projected[:, :, 0, :, :] = spd[:, :nbands, 0, :-1, 1:-1]
+        #     projected[:, :, 1, :, :] = spd[:, nbands:, 1, :-1, 1:-1]
+        # else:
+        #     projected[:, :, :, :, :] = spd[:, :, :, :-1, 1:-1]
+
         return projected
 
     def _parse_efermi(self, main_xml_root):

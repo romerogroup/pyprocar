@@ -2133,7 +2133,6 @@ class VaspParser(BaseParser):
             return None
         kgrid = self.kpoints.get("kgrid", None)
 
-
         return ElectronicBandStructure.from_data(
             kpoints=self.procar.kpoints,
             bands=self.procar.bands,

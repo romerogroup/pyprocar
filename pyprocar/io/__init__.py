@@ -12,7 +12,6 @@ from pyprocar.io.elk import ElkParser
 # from . import bsxf
 # from . import frmsf
 from pyprocar.io.lobster import LobsterParser
-from pyprocar.io.parser import Parser
 from pyprocar.io.procarparser import ProcarParser
 from pyprocar.io.qe import QEParser
 from pyprocar.io.siesta import SiestaParser
@@ -58,6 +57,7 @@ class Parser(BaseParser):
     """
     The parser class will be the main object to be used through out the code.
     This class will handle getting the main inputs (ebs,dos,structure,kpath,reciprocal_lattice) from the various dft parsers.
+    The bands must not be shifted so that the fermi energy 0.0
     """
 
     def __init__(self, code: str, dirpath: Union[str, Path], **kwargs):
