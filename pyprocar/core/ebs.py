@@ -506,6 +506,42 @@ class ElectronicBandStructure:
         return IPR
 
     @property
+    def ebs_ipr_atom(self):
+        """
+        It returns the atom-resolved , pIPR:
+
+        pIPR_j =  \\frac{\|c_j\|^4}{(\\sum_i \|c_i^2\|)^2}
+
+        Clearly, \\( \\sum_j pIPR_j = IPR \\).
+
+        Mind: \( c_i \) is the wavefunction \( c(n,k)_i \), in pyprocar we already
+        have density projections, \( c_i^2 \).
+
+        *THIS QUANTITY IS NOT READY FOR PLOTTING*, please prefer `self.ebs_ipr()`
+
+        Returns
+        -------
+        ret : list float
+            The IPR projections
+
+        """
+        orbitals = np.arange(self.n_orbitals, dtype=int)
+        # sum over orbitals
+        proj = np.sum(self.projected[:, :, :, :, orbitals], axis=-1)
+        # keeping only the last principal quantum number
+        # selecting all atoms:
+        atoms = np.arange(self.n_atoms, dtype=int)
+
+        # the partial pIPR is \frac{|c_j|^4}{(\sum_i |c_i^2|)^2}
+        # mind, every c_i is c_{i,n,k} with n,k the band and k-point indexes
+        num = np.absolute(proj) ** 2
+        den = np.absolute(proj)
+        den = np.sum(den[..., atoms], axis=-1) ** 2
+        pIPR = num / den[..., np.newaxis]
+        # print('pIPR', pIPR.shape)
+        return pIPR
+
+    @property
     def spin_texture(self):
         if not self.is_non_collinear:
             raise ValueError(
@@ -1069,8 +1105,34 @@ class ElectronicBandStructure:
             )
         ebs._op_post_processing()
         return ebs
+    
+    def shift_kpoints_to_fbz(self, inplace=True):
+        # Shifting all kpoint to first Brillouin zone
+        bound_ops = -1.0 * (self._kpoints > 0.5) + 1.0 * (self._kpoints <= -0.5)
+        new_kpoints = self._kpoints + bound_ops
+        if inplace:
+            self._kpoints = new_kpoints
+            ebs = self
+        else:
+            new_bands = self._properties.pop("bands")
+            ebs = ElectronicBandStructure.from_data(
+                kpoints=new_kpoints,
+                bands=new_bands,
+                efermi=self._efermi,
+                orbital_names=self._orbital_names,
+                reciprocal_lattice=self._reciprocal_lattice,
+                shifted_to_efermi=self._shifted_to_efermi,
+                structure=self._structure,
+                properties=self._properties,
+                gradients=self._gradients,
+                hessians=self._hessians,
+                kpath=self.__dict__.get("kpath", None),
+                kgrid=self.__dict__.get("kgrid", None),
+            )
+        ebs._op_post_processing()
+        return ebs
 
-    def unfold(self, transformation_matrix=None, structure=None, inplace=False):
+    def unfold(self, transformation_matrix=None, structure=None, inplace=True):
         """The method helps unfold the bands. This is done by using the unfolder to find the new kpoint weights.
         The current weights are then updated
 
@@ -1126,10 +1188,19 @@ class ElectronicBandStructure:
         return ebs
     
     @classmethod
-    def from_code(cls, code: str, dirpath: str, **kwargs):
+    def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl", **kwargs):
         from pyprocar.io import Parser
-        parser = Parser(code=code, dirpath=dirpath)
-        return parser.ebs
+        ebs_filepath = Path(dirpath) / ebs_filename
+        
+        if not use_cache or not ebs_filepath.exists():
+            logger.info(f"Parsing EBS calculation directory: {dirpath}")
+            parser = Parser(code=code, dirpath=dirpath)
+            ebs=parser.ebs
+            ebs.save(ebs_filepath)
+        else:
+            logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")
+            ebs = cls.load(ebs_filepath)
+        return ebs
 
     def compute_property(
         self,
@@ -1279,7 +1350,6 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
                         edge_order=2,
                     )
                 self._hessians[prop_name] = hessians * METER_ANGSTROM
-
             
     def as_kdist(self, as_segments=True):
         kdistances = self.kpath.get_distances(as_segments=False, cumlative_across_segments=True)
@@ -1292,7 +1362,6 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
         if as_segments:
             for indices in k_indices:
                 n_indices = indices.shape[0]
-                print(n_indices)
                 for iband in range(n_bands):
                     for ispin in range(n_spins):
                         k_segment_distances=kdistances[indices]
@@ -1314,7 +1383,6 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
                     blocks.append(pv.PolyData(band_kpoints))
         return blocks
         
-
     def plot(
         self,
         add_point_labels_args: dict = None,
@@ -1409,6 +1477,14 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
     @property
     def is_fbz(self):
         return self.n_kpoints == self.n_kx * self.n_ky * self.n_kz
+
+    @property
+    def kpoints_cartesian_mesh(self):
+        return mathematics.array_to_mesh(self.kpoints_cartesian, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz)
+    
+    @property
+    def kpoints_mesh(self):
+        return mathematics.array_to_mesh(self.kpoints, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz)
 
     def get_kpoints(self, as_mesh=False, **kwargs):
         kpoints = self.kpoints
@@ -1678,7 +1754,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             return ebs.sort_by_kpoints(inplace=inplace)
 
     def reduce_kpoints_to_axis_plane(
-        self, k_plane=0, k_plane_tol=0.01, axis=0, inplace=True
+        self, k_plane=0, k_plane_tol=0.001, axis=0
     ):
         """
         Reduces the kpoints to a plane
@@ -1901,8 +1977,9 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                     original_value = self.get_property(prop)
 
                     if prop == "kpoints":
+                        new_kpoints = self.kpoints.copy()
                         for i, axis in enumerate(axes_to_expand):
-                            self.kpoints[:, axis] += supercell_direction[i]
+                            new_kpoints[:, axis] += supercell_direction[i]
 
                         new_kpoints = np.concatenate(
                             [new_kpoints, original_value], axis=0
@@ -1934,6 +2011,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 hessians=new_hessians,
                 kgrid=self.kgrid,
             )
+        return ebs
 
     def pad(self, padding=10, order="F", inplace=True):
         new_properties = {}
@@ -2007,7 +2085,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                                  normal: np.ndarray,
                                  origin: np.ndarray,
                                  in_cartesian: bool, 
-                                 plane_tol: float = 0.01,
+                                 plane_tol: float = 0.001,
                                  interpolate_2d: bool = True,
                                  grid_resolution: tuple = (20, 20)):
         
@@ -2067,7 +2145,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         else:
             return ElectronicBandStructurePlaneUnaligned(**init_kwargs)
 
-
+    
 
 class ElectronicBandStructurePlane(ABC):
     
