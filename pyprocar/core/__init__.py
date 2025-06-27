@@ -4,6 +4,7 @@ from pyprocar.core.brillouin_zone import BrillouinZone, BrillouinZone2D
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.ebs import ElectronicBandStructure
 from pyprocar.core.fermisurface import FermiSurface
+from pyprocar.core.fermisurface2D import FermiSurface2D
 from pyprocar.core.fermisurface3D import FermiSurface3D
 from pyprocar.core.isosurface import Isosurface
 from pyprocar.core.kpath import KPath

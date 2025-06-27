@@ -14,7 +14,7 @@ import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
-from pyprocar.core import FermiSurface, ProcarSymmetry
+from pyprocar.core import ElectronicBandStructure, FermiSurface2D, ProcarSymmetry
 from pyprocar.io import Parser
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.log_utils import set_verbose_level
@@ -40,7 +40,7 @@ def fermi2D(
     orbitals: List[int] = None,
     energy: float = None,
     k_z_plane: float = 0.0,
-    k_z_plane_tol: float = 0.01,
+    k_z_plane_tol: float = 0.001,
     rot_symm=1,
     translate: List[int] = [0, 0, 0],
     rotation: List[int] = [0, 0, 0, 1],
@@ -48,7 +48,7 @@ def fermi2D(
     exportplt: bool = False,
     savefig: str = None,
     print_plot_opts: bool = False,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     **kwargs,
 ):
@@ -156,32 +156,8 @@ def fermi2D(
             user_logger.info(f"{key} : {value}")
 
     user_logger.info("_" * 100)
-    ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-
-    if not use_cache and os.path.exists(ebs_pkl_filepath):
-        logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
-        os.remove(ebs_pkl_filepath)
-
-    if not os.path.exists(ebs_pkl_filepath):
-        logger.info(f"Parsing EBS from {dirname}")
-
-        parser = Parser(code=code, dirpath=dirname)
-        ebs = parser.ebs
-        structure = parser.structure
-
-        if structure.rotations is not None:
-            logger.info(
-                f"Detected symmetry operations ({structure.rotations.shape}). Applying to ebs to get full BZ"
-            )
-            ebs.ibz2fbz(structure.rotations)
-
-        data_utils.save_pickle(ebs, ebs_pkl_filepath)
-
-    else:
-        logger.info(f"Loading EBS from cached Pickle files in {dirname}")
-
-        ebs = data_utils.load_pickle(ebs_pkl_filepath)
-
+    ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
+    
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
         logger.info(f"No fermi given, using the found fermi energy: {ebs.efermi}")
@@ -189,8 +165,8 @@ def fermi2D(
 
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
-        ebs.bands -= fermi
-        ebs.bands += fermi_shift
+        ebs.shift_bands(-1*fermi, inplace=True)
+        ebs.shift_bands(fermi_shift, inplace=True)
         fermi_level = fermi_shift
     else:
         user_logger.warning(
@@ -199,10 +175,6 @@ def fermi2D(
 
     logger.debug(f"EBS: {str(ebs)}")
 
-    # Shifting all kpoint to first Brillouin zone
-    bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
-    ebs.kpoints = ebs.kpoints + bound_ops
-    kpoints = ebs.kpoints_cartesian
 
     if spins is None:
         spins = np.arange(ebs.bands.shape[-1])
@@ -211,20 +183,10 @@ def fermi2D(
 
     ### End of parsing ###
     # Selecting kpoints in a constant k_z plane
-    i_kpoints_near_z_0 = np.where(
-        np.logical_and(
-            kpoints[:, 2] < k_z_plane + k_z_plane_tol,
-            kpoints[:, 2] > k_z_plane - k_z_plane_tol,
-        )
-    )
-
-    user_logger.info(f"Initial kpoints shape: {ebs.kpoints.shape}")
-    user_logger.info(f"Initial bands shape: {ebs.bands.shape}")
-    user_logger.info(f"Initial projected shape: {ebs.projected.shape}")
-
-    kpoints = kpoints[i_kpoints_near_z_0, :][0]
-    ebs.bands = ebs.bands[i_kpoints_near_z_0, :][0]
-    ebs.projected = ebs.projected[i_kpoints_near_z_0, :][0]
+    ebs=ebs.reduce_bands_near_energy(energy=energy, inplace=True)
+    ebs=ebs.reduce_kpoints_to_axis_plane(k_plane=k_z_plane, k_plane_tol=k_z_plane_tol, axis=2)
+    ebs=ebs.shift_kpoints_to_fbz(inplace=True)
+    kpoints=ebs.kpoints_cartesian
 
     user_logger.warning(
         f"Make sure the kmesh has the correct number of kz points"
@@ -238,9 +200,9 @@ def fermi2D(
     if spin_texture is False:
         # processing the data
         if orbitals is None and ebs.projected is not None:
-            orbitals = np.arange(ebs.norbitals, dtype=int)
+            orbitals = np.arange(ebs.n_orbitals, dtype=int)
         if atoms is None and ebs.projected is not None:
-            atoms = np.arange(ebs.natoms, dtype=int)
+            atoms = np.arange(ebs.n_atoms, dtype=int)
 
         user_logger.info(f"Spins for projections: {spins}")
         user_logger.info(f"Atoms for projections: {atoms}")
@@ -249,31 +211,18 @@ def fermi2D(
         projected = ebs.ebs_sum(
             spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
         )
-        projected = projected[:, :, spins]
+        projected = projected[..., spins]
 
         logger.info(f"projection shape after ebs_sum: {projected.shape}")
     else:
-        # first get the sdp reduced array for all spin components.
-        stData = []
-        ebsX = copy.deepcopy(ebs)
-        ebsY = copy.deepcopy(ebs)
-        ebsZ = copy.deepcopy(ebs)
-
         projected = ebs.ebs_sum(
             spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
         )
-        ebsX.projected = copy.deepcopy(projected)[:, :, [1]][:, :, 0]
-        ebsY.projected = copy.deepcopy(projected)[:, :, [2]][:, :, 0]
-        ebsZ.projected = copy.deepcopy(projected)[:, :, [3]][:, :, 0]
+        sx = copy.deepcopy(projected)[:, :, [1]][:, :, 0]
+        sy = copy.deepcopy(projected)[:, :, [2]][:, :, 0]
+        sz = copy.deepcopy(projected)[:, :, [3]][:, :, 0]
 
-        logger.info(f"ebsX.projected shape after ebs_sum: {ebsX.projected.shape}")
-        logger.info(f"ebsY.projected shape after ebs_sum: {ebsY.projected.shape}")
-        logger.info(f"ebsZ.projected shape after ebs_sum: {ebsZ.projected.shape}")
-
-        stData.append(ebsX.projected)
-        stData.append(ebsY.projected)
-        stData.append(ebsZ.projected)
-
+  
     # Once the PROCAR is parsed and reduced to 2x2 arrays, we can apply
     # symmetry operations to unfold the Brillouin Zone
     # kpoints = data.kpoints
@@ -288,7 +237,6 @@ def fermi2D(
     character = projected
 
     if spin_texture is True:
-        sx, sy, sz = stData[0], stData[1], stData[2]
         symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz, character=character)
     else:
         symm = ProcarSymmetry(kpoints, bands, character=character)
@@ -298,7 +246,7 @@ def fermi2D(
     # symm.MirrorX()
     symm.rot_symmetry_z(rot_symm)
 
-    fs = FermiSurface(
+    fs = FermiSurface2D(
         symm.kpoints,
         symm.bands,
         symm.character,
