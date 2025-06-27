@@ -379,8 +379,6 @@ class KPath:
         continuous_end_indices = list(np.where(k_diff_norms < self.zero_diff_threshold)[0])
         discontinuity_end_indices = list(np.where(k_diff_norms > self.discontinuity_threshold)[0])
         
-        print(k_diff_norms[discontinuity_end_indices])
-        
         logger.info(f"Continuous indices: {continuous_end_indices}")
         logger.info(f"Discontinuity indices: {discontinuity_end_indices}")
         segment_end_indices = continuous_end_indices + discontinuity_end_indices + [len(self._kpoints) - 1]
