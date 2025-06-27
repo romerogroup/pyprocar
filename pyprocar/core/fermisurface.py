@@ -1,552 +1,599 @@
-__author__ = "Pedram Tavadze and Logan Lang"
-__maintainer__ = "Pedram Tavadze and Logan Lang"
-__email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
-__date__ = "December 01, 2020"
-
+import copy
 import logging
-import os
 import re
-import sys
-from typing import List
+from typing import Dict, List, Tuple, Union
 
-import matplotlib.colors as colors
-import matplotlib.pyplot as plt
 import numpy as np
-import yaml
-from matplotlib import cm
-from matplotlib import colors as mpcolors
-from matplotlib.collections import LineCollection
-from scipy.interpolate import griddata
-from skimage import measure
+import pyvista as pv
+from scipy import interpolate
 
-from pyprocar.utils import ROOT, ConfigManager
+from pyprocar.core.brillouin_zone import BrillouinZone
+from pyprocar.utils.physics_constants import *
 
-logger = logging.getLogger(__name__)
-user_logger = logging.getLogger("user")
+logger = logging.getLogger("pyprocar")
 
 
-def validate_band_indices(band_indices):
-    """Validate the band indices"""
-    if band_indices is None:
-        return None
-    elif all(isinstance(x, list) for x in band_indices):
-        return band_indices
-    elif all(isinstance(x, int) for x in band_indices):
-        return [band_indices]
-    else:
-        raise ValueError(
-            "Invalid band indices. Band indices must be a list of lists of integers or a list of integers. This represents selecting the bands for each spin.\n"
-            "Example: \n [[0,1], [2,3]] means that the first band is selected for the first spin and the second band is selected for the second spin."
-        )
-
-
-class FermiSurface:
-    """This object is used to help plot the 2d fermi surface
+class FermiSurface(pv.PolyData):
+    """
+    A class to generate and manipulate Fermi surfaces from electronic band structure data.
+    Extends PyVista's PolyData class for rich 3D visualization capabilities.
 
     Parameters
     ----------
-    kpoints : np.ndarray
-        Numpy array with kpoints Nx3.
-    bands :  np.ndarray
-        Numpy array with the bands. The Fermi energy is already substracted.
-        (n_kpoints, n_bands)
-    spd : np.ndarray
-        Numpy array with the projections. Expected size (n_kppints,n_bands,n_spins,n_orbitals,n_atoms)
-    cmap : str
-        The cmap to use. default = 'jet
-    band_indices : List[List]
-        A list of list that contains band indices for a given spin
-    band_colors : List[List]
-        A list of list that contains colors for the band index
-        corresponding the band_indices for a given spin
-    loglevel : _type_, optional
-        The verbosity level., by default logging.WARNING
+    ebs : ElectronicBandStructure
+        The electronic band structure object containing band data
+    fermi : float, optional
+        The Fermi energy level, by default 0.0
+    fermi_shift : float, optional
+        Energy shift to apply to the Fermi level, by default 0.0
+    interpolation_factor : int, optional
+        Factor to increase k-point density, by default 1
+    projection_accuracy : str, optional
+        Accuracy for projections ('high' or 'normal'), by default 'normal'
+    max_distance : float, optional
+        Maximum distance for point projections, by default 0.2
     """
 
     def __init__(
         self,
-        kpoints,
-        bands,
-        spd,
-        band_indices: List[List] = None,
-        band_colors: List[List] = None,
-        **kwargs,
+        ebs,
+        fermi: float = 0.0,
+        fermi_shift: float = 0.0,
+        interpolation_factor: int = 1,
+        projection_accuracy: str = "normal",
+        max_distance: float = 0.2,
+        padding: int = 5,
     ):
+        super().__init__()
+        logger.info("___Initializing FermiSurface object___")
 
-        # Since some time ago Kpoints are in cartesian coords (ready to use)
-        self.kpoints = kpoints
-        self.bands = bands
-        self.spd = spd
-        self.band_indices = band_indices
-        self.band_colors = band_colors
+        # Store input parameters
+        # self.ebs = ebs
 
-        self.useful = None  # List of useful bands (filled in findEnergy)
-        self.energy = None
+        self.padding = padding
+        self._ebs = ebs
+        self._padded_ebs = ebs.pad(padding=self.padding, inplace=False)
 
-        logger.debug("FermiSurface.init: ...")
-        logger.info("Kpoints.shape : " + str(self.kpoints.shape))
-        logger.info("bands.shape   : " + str(self.bands.shape))
-        logger.info("spd.shape     : " + str(self.spd.shape))
-        logger.debug("FermiSurface.init: ...Done")
+        self.fermi_shift = fermi_shift
+        self.fermi = fermi + fermi_shift
+        self.interpolation_factor = interpolation_factor
+        self.projection_accuracy = projection_accuracy
+        self.max_distance = max_distance
 
-        self.band_indices = validate_band_indices(band_indices)
+        logger.debug(f"Electronic Band Structure Info: \n")
+        logger.debug(f"Bands shape: {self.ebs}")
+        logger.debug(f"Fermi Shift: {self.fermi_shift}")
+        logger.debug(f"Fermi energy: {self.fermi}")
+        logger.debug(f"Interpolation factor: {self.interpolation_factor}")
+        logger.debug(f"Projection accuracy: {self.projection_accuracy}")
+        logger.debug(f"Max distance: {self.max_distance}")
 
-        config_manager = ConfigManager(
-            os.path.join(ROOT, "pyprocar", "cfg", "fermi_surface_2d.yml")
+        # Initialize storage for surface data
+        self.band_spin_surface_map = {}
+        self.surface_band_spin_map = {}
+        self.band_spin_mask = {}
+
+        # Initialize ImageData Grid
+        self.nkx, self.nky, self.nkz = self.ebs.n_kx, self.ebs.n_ky, self.ebs.n_kz
+
+        logger.debug(f"nkx: {self.nkx}")
+        logger.debug(f"nky: {self.nky}")
+        logger.debug(f"nkz: {self.nkz}")
+
+        self.padded_x_unique = np.unique(self.padded_ebs.kpoints[:, 0])
+        self.padded_y_unique = np.unique(self.padded_ebs.kpoints[:, 1])
+        self.padded_z_unique = np.unique(self.padded_ebs.kpoints[:, 2])
+
+        self.padded_x_min = self.padded_x_unique.min()
+        self.padded_y_min = self.padded_y_unique.min()
+        self.padded_z_min = self.padded_z_unique.min()
+
+        self.x_spacing = 1 / self.nkx
+        self.y_spacing = 1 / self.nky
+        self.z_spacing = 1 / self.nkz
+
+        self.padded_grid = pv.ImageData(
+            dimensions=(
+                self.padded_ebs.n_kx,
+                self.padded_ebs.n_ky,
+                self.padded_ebs.n_kz,
+            ),
+            spacing=(self.x_spacing, self.y_spacing, self.z_spacing),
+            origin=(self.padded_x_min, self.padded_y_min, self.padded_z_min),
         )
 
-        config_manager.update_config(kwargs)
-        self.config = config_manager.get_config()
-        return None
+        self.transform_to_cart = np.eye(4)
+        self.transform_to_frac = np.eye(4)
+        self.transform_to_cart[:3, :3] = self.padded_ebs.reciprocal_lattice.T
+        self.transform_to_frac[:3, :3] = np.linalg.inv(
+            self.padded_ebs.reciprocal_lattice.T
+        )
 
-    def find_energy(self, energy):
-        """A method to find bands which are near a given energy
+        self.brillouin_zone = BrillouinZone(
+            self.padded_ebs.reciprocal_lattice, np.array([1, 1, 1])
+        )
 
-        Parameters
-        ----------
-        energy : float
-            The energy to search for bands around.
+        # Generate the surfaces
+        self._generate_all_surfaces()
+
+        logger.debug(f"fermi surface: \n {self}")
+        logger.debug(f"fermi surface point data: \n {self.point_data}")
+        logger.debug(f"fermi surface cell data: \n {self.cell_data}")
+        logger.info("___FermiSurface initialization complete___")
+
+    @property
+    def ebs(self):
+        return self._ebs
+
+    @property
+    def padded_ebs(self):
+        return self._padded_ebs
+
+    @property
+    def npoints(self):
+        return self.points.shape[0]
+
+    def _generate_all_surfaces(self, order="F"):
+        """
+        Generate isosurfaces for all bands and spins that cross the Fermi level.
+
+        This method iterates through all bands and spins in the electronic band structure,
+        generating Fermi surface isosurfaces for each band-spin combination that crosses
+        the Fermi level. It then merges all valid surfaces into a single combined surface.
+
+        The method creates mappings between band-spin pairs and their corresponding surface
+        indices, which are stored in the class attributes band_spin_surface_map and
+        surface_band_spin_map.
+
+        If a surface generation fails for any band-spin combination, the error is logged
+        and the method continues with the next combination.
 
         Returns
         -------
         None
-            None
-
-        Raises
-        ------
-        RuntimeError
-            If no bands are found, raise an error.
+            The generated surfaces are stored in the class instance, updating its points,
+            faces, point_data, and cell_data attributes.
         """
-        self.energy = energy
-        logger.info("Energy   : " + str(energy))
+        logger.info("___Generating all Fermi surfaces___")
 
-        # searching for bands crossing the desired energy
-        bands_to_plot = False
-        self.useful_bands_by_spins = []
-        for i_spin in range(self.bands.shape[2]):
-            bands = self.bands[:, :, i_spin]
+        fermi_surfaces = []
 
-            indices = np.where(
-                np.logical_and(bands.min(axis=0) < energy, bands.max(axis=0) > energy)
-            )[0]
-            self.useful_bands_by_spins.append(indices)
+        bands_mesh = self.padded_ebs.get_property("bands", as_mesh=True, order=order)
+        # Get dimensions from bands_mesh
+        _, _, _, nbands, nspins = bands_mesh.shape
 
-            if len(indices) != 0:
-                bands_to_plot = True
-                print(
-                    f"Band indices near iso-surface: (bands.shape={bands.shape}) spin-{i_spin} | bands-{indices}"
-                )
-        if not bands_to_plot:
-            user_logger.error(
-                f"Could not find any bands crossing the energy ({energy} eV) relative to the fermi energy.\n"
-                "Please check the energy and the bands:\n\n"
-                "1. Try shifting the energy to find crossings of the bands and the energy.\n"
-                "2. Check the density of states to see where the bands are in terms of energy.\n"
-                "3. Check the bands to see if they are crossing the energy."
-            )
-            raise RuntimeError("No bands to plot")
-        return None
+        for ispin in range(nspins):
+            for iband in range(nbands):
+                scalar_mesh = bands_mesh[..., iband, ispin]
 
-    def plot(self, mode: str, interpolation=500):
-        """This method plots the 2d fermi surface along the z axis
+                try:
+                    surface = self._generate_single_surface(scalar_mesh, order=order)
 
-        Only 2D layer geometry along z
+                    # Check if the surface is empty
+                    if surface.points.shape[0] > 0:
+                        logger.debug(
+                            f"Surface for band {iband}, spin {ispin} has {surface.points.shape[0]} points"
+                        )
+                        fermi_surfaces.append(surface)
+                        # Map the surface index to band and spin
+                        surface_idx = len(fermi_surfaces) - 1
+                        self.band_spin_surface_map[(iband, ispin)] = surface_idx
+                        self.surface_band_spin_map[surface_idx] = (iband, ispin)
+
+                except Exception as e:
+                    logger.exception(
+                        f"Failed to generate surface for band {iband}, spin {ispin}: {e}"
+                    )
+                    continue
+
+        if fermi_surfaces:
+            self.band_surfaces = fermi_surfaces
+            logger.info(f"___Generated {len(fermi_surfaces)} Fermi surfaces___")
+            # Combine all surfaces
+            combined_surface = self._merge_surfaces(fermi_surfaces)
+
+            # Update self with the combined surface data
+            self.points = combined_surface.points
+            self.faces = combined_surface.faces
+
+            for x in combined_surface.point_data:
+                if "Contour Data" not in x:
+                    self.point_data[x] = combined_surface.point_data[x]
+            for x in combined_surface.cell_data:
+                self.cell_data[x] = combined_surface.cell_data[x]
+
+    def _generate_single_surface(
+        self,
+        scalar_mesh: np.ndarray,
+        method: str = "marching_cubes",
+        order: str = "F",
+    ) -> pv.PolyData:
+        """
+        Generate a single isosurface for given band and spin.
 
         Parameters
         ----------
-        mode : str, optional
-            This parameters sets the mode,
-        interpolation : int, optional
-            The interpolation level, by default 500
+        scalar_mesh : np.ndarray
+            3D mesh of energy values
+        method : str, optional
+            Method for isosurface generation, by default "marching_cubes"
 
         Returns
         -------
-        List[plots]
-            Returns a list of matplotlib.pyplot instances
-
-        Raises
-        ------
-        RuntimeError
-            Raise error if find energy was not called before plotting.
+        pv.PolyData
+            Surface for the given band and spin
         """
-        logger.debug("Plot: ...")
-        from scipy.interpolate import griddata
 
-        if self.useful_bands_by_spins is None:
-            raise RuntimeError("self.find_energy() must be called before Plotting")
+        grid = copy.deepcopy(self.padded_grid)
+        padded_scalar_mesh = scalar_mesh
+        # Generate isosurface
+        surface = grid.contour(
+            [self.fermi],
+            scalars=padded_scalar_mesh.reshape(-1, order=order),
+            method=method,
+        )
 
-        # selecting components of K-points
-        x, y = self.kpoints[:, 0], self.kpoints[:, 1]
-        logger.debug("k_x[:10], k_y[:10] values" + str([x[:10], y[:10]]))
+        if surface.points.shape[0] > 0:
+            # Transform to cartesian coordinates
+            surface = surface.transform(
+                self.transform_to_cart, transform_all_input_vectors=False, inplace=False
+            )
 
-        # and new, interpolated component
-        xmax, xmin = x.max(), x.min()
-        ymax, ymin = y.max(), y.min()
-        logger.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
-        xnew, ynew = np.mgrid[
-            xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j
-        ]
+            # Clip surface with each face of the Brillouin zone
+            for normal, center in zip(
+                self.brillouin_zone.face_normals, self.brillouin_zone.centers
+            ):
+                surface = surface.clip(origin=center, normal=normal, inplace=False)
+                if surface.points.shape[0] == 0:
+                    break
 
-        unique_x = xnew[:, 0]
-        unique_y = ynew[0, :]
+        return surface
 
-        # interpolation
-        n_spins = self.bands.shape[2]
-        for i_spin in range(n_spins):
-            # transpose so bands axis is first
-            if self.band_indices is None:
-                bands = self.bands[
-                    :, self.useful_bands_by_spins[i_spin], i_spin
-                ].transpose()
-                spd = self.spd[
-                    :, self.useful_bands_by_spins[i_spin], i_spin
-                ].transpose()
-                band_labels = np.unique(self.useful_bands_by_spins[i_spin])
-            else:
-                bands = self.bands[:, self.band_indices[i_spin], i_spin].transpose()
-                spd = self.spd[:, self.band_indices[i_spin], i_spin].transpose()
-                band_labels = np.unique(self.band_indices[i_spin])
+    def _merge_surfaces(self, surfaces: List[pv.PolyData]) -> pv.PolyData:
+        """
+        Merge multiple Fermi surfaces into a single surface with band and spin information.
 
-            if spd.shape[0] == 0:
-                continue
-
-            # Normalizing
-            vmin = self.config["clim"]["value"][0]
-            vmax = self.config["clim"]["value"][1]
-            if vmin is None:
-                vmin = spd.min()
-            if vmax is None:
-                vmax = spd.max()
-            norm = mpcolors.Normalize(vmin, vmax)
-
-            # Interpolating band energies on to new grid
-            bnew = []
-            logger.debug("Interpolating ...")
-            for i_band, band in enumerate(bands):
-
-                bnew.append(griddata((x, y), band, (xnew, ynew), method="cubic"))
-            bnew = np.array(bnew)
-
-            # Generates colors per band
-            n_bands = bands.shape[0]
-            cmap = cm.get_cmap(self.config["cmap"]["value"])
-            if i_spin == 1:
-                factor = 0.25
-            else:
-                factor = 0
-            solid_color_surface = np.arange(n_bands) / n_bands + factor
-            band_colors = np.array(
-                [cmap(norm(x)) for x in solid_color_surface[:]]
-            ).reshape(-1, 4)
-            plots = []
-
-            for i_band, band_energies in enumerate(bnew):
-                contours = measure.find_contours(band_energies, self.energy)
-                for i_contour, contour in enumerate(contours):
-                    # measure.find contours returns a list of coordinates indcies of the mesh.
-                    # However, due to the algorithm they take values that are in between mesh points.
-                    # We need to interpolate the values to the original kmesh
-                    x_vals = contour[:, 0]
-                    y_vals = contour[:, 1]
-                    x_interp = np.interp(
-                        x_vals, np.arange(0, unique_x.shape[0]), unique_x
-                    )
-                    y_interp = np.interp(
-                        y_vals, np.arange(0, unique_y.shape[0]), unique_y
-                    )
-                    points = np.array([[x_interp, y_interp]])
-                    points = np.moveaxis(points, -1, 0)
-
-                    segments = np.concatenate([points[:-1], points[1:]], axis=1)
-                    if mode == "plain":
-                        lc = LineCollection(
-                            segments,
-                            colors=self.config["color"]["value"][i_spin],
-                            linestyle=self.config["linestyle"]["value"][i_spin],
-                        )
-                        lc.set_linestyle(self.config["linestyle"]["value"][i_spin])
-                    if mode == "plain_bands":
-                        if self.band_colors is None:
-                            c = band_colors[i_band]
-                        else:
-                            c = self.band_colors[i_spin][i_band]
-                        lc = LineCollection(segments, colors=c)
-                        # lc.set_array(c)
-                        if i_contour == 0:
-                            if n_spins == 2:
-                                label = f"Band {band_labels[i_band]}- Spin - {i_spin}"
-                            else:
-                                label = f"Band {band_labels[i_band]}"
-                            lc.set_label(label)
-                    if mode == "parametric":
-                        c = griddata(
-                            (x, y), spd[i_band, :], (x_interp, y_interp), method="cubic"
-                        )
-                        lc = LineCollection(
-                            segments,
-                            cmap=plt.get_cmap(self.config["cmap"]["value"]),
-                            norm=norm,
-                        )
-                        lc.set_array(c)
-
-                    plt.gca().add_collection(lc)
-
-        if mode == "parametric":
-            cbar = plt.colorbar(lc, ax=plt.gca())
-            cbar.ax.tick_params(labelsize=10)
-            cbar.ax.set_ylabel("Atomic Orbital Projections", labelpad=10, rotation=270)
-
-        plt.axis("equal")
-        logger.debug("Plot: ...Done")
-        # return plots
-
-    def spin_texture(self, sx, sy, sz, spin=None, interpolation=300):
-        """This method plots spin texture of the 2d fermi surface
-
-        Only 2D layer geometry along z. It is like a enhanced version of 'plot' method.
-
-        sx, sy, sz are spin projected Nkpoints x Nbands numpy arrays. They
-        also are (already) projected by orbital and atom (from other
-        class)
+        This method combines multiple PyVista PolyData objects representing different
+        Fermi surfaces (from different bands and spins) into a single PolyData object.
+        It adds point data arrays to track which points belong to which band and spin.
 
         Parameters
         ----------
-        sx : np.ndarray
-            Spin projected array for the x component. size (n_kpoints,n_bands)
-        sy : np.ndarray
-            Spin projected array for the y component. size (n_kpoints,n_bands)
-        sz : np.ndarray
-            Spin projected array for the z component. size (n_kpoints,n_bands)
-        spin : List or array-like, optional
-            List of marker colors for the arrows, by default None
+        surfaces : List[pv.PolyData]
+            List of PyVista PolyData objects representing Fermi surfaces for different
+            bands and spins.
 
-        interpolation : int, optional
-            The interpolation level, by default 300
+        Returns
+        -------
+        pv.PolyData
+            A merged PyVista PolyData object containing all surfaces with added
+            point data arrays 'spin_index' and 'spin_band_index' to identify the
+            original band and spin of each point.
+
+        """
+        if not surfaces:
+            return pv.PolyData()
+
+        # Add band and spin indices to each surface before merging
+        spin_band_index_array = np.empty(0, dtype=np.int32)
+        spin_index_array = np.empty(0, dtype=np.int32)
+        for surface_idx, surface in enumerate(surfaces):
+            iband, ispin = self.surface_band_spin_map[surface_idx]
+            n_points = surface.points.shape[0]
+
+            # spin index identifier
+            current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
+            spin_index_array = np.insert(
+                spin_index_array, 0, current_spin_index_array, axis=0
+            )
+
+            # spin band index identifier
+            current_spin_band_index_array = np.full(
+                n_points, surface_idx, dtype=np.int32
+            )
+            spin_band_index_array = np.insert(
+                spin_band_index_array, 0, current_spin_band_index_array, axis=0
+            )
+
+        # Create boolean masks for each band and spin combination
+        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
+            mask = spin_band_index_array == surface_idx
+            self.band_spin_mask[(iband, ispin)] = mask
+
+        merged = surfaces[0]
+        for surface in surfaces[1:]:
+            merged = merged.merge(surface, merge_points=False)
+
+        merged.point_data["spin_index"] = spin_index_array
+        merged.point_data["spin_band_index"] = spin_band_index_array
+
+        return merged
+
+    def get_brillouin_zone(self, supercell: List[int]):
+        """Returns the BrillouinZone of the material
+
+        Parameters
+        ----------
+        supercell : List[int]
+            The supercell to use for the BrillouinZone
+
+        Returns
+        -------
+        pyprocar.core.BrillouinZone
+            The BrillouinZone of the material
+        """
+
+        return BrillouinZone(self.ebs.reciprocal_lattice, supercell)
+
+    def _interpolate_to_surface(
+        self,
+        grid: pv.ImageData = None,
+        meshgrids: Dict[str, np.ndarray] = None,
+        interpolate_by_band: bool = False,
+        save_band_data: bool = False,
+    ):
+        """
+        Interpolate data from a grid or meshgrids onto the Fermi surface.
+
+        This method takes either a PyVista ImageData object or a dictionary of
+        numpy meshgrids and interpolates the data onto the Fermi surface points.
+        The interpolated data is stored in the point_data dictionary of the
+        Fermi surface.
+
+        Parameters
+        ----------
+        grid : pv.ImageData, optional
+            PyVista ImageData object containing the data to interpolate.
+            Must have point_data attributes to interpolate.
+        meshgrids : Dict[str, np.ndarray], optional
+            Dictionary mapping field names to numpy meshgrids. Each meshgrid
+            should have the same shape as the grid used to define the Fermi surface.
+
+        Returns
+        -------
+        pyvista.UnstructuredGrid
+            The interpolated grid containing the data as point attributes.
 
         Raises
         ------
-        RuntimeError
-            Raise error if find energy was not called before plotting.
+        ValueError
+            If neither grid nor meshgrids is provided.
+
+        Notes
+        -----
+        The interpolated data is also stored in the point_data dictionary
+        of the Fermi surface object.
         """
+        logger.info("___Interpolating to surface___")
+        # if image_data is None and meshgrids is None and unstructured_grid is None:
+        #     raise ValueError("image_data, meshgrids, or unstructured_grid must be provided")
 
-        logger.debug("spin_texture: ...")
-
-        if self.useful_bands_by_spins is None:
-            raise RuntimeError("self.find_energy() must be called before plotting")
-
-        # selecting components of K-points
-        x, y = self.kpoints[:, 0], self.kpoints[:, 1]
-
-        if self.band_indices is None:
-            bands = self.bands[:, self.useful_bands_by_spins[0], 0].transpose()
-            band_labels = np.unique(self.useful_bands_by_spins[0])
-            sx = sx[:, self.useful_bands_by_spins[0]].transpose()
-            sy = sy[:, self.useful_bands_by_spins[0]].transpose()
-            sz = sz[:, self.useful_bands_by_spins[0]].transpose()
-        else:
-            bands = self.bands[:, self.band_indices[0], 0].transpose()
-
-            band_labels = np.unique(self.band_indices[0])
-            sx = sx[:, self.band_indices[0]].transpose()
-            sy = sy[:, self.band_indices[0]].transpose()
-            sz = sz[:, self.band_indices[0]].transpose()
-
-        # and new, interpolated component
-        xmax, xmin = x.max(), x.min()
-        ymax, ymin = y.max(), y.min()
-
-        logger.debug("xlim = " + str([xmin, xmax]) + "  ylim = " + str([ymin, ymax]))
-
-        xnew, ynew = np.mgrid[
-            xmin : xmax : interpolation * 1j, ymin : ymax : interpolation * 1j
-        ]
-
-        # interpolation
-        bnew = []
-        for band in bands:
-            logger.debug("Interpolating ...")
-            interp_bands = griddata((x, y), band, (xnew, ynew), method="cubic")
-            bnew.append(interp_bands)
-
-        # Normalizing
-        vmin = self.config["clim"]["value"][0]
-        vmax = self.config["clim"]["value"][1]
-        if vmin is None:
-            vmin = -0.5
-        if vmax is None:
-            vmax = 0.5
-        norm = mpcolors.Normalize(vmin, vmax)
-
-        cont = [
-            plt.contour(
-                xnew,
-                ynew,
-                z,
-                [self.energy],
-                linewidths=self.config["linewidth"]["value"],
-                colors="k",
-                linestyles="solid",
-                alpha=self.config["contour_alpha"]["value"],
+        if grid is None and meshgrids is None:
+            raise ValueError(
+                "image_data, meshgrids, or unstructured_grid must be provided"
             )
-            for z in bnew
-        ]
 
-        if len(cont) == 0:
-            raise RuntimeError("Could not find any contours at this energy")
+        if meshgrids is not None:
+            logger.info("___Interpolating to surface from meshgrids___")
+            grid = copy.deepcopy(self.padded_grid)
+            for name, meshgrid in meshgrids.items():
+                grid.point_data[name] = meshgrid.reshape(-1, order="F")
+            unstructured_grid = grid.cast_to_unstructured_grid()
 
-        x_limits = [0, 0]
-        y_limits = [0, 0]
-        for i_band, (contour, spinX, spinY, spinZ) in enumerate(zip(cont, sx, sy, sz)):
-            # The previous interp. yields the level curves, nothing more is
-            # useful from there
-            paths = contour.get_paths()
-            if paths:
-                verts = [path.vertices for path in paths]
-                points = np.concatenate(verts)
-                x_limits = [
-                    min(x_limits[0], points[:, 0].min()),
-                    max(x_limits[1], points[:, 0].max()),
-                ]
-                y_limits = [
-                    min(y_limits[0], points[:, 1].min()),
-                    max(y_limits[1], points[:, 1].max()),
-                ]
+        if grid is not None:
+            logger.info("___Interpolating to surface from grid___")
+            unstructured_grid = grid.cast_to_unstructured_grid()
 
-                logger.debug("Fermi surf. points.shape: " + str(points.shape))
-                newSx = griddata((x, y), spinX, (points[:, 0], points[:, 1]))
-                newSy = griddata((x, y), spinY, (points[:, 0], points[:, 1]))
-                newSz = griddata((x, y), spinZ, (points[:, 0], points[:, 1]))
-                logger.info("newSx.shape: " + str(newSx.shape))
-                if self.config["arrow_size"]["value"] is not None:
-                    # This is so the density scales the way you think. increasing number means increasing density.
-                    # The number in the numerator is so it scales reasonable with 0-20
-                    scale = 10 / self.config["arrow_size"]["value"]
-                    scale_units = "xy"
-                    angles = "xy"
+        unstructured_grid_cart = unstructured_grid.transform(
+            self.transform_to_cart, transform_all_input_vectors=False, inplace=False
+        )
+
+        keys_to_interpolate = unstructured_grid_cart.point_data.keys()
+        logger.debug(f"point_data to be interpolated: {keys_to_interpolate}")
+
+        interpolated_surface = self.interpolate(
+            unstructured_grid_cart,
+            n_points=40,
+            sharpness=20,
+            strategy="null_value",
+        )
+
+        if interpolate_by_band:
+            total_property_value = None
+            for incoming_key in keys_to_interpolate:
+                property_name = self.padded_ebs.extract_property_label(incoming_key)
+
+                logger.debug(f"property_name: {property_name}")
+                logger.debug(f"incoming_key: {incoming_key}")
+                band_index, spin_index = self.padded_ebs.extract_band_index(
+                    incoming_key
+                )
+
+                mask = self.band_spin_mask[(band_index, spin_index)]
+
+                point_data_array = interpolated_surface.point_data[incoming_key]
+
+                if point_data_array.ndim == 1:
+                    # For scalar data
+                    point_data_array[~mask] = 0
                 else:
-                    scale = None
-                    scale_units = "xy"
-                    angles = "xy"
+                    # For vector data
+                    point_data_array[~mask, :] = 0
 
-                # This is so the density scales the way you think. increasing number means increasing density.
-                # The number in the numerator is so it scales reasonable with 0-20
-                arrow_density = 50 // self.config["arrow_density"]["value"]
-                if self.config["spin_projection"]["value"] == "z":
-                    color = newSz[::arrow_density]
-                elif self.config["spin_projection"]["value"] == "y":
-                    color = newSy[::arrow_density]
-                elif self.config["spin_projection"]["value"] == "x":
-                    color = newSx[::arrow_density]
-                elif self.config["spin_projection"]["value"] == "x^2":
-                    color = newSx[::arrow_density] ** 2
-                elif self.config["spin_projection"]["value"] == "y^2":
-                    color = newSy[::arrow_density] ** 2
-                elif self.config["spin_projection"]["value"] == "z^2":
-                    color = newSz[::arrow_density] ** 2
+                interpolated_surface.point_data[incoming_key] = point_data_array
 
-                if self.config["no_arrow"]["value"]:
-                    # a dictionary to select the right spin component
-                    # spinDict = {0: newSx[::self.config['arrow_density']['value']],
-                    #             1: newSy[::self.config['arrow_density']['value']],
-                    #             2: newSz[::self.config['arrow_density']['value']]}
+                if property_name not in interpolated_surface.point_data:
+                    interpolated_surface.point_data[property_name] = point_data_array
+                else:
+                    interpolated_surface.point_data[property_name] += point_data_array
 
-                    plt.scatter(
-                        points[::arrow_density, 0],
-                        points[::arrow_density, 1],
-                        c=color,
-                        # spinDict[spin],
-                        s=50,
-                        edgecolor="none",
-                        alpha=1.0,
-                        marker=self.config["marker"]["value"],
-                        cmap=self.config["cmap"]["value"],
-                        norm=norm,
+                if not save_band_data:
+                    interpolated_surface.point_data.pop(incoming_key)
+
+        self.point_data.update(interpolated_surface.point_data)
+
+        return interpolated_surface
+
+    def _compute_property(self, name, property_value, save_band_data=False):
+
+        logger.debug(f"property_value: {property_value.shape}")
+
+        padded_grid = copy.deepcopy(self.padded_grid)
+        if self.ebs.is_band_property(property_value):
+            nbands, nspins = property_value.shape[1:3]
+            for iband in range(nbands):
+                for ispin in range(nspins):
+                    band_property_label = self.padded_ebs.get_band_property_label(
+                        name, iband, ispin
                     )
 
-                else:
-                    if (
-                        self.config["arrow_color"]["value"] is not None
-                        or self.band_colors is not None
-                    ):
-                        if self.band_colors is not None:
-                            c = self.band_colors[0][i_band]
-                        if self.config["arrow_color"]["value"] is not None:
-                            c = self.config["arrow_color"]["value"]
-                        plt.quiver(
-                            points[::arrow_density, 0],  # Arrow position x-component
-                            points[::arrow_density, 1],  # Arrow position y-component
-                            newSx[::arrow_density],  # Arrow direction x-component
-                            newSy[::arrow_density],  # Arrow direction y-component
-                            scale=scale,
-                            scale_units=scale_units,
-                            angles=angles,
-                            color=c,
-                        )
-                    else:
+                    padded_grid.point_data[band_property_label] = property_value[
+                        :, iband, ispin, ...
+                    ]
 
-                        plt.quiver(
-                            points[::arrow_density, 0],  # Arrow position x-component
-                            points[::arrow_density, 1],  # Arrow position y-component
-                            newSx[::arrow_density],  # Arrow direction x-component
-                            newSy[::arrow_density],  # Arrow direction y-component
-                            color,  # Color for each arrow
-                            scale=scale,
-                            scale_units=scale_units,
-                            angles=angles,
-                            cmap=self.config["cmap"]["value"],
-                            norm=norm,
-                        )
+            self._interpolate_to_surface(
+                grid=padded_grid,
+                interpolate_by_band=True,
+                save_band_data=save_band_data,
+            )
 
-        if self.config["plot_color_bar"]["value"]:
-            cbar = plt.colorbar()
-            if len(self.config["spin_projection"]["value"].split("^")) == 2:
-                tmp = self.config["spin_projection"]["value"].split("^")
-                label = f"S$_{tmp[0]}^{tmp[1]}$ projection"
-            else:
-                tmp = self.config["spin_projection"]["value"].split("^")
-                label = f"S$_{tmp[0]}$ projection"
-            cbar.ax.set_ylabel(label, rotation=270)
+        else:
+            padded_grid.point_data[name] = property_value
+            self._interpolate_to_surface(grid=padded_grid)
 
-        xlimits = (
-            x_limits[0] - abs(x_limits[0]) * 0.1,
-            x_limits[1] + abs(x_limits[1]) * 0.1,
+        is_point_data_vector = self.point_data[name].shape[-1] == 3
+        logger.debug(f"is_point_data_vector|{name}: {is_point_data_vector}")
+        if is_point_data_vector:
+            scalar_name = f"{name}-norm"
+            self.point_data[scalar_name] = np.linalg.norm(
+                self.point_data[name], axis=-1
+            )
+            self.set_active_scalars(scalar_name, preference="point")
+            self.set_active_vectors(name, preference="point")
+        else:
+            self.set_active_scalars(name, preference="point")
+
+    def compute_property(
+        self,
+        property_name: str,
+        property=True,
+        gradient=False,
+        hessian=False,
+        save_band_data=False,
+    ):
+
+        if property:
+            property_value = self.padded_ebs.get_property(
+                property_name, as_mesh=False, order="F"
+            )
+            self._compute_property(property_name, property_value, save_band_data)
+            return self.point_data
+        if gradient:
+            gradient_value = self.padded_ebs.get_gradient(
+                property_name, as_mesh=False, order="F"
+            )
+            gradient_label = self.padded_ebs.get_property_gradient_label(property_name)
+            self._compute_property(gradient_label, gradient_value, save_band_data)
+        if hessian:
+            hessian_value = self.padded_ebs.get_hessian(
+                property_name, as_mesh=False, order="F"
+            )
+            hessian_label = self.padded_ebs.get_property_hessian_label(property_name)
+            self._compute_property(hessian_label, hessian_value, save_band_data)
+        return self.point_data
+
+    def compute_atomic_projection(
+        self,
+        atoms: List[int] = None,
+        orbitals: List[int] = None,
+        spins: List[int] = None,
+        save_band_data: bool = False,
+    ):
+
+        property_value = self.padded_ebs.get_projected_sum(
+            atoms=atoms,
+            orbitals=orbitals,
+            spins=spins,
         )
-        ylimits = (
-            y_limits[0] - abs(y_limits[0]) * 0.1,
-            y_limits[1] + abs(y_limits[1]) * 0.1,
+
+        property_value = self.padded_ebs.get_property(
+            "projected_sum", as_mesh=False, order="F"
         )
-        plt.xlim(xlimits)
-        plt.ylim(ylimits)
-        font = {"size": 16}
-        plt.rc("font", **font)
+        self._compute_property(
+            "projected_sum", property_value, save_band_data=save_band_data
+        )
+        return self.point_data
 
-        logger.debug("st: ...Done")
-        return None
+    def compute_spin_texture(
+        self,
+        atoms: List[int] = None,
+        orbitals: List[int] = None,
+        save_band_data: bool = False,
+    ):
+        property_name = "spin_texture"
+        if not self.padded_ebs.is_non_collinear:
+            raise ValueError(
+                "Spin texture is only available for non-collinear calculations"
+            )
 
-    def add_axes_labels(self):
-        """
-        Method to add labels to matplotlib plot
-        """
-        if self.config["add_axes_labels"]["value"]:
-            plt.ylabel(self.config["y_label"]["value"])
-            plt.xlabel(self.config["x_label"]["value"])
+        padded_grid = copy.deepcopy(self.padded_grid)
+        spin_texture = self.padded_ebs.get_projected_spin_texture(
+            atoms=atoms, orbitals=orbitals
+        )
 
-    def add_legend(self):
-        """
-        Method to add labels to matplotlib plot
-        """
-        if self.config["add_legend"]["value"]:
-            plt.legend()
+        self._compute_property(
+            "spin_texture", spin_texture, save_band_data=save_band_data
+        )
 
-    def savefig(self, savefig):
+    def extend_surface(
+        self, zone_directions: List[Union[List[int], Tuple[int, int, int]]]
+    ):
         """
-        Method to save plot
-        """
-        plt.savefig(savefig, dpi=self.config["dpi"]["value"], bbox_inches="tight")
-        plt.close()
+        Method to extend the surface in the direction of a reciprocal lattice vecctor
 
-    def show(self):
+        Parameters
+        ----------
+        zone_directions : List[List[int] or Tuple[int,int,int]], optional
+            List of directions to expand to, by default None
         """
-        Method show th plot
-        """
-        plt.show()
+        # The following code  creates exteneded surfaces in a given direction
+        print(
+            f"Warning. Extending the surface will disable the further calculation of properties.\n"
+            "Existing properties will still be available."
+        )
+        print(
+            f"To enable the calculation of properties, please create a new FermiSurface object.\n"
+        )
+
+        extended_surfaces = []
+        
+        new_surface = copy.deepcopy(self)
+        initial_surface = copy.deepcopy(self)
+        for direction in zone_directions:
+            surface = copy.deepcopy(initial_surface)
+
+            new_surface += surface.translate(
+                np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
+            )
+            
+        active_scalars_name = self.active_scalars_name
+        active_vectors_name = self.active_vectors_name
+        if active_vectors_name is not None and active_scalars_name is not None:
+            new_surface.set_active_scalars(active_scalars_name, preference="point")
+            new_surface.set_active_vectors(active_vectors_name, preference="point")
+        elif active_scalars_name is not None:
+            self.set_active_scalars(active_scalars_name, preference="point")
+
+        return new_surface
+
+    @classmethod
+    def from_code(cls, code, dirpath, fermi: float = None, **kwargs):
+        from pyprocar.io import Parser
+        parser = Parser(code=code, dirpath=dirpath)
+        ebs = parser.ebs
+        ebs.reduce_bands_near_fermi()
+
+        if fermi is None:
+            fermi = ebs.efermi
+
+        return cls(ebs, fermi=fermi, **kwargs)
