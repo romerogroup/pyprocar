@@ -45,7 +45,7 @@ def dosplot(
     print_plot_opts: bool = False,
     export_data_file: str = None,
     export_append_mode: bool = True,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     **kwargs,
 ):
