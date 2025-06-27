@@ -85,7 +85,11 @@ class EBSPlot:
         logger.debug("EBS: %s", self.ebs)
 
         # need to initiate kpath if kpath is not defined.
-        self.x = self.ebs.kpath.get_distances(as_segments=False)
+        if self.kpath is None:
+            self.x = np.arange(0, self.ebs.kpoints.shape[0]).reshape(-1)
+
+        else:
+            self.x = self.kpath.get_distances(as_segments=False)
 
         self._initiate_plot_args()
 
@@ -298,7 +302,7 @@ class EBSPlot:
         # levels will be called to fake another kpoint and then
         # exit. `plot_atomic_levels` will invoke this method again to
         # get the actual plot
-        if len(self.ebs.kpoints) == 1:
+        if len(self.x) == 1:
             self.plot_atomic_levels(
                 color_weights=color_weights,
                 width_weights=width_weights,
@@ -520,8 +524,9 @@ class EBSPlot:
             labels = [""]
         self.ebs._properties["bands"] = np.vstack((self.ebs.bands, self.ebs.bands))
         self.ebs._properties["projected"] = np.vstack((self.ebs.projected, self.ebs.projected))
-        self.ebs._kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
+        self.ebs._kpoints = np.vstack((self.ebs._kpoints, self.ebs._kpoints))
         self.ebs._kpoints[0][-1] += 1
+        self.x = np.arange(0, self.ebs.kpoints.shape[0]).reshape(-1)
         print("Atomic plot: bands.shape  :", self.ebs.bands.shape)
         print("Atomic plot: spd.shape    :", self.ebs.projected.shape)
         print("Atomic plot: kpoints.shape:", self.ebs.kpoints.shape)

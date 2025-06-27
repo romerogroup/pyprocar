@@ -5,9 +5,9 @@ import numpy as np
 import yaml
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.io import Parser
+from pyprocar.core import ElectronicBandStructure
 from pyprocar.plotter import EBSPlot
-from pyprocar.utils import ROOT, data_utils, welcome
+from pyprocar.utils import ROOT, welcome
 from pyprocar.utils.info import orbital_names
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -47,7 +47,7 @@ def unfold(
     old=False,
     savetab="unfold_result.csv",
     print_plot_opts: bool = False,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     **kwargs,
 ):
@@ -102,44 +102,12 @@ def unfold(
 
     user_logger.info("_" * 100)
 
-    # Creating pickle files for cache parsed data
-    ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-    structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
-    kpath_pkl_filepath = os.path.join(dirname, "kpath.pkl")
-
-    if not use_cache:
-        if os.path.exists(ebs_pkl_filepath):
-            logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
-            os.remove(ebs_pkl_filepath)
-        if os.path.exists(structure_pkl_filepath):
-            logger.info(f"Removing existing structure file: {structure_pkl_filepath}")
-            os.remove(structure_pkl_filepath)
-        if os.path.exists(kpath_pkl_filepath):
-            logger.info(f"Removing existing kpath file: {kpath_pkl_filepath}")
-            os.remove(kpath_pkl_filepath)
-
-    if not os.path.exists(ebs_pkl_filepath):
-        logger.info(f"Parsing EBS from {dirname}")
-
-        parser = Parser(code=code, dirpath=dirname)
-        ebs = parser.ebs
-        structure = parser.structure
-        kpath = ebs.kpath
-
-        data_utils.save_pickle(ebs, ebs_pkl_filepath)
-        data_utils.save_pickle(structure, structure_pkl_filepath)
-    else:
-        logger.info(
-            f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}"
-        )
-
-        ebs = data_utils.load_pickle(ebs_pkl_filepath)
-        structure = data_utils.load_pickle(structure_pkl_filepath)
-        kpath = ebs.kpath
-
+    ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
+    kpath = ebs.kpath
+    structure = ebs.structure
     if fermi is not None:
-        ebs.bands -= fermi
-        ebs.bands += fermi_shift
+        ebs.shift_bands(-1*fermi, inplace=True)
+        ebs.shift_bands(fermi_shift, inplace=True)
         fermi_level = fermi_shift
         y_label = r"E - E$_F$ (eV)"
     else:
@@ -150,6 +118,7 @@ def unfold(
             ----------------------------------------------------------------------------------------------------------
             """
         )
+    ebs = ebs.unfold(transformation_matrix=transformation_matrix, structure=structure)
 
     ebs_plot = EBSPlot(ebs, kpath, ax, spins, config=config)
 
@@ -160,9 +129,7 @@ def unfold(
             raise ValueError(
                 "The provided electronic band structure file does not include phases"
             )
-        ebs_plot.ebs.unfold(
-            transformation_matrix=transformation_matrix, structure=structure
-        )
+
     if unfold_mode == "both":
         logger.info("Unfolding bands in both modes")
 
@@ -206,7 +173,7 @@ def unfold(
             width_mask=width_mask,
             spins=spins,
         )
-        ebs_plot.handles = ebs_plot.handles[: ebs_plot.nspins]
+        ebs_plot.handles = ebs_plot.handles[: ebs_plot.n_spins]
     elif mode in ["overlay", "overlay_species", "overlay_orbitals"]:
 
         weights = []
@@ -219,7 +186,6 @@ def unfold(
                 atoms = np.where(structure.atoms == ispc)[0]
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
-                    principal_q_numbers=[-1],
                     orbitals=orbitals,
                     spins=spins,
                 )
@@ -228,13 +194,12 @@ def unfold(
             logger.info("Plotting bands in overlay orbitals mode")
 
             for iorb in ["s", "p", "d", "f"]:
-                if iorb == "f" and not ebs_plot.ebs.norbitals > 9:
+                if iorb == "f" and not ebs_plot.ebs.n_orbitals > 9:
                     continue
                 labels.append(iorb)
                 orbitals = orbital_names[iorb]
                 w = ebs_plot.ebs.ebs_sum(
                     atoms=atoms,
-                    principal_q_numbers=[-1],
                     orbitals=orbitals,
                     spins=spins,
                 )
@@ -262,7 +227,6 @@ def unfold(
                             labels.append(ispc + "-" + "_".join(it[ispc]))
                         w = ebs_plot.ebs.ebs_sum(
                             atoms=atoms,
-                            principal_q_numbers=[-1],
                             orbitals=orbitals,
                             spins=spins,
                         )
@@ -299,7 +263,7 @@ def unfold(
         projection_labels.append(projection_label)
 
         weights = ebs_plot.ebs.ebs_sum(
-            atoms=atoms, principal_q_numbers=[-1], orbitals=orbitals, spins=spins
+            atoms=atoms, orbitals=orbitals, spins=spins
         )
 
         if config.weighted_color:

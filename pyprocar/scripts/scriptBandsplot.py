@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
-from pyprocar.io import Parser
+from pyprocar.core import ElectronicBandStructure
 from pyprocar.plotter import EBSPlot
 from pyprocar.utils import data_utils, welcome
 from pyprocar.utils.info import orbital_names
@@ -46,7 +46,7 @@ def bandsplot(
     export_append_mode: bool = True,
     ktick_limit: List[float] = None,
     x_limit: List[float] = None,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     quiet_welcome: bool = False,
     **kwargs,
@@ -137,52 +137,25 @@ def bandsplot(
 
     user_logger.info("_" * 100)
 
-    ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-    structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
-    kpath_pkl_filepath = os.path.join(dirname, "kpath.pkl")
-
-    if not use_cache:
-        user_logger.warning(f"Not using cache, removing existing cache files")
-        if os.path.exists(structure_pkl_filepath):
-            logger.info(f"Removing existing structure file: {structure_pkl_filepath}")
-            os.remove(structure_pkl_filepath)
-        if os.path.exists(kpath_pkl_filepath):
-            logger.info(f"Removing existing kpath file: {kpath_pkl_filepath}")
-            os.remove(kpath_pkl_filepath)
-        if os.path.exists(ebs_pkl_filepath):
-            logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
-            os.remove(ebs_pkl_filepath)
-
-    if not os.path.exists(ebs_pkl_filepath):
-        logger.info(f"Parsing EBS from {dirname}")
-
-        parser = Parser(code=code, dirpath=dirname)
-        ebs = parser.ebs
-        structure = parser.structure
-        kpath = ebs.kpath
-
-        data_utils.save_pickle(ebs, ebs_pkl_filepath)
-        data_utils.save_pickle(structure, structure_pkl_filepath)
-    else:
-        logger.info(
-            f"Loading EBS, Structure, and Kpath from cached Pickle files in {dirname}"
-        )
-
-        ebs = data_utils.load_pickle(ebs_pkl_filepath)
-        structure = data_utils.load_pickle(structure_pkl_filepath)
-        kpath = ebs.kpath
+    ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
+    structure=ebs.structure
+    
+    # Covers when kpath is single kpoint
+    kpath=None
+    if hasattr(ebs, "kpath"):
+        kpath=ebs.kpath
+    
 
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
         logger.info(f"No fermi given, using the found fermi energy: {ebs.efermi}")
-
         fermi = ebs.efermi
 
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")
 
-        ebs._properties["bands"] -= fermi
-        ebs._properties["bands"] += fermi_shift
+        ebs.shift_bands(-1*fermi, inplace=True)
+        ebs.shift_bands(fermi_shift, inplace=True)
         fermi_level = fermi_shift
         y_label = r"E - E$_F$ (eV)"
     else:

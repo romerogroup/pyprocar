@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from pyprocar.core import ElectronicBandStructure
 from pyprocar.io import Parser
 from pyprocar.pyposcar.clusters import Clusters
 from pyprocar.pyposcar.defects import FindDefect
@@ -19,11 +20,11 @@ from scipy.signal import argrelextrema
 
 
 class AutoBandsPlot:
-    def __init__(self, code="vasp", dirname=".", fermi: int = None):
+    def __init__(self, code="vasp", dirname=".", fermi: int = None, use_cache=False):
 
-        self.parser = io.Parser(code="vasp", dirpath=dirname)
+        self.parser = Parser(code=code, dirpath=dirname)
         self.code = code
-        self.ebs = self.parser.ebs
+        self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
@@ -36,7 +37,7 @@ class AutoBandsPlot:
         self.fermi = fermi
 
         self.dirname = dirname
-        self.structure = self.parser.structure
+        self.structure = self.ebs.structure
         self.kpath = self.ebs.kpath
         self.ispin = self.ebs.bands.shape[-1]
         self.bands_up = self.ebs.bands[:, :, 0] - fermi
@@ -44,9 +45,10 @@ class AutoBandsPlot:
         if self.ispin == 2:
             self.bands_down = self.ebs.bands[:, :, 1] - fermi
 
-        self.IPR = self.ebs.ebs_ipr()
-        self.pIPR = self.ebs.ebs_ipr_atom()
-
+        self.IPR = self.ebs.ebs_ipr
+        self.pIPR = self.ebs.ebs_ipr_atom
+        print(self.pIPR.shape)
+        print(self.IPR.shape)
         #
         # Setting the energy window for plotting
         #
@@ -269,7 +271,7 @@ class AutoBandsPlot:
             Ndefect = len(defect)
             Nratio = Ndefect / Natoms
             # spin up first
-            pipr = self.pIPR[:, :, :, 0]
+            pipr = self.pIPR[:, :, 0, :]
             ipr = self.IPR[:, :, 0]
             bands = self.bands_up
             pipr = np.sum(pipr[:, :, defect], axis=-1)
@@ -468,5 +470,5 @@ class AutoBandsPlot:
             )
 
 
-def autobandsplot(code="vasp", dirname=".", fermi: int = None):
-    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi)
+def autobandsplot(code="vasp", dirname=".", fermi: int = None, use_cache=False):
+    a = AutoBandsPlot(code=code, dirname=dirname, fermi=fermi, use_cache=use_cache)

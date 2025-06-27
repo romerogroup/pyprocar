@@ -49,24 +49,27 @@ class Unfolder:
         self.positions = []
         self.eigenvectors = np.zeros(
             shape=(
-                self.ebs.nkpoints,
-                self.ebs.nbands,
-                self.ebs.nspins,
-                self.ebs.natoms * self.ebs.norbitals,
+                self.ebs.n_kpoints,
+                self.ebs.n_bands,
+                self.ebs.n_spins,
+                self.ebs.n_atoms * self.ebs.n_orbitals,
             ),
             dtype=np.complex_,
         )
-        for ispin in range(self.ebs.nspins):
+        for ispin in range(self.ebs.n_spins):
             self.eigenvectors[:, :, ispin, :] = np.reshape(
                 self.ebs.projected_phase[:, :, ispin, :, :],
                 (
-                    self.ebs.nkpoints,
-                    self.ebs.nbands,
-                    self.ebs.natoms * self.ebs.norbitals,
+                    self.ebs.n_kpoints,
+                    self.ebs.n_bands,
+                    self.ebs.n_atoms * self.ebs.n_orbitals,
                 ),
             )
-        norm = np.linalg.norm(self.eigenvectors, ord=2, axis=2)
+
+        # norm the atomic-orbital axis
+        norm = np.linalg.norm(self.eigenvectors, ord=2, axis=-1)
         self.eigenvectors /= norm[:, :, None]
+        
 
         for iatom, chem in enumerate(self.structure.atoms):
             for iorb, orb in enumerate(self.ebs.orbital_names):
@@ -162,11 +165,12 @@ class Unfolder:
         Get the weight for all the modes.
         """
         nqpts, nfreqs = self.eigenvectors.shape[0], self.eigenvectors.shape[1]
-        weights = np.zeros([nqpts, nfreqs, self.ebs.nspins])
-        for ispin in range(self.ebs.nspins):
+        weights = np.zeros([nqpts, nfreqs, self.ebs.n_spins])
+        for ispin in range(self.ebs.n_spins):
             for iqpt in range(nqpts):
                 for ifreq in range(nfreqs):
                     weights[iqpt, ifreq, ispin] = self._get_weight(
                         self.eigenvectors[iqpt, ifreq, ispin, :], self.qpoints[iqpt]
                     )
-            return weights
+                    
+        return weights
