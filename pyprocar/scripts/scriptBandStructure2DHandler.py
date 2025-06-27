@@ -19,6 +19,7 @@ from matplotlib import colors as mpcolors
 
 # from pyprocar.fermisurface3d import fermisurface3D
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.core import ElectronicBandStructure
 from pyprocar.io import Parser
 from pyprocar.plotter import BandStructure2DataHandler, BandStructure2DVisualizer
 from pyprocar.utils import ROOT, data_utils, welcome
@@ -40,9 +41,7 @@ class BandStructure2DHandler:
         dirname: str = "",
         fermi: float = None,
         fermi_shift: float = 0,
-        repair: bool = False,
-        apply_symmetry: bool = True,
-        use_cache: bool = True,
+        use_cache: bool = False,
         verbose: int = 1,
     ):
         """
@@ -81,7 +80,7 @@ class BandStructure2DHandler:
         self.default_config = ConfigFactory.create_config(PlotType.BAND_STRUCTURE_2D)
 
         modes = ["plain", "parametric", "spin_texture", "overlay"]
-        props = ["fermi_speed", "fermi_velocity", "harmonic_effective_mass"]
+        props = ["bands_speed", "bands_velocity", "avg_inv_effective_mass"]
         modes_txt = " , ".join(modes)
         props_txt = " , ".join(props)
         self.notification_message = f"""
@@ -95,49 +94,7 @@ class BandStructure2DHandler:
 
         self.code = code
         self.dirname = dirname
-        self.repair = repair
-        self.apply_symmetry = apply_symmetry
-
-        ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-        structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
-
-        if not use_cache:
-            if os.path.exists(structure_pkl_filepath):
-                logger.info(
-                    f"Removing existing structure file: {structure_pkl_filepath}"
-                )
-                os.remove(structure_pkl_filepath)
-            if os.path.exists(ebs_pkl_filepath):
-                logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
-                os.remove(ebs_pkl_filepath)
-
-        if not os.path.exists(ebs_pkl_filepath):
-            logger.info(f"Parsing EBS from {dirname}")
-
-            parser = Parser(code=code, dirpath=dirname)
-            ebs = parser.ebs
-            structure = parser.structure
-
-            if structure.rotations is not None:
-                logger.info(
-                    f"Detected symmetry operations ({structure.rotations.shape})."
-                    " Applying to ebs to get full BZ"
-                )
-                ebs.ibz2fbz(structure.rotations)
-
-            data_utils.save_pickle(ebs, ebs_pkl_filepath)
-            data_utils.save_pickle(structure, structure_pkl_filepath)
-
-        else:
-            logger.info(
-                f"Loading EBS and Structure from cached Pickle files in {dirname}"
-            )
-
-            ebs = data_utils.load_pickle(ebs_pkl_filepath)
-            structure = data_utils.load_pickle(structure_pkl_filepath)
-
-        self.ebs = ebs
-        self.structure = structure
+        self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
@@ -150,8 +107,8 @@ class BandStructure2DHandler:
         if fermi is not None:
             logger.info(f"Shifting Fermi energy to zero: {fermi}")
 
-            self.ebs.bands -= fermi
-            self.ebs.bands += fermi_shift
+            self.ebs.shift_bands(-1*fermi, inplace=True)
+            self.ebs.shift_bands(fermi_shift, inplace=True)
             self.fermi_level = fermi_shift
             self.energy_label = r"E - E$_F$ (eV)"
             self.fermi_message = None
@@ -243,10 +200,21 @@ class BandStructure2DHandler:
         )
 
         # Process the data
-        self.ebs.reduce_bands_near_fermi(bands=bands, tolerance=0.7)
-        self.ebs.expand_kpoints_to_supercell()
-        self.ebs.reduce_kpoints_to_plane(k_z_plane, k_z_plane_tol)
-        self.data_handler = BandStructure2DataHandler(self.ebs, config=config)
+        print(self.ebs.bands.shape)
+        if bands is not None:
+            self.ebs.reduce_bands_by_index(bands, inplace=True)
+        print(self.ebs.bands.shape)
+        self.ebs.reduce_bands_near_fermi(tolerance=0.7, inplace=True)
+        print(self.ebs.bands.shape)
+        self.ebs.pad(inplace=True)
+        print(self.ebs.bands.shape)
+        if property_name is not None:
+            self.ebs.get_property(property_name)
+        print(self.ebs)
+        ebs = self.ebs.reduce_kpoints_to_axis_plane(0.0, axis=2)
+        print(ebs)
+        print(ebs.bands.shape)
+        self.data_handler = BandStructure2DataHandler(ebs, config=config)
 
         self.data_handler.process_data(
             mode,

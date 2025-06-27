@@ -64,9 +64,9 @@ class BandStructure2D(Surface):
         self.projection_accuracy = projection_accuracy
 
         self.brillouin_zone = self._get_brilloin_zone(self.supercell, zlim=zlim)
-
-        grid_cart_x = self.ebs.kpoints_cartesian_mesh[:, :, 0, 0]
-        grid_cart_y = self.ebs.kpoints_cartesian_mesh[:, :, 0, 1]
+        kpoints_cartesian_mesh = self.ebs.kpoints_cartesian_mesh
+        grid_cart_x = kpoints_cartesian_mesh[:, :, 0, 0]
+        grid_cart_y = kpoints_cartesian_mesh[:, :, 0, 1]
 
         self.band_surfaces = self._generate_band_structure_2d(grid_cart_x, grid_cart_y)
         self.surface = self._combine_band_surfaces()
@@ -78,11 +78,11 @@ class BandStructure2D(Surface):
 
     def _generate_band_structure_2d(self, grid_cart_x, grid_cart_y):
         surfaces = []
-        n_bands = self.ebs.bands_mesh.shape[3]
+        bands_mesh = self.ebs.get_property(property_name="bands", as_mesh=True)
+        n_bands = bands_mesh.shape[3]
         n_points = 0
         for iband in range(n_bands):
-            grid_z = self.ebs.bands_mesh[:, :, 0, iband, self.ispin]
-
+            grid_z = bands_mesh[:, :, 0, iband, self.ispin]
             surface = pv.StructuredGrid(grid_cart_x, grid_cart_y, grid_z)
             surface = surface.cast_to_unstructured_grid()
             surface = surface.extract_surface()
@@ -168,7 +168,8 @@ class BandStructure2D(Surface):
         final_vectors_Y = []
         final_vectors_Z = []
         for iband, isosurface in enumerate(self.band_surfaces):
-            XYZ_extended = copy.copy(self.ebs.kpoints_cartesian)
+            kpoints_cartesian = self.ebs.kpoints_cartesian
+            XYZ_extended = copy.copy(kpoints_cartesian)
             XYZ_extended[:, 2] = self.ebs.bands[:, iband, self.ispin]
 
             vectors_extended_X = vectors_array[:, iband, 0].copy()
@@ -261,11 +262,10 @@ class BandStructure2D(Surface):
         -------
         None.
         """
-
-        points = self.ebs.kpoints_cartesian
         final_scalars = []
         for iband, isosurface in enumerate(self.band_surfaces):
-            XYZ_extended = copy.copy(self.ebs.kpoints_cartesian)
+            kpoints_cartesian = self.ebs.kpoints_cartesian
+            XYZ_extended = copy.copy(kpoints_cartesian)
             XYZ_extended[:, 2] = self.ebs.bands[:, iband, self.ispin]
             scalars_extended = scalars_array[:, iband].copy()
             XYZ_transformed = XYZ_extended

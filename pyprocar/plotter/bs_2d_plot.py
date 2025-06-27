@@ -87,9 +87,9 @@ class BandStructure2DataHandler:
             else:
                 spins = [0, 1]
 
-        if self.initial_ebs.nspins == 2 and spins is None:
+        if self.initial_ebs.n_spins == 2 and spins is None:
             self.spin_pol = [0, 1]
-        elif self.initial_ebs.nspins == 2:
+        elif self.initial_ebs.n_spins == 2:
             self.spin_pol = spins
         else:
             self.spin_pol = [0]
@@ -97,9 +97,9 @@ class BandStructure2DataHandler:
         spd = []
         if mode == "parametric":
             if orbitals is None and self.ebs.projected is not None:
-                orbitals = np.arange(self.ebs.norbitals, dtype=int)
+                orbitals = np.arange(self.ebs.n_orbitals, dtype=int)
             if atoms is None and self.ebs.projected is not None:
-                atoms = np.arange(self.ebs.natoms, dtype=int)
+                atoms = np.arange(self.ebs.n_atoms, dtype=int)
 
             if self.ebs.is_non_collinear:
                 projected = self.ebs.ebs_sum(
@@ -118,7 +118,7 @@ class BandStructure2DataHandler:
             spd = np.array(spd).T
             spins = np.arange(spd.shape[2])
         else:
-            spd = np.zeros(shape=(self.ebs.nkpoints, len(bands_to_keep), len(spins)))
+            spd = np.zeros(shape=(self.ebs.n_kpoints, len(bands_to_keep), len(spins)))
         spd_spin = []
         if spin_texture:
             ebs = copy.deepcopy(self.ebs)
@@ -159,8 +159,8 @@ class BandStructure2DataHandler:
             raise "You must call process data function before get_surface"
         if property_name:
             current_emplemented_properties = [
-                "band_velocity",
-                "band_speed",
+                "bands_velocity",
+                "bands_speed",
                 "avg_inv_effective_mass",
             ]
             if property_name not in current_emplemented_properties:
@@ -182,21 +182,21 @@ class BandStructure2DataHandler:
                 zlim=self.config.energy_lim,
             )
             self.property_name = property_name
-            if self.property_name == "band_speed":
+            if self.property_name == "bands_speed":
                 band_structure_2D.project_band_speed(
-                    band_speed=ebs.fermi_speed[..., ispin]
+                    band_speed=ebs.get_property(property_name="bands_speed")[..., ispin]
                 )
                 if self.config.scalar_bar_config.get("title") is None:
                     self.config.scalar_bar_config["title"] = "Band Speed"
-            elif self.property_name == "band_velocity":
+            elif self.property_name == "bands_velocity":
                 band_structure_2D.project_band_velocity(
-                    band_velocity=ebs.fermi_velocity[..., ispin, :]
+                    band_velocity=ebs.get_property(property_name="bands_velocity", as_mesh=False)[..., ispin, :]
                 )
                 if self.config.scalar_bar_config.get("title") is None:
                     self.config.scalar_bar_config["title"] = "Band Velocity"
             elif self.property_name == "avg_inv_effective_mass":
                 band_structure_2D.project_avg_inv_effective_mass(
-                    avg_inv_effective_mass=ebs.avg_inv_effective_mass[..., ispin]
+                    avg_inv_effective_mass=ebs.get_property(property_name="avg_inv_effective_mass", as_mesh=False)[..., ispin]
                 )
                 if self.config.scalar_bar_config.get("title") is None:
                     self.config.scalar_bar_config["title"] = (
