@@ -12,6 +12,7 @@ import numpy as np
 import yaml
 
 from pyprocar.cfg import ConfigFactory, ConfigManager, PlotType
+from pyprocar.core.ebs import ElectronicBandStructure
 from pyprocar.io import Parser
 from pyprocar.plotter import FermiDataHandler, FermiVisualizer
 from pyprocar.utils import ROOT, data_utils, welcome
@@ -36,10 +37,9 @@ class FermiHandler:
         code: str,
         dirname: str = "",
         fermi: float = None,
-        repair: bool = False,
-        apply_symmetry: bool = True,
         ebs_interpolation_factor=1,
-        use_cache: bool = True,
+        use_cache: bool = False,
+        ebs_filename: str = "ebs.pkl",
         verbose: int = 1,
     ):
         """
@@ -74,51 +74,7 @@ class FermiHandler:
         user_logger.info("_" * 100)
 
         self.default_config = ConfigFactory.create_config(PlotType.FERMI_SURFACE_3D)
-
-        self.code = code
-        self.dirname = dirname
-        self.repair = repair
-        self.apply_symmetry = apply_symmetry
-
-        ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-        structure_pkl_filepath = os.path.join(dirname, "structure.pkl")
-
-        if not use_cache:
-            if os.path.exists(structure_pkl_filepath):
-                logger.info(
-                    f"Removing existing structure file: {structure_pkl_filepath}"
-                )
-                os.remove(structure_pkl_filepath)
-            if os.path.exists(ebs_pkl_filepath):
-                logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
-                os.remove(ebs_pkl_filepath)
-
-        if not os.path.exists(ebs_pkl_filepath):
-            logger.info(f"Parsing EBS from {dirname}")
-
-            parser = Parser(code=code, dirpath=dirname)
-            ebs = parser.ebs
-            structure = parser.structure
-
-            if structure.rotations is not None:
-                logger.info(
-                    f"Detected symmetry operations ({structure.rotations.shape})."
-                    " Applying to ebs to get full BZ"
-                )
-                ebs.ibz2fbz(structure.rotations)
-
-            data_utils.save_pickle(ebs, ebs_pkl_filepath)
-            data_utils.save_pickle(structure, structure_pkl_filepath)
-        else:
-            logger.info(
-                f"Loading EBS and Structure from cached Pickle files in {dirname}"
-            )
-
-            ebs = data_utils.load_pickle(ebs_pkl_filepath)
-            structure = data_utils.load_pickle(structure_pkl_filepath)
-
-        self.ebs = ebs
-        self.structure = structure
+        self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
         if fermi is None:
             self.e_fermi = self.ebs.efermi
