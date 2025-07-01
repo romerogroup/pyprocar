@@ -5,8 +5,10 @@ from typing import Dict
 import numpy as np
 from scipy import ndimage
 from scipy.interpolate import RegularGridInterpolator, griddata
+from scipy.signal import find_peaks
 
 logger = logging.getLogger(__name__)
+
 
 
 def get_angle(v, w, radians=False):
@@ -363,341 +365,6 @@ def fft_interpolate_mesh(function, interpolation_factor=2):
     return interpolated
 
 
-def pad_scalar_3d_mesh(scalar_mesh, padding=10, add_1_on_wrap=False):
-    """
-    Pad a 3D scalar mesh with wrapped boundary conditions.
-
-    Parameters
-    ----------
-    scalar_mesh : np.ndarray
-        Input mesh with shape (n_kx, n_ky, n_kz, ...)
-    padding : int
-        Number of padding cells on each side
-    add_1_on_wrap : bool
-        If True, add/subtract 1 when wrapping (for kpoints coordinates)
-
-    Returns
-    -------
-    np.ndarray
-        Padded mesh with shape (n_kx + 2*padding, n_ky + 2*padding, n_kz + 2*padding, ...)
-    """
-    n_kx, n_ky, n_kz = scalar_mesh.shape[:3]
-    padded_scalar_mesh = np.zeros(
-        shape=(
-            n_kx + 2 * padding,
-            n_ky + 2 * padding,
-            n_kz + 2 * padding,
-            *scalar_mesh.shape[3:],
-        )
-    )
-
-    # Place original mesh in the center
-    padded_scalar_mesh[
-        padding : padding + n_kx,
-        padding : padding + n_ky,
-        padding : padding + n_kz,
-        ...,
-    ] = scalar_mesh
-
-    if add_1_on_wrap:
-        # Define wrap regions and their coordinate adjustments
-        # Each tuple: (padded_slice, source_slice, coord_adjustments)
-        # coord_adjustments: [dx, dy, dz] where +1 means add 1, -1 means subtract 1, 0 means no change
-
-        regions = []
-
-        # 8 Corners
-        corners = [
-            # (padded_region, source_region, [dx, dy, dz])
-            (
-                np.s_[:padding, :padding, :padding],
-                np.s_[-padding:, -padding:, -padding:],
-                [-1, -1, -1],
-            ),
-            (
-                np.s_[-padding:, :padding, :padding],
-                np.s_[:padding, -padding:, -padding:],
-                [+1, -1, -1],
-            ),
-            (
-                np.s_[:padding, -padding:, :padding],
-                np.s_[-padding:, :padding, -padding:],
-                [-1, +1, -1],
-            ),
-            (
-                np.s_[-padding:, -padding:, :padding],
-                np.s_[:padding, :padding, -padding:],
-                [+1, +1, -1],
-            ),
-            (
-                np.s_[:padding, :padding, -padding:],
-                np.s_[-padding:, -padding:, :padding],
-                [-1, -1, +1],
-            ),
-            (
-                np.s_[-padding:, :padding, -padding:],
-                np.s_[:padding, -padding:, :padding],
-                [+1, -1, +1],
-            ),
-            (
-                np.s_[:padding, -padding:, -padding:],
-                np.s_[-padding:, :padding, :padding],
-                [-1, +1, +1],
-            ),
-            (
-                np.s_[-padding:, -padding:, -padding:],
-                np.s_[:padding, :padding, :padding],
-                [+1, +1, +1],
-            ),
-        ]
-
-        # 12 Edges (along each axis)
-        edges = [
-            # Edges along x-axis (y and z wrap)
-            (
-                np.s_[padding : padding + n_kx, :padding, :padding],
-                np.s_[:, -padding:, -padding:],
-                [0, -1, -1],
-            ),
-            (
-                np.s_[padding : padding + n_kx, -padding:, :padding],
-                np.s_[:, :padding, -padding:],
-                [0, +1, -1],
-            ),
-            (
-                np.s_[padding : padding + n_kx, :padding, -padding:],
-                np.s_[:, -padding:, :padding],
-                [0, -1, +1],
-            ),
-            (
-                np.s_[padding : padding + n_kx, -padding:, -padding:],
-                np.s_[:, :padding, :padding],
-                [0, +1, +1],
-            ),
-            # Edges along y-axis (x and z wrap)
-            (
-                np.s_[:padding, padding : padding + n_ky, :padding],
-                np.s_[-padding:, :, -padding:],
-                [-1, 0, -1],
-            ),
-            (
-                np.s_[-padding:, padding : padding + n_ky, :padding],
-                np.s_[:padding, :, -padding:],
-                [+1, 0, -1],
-            ),
-            (
-                np.s_[:padding, padding : padding + n_ky, -padding:],
-                np.s_[-padding:, :, :padding],
-                [-1, 0, +1],
-            ),
-            (
-                np.s_[-padding:, padding : padding + n_ky, -padding:],
-                np.s_[:padding, :, :padding],
-                [+1, 0, +1],
-            ),
-            # Edges along z-axis (x and y wrap)
-            (
-                np.s_[:padding, :padding, padding : padding + n_kz],
-                np.s_[-padding:, -padding:, :],
-                [-1, -1, 0],
-            ),
-            (
-                np.s_[-padding:, :padding, padding : padding + n_kz],
-                np.s_[:padding, -padding:, :],
-                [+1, -1, 0],
-            ),
-            (
-                np.s_[:padding, -padding:, padding : padding + n_kz],
-                np.s_[-padding:, :padding, :],
-                [-1, +1, 0],
-            ),
-            (
-                np.s_[-padding:, -padding:, padding : padding + n_kz],
-                np.s_[:padding, :padding, :],
-                [+1, +1, 0],
-            ),
-        ]
-
-        # 6 Faces
-        faces = [
-            # x faces
-            (
-                np.s_[:padding, padding : padding + n_ky, padding : padding + n_kz],
-                np.s_[-padding:, :, :],
-                [-1, 0, 0],
-            ),
-            (
-                np.s_[-padding:, padding : padding + n_ky, padding : padding + n_kz],
-                np.s_[:padding, :, :],
-                [+1, 0, 0],
-            ),
-            # y faces
-            (
-                np.s_[padding : padding + n_kx, :padding, padding : padding + n_kz],
-                np.s_[:, -padding:, :],
-                [0, -1, 0],
-            ),
-            (
-                np.s_[padding : padding + n_kx, -padding:, padding : padding + n_kz],
-                np.s_[:, :padding, :],
-                [0, +1, 0],
-            ),
-            # z faces
-            (
-                np.s_[padding : padding + n_kx, padding : padding + n_ky, :padding],
-                np.s_[:, :, -padding:],
-                [0, 0, -1],
-            ),
-            (
-                np.s_[padding : padding + n_kx, padding : padding + n_ky, -padding:],
-                np.s_[:, :, :padding],
-                [0, 0, +1],
-            ),
-        ]
-
-        # Apply all regions
-        for padded_slice, source_slice, coord_adj in corners + edges + faces:
-            source_data = scalar_mesh[source_slice]
-
-            # Apply coordinate adjustments for first 3 dimensions (assuming they are coordinates)
-            if source_data.shape[-1] >= 3:
-                for i in range(3):
-                    if coord_adj[i] != 0:
-                        padded_scalar_mesh[padded_slice + (..., i)] = (
-                            source_data[..., i] + coord_adj[i]
-                        )
-                    else:
-                        padded_scalar_mesh[padded_slice + (..., i)] = source_data[
-                            ..., i
-                        ]
-
-                # Copy any additional dimensions unchanged
-                if source_data.shape[-1] > 3:
-                    padded_scalar_mesh[padded_slice + (..., slice(3, None))] = (
-                        source_data[..., 3:]
-                    )
-            else:
-                # If less than 3 coordinate dimensions, just copy the data
-                padded_scalar_mesh[padded_slice] = source_data
-
-    else:
-        # Regular wrapping without +1/-1 adjustments - this can also be simplified
-        wrap_regions = [
-            # 8 Corners
-            (
-                np.s_[:padding, :padding, :padding],
-                np.s_[-padding:, -padding:, -padding:],
-            ),
-            (
-                np.s_[-padding:, :padding, :padding],
-                np.s_[:padding, -padding:, -padding:],
-            ),
-            (
-                np.s_[:padding, -padding:, :padding],
-                np.s_[-padding:, :padding, -padding:],
-            ),
-            (
-                np.s_[-padding:, -padding:, :padding],
-                np.s_[:padding, :padding, -padding:],
-            ),
-            (
-                np.s_[:padding, :padding, -padding:],
-                np.s_[-padding:, -padding:, :padding],
-            ),
-            (
-                np.s_[-padding:, :padding, -padding:],
-                np.s_[:padding, -padding:, :padding],
-            ),
-            (
-                np.s_[:padding, -padding:, -padding:],
-                np.s_[-padding:, :padding, :padding],
-            ),
-            (
-                np.s_[-padding:, -padding:, -padding:],
-                np.s_[:padding, :padding, :padding],
-            ),
-            # 12 Edges
-            (
-                np.s_[padding : padding + n_kx, :padding, :padding],
-                np.s_[:, -padding:, -padding:],
-            ),
-            (
-                np.s_[padding : padding + n_kx, -padding:, :padding],
-                np.s_[:, :padding, -padding:],
-            ),
-            (
-                np.s_[padding : padding + n_kx, :padding, -padding:],
-                np.s_[:, -padding:, :padding],
-            ),
-            (
-                np.s_[padding : padding + n_kx, -padding:, -padding:],
-                np.s_[:, :padding, :padding],
-            ),
-            (
-                np.s_[:padding, padding : padding + n_ky, :padding],
-                np.s_[-padding:, :, -padding:],
-            ),
-            (
-                np.s_[-padding:, padding : padding + n_ky, :padding],
-                np.s_[:padding, :, -padding:],
-            ),
-            (
-                np.s_[:padding, padding : padding + n_ky, -padding:],
-                np.s_[-padding:, :, :padding],
-            ),
-            (
-                np.s_[-padding:, padding : padding + n_ky, -padding:],
-                np.s_[:padding, :, :padding],
-            ),
-            (
-                np.s_[:padding, :padding, padding : padding + n_kz],
-                np.s_[-padding:, -padding:, :],
-            ),
-            (
-                np.s_[-padding:, :padding, padding : padding + n_kz],
-                np.s_[:padding, -padding:, :],
-            ),
-            (
-                np.s_[:padding, -padding:, padding : padding + n_kz],
-                np.s_[-padding:, :padding, :],
-            ),
-            (
-                np.s_[-padding:, -padding:, padding : padding + n_kz],
-                np.s_[:padding, :padding, :],
-            ),
-            # 6 Faces
-            (
-                np.s_[:padding, padding : padding + n_ky, padding : padding + n_kz],
-                np.s_[-padding:, :, :],
-            ),
-            (
-                np.s_[-padding:, padding : padding + n_ky, padding : padding + n_kz],
-                np.s_[:padding, :, :],
-            ),
-            (
-                np.s_[padding : padding + n_kx, :padding, padding : padding + n_kz],
-                np.s_[:, -padding:, :],
-            ),
-            (
-                np.s_[padding : padding + n_kx, -padding:, padding : padding + n_kz],
-                np.s_[:, :padding, :],
-            ),
-            (
-                np.s_[padding : padding + n_kx, padding : padding + n_ky, :padding],
-                np.s_[:, :, -padding:],
-            ),
-            (
-                np.s_[padding : padding + n_kx, padding : padding + n_ky, -padding:],
-                np.s_[:, :, :padding],
-            ),
-        ]
-
-        for padded_slice, source_slice in wrap_regions:
-            padded_scalar_mesh[padded_slice] = scalar_mesh[source_slice]
-
-    return padded_scalar_mesh
-
-
 def calculate_central_differences_on_meshgrid_axis(scalar_mesh, axis):
     """Calculates the scalar differences over the
     k mesh grid using central differences
@@ -906,62 +573,19 @@ def calculate_3d_mesh_scalar_integral(scalar_mesh, reciprocal_lattice):
     return integral
 
 
-def interpolate_plane(source_2d_points, target_2d_points, data_on_plane, interpolation_method="linear"):
-    if data_on_plane is None:
-        return None
-    
-    original_shape = data_on_plane.shape
-    n_k, other_dims = original_shape[0], original_shape[1:]
-    data_flat = data_on_plane.reshape(n_k, -1)
-    
-    n_target = target_2d_points.shape[0]
-    interpolated_flat = np.zeros((n_target, data_flat.shape[1]))
-    
-    # Interpolate each feature column
-    for i in range(data_flat.shape[1]):
-        interpolated_flat[:, i] = griddata(
-            source_2d_points,
-            data_flat[:, i],
-            target_2d_points,
-            method=interpolation_method,
-        )
-    
-    # Handle NaNs from interpolating outside the convex hull by filling
-    nan_mask = np.isnan(interpolated_flat[:, 0])
-    if np.any(nan_mask):
-        nan_indices = np.where(nan_mask)[0]
-        for i in range(data_flat.shape[1]):
-            fill_values = griddata(
-                source_2d_points,
-                data_flat[:, i],
-                target_2d_points[nan_indices],
-                method="nearest",
-            )
-            interpolated_flat[nan_indices, i] = fill_values
-    
-    return interpolated_flat.reshape((n_target,) + other_dims)
-    
-def find_points_near_plane(points, normal, origin, plane_tol, return_indices=False):
-    if origin is None:
-        # Use center of kpoint mesh as origin
-        origin = np.array([0,0,0])
 
-    # Normalize the normal vector
-    normal = normal / np.linalg.norm(normal)
 
-    # Calculate distance from each kpoint to the plane
-    # Distance = |(k - origin) · normal|
-    points_shifted = points - origin
-    distances = np.abs(np.dot(points_shifted, normal))
 
-    # Find kpoints within tolerance of the plane
-    i_points_on_plane = np.where(distances <= plane_tol)[0]
+def unique_with_tolerance(arr, tolerance=1e-6):
+    """Find unique values with a tolerance for floating point comparison"""
+    sorted_indices = np.argsort(arr)
+    sorted_arr = arr[sorted_indices]
     
-    if return_indices:
-        return i_points_on_plane
-    else:
-        return points[i_points_on_plane]
-
+    # Find where adjacent values differ by more than tolerance
+    diff_mask = np.abs(np.diff(sorted_arr)) > tolerance
+    unique_mask = np.concatenate([[True], diff_mask])
+    
+    return sorted_arr[unique_mask]
         
 def project_points_to_plane(points: np.ndarray,
                             normal: np.ndarray, 
@@ -1157,7 +781,7 @@ def ravel_array(mesh_grid):
     return mesh_grid
 
 
-def array_to_mesh(array, nkx, nky, nkz, order="C"):
+def array_to_mesh(array, nkx, nky, nkz, order="F"):
     """
     Converts a list to a mesh that corresponds to ebs.kpoints
     [n_kx*n_ky*n_kz,...]->[n_kx,n_ky,n_kz,...]. Make sure array is sorted by lexisort
@@ -1198,7 +822,7 @@ def array_to_mesh(array, nkx, nky, nkz, order="C"):
     return scalar_grid
 
 
-def mesh_to_array(mesh, order="C"):
+def mesh_to_array(mesh, order="F"):
     """
     Converts a mesh to a list that corresponds to ebs.kpoints
     [n_kx,n_ky,n_kz,...]->[n_kx*n_ky*n_kz,...]
@@ -1220,3 +844,29 @@ def mesh_to_array(mesh, order="C"):
     prop_shape = (nkx * nky * nkz,) + mesh.shape[3:]
     array = mesh.reshape(prop_shape, order=order)
     return array
+
+
+def get_padding_dims(n_coords, padding):
+    if n_coords == 1:
+        return 1
+    else:
+        return n_coords + 2 * padding
+    
+def get_coord_diffs(coords):
+    if len(coords) == 1:
+        return 0
+    else:
+        return np.diff(coords)
+    
+    
+def get_grid_dims(points, num_bins=1000, height=1, coord_tol=0.01):
+    grid = np.zeros(3, dtype=int)
+    
+    for icoord in range(3):
+        coords = points[:, icoord]
+        coord_min, coord_max = np.min(coords), np.max(coords)
+        hist, bin_edges = np.histogram(coords, bins=num_bins, range=(coord_min-coord_tol, coord_max+coord_tol))
+
+        peaks, _ = find_peaks(hist, height=height)
+        grid[icoord] = len(peaks)
+    return grid
