@@ -12,15 +12,17 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pyvista as pv
 from matplotlib.collections import LineCollection
 from matplotlib.ticker import MultipleLocator
+from pyvista import ColorLike
 
-from pyprocar.core import ElectronicBandStructurePath
+from pyprocar.core import BandStructure2D, ElectronicBandStructurePath
 
 logger = logging.getLogger(__name__)
 user_logger = logging.getLogger("user")
 
-class BandStructurePlot:
+class BandStructurePlotter:
     """
     A plotter class for band structure using matplotlib.
 
@@ -39,7 +41,6 @@ class BandStructurePlot:
         self.ax = ax
         if self.ax is None:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
-
 
         self.ebs_store = {}
         self.kpath=None
@@ -252,3 +253,98 @@ class BandStructurePlot:
             String for the title, by default "Band Structure"
         """
         self.ax.set_title(label=label, **kwargs)
+
+
+
+
+
+class BandStructure2DPlotter(pv.Plotter):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._meshes = []
+        
+    def add_brillouin_zone(
+        self,
+        brillouin_zone: pv.PolyData = None,
+        style: str = "wireframe",
+        line_width: float = 2.0,
+        color: ColorLike = "black",
+        opacity: float = 1.0,
+    ):
+        self.add_mesh(
+            brillouin_zone,
+            style=style,
+            line_width=line_width,
+            color=color,
+            opacity=opacity,
+        )
+        
+    def add_surface(
+        self,
+        bs2d: BandStructure2D,
+        normalize: bool = False,
+        add_texture_args: dict = None,
+        add_active_vectors: bool = False,
+        show_scalar_bar: bool = True,
+        add_mesh_args: dict = None,
+        **kwargs,
+    ):
+        logger.info(f"____Adding Surface to Plotter____")
+
+        if add_texture_args is None:
+            add_texture_args = {}
+        add_texture_args["name"] = add_texture_args.get("name", "vectors")
+
+        if add_mesh_args is None:
+            add_mesh_args = {}
+            
+        
+        self.add_mesh(bs2d, **add_mesh_args)
+
+        # if show_scalar_bar:
+        #     active_scalar_name = fermi_surface.active_scalars_name
+        #     if "norm" in active_scalar_name:
+        #         active_scalar_name = active_scalar_name.replace("-norm", "")
+        #     add_mesh_args["show_scalar_bar"] = add_mesh_args.get(
+        #         "show_scalar_bar", True
+        #     )
+        #     add_mesh_args["scalar_bar_args"] = add_mesh_args.get("scalar_bar_args", {})
+        #     add_mesh_args["scalar_bar_args"]["title"] = add_mesh_args.get(
+        #         "scalar_bar_args", {}
+        #     ).get("title", active_scalar_name)
+
+        # add_mesh_args["cmap"] = add_mesh_args.get("cmap", "plasma")
+        # add_mesh_args["clim"] = add_mesh_args.get("clim", None)
+        # add_mesh_args["name"] = add_mesh_args.get("name", "surface")
+        # add_mesh_args.update(kwargs)
+
+        # clim = add_mesh_args.get("clim", None)
+        # cmap = add_mesh_args.get("cmap", "plasma")
+
+        # if normalize:
+        #     scalars = normalize_to_range(fermi_surface.active_scalars, clim=clim)
+        #     add_mesh_args["scalars"] = scalars
+        # add_mesh_args["scalars"] = add_mesh_args.get("scalars", None)
+
+        # self.add_mesh(fermi_surface, **add_mesh_args)
+
+        # if add_active_vectors:
+        #     # aligning the texture colors with the surface colors
+        #     add_texture_args["cmap"] = add_texture_args.get("cmap", cmap)
+        #     add_texture_args["clim"] = add_texture_args.get("clim", clim)
+
+        #     self.add_texture(fermi_surface, **add_texture_args)
+
+    def add_bounds(self, bs2d: BandStructure2D, ulim=None, vlim=None, elim=None, elim_offset=1, **kwargs):
+        current_bounds = bs2d.bounds
+        if ulim is None:
+            ulim = (current_bounds[0], current_bounds[1])
+        if vlim is None:
+            vlim = (current_bounds[2], current_bounds[3])
+        if elim is None:
+            elim = (bs2d.ebs.efermi - elim_offset, bs2d.ebs.efermi + elim_offset)
+        
+        bounds = (*ulim, *vlim, *elim)
+            
+        self.show_bounds(bs2d, bounds=bounds, **kwargs)
+        
