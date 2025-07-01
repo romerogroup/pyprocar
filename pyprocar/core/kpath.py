@@ -11,7 +11,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pyvista as pv
 
-from pyprocar.core import BrillouinZone
+from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.utils import mathematics
 
 logger = logging.getLogger(__name__)
