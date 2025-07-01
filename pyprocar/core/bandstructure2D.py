@@ -4,11 +4,12 @@ __email__ = "petavazohi@mail.wvu.edu, lllang@mix.wvu.edu"
 __date__ = "March 31, 2020"
 
 import copy
+import logging
 import math
 import random
 import sys
 from itertools import product
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pyvista as pv
@@ -18,15 +19,17 @@ from matplotlib import colors as mpcolors
 from scipy.spatial import KDTree
 
 from pyprocar.core.brillouin_zone import BrillouinZone2D
-from pyprocar.core.surface import Surface
+from pyprocar.core.ebs import ElectronicBandStructurePlane
 
 np.set_printoptions(threshold=sys.maxsize)
+
+logger = logging.getLogger(__name__)
 
 # TODO: method to reduce number of points for interpolation need to be modified since the tolerance on the space
 # is not lonmg soley reciprocal space, but energy and reciprocal space
 
 
-class BandStructure2D(Surface):
+class BandStructure2D(pv.PolyData):
     """
     The object is used to store and manapulate a 3d fermi surface.
 
@@ -45,341 +48,149 @@ class BandStructure2D(Surface):
         to assist in the calculation of the isosurface.
     """
 
-    def __init__(
-        self,
-        ebs,
-        ispin,
-        interpolation_factor: int = 1,
-        projection_accuracy: str = "Normal",
-        supercell: List[int] = [1, 1, 1],
-        zlim=None,
-    ):
+    def __init__(self, ebs: ElectronicBandStructurePlane):
+        super().__init__()
+        self._ebs = copy.copy(ebs)
 
-        self.ebs = copy.copy(ebs)
-        self.ispin = ispin
-
-        self.n_bands = self.ebs.bands.shape[1]
-        self.supercell = np.array(supercell)
-        self.interpolation_factor = interpolation_factor
-        self.projection_accuracy = projection_accuracy
-
-        self.brillouin_zone = self._get_brilloin_zone(self.supercell, zlim=zlim)
-        kpoints_cartesian_mesh = self.ebs.kpoints_cartesian_mesh
-        grid_cart_x = kpoints_cartesian_mesh[:, :, 0, 0]
-        grid_cart_y = kpoints_cartesian_mesh[:, :, 0, 1]
-
-        self.band_surfaces = self._generate_band_structure_2d(grid_cart_x, grid_cart_y)
-        self.surface = self._combine_band_surfaces()
-
+        
+         # Initialize storage for surface data
+        self.band_spin_surface_map = {}
+        self.surface_band_spin_map = {}
+        self.band_spin_mask = {}
+        
+        self.transform_to_cart = np.eye(4)
+        self.transform_to_frac = np.eye(4)
+        self.transform_to_cart[:3, :3] = self.ebs.transformation_matrix
+        self.transform_to_frac[:3, :3] = np.linalg.inv(
+            self.ebs.reciprocal_lattice.T
+        )
+        
         # Initialize the Fermi Surface
-        super().__init__(verts=self.surface.points, faces=self.surface.faces)
-        self.point_data["band_index"] = self.surface.point_data["band_index"]
+        self._generate_band_surfaces()
+        
+        self.transform(
+            self.transform_to_cart, transform_all_input_vectors=False, inplace=True
+        )
         return None
 
-    def _generate_band_structure_2d(self, grid_cart_x, grid_cart_y):
-        surfaces = []
-        bands_mesh = self.ebs.get_property(property_name="bands", as_mesh=True)
-        n_bands = bands_mesh.shape[3]
-        n_points = 0
-        for iband in range(n_bands):
-            grid_z = bands_mesh[:, :, 0, iband, self.ispin]
-            surface = pv.StructuredGrid(grid_cart_x, grid_cart_y, grid_z)
-            surface = surface.cast_to_unstructured_grid()
-            surface = surface.extract_surface()
-
-            surface = Surface(verts=surface.points, faces=surface.faces)
-            n_points += surface.points.shape[0]
-
-            band_index_list = [iband] * surface.points.shape[0]
-            surface.point_data["band_index"] = np.array(band_index_list)
-            surfaces.append(surface)
-
-        return surfaces
-
-    def _combine_band_surfaces(self):
-        band_surfaces = copy.deepcopy(self.band_surfaces)
-
-        band_indices = []
-        surface = None
-        for i_band, band_surface in enumerate(band_surfaces):
-            # The points are prepended to surface.points,
-            # so at the end we need to reverse this list
-            if i_band == 0:
-                surface = band_surface
-            else:
-                surface.merge(band_surface, merge_points=False, inplace=True)
-
-            band_index_list = [i_band] * band_surface.points.shape[0]
-            band_indices.extend(band_index_list)
-
-        band_indices.reverse()
-        surface.point_data["band_index"] = np.array(band_indices)
+    @property
+    def ebs(self):
+        return self._ebs
+    
+    def _generate_band_surface(self, scalars, order="F"):
+        logger.info(f"Generating band surface for {scalars.shape} scalars")
+        scalar_grid = self.ebs.scalars_to_mesh(scalars, order=order)
+        logger.debug(f"Scalar grid shape: {scalar_grid.shape}")
+        surface = pv.StructuredGrid(self.ebs.grid_u, self.ebs.grid_v, scalar_grid)
+        surface = surface.cast_to_unstructured_grid()
+        surface = surface.extract_surface()
         return surface
+        
+    def _generate_band_surfaces(self, order="F"):
+        
+        band_surfaces = []
+        n_kpoints, n_bands, n_spin_channels = self.ebs.bands.shape
+        for iband in range(n_bands):
+            for ispin in range(n_spin_channels):
+                band_scalars = self.ebs.bands[:, iband, ispin]
+                try:
+                    surface = self._generate_band_surface(band_scalars, order)
+                    if surface.points.shape[0] > 0:
+                        logger.debug(
+                            f"Surface for band {iband}, spin {ispin} has {surface.points.shape[0]} points"
+                        )
+                        band_surfaces.append(surface)
+                        surface_idx = len(band_surfaces) - 1
 
-    @staticmethod
-    def _keep_points_near_subset(points, subset, max_distance=0.3):
+                        surface_idx = len(band_surfaces) - 1
+                        self.band_spin_surface_map[(iband, ispin)] = surface_idx
+                        self.surface_band_spin_map[surface_idx] = (iband, ispin)
+                        
+                except Exception as e:
+                    logger.exception(
+                        f"Failed to generate surface for band {iband}, spin {ispin}: {e}"
+                    )
+                    continue
+        
+        if band_surfaces:
+            logger.info(f"___Generated {len(band_surfaces)} band surfaces___")
+            # Combine all surfaces
+            combined_surface = self._merge_surfaces(band_surfaces)
+            
+            self.points = combined_surface.points
+            self.faces = combined_surface.faces
+
+            for key in combined_surface.point_data.keys():
+                self.point_data[key] = combined_surface.point_data[key]
+            for key in combined_surface.cell_data.keys():
+                self.cell_data[key] = combined_surface.cell_data[key]
+            
+            self.field_data["band_spin_surface_map"] = self.band_spin_surface_map
+            self.field_data["surface_band_spin_map"] = self.surface_band_spin_map
+            
+            self.set_active_scalars("spin_band_index")
+            
+            self.point_data.pop("vtkOriginalPointIds", None)
+            self.cell_data.pop("vtkOriginalCellIds", None)
+            
+    def _merge_surfaces(self, surfaces: List[pv.PolyData]) -> pv.PolyData:
         """
-        Keep only the points that are within a specified distance of any point in the subset.
+        Merge multiple Fermi surfaces into a single surface with band and spin information.
+
+        This method combines multiple PyVista PolyData objects representing different
+        Fermi surfaces (from different bands and spins) into a single PolyData object.
+        It adds point data arrays to track which points belong to which band and spin.
 
         Parameters
         ----------
-        points : np.        Array of shape (n, 3) containing all points to be filtered.
-        subset : np.ndarray
-            Array of shape (m, 3) containing the subset of points to compare against.
-        max_distance : float
-            The maximum distance for a point to be considered "
-        Returns
-        -------
-        np.ndarray
-            Array of shape (k, 3) containing only the points that are near the subset,
-            where k <= n.
-        """
-
-        # Create a KDTree for efficient nearest neighbor search
-        tree = KDTree(subset)
-
-        # Find the distance to the
-        distances, _ = tree.query(points, k=3)
-
-        # Create a boolean mask for points within the max_distance
-        mask = np.ones(distances.shape[0], dtype=bool)
-        n_neighbors = distances.shape[1]
-        for i_neighbor in range(n_neighbors):
-            mask &= distances[:, i_neighbor] <= max_distance
-
-        # Return only the points that satisfy the distance criterion
-        return mask
-
-    def _create_vector_texture(
-        self, vectors_array: np.ndarray, vectors_name: str = "vector"
-    ):
-        """
-        This method will map a list of vector to the 3d fermi surface mesh
-
-        Parameters
-        ----------
-        vectors_array : np.ndarray
-            The vector array corresponding to the kpoints
-        vectors_name : str, optional
-            The name of the vectors, by default "vector"
-        """
-
-        final_vectors_X = []
-        final_vectors_Y = []
-        final_vectors_Z = []
-        for iband, isosurface in enumerate(self.band_surfaces):
-            kpoints_cartesian = self.ebs.kpoints_cartesian
-            XYZ_extended = copy.copy(kpoints_cartesian)
-            XYZ_extended[:, 2] = self.ebs.bands[:, iband, self.ispin]
-
-            vectors_extended_X = vectors_array[:, iband, 0].copy()
-            vectors_extended_Y = vectors_array[:, iband, 1].copy()
-            vectors_extended_Z = vectors_array[:, iband, 2].copy()
-
-            XYZ_transformed = XYZ_extended
-
-            near_isosurface_point = self._keep_points_near_subset(
-                XYZ_transformed, isosurface.points
-            )
-            XYZ_transformed = XYZ_transformed[near_isosurface_point]
-            vectors_extended_X = vectors_extended_X[near_isosurface_point]
-            vectors_extended_Y = vectors_extended_Y[near_isosurface_point]
-            vectors_extended_Z = vectors_extended_Z[near_isosurface_point]
-
-            if self.projection_accuracy.lower()[0] == "n":
-
-                vectors_X = interpolate.griddata(
-                    XYZ_transformed,
-                    vectors_extended_X,
-                    isosurface.points,
-                    method="nearest",
-                )
-                vectors_Y = interpolate.griddata(
-                    XYZ_transformed,
-                    vectors_extended_Y,
-                    isosurface.points,
-                    method="nearest",
-                )
-                vectors_Z = interpolate.griddata(
-                    XYZ_transformed,
-                    vectors_extended_Z,
-                    isosurface.points,
-                    method="nearest",
-                )
-
-            elif self.projection_accuracy.lower()[0] == "h":
-
-                vectors_X = interpolate.griddata(
-                    XYZ_transformed,
-                    vectors_extended_X,
-                    isosurface.points,
-                    method="linear",
-                )
-                vectors_Y = interpolate.griddata(
-                    XYZ_transformed,
-                    vectors_extended_Y,
-                    isosurface.points,
-                    method="linear",
-                )
-                vectors_Z = interpolate.griddata(
-                    XYZ_transformed,
-                    vectors_extended_Z,
-                    isosurface.points,
-                    method="linear",
-                )
-
-            # Again must flip here because when the values are stored in cell_data,
-            # the values are entered preprended to the cell_data array
-            # and are stored in the opposite order of what you would expect
-            vectors_X = np.flip(vectors_X, axis=0)
-            vectors_Y = np.flip(vectors_Y, axis=0)
-            vectors_Z = np.flip(vectors_Z, axis=0)
-            final_vectors_X.extend(vectors_X)
-            final_vectors_Y.extend(vectors_Y)
-            final_vectors_Z.extend(vectors_Z)
-
-        final_vectors_X.reverse()
-        final_vectors_Y.reverse()
-        final_vectors_Z.reverse()
-
-        self.set_vectors(
-            final_vectors_X, final_vectors_Y, final_vectors_Z, vectors_name=vectors_name
-        )
-        return None
-
-    def _project_color(self, scalars_array: np.ndarray, scalar_name: str = "scalars"):
-        """
-        Projects the scalars to the 3d fermi surface.
-
-        Parameters
-        ----------
-        scalars_array : np.array size[len(kpoints),len(self.bands)]
-            the length of the self.bands is the number of bands with a fermi iso surface
-        scalar_name :str, optional
-            The name of the scalars, by default "scalars"
+        surfaces : List[pv.PolyData]
+            List of PyVista PolyData objects representing Fermi surfaces for different
+            bands and spins.
 
         Returns
         -------
-        None.
-        """
-        final_scalars = []
-        for iband, isosurface in enumerate(self.band_surfaces):
-            kpoints_cartesian = self.ebs.kpoints_cartesian
-            XYZ_extended = copy.copy(kpoints_cartesian)
-            XYZ_extended[:, 2] = self.ebs.bands[:, iband, self.ispin]
-            scalars_extended = scalars_array[:, iband].copy()
-            XYZ_transformed = XYZ_extended
+        pv.PolyData
+            A merged PyVista PolyData object containing all surfaces with added
+            point data arrays 'spin_index' and 'spin_band_index' to identify the
+            original band and spin of each point.
 
-            near_isosurface_point = self._keep_points_near_subset(
-                XYZ_transformed, isosurface.centers
+        """
+        if not surfaces:
+            return pv.PolyData()
+
+        # Add band and spin indices to each surface before merging
+        spin_band_index_array = np.empty(0, dtype=np.int32)
+        spin_index_array = np.empty(0, dtype=np.int32)
+        for surface_idx, surface in enumerate(surfaces):
+            iband, ispin = self.surface_band_spin_map[surface_idx]
+            n_points = surface.points.shape[0]
+
+            # spin index identifier
+            current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
+            spin_index_array = np.insert(
+                spin_index_array, 0, current_spin_index_array, axis=0
             )
-            XYZ_transformed = XYZ_transformed[near_isosurface_point]
-            scalars_extended = scalars_extended[near_isosurface_point]
 
-            if self.projection_accuracy.lower()[0] == "n":
-                colors = interpolate.griddata(
-                    XYZ_transformed,
-                    scalars_extended,
-                    isosurface.centers,
-                    method="nearest",
-                )
-            elif self.projection_accuracy.lower()[0] == "h":
-                colors = interpolate.griddata(
-                    XYZ_transformed,
-                    scalars_extended,
-                    isosurface.centers,
-                    method="linear",
-                )
-            # Again must flip here because when the values are stored in cell_data,
-            # the values are entered preprended to the cell_data array
-            # and are stored in the opposite order of what you would expect
-            colors = np.flip(colors, axis=0)
-            final_scalars.extend(colors)
-        final_scalars.reverse()
+            # spin band index identifier
+            current_spin_band_index_array = np.full(
+                n_points, surface_idx, dtype=np.int32
+            )
+            spin_band_index_array = np.insert(
+                spin_band_index_array, 0, current_spin_band_index_array, axis=0
+            )
+            
+        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
+            mask = spin_band_index_array == surface_idx
+            self.band_spin_mask[(iband, ispin)] = mask
 
-        self.set_scalars(final_scalars, scalar_name=scalar_name)
-        return None
+        merged = surfaces[0]
+        for surface in surfaces[1:]:
+            merged = merged.merge(surface, merge_points=False)
 
-    def project_atomic_projections(self, spd):
-        """
-        Method to calculate the atomic projections of the surface.
-        """
-        scalars_array = []
-        count = 0
-        for iband in range(self.n_bands):
-            count += 1
-            scalars_array.append(spd[:, iband])
-        scalars_array = np.vstack(scalars_array).T
+        merged.point_data["spin_index"] = spin_index_array
+        merged.point_data["spin_band_index"] = spin_band_index_array
 
-        self._project_color(scalars_array=scalars_array, scalar_name="scalars")
-
-    def project_spin_texture_atomic_projections(self, spd_spin):
-        """
-        Method to calculate atomic spin texture projections of the surface.
-        """
-        vectors_array = spd_spin
-        self._create_vector_texture(vectors_array=vectors_array, vectors_name="spin")
-
-    def project_band_velocity(self, band_velocity):
-        """
-        Method to calculate band velocity of the surface.
-        """
-        vectors_array = band_velocity
-        self._create_vector_texture(
-            vectors_array=vectors_array, vectors_name="Band Velocity Vector"
-        )
-
-    def project_band_speed(self, band_speed):
-        """
-        Method to calculate the fermi speed of the surface.
-        """
-        scalars_array = []
-        count = 0
-        for iband in range(self.n_bands):
-            count += 1
-            scalars_array.append(band_speed[:, iband])
-        scalars_array = np.vstack(scalars_array).T
-        self._project_color(scalars_array=scalars_array, scalar_name="Band Speed")
-
-    def project_avg_inv_effective_mass(self, avg_inv_effective_mass):
-        """
-        Method to calculate the atomic projections of the surface.
-        """
-        scalars_array = []
-        count = 0
-        for iband in range(self.n_bands):
-            count += 1
-            scalars_array.append(avg_inv_effective_mass[:, iband])
-        scalars_array = np.vstack(scalars_array).T
-        self._project_color(
-            scalars_array=scalars_array, scalar_name="Avg Inverse Effective Mass"
-        )
-
-    def extend_surface(
-        self,
-        extended_zone_directions: List[Union[List[int], Tuple[int, int, int]]] = None,
-    ):
-        """
-        Method to extend the surface in the direction of a reciprocal lattice vecctor
-
-        Parameters
-        ----------
-        extended_zone_directions : List[List[int] or Tuple[int,int,int]], optional
-            List of directions to expand to, by default None
-        """
-        # The following code  creates exteneded surfaces in a given direction
-        extended_surfaces = []
-        if extended_zone_directions is not None:
-            # new_surface = copy.deepcopy(self)
-            initial_surface = copy.deepcopy(self)
-            for direction in extended_zone_directions:
-                surface = copy.deepcopy(initial_surface)
-
-                self += surface.translate(
-                    np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
-                )
-            # Clearing unneeded surface from memory
-            del surface
+        return merged
 
     def _get_brilloin_zone(self, supercell: List[int], zlim=[-2, 2]):
         """Returns the BrillouinZone of the material
@@ -394,3 +205,41 @@ class BandStructure2D(Surface):
         e_max = zlim[1]
 
         return BrillouinZone2D(e_min, e_max, self.ebs.reciprocal_lattice, supercell)
+    
+    
+    def scale_kplane(self, scale_factor: float = 2 * np.pi):
+        k_plane_scale_transform = np.eye(4)
+
+        k_plane_scale_transform[0, 0] = scale_factor * k_plane_scale_transform[0, 0]
+        k_plane_scale_transform[1, 1] = scale_factor * k_plane_scale_transform[1, 1]
+        self.transform(k_plane_scale_transform, inplace=True)
+    
+    @classmethod
+    def from_code(cls, code: str, dirpath: str, normal: np.ndarray, origin: np.ndarray, 
+                  reduce_bands_near_energy: float = None,
+                  reduce_bands_near_fermi: bool = False,
+                  bands: List[int] = None,
+                  in_cartesian: bool = True, 
+                  plane_tol: float = 0.01, 
+                  grid_resolution: tuple = (20, 20),
+                  **kwargs):
+        from pyprocar.io import Parser
+        parser = Parser(code=code, dirpath=dirpath, **kwargs)
+        ebs = parser.ebs
+        
+        if reduce_bands_near_energy is not None:
+            ebs.reduce_bands_near_energy(reduce_bands_near_energy)
+        elif reduce_bands_near_fermi:
+            ebs.reduce_bands_near_fermi()
+        elif bands is not None:
+            ebs.reduce_bands_by_index(bands)
+            
+        ebs.pad(padding=10, inplace=True)
+            
+        ebs_plane = ebs.reduce_kpoints_to_plane(normal=normal, 
+                                           origin=origin, 
+                                           in_cartesian=in_cartesian, 
+                                           plane_tol=plane_tol, 
+                                           grid_resolution=grid_resolution)
+
+        return cls(ebs_plane)
