@@ -78,6 +78,11 @@ class FermiPlotter(pv.Plotter):
 
         if show_scalar_bar:
             active_scalar_name = fermi_surface.active_scalars_name
+            
+            if active_scalar_name is None:
+                raise ValueError("No active scalar found for the Fermi surface. "
+                                 "Use the compute* methods on the FermiSurface object to compute the scalar data.")
+            
             if "norm" in active_scalar_name:
                 active_scalar_name = active_scalar_name.replace("-norm", "")
             add_mesh_args["show_scalar_bar"] = add_mesh_args.get(
