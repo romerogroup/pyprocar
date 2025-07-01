@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 from numpy import array
 
-from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.core import DensityOfStates, KPath, Structure, get_ebs_from_data
 from pyprocar.io.base import BaseParser
 from pyprocar.utils.strings import remove_comment
 
@@ -2131,9 +2131,9 @@ class VaspParser(BaseParser):
                 "Issue with outcar file. Either it was not found or there is an issue with the parser"
             )
             return None
-        kgrid = self.kpoints.get("kgrid", None)
-
-        return ElectronicBandStructure.from_data(
+        # kgrid = self.kpoints.get("kgrid", None)
+        
+        return get_ebs_from_data(
             kpoints=self.procar.kpoints,
             bands=self.procar.bands,
             projected=self.procar._spd2projected(self.procar.spd),
@@ -2143,7 +2143,6 @@ class VaspParser(BaseParser):
             orbital_names=self.procar.orbitalNames[:-1],
             structure=self.structure,
             kpath=self.kpath,
-            kgrid=kgrid,
         )
 
     @property
