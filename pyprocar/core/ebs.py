@@ -776,7 +776,7 @@ class ElectronicBandStructure:
     def compute_avg_inv_effective_mass(self, label=None, **kwargs):
         if label is None:
             label="avg_inv_effective_mass"
-        _ , bands_hessian = self.compute_gradient("bands", first_order=False, second_order=True, **kwargs)
+        bands_hessian = self.get_property("bands", return_gradient_order=2, **kwargs)
         avg_inv_effective_mass = calculate_avg_inv_effective_mass(bands_hessian)
         self.add_property(label, avg_inv_effective_mass, overwrite = kwargs.pop("overwrite", True))
         return avg_inv_effective_mass
@@ -1494,13 +1494,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
     def property_interpolators(self):
         return self._property_interpolators
     
-    @property
-    def gradient_interpolators(self):
-        return self._gradient_interpolators
     
-    @property
-    def hessian_interpolators(self):
-        return self._hessian_interpolators
     
     def get_kbounds(self):
         kbounds = np.zeros((3, 2))
@@ -1536,11 +1530,24 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 **kwargs,
             )
         
-    def get_property_interpolator(self, name:str, **kwargs):
-        if name not in self.property_interpolators:
-            interpolator = self.compute_interpolator(name, self.get_property_mesh(name, **kwargs))
-            self._property_interpolators[name] = interpolator
-        return self._property_interpolators[name]
+    def get_property_interpolator(self, name:str, return_gradient_order:int=0, **kwargs):
+        if return_gradient_order == 0:
+            if name not in self.property_interpolators:
+                interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=0, **kwargs))
+                self._property_interpolators[name] = interpolator
+            return self._property_interpolators[name]
+        elif return_gradient_order == 1:
+            if name not in self._gradient_interpolators:
+                interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=1, **kwargs))
+                self._gradient_interpolators[name] = interpolator
+            return self._gradient_interpolators[name]
+        elif return_gradient_order == 2:
+            if name not in self._hessian_interpolators:
+                interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=2, **kwargs))
+                self._hessian_interpolators[name] = interpolator
+            return self._hessian_interpolators[name]
+        else:
+            raise ValueError(f"Invalid return_gradient_order: {return_gradient_order}")
         
     def compute_gradient(
         self,
