@@ -285,12 +285,12 @@ class ElectronicBandStructure:
         ret += "\nGradients: \n"
         ret += "------------------------     \n"
         for prop in self._gradients.keys():
-            ret += f"{prop} shape = {self.get_gradient(prop).shape}\n"
+            ret += f"{prop} shape = {self.get_property(prop, return_gradient_order=1).shape}\n"
 
         ret += "\nHessians: \n"
         ret += "------------------------     \n"
         for prop in self._hessians.keys():
-            ret += f"{prop} shape = {self.get_hessian(prop).shape}\n"
+            ret += f"{prop} shape = {self.get_property(prop, return_gradient_order=2).shape}\n"
 
         ret += "\nAdditional information: \n"
         if self.orbital_names is not None:
@@ -498,12 +498,24 @@ class ElectronicBandStructure:
             return True
         else:
             return False
-
+        
+    @property
+    def is_spin_polarized(self):
+        return self.n_spin_channels == 2
+    
+    def has_spin_channels(self, property_value):
+        property_value_shape = list(property_value.shape)
+        if len(property_value_shape) >= 3:
+            nspins = property_value_shape[2]
+            return nspins == self.n_spin_channels
+        else:
+            return False
+    
     def is_band_property(self, property_value):
         property_value_shape = list(property_value.shape)
         if len(property_value_shape) >= 3:
-            nbands, nspins = property_value_shape[1], property_value_shape[2]
-            return nbands == self.n_bands and nspins == self.n_spin_channels
+            nbands = property_value_shape[1]
+            return nbands == self.n_bands
         else:
             return False
 
@@ -543,9 +555,7 @@ class ElectronicBandStructure:
         names = []
         for property_name in self._properties.keys():
             property_value = self.get_property(property_name)
-            if not isinstance(property_value, np.ndarray):
-                continue
-            if property_value.shape[1] == self.n_bands:
+            if self.is_band_property(property_value):
                 names.append(property_name)
         return names
 
@@ -660,51 +670,53 @@ class ElectronicBandStructure:
         projected_sum_spin_texture = self.compute_projected_sum_spin_texture()
         return projected_sum_spin_texture
     
-    def get_property(self, name: str, compute:bool=True, **kwargs):
-        if name not in self.properties and compute:
-            self.compute_property(name, **kwargs)
+    def get_property(self, name: str, return_gradient_order:int=0, compute:bool=True, order="F", **kwargs):
         
-        prop = self.properties.get(name, None)
-        return prop
-
-    def get_gradient(self, name: str, compute:bool=True, order:str="F"):
-        if name not in self.gradients and compute:
-            self.compute_gradient(name, order=order)
+        if return_gradient_order == 0:
+            if name not in self.properties and compute:
+                self.compute_property(name, **kwargs)
+            
+            prop = self.properties.get(name, None)
+            return prop
         
-        prop = self.gradients.get(name, None)
-        return prop
-
-    def get_hessian(self, name: str, compute:bool=True, order:str="F"):
-        if name not in self.hessians and compute:
-            self.compute_gradient(name, first_order=False, second_order=True, order=order)
-        
-        return self.hessians.get(name, None)
+        elif return_gradient_order == 1:
+            if name not in self.gradients and compute:
+                self.compute_gradient(name, order=order)
+            
+            prop = self.gradients.get(name, None)
+            return prop
+        elif return_gradient_order == 2:
+            if name not in self.hessians and compute:
+                self.compute_gradient(name, first_order=False, second_order=True, order=order)
+            
+            prop = self.hessians.get(name, None)
+            return prop
+        else:
+            raise ValueError(f"Gradient order ({return_gradient_order}) is not valid. Must be 0, 1, or 2.")
     
-    def add_property(self, name: str, value: np.ndarray, overwrite: bool = True):
-        if name in self._properties and not overwrite:
-            msg = (f"Property {name} already exists. "
-            f"Use overwrite=True to overwrite it.")
-            user_logger.warning(msg)
-            raise ValueError(msg)
-        self._properties[name] = value
-        return self
-    
-    def add_gradient(self, name: str, value: np.ndarray, overwrite: bool = True):
-        if name in self._gradients and not overwrite:
-            msg = (f"Gradient {name} already exists. "
-            f"Use overwrite=True to overwrite it.")
-            user_logger.warning(msg)
-            raise ValueError(msg)
-        self._gradients[name] = value
-        return self
-    
-    def add_hessian(self, name: str, value: np.ndarray, overwrite: bool = True):
-        if name in self._hessians and not overwrite:
-            msg = (f"Hessian {name} already exists. "
-            f"Use overwrite=True to overwrite it.")
-            user_logger.warning(msg)
-            raise ValueError(msg)
-        self._hessians[name] = value
+    def add_property(self, name: str, value: np.ndarray, return_gradient_order:int=0, overwrite: bool = True):
+        if return_gradient_order == 0:
+            if name in self._properties and not overwrite:
+                msg = (f"Property {name} already exists. "
+                f"Use overwrite=True to overwrite it.")
+                user_logger.warning(msg)
+                raise ValueError(msg)
+            self._properties[name] = value
+        elif return_gradient_order == 1:
+            if name in self._gradients and not overwrite:
+                msg = (f"Gradient {name} already exists. "
+                f"Use overwrite=True to overwrite it.")
+                user_logger.warning(msg)
+                raise ValueError(msg)
+            self._gradients[name] = value
+            
+        elif return_gradient_order == 2:
+            if name in self._hessians and not overwrite:
+                msg = (f"Hessian {name} already exists. "
+                f"Use overwrite=True to overwrite it.")
+                user_logger.warning(msg)
+                raise ValueError(msg)
+            self._hessians[name] = value
         return self
     
     def set_bands(self, bands: np.ndarray):
@@ -927,6 +939,14 @@ class ElectronicBandStructure:
             )
 
         return ret
+    
+    def iter_properties(self, compute:bool=False):
+        for gradient_order in [0, 1, 2]:
+            for prop_name in self.property_names:
+                property_value = self.get_property(prop_name, return_gradient_order=gradient_order, compute=compute)
+                if property_value is not None:
+                    yield prop_name, property_value, gradient_order
+                
 
     def reduce_bands_near_energy(
         self, energy: float, tolerance: float = 0.7, inplace=True
@@ -960,37 +980,18 @@ class ElectronicBandStructure:
                     if iband not in full_band_index:  # Avoid duplicates
                         full_band_index.append(iband)
 
-        property_dict = {}
-        gradient_dict = {}
-        hessian_dict = {}
-        for prop in ebs.property_names:
-            original_value = ebs.get_property(prop, compute=False)
-            original_gradient = ebs.get_gradient(prop, compute=False)
-            original_hessian = ebs.get_hessian(prop, compute=False)
-
-            if prop in ebs.band_property_names:
-                if original_value is not None:
-                    property_dict[prop] = original_value[:, full_band_index, ...]
-
-                if original_gradient is not None:
-                    gradient_dict[prop] = original_gradient[:, full_band_index, ...]
-
-                if original_hessian is not None:
-                    hessian_dict[prop] = original_hessian[:, full_band_index, ...]
+        band_property_names = ebs.band_property_names
+        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+            if prop_name in band_property_names:
+                ebs.add_property(prop_name, prop_value[:, full_band_index, ...], return_gradient_order=gradient_order)
             else:
-                property_dict[prop] = original_value
-                gradient_dict[prop] = original_gradient
-                hessian_dict[prop] = original_hessian
+                ebs.add_property(prop_name, prop_value, return_gradient_order=gradient_order)
 
         debug_message = f"Bands near energy {energy}. "
         debug_message += f"Spin-0 {bands_spin_index[0]} |"
         if self.n_spin_channels > 1 and not self.is_non_collinear:
             debug_message += f" Spin-1 {bands_spin_index[1]}"
         logger.debug(debug_message)
-
-        ebs._properties = property_dict
-        ebs._gradients = gradient_dict
-        ebs._hessians = hessian_dict
         return ebs
         
     def reduce_bands_near_fermi(self, tolerance=0.7, inplace=True):
@@ -1008,31 +1009,12 @@ class ElectronicBandStructure:
         else:
             ebs = self
 
-        new_properties = {}
-        new_gradients = {}
-        new_hessians = {}
-        for prop in ebs.property_names:
-            original_value = ebs.get_property(prop, compute=False)
-            original_gradient = ebs.get_gradient(prop, compute=False)
-            original_hessian = ebs.get_hessian(prop, compute=False)
-
-            if prop in ebs.band_property_names:
-                if original_value is not None:
-                    new_properties[prop] = original_value[:, bands, ...]
-
-                if original_gradient is not None:
-                    new_gradients[prop] = original_gradient[:, bands, ...]
-
-                if original_hessian is not None:
-                    new_hessians[prop] = original_hessian[:, bands, ...]
+        band_property_names = ebs.band_property_names
+        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+            if prop_name in band_property_names:
+                ebs.add_property(prop_name, prop_value[:, bands, ...], return_gradient_order=gradient_order)
             else:
-                new_properties[prop] = original_value
-                new_gradients[prop] = original_gradient
-                new_hessians[prop] = original_hessian
-
-        ebs._properties = new_properties
-        ebs._gradients = new_gradients
-        ebs._hessians = new_hessians
+                ebs.add_property(prop_name, prop_value, return_gradient_order=gradient_order)
         return ebs
         
     def fix_collinear_spin(self, inplace=True):
@@ -1056,47 +1038,18 @@ class ElectronicBandStructure:
         if ebs.n_spin_channels != 2:
             raise ValueError("Spin channels must be 2 for this function to work")
 
-        new_properties = {}
-        new_gradients = {}
-        new_hessians = {}
-        for prop in ebs.property_names:
-            original_value = ebs.get_property(prop, compute=False)
-            original_gradient = ebs.get_gradient(prop, compute=False)
-            original_hessian = ebs.get_hessian(prop, compute=False)
-
-            if prop in ebs.band_property_names:
-                if original_value is not None:
-                    original_value_shape = list(original_value.shape)
-                    band_dim = original_value_shape[1]
-                    original_value_shape[1] = 2 * band_dim
-                    original_value_shape[2] = 1
-                    original_value = original_value.reshape(original_value_shape)
-                    new_properties[prop] = original_value
-
-                if original_gradient is not None:
-                    original_gradient_shape = list(original_gradient.shape)
-                    original_gradient_shape[1] = 2 * original_gradient_shape[1]
-                    original_gradient_shape[2] = 1
-                    original_gradient = original_gradient.reshape(
-                        original_gradient_shape
-                    )
-                    new_gradients[prop] = original_gradient
-
-                if original_hessian is not None:
-                    original_hessian_shape = list(original_hessian.shape)
-                    original_hessian_shape[1] = 2 * original_hessian_shape[1]
-                    original_hessian_shape[2] = 1
-                    original_hessian = original_hessian.reshape(original_hessian_shape)
-                    new_hessians[prop] = original_hessian
+        band_property_names = ebs.band_property_names
+        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+            if prop_name in band_property_names and ebs.has_spin_channels(prop_value):
+                original_value_shape = list(prop_value.shape)
+                band_dim = original_value_shape[1]
+                original_value_shape[1] = 2 * band_dim
+                original_value_shape[2] = 1
+                modified_array = prop_value.reshape(original_value_shape)
+                ebs.add_property(prop_name, modified_array, return_gradient_order=gradient_order)
             else:
-                new_properties[prop] = original_value
-                new_gradients[prop] = original_gradient
-                new_hessians[prop] = original_hessian
+                ebs.add_property(prop_name, prop_value, return_gradient_order=gradient_order)
 
-
-        ebs._properties = new_properties
-        ebs._gradients = new_gradients
-        ebs._hessians = new_hessians
         return ebs
         
     def shift_bands(self, shift_value, inplace=False):
@@ -1105,13 +1058,9 @@ class ElectronicBandStructure:
         else:
             ebs = self
             
-        new_gradients = ebs._gradients
-        new_hessians = ebs._hessians
-        new_properties = ebs._properties
-        new_bands = new_properties["bands"]
-        new_bands += shift_value
-
-        ebs._properties["bands"] = new_bands
+        bands = ebs.get_property("bands")
+        bands += shift_value
+        ebs.add_property("bands", bands, return_gradient_order=0)
         return ebs
         
     def shift_kpoints_to_fbz(self, inplace=True):
@@ -1155,15 +1104,8 @@ class ElectronicBandStructure:
             transformation_matrix=transformation_matrix,
             structure=structure,
         )
-
-        new_gradients = ebs._gradients
-        new_hessians = ebs._hessians
-        new_properties = ebs._properties
-        new_properties["weights"] = uf.weights
-    
-        ebs._properties = new_properties
-        ebs._gradients = new_gradients
-        ebs._hessians = new_hessians
+        
+        ebs.add_property("weights", uf.weights, return_gradient_order=0)
         return ebs
         
     def save(self, path: Path):
@@ -1352,12 +1294,12 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
                     edge_order=2,
                 )
             gradients = gradients * METER_ANGSTROM
-            self.add_gradient(name, gradients)
+            self.add_property(name, gradients, return_gradient_order=1)
 
         if second_order:
-            continuous_segments = self.get_continous_segments()
+            continuous_segments = self.kpath.get_continuous_segments()
 
-            val_gradients = self.get_gradient(name)
+            val_gradients = self.get_property(name, return_gradient_order=1)
             hessians = np.zeros(val_gradients.shape)
             for k_indices in continuous_segments:
                 kpath_segment = self.kpoints_cartesian[k_indices]
@@ -1371,7 +1313,7 @@ class ElectronicBandStructurePath(ElectronicBandStructure):
                     edge_order=2,
                 )
             hessians = hessians * METER_ANGSTROM
-            self.add_hessian(name, hessians)
+            self.add_property(name, hessians, return_gradient_order=2)
             
         return gradients, hessians
                
@@ -1581,8 +1523,8 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 **kwargs,
             )
         
-    def get_property_mesh(self, name: str, compute:bool=True, **kwargs):
-        property_array = self.get_property(name, compute=compute, **kwargs)
+    def get_property_mesh(self, name: str, return_gradient_order:int=0, compute:bool=True, **kwargs):
+        property_array = self.get_property(name, return_gradient_order=return_gradient_order, compute=compute, **kwargs)
         if property_array is None:
             return None
         
@@ -1599,44 +1541,6 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             interpolator = self.compute_interpolator(name, self.get_property_mesh(name, **kwargs))
             self._property_interpolators[name] = interpolator
         return self._property_interpolators[name]
-
-    def get_gradient_mesh(self, name: str, compute:bool=True, **kwargs):
-        gradient_array = self.get_gradient(name, compute=compute, **kwargs)
-        if gradient_array is None:
-            return None
-        
-        return mathematics.array_to_mesh(
-                array=gradient_array,
-                nkx=self.n_kx,
-                nky=self.n_ky,
-                nkz=self.n_kz,
-                **kwargs,
-            )
-        
-    def get_gradient_interpolator(self, name:str, **kwargs):
-        if name not in self.gradient_interpolators:
-            interpolator = self.compute_interpolator(name, self.get_gradient_mesh(name, **kwargs))
-            self._gradient_interpolators[name] = interpolator
-        return self._gradient_interpolators[name]
-        
-    def get_hessian_mesh(self, name: str, compute:bool=True, **kwargs):
-        hessian_array = self.get_hessian(name, compute=compute, **kwargs)
-        if hessian_array is None:
-            return None
-        
-        return mathematics.array_to_mesh(
-                array=hessian_array,
-                nkx=self.n_kx,
-                nky=self.n_ky,
-                nkz=self.n_kz,
-                **kwargs,
-            )
-        
-    def get_hessian_interpolator(self, name:str, **kwargs):
-        if name not in self.hessian_interpolators:
-            interpolator = self.compute_interpolator(name, self.get_hessian_mesh(name, **kwargs))
-            self._hessian_interpolators[name] = interpolator
-        return self._hessian_interpolators[name]
         
     def compute_gradient(
         self,
@@ -1653,7 +1557,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         hessians=None
         
         if first_order:
-            val_mesh = self.get_property_mesh(name, **kwargs)
+            val_mesh = self.get_property_mesh(name, return_gradient_order=0, **kwargs)
 
             gradients_mesh = mathematics.calculate_3d_mesh_scalar_gradients(
                 val_mesh, self.reciprocal_lattice
@@ -1663,10 +1567,10 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             gradients=mathematics.mesh_to_array(
                 mesh=gradients_mesh, **kwargs
             )
-            self.add_gradient(name, gradients)
+            self.add_property(name, gradients, return_gradient_order=1)
 
         if second_order:
-            val_mesh = self.get_gradient_mesh(name, **kwargs)
+            val_mesh = self.get_property_mesh(name, return_gradient_order=1, **kwargs)
 
             hessians_mesh = mathematics.calculate_3d_mesh_scalar_gradients(
                 val_mesh, self.reciprocal_lattice
@@ -1675,7 +1579,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             hessians=mathematics.mesh_to_array(
                 mesh=hessians_mesh, **kwargs
             )
-            self.add_hessian(name, hessians)
+            self.add_property(name, hessians, return_gradient_order=2)
             
         return gradients, hessians
     
@@ -1706,50 +1610,20 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         padded_kpoints_mesh = np.pad(ebs.kpoints_mesh, kpoints_padding_dims, mode=edge_diff_ramp)
         logger.debug(f"Padded kpoints mesh shape: {padded_kpoints_mesh.shape}")
 
-        new_properties = {}
-        new_gradients = {}
-        new_hessians = {}
-        for prop in ebs.property_names:
-            original_value = ebs.get_property_mesh(prop, order=order, compute=False)
-            if original_value is not None:
-                n_scalar_dims = len(original_value.shape[3:])
-                scalar_padding_dims = copy.deepcopy(padding_dims)
-                for i in range(n_scalar_dims):
-                    scalar_padding_dims.append((0, 0))
-                padded_mesh = np.pad(original_value, scalar_padding_dims, mode='wrap')
-                logger.debug(f"Padded {prop} mesh shape: {padded_mesh.shape}")
-                new_properties[prop] = mathematics.mesh_to_array(
-                    padded_mesh, order=order
-                )
-                
+        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+            prop_mesh = ebs.get_property_mesh(prop_name, return_gradient_order=gradient_order, compute=False)
+            n_scalar_dims = len(prop_mesh.shape[3:])
+            scalar_padding_dims = copy.deepcopy(padding_dims)
+            for i in range(n_scalar_dims):
+                scalar_padding_dims.append((0, 0))
+            padded_mesh = np.pad(prop_mesh, scalar_padding_dims, mode='wrap')
+            logger.debug(f"Padded {prop_name} mesh shape: {padded_mesh.shape}")
+            padded_array = mathematics.mesh_to_array(
+                padded_mesh, order=order
+            )
+            ebs.add_property(prop_name, padded_array, return_gradient_order=gradient_order)
 
-            original_gradient = ebs.get_gradient_mesh(prop, order=order, compute=False)
-            if original_gradient is not None:
-                n_scalar_dims = len(original_gradient.shape[3:])
-                scalar_padding_dims = copy.deepcopy(padding_dims)
-                for i in range(n_scalar_dims):
-                    scalar_padding_dims.append((0, 0))
-                padded_mesh = np.pad(original_gradient, scalar_padding_dims, mode='wrap')
-
-                new_gradients[prop] = mathematics.mesh_to_array(
-                    padded_mesh, order=order
-                )
-
-            original_hessian = ebs.get_hessian_mesh(prop, order=order, compute=False)
-            if original_hessian is not None:
-                n_scalar_dims = len(original_hessian.shape[3:])
-                scalar_padding_dims = copy.deepcopy(padding_dims)
-                for i in range(n_scalar_dims):
-                    scalar_padding_dims.append((0, 0))
-                padded_mesh = np.pad(original_hessian, scalar_padding_dims, mode='wrap')
-                new_hessians[prop] = mathematics.mesh_to_array(padded_mesh, order=order)
-
-        new_kpoints = mathematics.mesh_to_array(padded_kpoints_mesh, order=order)
-
-        ebs._kpoints = new_kpoints
-        ebs._properties = new_properties
-        ebs._gradients = new_gradients
-        ebs._hessians = new_hessians
+        ebs._kpoints = mathematics.mesh_to_array(padded_kpoints_mesh, order=order)
         return ebs
     
     def expand_kpoints_to_supercell_by_axes(self, axes_to_expand=[0, 1, 2], inplace=True, **kwargs):
@@ -1767,51 +1641,29 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         supercell_directions = list(
             itertools.product([1, 0, -1], repeat=len(axes_to_expand))
         )
-
-        new_properties = {}
-        new_gradients = {}
-        new_hessians = {}
-        # Initialize the new properties
-        for prop in ebs.property_names:
-            original_value = ebs.get_property(prop, compute=False)
-            if original_value is not None:
-                new_properties[prop] = original_value
-
-            original_gradient = ebs.get_gradient(prop, compute=False)
-            if original_gradient is not None:
-                new_gradients[prop] = original_gradient
-
-            original_hessian = ebs.get_hessian(prop, compute=False)
-            if original_hessian is not None:
-                new_hessians[prop] = original_hessian
-
-            new_kpoints = ebs.kpoints.copy()
-
-        # Iterate over the supercell directions
+        
+        n_init_points = ebs.n_kpoints
+        new_kpoints = ebs.kpoints.copy()
         for supercell_direction in supercell_directions:
-            if supercell_direction != tuple([0] * len(axes_to_expand)):
-                for prop in ebs.property_names:
-                    original_value = ebs.get_property(prop)
+            if supercell_direction == tuple([0] * len(axes_to_expand)):
+                continue
+            
+            shifted_kpoints = ebs.kpoints.copy()
+            for i, axis in enumerate(axes_to_expand):
+                shifted_kpoints[:, axis] += supercell_direction[i]
 
-                    if prop == "kpoints":
-                        new_kpoints = ebs.kpoints.copy()
-                        for i, axis in enumerate(axes_to_expand):
-                            new_kpoints[:, axis] += supercell_direction[i]
-
-                        new_kpoints = np.concatenate(
-                            [new_kpoints, original_value], axis=0
-                        )
-                    else:
-                        new_properties[prop] = np.concatenate(
-                            [new_properties[prop], original_value], axis=0
-                        )
-
+            new_kpoints = np.concatenate(
+                [new_kpoints, shifted_kpoints], axis=0
+            )
+            for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+                initial_array = prop_value[:n_init_points]
+                new_points = np.concatenate([prop_value, initial_array], axis=0)
+                
+                ebs.add_property(prop_name, new_points, return_gradient_order=gradient_order)
+                    
         ebs._kpoints = new_kpoints
-        ebs._properties = new_properties
-        ebs._gradients = new_gradients
-        ebs._hessians = new_hessians
         return ebs
-
+        
     def interpolate(self, interpolation_factor=2, inplace=True, order="F"):
         """Interpolates the band structure meshes and properties using FFT interpolation.
         Creates and returns a new ElectronicBandStructure instance with interpolated data.
@@ -2184,15 +2036,8 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
 
     n_kpoints = ebs.n_kpoints
 
-    # Add initial values before applying rotations
-    new_properties = {}
-    new_kpoints = ebs.kpoints.copy()
-    for prop in ebs.property_names:
-        original_value = ebs.get_property(prop)
-        if original_value is not None:
-            new_properties[prop] = original_value.copy()
-
     # Apply rotations and copy properties
+    new_kpoints = ebs.kpoints.copy()
     for i, rotation in enumerate(rotations):
         start_idx = i * n_kpoints
         end_idx = start_idx + n_kpoints
@@ -2201,12 +2046,12 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
         new_values = ebs.kpoints.dot(rotation.T)
         new_kpoints = np.concatenate([new_kpoints, new_values], axis=0)
         # Update properties
-        for prop in ebs.property_names:
-            original_value = ebs.get_property(prop)
-            if original_value is not None:
-                new_properties[prop] = np.concatenate(
-                    [new_properties[prop], original_value], axis=0
-                )
+        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+            initial_array = prop_value[:n_kpoints]
+            new_points = np.concatenate([prop_value, initial_array], axis=0)
+            
+            ebs.add_property(prop_name, new_points, return_gradient_order=gradient_order)
+                
 
     # Apply boundary conditions to kpoints
     new_kpoints = -np.fmod(new_kpoints + 6.5, 1) + 0.5
@@ -2215,15 +2060,14 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
     # causing the unique indices to misidentify the kpoints
     new_kpoints = new_kpoints.round(decimals=decimals)
     _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
-
+    
     new_kpoints = new_kpoints[unique_indices, ...]
-    for prop in new_properties.keys():
-        new_properties[prop] = new_properties[prop][unique_indices, ...]
-
-
+    for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+        ebs.add_property(prop_name, prop_value[unique_indices, ...], return_gradient_order=gradient_order)
+                
     ebs._kpoints = new_kpoints
-    ebs._properties = new_properties
     return sort_by_kpoints(ebs, inplace=inplace, **kwargs)
+
 
 
 
@@ -2241,25 +2085,9 @@ def sort_by_kpoints(ebs, inplace=True, order="F"):
         sorted_indices = np.lexsort(
             (ebs.kpoints[:, 0], ebs.kpoints[:, 1], ebs.kpoints[:, 2])
         )
+    ebs._kpoints = ebs.kpoints[sorted_indices, ...]
+    
+    for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
+        ebs.add_property(prop_name, prop_value[sorted_indices, ...], return_gradient_order=gradient_order)
 
-    new_properties = {}
-    new_gradients = {}
-    new_hessians = {}
-    new_kpoints = ebs.kpoints[sorted_indices, ...]
-
-    for prop in ebs.property_names:
-        original_value = ebs.get_property(prop)
-        original_gradient = ebs.get_gradient(prop, compute=False)
-        original_hessian = ebs.get_hessian(prop, compute=False)
-        if original_value is not None:
-            new_properties[prop] = original_value[sorted_indices, ...]
-        if original_gradient is not None:
-            new_gradients[prop] = original_gradient[sorted_indices, ...]
-        if original_hessian is not None:
-            new_hessians[prop] = original_hessian[sorted_indices, ...]
-
-    ebs._kpoints = new_kpoints
-    ebs._properties = new_properties
-    ebs._gradients = new_gradients
-    ebs._hessians = new_hessians
     return ebs

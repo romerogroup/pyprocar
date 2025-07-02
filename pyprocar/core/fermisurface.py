@@ -169,21 +169,23 @@ class FermiSurface(pv.PolyData):
 
         return BrillouinZone(self.reciprocal_lattice, supercell)
     
-    def get_property(self, name: str, compute=True):
-        if name not in self.point_data and compute:
-            self.compute_property(name)
-        return self.point_data.get(name, None)
+    def get_property(self, name: str, return_gradient_order:int=0, compute=True):
+        
+        if return_gradient_order == 0:
+            if name not in self.point_data and compute:
+                self.compute_property(name)
+            return self.point_data.get(name, None)
+        elif return_gradient_order == 1:
+            if name not in self.point_data and compute:
+                self.compute_gradient(name, first_order=True, second_order=False)
+            return self.point_data.get(name, None)
+        elif return_gradient_order == 2:
+            if name not in self.point_data and compute:
+                self.compute_gradient(name, first_order=False, second_order=True)
+            return self.point_data.get(name, None)
+        else:
+            raise ValueError(f"Invalid return_gradient_order: {return_gradient_order}")
     
-    def get_gradient(self, name: str, compute=True):
-        if name not in self.point_data and compute:
-            self.compute_gradient(name, first_order=True, second_order=False)
-        return self.point_data.get(name, None)
-    
-    def get_hessian(self, name: str, compute=True):
-        if name not in self.point_data and compute:
-            self.compute_gradient(name, first_order=False, second_order=True)
-        return self.point_data.get(name, None)
-
     def compute_property(self, name: str, include_band_resolved_data=False, **kwargs):
         
         if name == "fermi_velocity":
@@ -198,12 +200,12 @@ class FermiSurface(pv.PolyData):
     
     def compute_gradient(self, name: str, first_order: bool = True, second_order: bool = False, order: str = "F"):
         if first_order:
-            gradient_value = self.padded_ebs.get_gradient(name, order=order)
+            gradient_value = self.padded_ebs.get_property(name, return_gradient_order=1, order=order)
             gradient_label = self.padded_ebs.get_property_gradient_label(name)
             self.project_property(gradient_label, gradient_value)
             
         if second_order:
-            hessian_value = self.padded_ebs.get_hessian(name, order=order)
+            hessian_value = self.padded_ebs.get_property(name, return_gradient_order=2, order=order)
             hessian_label = self.padded_ebs.get_property_hessian_label(name)
             self.project_property(hessian_label, hessian_value)
             
