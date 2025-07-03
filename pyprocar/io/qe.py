@@ -74,7 +74,7 @@ class QEParser(BaseParser):
             pdos_in_filepath=pdos_in_filepath,
         )
         # Parsing structual and calculation type information
-        self._parse_efermi(main_xml_root=xml_root)
+        self._parse_fermi(main_xml_root=xml_root)
         self._parse_magnetization(main_xml_root=xml_root)
         self._parse_structure(main_xml_root=xml_root)
         self._parse_band_structure_tag(main_xml_root=xml_root)
@@ -111,7 +111,7 @@ class QEParser(BaseParser):
             kpoints=self.kpoints,
             bands=self.bands,
             projected=self.spd,
-            efermi=self.efermi,
+            fermi=self.fermi,
             structure=self.structure,
             projected_phase=self.spd_phase,
             orbital_names=self.orbital_names[:-1],
@@ -257,7 +257,7 @@ class QEParser(BaseParser):
         dos = DensityOfStates(
             energies=energies,
             total=total_dos,
-            efermi=self.efermi,
+            fermi=self.fermi,
             projected=projected_dos,
             interpolation_factor=1,
         )
@@ -301,7 +301,7 @@ class QEParser(BaseParser):
             else:
                 total_dos[0, ienergy] = float(raw_dos_block_by_energy.split()[2])
 
-        energies # -= self.efermi
+        energies # -= self.fermi
         return energies, total_dos
 
     def _parse_dos_projections(self, wfc_filenames, n_energy):
@@ -1361,7 +1361,7 @@ class QEParser(BaseParser):
 
         return projected
 
-    def _parse_efermi(self, main_xml_root):
+    def _parse_fermi(self, main_xml_root):
         """A helper method to parse the band_structure tag of the main xml file for the fermi energy
 
         Parameters
@@ -1374,11 +1374,11 @@ class QEParser(BaseParser):
         None
             None
         """
-        # self.efermi =  float(main_xml_root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
+        # self.fermi =  float(main_xml_root.findall(".//output/band_structure/fermi_energy")[0].text) * HARTREE_TO_EV
 
         with open(self.scf_out_filepath, "r") as f:
             scf_out = f.read()
-            self.efermi = float(
+            self.fermi = float(
                 re.findall("the Fermi energy is\s*([-\d.]*)", scf_out)[0]
             )
         return None

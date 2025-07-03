@@ -87,7 +87,7 @@ class Outcar(collections.abc.Mapping):
         return tuple(int(x) for x in self.version.split("."))
 
     @cached_property
-    def efermi(self):
+    def fermi(self):
         """
         Just finds all E-fermi fields in the outcar file and keeps the
         last one (if more than one found).
@@ -322,7 +322,7 @@ class Outcar(collections.abc.Mapping):
                 if isinstance(symop[key], np.ndarray):
                     symop[key] = symop[key].tolist()
         tmp_dict["symops"] = symops
-        tmp_dict["efermi"] = self.efermi
+        tmp_dict["fermi"] = self.fermi
         if self.reciprocal_lattice is not None:
             tmp_dict["reciprocal_lattice"] = self.reciprocal_lattice.tolist()
         if self.rotations is not None:
@@ -539,7 +539,7 @@ class Procar(collections.abc.Mapping):
         The pyprocar.core.KPath object, by default None
     kpoints : np.ndarray, optional
         The kpoints, by default None
-    efermi : float, optional
+    fermi : float, optional
         The fermi energy, by default None
     interpolation_factor : int, optional
         The interpolation factor, by default 1
@@ -1414,7 +1414,7 @@ class VaspXML(collections.abc.Mapping):
         return DensityOfStates(
             energies=energies,
             total=total,
-            efermi=self.fermi,
+            fermi=self.fermi,
             projected=self.dos_projected,
         )
 
@@ -1553,7 +1553,7 @@ class VaspXML(collections.abc.Mapping):
         """
         Returns the fermi energy
         """
-        return self.data["general"]["dos"]["efermi"]
+        return self.data["general"]["dos"]["fermi"]
 
     @property
     def species(self):
@@ -1837,8 +1837,8 @@ class VaspXML(collections.abc.Mapping):
             for ielement in xml_tree:
                 if ielement.tag == "i":
                     if "name" in ielement.attrib:
-                        if ielement.attrib["name"] == "efermi":
-                            ret["efermi"] = float(ielement.text)
+                        if ielement.attrib["name"] == "fermi":
+                            ret["fermi"] = float(ielement.text)
                     continue
                 ret[ielement.tag] = {}
                 ret[ielement.tag] = self.get_general(ielement, ret[ielement.tag])
@@ -1998,8 +1998,8 @@ class VaspXML(collections.abc.Mapping):
                     # elif ielement.tag == 'dos':
                     #     for isub in ielement :
                     #         if 'name' in isub.attrib:
-                    #             if isub.attrib['name'] == 'efermi' :
-                    #                 dos['efermi'] = float(isub.text)
+                    #             if isub.attrib['name'] == 'fermi' :
+                    #                 dos['fermi'] = float(isub.text)
                     #             else :
                     #                 dos[isub.tag] = {}
                     #                 dos[isub.tag]['info'] = []
@@ -2138,7 +2138,7 @@ class VaspParser(BaseParser):
             bands=self.procar.bands,
             projected=self.procar._spd2projected(self.procar.spd),
             projected_phase=self.procar._spd2projected(self.procar.spd_phase),
-            efermi=self.outcar.efermi,
+            fermi=self.outcar.fermi,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
             orbital_names=self.procar.orbitalNames[:-1],
             structure=self.structure,

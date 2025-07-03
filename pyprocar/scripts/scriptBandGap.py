@@ -38,7 +38,7 @@ def bandgap(
     ebs = parser.ebs
 
     if fermi is None:
-        fermi = ebs.efermi
+        fermi = ebs.fermi
 
     bands = np.array(ebs.bands)
     subBands = np.subtract(bands, fermi)

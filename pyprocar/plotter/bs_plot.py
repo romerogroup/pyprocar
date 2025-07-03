@@ -342,7 +342,7 @@ class BandStructure2DPlotter(pv.Plotter):
         if vlim is None:
             vlim = (current_bounds[2], current_bounds[3])
         if elim is None:
-            elim = (bs2d.ebs.efermi - elim_offset, bs2d.ebs.efermi + elim_offset)
+            elim = (bs2d.ebs.fermi - elim_offset, bs2d.ebs.fermi + elim_offset)
         
         bounds = (*ulim, *vlim, *elim)
             

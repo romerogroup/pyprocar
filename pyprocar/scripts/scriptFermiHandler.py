@@ -77,7 +77,7 @@ class FermiHandler:
         self.ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
 
         if fermi is None:
-            self.e_fermi = self.ebs.efermi
+            self.e_fermi = self.ebs.fermi
             user_logger.warning(
                 f"Fermi Energy not set! Set `fermi={self.e_fermi}`."
                 "By default, using fermi energy found in the current directory."

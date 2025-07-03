@@ -121,7 +121,7 @@ class ElkParser(BaseParser):
                 kpoints=self.kpoints,
                 bands=self.bands,
                 projected=self._spd2projected(self.spd),
-                efermi=self.fermi,
+                fermi=self.fermi,
                 kpath=self._kpath,
                 projected_phase=None,
                 orbital_names=self.orbital_names[:-1],
@@ -492,7 +492,7 @@ class ElkParser(BaseParser):
         """
         Returns the fermi energy read from FERMI.OUT
         """
-        with open(self.dirpath / "EFERMI.OUT", "r") as rf:
+        with open(self.dirpath / "fermi.OUT", "r") as rf:
             self.fermi = float(rf.readline().split()[0]) * HARTREE_TO_EV
         return self.fermi
 

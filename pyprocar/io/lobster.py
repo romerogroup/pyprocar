@@ -105,16 +105,16 @@ class LobsterParser(BaseParser):
             self._createKPath()
             self.ebs = ElectronicBandStructure(
                 kpoints=self.kpoints,
-                bands=self.bands + self.efermi,
+                bands=self.bands + self.fermi,
                 projected=self._spd2projected(self.spd),
-                efermi=self.efermi,
+                fermi=self.fermi,
                 kpath=self.kpath,
                 projected_phase=None,
                 labels=self.orbitals[:-1],
                 reciprocal_lattice=self.reciprocal_lattice,
                 interpolation_factor=dos_interpolation_factor,
-                # shifted_to_efermi=True,
-                # shifted_to_efermi=False,
+                # shifted_to_fermi=True,
+                # shifted_to_fermi=False,
             )
 
         doscar_path = self.dirpath / "DOSCAR.lobster"
@@ -866,7 +866,7 @@ class LobsterParser(BaseParser):
             if outcar_filepath is not None:
                 outcar = vasp.Outcar(outcar_filepath)
                 if fermi is None:
-                    fermi = outcar.efermi
+                    fermi = outcar.fermi
                 reciprocal_lattice = outcar.reciprocal_lattice
             if poscar is not None:
                 poscar = vasp.Poscar(poscar)
@@ -918,7 +918,7 @@ class LobsterParser(BaseParser):
             self.ions = parser.ions
             self.alat = parser.alat
             self.composition = parser.composition
-            self.efermi = parser.efermi
+            self.fermi = parser.fermi
             self.reciprocal_lattice = parser.reciprocal_lattice
 
         return None

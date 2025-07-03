@@ -99,10 +99,10 @@ class BandStructure2DHandler:
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
             logger.info(
-                f"No fermi given, using the found fermi energy: {self.ebs.efermi}"
+                f"No fermi given, using the found fermi energy: {self.ebs.fermi}"
             )
 
-            fermi = self.ebs.efermi
+            fermi = self.ebs.fermi
 
         if fermi is not None:
             logger.info(f"Shifting Fermi energy to zero: {fermi}")

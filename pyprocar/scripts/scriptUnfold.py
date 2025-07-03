@@ -57,7 +57,7 @@ def unfold(
     ----------
     fname: PROCAR filename.
     poscar: POSCAR filename
-    outcar: OUTCAR filename, for reading fermi energy. You can also use efermi and set outcar=None
+    outcar: OUTCAR filename, for reading fermi energy. You can also use fermi and set outcar=None
     supercell_matrix: supercell matrix from primitive cell to supercell
     ispin: For non-spin polarized system, ispin=None.
        For spin polarized system: ispin=1 is spin up, ispin=2 is spin down.
@@ -323,8 +323,8 @@ def unfold(
     return ebs_plot.fig, ebs_plot.ax
 
 
-#     if efermi is not None:
-#         fermi = efermi
+#     if fermi is not None:
+#         fermi = fermi
 #     elif outcar is not None:
 #         outcarparser = UtilsProcar()
 #         fermi = outcarparser.FermiOutcar(outcar)
@@ -338,9 +338,9 @@ def unfold(
 #         for ik, k in enumerate(uf.procar.kpoints):
 #             print(ik, k)
 #     axes = uf.plot(
-#         efermi=fermi,
+#         fermi=fermi,
 #         ispin=ispin,
-#         shift_efermi=shift_efermi,
+#         shift_fermi=shift_fermi,
 #         ylim=elimit,
 #         ktick=kticks,
 #         kname=knames,
@@ -373,8 +373,8 @@ def unfold(
 # #         poscar='POSCAR',
 # #         outcar='OUTCAR',
 # #         supercell_matrix=np.diag([2, 2, 2]),
-# #         efermi=None,
-# #         shift_efermi=True,
+# #         fermi=None,
+# #         shift_fermi=True,
 # #         ispin=0,
 # #         elimit=(-5, 15),
 # #         kticks=[0, 36, 54, 86, 110, 147, 165, 199],

@@ -403,7 +403,7 @@ class FermiSurface(pv.PolyData):
                   **kwargs):
         ebs = ElectronicBandStructureMesh.from_code(code, dirpath)
         if fermi is None:
-            fermi = ebs.efermi
+            fermi = ebs.fermi
             
         if reduce_bands_near_fermi:
             ebs.reduce_bands_near_fermi()

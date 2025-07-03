@@ -421,7 +421,7 @@ class AbinitDOSParser:
         self.dos = DensityOfStates(
             energies=self.energies,
             total=self.dos_total,
-            efermi=self.fermi,
+            fermi=self.fermi,
             projected=self.projected,
             interpolation_factor=1,
         )
@@ -642,7 +642,7 @@ class AbinitParser(BaseParser):
             kpoints=procar.kpoints,
             bands=procar.bands,
             projected=procar._spd2projected(procar.spd),
-            efermi=self.abinit_output.fermi,
+            fermi=self.abinit_output.fermi,
             kpath=self.kpath,
             kgrid=self.kgrid,
             projected_phase=procar._spd2projected(procar.spd_phase),

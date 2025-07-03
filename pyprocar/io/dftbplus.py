@@ -303,11 +303,11 @@ class DFTB_utils:
     else:
       raise RuntimeError('File ' + filename + ' not found')
     # Fermi level:                        -0.1467617917 H           -3.9936 eV
-    efermi = re.findall(r'Fermi level:\s*[\-\d.]+\s*H\s*([\-\d.]+)', fermiFile)
-    efermi = float(efermi[0])
+    fermi = re.findall(r'Fermi level:\s*[\-\d.]+\s*H\s*([\-\d.]+)', fermiFile)
+    fermi = float(fermi[0])
     if self.verbose:
-      print("Fermi energy found: ", efermi, 'eV')
-    return efermi
+      print("Fermi energy found: ", fermi, 'eV')
+    return fermi
 
   def get_kpoints(self, filename):
     # in direct coordinates!
@@ -397,8 +397,8 @@ class DFTB_utils:
   
   def writeOutcar(self, detailed_out, detailed_xml):
     f = open('OUTCAR', 'w')
-    efermi = self.find_fermi(detailed_out)
-    f.write('E-fermi : ' + str(efermi) + ' \n')
+    fermi = self.find_fermi(detailed_out)
+    f.write('E-fermi : ' + str(fermi) + ' \n')
     
     lat = self.find_lattice(detailed_xml)
     # print('lat', lat)
@@ -468,8 +468,8 @@ class DFTB_bands:
       print('Bands found (Nkpoints. Nbands): ', evalues.shape)
 
     # # removed
-    # evalues = evalues - self.eFermi
-    # eFermi = 0
+    # evalues = evalues - self.fermi
+    # fermi = 0
     self.Bands = evalues
     self.Occupancies = occs
     return

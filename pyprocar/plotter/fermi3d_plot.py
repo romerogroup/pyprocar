@@ -110,9 +110,9 @@ class FermiDataHandler:
                 np.where(
                     np.logical_and(
                         self.initial_ebs.bands[:, iband, 0]
-                        >= self.initial_ebs.efermi - fermi_tolerance,
+                        >= self.initial_ebs.fermi - fermi_tolerance,
                         self.initial_ebs.bands[:, iband, 0]
-                        <= self.initial_ebs.efermi + fermi_tolerance,
+                        <= self.initial_ebs.fermi + fermi_tolerance,
                     )
                 )[0]
             )

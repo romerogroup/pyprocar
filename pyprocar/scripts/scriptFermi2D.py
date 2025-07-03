@@ -160,8 +160,8 @@ def fermi2D(
     
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
-        logger.info(f"No fermi given, using the found fermi energy: {ebs.efermi}")
-        fermi = ebs.efermi
+        logger.info(f"No fermi given, using the found fermi energy: {ebs.fermi}")
+        fermi = ebs.fermi
 
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")

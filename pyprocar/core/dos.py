@@ -34,7 +34,7 @@ class DensityOfStates:
         Points on energy spectrum. shape = (n_dos, )
     total : np.ndarray
         Densities at each point. shape = (n_dos, )
-    efermi : float
+    fermi : float
         Fermi energy of the system.
     projected : np.ndarray, optional
         Projection of elements, orbitals, spin, etc. shape = (n_atoms, n_principals, n_orbitals, n_spins, n_dos)
@@ -56,7 +56,7 @@ class DensityOfStates:
         self,
         energies: npt.NDArray[np.float64],
         total: npt.NDArray[np.float64],
-        efermi: float = 0.0,
+        fermi: float = 0.0,
         projected: npt.NDArray[np.float64] = None,
         interpolation_factor: int = 1,
         # interpolation_kind: str = 'cubic',
@@ -64,7 +64,7 @@ class DensityOfStates:
 
         self.energies = energies
         self.total = total
-        self.efermi = efermi
+        self.fermi = fermi
         self.projected = projected
         if interpolation_factor not in [1, 0]:
             interpolated = []
@@ -96,7 +96,7 @@ class DensityOfStates:
     def __eq__(self, other):
         energies_equal = np.allclose(self.energies, other.energies)
         total_equal = np.allclose(self.total, other.total)
-        efermi_equal = self.efermi == other.efermi
+        fermi_equal = self.fermi == other.fermi
         projected_equal = np.allclose(self.projected, other.projected)
 
         n_spins_equal = self.n_spins == other.n_spins
@@ -104,7 +104,7 @@ class DensityOfStates:
         dos_equal = (
             energies_equal
             and total_equal
-            and efermi_equal
+            and fermi_equal
             and projected_equal
             and n_spins_equal
         )

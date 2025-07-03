@@ -335,9 +335,9 @@ def dosplot(
     # Setting and shifting Fermi energy
     codes_with_scf_fermi = ["qe", "elk"]
     if code in codes_with_scf_fermi and fermi is None:
-        logger.info(f"No fermi given, using the found fermi energy: {dos.efermi}")
+        logger.info(f"No fermi given, using the found fermi energy: {dos.fermi}")
 
-        fermi = dos.efermi
+        fermi = dos.fermi
 
     if fermi is not None:
         logger.info(f"Shifting Fermi energy to zero: {fermi}")

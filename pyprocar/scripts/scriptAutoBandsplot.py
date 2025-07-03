@@ -29,9 +29,9 @@ class AutoBandsPlot:
         codes_with_scf_fermi = ["qe", "elk"]
         if code in codes_with_scf_fermi and fermi is None:
             logger.info(
-                f"No fermi given, using the found fermi energy: {self.ebs.efermi}"
+                f"No fermi given, using the found fermi energy: {self.ebs.fermi}"
             )
-            fermi = self.ebs.efermi
+            fermi = self.ebs.fermi
         elif fermi is None:
             fermi = 0
         self.fermi = fermi

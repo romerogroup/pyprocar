@@ -64,7 +64,7 @@ class BxsfParser(BaseParser):
             kpoints=self.kpoints,
             bands=self.bands,
             projected=None,
-            efermi=self.e_fermi,
+            fermi=self.e_fermi,
             kpath=None,
             kgrid=self._kgrid,
             projected_phase=None,

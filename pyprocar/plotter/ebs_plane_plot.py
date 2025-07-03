@@ -398,25 +398,18 @@ class EBSPlanePlotter:
             colorbar_args["label"] = colorbar_args.get("label", f"Scalar {self.scalar_name}")
             self.colorbar = self.fig.colorbar(self.scalar_plot, **colorbar_args)
         
-        
     def plot_vectors_quiver(self, 
-                             vectors:np.ndarray,
-                             use_magnitude_as_scalar:bool=False,
-                             color_arrow_by_scalar:bool=False,
-                             plot_scalar_args:dict=None,
-                             cmap:str=None,
-                             clim:Tuple[float, float]=None,
-                             show_colorbar:bool=True,
-                             vector_colorbar_args:dict=None,
-                             name:str="",
-                             angles:str='xy',
-                             scale_units:str='xy',
-                             arrow_scale:float=1.0,
-                             arrow_length=None,
-                             arrow_width=0.005,
-                             arrow_skip=2,
-                             arrow_color="black",
-                             zorder=10,
+                            vectors:np.ndarray,
+                            name:str="",
+                            angles:str='uv',
+                            scale=None,
+                            arrow_length_factor:float=1.0,
+                            arrow_skip:int=1,
+                            scale_units:str='inches',
+                            units:str='inches',
+                            color=None,
+                            cmap: str = "plasma",
+                            clim:Tuple[float, float]=None,
                              **kwargs):
         self.vector_name = name
 
@@ -435,69 +428,41 @@ class EBSPlanePlotter:
         velocity_v = np.dot(vectors, self.ebs_plane.v)
 
         # --- 2. Normalize the Vector Field ---
-        magnitudes = np.sqrt(velocity_u**2 + velocity_v**2)
+        vector_magnitude = np.sqrt(velocity_u**2 + velocity_v**2)
 
-        # To avoid division by zero for zero-velocity vectors, we use np.divide
-        # which allows us to specify what to do 'where' the condition is false.
-        norm_u = np.divide(velocity_u, magnitudes, out=np.zeros_like(velocity_u), where=(magnitudes != 0))
-        norm_v = np.divide(velocity_v, magnitudes, out=np.zeros_like(velocity_v), where=(magnitudes != 0))
-        
-        # Reshape the normalized vectors for plotting
-        norm_u_grid = norm_u.reshape(self.grid_u.shape, order="F")
-        norm_v_grid = norm_v.reshape(self.grid_v.shape, order="F")
-        
-        
-        if use_magnitude_as_scalar:
-            plot_scalar_args = plot_scalar_args or {}
-            plot_scalar_args["scalars"] = magnitudes
-            plot_scalar_args["name"] = f"{name} Magnitude"
-            self.plot_scalars(**plot_scalar_args)
-        
-        if arrow_length is None:
-            arrow_length = (1 / (self.coord_max * 0.1))
-            
-        arrow_length = arrow_length * (1 / arrow_scale)
-            
-        scalar_grid = magnitudes.reshape(self.grid_u.shape)
-        
+        grid_u_vec = velocity_u.reshape(self.grid_u.shape)
+        grid_v_vec = velocity_v.reshape(self.grid_v.shape)
         
         quiver_args=[]
         quiver_args.append(self.grid_u[::arrow_skip, ::arrow_skip])
         quiver_args.append(self.grid_v[::arrow_skip, ::arrow_skip])
-        quiver_args.append(norm_u_grid[::arrow_skip, ::arrow_skip])
-        quiver_args.append(norm_v_grid[::arrow_skip, ::arrow_skip])
+        quiver_args.append(grid_u_vec[::arrow_skip, ::arrow_skip])
+        quiver_args.append(grid_v_vec[::arrow_skip, ::arrow_skip])
         
-        vector_colorbar_args = vector_colorbar_args or {}
-        if arrow_color or kwargs.get("color", None) is not None:
-            kwargs["color"] = arrow_color
-        
-        if color_arrow_by_scalar:
-            vector_colorbar_args["label"] = vector_colorbar_args.get("label", f"Vector {self.vector_name} Magnitude")
-            quiver_args.append(scalar_grid[::arrow_skip, ::arrow_skip])
+        if color is None:
+            quiver_args.append(vector_magnitude)
             
+        if scale is None:
+            scale = vector_magnitude.max()*3
+        scale = scale / arrow_length_factor
+        
+        cmap = plt.get_cmap(cmap)
         if clim is not None:
-            norm = Normalize(vmin=clim[0], vmax=clim[1])
+            norm = plt.Normalize(vmin=clim[0], vmax=clim[1])
         else:
-            norm=None
+            norm=plt.Normalize(vmin=vector_magnitude.min(), vmax=vector_magnitude.max())
         
         self.vector_plot = self.ax.quiver(
             *quiver_args,
             angles=angles,
+            scale=scale,
             scale_units=scale_units,
-            scale=arrow_length,
-            width=arrow_width,
-            zorder=zorder,
+            units = units,
+            color=color,
             cmap=cmap,
-            clim=clim,
             norm=norm,
             **kwargs
         )
-        
-        
-        if show_colorbar and vector_colorbar_args:
-            vector_colorbar_args["cmap"] = vector_colorbar_args.get("cmap", "coolwarm")
-            self.set_vector_colorbar(**vector_colorbar_args)
-
         
     def set_xaxis(self, 
                   label:str='k$_u$ (1/Å)',

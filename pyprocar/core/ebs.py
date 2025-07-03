@@ -12,11 +12,12 @@ import itertools
 import logging
 import re
 from abc import ABC, abstractmethod
+from collections.abc import MutableMapping
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, TypedDict, Union
 
 import numpy as np
 import pyvista as pv
@@ -55,7 +56,7 @@ def get_ebs_from_data(
         projected: np.ndarray = None,
         projected_phase: np.ndarray = None,
         weights: np.ndarray = None,
-        efermi: float = 0.0,
+        fermi: float = 0.0,
         reciprocal_lattice: np.ndarray = None,
         orbital_names: List = None,
         structure: Structure = None,
@@ -72,7 +73,7 @@ def get_ebs_from_data(
         "projected": projected,
         "projected_phase": projected_phase,
         "weights": weights,
-        "efermi": efermi,
+        "fermi": fermi,
         "reciprocal_lattice": reciprocal_lattice,
         "orbital_names": orbital_names,
         "structure": structure,
@@ -178,6 +179,18 @@ def _deepcopy_dict(d):
     return {k: v.copy() if isinstance(v, np.ndarray) else v for k, v in d.items()}
 
 
+class BaseElectronicBandStructure(ABC):
+    
+    @property
+    @abstractmethod
+    def kpoints(self):
+        pass
+    
+    
+    
+    
+
+
 class ElectronicBandStructure:
     """This object stores electronic band structure informomration.
 
@@ -187,7 +200,7 @@ class ElectronicBandStructure:
         The kpoints array. Will have the shape (n_kpoints, 3)
     bands : np.ndarray
         The bands array. Will have the shape (n_kpoints, n_bands)
-    efermi : float
+    fermi : float
         The fermi energy
     projected : np.ndarray, optional
         The projections array. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
@@ -199,21 +212,21 @@ class ElectronicBandStructure:
         The names of the orbitals. Defaults to None
     reciprocal_lattice : np.ndarray, optional
         The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
-    shifted_to_efermi : bool, optional
+    shifted_to_fermi : bool, optional
          Boolean to determine if the fermi energy is shifted, defaults to False
     """
 
     def __init__(
         self,
         kpoints: np.ndarray,
-        efermi: float = 0.0,
+        fermi: float = 0.0,
         bands: np.ndarray = None,
         projected: np.ndarray = None,
         projected_phase: np.ndarray = None,
         weights: np.ndarray = None,
         orbital_names: List = None,
         reciprocal_lattice: np.ndarray = None,
-        shifted_to_efermi: bool = False,
+        shifted_to_fermi: bool = False,
         structure: Structure = None,
         properties: Dict[str, np.ndarray] = None,
         gradients: Dict[str, np.ndarray] = None,
@@ -224,10 +237,10 @@ class ElectronicBandStructure:
         # We store bands in the properties dict
         # to allow for a unified way of handling derivatives
         
-        self._efermi = efermi
+        self._fermi = fermi
         self._orbital_names = orbital_names
         self._reciprocal_lattice = reciprocal_lattice
-        self._shifted_to_efermi = shifted_to_efermi
+        self._shifted_to_fermi = shifted_to_fermi
 
         properties = {} if properties is None else properties
         gradients = {} if gradients is None else gradients
@@ -245,8 +258,6 @@ class ElectronicBandStructure:
         if weights is not None:
             self._properties["weights"] = np.array(weights, dtype=float).copy()
             
-        
-
         self._gradients = _deepcopy_dict(gradients)
         self._hessians = _deepcopy_dict(hessians)
         self._structure = structure
@@ -305,7 +316,7 @@ class ElectronicBandStructure:
         
         if self.reciprocal_lattice is not None:
             ret += "Reciprocal Lattice = \n {}\n".format(self.reciprocal_lattice)
-        ret += "Fermi Energy = {}\n".format(self.efermi)
+        ret += "Fermi Energy = {}\n".format(self.fermi)
         if self.structure is not None:
             ret += "\nStructure: \n"
             ret += "------------------------     \n"
@@ -316,12 +327,12 @@ class ElectronicBandStructure:
     def __eq__(self, other):
         kpoints_equal = _compare_arrays(self.kpoints, other.kpoints)
         bands_equal = _compare_arrays(self.bands, other.bands)
-        efermi_equal = self.efermi == other.efermi
+        fermi_equal = self.fermi == other.fermi
         projected_equal = _compare_arrays(self.projected, other.projected)
         projected_phase_equal = _compare_arrays(self.projected_phase, other.projected_phase)
         weights_equal = _compare_arrays(self.weights, other.weights)
         
-        is_ebs_equal = (kpoints_equal and bands_equal and efermi_equal and 
+        is_ebs_equal = (kpoints_equal and bands_equal and fermi_equal and 
                         projected_equal and projected_phase_equal and weights_equal)
         return is_ebs_equal
 
@@ -370,8 +381,8 @@ class ElectronicBandStructure:
         return BrillouinZone(self.reciprocal_lattice, np.array([1, 1, 1]))
 
     @property
-    def efermi(self):
-        return self._efermi
+    def fermi(self):
+        return self._fermi
 
     @property
     def structure(self):
@@ -947,7 +958,17 @@ class ElectronicBandStructure:
                 if property_value is not None:
                     yield prop_name, property_value, gradient_order
                 
-
+    def reduce_bands(self, bands: List[int] = None, near_fermi: bool = False, energy: float = None, 
+                     tolerance: float = 0.7, inplace=True):
+        if bands is not None:
+            return self.reduce_bands_by_index(bands, inplace)
+        elif energy is not None:
+            return self.reduce_bands_near_energy(energy, tolerance, inplace)
+        elif near_fermi:
+            return self.reduce_bands_near_fermi(tolerance, inplace)
+        else:
+            raise ValueError("Either bands or energy or near_fermi must be provided")
+        
     def reduce_bands_near_energy(
         self, energy: float, tolerance: float = 0.7, inplace=True
     ):
@@ -955,9 +976,9 @@ class ElectronicBandStructure:
         Reduces the bands to those near the fermi energy
         """
         if inplace:
-            ebs = copy.deepcopy(self)
-        else:
             ebs = self
+        else:
+            ebs = copy.deepcopy(self)
         
         logger.info("____Reducing bands near fermi energy____")
         full_band_index = []
@@ -974,6 +995,7 @@ class ElectronicBandStructure:
                         )
                     )[0]
                 )
+                
                 if fermi_surface_test != 0:
                     bands_spin_index[ispin].append(iband)
 
@@ -981,6 +1003,7 @@ class ElectronicBandStructure:
                         full_band_index.append(iband)
 
         band_property_names = ebs.band_property_names
+
         for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
             if prop_name in band_property_names:
                 ebs.add_property(prop_name, prop_value[:, full_band_index, ...], return_gradient_order=gradient_order)
@@ -998,17 +1021,17 @@ class ElectronicBandStructure:
         """
         Reduces the bands to those near the fermi energy
         """
-        return self.reduce_bands_near_energy(self.efermi, tolerance, inplace=inplace)
+        return self.reduce_bands_near_energy(self.fermi, tolerance, inplace=inplace)
 
     def reduce_bands_by_index(self, bands, inplace=True):
         """
         Reduces the bands to those near the fermi energy
         """
         if inplace:
-            ebs = copy.deepcopy(self)
-        else:
             ebs = self
-
+        else:
+            ebs = copy.deepcopy(self)
+            
         band_property_names = ebs.band_property_names
         for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
             if prop_name in band_property_names:
@@ -1031,9 +1054,10 @@ class ElectronicBandStructure:
             Returns True if the function changed the data, False otherwise.
         """
         if inplace:
-            ebs = copy.deepcopy(self)
-        else:
             ebs = self
+        else:
+            ebs = copy.deepcopy(self)
+            
         
         if ebs.n_spin_channels != 2:
             raise ValueError("Spin channels must be 2 for this function to work")
@@ -1054,9 +1078,10 @@ class ElectronicBandStructure:
         
     def shift_bands(self, shift_value, inplace=False):
         if inplace:
-            ebs = copy.deepcopy(self)
-        else:
             ebs = self
+        else:
+            ebs = copy.deepcopy(self)
+            
             
         bands = ebs.get_property("bands")
         bands += shift_value
@@ -1066,9 +1091,10 @@ class ElectronicBandStructure:
     def shift_kpoints_to_fbz(self, inplace=True):
         # Shifting all kpoint to first Brillouin zone
         if inplace:
-            ebs = copy.deepcopy(self)
-        else:
             ebs = self
+        else:
+            ebs = copy.deepcopy(self)
+            
             
         bound_ops = -1.0 * (ebs._kpoints > 0.5) + 1.0 * (ebs._kpoints <= -0.5)
         new_kpoints = ebs._kpoints + bound_ops
@@ -1095,9 +1121,10 @@ class ElectronicBandStructure:
             None
         """
         if inplace:
-            ebs = copy.deepcopy(self)
-        else:
             ebs = self
+        else:
+            ebs = copy.deepcopy(self)
+            
             
         uf = Unfolder(
             ebs=ebs,
@@ -1141,7 +1168,7 @@ class ElectronicBandStructure:
                    projected=ebs.projected,
                    projected_phase=ebs.projected_phase,
                    weights=ebs.weights,
-                   efermi=ebs.efermi,
+                   fermi=ebs.fermi,
                    reciprocal_lattice=ebs.reciprocal_lattice,
                    orbital_names=ebs.orbital_names,
                    structure=ebs.structure,
@@ -1494,8 +1521,6 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
     def property_interpolators(self):
         return self._property_interpolators
     
-    
-    
     def get_kbounds(self):
         kbounds = np.zeros((3, 2))
         for icoord in range(3):
@@ -1530,19 +1555,19 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 **kwargs,
             )
         
-    def get_property_interpolator(self, name:str, return_gradient_order:int=0, **kwargs):
+    def get_property_interpolator(self, name:str, return_gradient_order:int=0, compute_interpolator:bool=False, **kwargs):
         if return_gradient_order == 0:
-            if name not in self.property_interpolators:
+            if name not in self.property_interpolators or compute_interpolator:
                 interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=0, **kwargs))
                 self._property_interpolators[name] = interpolator
             return self._property_interpolators[name]
         elif return_gradient_order == 1:
-            if name not in self._gradient_interpolators:
+            if name not in self._gradient_interpolators or compute_interpolator:
                 interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=1, **kwargs))
                 self._gradient_interpolators[name] = interpolator
             return self._gradient_interpolators[name]
         elif return_gradient_order == 2:
-            if name not in self._hessian_interpolators:
+            if name not in self._hessian_interpolators or compute_interpolator:
                 interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=2, **kwargs))
                 self._hessian_interpolators[name] = interpolator
             return self._hessian_interpolators[name]
@@ -1779,7 +1804,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         return cls(
             kpoints=ebs.kpoints,
             bands=ebs.bands,
-            efermi=ebs.efermi,
+            fermi=ebs.fermi,
             projected=ebs.projected,
             projected_phase=ebs.projected_phase,
             weights=ebs.weights,
@@ -1842,17 +1867,19 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
         self._u_limits = u_limits if u_limits is not None else plane_limits[0]
         self._v_limits = v_limits if v_limits is not None else plane_limits[1]
             
-    
-        points_near_plane = self.ebs_mesh.kpoints_cartesian[i_mesh_points_near_plane]
-
-        
         super().__init__(kpoints=self.uv_kpoints,
-                         efermi=ebs_mesh.efermi,
+                         fermi=ebs_mesh.fermi,
                          orbital_names=ebs_mesh.orbital_names,
                          reciprocal_lattice=ebs_mesh.reciprocal_lattice,
                          structure=ebs_mesh.structure,
                             **kwargs)
-   
+        
+        # Transfer existing properties from the 3D mesh to the plane
+        for prop_name, prop_value, gradient_order in self.ebs_mesh.iter_properties(compute=False):
+            interpolator = self.ebs_mesh.get_property_interpolator(prop_name, return_gradient_order=gradient_order, **kwargs)
+            prop_value = interpolator(self.uv_kpoints)
+            self.add_property(prop_name, prop_value, return_gradient_order=gradient_order)
+
     @property
     def ebs_mesh(self):
         return self._ebs_mesh
@@ -1875,13 +1902,6 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
     @grid_interpolation.setter
     def grid_interpolation(self, grid_interpolation: Tuple[int, int]):
         self._grid_interpolation = grid_interpolation
-        
-        for prop_name, prop_value in self.properties.items():
-            self.properties[prop_name] = self._interpolate_regular_grid(self.kpoints_cartesian, prop_value)
-        for prop_name, prop_value in self.gradients.items():
-            self.gradients[prop_name] = self._interpolate_regular_grid(self.kpoints_cartesian, prop_value)
-        for prop_name, prop_value in self.hessians.items():
-            self.hessians[prop_name] = self._interpolate_regular_grid(self.kpoints_cartesian, prop_value)
 
     @property
     def u(self):
@@ -1960,16 +1980,13 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
             self.v_limits[0] : self.v_limits[1] : complex(0, self.grid_interpolation[1]),
         ]
         return grid_u, grid_v
-            
-    def get_property(self, name:str, **kwargs):
-        if name in self.properties:
-            return self.properties[name]
-        
-        interpolator = self.ebs_mesh.get_property_interpolator(name, **kwargs)
-        new_points=interpolator(self.kpoints)
-        self.add_property(name, new_points)
-        return new_points
     
+    def compute_property(self, name:str, return_gradient_order:int=0, **kwargs):
+        interpolator = self.ebs_mesh.get_property_interpolator(name, return_gradient_order=return_gradient_order, **kwargs)
+        property_value=interpolator(self.kpoints)
+        self.add_property(name, property_value, return_gradient_order=return_gradient_order)
+        return self.get_property(name, return_gradient_order=return_gradient_order, **kwargs)
+            
     def transform_points_to_uv(self, points:np.ndarray, is_shifted:bool=False):
         if is_shifted:
             points_shifted = points - self.origin
@@ -1984,6 +2001,7 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
         v_limits = plane_points[:, 1].min(), plane_points[:, 1].max()
         return u_limits, v_limits
     
+
     @classmethod
     def from_code(cls, code: str, dirpath: str, normal: np.ndarray, 
                   origin: np.ndarray = None, 
