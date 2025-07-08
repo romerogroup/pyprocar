@@ -17,9 +17,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Tuple, TypedDict, Union
+from typing import Literal, TypedDict
+from pyprocar.core.property_store import PointPropertyStore
 
 import numpy as np
+import numpy.typing as npt
 import pyvista as pv
 from scipy.interpolate import (
     CloughTocher2DInterpolator,
@@ -49,22 +51,30 @@ user_logger = logging.getLogger("user")
 
 NUMERICAL_STABILITY_FACTOR = 0.0001
 
+KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np.float_]]
+BANDS_DTYPE = np.ndarray[tuple[int,int,int], np.dtype[np.float_]]
+PROJECTED_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np.float_]]
+PROJECTED_PHASE_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np.float_]]
+WEIGHTS_DTYPE = np.ndarray[tuple[int,int], np.dtype[np.float_]]
+RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float_]]
+
+PROPERTIES_DTYPE = npt.NDArray[np.dtype[np.float_]]
 
 def get_ebs_from_data(
-        kpoints: np.ndarray,
-        bands: np.ndarray,
-        projected: np.ndarray = None,
-        projected_phase: np.ndarray = None,
-        weights: np.ndarray = None,
+        kpoints: KPOINTS_DTYPE,
+        bands: BANDS_DTYPE | None = None,
+        projected: PROJECTED_DTYPE | None = None,
+        projected_phase: PROJECTED_PHASE_DTYPE | None = None,
+        weights: WEIGHTS_DTYPE | None = None,
         fermi: float = 0.0,
-        reciprocal_lattice: np.ndarray = None,
-        orbital_names: List = None,
-        structure: Structure = None,
-        properties: Dict[str, np.ndarray] = None,
-        gradients: Dict[str, np.ndarray] = None,
-        hessians: Dict[str, np.ndarray] = None,
+        reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
+        orbital_names: list[str] | None = None,
+        structure: Structure | None = None,
+        properties: dict[str, PROPERTIES_DTYPE] | None = None,
+        gradients: dict[str, PROPERTIES_DTYPE] | None = None,
+        hessians: dict[str, PROPERTIES_DTYPE] | None = None,
         kpath: KPath = None,
-        kgrid: np.ndarray = None,
+        kgrid: tuple[int, int, int] | None = None,
         **kwargs):
     
     ebs_args = {
@@ -125,7 +135,7 @@ def get_ebs_from_code(
         return ebs
 
 
-def reduced_to_cartesian(kpoints, reciprocal_lattice):
+def reduced_to_cartesian(kpoints: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE) -> KPOINTS_DTYPE:
     if reciprocal_lattice is not None:
         return np.dot(kpoints, reciprocal_lattice)
     else:
@@ -133,7 +143,7 @@ def reduced_to_cartesian(kpoints, reciprocal_lattice):
         return
 
 
-def cartesian_to_reduced(cartesian, reciprocal_lattice):
+def cartesian_to_reduced(cartesian: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE) -> KPOINTS_DTYPE:
     """Converts cartesian coordinates to fractional coordinates
 
     Parameters
@@ -156,7 +166,8 @@ def cartesian_to_reduced(cartesian, reciprocal_lattice):
         return
 
 
-def _compare_arrays(array1, array2):
+def _compare_arrays(array1: npt.NDArray[np.dtype[np.number]], 
+                    array2: npt.NDArray[np.dtype[np.number]]) -> bool:
     if array1 is not None and array2 is not None:
         return np.allclose(array1, array2)
     elif array1 is None and array2 is None:
@@ -164,7 +175,7 @@ def _compare_arrays(array1, array2):
     else:
         return False
 
-def calculate_avg_inv_effective_mass(hessian):
+def calculate_avg_inv_effective_mass(hessian: np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float_]]):
     # Calculate the trace of each 3x3 matrix along the last two axes
     m_inv = (np.trace(hessian, axis1=-2, axis2=-1) * EV_TO_J / HBAR_J**2) / 3
     # Calculate the harmonic average effective mass for each element
@@ -172,7 +183,7 @@ def calculate_avg_inv_effective_mass(hessian):
     return e_mass
 
 
-def _deepcopy_dict(d):
+def _deepcopy_dict(d: PROPERTIES_DTYPE | None):
     """Performs a deep copy of a dictionary containing NumPy arrays."""
     if d is None:
         return None
@@ -183,12 +194,56 @@ class BaseElectronicBandStructure(ABC):
     
     @property
     @abstractmethod
-    def kpoints(self):
-        pass
-    
-    
-    
-    
+    def point_store(self) -> PointPropertyStore:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def fermi(self) -> float:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def structure(self) -> Structure | None:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def reciprocal_lattice(self) -> RECIPROCAL_LATTICE_DTYPE | None:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def orbital_names(self) -> list[str] | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def compute_property(self, name: str, **kwargs):
+        raise NotImplementedError
+
+    def get_property(self, 
+            name: str, 
+            calc_type: Literal["value", "gradients", "divergence", "vortex", "laplacian"] = "value", 
+            gradient_order:int=0, 
+            compute:bool=True, 
+            order: Literal["F", "C"] = "F", 
+            **kwargs):
+        if name not in self.point_store:
+            self.compute_property(name, **kwargs)
+
+        if calc_type == "value":
+            return self.point_store[name].value
+        elif calc_type == "gradients":
+            return self.point_store[name].gradients[gradient_order]
+        elif calc_type == "divergence":
+            return self.point_store[name].divergence
+        elif calc_type == "vortex":
+            return self.point_store[name].vortex
+        elif calc_type == "laplacian":
+            return self.point_store[name].laplacian
+        else:
+            raise ValueError(f"Invalid calc_type: {calc_type}")
+
 
 
 class ElectronicBandStructure:
@@ -208,7 +263,7 @@ class ElectronicBandStructure:
         The full projections array that incudes the complex part. Will have the shape (n_kpoints, n_bands, n_spins, norbitals,n_atoms), defaults to None
     weights : np.ndarray, optional
         The weights of the kpoints. Will have the shape (n_kpoints, 1), defaults to None
-    orbital_names : List, optional
+    orbital_names : list, optional
         The names of the orbitals. Defaults to None
     reciprocal_lattice : np.ndarray, optional
         The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
@@ -218,21 +273,20 @@ class ElectronicBandStructure:
 
     def __init__(
         self,
-        kpoints: np.ndarray,
+        kpoints: KPOINTS_DTYPE ,
         fermi: float = 0.0,
-        bands: np.ndarray = None,
-        projected: np.ndarray = None,
-        projected_phase: np.ndarray = None,
-        weights: np.ndarray = None,
-        orbital_names: List = None,
-        reciprocal_lattice: np.ndarray = None,
+        bands: BANDS_DTYPE | None = None,
+        projected: PROJECTED_DTYPE | None = None,
+        projected_phase: PROJECTED_PHASE_DTYPE | None = None,
+        weights: WEIGHTS_DTYPE | None = None,
+        orbital_names: list[str] | None = None,
+        reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
         shifted_to_fermi: bool = False,
-        structure: Structure = None,
-        properties: Dict[str, np.ndarray] = None,
-        gradients: Dict[str, np.ndarray] = None,
-        hessians: Dict[str, np.ndarray] = None,
+        structure: Structure | None = None,
+        point_store: PointPropertyStore | None = None,
     ):
         self._kpoints = np.array(kpoints, dtype=float).copy()
+        self._point_store = PointPropertyStore(self._kpoints)
         
         # We store bands in the properties dict
         # to allow for a unified way of handling derivatives
@@ -241,10 +295,6 @@ class ElectronicBandStructure:
         self._orbital_names = orbital_names
         self._reciprocal_lattice = reciprocal_lattice
         self._shifted_to_fermi = shifted_to_fermi
-
-        properties = {} if properties is None else properties
-        gradients = {} if gradients is None else gradients
-        hessians = {} if hessians is None else hessians
 
         self._properties = _deepcopy_dict(properties)
         if bands is not None:
@@ -335,6 +385,10 @@ class ElectronicBandStructure:
         is_ebs_equal = (kpoints_equal and bands_equal and fermi_equal and 
                         projected_equal and projected_phase_equal and weights_equal)
         return is_ebs_equal
+
+    @property
+    def point_store(self) -> PointPropertyStore:
+        return PointPropertyStore(self._kpoints, self._properties)
 
     @property
     def kpoints(self):
@@ -832,9 +886,9 @@ class ElectronicBandStructure:
         return pIPR
     
     def compute_projected_sum(self, 
-                              atoms: List[int] = None, 
-                              orbitals: List[int] = None, 
-                              spins: List[int] = None,
+                              atoms: list[int] = None, 
+                              orbitals: list[int] = None, 
+                              spins: list[int] = None,
                               label: str = None,
                               use_atomic_orbital_label:bool = False,
                               **kwargs):
@@ -872,8 +926,8 @@ class ElectronicBandStructure:
         return spin_texture
 
     def compute_projected_sum_spin_texture(self, 
-                                           atoms: List[int] = None, 
-                                           orbitals: List[int] = None, 
+                                           atoms: list[int] = None, 
+                                           orbitals: list[int] = None, 
                                            label: str = None, 
                                            use_atomic_orbital_label:bool = False, **kwargs):
         if not self.is_non_collinear:
@@ -908,21 +962,21 @@ class ElectronicBandStructure:
 
     def ebs_sum(
         self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
+        atoms: list[int] = None,
+        orbitals: list[int] = None,
+        spins: list[int] = None,
         sum_noncolinear: bool = True,
     ):
         """_summary_
 
         Parameters
         ----------
-        atoms : List[int], optional
-            List of atoms to be summed over, by default None
-        orbitals : List[int], optional
-            List of orbitals to be summed over, by default None
-        spins : List[int], optional
-            List of spins to be summed over, by default None
+        atoms : list[int], optional
+            list of atoms to be summed over, by default None
+        orbitals : list[int], optional
+            list of orbitals to be summed over, by default None
+        spins : list[int], optional
+            list of spins to be summed over, by default None
         sum_noncolinear : bool, optional
             Determines if the projection should be summed in a non-colinear calculation, by default True
 
@@ -958,7 +1012,7 @@ class ElectronicBandStructure:
                 if property_value is not None:
                     yield prop_name, property_value, gradient_order
                 
-    def reduce_bands(self, bands: List[int] = None, near_fermi: bool = False, energy: float = None, 
+    def reduce_bands(self, bands: list[int] = None, near_fermi: bool = False, energy: float = None, 
                      tolerance: float = 0.7, inplace=True):
         if bands is not None:
             return self.reduce_bands_by_index(bands, inplace)
@@ -1178,23 +1232,23 @@ class ElectronicBandStructure:
                    **kwargs)
 
     @staticmethod
-    def get_atomic_orbital_label(atoms: List[int], orbitals: List[int]):
+    def get_atomic_orbital_label(atoms: list[int], orbitals: list[int]):
         atom_label = ElectronicBandStructure.get_atom_label(atoms)
         orbital_label = ElectronicBandStructure.get_orbital_label(orbitals)
         return f"{atom_label}|{orbital_label}"
 
     @staticmethod
-    def get_orbital_label(orbitals: List[int]):
+    def get_orbital_label(orbitals: list[int]):
         orbitals_label = ",".join([str(orbital) for orbital in orbitals])
         return f"orbitals-({orbitals_label})"
 
     @staticmethod
-    def get_atom_label(atoms: List[int]):
+    def get_atom_label(atoms: list[int]):
         atoms_label = ",".join([str(atom) for atom in atoms])
         return f"atoms-({atoms_label})"
 
     @staticmethod
-    def get_band_label(bands: Union[List[int], int], spins: Union[List[int], int]):
+    def get_band_label(bands: list[int] | int, spins: list[int] | int):
         if isinstance(bands, int):
             bands = [bands]
         if isinstance(spins, int):
@@ -1224,7 +1278,7 @@ class ElectronicBandStructure:
         return property_name
 
     @staticmethod
-    def get_spin_projection_label(spin_projections: List[int]):
+    def get_spin_projection_label(spin_projections: list[int]):
         spin_projection_names_label = ",".join(
             [str(spin_projection_name) for spin_projection_name in spin_projections]
         )
@@ -1430,8 +1484,6 @@ def is_plane_aligned_with_reciprocal_lattice(normal: np.ndarray,
         if dot_product > 0.99:  # Nearly parallel (within 1 degree)
             return True
     return False
-
-
 
 def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
     if pad_width[0] == 0 or pad_width[1] == 0:
@@ -1791,7 +1843,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         ebs._hessians = new_hessians
         return ebs
     
-    def reduce_to_plane(self, normal: np.ndarray, origin: np.ndarray, grid_interpolation: Tuple[int, int] = None, **kwargs):
+    def reduce_to_plane(self, normal: np.ndarray, origin: np.ndarray, grid_interpolation: tuple[int, int] = None, **kwargs):
         return ElectronicBandStructurePlane(ebs_mesh=self, 
                                             normal=normal, 
                                             origin=origin, 
@@ -1831,9 +1883,9 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
                  normal: np.ndarray, 
                  origin: np.ndarray =None, 
                  plane_tol: float = 0.01,
-                 grid_interpolation: Tuple[int, int] = None,
-                 u_limits: Tuple[float, float] = None,
-                 v_limits: Tuple[float, float] = None,
+                 grid_interpolation: tuple[int, int] = None,
+                 u_limits: tuple[float, float] = None,
+                 v_limits: tuple[float, float] = None,
                  **kwargs):
         self._ebs_mesh = ebs_mesh
         self._normal = normal / np.linalg.norm(normal)
@@ -1900,7 +1952,7 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
     def grid_interpolation(self):
         return self._grid_interpolation
     @grid_interpolation.setter
-    def grid_interpolation(self, grid_interpolation: Tuple[int, int]):
+    def grid_interpolation(self, grid_interpolation: tuple[int, int]):
         self._grid_interpolation = grid_interpolation
 
     @property
@@ -2005,7 +2057,7 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
     @classmethod
     def from_code(cls, code: str, dirpath: str, normal: np.ndarray, 
                   origin: np.ndarray = None, 
-                  grid_interpolation: Tuple[int, int] = None, 
+                  grid_interpolation: tuple[int, int] = None, 
                   use_cache: bool = False, 
                   ebs_filename: str = "ebs.pkl", 
                   **kwargs):
