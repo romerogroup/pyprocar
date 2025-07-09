@@ -18,7 +18,6 @@ from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from typing import Literal, TypedDict
-from pyprocar.core.property_store import PointPropertyStore
 
 import numpy as np
 import numpy.typing as npt
@@ -32,6 +31,7 @@ from scipy.interpolate import (
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.kpath import KPath
+from pyprocar.core.property_store import PointSet
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
 from pyprocar.utils import mathematics
@@ -190,59 +190,59 @@ def _deepcopy_dict(d: PROPERTIES_DTYPE | None):
     return {k: v.copy() if isinstance(v, np.ndarray) else v for k, v in d.items()}
 
 
-class BaseElectronicBandStructure(ABC):
+# class BaseElectronicBandStructure(ABC):
     
-    @property
-    @abstractmethod
-    def point_store(self) -> PointPropertyStore:
-        raise NotImplementedError
+#     @property
+#     @abstractmethod
+#     def point_store(self) -> PointSet:
+#         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def fermi(self) -> float:
-        raise NotImplementedError
+#     @property
+#     @abstractmethod
+#     def fermi(self) -> float:
+#         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def structure(self) -> Structure | None:
-        raise NotImplementedError
+#     @property
+#     @abstractmethod
+#     def structure(self) -> Structure | None:
+#         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def reciprocal_lattice(self) -> RECIPROCAL_LATTICE_DTYPE | None:
-        raise NotImplementedError
+#     @property
+#     @abstractmethod
+#     def reciprocal_lattice(self) -> RECIPROCAL_LATTICE_DTYPE | None:
+#         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def orbital_names(self) -> list[str] | None:
-        raise NotImplementedError
+#     @property
+#     @abstractmethod
+#     def orbital_names(self) -> list[str] | None:
+#         raise NotImplementedError
 
-    @abstractmethod
-    def compute_property(self, name: str, **kwargs):
-        raise NotImplementedError
+#     @abstractmethod
+#     def compute_property(self, name: str, **kwargs):
+#         raise NotImplementedError
 
-    def get_property(self, 
-            name: str, 
-            calc_type: Literal["value", "gradients", "divergence", "vortex", "laplacian"] = "value", 
-            gradient_order:int=0, 
-            compute:bool=True, 
-            order: Literal["F", "C"] = "F", 
-            **kwargs):
-        if name not in self.point_store:
-            self.compute_property(name, **kwargs)
+#     def get_property(self, 
+#             name: str, 
+#             calc_type: Literal["value", "gradients", "divergence", "vortex", "laplacian"] = "value", 
+#             gradient_order:int=0, 
+#             compute:bool=True, 
+#             order: Literal["F", "C"] = "F", 
+#             **kwargs):
+#         if name not in self.point_store:
+#             self.compute_property(name, **kwargs)
 
-        if calc_type == "value":
-            return self.point_store[name].value
-        elif calc_type == "gradients":
-            return self.point_store[name].gradients[gradient_order]
-        elif calc_type == "divergence":
-            return self.point_store[name].divergence
-        elif calc_type == "vortex":
-            return self.point_store[name].vortex
-        elif calc_type == "laplacian":
-            return self.point_store[name].laplacian
-        else:
-            raise ValueError(f"Invalid calc_type: {calc_type}")
+#         if calc_type == "value":
+#             return self.point_store[name].value
+#         elif calc_type == "gradients":
+#             return self.point_store[name].gradients[gradient_order]
+#         elif calc_type == "divergence":
+#             return self.point_store[name].divergence
+#         elif calc_type == "vortex":
+#             return self.point_store[name].vortex
+#         elif calc_type == "laplacian":
+#             return self.point_store[name].laplacian
+#         else:
+#             raise ValueError(f"Invalid calc_type: {calc_type}")
 
 
 
@@ -283,10 +283,10 @@ class ElectronicBandStructure:
         reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
         shifted_to_fermi: bool = False,
         structure: Structure | None = None,
-        point_store: PointPropertyStore | None = None,
+        point_store: PointSet | None = None,
     ):
         self._kpoints = np.array(kpoints, dtype=float).copy()
-        self._point_store = PointPropertyStore(self._kpoints)
+        self._point_store = PointSet(self._kpoints)
         
         # We store bands in the properties dict
         # to allow for a unified way of handling derivatives
@@ -387,8 +387,8 @@ class ElectronicBandStructure:
         return is_ebs_equal
 
     @property
-    def point_store(self) -> PointPropertyStore:
-        return PointPropertyStore(self._kpoints, self._properties)
+    def point_store(self) -> PointSet:
+        return PointSet(self._kpoints, self._properties)
 
     @property
     def kpoints(self):

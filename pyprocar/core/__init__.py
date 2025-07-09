@@ -17,5 +17,6 @@ from pyprocar.core.isosurface import Isosurface
 from pyprocar.core.kpath import KPath
 from pyprocar.core.procarselect import ProcarSelect
 from pyprocar.core.procarsymmetry import ProcarSymmetry
+from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.structure import Structure
 from pyprocar.core.surface import Surface, boolean_add
