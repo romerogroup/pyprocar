@@ -1898,7 +1898,6 @@ class VaspXML(collections.abc.Mapping):
 
             # Skipping 1st structure which is primitive cell
             elif ichild.tag == "kpoints":
-                print(len(list(ichild)))
                 for ielement in ichild:
                     tag_name = ielement.tag
                     element_items = ielement.items()
