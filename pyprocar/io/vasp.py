@@ -1828,6 +1828,8 @@ class VaspXML(collections.abc.Mapping):
 
     def get_set(self, xml_tree, ret):
         """This function will extract any element taged set recurcively"""
+        if len(xml_tree) == 0:
+            return ret
         if xml_tree[0].tag == "r":
             ret[xml_tree.attrib["comment"]] = self.get_varray(xml_tree)
             return ret
