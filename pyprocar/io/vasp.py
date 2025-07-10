@@ -1898,10 +1898,18 @@ class VaspXML(collections.abc.Mapping):
 
             # Skipping 1st structure which is primitive cell
             elif ichild.tag == "kpoints":
-
+                print(len(list(ichild)))
                 for ielement in ichild:
-                    if ielement.items()[0][0] == "param":
-                        kpoints_info["mode"] = ielement.items()[0][1]
+                    tag_name = ielement.tag
+                    element_items = ielement.items()
+                    first_item_key = None
+                    first_item_value = None
+                    if len(element_items) > 0:
+                        first_item_key = element_items[0][0]
+                        first_item_value = element_items[0][1]
+                        
+                    if tag_name == "generation" or (first_item_key is not None and first_item_key == "param"):
+                        kpoints_info["mode"] = first_item_value
                         if kpoints_info["mode"] == "listgenerated":
                             kpoints_info["kpoint_vertices"] = []
                             for isub in ielement:
@@ -1940,15 +1948,25 @@ class VaspXML(collections.abc.Mapping):
                                     kpoints_info["shift"] = [
                                         float(x) for x in isub.text.split()
                                     ]
-
-                    elif ielement.items()[0][1] == "kpointlist":
+         
+                    elif tag_name == "varray" and first_item_key is not None and first_item_key == "kpointlist":
                         for ik in ielement:
                             kpoints_list.append([float(x) for x in ik.text.split()])
                         kpoints_list = array(kpoints_list)
-                    elif ielement.items()[0][1] == "weights":
+                    elif tag_name == "varray" and first_item_key is not None and first_item_key == "weights":
                         for ik in ielement:
                             k_weights.append(float(ik.text))
                         k_weights = array(k_weights)
+                        
+                    elif tag_name == "kpoints_labels":
+                        kpoints_info["kpoint_labels"] = []
+                        for ik in ielement:
+                            ik_items = ik.items()
+                            kpoint_label = None
+                            if len(ik_items) > 0:
+                                kpoint_label = ik_items[0][1]
+                            if kpoint_label is not None:
+                                kpoints_info["kpoint_labels"].append(kpoint_label)
 
             # Vasp Parameters
             elif ichild.tag == "parameters":
