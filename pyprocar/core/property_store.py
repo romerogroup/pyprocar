@@ -157,7 +157,7 @@ class Property:
 
     @override
     def __str__(self) -> str:
-        ret = f" - {self.name} \n"
+        ret = f"{self.name} \n"
         ret += f" - Value: {self.value.shape}\n"
         ret += f" - Gradients:\n"
         if self.gradients[2].shape[0] != 0:
