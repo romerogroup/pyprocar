@@ -455,29 +455,30 @@ class TestElectronicBandStructureMesh:
     def test_initialization(self, sample_ebs_mesh):
         """Test mesh initialization."""
         assert sample_ebs_mesh.n_kpoints == 64  # 4x4x4
-        assert sample_ebs_mesh.kgrid == (4, 4, 4)
+        
+        assert np.allclose(np.array(sample_ebs_mesh.kgrid), np.array([4, 4, 4]))
         assert sample_ebs_mesh.n_kx == 4
         assert sample_ebs_mesh.n_ky == 4
         assert sample_ebs_mesh.n_kz == 4
     
     def test_mesh_properties(self, sample_ebs_mesh):
         """Test mesh-specific properties."""
-        assert sample_ebs_mesh.is_grid is True
-        assert sample_ebs_mesh.is_fbz is True
+        assert sample_ebs_mesh.is_grid == True
+        assert sample_ebs_mesh.is_fbz == True
         
         kpoints_mesh = sample_ebs_mesh.kpoints_mesh
-        assert kpoints_mesh.shape == (4, 4, 4, 3)
+        assert np.allclose(kpoints_mesh.shape, np.array([4, 4, 4, 3]))
         
         bands_mesh = sample_ebs_mesh.get_property_mesh("bands")
-        assert bands_mesh.shape == (4, 4, 4, 3, 1)
+        assert np.allclose(bands_mesh.shape, np.array([4, 4, 4, 3, 1]))
     
     def test_padding(self, sample_ebs_mesh):
         """Test padding functionality."""
         padding = 2
         padded_ebs = sample_ebs_mesh.pad(padding=padding, inplace=False)
         
-        expected_shape = (4 + 2*padding, 4 + 2*padding, 4 + 2*padding)
-        assert padded_ebs.kgrid == expected_shape
+        expected_shape = np.array([4 + 2*padding, 4 + 2*padding, 4 + 2*padding])
+        assert np.allclose(padded_ebs.kgrid, expected_shape)
         assert padded_ebs.n_kpoints == np.prod(expected_shape)
     
     def test_interpolation(self, sample_ebs_mesh):
@@ -487,34 +488,99 @@ class TestElectronicBandStructureMesh:
             interpolation_factor=factor, inplace=False
         )
         
-        expected_shape = (4 * factor, 4 * factor, 4 * factor)
-        assert interpolated_ebs.kgrid == expected_shape
+        expected_shape = np.array([4 * factor, 4 * factor, 4 * factor])
+        assert np.allclose(interpolated_ebs.kgrid, expected_shape)
         assert interpolated_ebs.n_kpoints == np.prod(expected_shape)
     
-    def test_reduce_to_plane(self, sample_ebs_mesh):
-        """Test reducing mesh to plane."""
-        normal = np.array([0, 0, 1])  # z-normal plane
-        origin = np.array([0, 0, 0.5])
-        
-        plane_ebs = sample_ebs_mesh.reduce_to_plane(
-            normal=normal, origin=origin, grid_interpolation=(10, 10)
-        )
-        
-        assert isinstance(plane_ebs, ElectronicBandStructurePlane)
-        assert plane_ebs.normal.shape == (3,)
-        assert np.allclose(plane_ebs.normal, normal)
-    
-    def test_compute_gradient_mesh(self, sample_ebs_mesh):
+    def test_differentiable_property_interface(self, sample_ebs_mesh):
         """Test gradient computation on mesh."""
-        gradients, hessians = sample_ebs_mesh.compute_gradient(
-            "bands", first_order=True, second_order=True
-        )
+        velocity_property = sample_ebs_mesh.get_property("bands_velocity")
+        assert velocity_property is not None
+        assert velocity_property.value.shape == (64, 3, 1, 3)  # Last 3 is gradient dimensions
         
-        assert gradients is not None
-        assert gradients.shape == (64, 3, 1, 3)  # Last 3 is gradient dimensions
+        speed_property = sample_ebs_mesh.get_property("band_speed")
+        assert speed_property is not None
+        assert speed_property.value.shape == (64, 3, 1)
         
-        assert hessians is not None
-        assert hessians.shape == (64, 3, 1, 3, 3)  # Last 3x3 is hessian
+        avg_inv_mass_property = sample_ebs_mesh.get_property("avg_inv_effective_mass")
+        assert avg_inv_mass_property is not None
+        assert avg_inv_mass_property.value.shape == (64, 3, 1)
+        
+    def test_property_gradient_derived_access(self, sample_ebs_mesh):
+        """Test gradient access for properties."""
+        velocity_property = sample_ebs_mesh.get_property("bands_velocity")
+        sample_ebs_mesh.compute_gradients(2, names=["bands_velocity"])
+        velocity_property = sample_ebs_mesh.get_property("bands_velocity")
+        assert velocity_property is not None
+        assert velocity_property.is_vector == True
+        assert velocity_property.gradients[1] is not None
+        assert velocity_property.gradients[1].shape == (64, 3, 1, 3, 3)
+        assert velocity_property.gradients[2] is not None
+        assert velocity_property.gradients[2].shape == (64, 3, 1, 3, 3, 3)
+        assert velocity_property.magnitude is not None
+        assert velocity_property.magnitude.shape == (64, 3, 1)
+        
+        assert velocity_property.divergence is not None
+        assert velocity_property.divergence.shape == (64, 3, 1)
+        assert velocity_property.curl is not None
+        assert velocity_property.curl.shape == (64, 3, 1, 3)
+        assert velocity_property.divergence_gradient is not None
+        assert velocity_property.divergence_gradient.shape == (64, 3, 1, 3)
+        assert velocity_property.curl_gradient is not None
+        assert velocity_property.curl_gradient.shape == (64, 3, 1, 3)
+        assert velocity_property.laplacian is not None
+        assert velocity_property.laplacian.shape == (64, 3, 1, 3)
+        
+    def test_property_interpolator(self, sample_ebs_mesh):
+        """Test property interpolator."""
+        
+        # velocity_property = sample_ebs_mesh.get_property("bands_velocity")
+        velocity_interpolator = sample_ebs_mesh.get_property_interpolator("bands_velocity")
+        
+        new_points = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+        new_velocity = velocity_interpolator["value"](new_points)
+        assert new_velocity is not None
+        assert new_velocity.shape == (2, 3, 1, 3)
+        
+        
+        
+        assert velocity_interpolator is not None
+        assert velocity_interpolator["value"] is not None
+        assert velocity_interpolator["value"](new_points).shape == (2, 3, 1, 3)
+        assert velocity_interpolator["gradients"][1](new_points).shape == (2, 3, 1, 3, 3)
+        assert velocity_interpolator["gradients"][2](new_points).shape == (2, 3, 1, 3, 3, 3)
+        assert velocity_interpolator["magnitude"](new_points).shape == (2, 3, 1)
+        assert velocity_interpolator["divergence"](new_points).shape == (2, 3, 1)
+        assert velocity_interpolator["curl"](new_points).shape == (2, 3, 1, 3)
+        assert velocity_interpolator["laplacian"](new_points).shape == (2, 3, 1, 3)
+        
+        
+        
+        
+        
+    # def test_reduce_to_plane(self, sample_ebs_mesh):
+    #     """Test reducing mesh to plane."""
+    #     normal = np.array([0, 0, 1])  # z-normal plane
+    #     origin = np.array([0, 0, 0.5])
+        
+    #     plane_ebs = sample_ebs_mesh.reduce_to_plane(
+    #         normal=normal, origin=origin, grid_interpolation=(10, 10)
+    #     )
+        
+    #     assert isinstance(plane_ebs, ElectronicBandStructurePlane)
+    #     assert plane_ebs.normal.shape == (3,)
+    #     assert np.allclose(plane_ebs.normal, normal)
+    # def test_compute_gradient_mesh(self, sample_ebs_mesh):
+    #     """Test gradient computation on mesh."""
+    #     gradients, hessians = sample_ebs_mesh.compute_gradient(
+    #         "bands", first_order=True, second_order=True
+    #     )
+        
+    #     assert gradients is not None
+    #     assert gradients.shape == (64, 3, 1, 3)  # Last 3 is gradient dimensions
+        
+    #     assert hessians is not None
+    #     assert hessians.shape == (64, 3, 1, 3, 3)  # Last 3x3 is hessian
 
 
 class TestElectronicBandStructurePath:

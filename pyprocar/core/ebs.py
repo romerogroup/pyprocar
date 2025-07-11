@@ -206,27 +206,18 @@ class DifferentiablePropertyInterface(ABC):
         raise NotImplementedError
     
     def compute_band_velocity(self, label=None, **kwargs):
-        if label is None:
-            label="bands_velocity"
         bands_gradient = self.get_property(("bands","gradients",1))
         band_velocity = bands_gradient / HBAR_EV
-        self.add_property(label, band_velocity)
         return band_velocity
     
     def compute_band_speed(self, label = None, **kwargs):
-        if label is None:
-            label="band_speed"
         band_velocity = self.compute_band_velocity(**kwargs)
         band_speed = np.linalg.norm(band_velocity, axis=-1)
-        self.add_property(label, band_speed)
         return band_speed
     
     def compute_avg_inv_effective_mass(self, label=None, **kwargs):
-        if label is None:
-            label="avg_inv_effective_mass"
         bands_hessian = self.get_property(("bands","gradients",2))
         avg_inv_effective_mass = calculate_avg_inv_effective_mass(bands_hessian)
-        self.add_property(label, avg_inv_effective_mass)
         return avg_inv_effective_mass
     
     
@@ -1267,7 +1258,7 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
     vector[-pad_width[1]:] = right_pad
             
             
-class ElectronicBandStructureMesh(ElectronicBandStructure):
+class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropertyInterface):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
@@ -1275,8 +1266,6 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             raise ValueError("n_kpoints must be equal to np.prod(kgrid) (number of kpoints)")
         
         self._property_interpolators = {}
-        self._gradient_interpolators = {}
-        self._hessian_interpolators = {}
 
     def __str__(self):
         ret = super().__str__()
@@ -1358,84 +1347,94 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
                 **kwargs,
             )
         
-    def get_property_mesh(self, name: str, return_gradient_order:int=0, compute:bool=True, **kwargs):
-        property_array = self.get_property(name, return_gradient_order=return_gradient_order, compute=compute, **kwargs)
-        if property_array is None:
+    def get_property_mesh(self, key , **kwargs):
+        property = self.get_property(key, **kwargs)
+        if property is None:
             return None
         
         return mathematics.array_to_mesh(
-                array=property_array,
+                array=property.value,
                 nkx=self.n_kx,
                 nky=self.n_ky,
                 nkz=self.n_kz,
                 **kwargs,
             )
         
-    def get_property_interpolator(self, name:str, return_gradient_order:int=0, compute_interpolator:bool=False, **kwargs):
-        if return_gradient_order == 0:
-            if name not in self.property_interpolators or compute_interpolator:
-                interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=0, **kwargs))
-                self._property_interpolators[name] = interpolator
-            return self._property_interpolators[name]
-        elif return_gradient_order == 1:
-            if name not in self._gradient_interpolators or compute_interpolator:
-                interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=1, **kwargs))
-                self._gradient_interpolators[name] = interpolator
-            return self._gradient_interpolators[name]
-        elif return_gradient_order == 2:
-            if name not in self._hessian_interpolators or compute_interpolator:
-                interpolator = self.compute_interpolator(name, self.get_property_mesh(name, return_gradient_order=2, **kwargs))
-                self._hessian_interpolators[name] = interpolator
-            return self._hessian_interpolators[name]
-        else:
-            raise ValueError(f"Invalid return_gradient_order: {return_gradient_order}")
+    def get_property_interpolator(self, key):
+
+        prop_name, (calc_name, gradient_order) = self._extract_key(key)
         
-    def compute_gradient(
-        self,
-        name: str = None,
-        first_order: bool = True,
-        second_order: bool = False,
-        **kwargs,
-    ):
-        if name not in self.property_names:
-            raise ValueError(f"Property ({name}) does not exist. Use add_property to add it.")
+        property = self.get_property(prop_name)
+        self.compute_gradients(2, names=[prop_name])
+        property = self.get_property(prop_name)
+        
+        if property is None:
+            return None
+        
+        if prop_name in self._property_interpolators:
+            return self._property_interpolators[prop_name]
+
+        property_interpolators_dict = {
+            "value": self.compute_interpolator(property.value)
+        }
+        
+        gradient_interpolators = {}
+        for key, value in property.gradients.items():
+            if value.shape[0] != 0:
+                gradient_interpolators[key] = self.compute_interpolator(value)
         
         
-        gradients=None
-        hessians=None
-        
-        if first_order:
-            val_mesh = self.get_property_mesh(name, return_gradient_order=0, **kwargs)
+        property_interpolators_dict["gradients"] = gradient_interpolators
+        if property.magnitude.shape[0] != 0:
+            property_interpolators_dict["magnitude"] = self.compute_interpolator(property.magnitude)
+        if property.divergence.shape[0] != 0:
+            print(property.divergence.shape)
+            property_interpolators_dict["divergence"] = self.compute_interpolator(property.divergence)
+        if property.curl.shape[0] != 0:
+            property_interpolators_dict["curl"] = self.compute_interpolator(property.curl)
+        if property.laplacian.shape[0] != 0:
+            property_interpolators_dict["laplacian"] = self.compute_interpolator(property.laplacian)
 
-            gradients_mesh = mathematics.calculate_3d_mesh_scalar_gradients(
-                val_mesh, self.reciprocal_lattice
-            )
-            gradients_mesh *= METER_ANGSTROM
+        self._property_interpolators[prop_name] = property_interpolators_dict
 
-            gradients=mathematics.mesh_to_array(
-                mesh=gradients_mesh, **kwargs
-            )
-            self.add_property(name, gradients, return_gradient_order=1)
-
-        if second_order:
-            val_mesh = self.get_property_mesh(name, return_gradient_order=1, **kwargs)
-
-            hessians_mesh = mathematics.calculate_3d_mesh_scalar_gradients(
-                val_mesh, self.reciprocal_lattice
-            )
-            hessians_mesh *= METER_ANGSTROM
-            hessians=mathematics.mesh_to_array(
-                mesh=hessians_mesh, **kwargs
-            )
-            self.add_property(name, hessians, return_gradient_order=2)
-            
-        return gradients, hessians
+        return self._property_interpolators[prop_name]
     
-    def compute_interpolator(self, name:str, scalars:np.ndarray, **kwargs):
-        if name not in self.property_names:
-            raise ValueError(f"Property ({name}) does not exist. Use add_property to add it.")
+    def gradient_func(self, points, values, **kwargs):
+        val_mesh = mathematics.array_to_mesh(
+            array=values,
+            nkx=self.n_kx,
+            nky=self.n_ky,
+            nkz=self.n_kz,
+            **kwargs,
+        )
+        
+        
+        gradients_mesh = mathematics.calculate_3d_mesh_scalar_gradients(
+                val_mesh, self.reciprocal_lattice
+            )
+        gradients_mesh *= METER_ANGSTROM
 
-        interpolator = RegularGridInterpolator((self.ukx,self.uky,self.ukz), scalars, **kwargs)
+        gradients=mathematics.mesh_to_array(
+            mesh=gradients_mesh, **kwargs
+        )
+        
+        return gradients
+    
+    def compute_property(self, name:str, **kwargs):
+        if name == "bands_velocity":
+            return self.compute_band_velocity(**kwargs)
+        elif name == "band_speed":
+            return self.compute_band_speed(**kwargs)
+        elif name == "avg_inv_effective_mass":
+            return self.compute_avg_inv_effective_mass(**kwargs)
+        else:
+            return super().compute_property(name, **kwargs)
+        
+    
+    def compute_interpolator(self, scalars:np.ndarray, **kwargs):
+        print(self.ukx, self.uky, self.ukz, scalars.shape)
+        scalar_mesh = mathematics.array_to_mesh(scalars, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz)
+        interpolator = RegularGridInterpolator((self.ukx,self.uky,self.ukz), scalar_mesh, **kwargs)
         return interpolator
         
     def pad(self, padding=10, order="F", inplace=True):
@@ -1458,20 +1457,23 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         padded_kpoints_mesh = np.pad(ebs.kpoints_mesh, kpoints_padding_dims, mode=edge_diff_ramp)
         logger.debug(f"Padded kpoints mesh shape: {padded_kpoints_mesh.shape}")
 
-        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
-            prop_mesh = ebs.get_property_mesh(prop_name, return_gradient_order=gradient_order, compute=False)
-            n_scalar_dims = len(prop_mesh.shape[3:])
+        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+            property = ebs.get_property(prop_name)
+            value_mesh = mathematics.array_to_mesh(array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz)
+            n_scalar_dims = len(value_mesh.shape[3:])
             scalar_padding_dims = copy.deepcopy(padding_dims)
             for i in range(n_scalar_dims):
                 scalar_padding_dims.append((0, 0))
-            padded_mesh = np.pad(prop_mesh, scalar_padding_dims, mode='wrap')
+            padded_mesh = np.pad(value_mesh, scalar_padding_dims, mode='wrap')
             logger.debug(f"Padded {prop_name} mesh shape: {padded_mesh.shape}")
             padded_array = mathematics.mesh_to_array(
                 padded_mesh, order=order
             )
-            ebs.add_property(prop_name, padded_array, return_gradient_order=gradient_order)
-
-        ebs._kpoints = mathematics.mesh_to_array(padded_kpoints_mesh, order=order)
+            
+            property[calc_name, gradient_order] = padded_array
+                
+        new_kpoints = mathematics.mesh_to_array(padded_kpoints_mesh, order=order)
+        ebs.update_points(new_kpoints)
         return ebs
     
     def expand_kpoints_to_supercell_by_axes(self, axes_to_expand=[0, 1, 2], inplace=True, **kwargs):
@@ -1533,7 +1535,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
             ebs = copy.deepcopy(self)
             
         # Calculate new mesh dimensions
-        kpoints_mesh = ebs.get_kpoints_mesh(order=order, compute=False)
+        kpoints_mesh = ebs.get_kpoints_mesh()
         nkx, nky, nkz = (
             kpoints_mesh.shape[0],
             kpoints_mesh.shape[1],
@@ -1555,56 +1557,66 @@ class ElectronicBandStructureMesh(ElectronicBandStructure):
         new_kpoints_mesh = np.array(np.meshgrid(new_z, new_y, new_x, indexing="ij"))
         new_kpoints = new_kpoints_mesh.reshape(-1, 3)
 
-        new_properties = {}
-        new_gradients = {}
-        new_hessians = {}
-        for prop in ebs.property_names:
-            original_value = ebs.get_property(prop)
-            if original_value is not None:
-                mesh = mathematics.array_to_mesh(
-                    original_value, ebs.n_kx, ebs.n_ky, ebs.n_kz, order=order
-                )
-                interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(
-                    mesh,
-                    interpolation_factor,
-                )
-                interpolated_value = mathematics.mesh_to_array(interpolated_mesh)
-                new_properties[prop] = interpolated_value
+        
+        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+            property = ebs.get_property(prop_name)
+            value_mesh = mathematics.array_to_mesh(array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz)
+            interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
+            interpolated_value = mathematics.mesh_to_array(interpolated_mesh)
+            property[calc_name, gradient_order] = interpolated_value
+            
+        # new_properties = {}
+        # new_gradients = {}
+        # new_hessians = {}
+        # for prop in ebs.property_names:
+        #     original_value = ebs.get_property(prop)
+        #     if original_value is not None:
+        #         mesh = mathematics.array_to_mesh(
+        #             original_value, ebs.n_kx, ebs.n_ky, ebs.n_kz, order=order
+        #         )
+        #         interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(
+        #             mesh,
+        #             interpolation_factor,
+        #         )
+        #         interpolated_value = mathematics.mesh_to_array(interpolated_mesh)
+        #         new_properties[prop] = interpolated_value
 
-            original_gradient = ebs.get_gradient(prop, compute=False)
-            if original_gradient is not None:
-                mesh = mathematics.array_to_mesh(
-                    original_gradient, ebs.n_kx, ebs.n_ky, ebs.n_kz, order=order
-                )
-                interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(
-                    mesh,
-                    interpolation_factor,
-                )
-                interpolated_gradient = mathematics.mesh_to_array(interpolated_mesh)
-                new_gradients[prop] = interpolated_gradient
+        #     original_gradient = ebs.get_gradient(prop, compute=False)
+        #     if original_gradient is not None:
+        #         mesh = mathematics.array_to_mesh(
+        #             original_gradient, ebs.n_kx, ebs.n_ky, ebs.n_kz, order=order
+        #         )
+        #         interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(
+        #             mesh,
+        #             interpolation_factor,
+        #         )
+        #         interpolated_gradient = mathematics.mesh_to_array(interpolated_mesh)
+        #         new_gradients[prop] = interpolated_gradient
 
-            original_hessian = ebs.get_hessian(prop, compute=False)
-            if original_hessian is not None:
-                mesh = mathematics.array_to_mesh(
-                    original_hessian, ebs.n_kx, ebs.n_ky, ebs.n_kz, order=order
-                )
-                interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(
-                    mesh,
-                    interpolation_factor,
-                )
-                interpolated_hessian = mathematics.mesh_to_array(
-                    interpolated_mesh, order=order
-                )
-                new_hessians[prop] = interpolated_hessian
-        new_nkx = len(new_x)
-        new_nky = len(new_y)
-        new_nkz = len(new_z)
-        kgrid = [new_nkx, new_nky, new_nkz]
+        #     original_hessian = ebs.get_hessian(prop, compute=False)
+        #     if original_hessian is not None:
+        #         mesh = mathematics.array_to_mesh(
+        #             original_hessian, ebs.n_kx, ebs.n_ky, ebs.n_kz, order=order
+        #         )
+        #         interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(
+        #             mesh,
+        #             interpolation_factor,
+        #         )
+        #         interpolated_hessian = mathematics.mesh_to_array(
+        #             interpolated_mesh, order=order
+        #         )
+        #         new_hessians[prop] = interpolated_hessian
+        # new_nkx = len(new_x)
+        # new_nky = len(new_y)
+        # new_nkz = len(new_z)
+        # kgrid = [new_nkx, new_nky, new_nkz]
 
-        ebs._kpoints = new_kpoints
-        ebs._properties = new_properties
-        ebs._gradients = new_gradients
-        ebs._hessians = new_hessians
+        # ebs._kpoints = new_kpoints
+        # ebs._properties = new_properties
+        # ebs._gradients = new_gradients
+        # ebs._hessians = new_hessians
+        
+        ebs.update_points(new_kpoints)
         return ebs
     
     def reduce_to_plane(self, normal: np.ndarray, origin: np.ndarray, grid_interpolation: tuple[int, int] = None, **kwargs):
