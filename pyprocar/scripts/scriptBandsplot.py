@@ -46,7 +46,7 @@ def bandsplot(
     export_append_mode: bool = True,
     ktick_limit: List[float] = None,
     x_limit: List[float] = None,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     quiet_welcome: bool = False,
     **kwargs,

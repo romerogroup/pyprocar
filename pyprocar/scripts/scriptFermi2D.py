@@ -48,7 +48,7 @@ def fermi2D(
     exportplt: bool = False,
     savefig: str = None,
     print_plot_opts: bool = False,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     **kwargs,
 ):

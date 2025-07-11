@@ -47,7 +47,7 @@ def unfold(
     old=False,
     savetab="unfold_result.csv",
     print_plot_opts: bool = False,
-    use_cache: bool = True,
+    use_cache: bool = False,
     verbose: int = 1,
     **kwargs,
 ):

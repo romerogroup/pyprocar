@@ -43,7 +43,7 @@ class BandStructure2DHandler:
         fermi_shift: float = 0,
         repair: bool = False,
         apply_symmetry: bool = True,
-        use_cache: bool = True,
+        use_cache: bool = False,
         verbose: int = 1,
     ):
         """

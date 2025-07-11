@@ -39,7 +39,7 @@ class FermiHandler:
         repair: bool = False,
         apply_symmetry: bool = True,
         ebs_interpolation_factor=1,
-        use_cache: bool = True,
+        use_cache: bool = False,
         verbose: int = 1,
     ):
         """
