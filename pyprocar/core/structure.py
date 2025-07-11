@@ -49,9 +49,9 @@ class Structure:
         lattice=None,
         rotations=None,
     ):
-        atoms = atoms or []
-        fractional_coordinates = fractional_coordinates or []
-        rotations = rotations or []
+        atoms = atoms if atoms is not None else []
+        fractional_coordinates = fractional_coordinates if fractional_coordinates is not None else []
+        rotations = rotations if rotations is not None else []
 
         if fractional_coordinates is not None:
             self.fractional_coordinates = np.array(fractional_coordinates)
