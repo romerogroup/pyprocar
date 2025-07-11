@@ -42,6 +42,7 @@ class KPath:
         kpoints:np.ndarray=None,
         n_grids:List[int]=None,
         segment_names:List[Tuple[str, str]]=None,
+        special_kpoint_map:Dict[str, np.ndarray]=None,
         tick_name_map:Dict[int, str]=None,
         reciprocal_lattice=None,
         discontinuity_threshold=0.2,
@@ -61,6 +62,9 @@ class KPath:
             This is a list of tuples containing the names of the segments. 
             The first element of the tuple is the name of the start point of the segment 
             and the second element is the name of the end point of the segment.
+        special_kpoints: Dict[str, np.ndarray]
+            A dictionary containing the special kpoints.
+            The key is the name of the special kpoint and the value is the kpoint.
         tick_name_map: Dict[int, str]
             A dictionary containing the names of ticks on the kpath.
             The key is the index of the tick and the value is the name of the tick.
@@ -84,7 +88,7 @@ class KPath:
         
         if self._kpoints is None:
             logger.info("No kpoints provided. Generating kpoints from special kpoints and ngrids")
-            self._kpoints = self.generate_points()
+            self._kpoints = self.generate_points(segment_names, special_kpoint_map, n_grids)
             
         
         self._segment_indices, self._continuous_start_indices, self._discontinuity_start_indices = self.get_segment_indices()
@@ -418,19 +422,43 @@ class KPath:
             
         return continuous_segments
         
-    def generate_points(self):
+    def generate_points(self, 
+                        segment_names: List[Tuple[str, str]] = None, 
+                        special_kpoints_map: Dict[str, np.ndarray] = None,
+                        n_grids: List[int] = None):
         """
         Generate the kpath points
         """
-        kpoints_on_path = None
-        for isegment in range(self.n_segments):
-            kstart, kend = self.special_kpoints[isegment]
-            kpoints = np.linspace(kstart, kend, self.n_grids[isegment])
- 
-            if len(kpoints_on_path) == 0:
-                kpoints_on_path = kpoints
-            else:
-                kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
+        kpoints_on_path = []
+        if self.kpoints is not None:
+            
+            for isegment in range(self.n_segments):
+                kstart, kend = self.special_kpoints[isegment]
+                kpoints = np.linspace(kstart, kend, self.n_grids[isegment])
+    
+                if len(kpoints_on_path) == 0:
+                    kpoints_on_path = kpoints
+                else:
+                    kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
+            
+        else:
+            if n_grids is None:
+                raise ValueError("n_grids must be provided")
+            if segment_names is None:
+                raise ValueError("segment_names must be provided")
+            if special_kpoints_map is None:
+                raise ValueError("special_kpoints_map must be provided")
+            
+            for isegment, segment_name in enumerate(segment_names):
+                kstart_label, kend_label = segment_name
+                kstart = special_kpoints_map[kstart_label]
+                kend = special_kpoints_map[kend_label]
+                kpoints = np.linspace(kstart, kend, n_grids[isegment])
+    
+                if len(kpoints_on_path) == 0:
+                    kpoints_on_path = kpoints
+                else:
+                    kpoints_on_path = np.concatenate((kpoints_on_path, kpoints))
         return kpoints_on_path
 
     def get_optimized_kpoints_transformed(
