@@ -51,6 +51,7 @@ class Structure:
     ):
         atoms = atoms if atoms is not None else []
         fractional_coordinates = fractional_coordinates if fractional_coordinates is not None else []
+        cartesian_coordinates = cartesian_coordinates if cartesian_coordinates is not None else []
         rotations = rotations if rotations is not None else []
 
         if fractional_coordinates is not None:
