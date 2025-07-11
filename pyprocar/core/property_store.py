@@ -215,7 +215,7 @@ class PointSet:
         ret += "============================\n"
         ret += "Points: \n"
         ret += "------------------------     \n"
-        ret += f"Number of points = {self.points.shape[0]}\n"
+        ret += f"Number of points = {self._points.shape[0]}\n"
         ret += f"Number of properties = {len(self._property_store)}\n\n"
 
         ret += "Properties: \n"
@@ -230,7 +230,7 @@ class PointSet:
     
     @property
     def n_points(self) -> int:
-        return self.points.shape[0]
+        return self._points.shape[0]
     
     @property
     def property_store(self) -> dict[str, Property]:
@@ -245,8 +245,8 @@ class PointSet:
         return self._gradient_func
     
     def validate_property_points(self, property:Property) -> None:
-        if property.value.shape[0] != self.points.shape[0]:
-            err_msg = f"Property ({property.name}) has {property.value.shape[0]} points. Expected {self.points.shape[0]} points."
+        if property.value.shape[0] != self._points.shape[0]:
+            err_msg = f"Property ({property.name}) has {property.value.shape[0]} points. Expected {self._points.shape[0]} points."
             raise ValueError(err_msg)
         
     def validate_property_store(self, property_store:dict[str, Property] | None  = None) -> None:
@@ -329,7 +329,7 @@ class PointSet:
                 self.compute_gradients(gradient_order - 1, names=[name])
                 scalars = property.gradients[gradient_order - 1]
             
-            property.gradients[gradient_order] = self.gradient_func(self.points, scalars)
+            property.gradients[gradient_order] = self.gradient_func(self._points, scalars)
         return property.gradients[gradient_order]
     
     def iter_property_arrays(self, property_store:dict[str, Property] | None = None) -> Generator[tuple[str, str, int, npt.NDArray[np.float64]], None, None]:
