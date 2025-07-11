@@ -62,7 +62,7 @@ RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np
 PROPERTIES_DTYPE = npt.NDArray[np.dtype[np.float_]]
 
 def get_ebs_from_data(
-        kpoints: KPOINTS_DTYPE,
+        kpoints: KPOINTS_DTYPE | None = None,
         bands: BANDS_DTYPE | None = None,
         projected: PROJECTED_DTYPE | None = None,
         projected_phase: PROJECTED_PHASE_DTYPE | None = None,
@@ -71,9 +71,7 @@ def get_ebs_from_data(
         reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
         orbital_names: list[str] | None = None,
         structure: Structure | None = None,
-        properties: dict[str, PROPERTIES_DTYPE] | None = None,
-        gradients: dict[str, PROPERTIES_DTYPE] | None = None,
-        hessians: dict[str, PROPERTIES_DTYPE] | None = None,
+        point_set: PointSet | None = None,
         kpath: KPath = None,
         kgrid: tuple[int, int, int] | None = None,
         **kwargs):
@@ -88,9 +86,7 @@ def get_ebs_from_data(
         "reciprocal_lattice": reciprocal_lattice,
         "orbital_names": orbital_names,
         "structure": structure,
-        "properties": properties,
-        "gradients": gradients,
-        "hessians": hessians,
+        "point_set": point_set,
     }
     
     grid_dims = mathematics.get_grid_dims(kpoints)
@@ -194,7 +190,7 @@ def _deepcopy_dict(d: PROPERTIES_DTYPE | None):
 class DifferentiablePropertyInterface(ABC):
     
     @abstractmethod
-    def gradient_func(self, order: int, **kwargs):
+    def gradient_func(self, **kwargs):
         raise NotImplementedError
     
     @abstractmethod
@@ -205,23 +201,29 @@ class DifferentiablePropertyInterface(ABC):
     def add_property(self, label: str, value: np.ndarray, **kwargs):
         raise NotImplementedError
     
-    def compute_band_velocity(self, label=None, **kwargs):
+    def compute_band_velocity(self, **kwargs):
         bands_gradient = self.get_property(("bands","gradients",1))
         band_velocity = bands_gradient / HBAR_EV
         return band_velocity
     
-    def compute_band_speed(self, label = None, **kwargs):
+    def compute_band_speed(self, **kwargs):
         band_velocity = self.compute_band_velocity(**kwargs)
         band_speed = np.linalg.norm(band_velocity, axis=-1)
         return band_speed
     
-    def compute_avg_inv_effective_mass(self, label=None, **kwargs):
+    def compute_avg_inv_effective_mass(self, **kwargs):
         bands_hessian = self.get_property(("bands","gradients",2))
         avg_inv_effective_mass = calculate_avg_inv_effective_mass(bands_hessian)
         return avg_inv_effective_mass
     
+    def compute_property(self, name:str, **kwargs):
+        if name == "bands_velocity":
+            return self.compute_band_velocity(**kwargs)
+        elif name == "bands_speed":
+            return self.compute_band_speed(**kwargs)
+        elif name == "avg_inv_effective_mass":
+            return self.compute_avg_inv_effective_mass(**kwargs)
     
-
 class ElectronicBandStructure(PointSet):
     """This object stores electronic band structure informomration.
 
@@ -950,6 +952,22 @@ class ElectronicBandStructure(PointSet):
         return ebs
     
     @classmethod
+    def from_ebs(cls, ebs, **kwargs):
+        
+        return get_ebs_from_data(
+            kpoints=ebs.kpoints,
+            bands=ebs.bands,
+            projected=ebs.projected,
+            projected_phase=ebs.projected_phase,
+            weights=ebs.weights,
+            fermi=ebs.fermi,
+            reciprocal_lattice=ebs.reciprocal_lattice,
+            orbital_names=ebs.orbital_names,
+            structure=ebs.structure,
+            **kwargs
+        )
+        
+    @classmethod
     def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"):
         from pyprocar.io import Parser
         ebs_filepath = Path(dirpath) / ebs_filename
@@ -1085,74 +1103,36 @@ class ElectronicBandStructurePath(ElectronicBandStructure, DifferentiablePropert
                       values:npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         continuous_segments = self.kpath.get_continuous_segments()
 
-        val_array = self.get_property(name)
-        gradients = np.zeros(val_array.shape)
+        gradients = np.zeros(values.shape)
         for k_indices in continuous_segments:
-            kpath_segment = self.kpoints_cartesian[k_indices]
+            kpath_segment = points[k_indices]
             delta_k = np.gradient(kpath_segment, axis=0)
             delta_k = np.linalg.norm(delta_k, axis=1)
-
+            
+            # Determine distance coordinates for gradient calculation. 
+            # cumsum does not include 0 and includes an unnecessary point at the end.
+            distance_coordinates = np.cumsum(delta_k, axis=0)[:-1]
+            distance_coordinates = np.insert(distance_coordinates, 0, 0, axis=0)
             gradients[k_indices, ...] = np.gradient(
-                val_array[k_indices, ...],
-                delta_k,
+                values[k_indices, ...],
+                distance_coordinates,
                 axis=0,
                 edge_order=2,
             )
         gradients = gradients * METER_ANGSTROM
         return gradients
     
-    # def compute_gradient(
-    #     self,
-    #     name: str = None,
-    #     first_order: bool = True,
-    #     second_order: bool = False,
-    #     **kwargs,
-    # ):
-    #     if name not in self.property_names:
-    #         raise ValueError(f"Property ({name}) does not exist. Use add_property to add it.")
-        
-    #     gradients=None
-    #     hessians=None
-    #     if first_order:
-    #         continuous_segments = self.kpath.get_continuous_segments()
-
-    #         val_array = self.get_property(name)
-    #         gradients = np.zeros(val_array.shape)
-    #         for k_indices in continuous_segments:
-    #             kpath_segment = self.kpoints_cartesian[k_indices]
-    #             delta_k = np.gradient(kpath_segment, axis=0)
-    #             delta_k = np.linalg.norm(delta_k, axis=1)
-
-    #             gradients[k_indices, ...] = np.gradient(
-    #                 val_array[k_indices, ...],
-    #                 delta_k,
-    #                 axis=0,
-    #                 edge_order=2,
-    #             )
-    #         gradients = gradients * METER_ANGSTROM
-    #         self.add_property(name, gradients, return_gradient_order=1)
-
-    #     if second_order:
-    #         continuous_segments = self.kpath.get_continuous_segments()
-
-    #         val_gradients = self.get_property(name, return_gradient_order=1)
-    #         hessians = np.zeros(val_gradients.shape)
-    #         for k_indices in continuous_segments:
-    #             kpath_segment = self.kpoints_cartesian[k_indices]
-    #             delta_k = np.gradient(kpath_segment, axis=0)
-    #             delta_k = np.linalg.norm(delta_k, axis=1)
-
-    #             hessians[k_indices, ...] = np.gradient(
-    #                 val_gradients[k_indices, ...],
-    #                 delta_k,
-    #                 axis=0,
-    #                 edge_order=2,
-    #             )
-    #         hessians = hessians * METER_ANGSTROM
-    #         self.add_property(name, hessians, return_gradient_order=2)
-            
-    #     return gradients, hessians
-               
+    def compute_property(self, name:str, **kwargs):
+        if name == "bands_velocity":
+            return self.compute_band_velocity(**kwargs)
+        elif name == "bands_speed":
+            return self.compute_band_speed(**kwargs)
+        elif name == "avg_inv_effective_mass":
+            return self.compute_avg_inv_effective_mass(**kwargs)
+        else:
+            return super().compute_property(name, **kwargs)
+    
+    
     def as_kdist(self, as_segments=True):
         kdistances = self.kpath.get_distances(as_segments=False, cumlative_across_segments=True)
         n_bands = self.bands.shape[1]
@@ -1388,7 +1368,6 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         if property.magnitude.shape[0] != 0:
             property_interpolators_dict["magnitude"] = self.compute_interpolator(property.magnitude)
         if property.divergence.shape[0] != 0:
-            print(property.divergence.shape)
             property_interpolators_dict["divergence"] = self.compute_interpolator(property.divergence)
         if property.curl.shape[0] != 0:
             property_interpolators_dict["curl"] = self.compute_interpolator(property.curl)
@@ -1430,9 +1409,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         else:
             return super().compute_property(name, **kwargs)
         
-    
     def compute_interpolator(self, scalars:np.ndarray, **kwargs):
-        print(self.ukx, self.uky, self.ukz, scalars.shape)
         scalar_mesh = mathematics.array_to_mesh(scalars, nkx=self.n_kx, nky=self.n_ky, nkz=self.n_kz)
         interpolator = RegularGridInterpolator((self.ukx,self.uky,self.ukz), scalar_mesh, **kwargs)
         return interpolator
@@ -1632,16 +1609,12 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         return cls(
             kpoints=ebs.kpoints,
             bands=ebs.bands,
-            fermi=ebs.fermi,
             projected=ebs.projected,
             projected_phase=ebs.projected_phase,
             weights=ebs.weights,
             orbital_names=ebs.orbital_names,
             reciprocal_lattice=ebs.reciprocal_lattice,
             structure=ebs.structure,
-            properties=ebs.properties,
-            gradients=ebs.gradients,
-            hessians=ebs.hessians,
             **kwargs
         )
     
@@ -1652,7 +1625,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         return cls.from_ebs(ebs)
     
 
-class ElectronicBandStructurePlane(ElectronicBandStructure):
+class ElectronicBandStructurePlane(ElectronicBandStructure, DifferentiablePropertyInterface):
     
     def __init__(self, 
                  ebs_mesh: ElectronicBandStructureMesh,
@@ -1660,8 +1633,6 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
                  origin: np.ndarray =None, 
                  plane_tol: float = 0.01,
                  grid_interpolation: tuple[int, int] = None,
-                 u_limits: tuple[float, float] = None,
-                 v_limits: tuple[float, float] = None,
                  **kwargs):
         self._ebs_mesh = ebs_mesh
         self._normal = normal / np.linalg.norm(normal)
@@ -1692,8 +1663,8 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
         
         plane_points = self.transform_points_to_uv(ebs_mesh.kpoints_cartesian[i_mesh_points_near_plane])
         plane_limits = self._find_plane_limits(plane_points)
-        self._u_limits = u_limits if u_limits is not None else plane_limits[0]
-        self._v_limits = v_limits if v_limits is not None else plane_limits[1]
+        self._u_limits = plane_limits[0]
+        self._v_limits = plane_limits[1]
             
         super().__init__(kpoints=self.uv_kpoints,
                          fermi=ebs_mesh.fermi,
@@ -1703,11 +1674,15 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
                             **kwargs)
         
         # Transfer existing properties from the 3D mesh to the plane
-        for prop_name, prop_value, gradient_order in self.ebs_mesh.iter_properties(compute=False):
-            interpolator = self.ebs_mesh.get_property_interpolator(prop_name, return_gradient_order=gradient_order, **kwargs)
-            prop_value = interpolator(self.uv_kpoints)
-            self.add_property(prop_name, prop_value, return_gradient_order=gradient_order)
-
+        for prop_name, property  in self.ebs_mesh.property_store.items():
+            interpolator = self.ebs_mesh.get_property_interpolator(prop_name)
+            prop_value = interpolator['value'](self.uv_kpoints)
+            gradients = {}
+            for grad_key, grad_value in property.gradients.items():
+                gradients[grad_key] = interpolator['gradients'][grad_key](self.uv_kpoints)
+            property = Property(name=prop_name, value = prop_value, gradients=gradients)
+            self.add_property(property)
+            
     @property
     def ebs_mesh(self):
         return self._ebs_mesh
@@ -1809,11 +1784,15 @@ class ElectronicBandStructurePlane(ElectronicBandStructure):
         ]
         return grid_u, grid_v
     
-    def compute_property(self, name:str, return_gradient_order:int=0, **kwargs):
-        interpolator = self.ebs_mesh.get_property_interpolator(name, return_gradient_order=return_gradient_order, **kwargs)
-        property_value=interpolator(self.kpoints)
-        self.add_property(name, property_value, return_gradient_order=return_gradient_order)
-        return self.get_property(name, return_gradient_order=return_gradient_order, **kwargs)
+    def compute_property(self, name:str, **kwargs):
+        if "bands_velocity" in name:
+            return self.compute_band_velocity(**kwargs)
+        elif "bands_speed" in name:
+            return self.compute_band_speed(**kwargs)
+        elif "avg_inv_effective_mass" in name:
+            return self.compute_avg_inv_effective_mass(**kwargs)
+        else:
+            return super().compute_property(name, **kwargs)
             
     def transform_points_to_uv(self, points:np.ndarray, is_shifted:bool=False):
         if is_shifted:
@@ -1899,11 +1878,11 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
         new_values = ebs.kpoints.dot(rotation.T)
         new_kpoints = np.concatenate([new_kpoints, new_values], axis=0)
         # Update properties
-        for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
-            initial_array = prop_value[:n_kpoints]
-            new_points = np.concatenate([prop_value, initial_array], axis=0)
-            
-            ebs.add_property(prop_name, new_points, return_gradient_order=gradient_order)
+        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+            initial_array = value_array[:n_kpoints]
+            new_points = np.concatenate([value_array, initial_array], axis=0)
+            property = ebs.get_property(prop_name)
+            property[calc_name, gradient_order] = new_points
                 
 
     # Apply boundary conditions to kpoints
@@ -1915,14 +1894,12 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
     _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
     
     new_kpoints = new_kpoints[unique_indices, ...]
-    for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
-        ebs.add_property(prop_name, prop_value[unique_indices, ...], return_gradient_order=gradient_order)
+    for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+        property = ebs.get_property(prop_name)
+        property[calc_name, gradient_order] = value_array[unique_indices, ...]
                 
-    ebs._kpoints = new_kpoints
+    ebs.update_points(new_kpoints)
     return sort_by_kpoints(ebs, inplace=inplace, **kwargs)
-
-
-
 
 def sort_by_kpoints(ebs, inplace=True, order="F"):
     """Sorts the bands and projected arrays by kpoints"""
@@ -1938,9 +1915,11 @@ def sort_by_kpoints(ebs, inplace=True, order="F"):
         sorted_indices = np.lexsort(
             (ebs.kpoints[:, 0], ebs.kpoints[:, 1], ebs.kpoints[:, 2])
         )
-    ebs._kpoints = ebs.kpoints[sorted_indices, ...]
-    
-    for prop_name, prop_value, gradient_order in ebs.iter_properties(compute=False):
-        ebs.add_property(prop_name, prop_value[sorted_indices, ...], return_gradient_order=gradient_order)
+
+    ebs.update_points(ebs.kpoints[sorted_indices, ...])
+        
+    for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+        property = ebs.get_property(prop_name)
+        property[calc_name, gradient_order] = value_array[sorted_indices, ...]
 
     return ebs
