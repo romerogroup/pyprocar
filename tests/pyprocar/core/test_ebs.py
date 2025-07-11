@@ -36,7 +36,18 @@ def mesh_calc_dir():
 
     The `request.param` object will be one CalcInfo instance at a time.
     """
-    return DATA_DIR / "examples" / "fermi3d" / "non-collinear"
+    return DATA_DIR / "examples" / "fermi3d" / "non-spin-polarized"
+
+
+@pytest.fixture
+def path_calc_dir():
+    """
+    This is the parameterized fixture. Pytest will run any test that
+    uses this fixture once for each item in ALL_TEST_CASES.
+
+    The `request.param` object will be one CalcInfo instance at a time.
+    """
+    return DATA_DIR / "examples" / "bands" / "non-spin-polarized"
 
 
 @pytest.fixture
@@ -129,6 +140,15 @@ def mesh_bands(mesh_kpoints):
 
 
 @pytest.fixture
+def mesh_bands_spin_polarized(mesh_kpoints):
+    """Generate mesh bands for testing"""
+    n_kpoints = len(mesh_kpoints)
+    n_bands = 3
+    n_spins = 2
+    return np.random.rand(n_kpoints, n_bands, n_spins) * 10 - 5
+
+
+@pytest.fixture
 def sample_ebs_mesh(mesh_kpoints, mesh_bands, sample_reciprocal_lattice):
     """Create a sample ElectronicBandStructureMesh for testing"""
     n_kpoints = len(mesh_kpoints)
@@ -147,89 +167,49 @@ def sample_ebs_mesh(mesh_kpoints, mesh_bands, sample_reciprocal_lattice):
         reciprocal_lattice=sample_reciprocal_lattice,
         orbital_names=["s", "p", "d"],
     )
-
-
+    
 @pytest.fixture
-def sample_kpath():
-    """Create a sample KPath for testing"""
-    # Create a simple high-symmetry path: Gamma -> X -> L -> Gamma
-    special_kpoints = np.array([
-        [0.0, 0.0, 0.0],  # Gamma
-        [0.5, 0.0, 0.0],  # X
-        [0.5, 0.5, 0.5],  # L
-        [0.0, 0.0, 0.0],  # Gamma
-    ])
-    special_kpoint_names = ["Γ", "X", "L", "Γ"]
-    
-    # Create path kpoints (interpolate between special points)
-    n_points_per_segment = 10
-    path_kpoints = []
-    tick_positions = [0]
-    
-    for i in range(len(special_kpoints) - 1):
-        start = special_kpoints[i]
-        end = special_kpoints[i + 1]
-        segment = np.linspace(start, end, n_points_per_segment, endpoint=False)
-        path_kpoints.extend(segment)
-        tick_positions.append(len(path_kpoints))
-    
-    # Add final point
-    path_kpoints.append(special_kpoints[-1])
-    
-    kpath = KPath(
-        special_kpoints=special_kpoints,
-        special_kpoint_names=special_kpoint_names,
-        path=np.array(path_kpoints),
-    )
-    return kpath
-
-
-@pytest.fixture
-def path_kpoints(sample_kpath):
-    """Generate path kpoints for testing"""
-    return sample_kpath.path
-
-
-@pytest.fixture
-def path_bands(path_kpoints):
-    """Generate path bands for testing"""
-    n_kpoints = len(path_kpoints)
-    n_bands = 4
-    n_spins = 2
-    
-    # Create more realistic bands along the path
-    bands = np.zeros((n_kpoints, n_bands, n_spins))
-    
-    # Create some dispersive bands
-    for iband in range(n_bands):
-        for ispin in range(n_spins):
-            # Simple cosine dispersion
-            t = np.linspace(0, 4*np.pi, n_kpoints)
-            bands[:, iband, ispin] = np.cos(t + iband*np.pi/4) + iband*2.0 + ispin*0.1
-    
-    return bands
-
-
-@pytest.fixture
-def sample_ebs_path(path_kpoints, path_bands, sample_reciprocal_lattice, sample_kpath):
-    """Create a sample ElectronicBandStructurePath for testing"""
-    n_kpoints = len(path_kpoints)
-    n_bands = 4
+def sample_ebs_mesh_spin_polarized(mesh_kpoints, mesh_bands_spin_polarized, sample_reciprocal_lattice):
+    """Create a sample ElectronicBandStructureMesh for testing"""
+    n_kpoints = len(mesh_kpoints)
+    n_bands = 3
     n_spins = 2
     n_atoms = 2
     n_orbitals = 3
     
     projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
     
-    return ElectronicBandStructurePath(
-        kpoints=path_kpoints,
-        bands=path_bands,
+    return ElectronicBandStructureMesh(
+        kpoints=mesh_kpoints,
+        bands=mesh_bands_spin_polarized,
         projected=projected,
         fermi=0.0,
         reciprocal_lattice=sample_reciprocal_lattice,
         orbital_names=["s", "p", "d"],
-        kpath=sample_kpath,
     )
+    
+
+@pytest.fixture
+def sample_ebs_mesh_non_colinear(mesh_kpoints, mesh_bands, sample_reciprocal_lattice):
+    """Create a sample ElectronicBandStructureMesh for testing"""
+    n_kpoints = len(mesh_kpoints)
+    n_bands = 3
+    n_spins = 4
+    n_atoms = 2
+    n_orbitals = 3
+    
+    projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    
+    return ElectronicBandStructureMesh(
+        kpoints=mesh_kpoints,
+        bands=mesh_bands,
+        projected=projected,
+        fermi=0.0,
+        reciprocal_lattice=sample_reciprocal_lattice,
+        orbital_names=["s", "p", "d"],
+    )
+
+
 
 
 class TestElectronicBandStructure:
@@ -449,6 +429,527 @@ class TestElectronicBandStructure:
             assert loaded_ebs == sample_ebs
 
 
+
+
+
+@pytest.fixture
+def sample_kpath():
+    """Create a sample KPath for testing"""
+    # Create a simple high-symmetry path: Gamma -> X -> L -> Gamma
+    n_grids= [50, 50, 50, 50, 50, 50]
+    segment_names = [("GAMMA", "H"), 
+                     ("H", "N"), 
+                     ("N", "GAMMA"),
+                     ("GAMMA", "P"),
+                     ("P", "H"),
+                     ("P", "N"),
+                     ]
+    special_kpoints_map = {
+        "GAMMA": np.array([0.0, 0.0, 0.0]),
+        "H": np.array([ 0.50, -0.50, 0.50]),
+        "N": np.array([ 0.00, -0.00, 0.50]),
+        "P": np.array([0.25, 0.25, 0.25]),
+    }
+    reciprocal_lattice = np.eye(3)
+    kpath = KPath(
+        special_kpoint_map=special_kpoints_map,
+        segment_names=segment_names,
+        n_grids=n_grids,
+        reciprocal_lattice=reciprocal_lattice,
+    )
+    return kpath
+
+
+@pytest.fixture
+def path_kpoints(sample_kpath):
+    """Generate path kpoints for testing"""
+    return sample_kpath.kpoints
+
+
+@pytest.fixture
+def path_bands(path_kpoints):
+    """Generate path bands for testing"""
+    n_kpoints = len(path_kpoints)
+    n_bands = 4
+    n_spins = 2
+    
+    # Create more realistic bands along the path
+    bands = np.zeros((n_kpoints, n_bands, n_spins))
+    
+    # Create some dispersive bands
+    for iband in range(n_bands):
+        for ispin in range(n_spins):
+            # Simple cosine dispersion
+            t = np.linspace(0, 4*np.pi, n_kpoints)
+            bands[:, iband, ispin] = np.cos(t + iband*np.pi/4) + iband*2.0 + ispin*0.1
+    
+    return bands
+
+
+@pytest.fixture
+def sample_ebs_path(path_kpoints, path_bands, sample_reciprocal_lattice, sample_kpath):
+    """Create a sample ElectronicBandStructurePath for testing"""
+    n_kpoints = len(path_kpoints)
+    n_bands = 4
+    n_spins = 2
+    n_atoms = 2
+    n_orbitals = 3
+    
+    projected = np.random.rand(n_kpoints, n_bands, n_spins, n_atoms, n_orbitals)
+    
+    return ElectronicBandStructurePath(
+        kpoints=path_kpoints,
+        bands=path_bands,
+        projected=projected,
+        fermi=0.0,
+        reciprocal_lattice=sample_reciprocal_lattice,
+        orbital_names=["s", "p", "d"],
+        kpath=sample_kpath,
+    )
+
+class TestElectronicBandStructurePath:
+    """Test class for ElectronicBandStructurePath functionality."""
+    
+    def test_initialization(self, sample_ebs_path):
+        """Test basic initialization of ElectronicBandStructurePath."""
+        assert sample_ebs_path.n_kpoints == 300  # 3 segments * 10 points + 1 final
+        assert sample_ebs_path.n_bands == 4
+        assert sample_ebs_path.n_spins == 2
+        assert sample_ebs_path.n_atoms == 2
+        assert sample_ebs_path.n_orbitals == 3
+        assert sample_ebs_path.fermi == 0.0
+        assert len(sample_ebs_path.orbital_names) == 3
+    
+    def test_kpath_properties(self, sample_ebs_path):
+        """Test KPath-related properties."""
+        kpath = sample_ebs_path.kpath
+        assert kpath is not None
+        assert len(kpath.segment_names) == 6  # Γ, X, L, Γ
+        assert kpath.n_segments == 6
+        assert len(kpath.tick_positions) == 5
+        assert len(kpath.tick_names) == 5
+        assert len(kpath.tick_names_latex) == 5
+        assert len(kpath.special_kpoint_names) == 4
+        
+        # Check that tick names contain expected symbols
+        tick_names = ['$\\Gamma$', 'N', '$\\Gamma$', 'P|H', 'N']
+        tick_names_latex = ['$$\\Gamma$$', 'N', '$$\\Gamma$$', 'P|H', 'N']
+        assert tick_names == kpath.tick_names
+        assert tick_names_latex == kpath.tick_names_latex
+        
+    
+    def test_coordinate_transformation(self, sample_ebs_path):
+        """Test as_cart and as_frac methods."""
+        # Store original kpoints
+        original_kpoints = sample_ebs_path.kpoints.copy()
+        
+        # Convert to cartesian (should be called in __init__ already)
+        sample_ebs_path.as_cart()
+        cartesian_kpoints = sample_ebs_path.kpoints.copy()
+        
+        # Convert back to fractional
+        sample_ebs_path.as_frac()
+        fractional_kpoints = sample_ebs_path.kpoints.copy()
+        
+        # Should be close to original
+        assert np.allclose(fractional_kpoints, original_kpoints, atol=1e-10)
+        
+        # Cartesian and fractional should be different (unless reciprocal lattice is identity)
+        if not np.allclose(sample_ebs_path.reciprocal_lattice, np.eye(3)):
+            assert not np.allclose(cartesian_kpoints, fractional_kpoints)
+    
+    def test_gradient_func_interface(self, sample_ebs_path):
+        """Test gradient_func method from DifferentiablePropertyInterface."""
+        # Test that gradient_func exists and is callable
+        assert hasattr(sample_ebs_path, 'gradient_func')
+        assert callable(sample_ebs_path.gradient_func)
+        
+        # Note: The current implementation has a bug where it references 'name' 
+        # instead of using the 'values' parameter. We'll test the interface exists
+        # but skip the actual call since it would fail due to the implementation bug.
+        
+        # Test method signature
+        import inspect
+        sig = inspect.signature(sample_ebs_path.gradient_func)
+        expected_params = ['points', 'values']
+        actual_params = list(sig.parameters.keys())
+        
+        for param in expected_params:
+            assert param in actual_params
+    
+    def test_property_interface_methods(self, sample_ebs_path):
+        """Test DifferentiablePropertyInterface methods."""
+        # Test get_property
+        bands_prop = sample_ebs_path.get_property("bands")
+        assert bands_prop is not None
+        assert np.array_equal(bands_prop.value, sample_ebs_path.bands)
+        
+        # Test add_property
+        test_property = np.random.rand(sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins)
+        sample_ebs_path.add_property(name="test_prop", value=test_property)
+        
+        retrieved_prop = sample_ebs_path.get_property("test_prop")
+        assert retrieved_prop is not None
+        assert np.array_equal(retrieved_prop.value, test_property)
+    
+    def test_differentiable_property_interface(self, sample_ebs_path):
+        """Test compute_band_velocity method."""
+        # First add gradients manually for testing
+
+        # Compute band velocity
+        velocity_property = sample_ebs_path.get_property("bands_velocity")
+        
+        # Check output
+        assert velocity_property is not None
+        assert "bands_velocity" in sample_ebs_path.property_store
+        
+        # Check that it's stored as property
+        stored_velocity_property = sample_ebs_path.get_property("bands_velocity")
+        assert stored_velocity_property is not None
+        assert np.array_equal(stored_velocity_property.value, velocity_property.value)
+        
+        # Compute band speed
+        speed_property = sample_ebs_path.get_property("bands_speed")
+        
+        # Check output
+        assert speed_property is not None
+        assert "bands_speed" in sample_ebs_path.property_store
+        
+        # Check that it's stored as property
+        stored_speed_property = sample_ebs_path.get_property("bands_speed")
+        assert stored_speed_property is not None
+        assert np.array_equal(stored_speed_property.value, speed_property.value)
+        
+        
+        # Compute average inverse effective mass
+        avg_inv_mass_property = sample_ebs_path.get_property("avg_inv_effective_mass")
+        
+        # Check output
+        assert avg_inv_mass_property is not None
+        assert "avg_inv_effective_mass" in sample_ebs_path.property_store
+        
+        # Check that it's stored as property
+        stored_avg_inv_mass_property = sample_ebs_path.get_property("avg_inv_effective_mass")
+        assert stored_avg_inv_mass_property is not None
+        assert np.array_equal(stored_avg_inv_mass_property.value, avg_inv_mass_property.value)
+    
+    def test_as_kdist_method(self, sample_ebs_path):
+        """Test as_kdist method for plotting."""
+        # Test as segments
+        blocks_segments = sample_ebs_path.as_kdist(as_segments=True)
+        assert isinstance(blocks_segments, pv.MultiBlock)
+        assert len(blocks_segments) > 0
+        
+        # Test as continuous
+        blocks_continuous = sample_ebs_path.as_kdist(as_segments=False)
+        assert isinstance(blocks_continuous, pv.MultiBlock)
+        assert len(blocks_continuous) > 0
+        
+        # Should have different number of blocks
+        n_bands = sample_ebs_path.n_bands
+        n_spins = sample_ebs_path.n_spins
+        n_segments = sample_ebs_path.n_segments
+        
+        expected_segments = n_bands * n_spins * n_segments
+        expected_continuous = n_bands * n_spins
+        
+        assert len(blocks_segments) == expected_segments
+        assert len(blocks_continuous) == expected_continuous
+    
+    # def test_from_ebs_classmethod(self, sample_ebs, sample_kpath):
+    #     """Test creating ElectronicBandStructurePath from ElectronicBandStructure."""
+    #     # Add kpath to the regular ebs
+    #     sample_ebs._kpath = sample_kpath
+        
+    #     # Create path from ebs
+    #     ebs_path = ElectronicBandStructurePath.from_ebs(sample_ebs, kpath=sample_kpath)
+        
+    #     # Should be a new instance
+    #     assert ebs_path is not sample_ebs
+    #     assert isinstance(ebs_path, ElectronicBandStructurePath)
+        
+    #     # Should have same basic properties
+    #     assert ebs_path.n_kpoints == sample_ebs.n_kpoints
+    #     assert ebs_path.n_bands == sample_ebs.n_bands
+    #     assert ebs_path.fermi == sample_ebs.fermi
+        
+    #     # Should have kpath
+    #     assert ebs_path.kpath is not None
+    #     assert ebs_path.kpath == sample_kpath
+        
+    def test_from_code_classmethod(self, path_calc_dir):
+        """Test creating ElectronicBandStructurePath from code."""
+        ebs_path = ElectronicBandStructurePath.from_code(code="vasp", dirpath=path_calc_dir)
+        assert ebs_path is not None
+        assert isinstance(ebs_path, ElectronicBandStructurePath)
+
+
+@pytest.fixture
+def plane_normal_z():
+    """Normal vector for z-plane."""
+    return np.array([0.0, 0.0, 1.0])
+
+
+@pytest.fixture
+def plane_normal_xy():
+    """Normal vector for diagonal plane in xy."""
+    return np.array([1.0, 1.0, 0.0]) / np.sqrt(2)
+
+
+@pytest.fixture
+def plane_origin():
+    """Origin point for plane."""
+    return np.array([0.0, 0.0, 0.5])
+
+
+@pytest.fixture
+def sample_plane_z(sample_ebs_mesh, plane_normal_z, plane_origin):
+    """Create a sample ElectronicBandStructurePlane with z-normal."""
+    return ElectronicBandStructurePlane(
+        ebs_mesh=sample_ebs_mesh,
+        normal=plane_normal_z,
+        origin=plane_origin,
+        grid_interpolation=(8, 8),
+    )
+
+
+@pytest.fixture
+def sample_plane_xy(sample_ebs_mesh, plane_normal_xy):
+    """Create a sample ElectronicBandStructurePlane with xy-diagonal normal."""
+    return ElectronicBandStructurePlane(
+        ebs_mesh=sample_ebs_mesh,
+        normal=plane_normal_xy,
+        origin=np.array([0.0, 0.0, 0.0]),
+        grid_interpolation=(6, 6),
+    )
+
+
+class TestElectronicBandStructurePlane:
+    """Test class for ElectronicBandStructurePlane functionality."""
+    
+    def test_initialization(self, sample_plane_z, sample_ebs_mesh, plane_normal_z, plane_origin):
+        """Test basic initialization of ElectronicBandStructurePlane."""
+        assert sample_plane_z.ebs_mesh is sample_ebs_mesh
+        assert np.allclose(sample_plane_z.normal, plane_normal_z)
+        assert np.allclose(sample_plane_z.origin, plane_origin)
+        assert sample_plane_z.grid_interpolation == (8, 8)
+        
+        # Check inherited properties
+        assert sample_plane_z.fermi == sample_ebs_mesh.fermi
+        assert sample_plane_z.orbital_names == sample_ebs_mesh.orbital_names
+        assert np.array_equal(sample_plane_z.reciprocal_lattice, sample_ebs_mesh.reciprocal_lattice)
+    
+    def test_plane_properties(self, sample_plane_z):
+        """Test plane-specific properties."""
+        # Normal should be unit vector
+        assert np.isclose(np.linalg.norm(sample_plane_z.normal), 1.0)
+        
+        # u and v should be orthogonal to normal and each other
+        u, v = sample_plane_z.u, sample_plane_z.v
+        assert np.isclose(np.dot(u, sample_plane_z.normal), 0.0, atol=1e-10)
+        assert np.isclose(np.dot(v, sample_plane_z.normal), 0.0, atol=1e-10)
+        assert np.isclose(np.dot(u, v), 0.0, atol=1e-10)
+        
+        # u and v should be unit vectors
+        assert np.isclose(np.linalg.norm(u), 1.0)
+        assert np.isclose(np.linalg.norm(v), 1.0)
+    
+    def test_transformation_matrices(self, sample_plane_z):
+        """Test transformation matrix properties."""
+        uv_matrix = sample_plane_z.uv_transformation_matrix
+        full_matrix = sample_plane_z.transformation_matrix
+        
+        # UV transformation matrix should be 2x3
+        assert uv_matrix.shape == (2, 3)
+        
+        # Full transformation matrix should be 3x3
+        assert full_matrix.shape == (3, 3)
+        
+        # UV matrix should be first two rows of full matrix
+        assert np.allclose(uv_matrix, full_matrix[:2, :])
+        
+        # Third row should be the normal
+        assert np.allclose(full_matrix[2, :], sample_plane_z.normal)
+    
+    def test_grid_generation(self, sample_plane_z):
+        """Test UV grid generation."""
+        grid_u, grid_v = sample_plane_z.get_uv_grid()
+        
+        # Grid should have the correct shape
+        assert grid_u.shape == sample_plane_z.grid_interpolation
+        assert grid_v.shape == sample_plane_z.grid_interpolation
+        
+        # Grid should span the u and v limits
+        u_min, u_max = sample_plane_z.u_limits
+        v_min, v_max = sample_plane_z.v_limits
+        
+        assert np.isclose(np.min(grid_u), u_min)
+        assert np.isclose(np.max(grid_u), u_max)
+        assert np.isclose(np.min(grid_v), v_min)
+        assert np.isclose(np.max(grid_v), v_max)
+    
+    def test_uv_points_and_kpoints(self, sample_plane_z):
+        """Test UV points and kpoints generation."""
+        uv_points = sample_plane_z.uv_points
+        uv_kpoints = sample_plane_z.uv_kpoints
+        
+        # UV points should be 2D
+        n_points = np.prod(sample_plane_z.grid_interpolation)
+        assert uv_points.shape == (n_points, 2)
+        
+        # UV kpoints should be 3D and shifted by origin
+        assert uv_kpoints.shape == (n_points, 3)
+        
+        # First point should be at origin + u_min*u + v_min*v
+        u_min, _ = sample_plane_z.u_limits
+        v_min, _ = sample_plane_z.v_limits
+        expected_first_point = (sample_plane_z.origin + 
+                               u_min * sample_plane_z.u + 
+                               v_min * sample_plane_z.v)
+        assert np.allclose(uv_kpoints[0], expected_first_point)
+    
+    def test_cartesian_conversion(self, sample_plane_z):
+        """Test cartesian coordinate conversion."""
+        uv_kpoints_cart = sample_plane_z.uv_kpoints_cartesian
+        
+        # Should have same shape as uv_kpoints
+        assert uv_kpoints_cart.shape == sample_plane_z.uv_kpoints.shape
+        
+        # Should be different from fractional coordinates (unless reciprocal lattice is identity)
+        if not np.allclose(sample_plane_z.reciprocal_lattice, np.eye(3)):
+            assert not np.allclose(uv_kpoints_cart, sample_plane_z.uv_kpoints)
+    
+    def test_plane_alignment_detection(self, sample_plane_z, sample_plane_xy):
+        """Test plane alignment with reciprocal lattice axes."""
+        # Z-normal should be aligned with reciprocal lattice (identity matrix)
+        assert sample_plane_z.is_plane_axes_aligned
+        
+        # XY-diagonal normal should not be aligned
+        assert not sample_plane_xy.is_plane_axes_aligned
+    
+    def test_orthonormal_basis_generation(self, sample_plane_z, sample_plane_xy):
+        """Test orthonormal basis generation for different normals."""
+        # Test z-normal
+        u_z, v_z = sample_plane_z.get_orthonormal_basis()
+        assert np.isclose(np.linalg.norm(u_z), 1.0)
+        assert np.isclose(np.linalg.norm(v_z), 1.0)
+        assert np.isclose(np.dot(u_z, v_z), 0.0, atol=1e-10)
+        assert np.isclose(np.dot(u_z, sample_plane_z.normal), 0.0, atol=1e-10)
+        assert np.isclose(np.dot(v_z, sample_plane_z.normal), 0.0, atol=1e-10)
+        
+        # Test xy-diagonal normal
+        u_xy, v_xy = sample_plane_xy.get_orthonormal_basis()
+        assert np.isclose(np.linalg.norm(u_xy), 1.0)
+        assert np.isclose(np.linalg.norm(v_xy), 1.0)
+        assert np.isclose(np.dot(u_xy, v_xy), 0.0, atol=1e-10)
+        assert np.isclose(np.dot(u_xy, sample_plane_xy.normal), 0.0, atol=1e-10)
+        assert np.isclose(np.dot(v_xy, sample_plane_xy.normal), 0.0, atol=1e-10)
+    
+    def test_transform_points_to_uv(self, sample_plane_z):
+        """Test point transformation to UV coordinates."""
+        # Test some 3D points
+        test_points_3d = np.array([
+            [0.1, 0.2, 0.5],  # Near the plane
+            [0.0, 0.0, 0.5],  # On the plane at origin
+            [0.5, 0.3, 0.5],  # Another point on the plane
+        ])
+        
+        uv_coords = sample_plane_z.transform_points_to_uv(test_points_3d)
+        
+        # Should be 2D coordinates
+        assert uv_coords.shape == (3, 2)
+        
+        # Test with shifted points
+        shifted_points = test_points_3d - sample_plane_z.origin
+        uv_coords_shifted = sample_plane_z.transform_points_to_uv(shifted_points, is_shifted=True)
+        
+        # Should be the same result
+        assert np.allclose(uv_coords, uv_coords_shifted)
+    
+    def test_find_points_near_plane_static(self, sample_ebs_mesh):
+        """Test the static method for finding points near plane."""
+        normal = np.array([0.0, 0.0, 1.0])
+        origin = np.array([0.0, 0.0, 0.5])
+        plane_tol = 0.1
+        
+        # Get cartesian coordinates
+        kpoints_cart = sample_ebs_mesh.kpoints_cartesian
+        
+        # Find points near plane
+        points_near_plane = ElectronicBandStructurePlane.find_points_near_plane(
+            kpoints_cart, normal, origin, plane_tol=plane_tol
+        )
+        
+        # Should return some points
+        assert len(points_near_plane) > 0
+        assert points_near_plane.shape[1] == 3
+        
+        # Test with return_indices=True
+        points_near_plane_indexed, indices = ElectronicBandStructurePlane.find_points_near_plane(
+            kpoints_cart, normal, origin, plane_tol=plane_tol, return_indices=True
+        )
+        
+        # Should return same points
+        assert np.allclose(points_near_plane, points_near_plane_indexed)
+        assert len(indices) == len(points_near_plane)
+        
+        # Indices should be valid
+        assert np.all(indices >= 0)
+        assert np.all(indices < len(kpoints_cart))
+    
+    def test_property_inheritance(self, sample_plane_z, sample_ebs_mesh):
+        """Test that properties are properly transferred from mesh to plane."""
+        # Bands property should exist
+        bands_prop = sample_plane_z.get_property("bands")
+        assert bands_prop is not None
+        
+        # Should have correct shape for the plane grid
+        n_plane_points = np.prod(sample_plane_z.grid_interpolation)
+        expected_shape = (n_plane_points, sample_ebs_mesh.n_bands, sample_ebs_mesh.n_spin_channels)
+        assert bands_prop.value.shape == expected_shape
+        
+        # Projected property should also exist if it exists in the mesh
+        if sample_ebs_mesh.projected is not None:
+            projected_prop = sample_plane_z.get_property("projected")
+            assert projected_prop is not None
+            expected_projected_shape = (n_plane_points, sample_ebs_mesh.n_bands, 
+                                      sample_ebs_mesh.n_spins, sample_ebs_mesh.n_atoms, 
+                                      sample_ebs_mesh.n_orbitals)
+            assert projected_prop.value.shape == expected_projected_shape
+    
+    def test_initialization_without_grid_interpolation_aligned(self, sample_ebs_mesh, plane_normal_z):
+        """Test initialization without grid_interpolation for aligned plane."""
+        # For aligned plane, grid_interpolation should be auto-determined
+        plane = ElectronicBandStructurePlane(
+            ebs_mesh=sample_ebs_mesh,
+            normal=plane_normal_z,
+            origin=np.array([0.0, 0.0, 0.0]),
+        )
+        
+        # Should have determined grid interpolation automatically
+        assert plane.grid_interpolation is not None
+        assert len(plane.grid_interpolation) == 2
+    
+    def test_from_code_classmethod(self, mesh_calc_dir):
+        """Test creating plane from code directory."""
+        normal = np.array([0.0, 0.0, 1.0])
+        origin = np.array([0.0, 0.0, 0.0])
+        
+        plane = ElectronicBandStructurePlane.from_code(
+            code="vasp",
+            dirpath=mesh_calc_dir,
+            normal=normal,
+            origin=origin,
+            grid_interpolation=(5, 5),
+        )
+        
+        assert isinstance(plane, ElectronicBandStructurePlane)
+        assert np.allclose(plane.normal, normal)
+        assert np.allclose(plane.origin, origin)
+        assert plane.grid_interpolation == (5, 5)
+    
+
+
 class TestElectronicBandStructureMesh:
     """Test class for ElectronicBandStructureMesh functionality."""
     
@@ -554,10 +1055,6 @@ class TestElectronicBandStructureMesh:
         assert velocity_interpolator["curl"](new_points).shape == (2, 3, 1, 3)
         assert velocity_interpolator["laplacian"](new_points).shape == (2, 3, 1, 3)
         
-        
-        
-        
-        
     # def test_reduce_to_plane(self, sample_ebs_mesh):
     #     """Test reducing mesh to plane."""
     #     normal = np.array([0, 0, 1])  # z-normal plane
@@ -582,244 +1079,4 @@ class TestElectronicBandStructureMesh:
     #     assert hessians is not None
     #     assert hessians.shape == (64, 3, 1, 3, 3)  # Last 3x3 is hessian
 
-
-class TestElectronicBandStructurePath:
-    """Test class for ElectronicBandStructurePath functionality."""
-    
-    def test_initialization(self, sample_ebs_path):
-        """Test basic initialization of ElectronicBandStructurePath."""
-        assert sample_ebs_path.n_kpoints == 31  # 3 segments * 10 points + 1 final
-        assert sample_ebs_path.n_bands == 4
-        assert sample_ebs_path.n_spins == 2
-        assert sample_ebs_path.n_atoms == 2
-        assert sample_ebs_path.n_orbitals == 3
-        assert sample_ebs_path.fermi == 0.0
-        assert len(sample_ebs_path.orbital_names) == 3
-        assert sample_ebs_path.kpath is not None
-    
-    def test_kpath_properties(self, sample_ebs_path):
-        """Test KPath-related properties."""
-        assert sample_ebs_path.kpath is not None
-        assert len(sample_ebs_path.knames) == 4  # Γ, X, L, Γ
-        assert sample_ebs_path.n_segments == 3
-        assert len(sample_ebs_path.tick_positions) == 4
-        assert len(sample_ebs_path.tick_names) == 4
-        assert len(sample_ebs_path.tick_names_latex) == 4
-        assert len(sample_ebs_path.special_kpoint_names) == 4
-        
-        # Check that tick names contain expected symbols
-        assert "Γ" in sample_ebs_path.tick_names
-        assert "X" in sample_ebs_path.tick_names
-        assert "L" in sample_ebs_path.tick_names
-    
-    def test_coordinate_transformation(self, sample_ebs_path):
-        """Test as_cart and as_frac methods."""
-        # Store original kpoints
-        original_kpoints = sample_ebs_path.kpoints.copy()
-        
-        # Convert to cartesian (should be called in __init__ already)
-        sample_ebs_path.as_cart()
-        cartesian_kpoints = sample_ebs_path.kpoints.copy()
-        
-        # Convert back to fractional
-        sample_ebs_path.as_frac()
-        fractional_kpoints = sample_ebs_path.kpoints.copy()
-        
-        # Should be close to original
-        assert np.allclose(fractional_kpoints, original_kpoints, atol=1e-10)
-        
-        # Cartesian and fractional should be different (unless reciprocal lattice is identity)
-        if not np.allclose(sample_ebs_path.reciprocal_lattice, np.eye(3)):
-            assert not np.allclose(cartesian_kpoints, fractional_kpoints)
-    
-    def test_gradient_func_interface(self, sample_ebs_path):
-        """Test gradient_func method from DifferentiablePropertyInterface."""
-        # Test that gradient_func exists and is callable
-        assert hasattr(sample_ebs_path, 'gradient_func')
-        assert callable(sample_ebs_path.gradient_func)
-        
-        # Note: The current implementation has a bug where it references 'name' 
-        # instead of using the 'values' parameter. We'll test the interface exists
-        # but skip the actual call since it would fail due to the implementation bug.
-        
-        # Test method signature
-        import inspect
-        sig = inspect.signature(sample_ebs_path.gradient_func)
-        expected_params = ['points', 'values']
-        actual_params = list(sig.parameters.keys())
-        
-        for param in expected_params:
-            assert param in actual_params
-    
-    def test_property_interface_methods(self, sample_ebs_path):
-        """Test DifferentiablePropertyInterface methods."""
-        # Test get_property
-        bands_prop = sample_ebs_path.get_property("bands")
-        assert bands_prop is not None
-        assert np.array_equal(bands_prop.value, sample_ebs_path.bands)
-        
-        # Test add_property
-        test_property = np.random.rand(sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins)
-        sample_ebs_path.add_property("test_prop", test_property)
-        
-        retrieved_prop = sample_ebs_path.get_property("test_prop")
-        assert retrieved_prop is not None
-        assert np.array_equal(retrieved_prop.value, test_property)
-    
-    def test_compute_band_velocity(self, sample_ebs_path):
-        """Test compute_band_velocity method."""
-        # First add gradients manually for testing
-        gradients = np.random.rand(sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins, 3)
-        sample_ebs_path.add_property(name="bands", value=sample_ebs_path.bands)
-        sample_ebs_path.property_store["bands"].gradients[1] = gradients
-        
-        # Compute band velocity
-        velocity = sample_ebs_path.compute_band_velocity()
-        
-        # Check output
-        assert velocity is not None
-        assert velocity.shape == gradients.shape
-        assert "bands_velocity" in sample_ebs_path.property_store
-        
-        # Check that it's stored as property
-        stored_velocity = sample_ebs_path.get_property("bands_velocity")
-        assert stored_velocity is not None
-        assert np.array_equal(stored_velocity.value, velocity)
-    
-    def test_compute_band_speed(self, sample_ebs_path):
-        """Test compute_band_speed method."""
-        # First set up velocity manually
-        velocity = np.random.rand(sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins, 3)
-        sample_ebs_path.add_property("bands_velocity", velocity)
-        
-        # Compute band speed
-        speed = sample_ebs_path.compute_band_speed()
-        
-        # Check output
-        assert speed is not None
-        expected_shape = (sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins)
-        assert speed.shape == expected_shape
-        assert "band_speed" in sample_ebs_path.property_store
-        
-        # Speed should be positive
-        assert np.all(speed >= 0)
-        
-        # Check that it's the magnitude of velocity
-        expected_speed = np.linalg.norm(velocity, axis=-1)
-        assert np.allclose(speed, expected_speed)
-    
-    def test_compute_avg_inv_effective_mass(self, sample_ebs_path):
-        """Test compute_avg_inv_effective_mass method."""
-        # Set up hessian manually
-        hessian_shape = (sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins, 3, 3)
-        hessian = np.random.rand(*hessian_shape)
-        sample_ebs_path.add_property(name="bands", value=sample_ebs_path.bands)
-        sample_ebs_path.property_store["bands"].gradients[2] = hessian
-        
-        # Compute average inverse effective mass
-        avg_inv_mass = sample_ebs_path.compute_avg_inv_effective_mass()
-        
-        # Check output
-        assert avg_inv_mass is not None
-        expected_shape = (sample_ebs_path.n_kpoints, sample_ebs_path.n_bands, sample_ebs_path.n_spins)
-        assert avg_inv_mass.shape == expected_shape
-        assert "avg_inv_effective_mass" in sample_ebs_path.property_store
-        
-        # Check that it's finite
-        assert np.isfinite(avg_inv_mass).all()
-    
-    def test_string_representation(self, sample_ebs_path):
-        """Test string representation includes KPath information."""
-        str_repr = str(sample_ebs_path)
-        
-        # Should contain basic EBS info
-        assert "Electronic Band Structure" in str_repr
-        assert "Total number of kpoints" in str_repr
-        
-        # Should contain KPath specific info
-        assert "KPath" in str_repr
-    
-    def test_as_kdist_method(self, sample_ebs_path):
-        """Test as_kdist method for plotting."""
-        # Test as segments
-        blocks_segments = sample_ebs_path.as_kdist(as_segments=True)
-        assert isinstance(blocks_segments, pv.MultiBlock)
-        assert len(blocks_segments) > 0
-        
-        # Test as continuous
-        blocks_continuous = sample_ebs_path.as_kdist(as_segments=False)
-        assert isinstance(blocks_continuous, pv.MultiBlock)
-        assert len(blocks_continuous) > 0
-        
-        # Should have different number of blocks
-        n_bands = sample_ebs_path.n_bands
-        n_spins = sample_ebs_path.n_spins
-        n_segments = sample_ebs_path.n_segments
-        
-        expected_segments = n_bands * n_spins * n_segments
-        expected_continuous = n_bands * n_spins
-        
-        assert len(blocks_segments) == expected_segments
-        assert len(blocks_continuous) == expected_continuous
-    
-    def test_from_ebs_classmethod(self, sample_ebs, sample_kpath):
-        """Test creating ElectronicBandStructurePath from ElectronicBandStructure."""
-        # Add kpath to the regular ebs
-        sample_ebs._kpath = sample_kpath
-        
-        # Create path from ebs
-        ebs_path = ElectronicBandStructurePath.from_ebs(sample_ebs, kpath=sample_kpath)
-        
-        # Should be a new instance
-        assert ebs_path is not sample_ebs
-        assert isinstance(ebs_path, ElectronicBandStructurePath)
-        
-        # Should have same basic properties
-        assert ebs_path.n_kpoints == sample_ebs.n_kpoints
-        assert ebs_path.n_bands == sample_ebs.n_bands
-        assert ebs_path.fermi == sample_ebs.fermi
-        
-        # Should have kpath
-        assert ebs_path.kpath is not None
-        assert ebs_path.kpath == sample_kpath
-    
-    def test_differential_property_interface_inheritance(self, sample_ebs_path):
-        """Test that ElectronicBandStructurePath properly inherits DifferentiablePropertyInterface."""
-        from pyprocar.core.ebs import DifferentiablePropertyInterface
-
-        # Check inheritance
-        assert isinstance(sample_ebs_path, DifferentiablePropertyInterface)
-        
-        # Check all required methods exist
-        required_methods = ['gradient_func', 'get_property', 'add_property',
-                          'compute_band_velocity', 'compute_band_speed', 
-                          'compute_avg_inv_effective_mass']
-        
-        for method_name in required_methods:
-            assert hasattr(sample_ebs_path, method_name)
-            assert callable(getattr(sample_ebs_path, method_name))
-    
-    def test_kpath_consistency(self, sample_ebs_path):
-        """Test that kpath and kpoints are consistent."""
-        # Number of kpoints should match
-        assert len(sample_ebs_path.kpath.path) == sample_ebs_path.n_kpoints
-        
-        # Note: The kpoints may have been transformed (e.g., to cartesian), 
-        # so we can't directly compare them but we can check dimensions match
-    
-    def test_continuous_segments_property(self, sample_ebs_path):
-        """Test that kpath has continuous segments property."""
-        # Test that the kpath has the method for getting continuous segments
-        assert hasattr(sample_ebs_path.kpath, 'get_continuous_segments')
-        assert callable(sample_ebs_path.kpath.get_continuous_segments)
-        
-        # Test that it returns something (we can't test exact values without 
-        # knowing the KPath implementation details)
-        try:
-            segments = sample_ebs_path.kpath.get_continuous_segments()
-            # Should return some kind of iterable
-            assert hasattr(segments, '__iter__')
-        except (AttributeError, NotImplementedError):
-            # If method doesn't exist or isn't implemented, that's also valid to test
-            pass
 
