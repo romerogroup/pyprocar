@@ -10,6 +10,16 @@ from matplotlib import cm
 from matplotlib import colors as mpcolors
 
 from pyprocar.core import BandStructure2D
+from pyprocar.plotter.ebs_utils import (
+    find_plane_limits,
+    get_orthonormal_basis,
+    get_transformation_matrix,
+    get_uv_grid,
+    get_uv_grid_kpoints,
+    get_uv_grid_points,
+    get_uv_transformation_matrix,
+    transform_points_to_uv,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +31,8 @@ from pyvista.plotting.utilities.algorithms import (
     set_algorithm_input,
 )
 
-BZ_SCALE_FACTOR = 0.025
+# BZ_SCALE_FACTOR = 0.025
+BZ_SCALE_FACTOR = 1
 
 
 def find_nearest(array, value):
@@ -38,12 +49,25 @@ def normalize_to_range(scalars, clim=(0, 1)):
     ) + clim[0]
 
 
+def get_uv_bands_grid(
+    grid_interpolation:tuple[int, int],
+    u_limits:tuple[float, float],
+    v_limits:tuple[float, float],
+    ):
+    grid_u, grid_v = np.mgrid[
+        u_limits[0] : u_limits[1] : complex(0, grid_interpolation[0]),
+        v_limits[0] : v_limits[1] : complex(0, grid_interpolation[1]),
+    ]
+    return grid_u, grid_v
+
 class BS2DPlotter(pv.Plotter):
 
-    def __init__(self, **kwargs):
+    def __init__(self, 
+                 bandstructure2d,
+                 **kwargs):
         super().__init__(**kwargs)
-        self._meshes = []
-
+        self.bs2d = bandstructure2d
+        
     def add_brillouin_zone(
         self,
         brillouin_zone: pv.PolyData = None,
@@ -52,6 +76,7 @@ class BS2DPlotter(pv.Plotter):
         color: ColorLike = "black",
         opacity: float = 1.0,
     ):
+        self.brillouin_zone = brillouin_zone
         self.add_mesh(
             brillouin_zone,
             style=style,
@@ -62,8 +87,9 @@ class BS2DPlotter(pv.Plotter):
 
     def add_surface(
         self,
-        fermi_surface: pv.PolyData,
+        surface: pv.PolyData,
         normalize: bool = False,
+        clip_surface: bool = False,
         add_texture_args: dict = None,
         add_active_vectors: bool = False,
         show_scalar_bar: bool = True,
@@ -80,7 +106,7 @@ class BS2DPlotter(pv.Plotter):
             add_mesh_args = {}
 
         if show_scalar_bar:
-            active_scalar_name = fermi_surface.active_scalars_name
+            active_scalar_name = surface.active_scalars_name
             if "norm" in active_scalar_name:
                 active_scalar_name = active_scalar_name.replace("-norm", "")
             add_mesh_args["show_scalar_bar"] = add_mesh_args.get(
@@ -100,22 +126,36 @@ class BS2DPlotter(pv.Plotter):
         cmap = add_mesh_args.get("cmap", "plasma")
 
         if normalize:
-            scalars = normalize_to_range(fermi_surface.active_scalars, clim=clim)
+            scalars = normalize_to_range(surface.active_scalars, clim=clim)
             add_mesh_args["scalars"] = scalars
         add_mesh_args["scalars"] = add_mesh_args.get("scalars", None)
+        
+        if clip_surface:
+            surface = self.clip_surface(surface, self.brillouin_zone)
+        
 
-        self.add_mesh(fermi_surface, **add_mesh_args)
+        self.add_mesh(surface, **add_mesh_args)
 
         if add_active_vectors:
             # aligning the texture colors with the surface colors
             add_texture_args["cmap"] = add_texture_args.get("cmap", cmap)
             add_texture_args["clim"] = add_texture_args.get("clim", clim)
 
-            self.add_texture(fermi_surface, **add_texture_args)
+            self.add_texture(surface, **add_texture_args)
+
+    def clip_surface(self, surface: pv.PolyData, brillouin_zone: pv.PolyData):
+        
+        for normal, center in zip(brillouin_zone.face_normals, brillouin_zone.centers):
+            surface = surface.clip(origin=center, normal=normal, inplace=False)
+            if surface.points.shape[0] == 0:
+                break
+            
+        return surface
+
 
     def add_texture(
         self,
-        fermi_surface: pv.PolyData,
+        surface: pv.PolyData,
         vectors: Union[str, bool] = True,
         factor: float = 1.0,
         add_mesh_args: dict = None,
@@ -123,7 +163,7 @@ class BS2DPlotter(pv.Plotter):
         **kwargs,
     ):
 
-        active_vectors = fermi_surface.active_vectors
+        active_vectors = surface.active_vectors
         if active_vectors is None:
             return None
 
@@ -144,14 +184,14 @@ class BS2DPlotter(pv.Plotter):
         glyph_args["scale"] = glyph_args.get("scale", True)
         glyph_args["orient"] = glyph_args.get("orient", vectors)
 
-        active_vector_magnitude = np.linalg.norm(fermi_surface.active_vectors, axis=1)
+        active_vector_magnitude = np.linalg.norm(surface.active_vectors, axis=1)
         vector_scale_factor = 1 / active_vector_magnitude.max()
         factor = vector_scale_factor * BZ_SCALE_FACTOR * factor
 
         glyph_args["factor"] = factor
         glyph_args["indices"] = glyph_args.get("indices", None)
 
-        arrows = fermi_surface.glyph(**glyph_args)
+        arrows = surface.glyph(**glyph_args)
         self.add_mesh(arrows, **add_mesh_args)
         return arrows
 

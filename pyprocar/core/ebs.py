@@ -1572,7 +1572,48 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
             property[calc_name, gradient_order] = interpolated_value
             
         ebs.update_points(new_kpoints)
-        ebs._grid = ebs.to_pyvista_grid()
+        ebs._mesh = ebs.to_pyvista_grid()
+        return ebs
+    
+    def expand_single_dimension(self, inplace=False, fill_tol=0.1):
+        if inplace:
+            ebs = self
+        else:
+          ebs = copy.deepcopy(self)
+        
+        unique_coords = [self.ukx, self.uky, self.ukz]
+        
+        no_single_dim = True
+        for dim_size in unique_coords:
+            if len(dim_size) != 1:
+                no_single_dim = False
+                break
+        
+        if no_single_dim:
+            return ebs
+        
+        # Expand the kpoints and properties
+        new_kpoints = ebs.kpoints.copy()
+        for idim, dim_size in enumerate(unique_coords):
+            dim_size = len(dim_size)
+            if dim_size==1:
+                points_plus_fill = ebs.kpoints.copy()
+                points_minus_fill = ebs.kpoints.copy()
+                points_plus_fill[:, idim] += fill_tol
+                points_minus_fill[:, idim] -= fill_tol
+                
+                new_kpoints = np.concatenate([new_kpoints, points_plus_fill, points_minus_fill], axis=0)
+                
+                for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+                    property = ebs.get_property(prop_name)
+                    initial_array = value_array[:ebs.n_kpoints]
+                    new_points = np.concatenate([value_array, initial_array, initial_array], axis=0)
+                    
+                    property[calc_name, gradient_order] = new_points
+                    
+        ebs.update_points(new_kpoints)
+        sort_by_kpoints(ebs, inplace=True)
+        ebs._mesh = ebs.to_mesh()
         return ebs
     
     def slice(self, normal=(0, 0, 1), origin=(0, 0, 0), 
@@ -1583,6 +1624,17 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         
         mesh = self.to_mesh(scalars=scalars, vectors=vectors, as_cartesian=as_cartesian)
         slice = mesh.slice(normal=normal, origin=origin, **kwargs)
+        
+        if not as_cartesian:
+            transform_matrix = np.eye(4)
+            transform_matrix[:3, :3] = self.reciprocal_lattice.T
+            slice = slice.transform(transform_matrix, inplace=False)
+            
+        n_slice_points = len(slice.points)
+        if n_slice_points == 0:
+            error_message = "No points found in the slice."
+            error_message += "Look at the coordinates in cartesian or fractional space to see if origin is right."
+            raise ValueError(error_message)
         if scalars is not None:
             scalar_name, scalar_values = scalars
             slice.set_active_scalars(scalar_name)
