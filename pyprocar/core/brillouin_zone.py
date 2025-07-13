@@ -204,7 +204,8 @@ class BrillouinZone2D(pv.PolyData):
         self,
         e_min,
         e_max,
-        reciprocal_lattice: np.ndarray,
+        axis:int = 2,
+        reciprocal_lattice: np.ndarray = None,
         transformation_matrix: List[int] = None,
     ):
 
@@ -212,15 +213,15 @@ class BrillouinZone2D(pv.PolyData):
 
         verts, faces = self.wigner_seitz()
 
-        min_val = verts[:, 2].min()
-        max_val = verts[:, 2].max()
+        min_val = verts[:, axis].min()
+        max_val = verts[:, axis].max()
 
         for vert in verts:
-            vert_z = vert[2]
+            vert_z = vert[axis]
             if np.isclose(vert_z, min_val, atol=1e-2):
-                vert[2] = e_min
+                vert[axis] = e_min
             if np.isclose(vert_z, max_val, atol=1e-2):
-                vert[2] = e_max
+                vert[axis] = e_max
 
         new_faces = []
         for iface in faces:
