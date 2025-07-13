@@ -86,7 +86,6 @@ def get_ebs_from_data(
         "reciprocal_lattice": reciprocal_lattice,
         "orbital_names": orbital_names,
         "structure": structure,
-        "point_set": point_set,
     }
     
     grid_dims = mathematics.get_grid_dims(kpoints)
@@ -291,10 +290,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
         shifted_to_fermi: bool = False,
         structure: Structure | None = None,
-        point_set: PointSet | None = None,
     ):
         super().__init__(kpoints)
-    
+
         if bands is not None:
             self.add_property(name="bands", value=bands)
         if projected is not None:
@@ -534,8 +532,11 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         else:
             return False
     
-    def is_band_property(self, property: Property):
-        property_value_shape = list(property.value.shape)
+    def is_band_property(self, property: Property | np.ndarray):
+        if isinstance(property, np.ndarray):
+            property_value_shape = list(property.shape)
+        else:
+            property_value_shape = list(property.value.shape)
         if len(property_value_shape) >= 3:
             nbands = property_value_shape[1]
             return nbands == self.n_bands
@@ -808,6 +809,14 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             ret = np.sum(ret[:, :, spins], axis=-1).reshape(
                 self.n_kpoints, self.n_bands, 1
             )
+            
+        if self.is_spin_polarized:
+            # Zero out the spin channel that is not specified
+            if spins == [0]:
+                ret[..., 1] = 0
+            elif spins == [1]:
+                ret[..., 0] = 0
+
 
         return ret
     
@@ -1420,6 +1429,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
             return self.compute_avg_inv_effective_mass(**kwargs)
         else:
             return super().compute_property(name, **kwargs)
+    
     def pad(self, padding=10, order="F", inplace=True):
         logger.info(f"Padding kpoints by {padding} in all directions")
         if inplace:
@@ -1600,6 +1610,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
             projected=ebs.projected,
             projected_phase=ebs.projected_phase,
             weights=ebs.weights,
+            fermi=ebs.fermi,
             orbital_names=ebs.orbital_names,
             reciprocal_lattice=ebs.reciprocal_lattice,
             structure=ebs.structure,
