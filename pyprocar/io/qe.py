@@ -14,7 +14,7 @@ from typing import Union
 
 import numpy as np
 
-from pyprocar.core import DensityOfStates, ElectronicBandStructure, KPath, Structure
+from pyprocar.core import DensityOfStates, KPath, Structure, get_ebs_from_data
 from pyprocar.io.base import BaseParser
 from pyprocar.utils.units import AU_TO_ANG, HARTREE_TO_EV
 
@@ -107,18 +107,19 @@ class QEParser(BaseParser):
                 self.bandsIn = f.read()
             self._get_kpoint_labels()
 
-        self._ebs = ElectronicBandStructure.from_data(
+        self._ebs = get_ebs_from_data(
             kpoints=self.kpoints,
             bands=self.bands,
             projected=self.spd,
-            fermi=self.fermi,
-            structure=self.structure,
             projected_phase=self.spd_phase,
-            orbital_names=self.orbital_names[:-1],
+            fermi=self.fermi,
             reciprocal_lattice=self.reciprocal_lattice,
-            kpath=self._kpath,
-            kgrid=self._kgrid,
+            orbital_names=self.orbital_names[:-1],
+            structure=self.structure,
+            kpath=self.kpath,
         )
+
+    
 
         return None
     
