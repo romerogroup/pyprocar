@@ -522,10 +522,17 @@ class EBSPlot:
         """
         if labels is None:
             labels = [""]
-        self.ebs._properties["bands"] = np.vstack((self.ebs.bands, self.ebs.bands))
-        self.ebs._properties["projected"] = np.vstack((self.ebs.projected, self.ebs.projected))
-        self.ebs._kpoints = np.vstack((self.ebs._kpoints, self.ebs._kpoints))
-        self.ebs._kpoints[0][-1] += 1
+        
+        new_kpoints = np.vstack((self.ebs.kpoints, self.ebs.kpoints))
+        self.ebs.update_points(new_kpoints)
+        for prop_name, calc_name, gradient_order, prop_value in self.ebs.iter_properties():
+            property = self.ebs.get_property(prop_name)
+            property[calc_name, gradient_order] = np.vstack((self.ebs.bands, self.ebs.bands))
+            
+        # self.ebs._properties["bands"] = np.vstack((self.ebs.bands, self.ebs.bands))
+        # self.ebs._properties["projected"] = np.vstack((self.ebs.projected, self.ebs.projected))
+        # self.ebs._kpoints = np.vstack((self.ebs._kpoints, self.ebs._kpoints))
+        # self.ebs._kpoints[0][-1] += 1
         self.x = np.arange(0, self.ebs.kpoints.shape[0]).reshape(-1)
         print("Atomic plot: bands.shape  :", self.ebs.bands.shape)
         print("Atomic plot: spd.shape    :", self.ebs.projected.shape)
