@@ -10,6 +10,7 @@ from scipy import interpolate
 
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
+from pyprocar.core.property_store import PointSet, Property
 from pyprocar.utils.physics_constants import *
 
 logger = logging.getLogger("pyprocar")
@@ -52,7 +53,7 @@ class FermiSurface(pv.PolyData):
         self._padding = padding
         
         self._padded_ebs = ebs.pad(padding=self._padding, inplace=False)
-
+        # self._padded_ebs = ebs
         logger.debug(f"Padded Electronic Band Structure Info: \n {self.padded_ebs}")
 
         # Initialize storage for surface data
@@ -62,7 +63,9 @@ class FermiSurface(pv.PolyData):
 
         # Generate the surfaces
         self._generate_all_surfaces()
-
+        
+        self.point_set = PointSet(self.points)
+        
         logger.debug(f"Fermi Surface: \n {self}")
         logger.debug(f"Fermi Surface Point Data: \n {self.point_data}")
         logger.debug(f"Fermi Surface Cell Data: \n {self.cell_data}")
@@ -100,8 +103,7 @@ class FermiSurface(pv.PolyData):
         x_spacing = 1 / self.ebs.n_kx
         y_spacing = 1 / self.ebs.n_kx
         z_spacing = 1 / self.ebs.n_kx
-        
-        
+
         padded_grid = pv.ImageData(
             dimensions=(nx,ny,nz),
             spacing=(x_spacing, y_spacing, z_spacing),
@@ -169,164 +171,99 @@ class FermiSurface(pv.PolyData):
 
         return BrillouinZone(self.reciprocal_lattice, supercell)
     
-    def get_property(self, name: str, return_gradient_order:int=0, compute=True):
+    def get_property(self, key, **kwargs):
+        prop_name, (calc_name, gradient_order) = self.padded_ebs._extract_key(key)
         
-        if return_gradient_order == 0:
-            if name not in self.point_data and compute:
-                self.compute_property(name)
-            return self.point_data.get(name, None)
-        elif return_gradient_order == 1:
-            if name not in self.point_data and compute:
-                self.compute_gradient(name, first_order=True, second_order=False)
-            return self.point_data.get(name, None)
-        elif return_gradient_order == 2:
-            if name not in self.point_data and compute:
-                self.compute_gradient(name, first_order=False, second_order=True)
-            return self.point_data.get(name, None)
-        else:
-            raise ValueError(f"Invalid return_gradient_order: {return_gradient_order}")
+        if prop_name not in self.point_set.property_store:
+            property_value = self.compute_property(prop_name, **kwargs)
+            property = Property(name=prop_name, value=property_value)
+            self.point_set.add_property(property)
+            
+        self.set_values(prop_name, property_value)
+        return property_value
     
-    def compute_property(self, name: str, include_band_resolved_data=False, **kwargs):
+    def set_surface_point_data(self, name:str, values:np.ndarray):
+        if values.shape[-1] == 3:
+            last_dim = 3
+        else:
+            last_dim = 1
+            
+        self.point_data[name] = np.zeros(shape=(self.n_points, last_dim))
+        if self.ebs.is_band_property(values):
+            logger.debug(f"Adding band resolved to fermi surface point_data: {name}")
+            for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
+                values_band_values = values[:, iband, ispin, ...]
+                mask = self._band_spin_mask[(iband, ispin)]
+                values_band_values[~mask] = 0
+                self.point_data[name] += values_band_values
+        else:
+            logger.debug(f"Adding scalar to fermi surface point_data: {name}")
+            self.point_data[name] += values
+    
+    def set_scalars(self, name:str, value:np.ndarray):
+        self.set_surface_point_data(name, value)
+        self.set_active_scalars(name, preference="point")
+        
+    def set_vectors(self, name:str, value:np.ndarray, set_scalar:bool = True):
+        if value.shape[-1] != 3:
+            raise ValueError(f"Vector data must have 3 dimensions. Got {value.shape[-1]}.")
+        
+        vector_magnitude = np.linalg.norm(value, axis=-1)
+        if set_scalar:
+            self.set_surface_point_data(f"{name}-norm", vector_magnitude)
+            self.set_active_scalars(f"{name}-norm", preference="point")
+        self.set_surface_point_data(name, value)
+        self.set_active_vectors(name, preference="point")
+        
+    def set_values(self, name:str, value:np.ndarray, **kwargs):
+        if value.shape[-1] == 3:
+            self.set_vectors(name, value, **kwargs)
+        else:
+            self.set_scalars(name, value, **kwargs)
+        
+        
+    def compute_gradients(self, gradient_order:int, names:list[str] | None = None, **kwargs) -> None:
+        if names is None:
+            names = list(self.point_set._property_store.keys())
+        if gradient_order < 0:
+            raise ValueError(f"Gradient order must be greater than 0. Got {gradient_order}.")
+        self.padded_ebs.compute_gradients(gradient_order=gradient_order, names=names)
+        
+        for prop_name, calc_name, gradient_order, value_array in self.padded_ebs.iter_properties():
+            property = self.point_set.get_property(prop_name)
+            surface_points = self.interpolate_to_surface(value_array)
+            property[calc_name, gradient_order] = surface_points
+            
+        return None
+
+    def compute_property(self, name: str, **kwargs):
         
         if name == "fermi_velocity":
-            return self.compute_fermi_velocity(include_band_resolved_data=include_band_resolved_data, **kwargs)
+            return self.compute_fermi_velocity(**kwargs)
         elif name == "fermi_speed":
-            return self.compute_fermi_speed(include_band_resolved_data=include_band_resolved_data, **kwargs)
+            return self.compute_fermi_speed(**kwargs)
         else:
-            property_value = self.padded_ebs.get_property(name, **kwargs)
-            
-        self.project_property(name, property_value, include_band_resolved_data, spin_channels=kwargs.pop("spins", None))
-        return self.point_data[name]
+            property = self.padded_ebs.get_property(name, **kwargs)
+            surface_points = self.interpolate_to_surface(property.value)
+            return surface_points
+
+    def compute_fermi_speed(self, **kwargs):
+        band_speed = self.padded_ebs.get_property("bands_speed", **kwargs)
+        surface_points = self.interpolate_to_surface(band_speed.value)
+        return surface_points
+
+    def compute_fermi_velocity(self, **kwargs):
+        band_velocity = self.padded_ebs.get_property("bands_velocity", **kwargs)
+        surface_points = self.interpolate_to_surface(band_velocity.value)
+        return surface_points
     
-    def compute_gradient(self, name: str, first_order: bool = True, second_order: bool = False, order: str = "F"):
-        if first_order:
-            gradient_value = self.padded_ebs.get_property(name, return_gradient_order=1, order=order)
-            gradient_label = self.padded_ebs.get_property_gradient_label(name)
-            self.project_property(gradient_label, gradient_value)
-            
-        if second_order:
-            hessian_value = self.padded_ebs.get_property(name, return_gradient_order=2, order=order)
-            hessian_label = self.padded_ebs.get_property_hessian_label(name)
-            self.project_property(hessian_label, hessian_value)
-            
-        return self.point_data[name]
-
-    def compute_fermi_speed(self, label=None, include_band_resolved_data=False, **kwargs):
-        if label is None:
-            label="fermi_speed"
-        self.padded_ebs.compute_band_speed(label=label, **kwargs)
-        self.project_property(label, self.padded_ebs.get_property(label, **kwargs), include_band_resolved_data=include_band_resolved_data)
-        return self.point_data[label]
-
-    def compute_fermi_velocity(self, label=None, include_band_resolved_data=False, **kwargs):
-        if label is None:
-            label="fermi_velocity"
-        self.padded_ebs.compute_band_velocity(label=label, **kwargs)
-        self.project_property(label, self.padded_ebs.get_property(label, **kwargs), include_band_resolved_data=include_band_resolved_data)
-        return self.point_data[label]
-
-    def compute_avg_inv_effective_mass(self, label=None, include_band_resolved_data=False, **kwargs):
-        if label is None:
-            label="avg_inv_effective_mass"
-        self.padded_ebs.compute_avg_inv_effective_mass(label=label, **kwargs)
-        self.project_property(label, self.padded_ebs.get_property(label, **kwargs), include_band_resolved_data=include_band_resolved_data)
-        return self.point_data[label]
-
-    def compute_ebs_ipr(self, label=None, include_band_resolved_data=False, **kwargs):
-        if label is None:
-            label="ebs_ipr"
-        self.padded_ebs.compute_ebs_ipr(label=label, **kwargs)
-        self.project_property(label, self.padded_ebs.get_property(label, **kwargs), include_band_resolved_data=include_band_resolved_data)
-        return self.point_data[label]
-    
-    def compute_ebs_ipr_atom(self, label=None, include_band_resolved_data=False, **kwargs):
-        if label is None:
-            label="ebs_ipr_atom"
-        self.padded_ebs.compute_ebs_ipr_atom(label=label, **kwargs)
-        self.project_property(label, self.padded_ebs.get_property(label, **kwargs), include_band_resolved_data=include_band_resolved_data)
-        return self.point_data[label]
-
-    def compute_atomic_projection(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        spins: List[int] = None,
-        include_band_resolved_data: bool = False,
-        label=None,
-        **kwargs
-    ):
-
-        if label is None:
-            label="projected_sum"
-
-        property_values = self.padded_ebs.compute_projected_sum(
-                                                    atoms=atoms, orbitals=orbitals, spins=spins,
-                                                    label=label,
-                                                    **kwargs
-                                                    )
-
-        self.project_property(
-            label, property_values, include_band_resolved_data=include_band_resolved_data, spin_channels=spins
-        )
-        return self.point_data[label]
-    
-    
-    def compute_spin_texture(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        include_band_resolved_data: bool = False,
-        label=None,
-        **kwargs
-    ):
-
-        if label is None:
-            label="spin_texture"
-
-        property_value = self.padded_ebs.compute_projected_sum_spin_texture(
-                                                      atoms=atoms, orbitals=orbitals,
-                                                      label=label,
-                                                      **kwargs
-                                                      )
-        self.project_property(
-            label, property_value, include_band_resolved_data=include_band_resolved_data
-        )
-
-        return self.point_data[label]
-    
-    def compute_projected_sum_spin_texture(
-        self,
-        atoms: List[int] = None,
-        orbitals: List[int] = None,
-        include_band_resolved_data: bool = False,
-        label=None,
-        **kwargs
-    ):
-
-        if label is None:
-            label="projected_sum_spin_texture"
-
-        property_value = self.padded_ebs.get_property(label, 
-                                                      atoms=atoms, orbitals=orbitals,
-                                                      label=label,
-                                                      **kwargs
-                                                      )
+    def interpolate_to_surface(self, property_value:np.ndarray):
+        padded_grid = copy.deepcopy(self.padded_grid)
+        padded_grid.point_data["property"] = property_value.reshape((property_value.shape[0], -1), order="F")
+        interpolated_surface = self._create_interpolated_surface(grid=padded_grid)
+        property_surface_points = interpolated_surface.point_data["property"].reshape((-1, *property_value.shape[1:]), order="F")
+        return property_surface_points
         
-        self.project_property(
-            label, property_value, include_band_resolved_data=include_band_resolved_data
-        )
-
-        return self.point_data[label]
-        
-    def project_property(self, name, property_value, include_band_resolved_data=False, spin_channels=None):
-        property_value = self.format_property_data(property_value, spin_channels=spin_channels)
-        
-        if isinstance(property_value, dict):
-            self._interpolate_to_surface_by_band(name, property_value, include_band_resolved_data)
-        else:
-            self._interpolate_to_surface(name, property_value)
-
-            
     def update_point_data(self, name: str, 
                           point_data: Union[Dict[str, np.ndarray], np.ndarray]= None, 
                           surface:pv.UnstructuredGrid = None):
@@ -372,7 +309,6 @@ class FermiSurface(pv.PolyData):
         )
 
         extended_surfaces = []
-        
         new_surface = copy.deepcopy(self)
         initial_surface = copy.deepcopy(self)
         for direction in zone_directions:
@@ -404,7 +340,6 @@ class FermiSurface(pv.PolyData):
         ebs = ElectronicBandStructureMesh.from_code(code, dirpath)
         if fermi is None:
             fermi = ebs.fermi
-            
         if reduce_bands_near_fermi:
             ebs.reduce_bands_near_fermi()
         elif reduce_bands_near_energy is not None:
@@ -413,25 +348,8 @@ class FermiSurface(pv.PolyData):
             ebs.reduce_bands_by_index(reduce_bands_by_index)
 
         return cls(ebs, padding=padding, fermi=fermi, fermi_shift=fermi_shift, **kwargs)
-    
-    def format_property_data(self, property_value: np.ndarray, spin_channels: List[int] = None):
-        if self.padded_ebs.is_band_property(property_value):
-            if spin_channels is None:
-                spin_channels = self.ebs.spin_channels
-            band_property_values={}
-            if self.ebs.n_spins==2:
-                n_bands = self.padded_ebs.n_bands
-                for iband in range(n_bands):
-                    for ispin,spin_channel in enumerate(spin_channels):
-                        band_property_values[(iband, spin_channel)] = property_value[:, iband, ispin, ...]
-            else:
-                for iband in range(self.padded_ebs.n_bands):
-                    band_property_values[(iband, 0)] = property_value[:, iband, 0, ...]
-            return band_property_values
-        else:
-            return property_value
-    
-    def _generate_all_surfaces(self, order="F"):
+     
+    def _generate_all_surfaces(self):
         """
         Generate isosurfaces for all bands and spins that cross the Fermi level.
 
@@ -456,7 +374,7 @@ class FermiSurface(pv.PolyData):
 
         fermi_surfaces = []
 
-        bands_mesh = self.padded_ebs.get_property_mesh("bands", order=order)
+        bands_mesh = self.padded_ebs.get_property_mesh("bands", order="F")
         # Get dimensions from bands_mesh
         _, _, _, nbands, nspins = bands_mesh.shape
 
@@ -465,7 +383,7 @@ class FermiSurface(pv.PolyData):
                 scalar_mesh = bands_mesh[..., iband, ispin]
 
                 try:
-                    surface = self._generate_single_surface(scalar_mesh, order=order)
+                    surface = self._generate_single_surface(scalar_mesh, order="F")
 
                     # Check if the surface is empty
                     if surface.points.shape[0] > 0:
@@ -681,126 +599,6 @@ class FermiSurface(pv.PolyData):
             strategy=strategy,
         )
 
-        return interpolated_surface
-    
-    def _interpolate_to_surface(self, name: str, property_value: np.ndarray):
-        """Interpolate a property value to the Fermi surface.
-
-        This method takes a property value array and interpolates it to the Fermi
-        surface using the padded grid. The interpolated data is then stored in
-        the point_data dictionary.
-
-        Parameters
-        ----------
-        name : str
-            The name of the property to interpolate.
-        property_value : np.ndarray
-            The property values to interpolate. Should be a 1D array that can be
-            reshaped to match the padded grid dimensions.
-
-        Returns
-        -------
-        None
-            The interpolated data is stored in self.point_data.
-        """
-        padded_grid = copy.deepcopy(self.padded_grid)
-        padded_grid.point_data[name] = property_value.reshape(-1, order="F")
-        interpolated_surface = self._create_interpolated_surface(grid=padded_grid)
-        self.update_point_data(name, surface=interpolated_surface)
-        return None
-        
-    
-    def _interpolate_to_surface_by_band(self, name: str, band_property_values:  Dict[Tuple[int, int], np.ndarray], include_band_resolved_data: bool = False):
-        """Interpolate band-resolved property values to the Fermi surface.
-
-        This method handles properties that are resolved by band and spin indices.
-        It creates separate interpolated surfaces for each band-spin combination
-        and optionally merges them into a single property.
-
-        Parameters
-        ----------
-        name : str
-            The base name of the property to interpolate.
-        band_property_values : Dict[Tuple[int, int], np.ndarray]
-            The property values to interpolate. The keys of the dictionary are 
-            tuples of (band_index, spin_index). Each value should be a numpy 
-            array with shape (npoints, ...) where the last dimensions depend 
-            on the property type (scalar or vector).
-        include_band_resolved_data : bool, optional
-            If True, keeps individual band-spin resolved data in point_data.
-            If False, removes individual band-spin data after merging, by default False.
-
-        Returns
-        -------
-        None
-            The interpolated data is stored in self.point_data.
-        """
-        padded_grid = copy.deepcopy(self.padded_grid)
-        
-        for (iband, spin_channel), property_value in band_property_values.items():
-            band_property_label = self.padded_ebs.get_band_property_label(
-                name, iband, spin_channel
-            )
-            padded_grid.point_data[band_property_label] = property_value
-
-        interpolated_surface = self._create_interpolated_surface(grid=padded_grid)
-        
-        incoming_keys = padded_grid.point_data.keys()
-        interpolated_surface = self._merge_band_resolved_data(interpolated_surface, incoming_keys)
-        if not include_band_resolved_data:
-            for incoming_key in incoming_keys:
-                interpolated_surface.point_data.pop(incoming_key)
-        
-        if name in interpolated_surface.point_data:
-            self.update_point_data(name, surface=interpolated_surface)
-        else:
-            raise ValueError(f"The property {name} is not present on the fermi surface")
-    
-    def _merge_band_resolved_data(self, interpolated_surface, incoming_keys:List[str]):
-        """Merge band-resolved data into a single property on the Fermi surface.
-
-        This method takes individual band-spin resolved data and merges them into
-        a single property by applying band-spin masks and summing contributions.
-
-        Parameters
-        ----------
-        interpolated_surface : pyvista.UnstructuredGrid
-            The interpolated surface containing band-resolved point data.
-        incoming_keys : List[str]
-            List of keys corresponding to band-spin resolved properties to merge.
-
-        Returns
-        -------
-        pyvista.UnstructuredGrid
-            The interpolated surface with merged property data added to point_data.
-        """
-        for incoming_key in incoming_keys:
-            property_name = self.padded_ebs.extract_property_label(incoming_key)
-            band_index, spin_index = self.padded_ebs.extract_band_index(
-                incoming_key
-            )
-
-            if (band_index, spin_index) in self._band_spin_mask:
-                mask = self._band_spin_mask[(band_index, spin_index)]
-            else:
-                mask = np.zeros(interpolated_surface.points.shape[0], dtype=bool)
-
-            point_data_array = interpolated_surface.point_data[incoming_key]
-
-            if point_data_array.ndim == 1:
-                # For scalar data
-                point_data_array[~mask] = 0
-            else:
-                # For vector data
-                point_data_array[~mask, :] = 0
-
-            interpolated_surface.point_data[incoming_key] = point_data_array
-
-            if property_name not in interpolated_surface.point_data:
-                interpolated_surface.point_data[property_name] = point_data_array
-            else:
-                interpolated_surface.point_data[property_name] += point_data_array
-                
         return interpolated_surface
 
 

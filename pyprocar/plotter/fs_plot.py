@@ -647,6 +647,20 @@ class FermiSlicePlotter:
 
         kwargs are passed to the matplotlib LineCollection.
         """
+        if vectors_name is not None:
+            self.vector_name = vectors_name
+        elif fermi_surface.active_vectors_name is not None:
+            self.vector_name = fermi_surface.active_vectors_name
+        else:
+            self.vector_name = "vector"
+            
+        if scalars_name is not None:
+            self.scalar_name = scalars_name
+        elif fermi_surface.active_scalars_name is not None:
+            self.scalar_name = fermi_surface.active_scalars_name
+        else:
+            self.scalar_name = "scalar"
+
         lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
         if points is None or scalars is None:
             raise ValueError("Slice data is not available for plotting lines.")
@@ -673,7 +687,7 @@ class FermiSlicePlotter:
 
         # Use a LineCollection for much better performance than plotting one by one
         lc = LineCollection(line_segments, colors=colors, **kwargs)
-        self.ax.add_collection(lc)
+        self.scalar_plot = self.ax.add_collection(lc)
         self.ax.autoscale_view()  # Important after adding a collection
 
     def plot_points(
@@ -684,6 +698,20 @@ class FermiSlicePlotter:
         cmap: str = "plasma",
         **kwargs,
     ):
+        if vectors_name is not None:
+            self.vector_name = vectors_name
+        elif fermi_surface.active_vectors_name is not None:
+            self.vector_name = fermi_surface.active_vectors_name
+        else:
+            self.vector_name = "vector"
+            
+        if scalars_name is not None:
+            self.scalar_name = scalars_name
+        elif fermi_surface.active_scalars_name is not None:
+            self.scalar_name = fermi_surface.active_scalars_name
+        else:
+            self.scalar_name = "scalar"
+
         lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
         if points is None:
             raise ValueError("Slice data is not available for plotting lines.")
@@ -691,7 +719,7 @@ class FermiSlicePlotter:
         cmap = plt.get_cmap(cmap)
         norm = plt.Normalize(vmin=scalars.min(), vmax=scalars.max())
 
-        self.ax.scatter(
+        self.scalar_plot = self.ax.scatter(
             points[:, 0], points[:, 1], c=scalars, cmap=cmap, norm=norm, **kwargs
         )
 
@@ -722,6 +750,19 @@ class FermiSlicePlotter:
             A scaling factor for the length of the arrows.
         
         """
+        if vectors_name is not None:
+            self.vector_name = vectors_name
+        elif fermi_surface.active_vectors_name is not None:
+            self.vector_name = fermi_surface.active_vectors_name
+            self.vector_name = "vector"
+            
+        if scalars_name is not None:
+            self.scalar_name = scalars_name
+        elif fermi_surface.active_scalars_name is not None:
+            self.scalar_name = fermi_surface.active_scalars_name
+        else:
+            self.scalar_name = "scalar"
+
         lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
         if points is None or vectors is None:
             raise ValueError("Vector data is not available for plotting arrows.")
@@ -744,7 +785,7 @@ class FermiSlicePlotter:
             norm=plt.Normalize(vmin=vector_magnitude.min(), vmax=vector_magnitude.max())
         
         
-        plt.quiver(
+        self.vector_plot = self.ax.quiver(
             points[:, 0],  # Arrow position x-component
             points[:, 1],  # Arrow position y-component
             vectors[:, 0],  # Arrow direction x-component
@@ -814,5 +855,64 @@ class FermiSlicePlotter:
         if plot_arrows and vectors is not None:
             self.plot_arrows(fermi_surface, scalars_name, vectors_name, factor=arrow_factor, cmap=cmap)
 
+    def show_colorbar(self, 
+                      show_vectors:bool=False,
+                      show_scalars:bool=False,
+                      label:str="",
+                      vector_label:str="",
+                      scalar_label:str="",
+                      vector_colorbar_args:dict=None,
+                      scalar_colorbar_args:dict=None,
+                      **kwargs):
+        plot_handles = []
+        labels = []
+        colorbar_args_list = []
+        vector_colorbar_args = vector_colorbar_args if vector_colorbar_args is not None else {}
+        scalar_colorbar_args = scalar_colorbar_args if scalar_colorbar_args is not None else {}
+        
+        
+        if show_vectors and show_scalars:
+            plot_handles = [self.scalar_plot, self.vector_plot]
+            labels = [scalar_label or f"{self.scalar_name}", vector_label or f"{self.vector_name}"]
+            colorbar_args_list = []
+            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args.update(scalar_colorbar_args)
+            colorbar_args_list.append(tmp_colorbar_args)
+            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args.update(vector_colorbar_args)
+            colorbar_args_list.append(tmp_colorbar_args)
+        elif show_vectors and hasattr(self, "vector_plot"):
+            plot_handles = [self.vector_plot]
+            labels = [label or f"{self.vector_name}"]
+            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args.update(vector_colorbar_args)
+            colorbar_args_list = [tmp_colorbar_args]
+        elif show_scalars and hasattr(self, "scalar_plot"):
+            plot_handles = [self.scalar_plot]
+            labels = [label or f"{self.scalar_name}"]
+            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args.update(scalar_colorbar_args)
+            colorbar_args_list = [tmp_colorbar_args]
+        elif not show_vectors and not show_scalars and hasattr(self, "scalar_plot"):
+            plot_handles = [self.scalar_plot]
+            labels = [label or f"{self.scalar_name}"]
+            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args.update(scalar_colorbar_args)
+            colorbar_args_list = [tmp_colorbar_args]
+        elif not show_vectors and not show_scalars and hasattr(self, "vector_plot"):
+            plot_handles = [self.vector_plot]
+            labels = [label or f"{self.vector_name}"]
+            tmp_colorbar_args = kwargs.copy()
+            tmp_colorbar_args.update(vector_colorbar_args)
+            colorbar_args_list = [tmp_colorbar_args]
+        else:
+            raise ValueError("No plot to show colorbar for")
+        
+        
+        self.colorbars = []
+        for plot_handle, label, colorbar_args in zip(plot_handles, labels, colorbar_args_list):
+            self.colorbars.append(self.fig.colorbar(plot_handle, label=label, **colorbar_args))
+        
+        
     def show(self):
         plt.show()
