@@ -591,6 +591,15 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return names
     
     @property
+    def ebs_ipr(self):
+        prop = self.get_property("ebs_ipr")
+        if prop is not None:
+            return prop.value
+        
+        ebs_ipr = self.compute_ebs_ipr()
+        return ebs_ipr
+    
+    @property
     def ebs_ipr_atom(self):
         """
         It returns the atom-resolved , pIPR:
@@ -812,9 +821,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
             
         if self.is_spin_polarized:
             # Zero out the spin channel that is not specified
-            if spins == [0]:
+            if np.allclose(np.asarray(spins), np.array([0])):
                 ret[..., 1] = 0
-            elif spins == [1]:
+            elif np.allclose(np.asarray(spins), np.array([1])):
                 ret[..., 0] = 0
 
 
