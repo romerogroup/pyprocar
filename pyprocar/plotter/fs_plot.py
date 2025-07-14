@@ -529,7 +529,7 @@ class FermiSlicePlotter:
         Figure resolution in dots per inch, by default 100
     """
 
-    def __init__(self, normal, origin=None, figsize=(8, 6), dpi=100, ax=None):
+    def __init__(self, fermi_surface:pv.PolyData, normal=None, origin=None, figsize=(8, 6), dpi=100, ax=None):
         self.figsize = figsize
         self.dpi = dpi
 
@@ -537,13 +537,21 @@ class FermiSlicePlotter:
         if self.ax is None:
             self.fig, self.ax = plt.subplots(figsize=figsize, dpi=dpi)
 
-        self.normal = normal
-        if origin is None:
-            self.origin = np.array([0, 0, 0])
-        else:
-            self.origin = origin
-
-        self.set_default_settings()
+        self.fermi_surface = fermi_surface
+        
+        
+        self.origin = self.fermi_surface.points.mean(axis=0) if origin is None else origin
+        self.normal = np.array([0,0,1]) if normal is None else normal
+        if fermi_surface.is2d:
+            n_kx = fermi_surface.ebs.n_kx
+            n_ky = fermi_surface.ebs.n_ky
+            n_kz = fermi_surface.ebs.n_kz
+            if n_kz == 1:
+                self.normal = np.array([0,0,1])
+            elif n_ky == 1:
+                self.normal = np.array([0,1,0])
+            elif n_kx == 1:
+                self.normal = np.array([1,0,0])
         
     def get_orthonormal_basis(self):
         if np.abs(np.dot(self.normal, [0, 0, 1])) < 0.99:
@@ -603,10 +611,13 @@ class FermiSlicePlotter:
         self, fermi_surface: pv.PolyData, scalars_name:str=None, vectors_name:str=None
     ):
         """Slices the Fermi surface and stores the resulting data."""
-        
+       
         slice_data = fermi_surface.slice(normal=self.normal, origin=self.origin)
         points = slice_data.points
         lines = slice_data.lines
+        
+        logger.debug(f"Slice Data: \n {slice_data}")
+        logger.debug(f"Slice Lines Shape: {slice_data.lines.shape}")
         
         scalars = slice_data.active_scalars
         vectors = slice_data.active_vectors
@@ -667,7 +678,7 @@ class FermiSlicePlotter:
 
     def plot_lines(
         self,
-        fermi_surface:pv.PolyData,
+        fermi_surface:pv.PolyData|None=None,
         scalars_name:str=None,
         vectors_name:str=None,
         cmap: str = "plasma",
@@ -681,6 +692,9 @@ class FermiSlicePlotter:
 
         kwargs are passed to the matplotlib LineCollection.
         """
+        if fermi_surface is None:
+            fermi_surface = self.fermi_surface
+            
         if vectors_name is not None:
             self.vector_name = vectors_name
         elif fermi_surface.active_vectors_name is not None:
@@ -695,7 +709,7 @@ class FermiSlicePlotter:
         else:
             self.scalar_name = "scalar"
 
-        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
+        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface,scalars_name, vectors_name)
         if points is None or scalars is None:
             raise ValueError("Slice data is not available for plotting lines.")
 
@@ -726,12 +740,14 @@ class FermiSlicePlotter:
 
     def plot_points(
         self,
-        fermi_surface:pv.PolyData,
+        fermi_surface:pv.PolyData=None,
         scalars_name:str=None,
         vectors_name:str=None,
         cmap: str = "plasma",
         **kwargs,
     ):
+        if fermi_surface is None:
+            fermi_surface = self.fermi_surface
         if vectors_name is not None:
             self.vector_name = vectors_name
         elif fermi_surface.active_vectors_name is not None:
@@ -759,7 +775,7 @@ class FermiSlicePlotter:
 
     def plot_arrows(
         self,
-        fermi_surface:pv.PolyData,
+        fermi_surface:pv.PolyData|None=None,
         scalars_name:str=None,
         vectors_name:str=None,
         angles:str='uv',
@@ -784,6 +800,9 @@ class FermiSlicePlotter:
             A scaling factor for the length of the arrows.
         
         """
+        if fermi_surface is None:
+            fermi_surface = self.fermi_surface
+            
         if vectors_name is not None:
             self.vector_name = vectors_name
         elif fermi_surface.active_vectors_name is not None:
@@ -837,7 +856,7 @@ class FermiSlicePlotter:
 
     def plot(
         self,
-        fermi_surface: pv.PolyData,
+        fermi_surface: pv.PolyData|None=None,
         vectors_name:str=None,
         scalars_name:str=None,
         plot_arrows: bool = False,
@@ -850,6 +869,9 @@ class FermiSlicePlotter:
         This method orchestrates the slicing and calling of the modular
         plotting functions.
         """
+        if fermi_surface is None:
+            fermi_surface = self.fermi_surface
+            
         lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
 
         # 2. Plot the contour lines
@@ -862,7 +884,7 @@ class FermiSlicePlotter:
 
     def scatter(
         self,
-        fermi_surface: pv.PolyData,
+        fermi_surface: pv.PolyData|None=None,
         scalars_name:str=None,
         vectors_name:str=None,
         plot_arrows: bool = False,
@@ -877,10 +899,12 @@ class FermiSlicePlotter:
         This method orchestrates the slicing and calling of the modular
         plotting functions.
         """
+        if fermi_surface is None:
+            fermi_surface = self.fermi_surface
+            
         # 1. Slice the data
-        lines, points, scalars, vectors = self._prepare_slice_data(
-            fermi_surface, scalars_name, vectors_name
-        )
+        lines, points, scalars, vectors = self._prepare_slice_data(fermi_surface, scalars_name, vectors_name)
+        
         # 2. Plot the contour lines
         self.plot_points(fermi_surface, scalars_name, vectors_name, cmap=cmap, **line_kwargs)
 

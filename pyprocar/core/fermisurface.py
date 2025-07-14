@@ -11,7 +11,7 @@ from scipy import interpolate
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
-from pyprocar.utils.physics_constants import *
+from pyprocar.utils.physics import *
 
 logger = logging.getLogger("pyprocar")
 
@@ -53,7 +53,7 @@ class FermiSurface(pv.PolyData):
         self._padding = padding
         
         self._padded_ebs = ebs.pad(padding=self._padding, inplace=False)
-        # self._padded_ebs = ebs
+        self._padded_ebs = self._padded_ebs.expand_single_dimension(inplace=False)
         logger.debug(f"Padded Electronic Band Structure Info: \n {self.padded_ebs}")
 
         # Initialize storage for surface data
@@ -70,8 +70,28 @@ class FermiSurface(pv.PolyData):
         logger.debug(f"Fermi Surface Point Data: \n {self.point_data}")
         logger.debug(f"Fermi Surface Cell Data: \n {self.cell_data}")
         logger.info("___FermiSurface initialization complete___")
-        
 
+    @classmethod
+    def from_code(cls, code, dirpath, 
+                  reduce_bands_near_fermi: bool = False, 
+                  reduce_bands_near_energy: float = None,
+                  reduce_bands_by_index: List[int] = None,
+                  padding: int = 10,
+                  fermi: float = None,
+                  fermi_shift: float = 0.0,
+                  **kwargs):
+        ebs = ElectronicBandStructureMesh.from_code(code, dirpath)
+        if fermi is None:
+            fermi = ebs.fermi
+        if reduce_bands_near_fermi:
+            ebs.reduce_bands_near_fermi()
+        elif reduce_bands_near_energy is not None:
+            ebs.reduce_bands_near_energy(reduce_bands_near_energy)
+        elif reduce_bands_by_index is not None:
+            ebs.reduce_bands_by_index(reduce_bands_by_index)
+
+        return cls(ebs, padding=padding, fermi=fermi, fermi_shift=fermi_shift, **kwargs)
+    
     @property
     def ebs(self):
         return self._ebs
@@ -155,6 +175,10 @@ class FermiSurface(pv.PolyData):
     def brillouin_zone(self):
         return self.get_brillouin_zone(np.array([1, 1, 1]))
 
+    @property
+    def is2d(self):
+        return self.ebs.is2d
+    
     def get_brillouin_zone(self, supercell: List[int]):
         """Returns the BrillouinZone of the material
 
@@ -328,26 +352,7 @@ class FermiSurface(pv.PolyData):
 
         return new_surface
 
-    @classmethod
-    def from_code(cls, code, dirpath, 
-                  reduce_bands_near_fermi: bool = False, 
-                  reduce_bands_near_energy: float = None,
-                  reduce_bands_by_index: List[int] = None,
-                  padding: int = 10,
-                  fermi: float = None,
-                  fermi_shift: float = 0.0,
-                  **kwargs):
-        ebs = ElectronicBandStructureMesh.from_code(code, dirpath)
-        if fermi is None:
-            fermi = ebs.fermi
-        if reduce_bands_near_fermi:
-            ebs.reduce_bands_near_fermi()
-        elif reduce_bands_near_energy is not None:
-            ebs.reduce_bands_near_energy(reduce_bands_near_energy)
-        elif reduce_bands_by_index is not None:
-            ebs.reduce_bands_by_index(reduce_bands_by_index)
-
-        return cls(ebs, padding=padding, fermi=fermi, fermi_shift=fermi_shift, **kwargs)
+    
      
     def _generate_all_surfaces(self):
         """
