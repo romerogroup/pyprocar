@@ -540,9 +540,12 @@ class FermiSlicePlotter:
         self.fermi_surface = fermi_surface
         
         
-        self.origin = self.fermi_surface.points.mean(axis=0) if origin is None else origin
+        centroid = self.fermi_surface.points.mean(axis=0) 
+        
+        self.origin = centroid if origin is None else origin
         self.normal = np.array([0,0,1]) if normal is None else normal
         if fermi_surface.is2d:
+            self.origin = centroid
             n_kx = fermi_surface.ebs.n_kx
             n_ky = fermi_surface.ebs.n_ky
             n_kz = fermi_surface.ebs.n_kz
@@ -728,13 +731,14 @@ class FermiSlicePlotter:
             # Determine color from scalar data
             if scalars is not None:
                 avg_scalar = (scalars[start_idx] + scalars[end_idx]) / 2.0
-                colors.append(cmap(norm(avg_scalar)))
+                # colors.append(cmap(norm(avg_scalar)))
+                colors.append(avg_scalar)
 
         if len(colors) == 0:
             colors = None
 
         # Use a LineCollection for much better performance than plotting one by one
-        lc = LineCollection(line_segments, colors=colors, **kwargs)
+        lc = LineCollection(line_segments, array=colors, cmap=cmap, norm=norm, **kwargs)
         self.scalar_plot = self.ax.add_collection(lc)
         self.ax.autoscale_view()  # Important after adding a collection
 
@@ -860,7 +864,7 @@ class FermiSlicePlotter:
         vectors_name:str=None,
         scalars_name:str=None,
         plot_arrows: bool = False,
-        plot_arrows_args: dict = None,
+        plot_arrows_kwargs: dict = None,
         **line_kwargs,
     ):
         """
@@ -878,9 +882,9 @@ class FermiSlicePlotter:
         self.plot_lines(fermi_surface, scalars_name, vectors_name, **line_kwargs)
 
         # 3. Optionally plot the vector arrows
-        plot_arrows_args = plot_arrows_args or {}
+        plot_arrows_kwargs = plot_arrows_kwargs or {}
         if plot_arrows and vectors is not None:
-            self.plot_arrows(fermi_surface, scalars_name, vectors_name, **plot_arrows_args)
+            self.plot_arrows(fermi_surface, scalars_name, vectors_name, **plot_arrows_kwargs)
 
     def scatter(
         self,
@@ -888,7 +892,7 @@ class FermiSlicePlotter:
         scalars_name:str=None,
         vectors_name:str=None,
         plot_arrows: bool = False,
-        plot_arrows_args: dict = None,
+        plot_arrows_kwargs: dict = None,
         arrow_factor: float = 1.0,
         cmap: str = "plasma",
         **line_kwargs,
@@ -911,7 +915,7 @@ class FermiSlicePlotter:
         # 3. Optionally plot the vector arrows
         plot_arrows_args = plot_arrows_args or {}
         if plot_arrows and vectors is not None:
-            self.plot_arrows(fermi_surface, scalars_name, vectors_name, factor=arrow_factor, cmap=cmap)
+            self.plot_arrows(fermi_surface, scalars_name, vectors_name, factor=arrow_factor, cmap=cmap, **plot_arrows_kwargs)
 
     def show_colorbar(self, 
                       show_vectors:bool=False,

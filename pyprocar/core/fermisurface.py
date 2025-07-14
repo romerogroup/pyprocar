@@ -72,7 +72,7 @@ class FermiSurface(pv.PolyData):
         logger.info("___FermiSurface initialization complete___")
 
     @classmethod
-    def from_code(cls, code, dirpath, 
+    def from_code(cls, code, dirpath, use_cache: bool = False, ebs_filename: str = None,
                   reduce_bands_near_fermi: bool = False, 
                   reduce_bands_near_energy: float = None,
                   reduce_bands_by_index: List[int] = None,

@@ -6,7 +6,8 @@ __date__ = "December 01, 2020"
 import copy
 import logging
 import os
-from typing import List, Union
+from enum import Enum
+from typing import List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,35 +28,39 @@ user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
 
 
+class Fermi2DMode(Enum):
+    plain = "plain"
+    plain_bands = "plain_bands"
+    parametric = "parametric"
+    spin_texture = "spin_texture"
+    
+    
+
 def fermi2D(
     code: str,
     dirname: str,
-    mode: str = "plain",
+    mode: Fermi2DMode = Fermi2DMode.plain,
     fermi: float = None,
-    fermi_shift: float = 0.0,
     band_indices: List[List] = None,
-    band_colors: List[List] = None,
     spins: List[int] = None,
     atoms: List[int] = None,
     orbitals: List[int] = None,
-    energy: float = None,
+    energy: float = 0.0,
     k_z_plane: float = 0.0,
-    k_z_plane_tol: float = 0.001,
-    rot_symm=1,
-    translate: List[int] = [0, 0, 0],
-    rotation: List[int] = [0, 0, 0, 1],
-    spin_texture: bool = False,
-    exportplt: bool = False,
+    show: bool = True,
     savefig: str = None,
-    print_plot_opts: bool = False,
+    extend_zone_directions: List[Union[List[int], tuple]] = None,
+    show_colorbar: bool = True,
+    plot_line_kwargs: dict = None,
+    plot_arrows: bool = True,
+    plot_arrows_kwargs: dict = None,
+    show_colorbar_kwargs:dict=None,
     use_cache: bool = False,
     verbose: int = 1,
     padding: int = 10,
-    extend_zone_directions: List[Union[List[int], tuple]] = None,
-    plot_arrows: bool = False,
-    arrow_factor: float = 1.0,
-    cmap: str = "plasma",
-    **kwargs,
+    figsize: Tuple[float, float] = (8, 6),
+    dpi: int = 100,
+    ax: plt.Axes = None,
 ):
     """This function plots the 2d fermi surface in the z = 0 plane
 
@@ -136,11 +141,6 @@ def fermi2D(
 
     user_logger.info("_" * 100)
     user_logger.info("### Parameters ###")
-
-    if len(translate) != 3 and len(translate) != 1:
-        logger.error(f"Error: --translate option is invalid! ({translate})")
-        raise RuntimeError("invalid option --translate")
-
     user_logger.info(f"dirname         : {dirname}")
     user_logger.info(f"bands           : {band_indices}")
     user_logger.info(f"atoms           : {atoms}")
@@ -148,16 +148,10 @@ def fermi2D(
     user_logger.info(f"spin comp.      : {spins}")
     user_logger.info(f"energy          : {energy}")
     user_logger.info(f"k_z_plane       : {k_z_plane}")
-    user_logger.info(f"rot. symmetry   : {rot_symm}")
-    user_logger.info(f"origin (trasl.) : {translate}")
-    user_logger.info(f"rotation        : {rotation}")
     user_logger.info(f"save figure     : {savefig}")
-    user_logger.info(f"spin_texture    : {spin_texture}")
-    user_logger.info(f"padding         : {padding}")
     user_logger.info("_" * 100)
 
-    modes = ["plain", "plain_bands", "parametric"]
-    modes_txt = " , ".join(modes)
+    modes_txt = " , ".join([mode.value for mode in Fermi2DMode])
     message = f"""
             There are additional plot options that are defined in a configuration file. 
             You can change these configurations by passing the keyword argument to the function
@@ -166,21 +160,10 @@ def fermi2D(
             Here is a list modes : {modes_txt}"""
     user_logger.info(message)
 
-    if print_plot_opts:
-        for key, value in plot_opt.items():
-            user_logger.info(f"{key} : {value}")
-
     user_logger.info("_" * 100)
     
     # Create Fermi surface using the new implementation
     logger.info("Creating Fermi surface using the new implementation")
-    
-    # Set default energy to fermi level if not provided
-    if energy is None:
-        energy = 0.0
-        
-    # Reduce bands near the specified energy
-    # reduce_bands_near_energy = energy if energy != 0.0 else None
     
     fs = FermiSurface.from_code(
         code=code, 
@@ -192,26 +175,23 @@ def fermi2D(
     )
     
     logger.info(f"Created Fermi surface: {fs}")
-    user_logger.info(f"Fermi surface has {fs.n_points} points")
 
     # Calculate slice properties based on mode and spin texture
-    if spin_texture:
-        if not fs.ebs.is_non_collinear:
-            raise ValueError("Spin texture is only available for non-collinear calculations")
-        
-        property_name = "projected_sum_spin_texture"
-        fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
-        plot_arrows = True
-        
-    elif mode == "parametric":
+    if mode in [Fermi2DMode.plain.value, Fermi2DMode.plain_bands.value]:
+        property_name = None
+    elif mode == Fermi2DMode.parametric.value:
         property_name = "projected_sum"
         fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+
+    elif mode == Fermi2DMode.spin_texture.value and fs.ebs.is_non_collinear:
+        property_name = "projected_sum_spin_texture"
+        fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
         
-    elif mode in ["plain", "plain_bands"]:
-        # For plain mode, we just use the fermi surface itself without additional properties
-        property_name = None
+    elif mode == Fermi2DMode.spin_texture.value and not fs.ebs.is_non_collinear:
+        raise ValueError("Spin texture is only available for non-collinear calculations")
+        
     else:
-        raise ValueError(f"Unknown mode: {mode}")
+        raise ValueError(f"Unknown mode: {mode}. Please choose from {modes_txt}.")
 
     # Extend surface to neighboring zones if requested
     if extend_zone_directions is not None:
@@ -223,37 +203,41 @@ def fermi2D(
     origin = (0, 0, k_z_plane)
     
     fsplt = FermiSlicePlotter(
+        fs,
         normal=normal, 
         origin=origin,
-        figsize=(8, 6)
+        figsize=figsize,
+        dpi=dpi,
+        ax=ax
     )
     
     user_logger.info(f"Creating 2D slice at k_z = {k_z_plane}")
     
+    plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
+    plot_line_kwargs = {} if plot_line_kwargs is None else plot_line_kwargs
+    
     # Plot the slice
-    if mode == "plain" or property_name is None:
-        fsplt.plot(fs, plot_arrows=plot_arrows, cmap=cmap, **kwargs)
+    if mode == Fermi2DMode.plain.value or property_name is None:
+        fsplt.plot(plot_arrows=plot_arrows, **plot_line_kwargs)
     else:
+        plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
         fsplt.plot(
-            fs, 
             scalars_name=property_name,
-            vectors_name=property_name if spin_texture else None,
+            vectors_name=property_name if mode == Fermi2DMode.spin_texture.value else None,
             plot_arrows=plot_arrows,
-            plot_arrows_args={"arrow_length_factor": arrow_factor},
-            cmap=cmap,
-            **kwargs
+            plot_arrows_kwargs=plot_arrows_kwargs,
+            **plot_line_kwargs
         )
         
         # Show colorbar for parametric modes
-        fsplt.show_colorbar()
+        if show_colorbar:
+            show_colorbar_kwargs = {} if show_colorbar_kwargs is None else show_colorbar_kwargs
+            fsplt.show_colorbar(**show_colorbar_kwargs)
 
-    # Handle output
-    if exportplt:
-        return plt
-    else:
-        if savefig:
-            plt.savefig(savefig)
-            user_logger.info(f"Plot saved to {savefig}")
-        else:
-            fsplt.show()
-        return None
+    if savefig:
+        fsplt.fig.savefig(savefig)
+        user_logger.info(f"Plot saved to {savefig}")
+    elif show:
+        fsplt.show()
+        
+    return fsplt.fig, fsplt.ax
