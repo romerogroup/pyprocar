@@ -21,6 +21,9 @@ user_logger = logging.getLogger("user")
 
 BZ_SCALE_FACTOR = 0.01
 
+FS_AREA_SCALE_FACTOR = (2*np.pi)**2
+
+
 def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
@@ -33,6 +36,15 @@ def normalize_to_range(scalars, clim=(0, 1)):
     return (scalars - scalars.min()) / (scalars.max() - scalars.min()) * (
         clim[1] - clim[0]
     ) + clim[0]
+
+
+def dHvA_frequency(A_max_angstrom2):
+    hbar = 1.0546e-27    # erg·s
+    e = 4.768e-10        # statcoulombs
+    c = 3.0e10           # cm/s
+    A_max_cm2 = A_max_angstrom2 * 1e16          # cm^-2
+    F_max_theory = (hbar * A_max_cm2 * c) / (2 * np.pi * e)  # Gauss
+    return F_max_theory
 
 
 class FermiPlotter(pv.Plotter):
@@ -230,6 +242,8 @@ class FermiPlotter(pv.Plotter):
         surface,
         normal=(1, 0, 0),
         origin=(0, 0, 0),
+        show_van_alphen_frequency=False,
+        show_cross_section_area=False,
         add_surface_args=None,
         add_active_vectors=False,
         add_plane_widget_args=None,
@@ -249,9 +263,12 @@ class FermiPlotter(pv.Plotter):
                 self._slice_callback,
                 mesh=surface,
                 add_surface_args=add_surface_args,
+                show_van_alphen_frequency=show_van_alphen_frequency,
+                show_cross_section_area=show_cross_section_area,
             ),
             normal,
             origin,
+            
             **add_plane_widget_args,
         )
 
@@ -262,13 +279,16 @@ class FermiPlotter(pv.Plotter):
         mesh=None,
         add_surface_args=None,
         add_text_args=None,
-        cross_section_area=False,
+        show_van_alphen_frequency=False,
+        show_cross_section_area=False,
     ):
         if add_surface_args is None:
             add_surface_args = {}
 
         if mesh is None:
             mesh = self._meshes[0]
+            
+        add_text_args = add_text_args or {}
 
         slc = mesh.slice(normal=normal, origin=origin)
         active_vector_name = slc.active_vectors_name
@@ -289,9 +309,16 @@ class FermiPlotter(pv.Plotter):
 
         self.add_surface(slc, name="slice", **add_surface_args)
 
-        if cross_section_area:
+        if show_van_alphen_frequency and show_cross_section_area:
+            raise ValueError("show_van_alphen_frequency and show_cross_section_area cannot be True at the same time")
+        
+        if show_van_alphen_frequency:
             surface = slc.delaunay_2d()
-            text = f"Cross sectional area : {surface.area:.4f}" + " Ang^-2"
+            text = f"Van Alphen Frequency : {dHvA_frequency(surface.area*FS_AREA_SCALE_FACTOR):.4f}" + " Gauss"
+            self.add_text(text, name="area_text", **add_text_args)
+        elif show_cross_section_area:
+            surface = slc.delaunay_2d()
+            text = f"Cross sectional area : {surface.area*FS_AREA_SCALE_FACTOR:.4f}" + " Ang^-2"
             self.add_text(text, name="area_text", **add_text_args)
 
         return slc
@@ -368,17 +395,20 @@ class FermiPlotter(pv.Plotter):
         add_active_vectors=False,
         add_plane_widget_args=None,
         add_text_args=None,
-        cross_section_area=False,
+        show_van_alphen_frequency=False,
+        show_cross_section_area=False,
         save_2d=None,
         save_2d_slice=None,
         **kwargs,
     ):
-        self.cross_section_area = cross_section_area
         if add_surface_args is None:
             add_surface_args = {}
 
         if add_plane_widget_args is None:
             add_plane_widget_args = {}
+            
+        origin = np.array(origin)
+        normal = np.array(normal)
 
         add_surface_args["add_texture_args"] = add_surface_args.get(
             "add_texture_args", {}
@@ -411,7 +441,9 @@ class FermiPlotter(pv.Plotter):
 
         self.add_box_widget(
             callback=partial(
-                self._box_callback, port=0, add_surface_args=add_surface_args
+                self._box_callback, port=0, add_surface_args=add_surface_args, 
+                show_van_alphen_frequency=show_van_alphen_frequency, 
+                show_cross_section_area=show_cross_section_area
             ),
             bounds=surface.bounds,
             use_planes=True,
@@ -424,7 +456,8 @@ class FermiPlotter(pv.Plotter):
                 self._slice_callback,
                 add_surface_args=add_surface_args,
                 add_text_args=add_text_args,
-                cross_section_area=self.cross_section_area,
+                show_van_alphen_frequency=show_van_alphen_frequency,
+                show_cross_section_area=show_cross_section_area,
             ),
             normal,
             origin,
@@ -432,7 +465,7 @@ class FermiPlotter(pv.Plotter):
             **add_plane_widget_args,
         )
 
-    def _box_callback(self, planes, port=0, add_surface_args=None):
+    def _box_callback(self, planes, port=0, add_surface_args=None, show_van_alphen_frequency=False, show_cross_section_area=False):
         bounds = []
 
         for i in range(planes.GetNumberOfPlanes()):
@@ -459,8 +492,9 @@ class FermiPlotter(pv.Plotter):
                 origin=widget_origin,
                 mesh=self._meshes[0],
                 add_surface_args=add_surface_args,
-                cross_section_area=self.cross_section_area,
                 add_text_args=self.add_text_args,
+                show_van_alphen_frequency=show_van_alphen_frequency,
+                show_cross_section_area=show_cross_section_area,
             )
 
     def savefig(self, filename, camera_position=None, **kwargs):
