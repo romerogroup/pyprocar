@@ -5,23 +5,126 @@ __date__ = "March 31, 2020"
 
 
 import logging
+from dataclasses import dataclass
+from enum import Enum
 from functools import cached_property
-from typing import Dict, List, Tuple
+from typing import Dict, List, Literal, Tuple
 
 import numpy as np
 import pyvista as pv
 
 from pyprocar.core.brillouin_zone import BrillouinZone
-from pyprocar.utils import mathematics
+from pyprocar.utils import math
 
 logger = logging.getLogger(__name__)
 
-def reduced_to_cartesian(kpoints, reciprocal_lattice):
+KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np.float_]]
+RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float_]]
+
+class KGRID_MODE(Enum):
+    MONKHORST = "monkhorst"
+    GAMMA = "gamma"
+
+@dataclass
+class KGridInfo:
+    kgrid: tuple[int, int, int]
+    kgrid_mode: KGRID_MODE
+    kshift: tuple[float, float, float]
+
+def generate_gamma_centered_kpoints(kgrid: tuple[int, int, int], 
+                                    kshift: tuple[float, float, float] = (0.0, 0.0, 0.0)):
+    
+    n_kx = kgrid[0]
+    n_ky = kgrid[1]
+    n_kz = kgrid[2]
+    
+    kx_shift = kshift[0]
+    ky_shift = kshift[1]
+    kz_shift = kshift[2]
+
+    kx_vals = (np.arange(0, n_kx) + kx_shift) / n_kx
+    ky_vals = (np.arange(0, n_ky) + ky_shift) / n_ky
+    kz_vals = (np.arange(0, n_kz) + kz_shift) / n_kz
+    
+    meshgrid = np.array(np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij"))
+    move_axis = np.swapaxes(meshgrid, 0, -1)
+    grid_points = move_axis.reshape(-1, 3)
+    fbz_points = -np.fmod(grid_points + 6.5, 1) + 0.5
+    sorted_kpoints = sort_kpoints(fbz_points, order="F")
+    
+    return sorted_kpoints
+
+def monkhorst_pack_kpoints(kgrid: tuple[int, int, int], 
+                          kshift: tuple[float, float, float] = (0.0, 0.0, 0.0)):
+    n_kx = kgrid[0]
+    n_ky = kgrid[1]
+    n_kz = kgrid[2]
+    
+    kx_shift = kshift[0]
+    ky_shift = kshift[1]
+    kz_shift = kshift[2]
+
+    kpoints = np.zeros((np.prod(kgrid), 3))
+    kx_vals = (np.arange(0, n_kx) + kx_shift + (1 - n_kx) / 2) / n_kx
+    ky_vals = (np.arange(0, n_ky) + ky_shift + (1 - n_ky) / 2) / n_ky
+    kz_vals = (np.arange(0, n_kz) + kz_shift + (1 - n_kz) / 2) / n_kz
+    
+    kx_vals, ky_vals, kz_vals = np.meshgrid(kx_vals, ky_vals, kz_vals, indexing="ij")
+    
+    return np.stack([kx_vals.flatten(), ky_vals.flatten(), kz_vals.flatten()], axis=-1)
+    
+
+def get_kpoints_from_kgrid(kgrid: tuple[int, int, int], 
+                          kshift: tuple[float, float, float] = (0.0, 0.0, 0.0), 
+                          mode:str="monkhorst"):
+    if mode.lower()[0] == "m":
+        return monkhorst_pack_kpoints(kgrid, kshift)
+    elif mode.lower()[0] == "g":
+        return generate_gamma_centered_kpoints(kgrid, kshift)
+    else:
+        raise ValueError(f"Invalid mode: {mode}")
+
+def reduced_to_cartesian(kpoints: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE) -> KPOINTS_DTYPE:
     if reciprocal_lattice is not None:
         return np.dot(kpoints, reciprocal_lattice)
     else:
         print("Please provide a reciprocal lattice when initiating the Procar class")
-        return
+        return None
+
+def sort_kpoints(kpoints: KPOINTS_DTYPE, order: str = "C"):
+    if order == "C":
+        sorted_indices = np.lexsort(
+            (kpoints[:, 2], kpoints[:, 1], kpoints[:, 0])
+        )
+    elif order == "F":
+        sorted_indices = np.lexsort(
+            (kpoints[:, 0], kpoints[:, 1], kpoints[:, 2])
+        )
+    return kpoints[sorted_indices]
+        
+    
+
+def cartesian_to_reduced(cartesian: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE) -> KPOINTS_DTYPE:
+    """Converts cartesian coordinates to fractional coordinates
+
+    Parameters
+    ----------
+    cartesian : np.ndarray
+        The cartesian coordinates. shape = [N,3]
+    reciprocal_lattice : np.ndarray
+        The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
+
+    Returns
+    -------
+    np.ndarray
+        The fractional coordinates. shape = [N,3]
+    """
+    if reciprocal_lattice is not None:
+        kpoints = np.dot(cartesian, np.linalg.inv(reciprocal_lattice))
+        return kpoints
+    else:
+        print("Please provide a reciprocal lattice when initiating the Procar class")
+        return None
 
 def format_names(names: List[str], as_latex: bool = False):
 
@@ -507,7 +610,7 @@ class KPath:
 
             angles = np.array(
                 [
-                    mathematics.get_angle(x, distance, radians=False)
+                    math.get_angle(x, distance, radians=False)
                     for x in (symm_kpoints_path - kstart)
                 ]
             ).round()

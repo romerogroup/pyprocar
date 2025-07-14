@@ -13,7 +13,8 @@ from matplotlib import colors as mpcolors
 
 from pyprocar.core import FermiSurface3D, ProcarSelect, boolean_add
 from pyprocar.io import ProcarParser
-from pyprocar.utils import UtilsProcar, welcome
+from pyprocar.utils.splash import welcome
+from pyprocar.utils.utilsprocar import UtilsProcar
 
 
 def spin_asymmetry(procar='PROCAR',

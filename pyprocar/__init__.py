@@ -1,11 +1,11 @@
-from pyprocar import core, io, plotter, pyposcar, utils
+# from pyprocar import core, io, plotter, pyposcar, utils
 from pyprocar._version import __version__
 from pyprocar.io import *
 from pyprocar.scripts import *
-from pyprocar.utils import physics_constants, welcome
+from pyprocar.utils import physics, welcome
 from pyprocar.utils.defaults import Settings
 from pyprocar.utils.download_examples import download_from_hf, download_test_data
-from pyprocar.utils.physics_constants import *
+from pyprocar.utils.physics import *
 from pyprocar.version import author as __author__
 from pyprocar.version import copyright as __copyright__
 from pyprocar.version import date as __date__

@@ -14,7 +14,7 @@ from pyprocar.core.fermisurface import FermiSurface
 from pyprocar.core.fermisurface2D import FermiSurface2D
 from pyprocar.core.fermisurface3D import FermiSurface3D
 from pyprocar.core.isosurface import Isosurface
-from pyprocar.core.kpath import KPath
+from pyprocar.core.kpoints import KPath
 from pyprocar.core.procarselect import ProcarSelect
 from pyprocar.core.procarsymmetry import ProcarSymmetry
 from pyprocar.core.property_store import PointSet, Property

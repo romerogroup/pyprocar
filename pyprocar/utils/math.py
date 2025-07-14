@@ -786,3 +786,12 @@ def get_grid_dims(points, num_bins=1000, height=1, coord_tol=0.01):
         peaks, _ = find_peaks(hist, height=height)
         grid[icoord] = len(peaks)
     return grid
+
+
+def compare_arrays(array1: np.ndarray, array2: np.ndarray) -> bool:
+    if array1 is not None and array2 is not None:
+        return np.allclose(array1, array2)
+    elif array1 is None and array2 is None:
+        return True
+    else:
+        return False

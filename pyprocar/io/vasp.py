@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 from numpy import array
 
-from pyprocar.core import DensityOfStates, KPath, Structure, get_ebs_from_data
+from pyprocar.core import DensityOfStates, Structure, get_ebs_from_data, kpoints
 from pyprocar.io.base import BaseParser
 from pyprocar.utils.strings import remove_comment
 
@@ -2112,12 +2112,30 @@ class VaspParser(BaseParser):
         if self.kpoints.knames is None:
             return None
 
-        return KPath(
+        return kpoints.KPath(
             kpoints=kpoints,
             segment_names=self.kpoints.knames,
             n_grids=self.kpoints.ngrids,
             reciprocal_lattice=self.outcar.reciprocal_lattice,
         )
+        
+    @property
+    def kgrid_info(self):
+        if self.kpoints is None:
+            return None
+        
+        kgrid = self.kpoints.get("kgrid", None)
+        kgrid_mode = self.kpoints.get("mode", None)
+        k_shift = self.kpoints.get("kshift", None)
+        
+        if kgrid is None or kgrid_mode is None or k_shift is None:
+            return None
+        
+        return kpoints.KGridInfo(
+            kgrid=kgrid,
+            kgrid_mode=kgrid_mode,
+            kshift=k_shift
+            )
 
     @property
     def ebs(self):
@@ -2131,8 +2149,7 @@ class VaspParser(BaseParser):
                 "Issue with outcar file. Either it was not found or there is an issue with the parser"
             )
             return None
-        # kgrid = self.kpoints.get("kgrid", None)
-        
+
         return get_ebs_from_data(
             kpoints=self.procar.kpoints,
             bands=self.procar.bands,
@@ -2143,6 +2160,7 @@ class VaspParser(BaseParser):
             orbital_names=self.procar.orbitalNames[:-1],
             structure=self.structure,
             kpath=self.kpath,
+            kgrid_info=self.kgrid_info,
         )
 
     @property

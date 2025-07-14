@@ -1,10 +1,12 @@
-import numpy as np
-import re
 import logging
-import matplotlib.pyplot as plt
+import re
 import sys
 
-from ..utils import UtilsProcar
+import matplotlib.pyplot as plt
+import numpy as np
+
+from pyprocar.utils.utilsprocar import UtilsProcar
+
 
 class ProcarParser:
     """Parses a PROCAR file and store it in memory. It only deals with

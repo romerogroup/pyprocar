@@ -1,4 +1,5 @@
-from pyprocar.utils import UtilsProcar, welcome
+from pyprocar.utils.splash import welcome
+from pyprocar.utils.utilsprocar import UtilsProcar
 
 
 # calls ProcarRepair

@@ -12,7 +12,7 @@ import numpy as np
 
 from pyprocar.core.dos import DensityOfStates
 from pyprocar.core.ebs import ElectronicBandStructure
-from pyprocar.core.kpath import KPath
+from pyprocar.core.kpoints import KPath
 from pyprocar.core.structure import Structure
 from pyprocar.io.base import BaseParser
 

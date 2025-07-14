@@ -12,12 +12,8 @@ import itertools
 import logging
 import re
 from abc import ABC, abstractmethod
-from collections.abc import MutableMapping
-from dataclasses import dataclass, field
-from enum import Enum
-from functools import cached_property
 from pathlib import Path
-from typing import Literal, TypedDict
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -30,19 +26,12 @@ from scipy.interpolate import (
 )
 from typing_extensions import override
 
+from pyprocar.core import kpoints
 from pyprocar.core.brillouin_zone import BrillouinZone
-from pyprocar.core.kpath import KPath
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.core.serializer import get_serializer
 from pyprocar.core.structure import Structure
-from pyprocar.utils import mathematics
-from pyprocar.utils.physics_constants import (
-    EV_TO_J,
-    FREE_ELECTRON_MASS,
-    HBAR_EV,
-    HBAR_J,
-    METER_ANGSTROM,
-)
+from pyprocar.utils import math, physics
 from pyprocar.utils.unfolder import Unfolder
 
 pv.global_theme.allow_empty_mesh = True
@@ -52,28 +41,24 @@ user_logger = logging.getLogger("user")
 
 NUMERICAL_STABILITY_FACTOR = 0.0001
 
-KPOINTS_DTYPE = np.ndarray[tuple[int, Literal[3]], np.dtype[np.float_]]
+
 BANDS_DTYPE = np.ndarray[tuple[int,int,int], np.dtype[np.float_]]
 PROJECTED_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np.float_]]
 PROJECTED_PHASE_DTYPE = np.ndarray[tuple[int,int,int,int,int], np.dtype[np.float_]]
 WEIGHTS_DTYPE = np.ndarray[tuple[int,int], np.dtype[np.float_]]
-RECIPROCAL_LATTICE_DTYPE = np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float_]]
-
-PROPERTIES_DTYPE = npt.NDArray[np.dtype[np.float_]]
 
 def get_ebs_from_data(
-        kpoints: KPOINTS_DTYPE | None = None,
+        kpoints: kpoints.KPOINTS_DTYPE | None = None,
         bands: BANDS_DTYPE | None = None,
         projected: PROJECTED_DTYPE | None = None,
         projected_phase: PROJECTED_PHASE_DTYPE | None = None,
         weights: WEIGHTS_DTYPE | None = None,
         fermi: float = 0.0,
-        reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
+        reciprocal_lattice: kpoints.RECIPROCAL_LATTICE_DTYPE | None = None,
         orbital_names: list[str] | None = None,
         structure: Structure | None = None,
-        point_set: PointSet | None = None,
-        kpath: KPath = None,
-        kgrid: tuple[int, int, int] | None = None,
+        kpath: kpoints.KPath = None,
+        kgrid_info: kpoints.KGridInfo | None = None,
         **kwargs):
     
     ebs_args = {
@@ -88,15 +73,21 @@ def get_ebs_from_data(
         "structure": structure,
     }
     
-    grid_dims = mathematics.get_grid_dims(kpoints)
-    is_grid = kpoints.shape[0] == np.prod(grid_dims)
+    # grid_dims = mathematics.get_grid_dims(kpoints)
     
     if kpath is not None:
+        logger.debug(f"Creating ElectronicBandStructurePath from EBS")
         ebs_args["kpath"] = kpath
         return ElectronicBandStructurePath(**ebs_args)
-    elif is_grid:
+    
+    if kgrid_info is not None:
+        logger.debug(f"Creating ElectronicBandStructureMesh from EBS")
+        ebs_args["kgrid_info"] = kgrid_info
         return ElectronicBandStructureMesh(**ebs_args)
+    
+    
     else:
+        logger.debug(f"Creating ElectronicBandStructure from EBS")
         return ElectronicBandStructure(**ebs_args)
     
 def get_ebs_from_code(
@@ -106,85 +97,61 @@ def get_ebs_from_code(
     ebs_filename: str = "ebs.pkl",
     **kwargs):
 
-    ebs = ElectronicBandStructure.from_code(code, dirpath, use_cache, ebs_filename, **kwargs)
+    from pyprocar.io import Parser
+    ebs_filepath = Path(dirpath) / ebs_filename
     
-    kpath=getattr(ebs, "kpath", None)
-    if kpath is not None:
-        logger.info("Creating ElectronicBandStructurePath from EBS")
-        return ElectronicBandStructurePath.from_ebs(ebs)
+    if not use_cache or not ebs_filepath.exists():
+        logger.info(f"Parsing EBS calculation directory: {dirpath}")
+        parser = Parser(code=code, dirpath=dirpath)
+        ebs=parser.ebs
+        ebs.save(ebs_filepath)
+    else:
+        logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")
+        ebs = ElectronicBandStructure.load(ebs_filepath)
     
-    if ebs.structure.rotations.shape[0] > 0:
-        ebs = ibz2fbz(ebs, rotations=ebs.structure.rotations, decimals=4, inplace=False)
-        ebs = sort_by_kpoints(ebs, inplace=False)
+    return ebs
+    # kpath=getattr(ebs, "kpath", None)
+    # if kpath is not None:
+    #     logger.debug("Creating ElectronicBandStructurePath from EBS")
+    #     return ElectronicBandStructurePath(
+    #         kpath=ebs.kpath,
+    #         kpoints=ebs.kpoints,
+    #         bands=ebs.bands,
+    #         projected=ebs.projected,
+    #         projected_phase=ebs.projected_phase,
+    #         weights=ebs.weights,
+    #         fermi=ebs.fermi,
+    #         reciprocal_lattice=ebs.reciprocal_lattice,
+    #         orbital_names=ebs.orbital_names,
+    #         structure=ebs.structure,
+    #     )
+    
+    # if ebs.structure.rotations.shape[0] > 0:
+    #     ebs = ibz2fbz(ebs, rotations=ebs.structure.rotations, kgrid_info=ebs.kgrid_info, decimals=4, inplace=False)
+    #     ebs = sort_by_kpoints(ebs, inplace=False)
         
-    grid_dims = mathematics.get_grid_dims(ebs.kpoints)
-    is_grid = ebs.kpoints.shape[0] == np.prod(grid_dims)
+    # grid_dims = math.get_grid_dims(ebs.kpoints)
+    # is_grid = ebs.kpoints.shape[0] == np.prod(grid_dims)
     
+    # logger.debug(f"grid_dims: {grid_dims}")
     
-    
-    logger.debug(f"grid_dims: {grid_dims}")
-    
-    if is_grid:
-        ebs = sort_by_kpoints(ebs, inplace=False, order="C")
-        logger.info("Creating ElectronicBandStructureMesh from EBS")
-        return ElectronicBandStructureMesh.from_ebs(ebs)
-    else:
-        return ebs
-
-
-def reduced_to_cartesian(kpoints: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE) -> KPOINTS_DTYPE:
-    if reciprocal_lattice is not None:
-        return np.dot(kpoints, reciprocal_lattice)
-    else:
-        print("Please provide a reciprocal lattice when initiating the Procar class")
-        return
-
-
-def cartesian_to_reduced(cartesian: KPOINTS_DTYPE, reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE) -> KPOINTS_DTYPE:
-    """Converts cartesian coordinates to fractional coordinates
-
-    Parameters
-    ----------
-    cartesian : np.ndarray
-        The cartesian coordinates. shape = [N,3]
-    reciprocal_lattice : np.ndarray
-        The reciprocal lattice vector matrix. Will have the shape (3, 3), defaults to None
-
-    Returns
-    -------
-    np.ndarray
-        The fractional coordinates. shape = [N,3]
-    """
-    if reciprocal_lattice is not None:
-        kpoints = np.dot(cartesian, np.linalg.inv(reciprocal_lattice))
-        return kpoints
-    else:
-        print("Please provide a reciprocal lattice when initiating the Procar class")
-        return
-
-
-def _compare_arrays(array1: npt.NDArray[np.dtype[np.number]], 
-                    array2: npt.NDArray[np.dtype[np.number]]) -> bool:
-    if array1 is not None and array2 is not None:
-        return np.allclose(array1, array2)
-    elif array1 is None and array2 is None:
-        return True
-    else:
-        return False
-
-def calculate_avg_inv_effective_mass(hessian: np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float_]]):
-    # Calculate the trace of each 3x3 matrix along the last two axes
-    m_inv = (np.trace(hessian, axis1=-2, axis2=-1) * EV_TO_J / HBAR_J**2) / 3
-    # Calculate the harmonic average effective mass for each element
-    e_mass = FREE_ELECTRON_MASS * m_inv
-    return e_mass
-
-
-def _deepcopy_dict(d: PROPERTIES_DTYPE | None):
-    """Performs a deep copy of a dictionary containing NumPy arrays."""
-    if d is None:
-        return None
-    return {k: v.copy() if isinstance(v, np.ndarray) else v for k, v in d.items()}
+    # if kgrid_info or is_grid:
+    #     logger.debug("Creating ElectronicBandStructureMesh from EBS")
+    #     ebs = sort_by_kpoints(ebs, inplace=False, order="C")
+    #     return ElectronicBandStructureMesh(
+    #         kpoints=ebs.kpoints,
+    #         bands=ebs.bands,
+    #         projected=ebs.projected,
+    #         projected_phase=ebs.projected_phase,
+    #         weights=ebs.weights,
+    #         orbital_names=ebs.orbital_names,
+    #         reciprocal_lattice=ebs.reciprocal_lattice,
+    #         fermi=ebs.fermi,
+    #         structure=ebs.structure,
+    #     )
+    # else:
+    #     logger.debug("Creating ElectronicBandStructure from EBS")
+    #     return ebs
 
 
 class DifferentiablePropertyInterface(ABC):
@@ -204,25 +171,17 @@ class DifferentiablePropertyInterface(ABC):
     def compute_band_velocity(self, **kwargs):
         logger.info("Computing band velocity")
         bands_gradient = self.get_property(("bands","gradients",1))
-        band_velocity = bands_gradient / HBAR_EV
-        return band_velocity
+        return physics.calculate_band_velocity(bands_gradient)
     
     def compute_band_speed(self, **kwargs):
         logger.info("Computing band speed")
         band_velocity = self.compute_band_velocity(**kwargs)
-        band_speed = np.linalg.norm(band_velocity, axis=-1)
-        return band_speed
+        return physics.calculate_band_speed(band_velocity)
     
     def compute_avg_inv_effective_mass(self, **kwargs):
         logger.info("Computing average inverse effective mass")
         bands_hessian = self.get_property(("bands","gradients",2))
-        avg_inv_effective_mass = calculate_avg_inv_effective_mass(bands_hessian)
-        return avg_inv_effective_mass
-    
-
-    
-    
-        
+        return physics.calculate_avg_inv_effective_mass(bands_hessian)
         
 class PyvistaInterface(ABC):
     _mesh: pv.PolyData | pv.StructuredGrid | pv.PointSet
@@ -280,14 +239,14 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
     def __init__(
         self,
-        kpoints: KPOINTS_DTYPE | None = None,
+        kpoints: kpoints.KPOINTS_DTYPE | None = None,
         fermi: float = 0.0,
         bands: BANDS_DTYPE | None = None,
         projected: PROJECTED_DTYPE | None = None,
         projected_phase: PROJECTED_PHASE_DTYPE | None = None,
         weights: WEIGHTS_DTYPE | None = None,
         orbital_names: list[str] | None = None,
-        reciprocal_lattice: RECIPROCAL_LATTICE_DTYPE | None = None,
+        reciprocal_lattice: kpoints.RECIPROCAL_LATTICE_DTYPE | None = None,
         shifted_to_fermi: bool = False,
         structure: Structure | None = None,
     ):
@@ -335,12 +294,12 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return ret
     
     def __eq__(self, other):
-        kpoints_equal = _compare_arrays(self.kpoints, other.kpoints)
-        bands_equal = _compare_arrays(self.bands, other.bands)
+        kpoints_equal = math.compare_arrays(self.kpoints, other.kpoints)
+        bands_equal = math.compare_arrays(self.bands, other.bands)
         fermi_equal = self.fermi == other.fermi
-        projected_equal = _compare_arrays(self.projected, other.projected)
-        projected_phase_equal = _compare_arrays(self.projected_phase, other.projected_phase)
-        weights_equal = _compare_arrays(self.weights, other.weights)
+        projected_equal = math.compare_arrays(self.projected, other.projected)
+        projected_phase_equal = math.compare_arrays(self.projected_phase, other.projected_phase)
+        weights_equal = math.compare_arrays(self.weights, other.weights)
         
         is_ebs_equal = (kpoints_equal and bands_equal and fermi_equal and 
                         projected_equal and projected_phase_equal and weights_equal)
@@ -488,7 +447,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
     @property
     def kpoints_cartesian(self):
-        return reduced_to_cartesian(self.kpoints, self.reciprocal_lattice)
+        return kpoints.reduced_to_cartesian(self.kpoints, self.reciprocal_lattice)
 
     @property
     def inv_reciprocal_lattice(self):
@@ -503,7 +462,7 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         
     @property
     def is_grid(self):
-        grid_dims = mathematics.get_grid_dims(self.kpoints)
+        grid_dims = math.get_grid_dims(self.kpoints)
         return self.n_kpoints == np.prod(grid_dims)
 
     @property
@@ -968,10 +927,11 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         else:
             ebs = copy.deepcopy(self)
             
-            
-        bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
-        new_kpoints = ebs.kpoints + bound_ops
-
+        # Old method
+        # bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
+        # new_kpoints = ebs.kpoints + bound_ops
+        
+        new_kpoints = -np.fmod(ebs.kpoints + 6.5, 1) + 0.5
         ebs.update_points(new_kpoints)
         return  ebs
         
@@ -1019,37 +979,9 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
         return ebs
     
     @classmethod
-    def from_ebs(cls, ebs, **kwargs):
-        
-        return get_ebs_from_data(
-            kpoints=ebs.kpoints,
-            bands=ebs.bands,
-            projected=ebs.projected,
-            projected_phase=ebs.projected_phase,
-            weights=ebs.weights,
-            fermi=ebs.fermi,
-            reciprocal_lattice=ebs.reciprocal_lattice,
-            orbital_names=ebs.orbital_names,
-            structure=ebs.structure,
-            **kwargs
-        )
-        
-    @classmethod
     def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"):
-        from pyprocar.io import Parser
-        ebs_filepath = Path(dirpath) / ebs_filename
-        
-        if not use_cache or not ebs_filepath.exists():
-            logger.info(f"Parsing EBS calculation directory: {dirpath}")
-            parser = Parser(code=code, dirpath=dirpath)
-            ebs=parser.ebs
-            ebs.save(ebs_filepath)
-        else:
-            logger.info(f"Loading EBS  from picklefile: {ebs_filepath}")
-            ebs = cls.load(ebs_filepath)
-        return ebs
+        return get_ebs_from_code(code, dirpath, use_cache, ebs_filename)
     
-
     @staticmethod
     def get_atomic_orbital_label(atoms: list[int], orbitals: list[int]):
         atom_label = ElectronicBandStructure.get_atom_label(atoms)
@@ -1118,12 +1050,15 @@ class ElectronicBandStructure(PointSet, PyvistaInterface):
 
 class ElectronicBandStructurePath(ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface):
 
-    def __init__(self, kpath: KPath, **kwargs):
+    def __init__(self, kpath: kpoints.KPath, **kwargs):
         super().__init__(**kwargs)
         self._kpath = kpath
         self.as_cart()
         
-
+    @classmethod
+    def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"):
+        return get_ebs_from_code(code, dirpath, use_cache, ebs_filename)
+        
     def __str__(self):
         ret = super().__str__()
         ret += "\nKPath: \n"
@@ -1202,7 +1137,7 @@ class ElectronicBandStructurePath(ElectronicBandStructure, DifferentiablePropert
                 axis=0,
                 edge_order=2,
             )
-        gradients = gradients * METER_ANGSTROM
+        gradients = gradients * physics.METER_ANGSTROM
         return gradients
     
     def compute_property(self, name:str, **kwargs):
@@ -1280,11 +1215,6 @@ class ElectronicBandStructurePath(ElectronicBandStructure, DifferentiablePropert
             **bz_add_mesh_args,
         )
         p.show()
-        
-    @classmethod
-    def from_ebs(cls, ebs, **kwargs):
-        return super().from_ebs(ebs, kpath = ebs.kpath, **kwargs)
-        
 
 def is_plane_aligned_with_reciprocal_lattice(normal: np.ndarray, 
                                              reciprocal_lattice: np.ndarray):
@@ -1321,12 +1251,23 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
             
             
 class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropertyInterface, PyvistaInterface):
-    def __init__(self, **kwargs):
+    def __init__(self, kgrid_info: kpoints.KGridInfo, **kwargs):
         super(ElectronicBandStructureMesh, self).__init__(**kwargs)
         
-        if self.n_kpoints != np.prod(self.get_kgrid()):
+        self._kgrid_info = kgrid_info
+   
+
+        if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
+            ibz2fbz(self, rotations=self.structure.rotations, kgrid_info=self.kgrid_info, decimals=4, inplace=True)
+            sort_by_kpoints(self, inplace=True)
+            
+        if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
             raise ValueError("n_kpoints must be equal to np.prod(kgrid) (number of kpoints)")
         
+    @classmethod
+    def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"):
+        ebs = get_ebs_from_code(code, dirpath, use_cache, ebs_filename)
+        return ebs
 
     def __str__(self):
         ret = super().__str__()
@@ -1336,8 +1277,23 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         return ret
     
     @property
+    def kgrid_info(self):
+        return self._kgrid_info
+    
+    @property
     def kgrid(self):
         return self.get_kgrid()
+    
+    def get_kgrid(self, num_bins:int=1000, height:float=1, coord_tol:float=0.01):
+        return math.get_grid_dims(self.kpoints, num_bins=num_bins, height=height, coord_tol=coord_tol)
+    
+    @property
+    def kshift(self):
+        return self.kgrid_info.kshift
+    
+    @property
+    def kgrid_mode(self):
+        return self.kgrid_info.kgrid_mode
     
     @property
     def kbounds(self):
@@ -1374,6 +1330,20 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
     @property
     def is_fbz(self):
         return self.n_kpoints == np.prod(self.kgrid)
+
+    @property
+    def is2d(self):
+        unique_coords = [self.ukx, self.uky, self.ukz]
+        
+        is_2d = False
+        for dim_size in unique_coords:
+            if len(dim_size) == 1:
+                is_2d = True
+                break
+        
+        return is_2d
+
+
     
     def to_mesh(self, 
                 scalars:tuple[str, np.ndarray] | None = None, 
@@ -1404,11 +1374,9 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
             kbounds[icoord, 1] = kx_max
         return kbounds
         
-    def get_kgrid(self, num_bins:int=1000, height:float=1, coord_tol:float=0.01):
-        return mathematics.get_grid_dims(self.kpoints, num_bins=num_bins, height=height, coord_tol=coord_tol)
-                
+
     def get_kpoints_mesh(self, **kwargs):
-        return mathematics.array_to_mesh(
+        return math.array_to_mesh(
             array=self.kpoints,
             nkx=self.n_kx,
             nky=self.n_ky,
@@ -1420,14 +1388,18 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         property = self.get_property(key, **kwargs)
         if property is None:
             return None
-        
-        return mathematics.array_to_mesh(
+        property_mesh = math.array_to_mesh( 
                 array=property.value,
                 nkx=self.n_kx,
                 nky=self.n_ky,
                 nkz=self.n_kz,
                 **kwargs,
             )
+        
+        logger.debug(f"Property mesh shape: {property.value.shape}")
+        logger.debug(f"Nkx: {self.n_kx}, Nky: {self.n_ky}, Nkz: {self.n_kz}")
+        logger.debug(f"Property mesh shape: {property_mesh.shape}")
+        return property_mesh
 
     def compute_property(self, name:str, **kwargs):
         if name == "bands_velocity":
@@ -1462,20 +1434,21 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
 
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             property = ebs.get_property(prop_name)
-            value_mesh = mathematics.array_to_mesh(array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz)
+            value_mesh = math.array_to_mesh(array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz)
             n_scalar_dims = len(value_mesh.shape[3:])
             scalar_padding_dims = copy.deepcopy(padding_dims)
             for i in range(n_scalar_dims):
                 scalar_padding_dims.append((0, 0))
             padded_mesh = np.pad(value_mesh, scalar_padding_dims, mode='wrap')
             logger.debug(f"Padded {prop_name} mesh shape: {padded_mesh.shape}")
-            padded_array = mathematics.mesh_to_array(
+            padded_array = math.mesh_to_array(
                 padded_mesh, order=order
             )
             
             property[calc_name, gradient_order] = padded_array
                 
-        new_kpoints = mathematics.mesh_to_array(padded_kpoints_mesh, order=order)
+        new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
+        
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -1566,9 +1539,9 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
             property = ebs.get_property(prop_name)
-            value_mesh = mathematics.array_to_mesh(array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz)
-            interpolated_mesh = mathematics.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
-            interpolated_value = mathematics.mesh_to_array(interpolated_mesh)
+            value_mesh = math.array_to_mesh(array=value_array, nkx=ebs.n_kx, nky=ebs.n_ky, nkz=ebs.n_kz)
+            interpolated_mesh = math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
+            interpolated_value = math.mesh_to_array(interpolated_mesh)
             property[calc_name, gradient_order] = interpolated_value
             
         ebs.update_points(new_kpoints)
@@ -1581,16 +1554,11 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         else:
           ebs = copy.deepcopy(self)
         
-        unique_coords = [self.ukx, self.uky, self.ukz]
-        
-        no_single_dim = True
-        for dim_size in unique_coords:
-            if len(dim_size) != 1:
-                no_single_dim = False
-                break
-        
-        if no_single_dim:
+       
+        if not ebs.is2d:
             return ebs
+        
+        unique_coords = [ebs.ukx, ebs.uky, ebs.ukz]
         
         # Expand the kpoints and properties
         new_kpoints = ebs.kpoints.copy()
@@ -1615,6 +1583,33 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         sort_by_kpoints(ebs, inplace=True)
         ebs._mesh = ebs.to_mesh()
         return ebs
+    
+    def reduce_kpoints_to_plane(self, k_z_plane, k_z_plane_tol, inplace=True):
+        """
+        Reduces the kpoints to a plane
+        """
+        if inplace:
+            ebs = self
+        else:
+            ebs = copy.deepcopy(self)
+        
+
+        i_kpoints_near_z_0 = np.where(
+            np.logical_and(
+                ebs.kpoints_cartesian[:, 2] < k_z_plane + k_z_plane_tol,
+                ebs.kpoints_cartesian[:, 2] > k_z_plane - k_z_plane_tol,
+            )
+        )
+
+        for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
+            property = ebs.get_property(prop_name)
+            initial_array = value_array[:ebs.n_kpoints]
+            new_points = initial_array[i_kpoints_near_z_0, ...][0]
+            property[calc_name, gradient_order] = new_points
+            
+        ebs.update_points(ebs.kpoints[i_kpoints_near_z_0, ...])
+        ebs._mesh = ebs.to_mesh()
+        return None
     
     def slice(self, normal=(0, 0, 1), origin=(0, 0, 0), 
               scalars:tuple[str, np.ndarray] | None = None,
@@ -1644,53 +1639,31 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         return slice
     
     def gradient_func(self, points, values, **kwargs):
-        val_mesh = mathematics.array_to_mesh(
+        val_mesh = math.array_to_mesh(
             array=values,
             nkx=self.n_kx,
             nky=self.n_ky,
             nkz=self.n_kz,
             **kwargs,
         )
-        gradients_mesh = mathematics.calculate_3d_mesh_scalar_gradients(
+        gradients_mesh = math.calculate_3d_mesh_scalar_gradients(
                 val_mesh, self.reciprocal_lattice
             )
-        gradients_mesh *= METER_ANGSTROM
+        gradients_mesh *= physics.METER_ANGSTROM
 
-        gradients=mathematics.mesh_to_array(
+        gradients=math.mesh_to_array(
             mesh=gradients_mesh, **kwargs
         )
         
         return gradients
-        
-    @classmethod
-    def from_ebs(cls, ebs, **kwargs):
-        ebs=ibz2fbz(ebs, rotations=ebs.structure.rotations, decimals=4, inplace=False)
-        return cls(
-            kpoints=ebs.kpoints,
-            bands=ebs.bands,
-            projected=ebs.projected,
-            projected_phase=ebs.projected_phase,
-            weights=ebs.weights,
-            fermi=ebs.fermi,
-            orbital_names=ebs.orbital_names,
-            reciprocal_lattice=ebs.reciprocal_lattice,
-            structure=ebs.structure,
-            **kwargs
-        )
     
-    @classmethod
-    def from_code(cls, code: str, dirpath: str, use_cache: bool = False, ebs_filename: str = "ebs.pkl"):
-        ebs = super().from_code(code, dirpath, use_cache, ebs_filename)
-        ebs=ibz2fbz(ebs, rotations=ebs.structure.rotations, decimals=4, inplace=False)
-        ebs=sort_by_kpoints(ebs, inplace=False)
-        return cls.from_ebs(ebs)
     
 
 
 class ElectronicBandStructurePlane:
     pass
 
-def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
+def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True,**kwargs):
     """Applys symmetry operations to the kpoints, bands, and projections
 
     Parameters
@@ -1708,6 +1681,9 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
     if ebs.is_grid:
         logger.warning("ElectronicBandStructure is already in the grid, skipping ibz2fz")
         return ebs
+    logger.info(f"Applying symmetry operations to the kpoints")
+    logger.info(f"Kgrid info: {kgrid_info}")
+    
 
     if len(rotations) == 0 and ebs.structure is not None:
         rotations = ebs.structure.rotations
@@ -1716,7 +1692,7 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
         return ebs
 
     n_kpoints = ebs.n_kpoints
-
+    
     # Apply rotations and copy properties
     new_kpoints = ebs.kpoints.copy()
     for i, rotation in enumerate(rotations):
@@ -1725,6 +1701,7 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
 
         # Rotate kpoints
         new_values = ebs.kpoints.dot(rotation.T)
+
         new_kpoints = np.concatenate([new_kpoints, new_values], axis=0)
         # Update properties
         for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
@@ -1732,20 +1709,37 @@ def ibz2fbz(ebs, rotations=None, decimals=4, inplace=True,**kwargs):
             new_points = np.concatenate([value_array, initial_array], axis=0)
             property = ebs.get_property(prop_name)
             property[calc_name, gradient_order] = new_points
-                
-
+        
     # Apply boundary conditions to kpoints
     new_kpoints = -np.fmod(new_kpoints + 6.5, 1) + 0.5
+    
+    # 
+    if kgrid_info is not None:
+        kpoints_grid_points = kpoints.get_kpoints_from_kgrid(
+            kgrid=kgrid_info.kgrid, kshift=kgrid_info.kshift, mode=kgrid_info.kgrid_mode)
 
-    # Floating point error can cause the kpoints to be off by 0.000001 or so
-    # causing the unique indices to misidentify the kpoints
-    new_kpoints = new_kpoints.round(decimals=decimals)
+    
+        diff = new_kpoints[:, np.newaxis, :] - kpoints_grid_points[np.newaxis, :, :]
+        distances = np.linalg.norm(diff, axis=2)
+        # Find the minimum distance for each k-point in new_kpoints to any
+        # k-point in kpoints_grid_points
+        min_distances = np.min(distances, axis=1)
+
+        # Get the indices in new_kpoints where the minimum distance is within the tolerance
+        new_in_original_grid_indices = np.where(min_distances < 0.000001)[0]
+        
+        new_kpoints = new_kpoints[new_in_original_grid_indices, ...]
+   
+    # # Floating point error can cause the kpoints to be off by 0.000001 or so
+    # # causing the unique indices to misidentify the kpoints
+    new_kpoints = new_kpoints.round(decimals=3)
     _, unique_indices = np.unique(new_kpoints, axis=0, return_index=True)
     
     new_kpoints = new_kpoints[unique_indices, ...]
+
     for prop_name, calc_name, gradient_order, value_array in ebs.iter_properties():
         property = ebs.get_property(prop_name)
-        property[calc_name, gradient_order] = value_array[unique_indices, ...]
+        property[calc_name, gradient_order] = value_array[new_in_original_grid_indices][unique_indices]
                 
     ebs.update_points(new_kpoints)
     return sort_by_kpoints(ebs, inplace=inplace, **kwargs)

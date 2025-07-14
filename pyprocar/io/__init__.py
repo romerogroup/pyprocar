@@ -2,7 +2,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Union
 
-from pyprocar.io import abinit, dftbplus, elk, lobster, qe, siesta, vasp
+# from pyprocar.io import abinit, dftbplus, elk, lobster, qe, siesta, vasp
 from pyprocar.io.abinit import AbinitParser
 from pyprocar.io.base import BaseParser
 from pyprocar.io.bxsf import BxsfParser

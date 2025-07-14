@@ -6,7 +6,7 @@ __date__ = "December 01, 2020"
 import copy
 import logging
 import os
-from typing import List
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,8 +14,8 @@ import yaml
 from matplotlib import cm
 from matplotlib import colors as mpcolors
 
-from pyprocar.core import ElectronicBandStructure, FermiSurface2D, ProcarSymmetry
-from pyprocar.io import Parser
+from pyprocar.core import FermiSurface
+from pyprocar.plotter import FermiSlicePlotter
 from pyprocar.utils import ROOT, data_utils, welcome
 from pyprocar.utils.log_utils import set_verbose_level
 
@@ -50,6 +50,11 @@ def fermi2D(
     print_plot_opts: bool = False,
     use_cache: bool = False,
     verbose: int = 1,
+    padding: int = 10,
+    extend_zone_directions: List[Union[List[int], tuple]] = None,
+    plot_arrows: bool = False,
+    arrow_factor: float = 1.0,
+    cmap: str = "plasma",
     **kwargs,
 ):
     """This function plots the 2d fermi surface in the z = 0 plane
@@ -64,13 +69,11 @@ def fermi2D(
         The fermi energy. If none is given, the fermi energy in the directory will be used, by default None
     fermi_shift : float, optional
         The fermi energy shift, by default 0.0
-    lobster : bool, optional
-        A boolean value to determine to use lobster, by default False
     band_indices : List[List]
-        A list of list that contains band indices for a given spin
+        A list of list that contains band indices for a given spin (Not implemented in new version)
     band_colors : List[List]
-            A list of list that contains colors for the band index
-            corresponding the band_indices for a given spin
+        A list of list that contains colors for the band index
+        corresponding the band_indices for a given spin (Not implemented in new version)
     spins : List[int], optional
         List of spins, by default [0]
     atoms : List[int], optional
@@ -101,11 +104,21 @@ def fermi2D(
         Boolean to use cache for EBS
     verbose: int, optional
         Verbosity level
+    padding: int, optional
+        Amount of padding for the Fermi surface calculation, by default 10
+    extend_zone_directions: List[Union[List[int], tuple]], optional
+        Directions to extend the surface to neighboring Brillouin zones, by default None
+    plot_arrows: bool, optional
+        Whether to plot arrow vectors on the 2D slice, by default False
+    arrow_factor: float, optional
+        Scaling factor for arrow sizes, by default 1.0
+    cmap: str, optional
+        Colormap for the plot, by default "plasma"
 
     Returns
     -------
-    matplotlib.pyplot
-        Returns the matplotlib.pyplot state plt
+    matplotlib.pyplot or FermiSlicePlotter
+        Returns the matplotlib.pyplot state plt or the FermiSlicePlotter object
 
     Raises
     ------
@@ -134,11 +147,13 @@ def fermi2D(
     user_logger.info(f"orbitals        : {orbitals}")
     user_logger.info(f"spin comp.      : {spins}")
     user_logger.info(f"energy          : {energy}")
+    user_logger.info(f"k_z_plane       : {k_z_plane}")
     user_logger.info(f"rot. symmetry   : {rot_symm}")
     user_logger.info(f"origin (trasl.) : {translate}")
     user_logger.info(f"rotation        : {rotation}")
     user_logger.info(f"save figure     : {savefig}")
     user_logger.info(f"spin_texture    : {spin_texture}")
+    user_logger.info(f"padding         : {padding}")
     user_logger.info("_" * 100)
 
     modes = ["plain", "plain_bands", "parametric"]
@@ -156,120 +171,89 @@ def fermi2D(
             user_logger.info(f"{key} : {value}")
 
     user_logger.info("_" * 100)
-    ebs = ElectronicBandStructure.from_code(code, dirname, use_cache=use_cache)
     
-    codes_with_scf_fermi = ["qe", "elk"]
-    if code in codes_with_scf_fermi and fermi is None:
-        logger.info(f"No fermi given, using the found fermi energy: {ebs.fermi}")
-        fermi = ebs.fermi
-
-    if fermi is not None:
-        logger.info(f"Shifting Fermi energy to zero: {fermi}")
-        ebs.shift_bands(-1*fermi, inplace=True)
-        ebs.shift_bands(fermi_shift, inplace=True)
-        fermi_level = fermi_shift
-    else:
-        user_logger.warning(
-            "`fermi` is not set! Set `fermi={value}`. The plot did not shift the bands by the Fermi energy."
-        )
-
-    logger.debug(f"EBS: {str(ebs)}")
-
-
-    if spins is None:
-        spins = np.arange(ebs.bands.shape[-1])
+    # Create Fermi surface using the new implementation
+    logger.info("Creating Fermi surface using the new implementation")
+    
+    # Set default energy to fermi level if not provided
     if energy is None:
-        energy = 0
-
-    ### End of parsing ###
-    # Selecting kpoints in a constant k_z plane
-    ebs=ebs.reduce_bands_near_energy(energy=energy, inplace=True)
-    ebs=ebs.reduce_kpoints_to_axis_plane(k_plane=k_z_plane, k_plane_tol=k_z_plane_tol, axis=2)
-    ebs=ebs.shift_kpoints_to_fbz(inplace=True)
-    kpoints=ebs.kpoints_cartesian
-
-    user_logger.warning(
-        f"Make sure the kmesh has the correct number of kz points"
-        f"with kz={k_z_plane} +- {k_z_plane_tol}."
+        energy = 0.0
+        
+    # Reduce bands near the specified energy
+    # reduce_bands_near_energy = energy if energy != 0.0 else None
+    
+    fs = FermiSurface.from_code(
+        code=code, 
+        dirpath=dirname, 
+        fermi=fermi,
+        fermi_shift=energy,
+        padding=padding,
+        use_cache=use_cache
     )
+    
+    logger.info(f"Created Fermi surface: {fs}")
+    user_logger.info(f"Fermi surface has {fs.n_points} points")
 
-    user_logger.info(f"Kpoints in the kz={k_z_plane} plane: {kpoints.shape}")
-    user_logger.info(f"Bands in the kz={k_z_plane} plane: {ebs.bands.shape}")
-    user_logger.info(f"Projected in the kz={k_z_plane} plane: {ebs.projected.shape}")
-
-    if spin_texture is False:
-        # processing the data
-        if orbitals is None and ebs.projected is not None:
-            orbitals = np.arange(ebs.n_orbitals, dtype=int)
-        if atoms is None and ebs.projected is not None:
-            atoms = np.arange(ebs.n_atoms, dtype=int)
-
-        user_logger.info(f"Spins for projections: {spins}")
-        user_logger.info(f"Atoms for projections: {atoms}")
-        user_logger.info(f"Orbitals for projections: {orbitals}")
-
-        projected = ebs.ebs_sum(
-            spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
-        )
-        projected = projected[..., spins]
-
-        logger.info(f"projection shape after ebs_sum: {projected.shape}")
+    # Calculate slice properties based on mode and spin texture
+    if spin_texture:
+        if not fs.ebs.is_non_collinear:
+            raise ValueError("Spin texture is only available for non-collinear calculations")
+        
+        property_name = "projected_sum_spin_texture"
+        fs.get_property(property_name, atoms=atoms, orbitals=orbitals)
+        plot_arrows = True
+        
+    elif mode == "parametric":
+        property_name = "projected_sum"
+        fs.get_property(property_name, atoms=atoms, orbitals=orbitals, spins=spins)
+        
+    elif mode in ["plain", "plain_bands"]:
+        # For plain mode, we just use the fermi surface itself without additional properties
+        property_name = None
     else:
-        projected = ebs.ebs_sum(
-            spins=spins, atoms=atoms, orbitals=orbitals, sum_noncolinear=False
-        )
-        sx = copy.deepcopy(projected)[:, :, [1]][:, :, 0]
-        sy = copy.deepcopy(projected)[:, :, [2]][:, :, 0]
-        sz = copy.deepcopy(projected)[:, :, [3]][:, :, 0]
+        raise ValueError(f"Unknown mode: {mode}")
 
-  
-    # Once the PROCAR is parsed and reduced to 2x2 arrays, we can apply
-    # symmetry operations to unfold the Brillouin Zone
-    # kpoints = data.kpoints
-    # bands = data.bands
-    # character = data.spd
-    if ebs.is_non_collinear:
-        spin_channels = [0]
-    else:
-        spin_channels = spins
+    # Extend surface to neighboring zones if requested
+    if extend_zone_directions is not None:
+        user_logger.info(f"Extending surface to zones: {extend_zone_directions}")
+        fs = fs.extend_surface(zone_directions=extend_zone_directions)
 
-    bands = ebs.bands[..., spin_channels]
-    character = projected
-
-    if spin_texture is True:
-        symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz, character=character)
-    else:
-        symm = ProcarSymmetry(kpoints, bands, character=character)
-
-    symm.translate(translate)
-    symm.general_rotation(rotation[0], rotation[1:])
-    # symm.MirrorX()
-    symm.rot_symmetry_z(rot_symm)
-
-    fs = FermiSurface2D(
-        symm.kpoints,
-        symm.bands,
-        symm.character,
-        band_indices=band_indices,
-        band_colors=band_colors,
-        **kwargs,
+    # Create 2D slice plotter
+    normal = (0, 0, 1)
+    origin = (0, 0, k_z_plane)
+    
+    fsplt = FermiSlicePlotter(
+        normal=normal, 
+        origin=origin,
+        figsize=(8, 6)
     )
-    fs.find_energy(energy)
-
-    if not spin_texture:
-        fs.plot(mode=mode, interpolation=300)
+    
+    user_logger.info(f"Creating 2D slice at k_z = {k_z_plane}")
+    
+    # Plot the slice
+    if mode == "plain" or property_name is None:
+        fsplt.plot(fs, plot_arrows=plot_arrows, cmap=cmap, **kwargs)
     else:
-        fs.spin_texture(sx=symm.sx, sy=symm.sy, sz=symm.sz, spin=spins[0])
+        fsplt.plot(
+            fs, 
+            scalars_name=property_name,
+            vectors_name=property_name if spin_texture else None,
+            plot_arrows=plot_arrows,
+            plot_arrows_args={"arrow_length_factor": arrow_factor},
+            cmap=cmap,
+            **kwargs
+        )
+        
+        # Show colorbar for parametric modes
+        fsplt.show_colorbar()
 
-    fs.add_axes_labels()
-    fs.add_legend()
-
+    # Handle output
     if exportplt:
         return plt
-
     else:
         if savefig:
-            fs.savefig(savefig)
+            plt.savefig(savefig)
+            user_logger.info(f"Plot saved to {savefig}")
         else:
-            fs.show()
-        return
+            fsplt.show()
+        return None
