@@ -49,11 +49,6 @@ class Structure:
         lattice=None,
         rotations=None,
     ):
-        atoms = atoms if atoms is not None else []
-        fractional_coordinates = fractional_coordinates if fractional_coordinates is not None else []
-        cartesian_coordinates = cartesian_coordinates if cartesian_coordinates is not None else []
-        rotations = rotations if rotations is not None else []
-
         if fractional_coordinates is not None:
             self.fractional_coordinates = np.array(fractional_coordinates)
             self.cartesian_coordinates = np.dot(fractional_coordinates, lattice)
@@ -67,7 +62,7 @@ class Structure:
             self.fractional_coordinates = None
         self.atoms = np.array(atoms)
         self.lattice = np.array(lattice)
-        
+    
         if self.atoms.shape[0] == 0:
             raise ValueError("atoms must be a non-empty list")
         if self.fractional_coordinates.shape[0] == 0:
@@ -91,7 +86,9 @@ class Structure:
         if self.has_complete_data:
             self.get_wyckoff_positions()
 
-        self.rotations = rotations
+        self._rotations = rotations
+        if self._rotations is None:
+            self._rotations = np.empty(shape=(0, 3, 3))
 
         return None
 
@@ -113,6 +110,10 @@ class Structure:
 
         structure_equal = atoms_equal and fractional_coordinates_equal and lattice_equal
         return structure_equal
+    
+    @property
+    def rotations(self):
+        return self._rotations
 
     @property
     def volume(self):
