@@ -13,7 +13,7 @@ from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
 from pyprocar.utils.physics import *
 
-logger = logging.getLogger("pyprocar")
+logger = logging.getLogger(__name__)
 
 
 class FermiSurface(pv.PolyData):
@@ -36,18 +36,17 @@ class FermiSurface(pv.PolyData):
     max_distance : float, optional
         Maximum distance for point projections, by default 0.2
     """
-
+    
     def __init__(
         self,
-        ebs,
+        ebs: ElectronicBandStructureMesh,
         fermi: float = 0.0,
         fermi_shift: float = 0.0,
         padding: int = 5,
     ):
-        super().__init__()
         logger.info("___Initializing FermiSurface object___")
 
-        self._ebs = ebs
+        ebs = ebs
         self._fermi_shift = fermi_shift
         self._fermi = fermi + fermi_shift
         self._padding = padding
@@ -91,7 +90,8 @@ class FermiSurface(pv.PolyData):
             ebs.reduce_bands_by_index(reduce_bands_by_index)
 
         return cls(ebs, padding=padding, fermi=fermi, fermi_shift=fermi_shift, **kwargs)
-    
+
+
     @property
     def ebs(self):
         return self._ebs
@@ -171,6 +171,10 @@ class FermiSurface(pv.PolyData):
     def surface_band_spin_map(self):
         return self._surface_band_spin_map
     
+    @property
+    def band_spin_mask(self):
+        return self._band_spin_mask
+    
     @cached_property
     def brillouin_zone(self):
         return self.get_brillouin_zone(np.array([1, 1, 1]))
@@ -205,6 +209,64 @@ class FermiSurface(pv.PolyData):
             
         self.set_values(prop_name, property_value)
         return property_value
+    
+    def select_bands(self, bands_spin_indices: List[tuple[int, int]], 
+                     inplace:bool = True, 
+                     return_relative_indices:bool = False):
+        """
+        Select specific bands by filtering the Fermi surface to only include points
+        from the specified band-spin combinations.
+        
+        Parameters
+        ----------
+        bands_spin_indices : List[tuple[int, int]]
+            List of (band_index, spin_index) tuples to keep in the surface
+            
+        Returns
+        -------
+        None
+            Modifies the current FermiSurface object in place
+        """
+        if not inplace:
+            fs = copy.deepcopy(self)
+        else:
+            fs = self
+            
+        logger.info(f"Selecting bands: {bands_spin_indices}")
+        
+        # Validate that all requested band-spin combinations exist
+        for (iband, ispin) in bands_spin_indices:
+            if (iband, ispin) not in fs.band_spin_mask:
+                available_bands = list(fs.band_spin_mask.keys())
+                raise ValueError(
+                    f"Band-spin combination ({iband}, {ispin}) not found in Fermi surface. "
+                    f"Available combinations: {available_bands}"
+                )
+        
+        # Create combined mask for all selected band-spin combinations
+        combined_mask = np.zeros(self.n_points, dtype=bool)
+        for (iband, ispin) in bands_spin_indices:
+            mask = fs.band_spin_mask[(iband, ispin)]
+            combined_mask |= mask
+            
+        logger.debug(f"Combined mask selects {combined_mask.sum()} out of {self.n_points} points")
+        logger.debug(f"Combined mask shape: {combined_mask.shape}")
+        # If no points are selected, create an empty surface
+        if not combined_mask.any():
+            logger.warning("No points selected - creating empty surface")
+            fs.points = np.empty((0, 3))
+            fs.faces = np.empty((0, 4), dtype=np.int32)
+            fs.point_data.clear()
+            fs.cell_data.clear()
+            return None
+            
+        result = fs.remove_points(combined_mask, inplace=False)
+        if len(result) == 2 and return_relative_indices:
+            return result
+        elif len(result) == 2 and not return_relative_indices:
+            return result[0]
+        else:
+            raise ValueError(f"Remove points failed. Result: {result}")
     
     def set_surface_point_data(self, name:str, values:np.ndarray):
         if values.shape[-1] == 3:

@@ -6,7 +6,6 @@ from pyprocar.core.ebs import (
     ElectronicBandStructure,
     ElectronicBandStructureMesh,
     ElectronicBandStructurePath,
-    ElectronicBandStructurePlane,
     get_ebs_from_code,
     get_ebs_from_data,
 )

@@ -6,20 +6,13 @@ import numpy as np
 import pytest
 import pyvista as pv
 
-from pyprocar.core import ElectronicBandStructureMesh
+from pyprocar.core import kpoints
 from pyprocar.core.ebs import (
     ElectronicBandStructure,
+    ElectronicBandStructureMesh,
     ElectronicBandStructurePath,
-    ElectronicBandStructurePlane,
-    cartesian_to_reduced,
-    get_ebs_from_code,
-    get_ebs_from_data,
-    ibz2fbz,
-    reduced_to_cartesian,
-    sort_by_kpoints,
 )
 from pyprocar.core.fermisurface import FermiSurface
-from pyprocar.core.kpath import KPath
 from pyprocar.core.structure import Structure
 from tests.utils import DATA_DIR, BaseTest
 
@@ -249,7 +242,7 @@ class TestElectronicBandStructure:
         assert kpoints_cart.shape == sample_ebs.kpoints.shape
         
         # Test conversion functions
-        kpoints_reduced = cartesian_to_reduced(kpoints_cart, sample_ebs.reciprocal_lattice)
+        kpoints_reduced = kpoints.cartesian_to_reduced(kpoints_cart, sample_ebs.reciprocal_lattice)
         assert np.allclose(kpoints_reduced, sample_ebs.kpoints)
     
     def test_ebs_sum(self, sample_ebs):
@@ -434,7 +427,7 @@ class TestElectronicBandStructure:
 
 @pytest.fixture
 def sample_kpath():
-    """Create a sample KPath for testing"""
+    """Create a sample kpoints.KPath for testing"""
     # Create a simple high-symmetry path: Gamma -> X -> L -> Gamma
     n_grids= [50, 50, 50, 50, 50, 50]
     segment_names = [("GAMMA", "H"), 
@@ -451,7 +444,7 @@ def sample_kpath():
         "P": np.array([0.25, 0.25, 0.25]),
     }
     reciprocal_lattice = np.eye(3)
-    kpath = KPath(
+    kpath = kpoints.KPath(
         special_kpoint_map=special_kpoints_map,
         segment_names=segment_names,
         n_grids=n_grids,
@@ -521,7 +514,7 @@ class TestElectronicBandStructurePath:
         assert len(sample_ebs_path.orbital_names) == 3
     
     def test_kpath_properties(self, sample_ebs_path):
-        """Test KPath-related properties."""
+        """Test kpoints.KPath-related properties."""
         kpath = sample_ebs_path.kpath
         assert kpath is not None
         assert len(kpath.segment_names) == 6  # Γ, X, L, Γ
@@ -682,272 +675,6 @@ class TestElectronicBandStructurePath:
         ebs_path = ElectronicBandStructurePath.from_code(code="vasp", dirpath=path_calc_dir)
         assert ebs_path is not None
         assert isinstance(ebs_path, ElectronicBandStructurePath)
-
-
-@pytest.fixture
-def plane_normal_z():
-    """Normal vector for z-plane."""
-    return np.array([0.0, 0.0, 1.0])
-
-
-@pytest.fixture
-def plane_normal_xy():
-    """Normal vector for diagonal plane in xy."""
-    return np.array([1.0, 1.0, 0.0]) / np.sqrt(2)
-
-
-@pytest.fixture
-def plane_origin():
-    """Origin point for plane."""
-    return np.array([0.0, 0.0, 0.5])
-
-
-@pytest.fixture
-def sample_plane_z(sample_ebs_mesh, plane_normal_z, plane_origin):
-    """Create a sample ElectronicBandStructurePlane with z-normal."""
-    return ElectronicBandStructurePlane(
-        ebs_mesh=sample_ebs_mesh,
-        normal=plane_normal_z,
-        origin=plane_origin,
-        grid_interpolation=(8, 8),
-    )
-
-
-@pytest.fixture
-def sample_plane_xy(sample_ebs_mesh, plane_normal_xy):
-    """Create a sample ElectronicBandStructurePlane with xy-diagonal normal."""
-    return ElectronicBandStructurePlane(
-        ebs_mesh=sample_ebs_mesh,
-        normal=plane_normal_xy,
-        origin=np.array([0.0, 0.0, 0.0]),
-        grid_interpolation=(6, 6),
-    )
-
-
-class TestElectronicBandStructurePlane:
-    """Test class for ElectronicBandStructurePlane functionality."""
-    
-    def test_initialization(self, sample_plane_z, sample_ebs_mesh, plane_normal_z, plane_origin):
-        """Test basic initialization of ElectronicBandStructurePlane."""
-        assert sample_plane_z.ebs_mesh is sample_ebs_mesh
-        assert np.allclose(sample_plane_z.normal, plane_normal_z)
-        assert np.allclose(sample_plane_z.origin, plane_origin)
-        assert sample_plane_z.grid_interpolation == (8, 8)
-        
-        # Check inherited properties
-        assert sample_plane_z.fermi == sample_ebs_mesh.fermi
-        assert sample_plane_z.orbital_names == sample_ebs_mesh.orbital_names
-        assert np.array_equal(sample_plane_z.reciprocal_lattice, sample_ebs_mesh.reciprocal_lattice)
-    
-    def test_plane_properties(self, sample_plane_z):
-        """Test plane-specific properties."""
-        # Normal should be unit vector
-        assert np.isclose(np.linalg.norm(sample_plane_z.normal), 1.0)
-        
-        # u and v should be orthogonal to normal and each other
-        u, v = sample_plane_z.u, sample_plane_z.v
-        assert np.isclose(np.dot(u, sample_plane_z.normal), 0.0, atol=1e-10)
-        assert np.isclose(np.dot(v, sample_plane_z.normal), 0.0, atol=1e-10)
-        assert np.isclose(np.dot(u, v), 0.0, atol=1e-10)
-        
-        # u and v should be unit vectors
-        assert np.isclose(np.linalg.norm(u), 1.0)
-        assert np.isclose(np.linalg.norm(v), 1.0)
-    
-    def test_transformation_matrices(self, sample_plane_z):
-        """Test transformation matrix properties."""
-        uv_matrix = sample_plane_z.uv_transformation_matrix
-        full_matrix = sample_plane_z.transformation_matrix
-        
-        # UV transformation matrix should be 2x3
-        assert uv_matrix.shape == (2, 3)
-        
-        # Full transformation matrix should be 3x3
-        assert full_matrix.shape == (3, 3)
-        
-        # UV matrix should be first two rows of full matrix
-        assert np.allclose(uv_matrix, full_matrix[:2, :])
-        
-        # Third row should be the normal
-        assert np.allclose(full_matrix[2, :], sample_plane_z.normal)
-    
-    def test_grid_generation(self, sample_plane_z):
-        """Test UV grid generation."""
-        grid_u, grid_v = sample_plane_z.get_uv_grid()
-        
-        # Grid should have the correct shape
-        assert grid_u.shape == sample_plane_z.grid_interpolation
-        assert grid_v.shape == sample_plane_z.grid_interpolation
-        
-        # Grid should span the u and v limits
-        u_min, u_max = sample_plane_z.u_limits
-        v_min, v_max = sample_plane_z.v_limits
-        
-        assert np.isclose(np.min(grid_u), u_min)
-        assert np.isclose(np.max(grid_u), u_max)
-        assert np.isclose(np.min(grid_v), v_min)
-        assert np.isclose(np.max(grid_v), v_max)
-    
-    def test_uv_points_and_kpoints(self, sample_plane_z):
-        """Test UV points and kpoints generation."""
-        uv_points = sample_plane_z.uv_points
-        uv_kpoints = sample_plane_z.uv_kpoints
-        
-        # UV points should be 2D
-        n_points = np.prod(sample_plane_z.grid_interpolation)
-        assert uv_points.shape == (n_points, 2)
-        
-        # UV kpoints should be 3D and shifted by origin
-        assert uv_kpoints.shape == (n_points, 3)
-        
-        # First point should be at origin + u_min*u + v_min*v
-        u_min, _ = sample_plane_z.u_limits
-        v_min, _ = sample_plane_z.v_limits
-        expected_first_point = (sample_plane_z.origin + 
-                               u_min * sample_plane_z.u + 
-                               v_min * sample_plane_z.v)
-        assert np.allclose(uv_kpoints[0], expected_first_point)
-    
-    def test_cartesian_conversion(self, sample_plane_z):
-        """Test cartesian coordinate conversion."""
-        uv_kpoints_cart = sample_plane_z.uv_kpoints_cartesian
-        
-        # Should have same shape as uv_kpoints
-        assert uv_kpoints_cart.shape == sample_plane_z.uv_kpoints.shape
-        
-        # Should be different from fractional coordinates (unless reciprocal lattice is identity)
-        if not np.allclose(sample_plane_z.reciprocal_lattice, np.eye(3)):
-            assert not np.allclose(uv_kpoints_cart, sample_plane_z.uv_kpoints)
-    
-    def test_plane_alignment_detection(self, sample_plane_z, sample_plane_xy):
-        """Test plane alignment with reciprocal lattice axes."""
-        # Z-normal should be aligned with reciprocal lattice (identity matrix)
-        assert sample_plane_z.is_plane_axes_aligned
-        
-        # XY-diagonal normal should not be aligned
-        assert not sample_plane_xy.is_plane_axes_aligned
-    
-    def test_orthonormal_basis_generation(self, sample_plane_z, sample_plane_xy):
-        """Test orthonormal basis generation for different normals."""
-        # Test z-normal
-        u_z, v_z = sample_plane_z.get_orthonormal_basis()
-        assert np.isclose(np.linalg.norm(u_z), 1.0)
-        assert np.isclose(np.linalg.norm(v_z), 1.0)
-        assert np.isclose(np.dot(u_z, v_z), 0.0, atol=1e-10)
-        assert np.isclose(np.dot(u_z, sample_plane_z.normal), 0.0, atol=1e-10)
-        assert np.isclose(np.dot(v_z, sample_plane_z.normal), 0.0, atol=1e-10)
-        
-        # Test xy-diagonal normal
-        u_xy, v_xy = sample_plane_xy.get_orthonormal_basis()
-        assert np.isclose(np.linalg.norm(u_xy), 1.0)
-        assert np.isclose(np.linalg.norm(v_xy), 1.0)
-        assert np.isclose(np.dot(u_xy, v_xy), 0.0, atol=1e-10)
-        assert np.isclose(np.dot(u_xy, sample_plane_xy.normal), 0.0, atol=1e-10)
-        assert np.isclose(np.dot(v_xy, sample_plane_xy.normal), 0.0, atol=1e-10)
-    
-    def test_transform_points_to_uv(self, sample_plane_z):
-        """Test point transformation to UV coordinates."""
-        # Test some 3D points
-        test_points_3d = np.array([
-            [0.1, 0.2, 0.5],  # Near the plane
-            [0.0, 0.0, 0.5],  # On the plane at origin
-            [0.5, 0.3, 0.5],  # Another point on the plane
-        ])
-        
-        uv_coords = sample_plane_z.transform_points_to_uv(test_points_3d)
-        
-        # Should be 2D coordinates
-        assert uv_coords.shape == (3, 2)
-        
-        # Test with shifted points
-        shifted_points = test_points_3d - sample_plane_z.origin
-        uv_coords_shifted = sample_plane_z.transform_points_to_uv(shifted_points, is_shifted=True)
-        
-        # Should be the same result
-        assert np.allclose(uv_coords, uv_coords_shifted)
-    
-    def test_find_points_near_plane_static(self, sample_ebs_mesh):
-        """Test the static method for finding points near plane."""
-        normal = np.array([0.0, 0.0, 1.0])
-        origin = np.array([0.0, 0.0, 0.5])
-        plane_tol = 0.1
-        
-        # Get cartesian coordinates
-        kpoints_cart = sample_ebs_mesh.kpoints_cartesian
-        
-        # Find points near plane
-        points_near_plane = ElectronicBandStructurePlane.find_points_near_plane(
-            kpoints_cart, normal, origin, plane_tol=plane_tol
-        )
-        
-        # Should return some points
-        assert len(points_near_plane) > 0
-        assert points_near_plane.shape[1] == 3
-        
-        # Test with return_indices=True
-        points_near_plane_indexed, indices = ElectronicBandStructurePlane.find_points_near_plane(
-            kpoints_cart, normal, origin, plane_tol=plane_tol, return_indices=True
-        )
-        
-        # Should return same points
-        assert np.allclose(points_near_plane, points_near_plane_indexed)
-        assert len(indices) == len(points_near_plane)
-        
-        # Indices should be valid
-        assert np.all(indices >= 0)
-        assert np.all(indices < len(kpoints_cart))
-    
-    def test_property_inheritance(self, sample_plane_z, sample_ebs_mesh):
-        """Test that properties are properly transferred from mesh to plane."""
-        # Bands property should exist
-        bands_prop = sample_plane_z.get_property("bands")
-        assert bands_prop is not None
-        
-        # Should have correct shape for the plane grid
-        n_plane_points = np.prod(sample_plane_z.grid_interpolation)
-        expected_shape = (n_plane_points, sample_ebs_mesh.n_bands, sample_ebs_mesh.n_spin_channels)
-        assert bands_prop.value.shape == expected_shape
-        
-        # Projected property should also exist if it exists in the mesh
-        if sample_ebs_mesh.projected is not None:
-            projected_prop = sample_plane_z.get_property("projected")
-            assert projected_prop is not None
-            expected_projected_shape = (n_plane_points, sample_ebs_mesh.n_bands, 
-                                      sample_ebs_mesh.n_spins, sample_ebs_mesh.n_atoms, 
-                                      sample_ebs_mesh.n_orbitals)
-            assert projected_prop.value.shape == expected_projected_shape
-    
-    def test_initialization_without_grid_interpolation_aligned(self, sample_ebs_mesh, plane_normal_z):
-        """Test initialization without grid_interpolation for aligned plane."""
-        # For aligned plane, grid_interpolation should be auto-determined
-        plane = ElectronicBandStructurePlane(
-            ebs_mesh=sample_ebs_mesh,
-            normal=plane_normal_z,
-            origin=np.array([0.0, 0.0, 0.0]),
-        )
-        
-        # Should have determined grid interpolation automatically
-        assert plane.grid_interpolation is not None
-        assert len(plane.grid_interpolation) == 2
-    
-    def test_from_code_classmethod(self, mesh_calc_dir):
-        """Test creating plane from code directory."""
-        normal = np.array([0.0, 0.0, 1.0])
-        origin = np.array([0.0, 0.0, 0.0])
-        
-        plane = ElectronicBandStructurePlane.from_code(
-            code="vasp",
-            dirpath=mesh_calc_dir,
-            normal=normal,
-            origin=origin,
-            grid_interpolation=(5, 5),
-        )
-        
-        assert isinstance(plane, ElectronicBandStructurePlane)
-        assert np.allclose(plane.normal, normal)
-        assert np.allclose(plane.origin, origin)
-        assert plane.grid_interpolation == (5, 5)
-    
 
 
 class TestElectronicBandStructureMesh:

@@ -110,48 +110,6 @@ def get_ebs_from_code(
         ebs = ElectronicBandStructure.load(ebs_filepath)
     
     return ebs
-    # kpath=getattr(ebs, "kpath", None)
-    # if kpath is not None:
-    #     logger.debug("Creating ElectronicBandStructurePath from EBS")
-    #     return ElectronicBandStructurePath(
-    #         kpath=ebs.kpath,
-    #         kpoints=ebs.kpoints,
-    #         bands=ebs.bands,
-    #         projected=ebs.projected,
-    #         projected_phase=ebs.projected_phase,
-    #         weights=ebs.weights,
-    #         fermi=ebs.fermi,
-    #         reciprocal_lattice=ebs.reciprocal_lattice,
-    #         orbital_names=ebs.orbital_names,
-    #         structure=ebs.structure,
-    #     )
-    
-    # if ebs.structure.rotations.shape[0] > 0:
-    #     ebs = ibz2fbz(ebs, rotations=ebs.structure.rotations, kgrid_info=ebs.kgrid_info, decimals=4, inplace=False)
-    #     ebs = sort_by_kpoints(ebs, inplace=False)
-        
-    # grid_dims = math.get_grid_dims(ebs.kpoints)
-    # is_grid = ebs.kpoints.shape[0] == np.prod(grid_dims)
-    
-    # logger.debug(f"grid_dims: {grid_dims}")
-    
-    # if kgrid_info or is_grid:
-    #     logger.debug("Creating ElectronicBandStructureMesh from EBS")
-    #     ebs = sort_by_kpoints(ebs, inplace=False, order="C")
-    #     return ElectronicBandStructureMesh(
-    #         kpoints=ebs.kpoints,
-    #         bands=ebs.bands,
-    #         projected=ebs.projected,
-    #         projected_phase=ebs.projected_phase,
-    #         weights=ebs.weights,
-    #         orbital_names=ebs.orbital_names,
-    #         reciprocal_lattice=ebs.reciprocal_lattice,
-    #         fermi=ebs.fermi,
-    #         structure=ebs.structure,
-    #     )
-    # else:
-    #     logger.debug("Creating ElectronicBandStructure from EBS")
-    #     return ebs
 
 
 class DifferentiablePropertyInterface(ABC):
@@ -1656,12 +1614,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
         )
         
         return gradients
-    
-    
 
-
-class ElectronicBandStructurePlane:
-    pass
 
 def ibz2fbz(ebs, rotations=None, kgrid_info=None, decimals=4, inplace=True,**kwargs):
     """Applys symmetry operations to the kpoints, bands, and projections
