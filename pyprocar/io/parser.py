@@ -19,7 +19,7 @@ class Parser:
     This class will handle getting the main inputs (ebs,dos,structure,kpath,reciprocal_lattice) from the various dft parsers.
     """
 
-    def __init__(self, code: str, dirpath: Union[str, Path], verbose: int = 2):
+    def __init__(self, code: str, dirpath: Union[str, Path], verbose: int = 0):
         self.code = code
         self.dirpath = Path(dirpath)
 
@@ -28,7 +28,7 @@ class Parser:
         self.structure = None
 
         self._parse()
-        set_verbose_level(verbose)
+
 
     def _parse(self):
         """Handles which DFT parser to use"""

@@ -75,11 +75,11 @@ logging_config = {
     },
     "loggers": {
         "pyprocar": {
-            "level": "INFO",
+            "level": "ERROR",
             "handlers": ["console", "file"],
             "propagate": False,
         },
-        "user": {"level": "DEBUG", "handlers": ["user_console"], "propagate": False},
+        "user": {"level": "ERROR", "handlers": ["user_console"], "propagate": False},
         "tests": {"level": "DEBUG", "handlers": ["console"], "propagate": False},
     },
 }
