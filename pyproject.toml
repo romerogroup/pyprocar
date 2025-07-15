@@ -66,6 +66,12 @@ tests = [
     
 ]
 
+build = [
+    "setuptools-scm",
+    "setuptools",
+    "build",
+]
+
 docs = [
     "sphinx_design",
     "sphinx-copybutton",
