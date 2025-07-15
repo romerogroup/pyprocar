@@ -903,7 +903,7 @@ class FermiSurface:
         can represent any spin projection specified during contour generation.
         """
         quiver_kwargs = {} if quiver_kwargs is None else quiver_kwargs
-        quiver_kwargs.setdefault("scale", scale)
+        quiver_kwargs.setdefault("scale",  1 / scale)
         quiver_kwargs.setdefault("scale_units", scale_units)
         quiver_kwargs.setdefault("angles", angles)
         quiver_kwargs.setdefault("cmap", cmap)
