@@ -6,6 +6,7 @@ __date__ = "December 01, 2020"
 import copy
 import logging
 import os
+from enum import Enum
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -16,21 +17,43 @@ from matplotlib import colors as mpcolors
 
 from pyprocar import io
 from pyprocar.core import FermiSurface, ProcarSymmetry
+from pyprocar.core.fermisurface import SpinProjection
 from pyprocar.utils import ROOT, data_utils, welcome
-from pyprocar.utils.log_utils import set_verbose_level
-
-with open(os.path.join(ROOT, "pyprocar", "cfg", "fermi_surface_2d.yml"), "r") as file:
-    plot_opt = yaml.safe_load(file)
-
 
 user_logger = logging.getLogger("user")
 logger = logging.getLogger(__name__)
 
+class FermiSurface2DMode(Enum):
+    """
+    An enumeration for defining the modes of 2D Fermi surface representations.
+    """
+    PLAIN = "plain"
+    PLAIN_BANDS = "plain_bands"
+    PARAMETRIC = "parametric"
+    SPIN_TEXTURE = "spin_texture"
+    
+    @classmethod
+    def from_str(cls, mode: str):
+        """
+        Returns the FermiSurface2DMode enum value from a string.
+        """
+        if mode.lower() == cls.PLAIN.value:
+            return cls.PLAIN
+        elif mode.lower() == cls.PLAIN_BANDS.value:
+            return cls.PLAIN_BANDS
+        elif mode.lower() == cls.PARAMETRIC.value:
+            return cls.PARAMETRIC
+        elif mode.lower() == cls.SPIN_TEXTURE.value:
+            return cls.SPIN_TEXTURE
+        else:
+            raise ValueError(f"Invalid mode: {mode}")
 
 def fermi2D(
     code: str,
     dirname: str,
     mode: str = "plain",
+    use_cache: bool = False,
+    spin_projection: SpinProjection | str = "z^2",
     fermi: float = None,
     fermi_shift: float = 0.0,
     band_indices: List[List] = None,
@@ -44,75 +67,194 @@ def fermi2D(
     rot_symm=1,
     translate: List[int] = [0, 0, 0],
     rotation: List[int] = [0, 0, 0, 1],
-    spin_texture: bool = False,
-    exportplt: bool = False,
+    point_density: int = 10,
+    interpolation: int = 300,
+    linecollection_kwargs: dict = None,
+    linestyles: tuple[str, str] = ("solid", "dashed"),
+    colors: tuple[str, str] = None,
+    linewidths: tuple[float, float] = (0.2, 0.2),
+    alphas: tuple[float, float] = (1.0, 1.0),
+    plot_scatter: bool = True,
+    plot_scatter_kwargs: dict = None,
+    plot_contours: bool = True,
+    plot_contours_kwargs: dict = None,
+    plot_arrows: bool = True,
+    plot_arrows_kwargs: dict = None,
+    arrow_scale: float | None = 1.0,
+    show_colorbar: bool = True,
+    cmap: str = "plasma",
+    norm: mpcolors.Normalize = None,
+    clim: tuple = (None, None),
+    colorbar_kwargs: dict = None,
+    colorbar_tick_kwargs: dict = None,
+    colorbar_tick_params_kwargs: dict = None,
+    colorbar_label_kwargs: dict = None,
+    add_legend: bool = False,
+    show: bool = True,
     savefig: str = None,
-    print_plot_opts: bool = False,
-    use_cache: bool = False,
-    verbose: int = 1,
+    dpi: int | str = "figure",
+    savefig_kwargs: dict = None,
+    xlabel_kwargs: dict = None,
+    ylabel_kwargs: dict = None,
+    xlim_kwargs: dict = None,
+    ylim_kwargs: dict = None,
+    tick_params_kwargs: dict = None,
+    figsize: tuple = (6, 6),
+    ax: plt.Axes | None = None,
     **kwargs,
 ):
-    """This function plots the 2d fermi surface in the z = 0 plane
+    """Plot the 2D Fermi surface in a constant k_z plane.
+
+    This function generates 2D Fermi surface plots by slicing the 3D Fermi surface
+    at a specified k_z plane. It supports multiple visualization modes including
+    plain contours, parametric coloring, and spin texture analysis.
 
     Parameters
     ----------
-    code : str,
-        This parameter sets the code to parse, by default "vasp"
-    dirname : str, optional
-        This parameter is the directory of the calculation, by default ''
+    code : str
+        The DFT code used for the calculation. Options include 'vasp', 'qe', 'elk', 
+        'abinit', 'siesta', 'lobster', etc.
+    dirname : str
+        The directory path containing the DFT calculation files.
+    mode : str, optional
+        The plotting mode. Options are 'plain', 'plain_bands', 'parametric', or 
+        'spin_texture', by default 'plain'
+    use_cache : bool, optional
+        Whether to use cached EBS data if available, by default False
+    spin_projection : SpinProjection or str, optional
+        The spin projection component for spin texture mode. Options include 
+        'x', 'y', 'z', 'x^2', 'y^2', 'z^2', by default 'z^2'
     fermi : float, optional
-        The fermi energy. If none is given, the fermi energy in the directory will be used, by default None
+        The Fermi energy in eV. If None, the Fermi energy from the calculation 
+        will be used, by default None
     fermi_shift : float, optional
-        The fermi energy shift, by default 0.0
-    lobster : bool, optional
-        A boolean value to determine to use lobster, by default False
-    band_indices : List[List]
-        A list of list that contains band indices for a given spin
-    band_colors : List[List]
-            A list of list that contains colors for the band index
-            corresponding the band_indices for a given spin
-    spins : List[int], optional
-        List of spins, by default [0]
-    atoms : List[int], optional
-        List of atoms, by default None
-    orbitals : List[int], optional
-        List of orbitals, by default None
-    energy : float, optional
-        The energy to generate the iso surface.
-        When energy is None the 0 is used by default, which is the fermi energy,
+        Energy shift to apply to the Fermi level in eV, by default 0.0
+    band_indices : List[List], optional
+        List of band indices for each spin channel to include in the plot, 
+        by default None (all bands)
+    band_colors : List[List], optional
+        List of colors corresponding to each band index for each spin channel, 
         by default None
+    spins : List[int], optional
+        List of spin indices to include. For non-collinear calculations, 
+        use [0], by default None (all spins)
+    atoms : List[int], optional
+        List of atom indices for atomic projections, by default None (all atoms)
+    orbitals : List[int], optional
+        List of orbital indices for orbital projections, by default None (all orbitals)
+    energy : float, optional
+        The energy level (relative to Fermi) at which to generate the iso-surface.
+        When None, uses 0 (Fermi energy), by default None
     k_z_plane : float, optional
-        Which K_z plane to generate 2d fermi surface, by default 0.0
+        The k_z coordinate of the plane to slice for the 2D surface, by default 0.0
+    k_z_plane_tol : float, optional
+        Tolerance for selecting k-points near the k_z plane, by default 0.01
     rot_symm : int, optional
-        _description_, by default 1
+        Rotational symmetry factor to apply around the z-axis, by default 1
     translate : List[int], optional
-        Matrix to translate the kpoints, by default [0, 0, 0]
+        Translation vector [x, y, z] to apply to k-points, by default [0, 0, 0]
     rotation : List[int], optional
-         Matrix to rotate the kpoints, by default [0, 0, 0, 1]
+        Rotation parameters [angle, x, y, z] where angle is in degrees and 
+        [x, y, z] is the rotation axis, by default [0, 0, 0, 1]
+    point_density : int, optional
+        Density of points for spin texture interpolation, by default 10
+    interpolation : int, optional
+        Number of interpolation points for generating smooth contours, by default 300
+    linecollection_kwargs : dict, optional
+        Additional keyword arguments for matplotlib LineCollection, by default None
+    linestyles : tuple[str, str], optional
+        Line styles for different spin channels, by default ('solid', 'dashed')
+    colors : tuple[str, str], optional
+        Colors for different spin channels, by default None
+    linewidths : tuple[float, float], optional
+        Line widths for different spin channels, by default (0.2, 0.2)
+    alphas : tuple[float, float], optional
+        Alpha values (transparency) for different spin channels, by default (1.0, 1.0)
+    plot_scatter : bool, optional
+        Whether to plot scatter points in spin texture mode, by default True
+    plot_scatter_kwargs : dict, optional
+        Additional keyword arguments for scatter plot, by default None
+    plot_contours : bool, optional
+        Whether to plot contour lines, by default True
+    plot_contours_kwargs : dict, optional
+        Additional keyword arguments for contour plots, by default None
+    plot_arrows : bool, optional
+        Whether to plot spin direction arrows in spin texture mode, by default True
+    plot_arrows_kwargs : dict, optional
+        Additional keyword arguments for arrow plots, by default None
+    arrow_scale : float or None, optional
+        Scaling factor for arrow size in spin texture mode, by default 1.0
+    show_colorbar : bool, optional
+        Whether to display the colorbar, by default True
+    cmap : str, optional
+        Colormap name for the plot, by default 'plasma'
+    norm : matplotlib.colors.Normalize, optional
+        Normalization for the colormap, by default None
+    clim : tuple, optional
+        Color limits (vmin, vmax) for the colormap, by default (None, None)
+    colorbar_kwargs : dict, optional
+        Additional keyword arguments for colorbar creation, by default None
+    colorbar_tick_kwargs : dict, optional
+        Additional keyword arguments for colorbar tick formatting, by default None
+    colorbar_tick_params_kwargs : dict, optional
+        Additional keyword arguments for colorbar tick parameters, by default None
+    colorbar_label_kwargs : dict, optional
+        Additional keyword arguments for colorbar label formatting, by default None
+    add_legend : bool, optional
+        Whether to add a legend to the plot, by default False
+    show : bool, optional
+        Whether to display the plot immediately, by default True
     savefig : str, optional
-        The filename to save the plot as., by default None
-    spin_texture : bool, optional
-        Boolean value to determine if spin arrows are plotted, by default False
-    exportplt : bool, optional
-        Boolean value where to return the matplotlib.pyplot state plt, by default False
-    print_plot_opts: bool, optional
-        Boolean to print the plotting options
-    use_cache: bool, optional
-        Boolean to use cache for EBS
-    verbose: int, optional
-        Verbosity level
+        Filename to save the figure. If None, the figure is not saved, by default None
+    dpi : int or str, optional
+        Resolution for saved figure. Can be integer DPI or 'figure', by default 'figure'
+    savefig_kwargs : dict, optional
+        Additional keyword arguments for figure saving, by default None
+    xlabel_kwargs : dict, optional
+        Additional keyword arguments for x-axis label formatting, by default None
+    ylabel_kwargs : dict, optional
+        Additional keyword arguments for y-axis label formatting, by default None
+    xlim_kwargs : dict, optional
+        Additional keyword arguments for x-axis limits, by default None
+    ylim_kwargs : dict, optional
+        Additional keyword arguments for y-axis limits, by default None
+    tick_params_kwargs : dict, optional
+        Additional keyword arguments for tick parameters, by default None
+    figsize : tuple, optional
+        Figure size as (width, height) in inches, by default (6, 6)
+    ax : matplotlib.pyplot.Axes, optional
+        Existing axes object to plot on. If None, creates new figure, by default None
+    **kwargs
+        Additional keyword arguments passed to the FermiSurface class
 
     Returns
     -------
-    matplotlib.pyplot
-        Returns the matplotlib.pyplot state plt
+    FermiSurface or None
+        Returns the FermiSurface object if show=False, otherwise returns None
 
     Raises
     ------
     RuntimeError
-        invalid option --translate
+        If the translate option is invalid (not length 1 or 3)
+    ValueError
+        If an invalid mode is specified
+
+    Examples
+    --------
+    Basic usage with VASP calculation:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir')
+
+    Plot with parametric coloring for specific atoms and orbitals:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='parametric',
+    ...         atoms=[0, 1], orbitals=[0, 1, 2])
+
+    Generate spin texture plot:
+
+    >>> fermi2D(code='vasp', dirname='calculation_dir', mode='spin_texture',
+    ...         spin_projection='z', plot_arrows=True)
     """
-    set_verbose_level(verbose)
 
     user_logger.info(f"If you want more detailed logs, set verbose to 2 or more")
     user_logger.info("_" * 100)
@@ -127,8 +269,11 @@ def fermi2D(
     if len(translate) != 3 and len(translate) != 1:
         logger.error(f"Error: --translate option is invalid! ({translate})")
         raise RuntimeError("invalid option --translate")
+    
+    mode = FermiSurface2DMode.from_str(mode)
 
     user_logger.info(f"dirname         : {dirname}")
+    user_logger.info(f"mode            : {mode.value}")
     user_logger.info(f"bands           : {band_indices}")
     user_logger.info(f"atoms           : {atoms}")
     user_logger.info(f"orbitals        : {orbitals}")
@@ -138,26 +283,9 @@ def fermi2D(
     user_logger.info(f"origin (trasl.) : {translate}")
     user_logger.info(f"rotation        : {rotation}")
     user_logger.info(f"save figure     : {savefig}")
-    user_logger.info(f"spin_texture    : {spin_texture}")
     user_logger.info("_" * 100)
 
-    modes = ["plain", "plain_bands", "parametric"]
-    modes_txt = " , ".join(modes)
-    message = f"""
-            There are additional plot options that are defined in a configuration file. 
-            You can change these configurations by passing the keyword argument to the function
-            To print a list of plot options set print_plot_opts=True
-
-            Here is a list modes : {modes_txt}"""
-    user_logger.info(message)
-
-    if print_plot_opts:
-        for key, value in plot_opt.items():
-            user_logger.info(f"{key} : {value}")
-
-    user_logger.info("_" * 100)
     ebs_pkl_filepath = os.path.join(dirname, "ebs.pkl")
-
     if not use_cache and os.path.exists(ebs_pkl_filepath):
         logger.info(f"Removing existing EBS file: {ebs_pkl_filepath}")
         os.remove(ebs_pkl_filepath)
@@ -235,7 +363,7 @@ def fermi2D(
     user_logger.info(f"Bands in the kz={k_z_plane} plane: {ebs.bands.shape}")
     user_logger.info(f"Projected in the kz={k_z_plane} plane: {ebs.projected.shape}")
 
-    if spin_texture is False:
+    if mode != FermiSurface2DMode.SPIN_TEXTURE:
         # processing the data
         if orbitals is None and ebs.projected is not None:
             orbitals = np.arange(ebs.norbitals, dtype=int)
@@ -274,11 +402,6 @@ def fermi2D(
         stData.append(ebsY.projected)
         stData.append(ebsZ.projected)
 
-    # Once the PROCAR is parsed and reduced to 2x2 arrays, we can apply
-    # symmetry operations to unfold the Brillouin Zone
-    # kpoints = data.kpoints
-    # bands = data.bands
-    # character = data.spd
     if ebs.is_non_collinear:
         spin_channels = [0]
     else:
@@ -287,7 +410,7 @@ def fermi2D(
     bands = ebs.bands[..., spin_channels]
     character = projected
 
-    if spin_texture is True:
+    if mode == FermiSurface2DMode.SPIN_TEXTURE:
         sx, sy, sz = stData[0], stData[1], stData[2]
         symm = ProcarSymmetry(kpoints, bands, sx=sx, sy=sy, sz=sz, character=character)
     else:
@@ -302,26 +425,119 @@ def fermi2D(
         symm.kpoints,
         symm.bands,
         symm.character,
-        band_indices=band_indices,
-        band_colors=band_colors,
+        figsize=figsize,
         **kwargs,
     )
     fs.find_energy(energy)
 
-    if not spin_texture:
-        fs.plot(mode=mode, interpolation=300)
+    if mode in [FermiSurface2DMode.PLAIN, FermiSurface2DMode.PLAIN_BANDS]:
+        
+        bands_spin_contour_data = fs.generate_contours(band_indices=band_indices, 
+                                                       interpolation=interpolation, 
+                                                       ignore_scalars=True)
+        
+        linecollection_kwargs = {} if linecollection_kwargs is None else linecollection_kwargs
+        fs.plot_band_spin_contour_line_segments(bands_spin_contour_data=bands_spin_contour_data,
+                                                linestyles=linestyles,
+                                                colors=colors,
+                                                linewidths=linewidths,
+                                                alphas=alphas,
+                                                cmap=cmap, 
+                                                norm=norm,
+                                                clim=clim,
+                                                line_collection_kwargs=linecollection_kwargs,
+                                                )
+    
+
+    elif mode == FermiSurface2DMode.PARAMETRIC:
+        bands_spin_contour_data = fs.generate_contours(band_indices=band_indices, interpolation=interpolation, ignore_scalars=False)
+        linecollection_kwargs = {} if linecollection_kwargs is None else linecollection_kwargs
+        fs.plot_band_spin_contour_line_segments(bands_spin_contour_data=bands_spin_contour_data,
+                                                linestyles=linestyles,
+                                                colors=colors,
+                                                linewidths=linewidths,
+                                                alphas=alphas,
+                                                cmap=cmap, 
+                                                norm=norm,
+                                                clim=clim,
+                                                line_collection_kwargs=linecollection_kwargs,
+                                                )
+    
+        if show_colorbar and mode not in [FermiSurface2DMode.PLAIN, FermiSurface2DMode.PLAIN_BANDS]:
+            
+            colorbar_kwargs = {} if colorbar_kwargs is None else colorbar_kwargs
+            fs.show_colorbar(
+                label="Atomic Orbital Projection",
+                cmap=cmap,
+                norm=norm,
+                clim=clim,
+                colorbar_kwargs=colorbar_kwargs,
+            )
+            
+
+    elif mode == FermiSurface2DMode.SPIN_TEXTURE:
+        spin_texture_contour_data = fs.generate_spin_texture_contours(
+            sx=sx,
+            sy=sy,
+            sz=sz,
+            band_indices=band_indices,
+            point_density=point_density,
+            spin_projection=spin_projection,
+            interpolation=interpolation,
+        )
+        if plot_contours:
+            plot_contours_kwargs = {} if plot_contours_kwargs is None else plot_contours_kwargs
+            fs.plot_spin_texture_contours(spin_texture_contour_data, **plot_contours_kwargs)
+        if plot_arrows:
+            plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
+            if arrow_scale is not None:
+                plot_arrows_kwargs.setdefault("scale", arrow_scale)
+            fs.plot_spin_texture_arrows(spin_texture_contour_data, **plot_arrows_kwargs)
+        if plot_scatter:
+            plot_scatter_kwargs = {} if plot_scatter_kwargs is None else plot_scatter_kwargs
+            fs.plot_spin_texture_scatter(spin_texture_contour_data, **plot_scatter_kwargs)
+            
+            
+        if show_colorbar:
+            
+            colorbar_kwargs = {} if colorbar_kwargs is None else colorbar_kwargs
+            fs.show_colorbar(
+                label=SpinProjection.from_str(spin_projection).value,
+                cmap=cmap,
+                norm=norm,
+                clim=clim,
+                colorbar_kwargs=colorbar_kwargs,
+            )
+            
+    if hasattr(fs, "colorbar"):
+        colorbar_tick_kwargs = {} if colorbar_tick_kwargs is None else colorbar_tick_kwargs
+        fs.set_colorbar_ticks(**colorbar_tick_kwargs)
+        
+        colorbar_tick_params_kwargs = {} if colorbar_tick_params_kwargs is None else colorbar_tick_params_kwargs
+        fs.set_colorbar_tick_params(**colorbar_tick_params_kwargs)
+        
+        colorbar_label_kwargs = {} if colorbar_label_kwargs is None else colorbar_label_kwargs
+        fs.set_colorbar_label(**colorbar_label_kwargs)
+        
+    xlabel_kwargs = {} if xlabel_kwargs is None else xlabel_kwargs
+    ylabel_kwargs = {} if ylabel_kwargs is None else ylabel_kwargs
+    xlim_kwargs = {} if xlim_kwargs is None else xlim_kwargs
+    ylim_kwargs = {} if ylim_kwargs is None else ylim_kwargs
+ 
+    fs.set_xlabel(**xlabel_kwargs)
+    fs.set_ylabel(**ylabel_kwargs)
+    fs.set_xlim(**xlim_kwargs)
+    fs.set_ylim(**ylim_kwargs)
+    fs.set_tick_params(**tick_params_kwargs)
+    
+    if add_legend and mode in [FermiSurface2DMode.PLAIN, FermiSurface2DMode.PLAIN_BANDS]:
+        fs.add_legend()
+        
+    if savefig:
+        savefig_kwargs = {} if savefig_kwargs is None else savefig_kwargs
+        fs.savefig(savefig, dpi=dpi, **savefig_kwargs)
+
+    if show:
+        fs.show()
     else:
-        fs.spin_texture(sx=symm.sx, sy=symm.sy, sz=symm.sz, spin=spins[0])
-
-    fs.add_axes_labels()
-    fs.add_legend()
-
-    if exportplt:
-        return plt
-
-    else:
-        if savefig:
-            fs.savefig(savefig)
-        else:
-            fs.show()
-        return
+        return fs

@@ -1,10 +1,13 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, Any, List, Optional,Tuple
 from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Tuple
 
-from pyprocar.cfg.base import PlotType, BaseConfig
-
-from pyprocar.utils.plot_utils import DEFAULT_COLORS, wes_anderson_palettes, create_colormap
+from pyprocar.cfg.base import BaseConfig, PlotType
+from pyprocar.utils.plot_utils import (
+    DEFAULT_COLORS,
+    create_colormap,
+    wes_anderson_palettes,
+)
 
 
 class FermiSurface2DMode(Enum):
@@ -101,7 +104,6 @@ class FermiSurface2DConfig(BaseConfig):
     modes: List[str] = field(default_factory=lambda: [mode.value for mode in FermiSurface2DMode])
     # Basic Plot Settings
     add_axes_labels: bool = True
-    add_legend: bool = False
     plot_color_bar: bool = False
 
     # Plot Appearance
@@ -118,9 +120,6 @@ class FermiSurface2DConfig(BaseConfig):
     marker: str = '.'
     dpi: str = 'figure'
 
-    # Axes and Labels
-    x_label: str = '$k_{x}$ ($\AA^{-1}$)'
-    y_label: str = '$k_{y}$ ($\AA^{-1}$)'
 
     def __post_init__(self):
         """This method is immediately called after the object is initialized. 
