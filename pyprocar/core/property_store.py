@@ -342,6 +342,22 @@ class PointSet:
         finally:
             pass
         
+    def select_points(self, indices):
+        if len(indices) == 0:
+            return PointSet(points=np.empty((0, 3)), property_store={}, gradient_func=self.gradient_func)
+        
+        points = self.points[indices]
+        
+        new_property_store = {}
+        for prop_name, calc_name, gradient_order, value_array in self.iter_property_arrays():
+            if prop_name not in new_property_store:
+                new_property_store[prop_name] = Property(name=prop_name)
+            
+            new_property_store[prop_name][(calc_name, gradient_order)] = value_array[indices]
+            
+        return PointSet(points=points, property_store=new_property_store, gradient_func=self.gradient_func)
+            
+        
     def _extract_key(self, key: str | tuple[str, int] | tuple[str,str] | tuple[str,str,int]) -> tuple[str, tuple[str | None, int]]:
         if isinstance(key, str):
             prop_name = key
