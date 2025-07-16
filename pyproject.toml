@@ -36,7 +36,7 @@ dynamic = ["version"]
 
 requires-python = ">=3.8"
 dependencies = [
-    "matplotlib",
+    "matplotlib>=3.8",
     "numpy<2.0",
     "pandas",
     "scikit-image",
