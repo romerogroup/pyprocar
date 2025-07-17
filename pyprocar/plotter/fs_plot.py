@@ -88,7 +88,7 @@ class FermiPlotter(pv.Plotter):
         if add_mesh_args is None:
             add_mesh_args = {}
 
-        if show_scalar_bar:
+        if show_scalar_bar and fermi_surface.active_scalars_name is not None:
             active_scalar_name = fermi_surface.active_scalars_name
             
             if active_scalar_name is None:
