@@ -10,6 +10,7 @@ import numpy as np
 import pyvista as pv
 from scipy import interpolate
 
+from pyprocar.core import kpoints
 from pyprocar.core.brillouin_zone import BrillouinZone
 from pyprocar.core.ebs import ElectronicBandStructureMesh
 from pyprocar.core.property_store import PointSet, Property
@@ -60,7 +61,13 @@ class FermiSurface(pv.PolyData):
         self._original_ebs = original_ebs
         self._ebs = ebs
         self._point_set = point_set
-  
+        
+        if "spin_band_index" not in point_set.property_store.keys():
+            raise ValueError("spin_band_index not found in point_set.property_store")
+        
+        if "spin_index" not in point_set.property_store.keys():
+            raise ValueError("spin_index not found in point_set.property_store")
+        
         point_data = point_data if point_data is not None else {}
         cell_data = cell_data if cell_data is not None else {}
         field_data = field_data if field_data is not None else {}
@@ -190,6 +197,8 @@ class FermiSurface(pv.PolyData):
     def n_points(self):
         return self.points.shape[0]
     
+    
+    
     @property
     def point_set(self):
         return self._point_set
@@ -202,51 +211,32 @@ class FermiSurface(pv.PolyData):
     def band_indices(self):
         return self.band_isosurfaces.keys()
     
-    @cached_property
+    @property
     def band_spin_surface_map(self):
         band_spin_surface_map = {}
         for isurface, (iband, ispin) in enumerate(self.band_isosurfaces.keys()):
             band_spin_surface_map[(iband, ispin)] = isurface
         return band_spin_surface_map
     
-    @cached_property
+    @property
     def surface_band_spin_map(self):
         surface_band_spin_map = {}
         for isurface, (iband, ispin) in enumerate(self.band_isosurfaces.keys()):
             surface_band_spin_map[isurface] = (iband, ispin)
         return surface_band_spin_map
     
-    @cached_property
+    @property
     def band_spin_mask(self):
-        spin_band_index_array = np.empty(0, dtype=np.int32)
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            n_points = self.band_isosurfaces[(iband, ispin)].points.shape[0]
-
-            # spin band index identifier
-            current_spin_band_index_array = np.full(
-                n_points, surface_idx, dtype=np.int32
-            )
-            spin_band_index_array = np.insert(
-                spin_band_index_array, 0, current_spin_band_index_array, axis=0
-            )
-        
+        spin_band_index_array = self.point_set.get_property("spin_band_index").value
         tmp_mask_dict = {}
         for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
             mask = spin_band_index_array == surface_idx
             tmp_mask_dict[(iband, ispin)] = mask
         return tmp_mask_dict
-    
-    @cached_property
-    def spin_channel_mask(self):
-        spin_index_array = np.empty(0, dtype=np.int32)
-        for (iband, ispin), surface_idx in self.band_spin_surface_map.items():
-            n_points = self.band_isosurfaces[(iband, ispin)].points.shape[0]
 
-            # spin index identifier
-            current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
-            spin_index_array = np.insert(
-                spin_index_array, 0, current_spin_index_array, axis=0
-            )
+    @property
+    def spin_channel_mask(self):
+        spin_index_array = self.point_set.get_property("spin_index").value
         
         spin_channels = np.unique(spin_index_array)
         tmp_mask_dict = {}
@@ -263,6 +253,7 @@ class FermiSurface(pv.PolyData):
     @property
     def is2d(self):
         return self.original_ebs.is2d
+    
     
     def get_brillouin_zone(self, supercell: List[int]):
         """Returns the BrillouinZone of the material
@@ -287,7 +278,9 @@ class FermiSurface(pv.PolyData):
             property_value = self.compute_property(prop_name, **kwargs)
             property = Property(name=prop_name, value=property_value)
             self.point_set.add_property(property)
-            
+        else:
+            property_value = self.point_set.get_property(prop_name)[calc_name, gradient_order]
+        
         self.set_values(prop_name, property_value)
         return property_value
     
@@ -538,25 +531,50 @@ class FermiSurface(pv.PolyData):
             f"To enable the calculation of properties, please create a new FermiSurface object.\n"
         )
 
-        extended_surfaces = []
         new_surface = copy.deepcopy(self)
         initial_surface = copy.deepcopy(self)
+        initial_band_surfaces = copy.deepcopy(self.band_isosurfaces)
+        new_band_surfaces = copy.deepcopy(self.band_isosurfaces)
+        new_point_set = copy.deepcopy(self.point_set)
         for direction in zone_directions:
             surface = copy.deepcopy(initial_surface)
-
-            new_surface += surface.translate(
+            translated_surface = surface.translate(
                 np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
             )
+            new_surface= new_surface.merge(translated_surface, merge_points=False)
             
-        active_scalars_name = self.active_scalars_name
-        active_vectors_name = self.active_vectors_name
-        if active_vectors_name is not None and active_scalars_name is not None:
-            new_surface.set_active_scalars(active_scalars_name, preference="point")
-            new_surface.set_active_vectors(active_vectors_name, preference="point")
-        elif active_scalars_name is not None:
-            self.set_active_scalars(active_scalars_name, preference="point")
+            # Copying exisiting band_isosurfaces
+            for (iband, ispin), initial_band_surface in initial_band_surfaces.items():
+                new_band_surface = copy.deepcopy(initial_band_surface)
+                new_band_surface += initial_band_surface.translate(
+                    np.dot(direction, self.ebs.reciprocal_lattice), inplace=True
+                )
+                new_band_surfaces[(iband, ispin)] += new_band_surface
+                
+            # Copying exisiting properties
+            for prop_name, calc_name, gradient_order, value_array in new_point_set.iter_property_arrays():
+                current_property = self.point_set.get_property(prop_name)
+                current_array = current_property[calc_name, gradient_order]
 
-        return new_surface
+                new_array = np.concatenate((value_array, current_array), axis=0)
+                new_property = new_point_set.get_property(prop_name)
+                new_property[calc_name, gradient_order] = new_array
+                
+        new_point_set.update_points(new_surface.points)
+        
+        fs = FermiSurface(
+            points = new_surface.points,
+            faces = new_surface.faces,
+            band_isosurfaces = new_band_surfaces,
+            isovalue = self.isovalue,
+            original_ebs = self.original_ebs,
+            ebs = self.ebs,
+            point_set = new_point_set,
+            point_data = new_surface.point_data,
+            cell_data = new_surface.cell_data,
+            field_data = new_surface.field_data,
+        )
+        return fs
     
     def _create_interpolated_surface(self,
                                      grid: pv.ImageData = None,
@@ -657,8 +675,8 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     """
     logger.info("___Generating all Fermi surfaces___")
     
-    ebs.pad(padding=padding, inplace=False)
-    padded_ebs = ebs.expand_single_dimension(inplace=False)
+    padded_ebs = ebs.pad(padding=padding, inplace=False)
+    padded_ebs = padded_ebs.expand_single_dimension(inplace=False)
     
     transform_matrix_to_cart = np.eye(4)
     transform_matrix_to_cart[:3, :3] = ebs.reciprocal_lattice
@@ -713,14 +731,28 @@ def generate_band_isosurfaces(ebs: ElectronicBandStructureMesh, isovalue: float,
     if len(band_isosurfaces) == 0:
         raise ValueError("No Fermi surfaces were generated. Please check the isovalue and padding.")
 
+    # Combine all surfaces into a single surface
     combined_surface = None
+    i_surface = 0
+    spin_band_index = np.empty(0, dtype=np.int32)
+    spin_index = np.empty(0, dtype=np.int32)
     for (iband, ispin), surface in band_isosurfaces.items():
         if combined_surface is None:
             combined_surface = surface
         else:
             combined_surface = combined_surface.merge(surface, merge_points=False)
+            
+        surface_spin_band_index = np.full(surface.points.shape[0], i_surface, dtype=np.int32)
+        surface_spin_index = np.full(surface.points.shape[0], ispin, dtype=np.int32)
+        
+        spin_band_index = np.insert(spin_band_index, 0, surface_spin_band_index, axis=0)
+        spin_index = np.insert(spin_index, 0, surface_spin_index, axis=0)
+        
+        i_surface += 1
 
     point_set = PointSet(combined_surface.points)
+    point_set.add_property(name="spin_index", value=spin_index)
+    point_set.add_property(name="spin_band_index", value=spin_band_index)
     return combined_surface, band_isosurfaces, isovalue, ebs, padded_ebs, point_set
 
 
@@ -773,63 +805,24 @@ def clip_surface(surface: pv.PolyData, brillouin_zone: BrillouinZone):
             raise ValueError(f"Surface is empty after clipping with normal {normal} and center {center}")
     return surface
 
+def compute_spin_band_index_array(band_isosurfaces: dict[tuple[int, int], pv.PolyData], reciprocal_lattice: np.ndarray) -> np.ndarray:
+    spin_band_index_array = np.empty(0, dtype=np.int32)
+    for i_surface, (iband, ispin) in enumerate(band_isosurfaces.keys()):
+        points = band_isosurfaces[(iband, ispin)].points
+        reduced_points = kpoints.cartesian_to_reduced(points, reciprocal_lattice)
+        # Drop kpoints with coordinates with absolute values greater than 0.5
+        mask = np.all(np.abs(reduced_points) <= 0.5, axis=1)
+        points = points[mask]
+        reduced_points = reduced_points[mask]
+        n_points = points.shape[0]
 
-# def merge_surfaces(surfaces: List[pv.PolyData]) -> pv.PolyData:
-#     """
-#     Merge multiple Fermi surfaces into a single surface with band and spin information.
-
-#     This method combines multiple PyVista PolyData objects representing different
-#     Fermi surfaces (from different bands and spins) into a single PolyData object.
-#     It adds point data arrays to track which points belong to which band and spin.
-
-#     Parameters
-#     ----------
-#     surfaces : List[pv.PolyData]
-#         List of PyVista PolyData objects representing Fermi surfaces for different
-#         bands and spins.
-
-#     Returns
-#     -------
-#     pv.PolyData
-#         A merged PyVista PolyData object containing all surfaces with added
-#         point data arrays 'spin_index' and 'spin_band_index' to identify the
-#         original band and spin of each point.
-
-#     """
-#     if not surfaces:
-#         return pv.PolyData()
-
-#     # Add band and spin indices to each surface before merging
-#     spin_band_index_array = np.empty(0, dtype=np.int32)
-#     spin_index_array = np.empty(0, dtype=np.int32)
-#     for surface_idx, surface in enumerate(surfaces):
-#         iband, ispin = self._surface_band_spin_map[surface_idx]
-#         n_points = surface.points.shape[0]
-
-#         # spin index identifier
-#         current_spin_index_array = np.full(n_points, ispin, dtype=np.int32)
-#         spin_index_array = np.insert(
-#             spin_index_array, 0, current_spin_index_array, axis=0
-#         )
-
-#         # spin band index identifier
-#         current_spin_band_index_array = np.full(
-#             n_points, surface_idx, dtype=np.int32
-#         )
-#         spin_band_index_array = np.insert(
-#             spin_band_index_array, 0, current_spin_band_index_array, axis=0
-#         )
-
-#     # Create boolean masks for each band and spin combination
-#     for (iband, ispin), surface_idx in self._band_spin_surface_map.items():
-#         mask = spin_band_index_array == surface_idx
-#         self._band_spin_mask[(iband, ispin)] = mask
-
-#     merged = surfaces[0]
-#     for surface in surfaces[1:]:
-#         merged = merged.merge(surface, merge_points=False)
-
-#     merged.point_data["spin_index"] = spin_index_array
-#     merged.point_data["spin_band_index"] = spin_band_index_array
-
-#     return merged
+        # spin band index identifier
+        current_spin_band_index_array = np.full(
+            n_points, i_surface, dtype=np.int32
+        )
+        spin_band_index_array = np.insert(
+            spin_band_index_array, 0, current_spin_band_index_array, axis=0
+        )
+        
+    return spin_band_index_array
+        

@@ -191,7 +191,6 @@ class TestFermiSurface:
         assert fs.points.shape[0] > 0
         
         ebs = fs.ebs
-        print(type(ebs))
         assert isinstance(fs.original_ebs, ElectronicBandStructureMesh)
         assert isinstance(fs.ebs, ElectronicBandStructureMesh)
         assert isinstance(fs.point_set, PointSet)
@@ -276,7 +275,21 @@ class TestFermiSurface:
         assert fs.point_data["avg_inv_effective_mass"].shape[0] == fs.n_points
         assert len(fs.point_data["avg_inv_effective_mass"].shape) == 1
         
-
+    def test_extend_surface(self, fermisurface_3d_non_spin_polarized):
+        fs = fermisurface_3d_non_spin_polarized
+        zone_directions = [(0, 0, 1), (1, 0, 0), (0, 1, 0)]
+        n_zones = len(zone_directions) +1
+        extended_fs = fs.extend_surface(zone_directions=zone_directions)
+        assert extended_fs.points.shape[0] == fs.n_points*n_zones, f"extended_fs.points.shape[0]: {extended_fs.points.shape[0]} does not match fs.n_points*n_zones: {fs.n_points*n_zones}"
+        assert extended_fs.n_points == fs.n_points*n_zones, f"extended_fs.n_points: {extended_fs.n_points} does not match fs.n_points*n_zones: {fs.n_points*n_zones}"
         
-        
-        
+        # Testing properties
+        for prop_name, property in fs.point_set.property_store.items():
+            extended_property = extended_fs.point_set.get_property(prop_name)
+            
+            extended_values = extended_property.value
+            old_values = property.value
+            assert np.allclose(extended_values[:fs.n_points], old_values), f"extended_values: {extended_values} does not match old_values: {old_values}"
+            assert np.allclose(extended_values[-1*fs.n_points:], old_values), f"extended_values: {extended_values} does not match old_values: {old_values}"
+    
+    
