@@ -805,24 +805,3 @@ def clip_surface(surface: pv.PolyData, brillouin_zone: BrillouinZone):
             raise ValueError(f"Surface is empty after clipping with normal {normal} and center {center}")
     return surface
 
-def compute_spin_band_index_array(band_isosurfaces: dict[tuple[int, int], pv.PolyData], reciprocal_lattice: np.ndarray) -> np.ndarray:
-    spin_band_index_array = np.empty(0, dtype=np.int32)
-    for i_surface, (iband, ispin) in enumerate(band_isosurfaces.keys()):
-        points = band_isosurfaces[(iband, ispin)].points
-        reduced_points = kpoints.cartesian_to_reduced(points, reciprocal_lattice)
-        # Drop kpoints with coordinates with absolute values greater than 0.5
-        mask = np.all(np.abs(reduced_points) <= 0.5, axis=1)
-        points = points[mask]
-        reduced_points = reduced_points[mask]
-        n_points = points.shape[0]
-
-        # spin band index identifier
-        current_spin_band_index_array = np.full(
-            n_points, i_surface, dtype=np.int32
-        )
-        spin_band_index_array = np.insert(
-            spin_band_index_array, 0, current_spin_band_index_array, axis=0
-        )
-        
-    return spin_band_index_array
-        
