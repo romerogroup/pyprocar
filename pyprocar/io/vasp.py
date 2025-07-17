@@ -487,6 +487,9 @@ class Kpoints(collections.abc.Mapping):
                 self.kgrid = [int(x) for x in kgrid.split()]
                 shift = rf.readline()
                 self.kshift = [int(float(x)) for x in shift.split()]
+                
+                if len(self.kshift) == 0:
+                    self.kshift = (0, 0, 0)
 
             elif self.mode == "line":
                 if rf.readline()[0].lower() == "c":
