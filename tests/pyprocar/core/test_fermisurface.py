@@ -292,4 +292,11 @@ class TestFermiSurface:
             assert np.allclose(extended_values[:fs.n_points], old_values), f"extended_values: {extended_values} does not match old_values: {old_values}"
             assert np.allclose(extended_values[-1*fs.n_points:], old_values), f"extended_values: {extended_values} does not match old_values: {old_values}"
     
-    
+    def test_2dmesh_fermisurface_creation(self, fermisurface_2d_non_colinear):
+        fs = fermisurface_2d_non_colinear
+        assert isinstance(fs.ebs, ElectronicBandStructureMesh)
+        assert isinstance(fs.point_set, PointSet)
+        assert isinstance(fs.isovalue, float)
+        assert isinstance(fs.band_isosurfaces, dict)
+        assert fs.isovalue == fs.ebs.fermi
+        assert fs.fermi_shift == 0.0

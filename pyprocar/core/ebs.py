@@ -1198,7 +1198,7 @@ def edge_diff_ramp(vector, pad_width, iaxis, kwargs):
     original_end_index = vector.shape[0] - pad_width[1] - 1
     
     dx = abs(vector[original_index] - vector[original_index + 1])
-    
+
     # Create left padding using array operations
     left_pad = vector[original_index] - (np.arange(pad_width[0], 0, -1) + 1) * dx
     vector[:pad_width[0]] = left_pad
@@ -1217,7 +1217,8 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
 
         if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
             ibz2fbz(self, rotations=self.structure.rotations, kgrid_info=self.kgrid_info, decimals=4, inplace=True)
-            sort_by_kpoints(self, inplace=True)
+        
+        sort_by_kpoints(self, inplace=True)
             
         if self.n_kpoints != np.prod(self.kgrid_info.kgrid):
             raise ValueError("n_kpoints must be equal to np.prod(kgrid) (number of kpoints)")
@@ -1406,7 +1407,6 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
             property[calc_name, gradient_order] = padded_array
                 
         new_kpoints = math.mesh_to_array(padded_kpoints_mesh, order=order)
-        
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_mesh()
         return ebs
@@ -1501,7 +1501,7 @@ class ElectronicBandStructureMesh(ElectronicBandStructure, DifferentiablePropert
             interpolated_mesh = math.fft_interpolate_nd_3dmesh(value_mesh, interpolation_factor)
             interpolated_value = math.mesh_to_array(interpolated_mesh)
             property[calc_name, gradient_order] = interpolated_value
-            
+             
         ebs.update_points(new_kpoints)
         ebs._mesh = ebs.to_pyvista_grid()
         return ebs
