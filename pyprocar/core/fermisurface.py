@@ -1139,6 +1139,13 @@ class FermiSurface:
         """
         
         self.ax.legend()
+        
+    def set_aspect(self, aspect: float | str = "equal", **kwargs):
+        """Set the aspect ratio of the plot.
+        
+        Parameters
+        """
+        self.ax.set_aspect(aspect, **kwargs)
 
     def savefig(self, savefig, dpi: int | str = "figure", **kwargs):
         """Save the figure to a file.

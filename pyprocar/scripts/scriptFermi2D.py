@@ -100,6 +100,8 @@ def fermi2D(
     ylim_kwargs: dict = None,
     tick_params_kwargs: dict = None,
     figsize: tuple = (6, 6),
+    aspect: float | str = "equal",
+    set_aspect_kwargs: dict = None,
     ax: plt.Axes | None = None,
     **kwargs,
 ):
@@ -222,6 +224,10 @@ def fermi2D(
         Additional keyword arguments for tick parameters, by default None
     figsize : tuple, optional
         Figure size as (width, height) in inches, by default (6, 6)
+    aspect: float | str, optional
+        Aspect ratio of the plot, by default "equal"
+    set_aspect_kwargs : dict, optional
+        Additional keyword arguments for set_aspect, by default None
     ax : matplotlib.pyplot.Axes, optional
         Existing axes object to plot on. If None, creates new figure, by default None
     **kwargs
@@ -494,6 +500,8 @@ def fermi2D(
             fs.plot_spin_texture_contours(spin_texture_contour_data, **plot_contours_kwargs)
         if plot_arrows:
             plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
+            
+            plot_arrows_kwargs.setdefault("cmap", cmap)
             if arrow_scale is not None:
                 plot_arrows_kwargs.setdefault("scale", arrow_scale)
             fs.plot_spin_texture_arrows(spin_texture_contour_data, **plot_arrows_kwargs)
@@ -533,6 +541,9 @@ def fermi2D(
     fs.set_xlim(**xlim_kwargs)
     fs.set_ylim(**ylim_kwargs)
     fs.set_tick_params(**tick_params_kwargs)
+    set_aspect_kwargs = {} if set_aspect_kwargs is None else set_aspect_kwargs
+    
+    fs.set_aspect(aspect=aspect, **set_aspect_kwargs)
     
     if add_legend and mode in [FermiSurface2DMode.PLAIN, FermiSurface2DMode.PLAIN_BANDS]:
         fs.add_legend()
