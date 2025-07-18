@@ -16,7 +16,7 @@ from matplotlib import cm
 from matplotlib import colors as mpcolors
 
 from pyprocar import io
-from pyprocar.core import FermiSurface, ProcarSymmetry
+from pyprocar.core import ElectronicBandStructure, FermiSurface, ProcarSymmetry
 from pyprocar.core.fermisurface import SpinProjection
 from pyprocar.utils import ROOT, data_utils, welcome
 
@@ -330,7 +330,11 @@ def fermi2D(
     # Shifting all kpoint to first Brillouin zone
     bound_ops = -1.0 * (ebs.kpoints > 0.5) + 1.0 * (ebs.kpoints <= -0.5)
     ebs.kpoints = ebs.kpoints + bound_ops
-    kpoints = ebs.kpoints_cartesian
+    
+    kpoints = ElectronicBandStructure.reduced_to_cartesian(ebs.kpoints, 2*np.pi*ebs.reciprocal_lattice)
+    # kpoints = ebs.kpoints_cartesian
+    
+    
 
     if spins is None:
         spins = np.arange(ebs.bands.shape[-1])
