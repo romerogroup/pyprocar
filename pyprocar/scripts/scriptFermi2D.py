@@ -84,6 +84,7 @@ def fermi2D(
     show_colorbar: bool = True,
     cmap: str = "plasma",
     norm: mpcolors.Normalize = None,
+    use_norm: bool = False,
     clim: tuple = (None, None),
     colorbar_kwargs: dict = None,
     colorbar_tick_kwargs: dict = None,
@@ -98,7 +99,14 @@ def fermi2D(
     ylabel_kwargs: dict = None,
     xlim_kwargs: dict = None,
     ylim_kwargs: dict = None,
-    tick_params_kwargs: dict = None,
+    x_major_tick_params_kwargs: dict = None,
+    y_major_tick_params_kwargs: dict = None,
+    x_minor_tick_params_kwargs: dict = None,
+    y_minor_tick_params_kwargs: dict = None,
+    major_tick_params_kwargs: dict = None,
+    minor_tick_params_kwargs: dict = None,
+    x_ticks_kwargs: dict = None,
+    y_ticks_kwargs: dict = None,
     figsize: tuple = (6, 6),
     aspect: float | str = "equal",
     set_aspect_kwargs: dict = None,
@@ -220,8 +228,22 @@ def fermi2D(
         Additional keyword arguments for x-axis limits, by default None
     ylim_kwargs : dict, optional
         Additional keyword arguments for y-axis limits, by default None
-    tick_params_kwargs : dict, optional
-        Additional keyword arguments for tick parameters, by default None
+    x_major_tick_params_kwargs : dict, optional
+        Additional keyword arguments for x-axis major tick parameters, by default None
+    y_major_tick_params_kwargs : dict, optional
+        Additional keyword arguments for y-axis major tick parameters, by default None
+    x_minor_tick_params_kwargs : dict, optional
+        Additional keyword arguments for x-axis minor tick parameters, by default None
+    y_minor_tick_params_kwargs : dict, optional
+        Additional keyword arguments for y-axis minor tick parameters, by default None
+    major_tick_params_kwargs : dict, optional
+        Additional keyword arguments for major tick parameters, by default None
+    minor_tick_params_kwargs : dict, optional
+        Additional keyword arguments for minor tick parameters, by default None
+    x_ticks_kwargs : dict, optional
+        Additional keyword arguments for x-axis tick parameters, by default None
+    y_ticks_kwargs : dict, optional
+        Additional keyword arguments for y-axis tick parameters, by default None
     figsize : tuple, optional
         Figure size as (width, height) in inches, by default (6, 6)
     aspect: float | str, optional
@@ -495,13 +517,15 @@ def fermi2D(
             spin_projection=spin_projection,
             interpolation=interpolation,
         )
+        
+        fs.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
+        
         if plot_contours:
             plot_contours_kwargs = {} if plot_contours_kwargs is None else plot_contours_kwargs
             fs.plot_spin_texture_contours(spin_texture_contour_data, **plot_contours_kwargs)
+
         if plot_arrows:
             plot_arrows_kwargs = {} if plot_arrows_kwargs is None else plot_arrows_kwargs
-            
-            plot_arrows_kwargs.setdefault("cmap", cmap)
             if arrow_scale is not None:
                 plot_arrows_kwargs.setdefault("scale", arrow_scale)
             fs.plot_spin_texture_arrows(spin_texture_contour_data, **plot_arrows_kwargs)
@@ -516,10 +540,10 @@ def fermi2D(
             fs.show_colorbar(
                 label=SpinProjection.from_str(spin_projection).value,
                 cmap=cmap,
-                norm=norm,
                 clim=clim,
                 colorbar_kwargs=colorbar_kwargs,
             )
+            
             
     if hasattr(fs, "colorbar"):
         colorbar_tick_kwargs = {} if colorbar_tick_kwargs is None else colorbar_tick_kwargs
@@ -540,7 +564,28 @@ def fermi2D(
     fs.set_ylabel(**ylabel_kwargs)
     fs.set_xlim(**xlim_kwargs)
     fs.set_ylim(**ylim_kwargs)
-    fs.set_tick_params(**tick_params_kwargs)
+    
+    if x_ticks_kwargs is not None:
+        fs.set_xticks(**x_ticks_kwargs)
+    if y_ticks_kwargs is not None:
+        fs.set_yticks(**y_ticks_kwargs)
+    
+    if x_major_tick_params_kwargs is not None:
+        fs.set_tick_params(axis = "x", which = "major", **x_major_tick_params_kwargs)
+    if x_minor_tick_params_kwargs is not None:
+        fs.set_tick_params(axis = "x", which = "minor", **x_minor_tick_params_kwargs)
+    if y_major_tick_params_kwargs is not None:
+        fs.set_tick_params(axis = "y", which = "major", **y_major_tick_params_kwargs)
+    if y_minor_tick_params_kwargs is not None:
+        fs.set_tick_params(axis = "y", which = "minor", **y_minor_tick_params_kwargs)
+    
+    if major_tick_params_kwargs is not None:
+        fs.set_tick_params(which = "major", **major_tick_params_kwargs)
+    if minor_tick_params_kwargs is not None:
+        fs.set_tick_params(which = "minor", **minor_tick_params_kwargs)
+    
+    
+    
     set_aspect_kwargs = {} if set_aspect_kwargs is None else set_aspect_kwargs
     
     fs.set_aspect(aspect=aspect, **set_aspect_kwargs)

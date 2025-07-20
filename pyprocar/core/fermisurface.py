@@ -491,17 +491,19 @@ class FermiSurface:
                 for i_segment, segment_scalars in enumerate(scalars):
                     vmin = min(vmin, segment_scalars.min())
                     vmax = max(vmax, segment_scalars.max())
-                self.clim = (vmin, vmax)
-            norm = mpcolors.Normalize(vmin, vmax)
-            cmap = cm.get_cmap(cmap)
+                clim = (vmin, vmax)
+                
+        if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
+            self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
+            
 
         for i_segment, segments in enumerate(lines):
             lc = LineCollection(segments,  linestyle=linestyle, linewidth=linewidth, alpha=alpha, **line_collection_kwargs)
 
             if len(scalars) > 0:
                 lc.set_array(scalars[i_segment])
-                lc.set_cmap(cmap)
-                lc.set_norm(norm)
+                lc.set_cmap(self.cmap)
+                lc.set_norm(self.norm)
             else:
                 lc.set_color(color)
                 if i_segment == 0:
@@ -519,11 +521,10 @@ class FermiSurface:
                                 colors:tuple[str, str] = None,
                                 linewidths:tuple[float, float] = (0.2, 0.2),
                                 alphas:tuple[float, float] = (1.0, 1.0),
-                                cmap:str = "plasma", 
+                                cmap:str = "plasma",
                                 norm:mpcolors.Normalize = None,
                                 clim:tuple = (None, None),
-                                line_collection_kwargs:dict = None,
-
+                                line_collection_kwargs:dict = None
                                    ):
         """Plot contour line segments for multiple bands and spins.
 
@@ -555,9 +556,11 @@ class FermiSurface:
         """
         plot_contour_line_segments_kwargs = {}
         
-        plot_contour_line_segments_kwargs["norm"] = norm
-        plot_contour_line_segments_kwargs["clim"] = clim
-        plot_contour_line_segments_kwargs["cmap"] = cmap
+        if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
+            self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
+        plot_contour_line_segments_kwargs["norm"] = self.norm
+        plot_contour_line_segments_kwargs["clim"] = self.clim
+        plot_contour_line_segments_kwargs["cmap"] = self.cmap
         plot_contour_line_segments_kwargs["line_collection_kwargs"] = line_collection_kwargs if line_collection_kwargs is not None else {}
         
         band_spin_handles = []
@@ -658,7 +661,6 @@ class FermiSurface:
             "scalars": [],
         }
         
-        self.clim = (0, 0)
         for i_band, (contour, spinX, spinY, spinZ) in enumerate(zip(spin_texture_contours, sx, sy, sz)):
             # The previous interp. yields the level curves, nothing more is
             # useful from there
@@ -690,26 +692,25 @@ class FermiSurface:
                 elif spin_projection == SpinProjection.SZ2:
                     scalars = newSz[::point_density] ** 2
                     
-                if scalars is not None:
-                    self.clim = (min(self.clim[0], scalars.min()), max(self.clim[1], scalars.max()))
-                    
                 spin_texture_contour_data["sx"].append(newSx[::point_density])
                 spin_texture_contour_data["sy"].append(newSy[::point_density])
                 spin_texture_contour_data["sz"].append(newSz[::point_density])
                 spin_texture_contour_data["points"].append(points[::point_density])
                 spin_texture_contour_data["contours"].append(contour)
                 spin_texture_contour_data["scalars"].append(scalars)
+                
         
         self.spin_texture_contour_data = spin_texture_contour_data
         return self.spin_texture_contour_data 
     
     def plot_spin_texture_contours(self, spin_texture_contour_data:dict, 
-                    clim: tuple = (None, None),
-                    cmap: str = "plasma",
                     alpha:float = 1.0,
                     linewidth:float = 0.2,
                     colors:str = None,
                     linestyles:str = "solid",
+                    norm:mpcolors.Normalize = None,
+                    clim:tuple = (None, None),
+                    cmap:str = "plasma",
                     countour_kwargs: dict = None):
         """Plot spin texture contours from spin texture data.
 
@@ -729,6 +730,12 @@ class FermiSurface:
             Color for the contours, by default None.
         linestyles : str, optional
             Style of the contour lines, by default "solid".
+        norm : matplotlib.colors.Normalize, optional
+            Normalization instance for color mapping, by default None.
+        clim : tuple of float, optional
+            Color limits as (vmin, vmax), by default (None, None).
+        cmap : str, optional
+            Colormap name, by default "plasma".
         countour_kwargs : dict, optional
             Additional kwargs for matplotlib contour function, by default None.
 
@@ -738,15 +745,9 @@ class FermiSurface:
             List of matplotlib contour handles.
         """
         
-        # Normalizing
-        vmin = clim[0]
-        vmax = clim[1]
-        if vmin is None:
-            vmin = self.clim[0]
-        if vmax is None:
-            vmax = self.clim[1]
-            
-        norm = mpcolors.Normalize(vmin, vmax)
+        
+        if not hasattr(self, "norm") or not hasattr(self, "clim") or not hasattr(self, "cmap"):
+            self.set_scalar_mappable(norm=norm, clim=clim, cmap=cmap)
             
         countour_kwargs = {} if countour_kwargs is None else countour_kwargs
         countour_kwargs.setdefault("linewidths", linewidth)
@@ -755,16 +756,18 @@ class FermiSurface:
         countour_kwargs.setdefault("alpha", alpha)
         if colors is not None:
             countour_kwargs.setdefault("colors", colors)
-            countour_kwargs.setdefault("cmap", cmap)
-        countour_kwargs.setdefault("norm", norm)
-        countour_kwargs.setdefault("vmin", vmin)
-        countour_kwargs.setdefault("vmax", vmax)
+        else:
+            countour_kwargs.setdefault("cmap", self.cmap)
+            countour_kwargs.setdefault("norm", self.norm)
+            countour_kwargs.setdefault("vmin", self.clim[0])
+            countour_kwargs.setdefault("vmax", self.clim[1])
         
         self.contour_handles = []
         for z in spin_texture_contour_data["contours"]:
             self.contour_handles.append(self.ax.contour(z, [self.energy], **countour_kwargs))
         
         self.handles.extend(self.contour_handles)
+
         return self.contour_handles
     
     def plot_spin_texture_scatter(self, 
@@ -773,9 +776,7 @@ class FermiSurface:
                                   edgecolor:str = "none",
                                   alpha:float = 1.0,
                                   marker:str = ".",
-                                  cmap:str = "plasma",
                                   color:str = "k",
-                                  norm:mpcolors.Normalize = None,
                                   scatter_kwargs:dict = None,
                                   ):
         """Plot spin texture as scatter points on Fermi surface contours.
@@ -792,12 +793,8 @@ class FermiSurface:
             Transparency level (0-1), by default 1.0.
         marker : str, optional
             Marker style for scatter points, by default ".".
-        cmap : str, optional
-            Colormap name, by default "plasma".
         color : str, optional
             Color for points when not using scalar coloring, by default "k".
-        norm : matplotlib.colors.Normalize, optional
-            Normalization instance for color mapping, by default None.
         scatter_kwargs : dict, optional
             Additional kwargs for matplotlib scatter function, by default None.
 
@@ -809,7 +806,6 @@ class FermiSurface:
 
         x_limits = [0, 0]
         y_limits = [0, 0]
-        self.clim = (0, 0)
         self.scatter_handles = []
         for i_band, (sx, sy, sz, points, scalars) in enumerate(zip(spin_texture_contour_data["sx"], 
                                                           spin_texture_contour_data["sy"], 
@@ -825,15 +821,17 @@ class FermiSurface:
                 min(y_limits[0], points[:, 1].min()),
                 max(y_limits[1], points[:, 1].max()),
             ]
-            self.clim = (min(self.clim[0], scalars.min()), max(self.clim[1], scalars.max()))
+            
             scatter_kwargs = {} if scatter_kwargs is None else scatter_kwargs
             scatter_kwargs.setdefault("s", s)
             scatter_kwargs.setdefault("edgecolor", edgecolor)
             scatter_kwargs.setdefault("alpha", alpha)
             scatter_kwargs.setdefault("marker", marker)
             scatter_kwargs.setdefault("c", color)
-            scatter_kwargs.setdefault("cmap", cmap)
-            scatter_kwargs.setdefault("norm", norm)
+            scatter_kwargs.setdefault("cmap", self.cmap)
+            scatter_kwargs.setdefault("norm", self.norm)
+            scatter_kwargs.setdefault("vmin", self.clim[0])
+            scatter_kwargs.setdefault("vmax", self.clim[1])
             
             self.scatter_handles.append(self.ax.scatter(
                 points[:, 0],
@@ -859,8 +857,6 @@ class FermiSurface:
                      scale_units:str = "inches",
                      units:str = "inches",
                      angles:str = "uv",
-                     cmap:str = "plasma",
-                     norm:mpcolors.Normalize = None,
                      quiver_kwargs: dict = None,
                      ):
         """Plot spin texture as arrows (vectors) on Fermi surface contours.
@@ -902,16 +898,17 @@ class FermiSurface:
         The arrows represent the in-plane spin components (sx, sy) while the color
         can represent any spin projection specified during contour generation.
         """
+        
+        
         quiver_kwargs = {} if quiver_kwargs is None else quiver_kwargs
         quiver_kwargs.setdefault("scale",  1 / scale)
         quiver_kwargs.setdefault("scale_units", scale_units)
         quiver_kwargs.setdefault("angles", angles)
-        quiver_kwargs.setdefault("cmap", cmap)
-        quiver_kwargs.setdefault("norm", norm)
         
+        
+            
         x_limits = [0, 0]
         y_limits = [0, 0]
-        self.clim = (0, 0)
         self.quiver_handles = []
         for i_band, (sx, sy, sz, points, scalars) in enumerate(zip(spin_texture_contour_data["sx"], 
                                                           spin_texture_contour_data["sy"], 
@@ -927,9 +924,7 @@ class FermiSurface:
                 min(y_limits[0], points[:, 1].min()),
                 max(y_limits[1], points[:, 1].max()),
             ]
-            self.clim = (min(self.clim[0], scalars.min()), max(self.clim[1], scalars.max()))
-            
-   
+
             quiver_args = [
                 points[:, 0],  # Arrow position x-component
                 points[:, 1],  # Arrow position y-component
@@ -944,10 +939,12 @@ class FermiSurface:
                 band_quiver_kwargs["color"] = arrow_color
             else:
                 quiver_args.append(scalars)
+                band_quiver_kwargs.setdefault("cmap", self.cmap)
+                band_quiver_kwargs.setdefault("norm", self.norm)
+                band_quiver_kwargs.setdefault("clim", self.clim)
                 band_quiver_kwargs["color"] = None
 
             self.quiver_handles.append(self.ax.quiver(*quiver_args,**band_quiver_kwargs))
-
 
         self.x_limits = (
             x_limits[0] - abs(x_limits[0]) * 0.1,
@@ -958,7 +955,7 @@ class FermiSurface:
             y_limits[1] + abs(y_limits[1]) * 0.1,
         )
         self.handles.extend(self.quiver_handles)
-
+   
         return None
         
 
@@ -966,7 +963,6 @@ class FermiSurface:
                       label:str = "",
                       n_ticks:int = 5,
                       cmap:str = "plasma", 
-                      norm:mpl.colors.Normalize = None, 
                       clim:tuple = (None, None),
                       colorbar_kwargs:dict = None):
         """Add a colorbar to the plot.
@@ -986,20 +982,32 @@ class FermiSurface:
         colorbar_kwargs : dict, optional
             Additional kwargs for matplotlib colorbar function, by default None.
         """
+        self.colorbar = self.fig.colorbar(
+                        self.cm,
+                        ax=self.ax, 
+                        label=label,
+                        **colorbar_kwargs)
+        
+    def set_scalar_mappable(self, 
+                            norm:mpcolors.Normalize = None, 
+                            clim:tuple = (None, None), 
+                            cmap:str = "plasma"):
+        
         vmin = clim[0]
         vmax = clim[1]
         if vmin is None:
-            vmin = self.clim[0]
+            vmin=-0.5
         if vmax is None:
-            vmax = self.clim[1]
-                
-        norm = mpl.colors.Normalize(vmin=clim[0], vmax=clim[1])
-        cmap = mpl.cm.get_cmap(cmap)
-    
-        self.colorbar = self.fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
-                          ax=self.ax, 
-                          label=label,
-                          **colorbar_kwargs)
+            vmax=0.5
+        if norm is None:
+            norm = mpcolors.Normalize
+            
+        norm = norm(vmin, vmax)
+        self.norm = norm
+        self.clim = clim
+        self.cmap = cmap
+
+        self.cm = cm.ScalarMappable(norm=norm, cmap=cmap)
         
         
     def set_colorbar_ticks(self, n_ticks:int = 5, tick_labels = None, tick_positions = None, **kwargs):
@@ -1025,6 +1033,55 @@ class FermiSurface:
         set_y_tick_kwargs.setdefault("labels", tick_labels)
         set_y_tick_kwargs.update(kwargs)
         self.colorbar.ax.set_yticks(**set_y_tick_kwargs)
+        
+        
+    def set_xticks(self, n_ticks:int = 5, tick_labels = None, tick_positions = None, **kwargs):
+        """Set the tick positions and labels for the colorbar.
+
+        Parameters
+        ----------
+        n_ticks : int, optional
+            Number of ticks to use if tick_positions is None, by default 5.
+        tick_labels : array-like, optional
+            Custom tick labels, by default None.
+        tick_positions : array-like, optional
+            Custom tick positions, by default None.
+        **kwargs
+            Additional keyword arguments passed to matplotlib set_yticks.
+        """
+        if tick_positions is None:
+            tick_positions = np.linspace(self.x_limits[0], self.x_limits[1], n_ticks)
+        if tick_labels is None:
+            tick_labels = np.linspace(self.x_limits[0], self.x_limits[1], n_ticks)
+        set_x_tick_kwargs = {}
+        set_x_tick_kwargs.setdefault("ticks", tick_positions)
+        set_x_tick_kwargs.setdefault("labels", tick_labels)
+        set_x_tick_kwargs.update(kwargs)
+        self.ax.set_xticks(**set_x_tick_kwargs)
+        
+    def set_yticks(self, n_ticks:int = 5, tick_labels = None, tick_positions = None, **kwargs):
+        """Set the tick positions and labels for the colorbar.
+
+        Parameters
+        ----------
+        n_ticks : int, optional
+            Number of ticks to use if tick_positions is None, by default 5.
+        tick_labels : array-like, optional
+            Custom tick labels, by default None.
+        tick_positions : array-like, optional
+            Custom tick positions, by default None.
+        **kwargs
+            Additional keyword arguments passed to matplotlib set_yticks.
+        """
+        if tick_positions is None:
+            tick_positions = np.linspace(self.y_limits[0], self.y_limits[1], n_ticks)
+        if tick_labels is None:
+            tick_labels = np.linspace(self.y_limits[0], self.y_limits[1], n_ticks)
+        set_y_tick_kwargs = {}
+        set_y_tick_kwargs.setdefault("ticks", tick_positions)
+        set_y_tick_kwargs.setdefault("labels", tick_labels)
+        set_y_tick_kwargs.update(kwargs)
+        self.ax.set_yticks(**set_y_tick_kwargs)
        
     def set_colorbar_tick_params(self, **kwargs):
         """Set the tick parameters for the colorbar.
