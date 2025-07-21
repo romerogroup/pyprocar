@@ -835,6 +835,9 @@ class EBSPlot:
             title = title
         else:
             title = self.config.colorbar_title
+            
+        if not hasattr(self, "cb"):
+            return None
 
         if self.config.colorbar_tick_params:
             self.cb.ax.tick_params(**self.config.colorbar_tick_params)
