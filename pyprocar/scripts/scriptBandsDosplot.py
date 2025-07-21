@@ -52,7 +52,7 @@ def bandsdosplot(
     repair: bool = True,
     show: bool = True,
     dpi: int = 300,
-    figsize=(16.5, 5.5),
+    figsize=(8, 6),
     **kwargs,
 ):
     """A function to plot the band structure and the density of states in the same plot
@@ -104,19 +104,31 @@ def bandsdosplot(
 
     # parses old elements
     # bands_settings, dos_settings = parse_kwargs(kwargs,bands_settings, dos_settings)
+    
 
     # plots bandsplot and dosplot
-    ebs_plot_fig, ebs_plot_ax = bandsplot(**bands_settings)
-    edos_plot_fig, edos_plot_ax = dosplot(**dos_settings)
-
+    
     plt.close("all")
-    fig = plt.figure(figsize=figsize, clear=True, dpi=dpi)
+    # fig = plt.figure(figsize=figsize, clear=True, dpi=dpi)
+    
+    # fig, axes = plt.subplots(1, 2, figsize=figsize, clear=True, dpi=dpi)
+    
+    if "plain" != dos_settings["mode"] and "plain" != bands_settings["mode"]:
+        bands_settings["plot_color_bar"] = False
+        
+    # Make the two axes share the y-axis (energy axis)
+    fig, axes = plt.subplots(1, 2, figsize=figsize, clear=True, dpi=dpi, sharey=True)
+    ebs_plot_fig, ebs_plot_ax = bandsplot(ax=axes[0], **bands_settings)
+    edos_plot_fig, edos_plot_ax = dosplot(ax=axes[1], **dos_settings)
 
-    # combines bandsplot and dos plot
-    ax_ebs, ax_dos = combine_axes(
-        ebs_plot_fig, edos_plot_fig, fig, plot_color_bar=plot_color_bar
-    )
-
+    # # combines bandsplot and dos plot
+    # ax_ebs, ax_dos = combine_axes(
+    #     ebs_plot_fig, edos_plot_fig, fig, plot_color_bar=plot_color_bar
+    # )
+    ax_ebs = axes[0]
+    ax_dos = axes[1]
+    ax_dos.set_ylabel("")
+    
     # axes opitions
     if elimit is not None:
         ax_dos.set_ylim(elimit)
